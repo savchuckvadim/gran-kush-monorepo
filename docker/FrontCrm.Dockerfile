@@ -44,7 +44,7 @@ COPY --from=base /app/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY --from=base /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY --from=base /app/packages ./packages
 COPY --from=base /app/apps/crm/public ./public
-COPY --from=base /app/apps/crm/next.config.js ./next.config.js
+COPY --from=base /app/apps/crm/next.config.mjs ./next.config.mjs
 # COPY --from=base /app/apps/${APP}/.env ./.env
 
 RUN pnpm config set ignore-scripts false
