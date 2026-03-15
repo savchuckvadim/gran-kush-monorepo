@@ -5,15 +5,16 @@ import { useTranslations } from "next-intl";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { EmployeeAuthenticationCrmService, type EmployeeLoginDto } from "@workspace/api-client/generated";
+// import { EmployeeAuthenticationCrmService, type EmployeeLoginDto } from "@workspace/api-client/generated";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Button, FieldInput } from "@workspace/ui";
 
 import { ROUTES } from "@/modules/shared/config/routes";
-import { configureOpenApiClient, setSessionTokens } from "@/modules/shared/api/api";
+// import { configureOpenApiClient, setSessionTokens } from "@/modules/shared/api/api";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
+import { $api } from "@/modules/shared";
 
 const loginSchema = z.object({
     email: z.string().email("Invalid email"),
@@ -35,14 +36,18 @@ export function LoginForm() {
 
     const mutation = useMutation({
         mutationFn: async (data: LoginFormData) => {
-            configureOpenApiClient();
-            return EmployeeAuthenticationCrmService.employeeAuthLogin(data as EmployeeLoginDto);
+            // configureOpenApiClient();
+            // return EmployeeAuthenticationCrmService.employeeAuthLogin(data as EmployeeLoginDto);
+            const response = await $api.POST('/crm/auth/login', {
+                body: data
+            });
+            return response.data;
         },
         onSuccess: (response) => {
-            setSessionTokens({
-                accessToken: response.accessToken,
-                refreshToken: response.refreshToken,
-            });
+            // setSessionTokens({
+            //     accessToken: response.accessToken,
+            //     refreshToken: response.refreshToken,
+            // });
             window.location.href = localizedLink(ROUTES.CRM_HOME);
         },
         onError: (error) => {

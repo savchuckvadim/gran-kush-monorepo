@@ -62,8 +62,8 @@ export function MemberProfileEditModal({ member }: MemberProfileEditModalProps) 
                     isMedical: profileForm.isMedical,
                     isMj: profileForm.isMj,
                     isRecreation: profileForm.isRecreation,
-                    documentType: profileForm.documentType || undefined,
-                    documentNumber: profileForm.documentNumber || undefined,
+                    documentType: profileForm.documentType || null,
+                    documentNumber: profileForm.documentNumber || null,
                 },
             });
             setIsOpen(false);

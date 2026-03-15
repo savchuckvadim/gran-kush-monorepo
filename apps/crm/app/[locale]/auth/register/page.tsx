@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { Card } from "@workspace/ui";
 
-import { RegistrationForm } from "@/modules/features/auth";
+// import { RegistrationForm } from "@/modules/features/auth";
 
 export default function RegisterPage() {
     const t = useTranslations("auth.register");
@@ -17,7 +17,10 @@ export default function RegisterPage() {
                 description={t("subtitle")}
                 headerClassName="text-center"
             >
-                <RegistrationForm />
+                <p>
+                    Регистрация сотрудников
+                </p>
+                {/* <RegistrationForm /> */}
             </Card>
         </div>
     );
