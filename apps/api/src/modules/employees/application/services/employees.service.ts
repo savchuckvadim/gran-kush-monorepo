@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 
 import { Employee } from "@employees/domain/entity/employee.entity";
 import { EmployeeRepository } from "@employees/domain/repositories/employee-repository.interface";
@@ -41,5 +41,12 @@ export class EmployeesService {
         await this.employeeRepository.update(employee.id, { lastLoginAt: new Date() });
 
         return this.employeeRepository.findById(employee.id);
+    }
+
+    /**
+     * Получить список всех сотрудников
+     */
+    async findAll(limit?: number): Promise<Employee[]> {
+        return this.employeeRepository.findAll(limit);
     }
 }

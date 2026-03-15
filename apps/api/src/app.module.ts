@@ -11,6 +11,7 @@ import { EmployeesModule } from "./modules/employees/employees.module";
 import { MailModule } from "./modules/mail/mail.module";
 import { MembersModule } from "./modules/members/members.module";
 import { StorageModule } from "./modules/storage/storage.module";
+import { TestModule } from "./modules/test/test.module";
 
 @Module({
     imports: [
@@ -27,6 +28,7 @@ import { StorageModule } from "./modules/storage/storage.module";
         EmployeesModule,
         MembersModule,
         StorageModule,
+        TestModule,
     ],
     controllers: [AppController],
     providers: [AppService],

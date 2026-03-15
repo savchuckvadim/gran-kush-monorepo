@@ -36,6 +36,15 @@ export class EmployeePrismaRepository implements EmployeeRepository {
         return this.mapToEntity(user.employee, user);
     }
 
+    async findAll(limit?: number): Promise<Employee[]> {
+        const employees = await this.prisma.employee.findMany({
+            take: limit,
+            include: { user: true },
+            orderBy: { createdAt: "desc" },
+        });
+        return employees.map((emp) => this.mapToEntity(emp, emp.user));
+    }
+
     async create(data: {
         userId: string;
         name: string;
