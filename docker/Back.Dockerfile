@@ -24,5 +24,5 @@ RUN pnpm --filter api exec prisma generate
 RUN pnpm --filter api build
 
 EXPOSE 7000
-CMD ["node", "apps/api/dist/main"]
+CMD ["node", "apps/api/dist/main.js"]
 
