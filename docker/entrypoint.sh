@@ -3,21 +3,22 @@ set -e
 
 echo "🚀 Starting application..."
 
-# Применяем миграции (нужно быть в директории apps/api для Prisma)
-echo "📦 Applying database migrations..."
-cd /app/apps/api
+# Остаемся в корне монорепо для правильной работы pnpm workspace
+cd /app
 
 # Проверяем наличие миграций
 echo "🔍 Checking migrations directory..."
-if [ -d "prisma/migrations" ]; then
+if [ -d "apps/api/prisma/migrations" ]; then
     echo "✅ Migrations directory found"
-    ls -la prisma/migrations/ || true
+    ls -la apps/api/prisma/migrations/ || true
 else
     echo "❌ Migrations directory not found!"
     exit 1
 fi
 
-pnpm run prisma:migrate:deploy || {
+# Применяем миграции (используем --filter для монорепо)
+echo "📦 Applying database migrations..."
+pnpm --filter api run prisma:migrate:deploy || {
     echo "❌ Migration failed!"
     exit 1
 }
@@ -25,14 +26,13 @@ pnpm run prisma:migrate:deploy || {
 # Создаем super admin (если включен)
 if [ "$BOOTSTRAP_ADMIN_ENABLED" = "true" ]; then
     echo "👤 Seeding bootstrap admin..."
-    pnpm run prisma:seed:admin || {
+    pnpm --filter api run prisma:seed:admin || {
         echo "⚠️  Admin seed failed, but continuing..."
     }
 else
     echo "⏭️  Skipping admin seed (BOOTSTRAP_ADMIN_ENABLED=false)"
 fi
 
-# Запускаем приложение (возвращаемся в корень для правильного пути)
-cd /app
+# Запускаем приложение
 echo "✅ Starting NestJS application..."
 exec "$@"
