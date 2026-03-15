@@ -18,10 +18,10 @@ COPY . .
 RUN pnpm install --frozen-lockfile
 
 # Генерируем Prisma
-RUN pnpm --filter back exec prisma generate
+RUN pnpm --filter api exec prisma generate
 
 # Строим только API
-RUN pnpm --filter back build
+RUN pnpm --filter api build
 
 EXPOSE 7000
 CMD ["node", "apps/api/dist/main"]
