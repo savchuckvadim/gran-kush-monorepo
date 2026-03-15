@@ -1,5 +1,5 @@
 import { Controller, Get, Query } from "@nestjs/common";
-import { ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { EmployeesService } from "@employees/application/services/employees.service";
 import { EmployeeListItemDto } from "@employees/api/dto/employee-list.dto";
@@ -8,7 +8,10 @@ import { CrmMemberDto } from "@members/api/dto/crm-member.dto";
 
 import { Public } from "@common/decorators/auth/public.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
-import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
+import { PaginationDto } from "@common/paginate/dto/pagination.dto";
+import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
+import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 
 @ApiTags("Test (Public - No Authentication Required)")
 @Controller("test")
@@ -20,19 +23,24 @@ export class TestController {
     ) {}
 
     @Get("employees")
-    @ApiOperation({ summary: "Get list of employees (public, no auth required)" })
-    @ApiQuery({ name: "limit", required: false, type: Number, example: 100 })
-    @ApiSuccessResponse(EmployeeListItemDto, {
-        description: "List of employees",
-        isArray: true,
+    @ApiOperation({ summary: "Get paginated list of employees (public, no auth required)" })
+    @ApiPaginatedResponse(EmployeeListItemDto, {
+        description: "Paginated list of employees",
     })
     @ApiErrorResponse([400])
-    async getEmployees(@Query("limit") limit?: string): Promise<EmployeeListItemDto[]> {
-        const parsedLimit = Number.parseInt(limit ?? "", 10);
-        const take = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 100;
-        const employees = await this.employeesService.findAll(take);
+    async getEmployees(
+        @Query() query: PaginationDto
+    ): Promise<PaginatedResult<EmployeeListItemDto>> {
+        const page = query.page ?? 1;
+        const limit = query.limit ?? 10;
+        const skip = PaginationUtil.getSkip(page, limit);
 
-        return employees.map((employee) => ({
+        const [employees, total] = await Promise.all([
+            this.employeesService.findAll(limit, skip),
+            this.employeesService.count(),
+        ]);
+
+        const items = employees.map((employee) => ({
             id: employee.id,
             userId: employee.userId,
             email: employee.email,
@@ -47,22 +55,29 @@ export class TestController {
             createdAt: employee.createdAt,
             updatedAt: employee.updatedAt,
         }));
+
+        return PaginationUtil.createPaginatedResult(items, total, page, limit);
     }
 
     @Get("members")
-    @ApiOperation({ summary: "Get list of members (public, no auth required)" })
-    @ApiQuery({ name: "limit", required: false, type: Number, example: 100 })
-    @ApiSuccessResponse(CrmMemberDto, {
-        description: "List of members",
-        isArray: true,
+    @ApiOperation({ summary: "Get paginated list of members (public, no auth required)" })
+    @ApiPaginatedResponse(CrmMemberDto, {
+        description: "Paginated list of members",
     })
     @ApiErrorResponse([400])
-    async getMembers(@Query("limit") limit?: string): Promise<CrmMemberDto[]> {
-        const parsedLimit = Number.parseInt(limit ?? "", 10);
-        const take = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 100;
-        const members = await this.membersService.findAll(take);
+    async getMembers(
+        @Query() query: PaginationDto
+    ): Promise<PaginatedResult<CrmMemberDto>> {
+        const page = query.page ?? 1;
+        const limit = query.limit ?? 10;
+        const skip = PaginationUtil.getSkip(page, limit);
 
-        return members.map((member) => ({
+        const [members, total] = await Promise.all([
+            this.membersService.findAll(limit, skip),
+            this.membersService.count(),
+        ]);
+
+        const items = members.map((member) => ({
             id: member.id,
             userId: member.userId,
             email: member.user.email,
@@ -74,5 +89,7 @@ export class TestController {
             emailConfirmed: false, // User entity doesn't have emailConfirmed field
             createdAt: member.createdAt.toISOString(),
         }));
+
+        return PaginationUtil.createPaginatedResult(items, total, page, limit);
     }
 }

@@ -12,12 +12,17 @@ import { PrismaService } from "@common/prisma/prisma.service";
 export class MemberPrismaRepository implements MemberRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    async findAll(limit: number = 100): Promise<MemberWithRelations[]> {
+    async findAll(limit: number = 100, skip?: number): Promise<MemberWithRelations[]> {
         return this.prisma.member.findMany({
             take: limit,
+            skip: skip,
             orderBy: { createdAt: "desc" },
             include: memberWithRelationsInclude,
         });
+    }
+
+    async count(): Promise<number> {
+        return this.prisma.member.count();
     }
 
     async findById(id: string): Promise<MemberWithRelations | null> {

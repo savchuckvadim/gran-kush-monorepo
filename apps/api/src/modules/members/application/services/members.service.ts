@@ -240,8 +240,12 @@ export class MembersService {
         return this.memberRepository.findById(id);
     }
 
-    async findAll(limit?: number) {
-        return this.memberRepository.findAll(limit);
+    async findAll(limit?: number, skip?: number) {
+        return this.memberRepository.findAll(limit, skip);
+    }
+
+    async count(): Promise<number> {
+        return this.memberRepository.count();
     }
 
     async updateCrmMember(memberId: string, dto: CrmMemberUpdateDto) {

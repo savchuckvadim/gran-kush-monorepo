@@ -46,7 +46,14 @@ export class EmployeesService {
     /**
      * Получить список всех сотрудников
      */
-    async findAll(limit?: number): Promise<Employee[]> {
-        return this.employeeRepository.findAll(limit);
+    async findAll(limit?: number, skip?: number): Promise<Employee[]> {
+        return this.employeeRepository.findAll(limit, skip);
+    }
+
+    /**
+     * Получить общее количество сотрудников
+     */
+    async count(): Promise<number> {
+        return this.employeeRepository.count();
     }
 }
