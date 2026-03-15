@@ -39,6 +39,8 @@ RUN pnpm --filter api build
 
 # Применяем миграции и создаем admin при старте
 # (через entrypoint скрипт)
+
+
 # COPY docker/entrypoint.sh /entrypoint.sh
 # RUN chmod +x /entrypoint.sh
 
