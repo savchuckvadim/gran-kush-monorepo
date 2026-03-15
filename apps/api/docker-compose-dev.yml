@@ -1,0 +1,56 @@
+version: '3.9'
+
+
+
+services:
+  redis:
+    image: redis:7
+    container_name: redis-kush
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network 
+  
+  # db:
+  #   image: mysql:8.0
+  #   container_name: db-kush
+  #   restart: "unless-stopped"
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: kush # Задай свой пароль для root
+  #     MYSQL_DATABASE: kush # Название базы данных
+  #     # MYSQL_USER: root # Имя пользователя
+  #     MYSQL_PASSWORD: kush # Пароль пользователя
+  #   ports:
+  #     - "3306:3306"
+  #   volumes:
+  #     - db_data:/var/lib/mysql
+  #   networks:
+  #     - app-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-kush
+    restart: "unless-stopped"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kush} -d ${POSTGRES_DB:-kush}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db_data:
+  postgres_data:
+networks:
+  app-network:
+    driver: bridge  

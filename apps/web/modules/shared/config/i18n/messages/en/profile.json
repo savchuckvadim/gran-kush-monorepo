@@ -1,0 +1,17 @@
+{
+    "profile": {
+        "title": "Personal Cabinet",
+        "subtitle": "Manage your account and preferences",
+        "profile": "Profile",
+        "settings": "Settings",
+        "logout": "Logout",
+        "profileInformation": "Profile Information",
+        "name": "Name",
+        "email": "Email",
+        "memberStatus": "Member Status",
+        "activeMember": "Active Member",
+        "quickActions": "Quick Actions",
+        "completeRegistration": "Complete Registration",
+        "contactSupport": "Contact Support"
+    }
+}

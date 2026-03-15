@@ -1,0 +1,13 @@
+{
+    "name": "@workspace/prettier-config",
+    "version": "0.0.0",
+    "private": true,
+    "main": "./index.js",
+    "exports": {
+        ".": "./index.js"
+    },
+    "dependencies": {
+        "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+        "prettier": "^3.8.1"
+    }
+}

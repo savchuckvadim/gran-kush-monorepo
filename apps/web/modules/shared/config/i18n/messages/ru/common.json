@@ -1,0 +1,18 @@
+{
+    "common": {
+        "loading": "Загрузка...",
+        "error": "Ошибка",
+        "success": "Успешно",
+        "cancel": "Отмена",
+        "save": "Сохранить",
+        "delete": "Удалить",
+        "edit": "Редактировать",
+        "submit": "Отправить",
+        "back": "Назад",
+        "next": "Далее",
+        "required": "Обязательное поле",
+        "companyName": "Gran Kush",
+        "companyTagline": "Ваш надежный каннабис-клуб",
+        "allRightsReserved": "Все права защищены"
+    }
+}

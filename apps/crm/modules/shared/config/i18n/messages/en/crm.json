@@ -1,0 +1,127 @@
+{
+    "crm": {
+        "shell": {
+            "brand": "Gran Kush",
+            "title": "CRM",
+            "workspace": "Internal workspace",
+            "profile": "Employee profile",
+            "nav": {
+                "clients": "Clients",
+                "products": "Products",
+                "orders": "Orders",
+                "attendance": "Attendance",
+                "employees": "Employees"
+            }
+        },
+        "members": {
+            "title": "Clients",
+            "subtitle": "Created club members (temporary no-auth preview)",
+            "total": "{count} total",
+            "columns": {
+                "name": "Name",
+                "email": "Email",
+                "phone": "Phone",
+                "status": "Status",
+                "action": "Action"
+            },
+            "openProfile": "Open profile",
+            "backToClients": "Back to clients",
+            "backToProfile": "Back to profile",
+            "profileTitle": "Profile",
+            "notesTitle": "Notes",
+            "noNotes": "No notes",
+            "phone": "Phone",
+            "birthday": "Birthday",
+            "address": "Address",
+            "memberId": "Member ID",
+            "userId": "User ID",
+            "membershipNumber": "Membership number",
+            "createdAt": "Created at",
+            "updatedAt": "Updated at",
+            "mjStatuses": "MJ statuses",
+            "noStatuses": "No statuses",
+            "emailConfirmed": "Email confirmed",
+            "emailNotConfirmed": "Email not confirmed",
+            "documents": "Documents",
+            "noDocumentMetadata": "No document metadata",
+            "statusLabel": "status",
+            "openDocumentsRoute": "Open documents",
+            "documentsRouteTitle": "Member documents",
+            "backToDocuments": "Back to documents",
+            "singleDocumentPreviewTitle": "Document preview",
+            "identityDocuments": "Identity documents",
+            "noIdentityDocuments": "No identity documents uploaded",
+            "signatureTitle": "Signature",
+            "noSignature": "No signature uploaded",
+            "storagePath": "Storage path",
+            "uploadedAt": "Uploaded at",
+            "openDocument": "Open document",
+            "downloadDocument": "Download",
+            "fileTooLarge": "File is too large. Please choose a smaller image.",
+            "editDocument": "Edit",
+            "editSignature": "Edit signature",
+            "newFile": "New file",
+            "chooseFile": "Choose file",
+            "currentFileUsed": "Current file preview is shown",
+            "uploadImage": "Upload image",
+            "drawSignature": "Draw signature",
+            "signaturePlaceholder": "Draw signature in the area",
+            "preview": "Preview",
+            "saveDocument": "Save changes",
+            "editor": {
+                "title": "Edit member profile",
+                "startEdit": "Edit",
+                "cancelEdit": "Cancel",
+                "saveProfile": "Save profile changes",
+                "saving": "Saving...",
+                "profileSaved": "Profile updated",
+                "saveError": "Failed to save profile changes",
+                "filesTitle": "Re-upload documents and signature",
+                "uploadFiles": "Upload selected files",
+                "uploading": "Uploading...",
+                "filesUploaded": "Files updated",
+                "uploadError": "Failed to upload files",
+                "fields": {
+                    "name": "Name",
+                    "surname": "Surname",
+                    "phone": "Phone",
+                    "birthday": "Birthday",
+                    "membershipNumber": "Membership number",
+                    "address": "Address",
+                    "status": "Status",
+                    "notes": "Notes",
+                    "documentType": "Document type",
+                    "documentNumber": "Document number",
+                    "isMedical": "Medical",
+                    "isMj": "MJ",
+                    "isRecreation": "Recreation",
+                    "documentFirst": "Document front side",
+                    "documentSecond": "Document back side",
+                    "signature": "Signature image"
+                }
+            }
+        },
+        "sections": {
+            "products": {
+                "title": "Products",
+                "description": "Placeholder section for product catalog and stock controls."
+            },
+            "orders": {
+                "title": "Orders",
+                "description": "Placeholder section for order list, statuses, and order details."
+            },
+            "attendance": {
+                "title": "Attendance",
+                "description": "Placeholder section for QR entry/exit scanner and time-in-club analytics."
+            },
+            "employees": {
+                "title": "Employees",
+                "description": "Placeholder section for employee list, invitation flow, and admin role controls."
+            },
+            "profile": {
+                "title": "Employee Profile",
+                "description": "Placeholder section for the current employee account and settings."
+            }
+        }
+    }
+}

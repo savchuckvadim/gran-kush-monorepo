@@ -1,0 +1,28 @@
+import { Employee } from "@employees/domain/entity/employee.entity";
+
+export abstract class EmployeeRepository {
+    abstract findById(id: string): Promise<Employee | null>;
+    abstract findByEmail(email: string): Promise<Employee | null>;
+    abstract create(data: {
+        userId: string;
+        name: string;
+        surname?: string;
+        phone?: string;
+        role?: string;
+        position?: string;
+        department?: string;
+    }): Promise<Employee>;
+    abstract update(
+        id: string,
+        data: Partial<{
+            name: string;
+            surname: string;
+            phone: string;
+            role: string;
+            position: string;
+            department: string;
+            isActive: boolean;
+            lastLoginAt: Date;
+        }>
+    ): Promise<Employee>;
+}

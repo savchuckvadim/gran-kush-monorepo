@@ -1,0 +1,263 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Модель пользователя (минимальная - только для аутентификации)
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique @db.VarChar(255)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Связи
+  tokens      Token[]
+  member      Member?
+  employee    Employee?
+  storageFiles StorageFile[]
+
+  @@index([email])
+  @@index([isActive])
+  @@map("users")
+}
+
+// Модель токенов пользователей (для refresh tokens)
+model Token {
+  id     String @id @default(uuid())
+  token  String @unique @db.VarChar(500)
+  userId String @map("user_id")
+
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Связи
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("tokens")
+}
+
+// Модель токенов сотрудников (для refresh tokens)
+model EmployeeToken {
+  id         String @id @default(uuid())
+  token      String @unique @db.VarChar(500)
+  employeeId String @map("employee_id")
+
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Связи
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("employee_tokens")
+}
+
+// Модель документа удостоверения личности
+// Хранит переднюю (first) и заднюю (second) части документа
+model IdentityDocument {
+  id          String   @id @default(uuid())
+  memberId    String   @map("member_id")
+  type        String   @db.VarChar(50) // ID, passport, etc. - тип документа
+  side        String   @db.VarChar(20) // first, second - сторона документа
+  storagePath String   @map("storage_path") @db.VarChar(500) // Путь в storage
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Связи
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, type, side]) // Один документ одного типа с одной стороной на члена
+  @@index([memberId])
+  @@index([type])
+  @@index([side])
+  @@map("identity_documents")
+}
+
+// Модель подписи члена клуба
+model Signature {
+  id          String   @id @default(uuid())
+  memberId    String   @unique @map("member_id")
+  storagePath String   @map("storage_path") @db.VarChar(500) // Путь к скан-картинке подписи
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Связи
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@map("signatures")
+}
+
+// Модель статуса употребления марихуаны
+model MjStatus {
+  id          String   @id @default(uuid())
+  code        String   @unique @db.VarChar(50) // medical, mj, recreation
+  name        String   @db.VarChar(255) // Название статуса
+  description String?  @db.Text
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Связи
+  memberMjStatuses MemberMjStatus[]
+
+  @@index([code])
+  @@index([isActive])
+  @@map("mj_statuses")
+}
+
+// Связь Member и MjStatus (many-to-many)
+model MemberMjStatus {
+  id         String   @id @default(uuid())
+  memberId   String   @map("member_id")
+  mjStatusId String   @map("mj_status_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Связи
+  member   Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  mjStatus MjStatus @relation(fields: [mjStatusId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, mjStatusId])
+  @@index([memberId])
+  @@index([mjStatusId])
+  @@map("member_mj_statuses")
+}
+
+// Модель документа (тип и номер)
+model Document {
+  id          String   @id @default(uuid())
+  type        String   @unique @db.VarChar(50) // passport, id, driver_license, etc.
+  name        String   @db.VarChar(255) // Название типа документа
+  description String?  @db.Text
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Связи
+  memberDocuments MemberDocument[]
+
+  @@index([type])
+  @@index([isActive])
+  @@map("documents")
+}
+
+// Связь Member и Document (many-to-many с дополнительными полями)
+model MemberDocument {
+  id         String    @id @default(uuid())
+  memberId   String    @map("member_id")
+  documentId String    @map("document_id")
+  number     String    @db.VarChar(100) // Номер документа
+  issuedAt   DateTime? @map("issued_at") @db.Date // Дата выдачи
+  expiresAt  DateTime? @map("expires_at") @db.Date // Дата истечения
+  issuedBy   String?   @map("issued_by") @db.VarChar(255) // Кем выдан
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  // Связи
+  member   Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@index([documentId])
+  @@index([number])
+  @@map("member_documents")
+}
+
+// Модель члена клуба (расширяет пользователя)
+model Member {
+  id               String    @id @default(uuid())
+  userId           String    @unique @map("user_id") // Один User может иметь только одного Member
+  // Личные данные
+  name             String    @db.VarChar(255)
+  surname          String?   @db.VarChar(255)
+  phone            String?   @db.VarChar(20)
+  birthday         DateTime? @db.Date
+  // Данные членства
+  membershipNumber String?   @unique @map("membership_number") @db.VarChar(50)
+  address          String?   @db.Text
+  // Статус заявки/членства
+  status           String    @default("inProgress") @db.VarChar(50) // inProgress, approved, rejected, pending
+  // Дополнительные данные
+  notes            String?   @db.Text
+  isActive         Boolean   @default(true) @map("is_active")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  // Связи
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  identityDocuments IdentityDocument[]
+  signature         Signature?
+  memberMjStatuses  MemberMjStatus[]
+  memberDocuments   MemberDocument[]
+
+  @@index([userId])
+  @@index([membershipNumber])
+  @@index([status])
+  @@index([isActive])
+  @@map("members")
+}
+
+// Модель сотрудника (для входа в CRM)
+model Employee {
+  id          String    @id @default(uuid())
+  userId      String    @unique @map("user_id") // Один User может иметь только одного Employee
+  // Личные данные
+  name        String    @db.VarChar(255)
+  surname     String?   @db.VarChar(255)
+  phone       String?   @db.VarChar(20)
+  // Рабочие данные
+  role        String    @default("employee") @db.VarChar(50) // employee, manager, admin (admin может входить в админку)
+  position    String?   @db.VarChar(255)
+  department  String?   @db.VarChar(255)
+  isActive    Boolean   @default(true) @map("is_active")
+  lastLoginAt DateTime? @map("last_login_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // Связи
+  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokens EmployeeToken[]
+
+  @@index([userId])
+  @@index([role])
+  @@index([isActive])
+  @@map("employees")
+}
+
+// Модель файлов в storage
+model StorageFile {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  originalName String   @map("original_name") @db.VarChar(255)
+  fileName     String   @map("file_name") @db.VarChar(255)
+  mimeType     String   @map("mime_type") @db.VarChar(100)
+  size         Int      // Размер в байтах
+  storageType  String   @map("storage_type") @db.VarChar(20) // public, private
+  category     String   @db.VarChar(50) // member-document, member-signature, product-image, etc.
+  path         String   @db.VarChar(500) // Относительный путь от корня storage
+  url          String   @db.VarChar(500) // Полный URL для доступа к файлу
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Связи
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([category])
+  @@index([storageType])
+  @@index([createdAt])
+  @@map("storage_files")
+}

@@ -1,0 +1,127 @@
+{
+    "crm": {
+        "shell": {
+            "brand": "Gran Kush",
+            "title": "CRM",
+            "workspace": "Внутреннее рабочее пространство",
+            "profile": "Профиль сотрудника",
+            "nav": {
+                "clients": "Клиенты",
+                "products": "Товары",
+                "orders": "Заказы",
+                "attendance": "Посещаемость",
+                "employees": "Сотрудники"
+            }
+        },
+        "members": {
+            "title": "Клиенты",
+            "subtitle": "Созданные члены клуба (временный просмотр без авторизации)",
+            "total": "Всего: {count}",
+            "columns": {
+                "name": "Имя",
+                "email": "Email",
+                "phone": "Телефон",
+                "status": "Статус",
+                "action": "Действие"
+            },
+            "openProfile": "Открыть профиль",
+            "backToClients": "Назад к клиентам",
+            "backToProfile": "Назад к профилю",
+            "profileTitle": "Профиль",
+            "notesTitle": "Заметки",
+            "noNotes": "Заметки отсутствуют",
+            "phone": "Телефон",
+            "birthday": "Дата рождения",
+            "address": "Адрес",
+            "memberId": "ID члена",
+            "userId": "ID пользователя",
+            "membershipNumber": "Номер членства",
+            "createdAt": "Создан",
+            "updatedAt": "Обновлен",
+            "mjStatuses": "Статусы MJ",
+            "noStatuses": "Нет статусов",
+            "emailConfirmed": "Email подтвержден",
+            "emailNotConfirmed": "Email не подтвержден",
+            "documents": "Документы",
+            "noDocumentMetadata": "Нет данных по документам",
+            "statusLabel": "статус",
+            "openDocumentsRoute": "Открыть документы",
+            "documentsRouteTitle": "Документы члена",
+            "backToDocuments": "Назад к документам",
+            "singleDocumentPreviewTitle": "Предпросмотр документа",
+            "identityDocuments": "Документы личности",
+            "noIdentityDocuments": "Документы личности не загружены",
+            "signatureTitle": "Подпись",
+            "noSignature": "Подпись не загружена",
+            "storagePath": "Путь в хранилище",
+            "uploadedAt": "Загружено",
+            "openDocument": "Открыть документ",
+            "downloadDocument": "Скачать",
+            "fileTooLarge": "Файл слишком большой. Выберите изображение меньшего размера.",
+            "editDocument": "Редактировать",
+            "editSignature": "Редактировать подпись",
+            "newFile": "Новый файл",
+            "chooseFile": "Выбрать файл",
+            "currentFileUsed": "Показывается текущий файл",
+            "uploadImage": "Загрузить изображение",
+            "drawSignature": "Нарисовать подпись",
+            "signaturePlaceholder": "Распишитесь в поле",
+            "preview": "Предпросмотр",
+            "saveDocument": "Сохранить изменения",
+            "editor": {
+                "title": "Редактирование профиля члена",
+                "startEdit": "Редактировать",
+                "cancelEdit": "Отмена",
+                "saveProfile": "Сохранить изменения профиля",
+                "saving": "Сохранение...",
+                "profileSaved": "Профиль обновлен",
+                "saveError": "Не удалось сохранить изменения профиля",
+                "filesTitle": "Перезагрузка документов и подписи",
+                "uploadFiles": "Загрузить выбранные файлы",
+                "uploading": "Загрузка...",
+                "filesUploaded": "Файлы обновлены",
+                "uploadError": "Не удалось загрузить файлы",
+                "fields": {
+                    "name": "Имя",
+                    "surname": "Фамилия",
+                    "phone": "Телефон",
+                    "birthday": "Дата рождения",
+                    "membershipNumber": "Номер членства",
+                    "address": "Адрес",
+                    "status": "Статус",
+                    "notes": "Заметки",
+                    "documentType": "Тип документа",
+                    "documentNumber": "Номер документа",
+                    "isMedical": "Медицинский",
+                    "isMj": "MJ",
+                    "isRecreation": "Recreation",
+                    "documentFirst": "Документ, лицевая сторона",
+                    "documentSecond": "Документ, обратная сторона",
+                    "signature": "Изображение подписи"
+                }
+            }
+        },
+        "sections": {
+            "products": {
+                "title": "Товары",
+                "description": "Раздел-заглушка для каталога товаров и контроля остатков."
+            },
+            "orders": {
+                "title": "Заказы",
+                "description": "Раздел-заглушка для списка заказов, статусов и деталей заказа."
+            },
+            "attendance": {
+                "title": "Посещаемость",
+                "description": "Раздел-заглушка для QR входа/выхода и аналитики времени в клубе."
+            },
+            "employees": {
+                "title": "Сотрудники",
+                "description": "Раздел-заглушка для списка сотрудников, приглашений и управления ролями администратора."
+            },
+            "profile": {
+                "title": "Профиль сотрудника",
+                "description": "Раздел-заглушка для аккаунта и настроек текущего сотрудника."
+            }
+        }
+    }
+}

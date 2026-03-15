@@ -1,0 +1,127 @@
+{
+    "crm": {
+        "shell": {
+            "brand": "Gran Kush",
+            "title": "CRM",
+            "workspace": "Espacio de trabajo interno",
+            "profile": "Perfil del empleado",
+            "nav": {
+                "clients": "Clientes",
+                "products": "Productos",
+                "orders": "Pedidos",
+                "attendance": "Asistencia",
+                "employees": "Empleados"
+            }
+        },
+        "members": {
+            "title": "Clientes",
+            "subtitle": "Miembros del club creados (vista temporal sin autenticación)",
+            "total": "{count} en total",
+            "columns": {
+                "name": "Nombre",
+                "email": "Correo",
+                "phone": "Teléfono",
+                "status": "Estado",
+                "action": "Acción"
+            },
+            "openProfile": "Abrir perfil",
+            "backToClients": "Volver a clientes",
+            "backToProfile": "Volver al perfil",
+            "profileTitle": "Perfil",
+            "notesTitle": "Notas",
+            "noNotes": "Sin notas",
+            "phone": "Teléfono",
+            "birthday": "Fecha de nacimiento",
+            "address": "Dirección",
+            "memberId": "ID de miembro",
+            "userId": "ID de usuario",
+            "membershipNumber": "Número de membresía",
+            "createdAt": "Creado",
+            "updatedAt": "Actualizado",
+            "mjStatuses": "Estados MJ",
+            "noStatuses": "Sin estados",
+            "emailConfirmed": "Correo confirmado",
+            "emailNotConfirmed": "Correo no confirmado",
+            "documents": "Documentos",
+            "noDocumentMetadata": "Sin metadatos de documentos",
+            "statusLabel": "estado",
+            "openDocumentsRoute": "Abrir documentos",
+            "documentsRouteTitle": "Documentos del miembro",
+            "backToDocuments": "Volver a documentos",
+            "singleDocumentPreviewTitle": "Vista previa del documento",
+            "identityDocuments": "Documentos de identidad",
+            "noIdentityDocuments": "No hay documentos de identidad subidos",
+            "signatureTitle": "Firma",
+            "noSignature": "No hay firma subida",
+            "storagePath": "Ruta de almacenamiento",
+            "uploadedAt": "Subido",
+            "openDocument": "Abrir documento",
+            "downloadDocument": "Descargar",
+            "fileTooLarge": "El archivo es demasiado grande. Elige una imagen más pequeña.",
+            "editDocument": "Editar",
+            "editSignature": "Editar firma",
+            "newFile": "Archivo nuevo",
+            "chooseFile": "Elegir archivo",
+            "currentFileUsed": "Se muestra la vista previa del archivo actual",
+            "uploadImage": "Subir imagen",
+            "drawSignature": "Dibujar firma",
+            "signaturePlaceholder": "Dibuja la firma en el área",
+            "preview": "Vista previa",
+            "saveDocument": "Guardar cambios",
+            "editor": {
+                "title": "Editar perfil del miembro",
+                "startEdit": "Editar",
+                "cancelEdit": "Cancelar",
+                "saveProfile": "Guardar cambios del perfil",
+                "saving": "Guardando...",
+                "profileSaved": "Perfil actualizado",
+                "saveError": "No se pudieron guardar los cambios del perfil",
+                "filesTitle": "Re-subir documentos y firma",
+                "uploadFiles": "Subir archivos seleccionados",
+                "uploading": "Subiendo...",
+                "filesUploaded": "Archivos actualizados",
+                "uploadError": "No se pudieron subir los archivos",
+                "fields": {
+                    "name": "Nombre",
+                    "surname": "Apellido",
+                    "phone": "Teléfono",
+                    "birthday": "Fecha de nacimiento",
+                    "membershipNumber": "Número de membresía",
+                    "address": "Dirección",
+                    "status": "Estado",
+                    "notes": "Notas",
+                    "documentType": "Tipo de documento",
+                    "documentNumber": "Número de documento",
+                    "isMedical": "Médico",
+                    "isMj": "MJ",
+                    "isRecreation": "Recreation",
+                    "documentFirst": "Documento, lado frontal",
+                    "documentSecond": "Documento, lado trasero",
+                    "signature": "Imagen de firma"
+                }
+            }
+        },
+        "sections": {
+            "products": {
+                "title": "Productos",
+                "description": "Sección placeholder para catálogo de productos y control de stock."
+            },
+            "orders": {
+                "title": "Pedidos",
+                "description": "Sección placeholder para lista de pedidos, estados y detalles."
+            },
+            "attendance": {
+                "title": "Asistencia",
+                "description": "Sección placeholder para escáner QR de entrada/salida y analítica de tiempo en el club."
+            },
+            "employees": {
+                "title": "Empleados",
+                "description": "Sección placeholder para lista de empleados, invitaciones y control de roles admin."
+            },
+            "profile": {
+                "title": "Perfil del empleado",
+                "description": "Sección placeholder para la cuenta y ajustes del empleado actual."
+            }
+        }
+    }
+}

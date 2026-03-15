@@ -1,0 +1,17 @@
+{
+    "contacts": {
+        "title": "Связаться с нами",
+        "subtitle": "Свяжитесь с нами. Мы здесь, чтобы помочь.",
+        "email": "Email",
+        "phone": "Телефон",
+        "address": "Адрес",
+        "sendMessage": "Отправить нам сообщение",
+        "name": "Имя",
+        "message": "Сообщение",
+        "send": "Отправить сообщение",
+        "emailPlaceholder": "example@email.com",
+        "emailValue": "info@grankush.com",
+        "phoneValue": "+1 (234) 567-890",
+        "addressValue": "123 Main Street\nCity, State 12345\nCountry"
+    }
+}

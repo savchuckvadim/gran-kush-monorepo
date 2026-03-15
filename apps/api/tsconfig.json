@@ -1,0 +1,42 @@
+{
+    "compilerOptions": {
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "resolvePackageJsonExports": true,
+        "esModuleInterop": true,
+        "isolatedModules": true,
+        "declaration": true,
+        "removeComments": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "allowSyntheticDefaultImports": true,
+        "target": "ES2023",
+        "sourceMap": true,
+        "outDir": "./dist",
+        "baseUrl": "./",
+        "jsx": "react-jsx",
+        "paths": {
+            "@modules/*": ["src/modules/*"],
+            "@modules": ["src/modules"],
+            "@shared/*": ["src/modules/shared/*"],
+            "@common/*": ["src/common/*"],
+            "@users": ["src/modules/users"],
+            "@users/*": ["src/modules/users/*"],
+            "@auth": ["src/modules/auth"],
+            "@auth/*": ["src/modules/auth/*"],
+            "@employees": ["src/modules/employees"],
+            "@employees/*": ["src/modules/employees/*"],
+            "@members": ["src/modules/members"],
+            "@members/*": ["src/modules/members/*"],
+            "@storage": ["src/modules/storage"],
+            "@storage/*": ["src/modules/storage/*"]
+        },
+        "incremental": true,
+        "skipLibCheck": true,
+        "strictNullChecks": true,
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitAny": false,
+        "strictBindCallApply": false,
+        "noFallthroughCasesInSwitch": false
+    }
+}

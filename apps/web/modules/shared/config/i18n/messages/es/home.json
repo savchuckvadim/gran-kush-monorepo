@@ -1,0 +1,31 @@
+{
+    "home": {
+        "hero": {
+            "title": "Bienvenido a",
+            "subtitle": "Tu club de cannabis de confianza. Únete a nuestra comunidad y experimenta productos de calidad premium con servicio profesional.",
+            "getStarted": "Comenzar",
+            "personalCabinet": "Cabina Personal"
+        },
+        "about": {
+            "title": "Sobre nosotros",
+            "description": "Gran Kush es una asociación privada sin fines de lucro en el centro de Torrevieja. Creamos un espacio cultural seguro para compartir, relajarse y mantener un enfoque responsable del cannabis.",
+            "quality": {
+                "title": "Calidad y responsabilidad",
+                "description": "Compartimos información actualizada sobre variedades, reducción de riesgos y consumo consciente."
+            },
+            "community": {
+                "title": "Comunidad",
+                "description": "Encuentros regulares, noches temáticas y eventos culturales unen a los miembros en un ambiente de respeto."
+            },
+            "service": {
+                "title": "Formato del club",
+                "description": "El acceso es exclusivo para miembros. No hacemos publicidad ni ventas."
+            }
+        },
+        "cta": {
+            "title": "¿Listo para comenzar?",
+            "description": "Únete a Gran Kush hoy y forma parte de nuestra comunidad. Regístrate ahora para comenzar.",
+            "button": "Registrarse ahora"
+        }
+    }
+}

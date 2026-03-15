@@ -1,0 +1,17 @@
+{
+    "navigation": {
+        "home": "Главная",
+        "about": "О нас",
+        "contacts": "Контакты",
+        "login": "Войти",
+        "register": "Регистрация",
+        "profile": "Профиль",
+        "settings": "Настройки",
+        "logout": "Выйти",
+        "privacy": "Конфиденциальность",
+        "terms": "Условия",
+        "navigationSection": "Навигация",
+        "accountSection": "Аккаунт",
+        "legalSection": "Правовая информация"
+    }
+}
