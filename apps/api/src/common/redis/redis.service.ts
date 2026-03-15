@@ -18,6 +18,7 @@ export class RedisService implements OnModuleDestroy {
             url: redisUrl,
             host,
             port,
+            password,
             connectTimeout,
             maxRetriesPerRequest,
         } = createRedisOptions(this.configService);
@@ -43,6 +44,7 @@ export class RedisService implements OnModuleDestroy {
             this.client = new Redis({
                 host,
                 port,
+                password,
                 retryStrategy: (times) => {
                     const delay = Math.min(times * 50, 2000);
                     this.logger.log(`Повторная попытка подключения к Redis через ${delay}ms...`);

@@ -22,10 +22,7 @@ import { RedisModule } from "@common/redis/redis.module";
                     const url = new URL(redisOptions.url);
                     return {
                         connection: {
-                            host: url.hostname,
-                            port: parseInt(url.port, 10) || 6379,
-                            maxRetriesPerRequest: redisOptions.maxRetriesPerRequest,
-                            connectTimeout: redisOptions.connectTimeout,
+                            url: redisOptions.url,
                         },
                     };
                 }
@@ -34,6 +31,7 @@ import { RedisModule } from "@common/redis/redis.module";
                     connection: {
                         host: redisOptions.host ?? "localhost",
                         port: redisOptions.port,
+                        password: redisOptions.password,
                         maxRetriesPerRequest: redisOptions.maxRetriesPerRequest,
                         connectTimeout: redisOptions.connectTimeout,
                     },
