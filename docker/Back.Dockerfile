@@ -2,27 +2,35 @@ FROM node:20-slim
 
 WORKDIR /app
 
-# Устанавливаем OpenSSL для Prisma
 RUN apt-get update && \
     apt-get install -y openssl libssl-dev ca-certificates && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Устанавливаем pnpm
 RUN npm install -g pnpm
 
-# Копируем всё монорепо
-COPY . .
+# ---- workspace файлы ----
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-# Ставим зависимости с учётом workspaces
+# turborepo (если есть)
+COPY turbo.json ./
+
+# ---- package.json пакетов ----
+COPY apps/api/package.json apps/api/package.json
+COPY packages/*/package.json packages/
+
+# install
 RUN pnpm install --frozen-lockfile
 
-# Генерируем Prisma
+# ---- исходный код ----
+COPY . .
+
+# prisma
 RUN pnpm --filter api exec prisma generate
 
-# Строим только API
+# build
 RUN pnpm --filter api build
 
 EXPOSE 7000
-CMD ["node", "apps/api/dist/main.js"]
 
+CMD ["node", "apps/api/dist/main.js"]
