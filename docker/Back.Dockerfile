@@ -28,10 +28,6 @@ RUN pnpm install --frozen-lockfile
 # ---- исходный код ----
 COPY . .
 
-# 👇 Убеждаемся, что миграции и конфиг скопированы (на случай, если они были перезаписаны)
-COPY apps/api/prisma/migrations apps/api/prisma/migrations
-COPY apps/api/prisma.config.ts apps/api/prisma.config.ts
-
 # prisma
 RUN pnpm --filter api exec prisma generate
 
@@ -43,8 +39,8 @@ RUN pnpm --filter api build
 
 # Применяем миграции и создаем admin при старте
 # (через entrypoint скрипт)
-COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# COPY docker/entrypoint.sh /entrypoint.sh
+# RUN chmod +x /entrypoint.sh
 
 EXPOSE 4200
 
