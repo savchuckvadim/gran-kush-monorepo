@@ -43,7 +43,7 @@ COPY --from=base /app/package.json ./root-package.json
 COPY --from=base /app/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY --from=base /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY --from=base /app/packages ./packages
-COPY --from=base /app/apps/web/public ./public
+# COPY --from=base /app/apps/web/public ./public
 COPY --from=base /app/apps/web/next.config.mjs ./next.config.mjs
 # COPY --from=base /app/apps/${APP}/.env ./.env
 
