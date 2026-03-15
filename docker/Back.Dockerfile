@@ -1,8 +1,6 @@
 FROM node:20-slim
 
 WORKDIR /app
-ARG PORT
-ENV PORT=${PORT}
 
 RUN apt-get update && \
     apt-get install -y openssl libssl-dev ca-certificates && \
@@ -36,6 +34,6 @@ RUN pnpm --filter api exec prisma generate
 # build
 RUN pnpm --filter api build
 
-EXPOSE ${PORT}
+EXPOSE 4200
 
 CMD ["node", "apps/api/dist/main.js"]
