@@ -4,7 +4,7 @@ FROM node:20 AS base
 
 
 ARG APP
-ARG PORT
+ENV APP=${APP}
 WORKDIR /app
 
 # Установка PNPM
@@ -30,7 +30,7 @@ FROM node:20-slim AS prod
 
 
 ARG APP
-ARG PORT
+ENV APP=${APP}
 ENV CI=true
 ENV NODE_ENV=production
 WORKDIR /app
