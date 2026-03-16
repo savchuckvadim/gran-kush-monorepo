@@ -41,8 +41,8 @@ RUN pnpm --filter api build
 # (через entrypoint скрипт)
 
 
-# COPY docker/entrypoint.sh /entrypoint.sh
-# RUN chmod +x /entrypoint.sh
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 4200
 
