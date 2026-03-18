@@ -1,6 +1,8 @@
+import { ValidationPipe } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
 
-import { cors } from "@common/config/cors/cors.config";
+import { setCorsConfig } from "@common/config/cors/cors.config";
 
 import { AppModule } from "./app.module";
 import { getSwaggerConfig } from "./common/config/swagger/swagger.config";
@@ -8,8 +10,17 @@ import { getSwaggerConfig } from "./common/config/swagger/swagger.config";
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
 
+    // Глобальная валидация и трансформация типов
+    app.useGlobalPipes(
+        new ValidationPipe({
+            transform: true, // Автоматически преобразует типы (строки в числа и т.д.)
+            whitelist: true, // Удаляет свойства, которых нет в DTO
+            forbidNonWhitelisted: false, // Не выбрасывает ошибку при лишних свойствах
+        })
+    );
+    const configService = app.get(ConfigService);
     // Настройка CORS
-    app.enableCors(cors);
+    setCorsConfig(configService, app);
 
     // Настройка Swagger
     getSwaggerConfig(app);

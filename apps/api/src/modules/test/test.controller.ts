@@ -1,10 +1,10 @@
 import { Controller, Get, Query } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
-import { EmployeesService } from "@employees/application/services/employees.service";
 import { EmployeeListItemDto } from "@employees/api/dto/employee-list.dto";
-import { MembersService } from "@members/application/services/members.service";
+import { EmployeesService } from "@employees/application/services/employees.service";
 import { CrmMemberDto } from "@members/api/dto/crm-member.dto";
+import { MembersService } from "@members/application/services/members.service";
 
 import { Public } from "@common/decorators/auth/public.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
@@ -65,9 +65,7 @@ export class TestController {
         description: "Paginated list of members",
     })
     @ApiErrorResponse([400])
-    async getMembers(
-        @Query() query: PaginationDto
-    ): Promise<PaginatedResult<CrmMemberDto>> {
+    async getMembers(@Query() query: PaginationDto): Promise<PaginatedResult<CrmMemberDto>> {
         const page = query.page ?? 1;
         const limit = query.limit ?? 10;
         const skip = PaginationUtil.getSkip(page, limit);

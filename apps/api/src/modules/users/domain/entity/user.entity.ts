@@ -10,6 +10,11 @@ export class User {
     email: string;
     passwordHash: string;
     isActive: boolean;
+    emailConfirmed: boolean;
+    emailVerificationToken?: string | null;
+    emailVerificationExpiresAt?: Date | null;
+    resetPasswordToken?: string | null;
+    resetPasswordExpiresAt?: Date | null;
     createdAt: Date;
     updatedAt: Date;
 

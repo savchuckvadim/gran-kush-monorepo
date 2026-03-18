@@ -5,6 +5,9 @@
         "profile": "Profile",
         "settings": "Settings",
         "logout": "Logout",
+        "loading": "Loading...",
+        "phone": "Phone",
+        "inactiveMember": "Inactive Member",
         "profileInformation": "Profile Information",
         "name": "Name",
         "email": "Email",
@@ -12,6 +15,55 @@
         "activeMember": "Active Member",
         "quickActions": "Quick Actions",
         "completeRegistration": "Complete Registration",
-        "contactSupport": "Contact Support"
+        "contactSupport": "Contact Support",
+        "nav": {
+            "dashboard": "Dashboard",
+            "qrCode": "QR Code",
+            "presence": "Visit History",
+            "settings": "Settings",
+            "logout": "Logout",
+            "loggingOut": "Logging out..."
+        },
+        "dashboard": {
+            "qrCode": {
+                "title": "My QR Code",
+                "viewFull": "View Full"
+            },
+            "viewHistory": "Visit History",
+            "settings": "Settings"
+        },
+        "qrCode": {
+            "title": "My QR Code",
+            "subtitle": "Show this QR code to the administrator when entering the club",
+            "yourQrCode": "Your QR Code",
+            "loading": "Loading QR code...",
+            "error": "Error",
+            "notFound": "QR code not found",
+            "instruction": "Show this QR code to the administrator when entering the club",
+            "instructionDetail": "The QR code is used for quick entry to the club. Show it to the administrator at the registration desk.",
+            "regenerate": "Regenerate QR Code",
+            "regenerating": "Regenerating...",
+            "download": "Download"
+        },
+        "presence": {
+            "title": "Visit History",
+            "subtitle": "View your club visit history",
+            "loading": "Loading...",
+            "error": "Error",
+            "noHistory": "No visit history",
+            "status": {
+                "present": "In Club",
+                "notPresent": "Not in Club",
+                "enteredAt": "Entered at"
+            },
+            "columns": {
+                "date": "Date",
+                "entryTime": "Entry Time",
+                "exitTime": "Exit Time",
+                "duration": "Duration",
+                "status": "Status"
+            },
+            "pagination": "Page {page} of {totalPages} (total {total} records)"
+        }
     }
 }

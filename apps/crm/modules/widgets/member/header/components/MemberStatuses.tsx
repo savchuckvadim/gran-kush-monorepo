@@ -1,6 +1,7 @@
 'use client'
-import { CrmMemberDetails } from "@/modules/entities/member";
 import { useTranslations } from "next-intl";
+
+import { CrmMemberDetails } from "@/modules/entities/member";
 
 export interface IMemberStatusesProps {
     member: CrmMemberDetails;

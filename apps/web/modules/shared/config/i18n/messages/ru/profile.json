@@ -5,6 +5,9 @@
         "profile": "Профиль",
         "settings": "Настройки",
         "logout": "Выйти",
+        "loading": "Загрузка...",
+        "phone": "Телефон",
+        "inactiveMember": "Неактивный участник",
         "profileInformation": "Информация о профиле",
         "name": "Имя",
         "email": "Email",
@@ -12,6 +15,55 @@
         "activeMember": "Активный участник",
         "quickActions": "Быстрые действия",
         "completeRegistration": "Завершить регистрацию",
-        "contactSupport": "Связаться с поддержкой"
+        "contactSupport": "Связаться с поддержкой",
+        "nav": {
+            "dashboard": "Главная",
+            "qrCode": "QR-код",
+            "presence": "История визитов",
+            "settings": "Настройки",
+            "logout": "Выйти",
+            "loggingOut": "Выход..."
+        },
+        "dashboard": {
+            "qrCode": {
+                "title": "Мой QR-код",
+                "viewFull": "Показать полностью"
+            },
+            "viewHistory": "История визитов",
+            "settings": "Настройки"
+        },
+        "qrCode": {
+            "title": "Мой QR-код",
+            "subtitle": "Покажите этот QR-код администратору при входе в клуб",
+            "yourQrCode": "Ваш QR-код",
+            "loading": "Загрузка QR-кода...",
+            "error": "Ошибка",
+            "notFound": "QR-код не найден",
+            "instruction": "Покажите этот QR-код администратору при входе в клуб",
+            "instructionDetail": "QR-код используется для быстрого входа в клуб. Покажите его администратору на стойке регистрации.",
+            "regenerate": "Обновить QR-код",
+            "regenerating": "Обновление...",
+            "download": "Скачать"
+        },
+        "presence": {
+            "title": "История визитов",
+            "subtitle": "Просмотр истории ваших посещений клуба",
+            "loading": "Загрузка...",
+            "error": "Ошибка",
+            "noHistory": "История визитов пуста",
+            "status": {
+                "present": "В клубе",
+                "notPresent": "Не в клубе",
+                "enteredAt": "Вход"
+            },
+            "columns": {
+                "date": "Дата",
+                "entryTime": "Время входа",
+                "exitTime": "Время выхода",
+                "duration": "Длительность",
+                "status": "Статус"
+            },
+            "pagination": "Страница {page} из {totalPages} (всего {total} записей)"
+        }
     }
 }

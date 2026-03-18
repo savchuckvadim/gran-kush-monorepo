@@ -2,6 +2,11 @@
 
 FROM node:20 AS base
 
+# NEXT_PUBLIC_* переменные в Next.js встраиваются в код на этапе build,
+# поэтому значение должно быть доступно именно тут (а не только на runtime).
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
 
 WORKDIR /app
 
@@ -30,6 +35,9 @@ FROM node:20-slim AS prod
 ENV CI=true
 ENV NODE_ENV=production
 WORKDIR /app
+
+# На runtime уже не важно для NEXT_PUBLIC (оно вшито в бандл), но пусть будет доступно для любых client code/path.
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
 
 

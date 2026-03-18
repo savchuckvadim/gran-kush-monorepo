@@ -18,8 +18,7 @@ import {
     ApiTags,
 } from "@nestjs/swagger";
 
-import { AdminGuard } from "@employees/infrastructure/guards/admin.guard";
-import { EmployeeJwtAuthGuard } from "@employees/infrastructure/guards/employee-jwt-auth.guard";
+import { AdminGuard, EmployeeJwtAuthGuard } from "@auth/employees";
 import { CreateUserDto } from "@users/api/dto/create-user.dto";
 import { UpdateUserDto } from "@users/api/dto/update-user.dto";
 import { UserResponseDto } from "@users/api/dto/user-response.dto";

@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemberDetails } from "@/modules/entities/member";
-import { MemberDocuments, MemberHeader, MemberProfileInfo } from "@/modules/widgets/member";
+import { MemberDocuments, MemberHeader, MemberProfileInfo, MemberQrCodeCard } from "@/modules/widgets/member";
 
 export interface IMemberPageProps {
     memberId: string;
@@ -21,17 +21,15 @@ export function MemberPage({ memberId, locale, signatureTitle, documentsTitle, o
     if (!member) {
         return <div>Member not found</div>
     }
-    if (!member) {
-        return <div>Member not found</div>
-    }
     return (
         <div className="space-y-6">
 
             <MemberHeader member={member} locale={locale} />
 
-
-            <MemberProfileInfo member={member} />
-
+            <div className="grid gap-4 lg:grid-cols-2">
+                <MemberProfileInfo member={member} />
+                <MemberQrCodeCard memberId={memberId} />
+            </div>
 
             <MemberDocuments member={member} locale={locale}  />
         </div>

@@ -1,14 +1,15 @@
 import { Module } from "@nestjs/common";
 
-import { UsersModule } from "@users/users.module";
-
-import { PrismaModule } from "@common/prisma/prisma.module";
+import { EmployeeAuthModule } from "@auth/employees/employee-auth.module";
+import { MemberAuthModule } from "@auth/members/member-auth.module";
+import { SharedAuthModule } from "@auth/shared/shared-auth.module";
 
 /**
- * AuthModule - базовый модуль для общих сервисов аутентификации
- * Конкретные контроллеры находятся в MembersModule и EmployeesModule
+ * Главный модуль аутентификации
+ * Импортирует модули для аутентификации сотрудников и членов
  */
 @Module({
-    imports: [UsersModule, PrismaModule],
+    imports: [EmployeeAuthModule, MemberAuthModule, SharedAuthModule],
+    exports: [EmployeeAuthModule, MemberAuthModule, SharedAuthModule],
 })
 export class AuthModule {}

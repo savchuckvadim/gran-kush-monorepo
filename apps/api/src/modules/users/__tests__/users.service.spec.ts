@@ -3,14 +3,10 @@ import { Test, TestingModule } from "@nestjs/testing";
 
 import { CreateUserDto } from "@users/api/dto/create-user.dto";
 import { UpdateUserDto } from "@users/api/dto/update-user.dto";
-import { UserQueryDto } from "@users/api/dto/user-query.dto";
 import { UsersService } from "@users/application/services/users.service";
 import { User } from "@users/domain/entity/user.entity";
-import { UserRepository } from "@users/infrastructure/repositories/user.repository";
-import { UserDocument } from "@users/infrastructure/schemas/user.schema";
+import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import * as bcrypt from "bcrypt";
-
-import { SortOrder } from "@common/paginate/dto/pagination.dto";
 
 // Mock bcrypt module
 jest.mock("bcrypt", () => ({
@@ -24,41 +20,22 @@ describe("UsersService", () => {
         id: "507f1f77bcf86cd799439011",
         email: "test@example.com",
         passwordHash: "hashedPassword123",
-        name: "Test User",
-        phone: "+1234567890",
         isActive: true,
+        emailConfirmed: false,
         createdAt: new Date("2024-01-01"),
         updatedAt: new Date("2024-01-01"),
     };
-
-    const mockUserDocument = {
-        _id: { toString: () => mockUser.id },
-        email: mockUser.email,
-        passwordHash: mockUser.passwordHash,
-        name: mockUser.name,
-        phone: mockUser.phone,
-        isActive: mockUser.isActive,
-        createdAt: mockUser.createdAt,
-        updatedAt: mockUser.updatedAt,
-    } as unknown as UserDocument;
 
     const mockUserRepository = {
         existsByEmail: jest.fn(),
         create: jest.fn(),
         findById: jest.fn(),
+        findByEmail: jest.fn(),
+        findByEmailWithRelations: jest.fn(),
+        findByEmailVerificationToken: jest.fn(),
+        findByResetPasswordToken: jest.fn(),
         update: jest.fn(),
         delete: jest.fn(),
-        getModel: jest.fn(),
-        mapDocumentToEntity: jest.fn(),
-    };
-
-    const mockModel = {
-        find: jest.fn().mockReturnThis(),
-        skip: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockReturnThis(),
-        sort: jest.fn().mockReturnThis(),
-        exec: jest.fn(),
-        countDocuments: jest.fn().mockReturnThis(),
     };
 
     beforeEach(async () => {
@@ -90,8 +67,6 @@ describe("UsersService", () => {
         const createDto: CreateUserDto = {
             email: "test@example.com",
             password: "password123",
-            name: "Test User",
-            phone: "+1234567890",
         };
 
         it("should create a user successfully", async () => {
@@ -108,8 +83,6 @@ describe("UsersService", () => {
             expect(mockUserRepository.create).toHaveBeenCalled();
             expect(result).toMatchObject({
                 email: createDto.email.toLowerCase(),
-                name: createDto.name,
-                phone: createDto.phone,
                 isActive: true,
             });
             expect(result.id).toBeDefined();
@@ -145,92 +118,6 @@ describe("UsersService", () => {
         });
     });
 
-    describe("findAll", () => {
-        const queryDto: UserQueryDto = {
-            page: 1,
-            limit: 10,
-            sortBy: "createdAt",
-            sortOrder: SortOrder.DESC,
-        };
-
-        it("should return paginated users", async () => {
-            const mockDocs = [mockUserDocument];
-            const mockTotal = 1;
-
-            mockUserRepository.getModel.mockReturnValue(mockModel);
-            mockModel.exec.mockResolvedValueOnce(mockDocs).mockResolvedValueOnce(mockTotal);
-            mockUserRepository.mapDocumentToEntity.mockReturnValue(mockUser);
-
-            const result = await service.findAll(queryDto);
-
-            expect(result).toHaveProperty("items");
-            expect(result).toHaveProperty("total");
-            expect(result).toHaveProperty("page");
-            expect(result).toHaveProperty("limit");
-            expect(result.items).toHaveLength(1);
-            expect(result.total).toBe(mockTotal);
-        });
-
-        it("should apply search filter", async () => {
-            const searchQuery: UserQueryDto = {
-                ...queryDto,
-                search: "test",
-            };
-
-            mockUserRepository.getModel.mockReturnValue(mockModel);
-            mockModel.exec.mockResolvedValueOnce([mockUserDocument]).mockResolvedValueOnce(1);
-            mockUserRepository.mapDocumentToEntity.mockReturnValue(mockUser);
-
-            await service.findAll(searchQuery);
-
-            expect(mockModel.find).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                    $or: expect.arrayContaining([
-                        expect.objectContaining({
-                            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                            email: expect.objectContaining({
-                                $regex: "test",
-                            }),
-                        }),
-                    ]),
-                })
-            );
-        });
-
-        it("should apply isActive filter", async () => {
-            const activeQuery: UserQueryDto = {
-                ...queryDto,
-                isActive: true,
-            };
-
-            mockUserRepository.getModel.mockReturnValue(mockModel);
-            mockModel.exec.mockResolvedValueOnce([mockUserDocument]).mockResolvedValueOnce(1);
-            mockUserRepository.mapDocumentToEntity.mockReturnValue(mockUser);
-
-            await service.findAll(activeQuery);
-
-            expect(mockModel.find).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    isActive: true,
-                })
-            );
-        });
-
-        it("should use default pagination values", async () => {
-            const emptyQuery: UserQueryDto = {};
-
-            mockUserRepository.getModel.mockReturnValue(mockModel);
-            mockModel.exec.mockResolvedValueOnce([]).mockResolvedValueOnce(0);
-            mockUserRepository.mapDocumentToEntity.mockReturnValue(mockUser);
-
-            const result = await service.findAll(emptyQuery);
-
-            expect(result.page).toBe(1);
-            expect(result.limit).toBe(10);
-        });
-    });
-
     describe("findById", () => {
         it("should return user by id", async () => {
             mockUserRepository.findById.mockResolvedValue(mockUser);
@@ -241,7 +128,7 @@ describe("UsersService", () => {
             expect(result).toMatchObject({
                 id: mockUser.id,
                 email: mockUser.email,
-                name: mockUser.name,
+                isActive: mockUser.isActive,
             });
         });
 
@@ -257,14 +144,14 @@ describe("UsersService", () => {
 
     describe("update", () => {
         const updateDto: UpdateUserDto = {
-            name: "Updated Name",
-            phone: "+9876543210",
+            password: "newPassword123",
             isActive: false,
         };
 
         const updatedUser: User = {
             ...mockUser,
-            ...updateDto,
+            passwordHash: "hashedNewPassword",
+            isActive: false,
         };
 
         it("should update user successfully", async () => {
@@ -277,13 +164,10 @@ describe("UsersService", () => {
             expect(mockUserRepository.update).toHaveBeenCalledWith(
                 mockUser.id,
                 expect.objectContaining({
-                    name: updateDto.name,
-                    phone: updateDto.phone,
+                    passwordHash: expect.any(String),
                     isActive: updateDto.isActive,
                 })
             );
-            expect(result.name).toBe(updateDto.name);
-            expect(result.phone).toBe(updateDto.phone);
             expect(result.isActive).toBe(updateDto.isActive);
         });
 
@@ -309,12 +193,12 @@ describe("UsersService", () => {
 
         it("should update only provided fields", async () => {
             const partialDto: UpdateUserDto = {
-                name: "New Name",
+                isActive: false,
             };
 
             const partiallyUpdatedUser: User = {
                 ...mockUser,
-                name: "New Name",
+                isActive: false,
             };
 
             mockUserRepository.findById
@@ -327,10 +211,10 @@ describe("UsersService", () => {
             expect(mockUserRepository.update).toHaveBeenCalledWith(
                 mockUser.id,
                 expect.objectContaining({
-                    name: partialDto.name,
+                    isActive: partialDto.isActive,
                 })
             );
-            expect(result.name).toBe(partialDto.name);
+            expect(result.isActive).toBe(partialDto.isActive);
         });
     });
 

@@ -1,16 +1,16 @@
 "use client";
 
 import { ChangeEvent, useRef, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { useTranslations, useLocale } from "next-intl";
+import { usePathname,useRouter } from "next/navigation";
+import { useLocale,useTranslations } from "next-intl";
+
 import { Pencil, Upload } from "lucide-react";
 
 import { Button, FieldInput, SignatureCanvasField } from "@workspace/ui";
 import { Field, FieldContent, FieldLabel } from "@workspace/ui/components/field";
 
-import { useUpdateCrmMemberFiles } from "@/modules/entities/member-documents/hooks/member-documents.hook";
-import { updateCrmMemberFiles, type UpdateCrmMemberFilesPayload } from "@/modules/entities/member-documents/api/member-documents.api";
-import { ThemedSignatureImage } from "@/modules/entities/member/ui/themed-signature-image";
+import { ThemedSignatureImage } from "@/modules/entities/member";
+import { type UpdateCrmMemberFilesPayload,useUpdateCrmMemberFiles } from "@/modules/entities/member-documents";
 import { isApiErrorWithStatus } from "@/modules/shared";
 
 interface MemberDocumentEditModalProps {

@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { Card } from "@workspace/ui";
 
-import { LoginForm } from "@/modules/features/auth/";
+import { LoginForm } from "@/modules/features";
 
 export default function LoginPage() {
     const t = useTranslations("auth.login");

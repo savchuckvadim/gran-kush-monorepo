@@ -1,5 +1,6 @@
 "use client";
 import { useMutation } from "@tanstack/react-query";
+
 import {
     SchemaRegisterMemberDto,
     SchemaRegisterMemberResponseDto,
@@ -7,12 +8,7 @@ import {
     SchemaUploadMemberFilesResponseDto,
 } from "@workspace/api-client/core";
 
-import { configureApiClient, ApiAuthType } from "@workspace/api-client/core";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-const API_AUTH_TYPE = ApiAuthType.SITE;
-
-const $api = configureApiClient(API_BASE_URL, API_AUTH_TYPE);
+import { $api } from "@/modules/shared/api";
 
 
 
@@ -87,47 +83,14 @@ export const useSubmitRegister = () => {
     const uploadMutation = useMutation<
         SchemaUploadMemberFilesResponseDto,
         Error,
-        { accessToken: string; data: RegisterFormSubmitData }
+        RegisterFormSubmitData
     >({
-        mutationFn: async ({ accessToken, data }) => {
+        mutationFn: async (data) => {
             const filesPayload = await mapToUploadMemberFilesDto(data);
-            // For authenticated requests, we need to temporarily set the token
-            // The $api middleware will handle it, but we need to set it in storage first
-            // Since we're using ApiAuthType.SITE, tokens are stored in site.* keys
-            if (typeof window !== "undefined") {
-                const previousToken = window.localStorage.getItem("site.accessToken");
-                window.localStorage.setItem("site.accessToken", accessToken);
-                try {
-                    const response = await $api.POST('/lk/auth/member/files', {
-                        body: filesPayload,
-                    });
-                    return response.data as SchemaUploadMemberFilesResponseDto;
-                } finally {
-                    // Restore previous token or remove if it was null
-                    if (previousToken) {
-                        window.localStorage.setItem("site.accessToken", previousToken);
-                    } else {
-                        window.localStorage.removeItem("site.accessToken");
-                    }
-                }
-            } else {
-                // Server-side fallback
-                const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-                const response = await fetch(`${API_BASE_URL}/lk/auth/member/files`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${accessToken}`,
-                    },
-                    body: JSON.stringify(filesPayload),
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Failed to upload files: ${response.status}`);
-                }
-
-                return (await response.json()) as SchemaUploadMemberFilesResponseDto;
-            }
+            const response = await $api.POST("/lk/auth/member/files", {
+                body: filesPayload,
+            });
+            return response.data as SchemaUploadMemberFilesResponseDto;
         },
     });
 

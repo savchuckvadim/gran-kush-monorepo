@@ -3,11 +3,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
+    type CrmMemberDetails,
+    type CrmMemberListItem,
     getCrmMemberById,
     getCrmMembers,
     updateCrmMember,
-    type CrmMemberDetails,
-    type CrmMemberListItem,
 } from "../api/member.api";
 
 // Query keys

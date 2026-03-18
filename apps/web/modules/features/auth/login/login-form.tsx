@@ -4,14 +4,13 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Button, FieldInput } from "@workspace/ui";
 
+import { useLogin } from "@/modules/entities/auth";
 import { ROUTES } from "@/modules/shared/config/routes";
-import { apiClient } from "@/modules/shared/lib/api";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
 const loginSchema = z.object({
@@ -32,20 +31,7 @@ export function LoginForm() {
         resolver: zodResolver(loginSchema),
     });
 
-    const mutation = useMutation({
-        mutationFn: async (data: LoginFormData) => {
-            // TODO: Replace with actual API call
-            const response = await apiClient.post("/auth/login", data);
-            return response.data;
-        },
-        onSuccess: () => {
-            // TODO: Handle success (redirect, set token, etc.)
-            console.log("Login successful");
-        },
-        onError: (error) => {
-            console.error("Login error:", error);
-        },
-    });
+    const mutation = useLogin();
 
     const onSubmit = (data: LoginFormData) => {
         mutation.mutate(data);
@@ -55,7 +41,9 @@ export function LoginForm() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {mutation.isError && (
                 <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
-                    {t("error")}
+                    {mutation.error instanceof Error
+                        ? mutation.error.message
+                        : t("error")}
                 </div>
             )}
 
@@ -69,16 +57,14 @@ export function LoginForm() {
             />
 
             <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                    <FieldInput
-                        label={t("password")}
-                        type="password"
-                        error={errors.password?.message}
-                        required
-                        {...register("password")}
-                        placeholder="••••••••"
-                    />
-                </div>
+                <FieldInput
+                    label={t("password")}
+                    type="password"
+                    error={errors.password?.message}
+                    required
+                    {...register("password")}
+                    placeholder="••••••••"
+                />
                 <Link
                     href={localizedLink(ROUTES.FORGOT_PASSWORD)}
                     className="text-sm text-primary hover:underline"

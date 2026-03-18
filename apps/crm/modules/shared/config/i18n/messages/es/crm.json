@@ -10,6 +10,7 @@
                 "products": "Productos",
                 "orders": "Pedidos",
                 "attendance": "Asistencia",
+                "finance": "Finanzas",
                 "employees": "Empleados"
             }
         },
@@ -99,21 +100,267 @@
                     "documentSecond": "Documento, lado trasero",
                     "signature": "Imagen de firma"
                 }
+            },
+            "qrCode": {
+                "title": "Código QR",
+                "loading": "Cargando código QR...",
+                "error": "Error",
+                "notFound": "Código QR no encontrado. Genere un nuevo código QR para el miembro.",
+                "generate": "Generar código QR",
+                "generating": "Generando...",
+                "regenerate": "Regenerar",
+                "regenerating": "Regenerando...",
+                "status": "Estado",
+                "active": "Activo",
+                "expired": "Expirado",
+                "expiresAt": "Expira en",
+                "createdAt": "Creado en",
+                "note": "El código QR se utiliza para la entrada del miembro al club. Cuando se regenera, el código QR antiguo dejará de funcionar."
+            }
+        },
+        "attendance": {
+            "title": "Asistencia",
+            "subtitle": "Gestión de presencia de miembros: escaneo QR, registro manual, historial de visitas",
+            "scanner": {
+                "scanButton": "Escanear QR",
+                "title": "Escanear código QR",
+                "description": "Escanea el código QR del miembro o introduce el código manualmente",
+                "manualInput": "Introducir código manualmente",
+                "manualPlaceholder": "Pega el código QR encriptado...",
+                "submitScan": "Verificar código",
+                "scanning": "Verificando...",
+                "scanError": "No se pudo reconocer el código QR. Intenta de nuevo.",
+                "entryConfirmed": "Entrada confirmada",
+                "exitConfirmed": "Salida confirmada",
+                "memberName": "Miembro",
+                "enteredAt": "Hora de entrada",
+                "exitedAt": "Hora de salida",
+                "duration": "Duración",
+                "minutes": "min",
+                "scanAnother": "Escanear otro",
+                "unknownMember": "Miembro desconocido"
+            },
+            "present": {
+                "title": "Actualmente en el club",
+                "loading": "Cargando...",
+                "error": "Error de carga",
+                "empty": "No hay nadie actualmente en el club",
+                "since": "desde",
+                "min": "min",
+                "checkOut": "Salida",
+                "unknownMember": "Miembro desconocido"
+            },
+            "sessions": {
+                "title": "Historial de visitas",
+                "loading": "Cargando...",
+                "error": "Error de carga",
+                "empty": "Sin registros de visitas",
+                "colMember": "Miembro",
+                "colDate": "Fecha",
+                "colEntry": "Entrada",
+                "colExit": "Salida",
+                "colDuration": "Duración",
+                "colMethod": "Método",
+                "colStatus": "Estado",
+                "statusActive": "En el club",
+                "statusClosed": "Completado",
+                "min": "min",
+                "page": "Pág."
+            },
+            "stats": {
+                "title": "Estadísticas",
+                "loading": "Cargando...",
+                "totalVisits": "Total de visitas",
+                "uniqueMembers": "Miembros únicos",
+                "avgDuration": "Duración promedio",
+                "currentlyPresent": "Presentes actualmente",
+                "min": "min"
+            }
+        },
+        "products": {
+            "title": "Catálogo de productos",
+            "subtitle": "Gestión de productos, categorías y unidades de medida",
+            "list": {
+                "loading": "Cargando...",
+                "error": "Error al cargar productos",
+                "empty": "Sin productos. Añade tu primer producto.",
+                "colProduct": "Producto",
+                "colCategory": "Categoría",
+                "colPrice": "Precio",
+                "colStock": "Stock",
+                "colStatus": "Estado",
+                "colActions": "Acciones",
+                "active": "Activo",
+                "inactive": "Inactivo",
+                "page": "Pág.",
+                "confirmDelete": "¿Estás seguro de que quieres eliminar este producto?"
+            },
+            "form": {
+                "createButton": "Añadir producto",
+                "createTitle": "Nuevo producto",
+                "name": "Nombre",
+                "description": "Descripción",
+                "sku": "SKU",
+                "category": "Categoría",
+                "selectCategory": "Seleccionar categoría",
+                "measurementUnit": "Unidad de medida",
+                "selectUnit": "Seleccionar unidad",
+                "price": "Precio (€)",
+                "initialQuantity": "Cantidad inicial",
+                "thc": "THC (%)",
+                "cbd": "CBD (%)",
+                "strain": "Variedad",
+                "creating": "Creando...",
+                "create": "Crear producto",
+                "createError": "No se pudo crear el producto"
+            },
+            "detail": {
+                "loading": "Cargando...",
+                "error": "Producto no encontrado",
+                "editTitle": "Editar producto",
+                "edit": "Editar",
+                "cancel": "Cancelar",
+                "save": "Guardar",
+                "saveError": "No se pudo guardar",
+                "name": "Nombre",
+                "description": "Descripción",
+                "sku": "SKU",
+                "category": "Categoría",
+                "selectCategory": "Seleccionar categoría",
+                "measurementUnit": "Unidad de medida",
+                "selectUnit": "Seleccionar unidad",
+                "price": "Precio",
+                "stock": "Stock",
+                "currentQuantity": "Stock actual",
+                "status": "Estado",
+                "active": "Activo",
+                "inactive": "Inactivo",
+                "isActive": "Activo",
+                "isAvailable": "Disponible para pedidos",
+                "thc": "THC",
+                "cbd": "CBD",
+                "strain": "Variedad"
+            }
+        },
+        "orders": {
+            "title": "Pedidos",
+            "subtitle": "Gestión de pedidos: estados, pagos, detalles",
+            "list": {
+                "loading": "Cargando...",
+                "error": "Error de carga",
+                "empty": "Sin pedidos",
+                "allStatuses": "Todos",
+                "colOrder": "Pedido",
+                "colMember": "Miembro",
+                "colStatus": "Estado",
+                "colPayment": "Pago",
+                "colTotal": "Total",
+                "colDate": "Fecha",
+                "colActions": "Acciones",
+                "page": "Pág.",
+                "status": {
+                    "pending": "Pendiente",
+                    "confirmed": "Confirmado",
+                    "preparing": "Preparando",
+                    "ready": "Listo",
+                    "completed": "Completado",
+                    "cancelled": "Cancelado"
+                },
+                "payment": {
+                    "pending": "Sin pagar",
+                    "paid": "Pagado",
+                    "refunded": "Reembolsado"
+                }
+            },
+            "detail": {
+                "loading": "Cargando...",
+                "error": "Pedido no encontrado",
+                "orderTitle": "Pedido",
+                "info": "Información",
+                "member": "Miembro",
+                "total": "Total",
+                "subtotal": "Subtotal",
+                "discount": "Descuento",
+                "notes": "Notas",
+                "adminNotes": "Notas del empleado",
+                "orderStatus": "Estado del pedido",
+                "paymentStatus": "Estado del pago",
+                "paymentMethod": "Método de pago",
+                "items": "Artículos del pedido",
+                "noItems": "Sin artículos",
+                "colProduct": "Producto",
+                "colQty": "Cant.",
+                "colPrice": "Precio",
+                "colItemTotal": "Total",
+                "status": {
+                    "pending": "Pendiente",
+                    "confirmed": "Confirmado",
+                    "preparing": "Preparando",
+                    "ready": "Listo",
+                    "completed": "Completado",
+                    "cancelled": "Cancelado"
+                },
+                "payment": {
+                    "pending": "Sin pagar",
+                    "paid": "Pagado",
+                    "refunded": "Reembolsado"
+                },
+                "method": {
+                    "cash": "Efectivo",
+                    "card": "Tarjeta",
+                    "crypto": "Cripto"
+                }
+            }
+        },
+        "finance": {
+            "title": "Finanzas",
+            "subtitle": "Informes financieros, transacciones y analítica",
+            "summary": {
+                "loading": "Cargando...",
+                "totalIncome": "Ingresos totales",
+                "totalExpense": "Gastos totales",
+                "netBalance": "Balance neto"
+            },
+            "transactions": {
+                "title": "Transacciones",
+                "loading": "Cargando...",
+                "error": "Error de carga",
+                "empty": "Sin transacciones",
+                "all": "Todas",
+                "income": "Ingreso",
+                "expense": "Gasto",
+                "colDate": "Fecha",
+                "colType": "Tipo",
+                "colDirection": "Dirección",
+                "colAmount": "Monto",
+                "colMethod": "Método",
+                "colDescription": "Descripción",
+                "page": "Pág.",
+                "type": {
+                    "order_payment": "Pago de pedido",
+                    "refund": "Reembolso",
+                    "adjustment": "Ajuste",
+                    "manual": "Manual"
+                },
+                "method": {
+                    "cash": "Efectivo",
+                    "card": "Tarjeta",
+                    "crypto": "Cripto"
+                }
+            },
+            "reports": {
+                "loading": "Cargando...",
+                "byTypeTitle": "Por tipo",
+                "transactions": "transacciones",
+                "type": {
+                    "order_payment": "Pago de pedido",
+                    "refund": "Reembolso",
+                    "adjustment": "Ajuste",
+                    "manual": "Manual"
+                }
             }
         },
         "sections": {
-            "products": {
-                "title": "Productos",
-                "description": "Sección placeholder para catálogo de productos y control de stock."
-            },
-            "orders": {
-                "title": "Pedidos",
-                "description": "Sección placeholder para lista de pedidos, estados y detalles."
-            },
-            "attendance": {
-                "title": "Asistencia",
-                "description": "Sección placeholder para escáner QR de entrada/salida y analítica de tiempo en el club."
-            },
             "employees": {
                 "title": "Empleados",
                 "description": "Sección placeholder para lista de empleados, invitaciones y control de roles admin."

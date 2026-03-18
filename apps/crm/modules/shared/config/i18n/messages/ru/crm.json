@@ -10,6 +10,7 @@
                 "products": "Товары",
                 "orders": "Заказы",
                 "attendance": "Посещаемость",
+                "finance": "Финансы",
                 "employees": "Сотрудники"
             }
         },
@@ -99,21 +100,267 @@
                     "documentSecond": "Документ, обратная сторона",
                     "signature": "Изображение подписи"
                 }
+            },
+            "qrCode": {
+                "title": "QR-код",
+                "loading": "Загрузка QR-кода...",
+                "error": "Ошибка",
+                "notFound": "QR-код не найден. Сгенерируйте новый QR-код для участника.",
+                "generate": "Сгенерировать QR-код",
+                "generating": "Генерация...",
+                "regenerate": "Перегенерировать",
+                "regenerating": "Перегенерация...",
+                "status": "Статус",
+                "active": "Активен",
+                "expired": "Истёк",
+                "expiresAt": "Истекает",
+                "createdAt": "Создан",
+                "note": "QR-код используется для входа участника в клуб. При перегенерации старый QR-код перестанет работать."
+            }
+        },
+        "attendance": {
+            "title": "Посещаемость",
+            "subtitle": "Управление присутствием участников: QR-сканирование, ручная отметка, история визитов",
+            "scanner": {
+                "scanButton": "Сканировать QR",
+                "title": "Сканирование QR-кода",
+                "description": "Отсканируйте QR-код участника или введите код вручную",
+                "manualInput": "Ввод кода вручную",
+                "manualPlaceholder": "Вставьте зашифрованный код QR...",
+                "submitScan": "Проверить код",
+                "scanning": "Проверка...",
+                "scanError": "Не удалось распознать QR-код. Попробуйте снова.",
+                "entryConfirmed": "Вход подтверждён",
+                "exitConfirmed": "Выход подтверждён",
+                "memberName": "Участник",
+                "enteredAt": "Время входа",
+                "exitedAt": "Время выхода",
+                "duration": "Длительность",
+                "minutes": "мин.",
+                "scanAnother": "Сканировать ещё",
+                "unknownMember": "Неизвестный участник"
+            },
+            "present": {
+                "title": "Сейчас в клубе",
+                "loading": "Загрузка...",
+                "error": "Ошибка загрузки",
+                "empty": "Сейчас никого нет в клубе",
+                "since": "с",
+                "min": "мин.",
+                "checkOut": "Выход",
+                "unknownMember": "Неизвестный участник"
+            },
+            "sessions": {
+                "title": "История визитов",
+                "loading": "Загрузка...",
+                "error": "Ошибка загрузки",
+                "empty": "Нет записей о визитах",
+                "colMember": "Участник",
+                "colDate": "Дата",
+                "colEntry": "Вход",
+                "colExit": "Выход",
+                "colDuration": "Длительность",
+                "colMethod": "Метод",
+                "colStatus": "Статус",
+                "statusActive": "В клубе",
+                "statusClosed": "Завершён",
+                "min": "мин.",
+                "page": "Стр."
+            },
+            "stats": {
+                "title": "Статистика",
+                "loading": "Загрузка...",
+                "totalVisits": "Всего визитов",
+                "uniqueMembers": "Уникальных участников",
+                "avgDuration": "Ср. длительность",
+                "currentlyPresent": "Сейчас в клубе",
+                "min": "мин."
+            }
+        },
+        "products": {
+            "title": "Каталог товаров",
+            "subtitle": "Управление товарами, категориями и единицами измерения",
+            "list": {
+                "loading": "Загрузка...",
+                "error": "Ошибка загрузки товаров",
+                "empty": "Нет товаров. Добавьте первый товар.",
+                "colProduct": "Товар",
+                "colCategory": "Категория",
+                "colPrice": "Цена",
+                "colStock": "Остаток",
+                "colStatus": "Статус",
+                "colActions": "Действия",
+                "active": "Активен",
+                "inactive": "Неактивен",
+                "page": "Стр.",
+                "confirmDelete": "Вы уверены, что хотите удалить этот товар?"
+            },
+            "form": {
+                "createButton": "Добавить товар",
+                "createTitle": "Новый товар",
+                "name": "Название",
+                "description": "Описание",
+                "sku": "Артикул (SKU)",
+                "category": "Категория",
+                "selectCategory": "Выберите категорию",
+                "measurementUnit": "Единица измерения",
+                "selectUnit": "Выберите единицу",
+                "price": "Цена (€)",
+                "initialQuantity": "Начальное количество",
+                "thc": "THC (%)",
+                "cbd": "CBD (%)",
+                "strain": "Сорт",
+                "creating": "Создание...",
+                "create": "Создать товар",
+                "createError": "Не удалось создать товар"
+            },
+            "detail": {
+                "loading": "Загрузка...",
+                "error": "Товар не найден",
+                "editTitle": "Редактирование товара",
+                "edit": "Редактировать",
+                "cancel": "Отмена",
+                "save": "Сохранить",
+                "saveError": "Не удалось сохранить",
+                "name": "Название",
+                "description": "Описание",
+                "sku": "Артикул",
+                "category": "Категория",
+                "selectCategory": "Выберите категорию",
+                "measurementUnit": "Единица измерения",
+                "selectUnit": "Выберите единицу",
+                "price": "Цена",
+                "stock": "Остаток",
+                "currentQuantity": "Текущий остаток",
+                "status": "Статус",
+                "active": "Активен",
+                "inactive": "Неактивен",
+                "isActive": "Активен",
+                "isAvailable": "Доступен для заказа",
+                "thc": "THC",
+                "cbd": "CBD",
+                "strain": "Сорт"
+            }
+        },
+        "orders": {
+            "title": "Заказы",
+            "subtitle": "Управление заказами участников: статусы, оплата, детали",
+            "list": {
+                "loading": "Загрузка...",
+                "error": "Ошибка загрузки",
+                "empty": "Нет заказов",
+                "allStatuses": "Все",
+                "colOrder": "Заказ",
+                "colMember": "Участник",
+                "colStatus": "Статус",
+                "colPayment": "Оплата",
+                "colTotal": "Итого",
+                "colDate": "Дата",
+                "colActions": "Действия",
+                "page": "Стр.",
+                "status": {
+                    "pending": "Ожидает",
+                    "confirmed": "Подтверждён",
+                    "preparing": "Готовится",
+                    "ready": "Готов",
+                    "completed": "Завершён",
+                    "cancelled": "Отменён"
+                },
+                "payment": {
+                    "pending": "Не оплачен",
+                    "paid": "Оплачен",
+                    "refunded": "Возвращён"
+                }
+            },
+            "detail": {
+                "loading": "Загрузка...",
+                "error": "Заказ не найден",
+                "orderTitle": "Заказ",
+                "info": "Информация",
+                "member": "Участник",
+                "total": "Итого",
+                "subtotal": "Подытог",
+                "discount": "Скидка",
+                "notes": "Примечания",
+                "adminNotes": "Заметки сотрудника",
+                "orderStatus": "Статус заказа",
+                "paymentStatus": "Статус оплаты",
+                "paymentMethod": "Метод оплаты",
+                "items": "Позиции заказа",
+                "noItems": "Нет позиций",
+                "colProduct": "Товар",
+                "colQty": "Кол-во",
+                "colPrice": "Цена",
+                "colItemTotal": "Сумма",
+                "status": {
+                    "pending": "Ожидает",
+                    "confirmed": "Подтверждён",
+                    "preparing": "Готовится",
+                    "ready": "Готов",
+                    "completed": "Завершён",
+                    "cancelled": "Отменён"
+                },
+                "payment": {
+                    "pending": "Не оплачен",
+                    "paid": "Оплачен",
+                    "refunded": "Возвращён"
+                },
+                "method": {
+                    "cash": "Наличные",
+                    "card": "Карта",
+                    "crypto": "Крипто"
+                }
+            }
+        },
+        "finance": {
+            "title": "Финансы",
+            "subtitle": "Финансовые отчёты, транзакции и аналитика",
+            "summary": {
+                "loading": "Загрузка...",
+                "totalIncome": "Общий доход",
+                "totalExpense": "Общий расход",
+                "netBalance": "Чистый баланс"
+            },
+            "transactions": {
+                "title": "Транзакции",
+                "loading": "Загрузка...",
+                "error": "Ошибка загрузки",
+                "empty": "Нет транзакций",
+                "all": "Все",
+                "income": "Доход",
+                "expense": "Расход",
+                "colDate": "Дата",
+                "colType": "Тип",
+                "colDirection": "Направление",
+                "colAmount": "Сумма",
+                "colMethod": "Метод",
+                "colDescription": "Описание",
+                "page": "Стр.",
+                "type": {
+                    "order_payment": "Оплата заказа",
+                    "refund": "Возврат",
+                    "adjustment": "Корректировка",
+                    "manual": "Ручная"
+                },
+                "method": {
+                    "cash": "Наличные",
+                    "card": "Карта",
+                    "crypto": "Крипто"
+                }
+            },
+            "reports": {
+                "loading": "Загрузка...",
+                "byTypeTitle": "По типам",
+                "transactions": "транзакций",
+                "type": {
+                    "order_payment": "Оплата заказа",
+                    "refund": "Возврат",
+                    "adjustment": "Корректировка",
+                    "manual": "Ручная"
+                }
             }
         },
         "sections": {
-            "products": {
-                "title": "Товары",
-                "description": "Раздел-заглушка для каталога товаров и контроля остатков."
-            },
-            "orders": {
-                "title": "Заказы",
-                "description": "Раздел-заглушка для списка заказов, статусов и деталей заказа."
-            },
-            "attendance": {
-                "title": "Посещаемость",
-                "description": "Раздел-заглушка для QR входа/выхода и аналитики времени в клубе."
-            },
             "employees": {
                 "title": "Сотрудники",
                 "description": "Раздел-заглушка для списка сотрудников, приглашений и управления ролями администратора."

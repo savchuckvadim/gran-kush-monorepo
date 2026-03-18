@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { Menu, X } from "lucide-react";
 
@@ -36,6 +36,21 @@ export function MobileMenu({
     registerLabel,
     currentPath,
 }: MobileMenuProps) {
+    const lastPathRef = useRef<string>(currentPath);
+
+    // Close mobile menu after any navigation (login/logout/profile/etc).
+    useEffect(() => {
+        if (!isOpen) {
+            lastPathRef.current = currentPath;
+            return;
+        }
+
+        if (lastPathRef.current !== currentPath) {
+            onToggle(); // flips open -> closed
+            lastPathRef.current = currentPath;
+        }
+    }, [currentPath, isOpen, onToggle]);
+
     // Prevent body scroll when menu is open
     useEffect(() => {
         if (isOpen) {

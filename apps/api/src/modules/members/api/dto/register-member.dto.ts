@@ -85,5 +85,4 @@ export class RegisterMemberDto {
     @IsBoolean()
     @IsOptional()
     isRecreation?: boolean;
-
 }

@@ -4,12 +4,11 @@ import { getTranslations } from "next-intl/server";
 
 import { Button } from "@workspace/ui";
 
-import { ThemedSignatureImage } from "@/modules/entities/member/ui/themed-signature-image";
-import { getCrmMemberById } from "@/modules/entities/member/api/member.api";
+import { getCrmMemberById,ThemedSignatureImage } from "@/modules/entities/member";
 import {
     getIdentityDocumentPreviewUrl,
     getSignaturePreviewUrl,
-} from "@/modules/entities/member-documents/api/member-documents.api";
+} from "@/modules/entities/member-documents";
 
 export default async function CrmMemberDocumentPreviewPage({
     params,

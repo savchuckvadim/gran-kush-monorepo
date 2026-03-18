@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+
 import { Button, ThemeToggle } from "@workspace/ui";
+
 import { LangSwitcher } from "@/modules/features";
 
 interface CrmShellProps {
@@ -15,6 +17,7 @@ export function CrmShell({ locale, children }: CrmShellProps) {
         { label: t("nav.products"), href: "/crm/products" },
         { label: t("nav.orders"), href: "/crm/orders" },
         { label: t("nav.attendance"), href: "/crm/attendance" },
+        { label: t("nav.finance"), href: "/crm/finance" },
         { label: t("nav.employees"), href: "/crm/employees" },
     ];
 

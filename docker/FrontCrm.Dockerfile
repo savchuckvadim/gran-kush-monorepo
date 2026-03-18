@@ -2,6 +2,8 @@
 
 FROM node:20 AS base
 
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
 WORKDIR /app
 
@@ -31,7 +33,8 @@ ENV CI=true
 ENV NODE_ENV=production
 WORKDIR /app
 
-
+# На runtime уже не важно для NEXT_PUBLIC (оно вшито в бандл), но пусть будет доступно для любых client code/path.
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
 RUN npm install -g pnpm
 RUN pnpm add typescript

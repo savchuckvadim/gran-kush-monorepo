@@ -18,6 +18,7 @@ export const ROUTES = {
     CRM_PRODUCTS: "/crm/products",
     CRM_ORDERS: "/crm/orders",
     CRM_ATTENDANCE: "/crm/attendance",
+    CRM_FINANCE: "/crm/finance",
     CRM_EMPLOYEES: "/crm/employees",
     CRM_PROFILE: "/crm/profile",
     LOGIN: "/auth/login",

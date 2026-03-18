@@ -1,11 +1,28 @@
-import { getTranslations } from "next-intl/server";
+"use client";
 
-export default async function CrmOrdersPage() {
-    const t = await getTranslations("crm.sections.orders");
+import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+
+import { ShoppingCart } from "lucide-react";
+
+import { OrdersTable } from "@/modules/widgets/orders";
+
+export default function CrmOrdersPage() {
+    const t = useTranslations("crm.orders");
+    const params = useParams();
+    const locale = (params.locale as string) ?? "en";
+
     return (
-        <div className="rounded-lg border bg-background p-6">
-            <h1 className="text-2xl font-semibold">{t("title")}</h1>
-            <p className="mt-2 text-sm text-muted-foreground">{t("description")}</p>
+        <div className="space-y-6">
+            <div>
+                <h1 className="flex items-center gap-2 text-2xl font-semibold">
+                    <ShoppingCart className="h-6 w-6" />
+                    {t("title")}
+                </h1>
+                <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
+            </div>
+
+            <OrdersTable locale={locale} />
         </div>
     );
 }

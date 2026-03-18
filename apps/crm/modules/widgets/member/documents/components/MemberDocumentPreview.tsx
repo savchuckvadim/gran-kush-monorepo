@@ -1,6 +1,6 @@
 "use client";
 
-import { useIdentityDocumentPreview } from "@/modules/entities/member-documents/api";
+import { useIdentityDocumentPreview } from "@/modules/entities/member-documents";
 
 interface MemberDocumentPreviewProps {
     memberId: string;

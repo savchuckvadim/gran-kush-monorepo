@@ -1,8 +1,7 @@
-
 import { getTranslations } from "next-intl/server";
 
-import { MemberList } from "./components/MemberList";
-import { MemberListCounter } from "./components/MemberListCounter";
+import { MemberList } from "@/modules/widgets/member";
+import { MemberListCounter } from "@/modules/widgets/member";
 
 export default async function CrmMembersPage({
     params,
@@ -11,7 +10,6 @@ export default async function CrmMembersPage({
 }) {
     const { locale } = await params;
     const t = await getTranslations("crm.members");
-
 
     return (
         <div className="space-y-4">

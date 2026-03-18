@@ -447,6 +447,8 @@ return { accessToken, refreshToken };
 
 **POST** `/crm/auth/employee/register`
 - Регистрация нового Employee
+- **Требует авторизации:** `EmployeeJwtAuthGuard` + `AdminGuard`
+- **Доступ:** Только для сотрудников с ролью `admin`
 - Создает `User` и `Employee` с полными данными
 - Если User уже существует как Member, можно создать Employee
 
@@ -472,6 +474,126 @@ return { accessToken, refreshToken };
 - Требует `Authorization: Bearer <accessToken>` в заголовке
 - Возвращает полную информацию Employee с User
 
+## Архитектура модулей аутентификации
+
+### Структура модулей
+
+Вся аутентификация разделена на два независимых модуля:
+
+#### `modules/auth/employees` - Аутентификация сотрудников (CRM)
+
+**Расположение:** `apps/api/src/modules/auth/employees/`
+
+**Структура:**
+```
+auth/employees/
+├── api/
+│   ├── controllers/
+│   │   ├── employee-auth.controller.ts      # login, logout, refresh, me
+│   │   └── employee-registration.controller.ts  # register (только для админов)
+│   ├── decorators/
+│   │   └── current-employee.decorator.ts
+│   └── dto/
+│       └── [DTO для employees]
+├── application/
+│   └── services/
+│       ├── employee-auth.service.ts
+│       └── employee-registration.service.ts
+├── infrastructure/
+│   ├── guards/
+│   │   ├── employee-jwt-auth.guard.ts
+│   │   ├── employee-local-auth.guard.ts
+│   │   └── admin.guard.ts
+│   └── strategies/
+│       ├── employee-jwt.strategy.ts
+│       └── employee-local.strategy.ts
+└── employee-auth.module.ts
+```
+
+**Экспорты:**
+- Guards: `EmployeeJwtAuthGuard`, `EmployeeLocalAuthGuard`, `AdminGuard`
+- Decorators: `CurrentEmployee`, `Admin`
+- Services: `EmployeeAuthService`, `EmployeeRegistrationService`
+- DTOs: все DTO для employees
+
+#### `modules/auth/members` - Аутентификация членов (Site/LK)
+
+**Расположение:** `apps/api/src/modules/auth/members/`
+
+**Структура:**
+```
+auth/members/
+├── api/
+│   ├── controllers/
+│   │   ├── member-auth.controller.ts        # login, logout, refresh, me
+│   │   └── member-registration.controller.ts # register (публичный)
+│   ├── decorators/
+│   │   └── current-member.decorator.ts
+│   └── dto/
+│       └── [DTO для members]
+├── application/
+│   └── services/
+│       ├── member-auth.service.ts
+│       └── member-registration.service.ts
+├── infrastructure/
+│   ├── guards/
+│   │   ├── member-jwt-auth.guard.ts
+│   │   └── member-local-auth.guard.ts
+│   └── strategies/
+│       ├── member-jwt.strategy.ts
+│       └── member-local.strategy.ts
+└── member-auth.module.ts
+```
+
+**Экспорты:**
+- Guards: `MemberJwtAuthGuard`, `MemberLocalAuthGuard`
+- Decorators: `CurrentMember`
+- Services: `MemberAuthService`, `MemberRegistrationService`
+- DTOs: все DTO для members
+
+### Использование в других модулях
+
+#### Импорт guards и декораторов
+
+```typescript
+// Для Employee операций
+import { EmployeeJwtAuthGuard, AdminGuard, Admin, CurrentEmployee } from "@auth/employees";
+
+// Для Member операций
+import { MemberJwtAuthGuard, CurrentMember } from "@auth/members";
+```
+
+#### Пример использования в контроллере
+
+```typescript
+// CRM контроллер (для сотрудников)
+@Controller("crm/members")
+@UseGuards(EmployeeJwtAuthGuard)  // Требуется авторизация сотрудника
+export class CrmMembersController {
+    @Get()
+    async list() {
+        // Доступно всем сотрудникам
+    }
+
+    @Post()
+    @UseGuards(AdminGuard)
+    @Admin()
+    async create() {
+        // Доступно только админам
+    }
+}
+
+// LK контроллер (для членов)
+@Controller("lk/members")
+@UseGuards(MemberJwtAuthGuard)  // Требуется авторизация члена
+export class LkMembersController {
+    @Get("me")
+    async getMe(@CurrentMember() member: Member) {
+        // Член может получить только свои данные
+    }
+}
+```
+
 ## Guards и Strategies
 
 ### Member
@@ -479,30 +601,72 @@ return { accessToken, refreshToken };
 - **MemberLocalAuthGuard** - для входа по email/password
   - Использует `MemberLocalStrategy`
   - Вызывает `MemberAuthService.validateMember()`
+  - Расположение: `@auth/members/infrastructure/guards/member-local-auth.guard.ts`
 - **MemberJwtAuthGuard** - для защищенных эндпоинтов
   - Использует `MemberJwtStrategy`
   - Извлекает токен из заголовка `Authorization: Bearer <token>`
   - Вызывает `MemberAuthService.validateJwtPayload()`
+  - Расположение: `@auth/members/infrastructure/guards/member-jwt-auth.guard.ts`
 - **MemberLocalStrategy** - валидация email/password для Member
+  - Расположение: `@auth/members/infrastructure/strategies/member-local.strategy.ts`
 - **MemberJwtStrategy** - валидация JWT токена для Member
+  - Расположение: `@auth/members/infrastructure/strategies/member-jwt.strategy.ts`
 
 ### Employee
 
 - **EmployeeLocalAuthGuard** - для входа по email/password
   - Использует `EmployeeLocalStrategy`
   - Вызывает `EmployeeAuthService.validateEmployee()`
+  - Расположение: `@auth/employees/infrastructure/guards/employee-local-auth.guard.ts`
 - **EmployeeJwtAuthGuard** - для защищенных эндпоинтов
   - Использует `EmployeeJwtStrategy`
   - Извлекает токен из заголовка `Authorization: Bearer <token>`
   - Вызывает `EmployeeAuthService.validateJwtPayload()`
+  - Расположение: `@auth/employees/infrastructure/guards/employee-jwt-auth.guard.ts`
+- **AdminGuard** - проверка роли admin
+  - Работает вместе с `EmployeeJwtAuthGuard`
+  - Проверяет `employee.role === "admin"`
+  - Расположение: `@auth/employees/infrastructure/guards/admin.guard.ts`
 - **EmployeeLocalStrategy** - валидация email/password для Employee
+  - Расположение: `@auth/employees/infrastructure/strategies/employee-local.strategy.ts`
 - **EmployeeJwtStrategy** - валидация JWT токена для Employee
+  - Расположение: `@auth/employees/infrastructure/strategies/employee-jwt.strategy.ts`
 
 ## Декораторы
 
 - `@CurrentMember()` - получение текущего Member из запроса (после прохождения `MemberJwtAuthGuard`)
+  - Расположение: `@auth/members/api/decorators/current-member.decorator.ts`
+  - Импорт: `import { CurrentMember } from "@auth/members";`
 - `@CurrentEmployee()` - получение текущего Employee из запроса (после прохождения `EmployeeJwtAuthGuard`)
+  - Расположение: `@auth/employees/api/decorators/current-employee.decorator.ts`
+  - Импорт: `import { CurrentEmployee } from "@auth/employees";`
+- `@Admin()` - пометка эндпоинта как доступного только для админов
+  - Работает вместе с `AdminGuard`
+  - Импорт: `import { Admin } from "@auth/employees";`
 - `@Public()` - пометка эндпоинта как публичного (без аутентификации)
+  - Расположение: `@common/decorators/auth/public.decorator.ts`
+
+## Разделение бизнес-логики и аутентификации
+
+### Модули бизнес-логики
+
+**`modules/members`** - Бизнес-логика для членов клуба
+- **Контроллеры:**
+  - `CrmMembersController` (`/crm/members/*`) - для сотрудников CRM
+    - Защита: `EmployeeJwtAuthGuard`
+    - Операции создания/обновления: `AdminGuard` + `@Admin()`
+  - `LkMembersController` (`/lk/members/*`) - для членов (только свои данные)
+    - Защита: `MemberJwtAuthGuard`
+    - Доступ только к собственным данным
+- **Сервисы:**
+  - `MembersService` - бизнес-логика работы с членами
+  - `MemberFilesService` - обработка файлов членов
+
+**`modules/employees`** - Бизнес-логика для сотрудников
+- **Сервисы:**
+  - `EmployeesService` - бизнес-логика работы с сотрудниками
+
+**Важно:** Модули `modules/members` и `modules/employees` содержат только бизнес-логику (CRUD операции). Вся аутентификация находится в `modules/auth/*`.
 
 ## Репозитории
 
@@ -523,8 +687,13 @@ return { accessToken, refreshToken };
 ### Разделение доступа
 
 - **Member** может входить только через `/lk/auth/*` эндпоинты
+- **Member** может получать только свои данные через `/lk/members/me`
 - **Employee** может входить только через `/crm/auth/*` эндпоинты
-- **Employee с ролью `admin`** может входить в админку (`/admin/*`)
+- **Employee** может просматривать всех членов через `/crm/members/*`
+- **Employee с ролью `admin`** может:
+  - Создавать новых сотрудников через `/crm/auth/employee/register`
+  - Создавать/обновлять/удалять членов через `/crm/members/*`
+  - Входить в админку (`/admin/*`)
 - Member **недоступен** в CRM, Employee **недоступен** на сайте
 
 ### Валидация

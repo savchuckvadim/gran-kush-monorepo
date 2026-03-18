@@ -11,12 +11,17 @@ datasource db {
 
 // Модель пользователя (минимальная - только для аутентификации)
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique @db.VarChar(255)
-  passwordHash String   @map("password_hash") @db.VarChar(255)
-  isActive     Boolean  @default(true) @map("is_active")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id                           String    @id @default(uuid())
+  email                        String    @unique @db.VarChar(255)
+  passwordHash                 String    @map("password_hash") @db.VarChar(255)
+  isActive                     Boolean   @default(false) @map("is_active") // По умолчанию false, активируется после подтверждения email
+  emailConfirmed               Boolean   @default(false) @map("email_confirmed")
+  emailVerificationToken       String?   @unique @map("email_verification_token") @db.VarChar(255)
+  emailVerificationExpiresAt   DateTime? @map("email_verification_expires_at")
+  resetPasswordToken           String?   @unique @map("reset_password_token") @db.VarChar(255)
+  resetPasswordExpiresAt       DateTime? @map("reset_password_expires_at")
+  createdAt                    DateTime  @default(now()) @map("created_at")
+  updatedAt                    DateTime  @updatedAt @map("updated_at")
 
   // Связи
   tokens      Token[]
@@ -202,6 +207,10 @@ model Member {
   signature         Signature?
   memberMjStatuses  MemberMjStatus[]
   memberDocuments   MemberDocument[]
+  qrCode            QrCode?
+  presenceSessions  PresenceSession[]
+  orders            Order[]
+  financialTransactions FinancialTransaction[]
 
   @@index([userId])
   @@index([membershipNumber])
@@ -228,8 +237,13 @@ model Employee {
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
   // Связи
-  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tokens EmployeeToken[]
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokens            EmployeeToken[]
+  presenceSessions  PresenceSession[] @relation("PresenceEmployee") // Сессии, где сотрудник отметил вход/выход
+  processedOrders   Order[]           @relation("OrderEmployee") // Заказы, обработанные сотрудником
+  createdProducts   Product[]         @relation("ProductCreatedBy") // Товары, созданные сотрудником
+  updatedProducts   Product[]         @relation("ProductUpdatedBy") // Товары, обновленные сотрудником
+  financialTransactions FinancialTransaction[] @relation("TransactionCreatedBy") // Транзакции, созданные сотрудником
 
   @@index([userId])
   @@index([role])
@@ -260,4 +274,286 @@ model StorageFile {
   @@index([storageType])
   @@index([createdAt])
   @@map("storage_files")
+}
+
+// ========================
+// QR-коды и присутствие
+// ========================
+
+// QR-код члена клуба
+model QrCode {
+  id            String   @id @default(uuid())
+  memberId      String   @unique @map("member_id")
+  encryptedCode String   @map("encrypted_code") @db.VarChar(1000) // Зашифрованный payload QR-кода
+  expiresAt     DateTime @map("expires_at") // Срок действия QR-кода
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Связи
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@index([encryptedCode])
+  @@index([expiresAt])
+  @@map("qr_codes")
+}
+
+// Сессия присутствия (каждый вход — новая сессия)
+model PresenceSession {
+  id          String    @id @default(uuid())
+  memberId    String    @map("member_id")
+  employeeId  String?   @map("employee_id") // Сотрудник, отметивший вход/выход вручную
+  enteredAt   DateTime  @default(now()) @map("entered_at")
+  exitedAt    DateTime? @map("exited_at")
+  entryMethod String    @map("entry_method") @db.VarChar(50) // "qr", "manual_employee"
+  exitMethod  String?   @map("exit_method") @db.VarChar(50) // "qr", "manual_employee", "auto_cron"
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // Связи
+  member   Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  employee Employee? @relation("PresenceEmployee", fields: [employeeId], references: [id], onDelete: SetNull)
+
+  @@index([memberId])
+  @@index([employeeId])
+  @@index([enteredAt])
+  @@index([exitedAt])
+  @@map("presence_sessions")
+}
+
+// ========================
+// Каталог товаров
+// ========================
+
+// Единицы измерения
+model MeasurementUnit {
+  id          String   @id @default(uuid())
+  code        String   @unique @db.VarChar(50) // "g", "kg", "piece", "ml"
+  name        String   @db.VarChar(255) // "Грамм", "Килограмм", "Штука"
+  description String?  @db.Text
+  isCustom    Boolean  @default(false) @map("is_custom") // Кастомная единица
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Связи
+  products Product[]
+
+  @@index([code])
+  @@index([isActive])
+  @@map("measurement_units")
+}
+
+// Категории товаров (иерархические)
+model ProductCategory {
+  id          String   @id @default(uuid())
+  code        String   @unique @db.VarChar(50) // "flower", "edible", "concentrate"
+  name        String   @db.VarChar(255)
+  description String?  @db.Text
+  parentId    String?  @map("parent_id")
+  sortOrder   Int      @default(0) @map("sort_order")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Связи
+  parent   ProductCategory?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children ProductCategory[] @relation("CategoryTree")
+  products Product[]
+
+  @@index([code])
+  @@index([parentId])
+  @@index([isActive])
+  @@index([sortOrder])
+  @@map("product_categories")
+}
+
+// Товары
+model Product {
+  id                String   @id @default(uuid())
+  categoryId        String   @map("category_id")
+  measurementUnitId String   @map("measurement_unit_id")
+
+  // Основная информация
+  name        String  @db.VarChar(255)
+  description String? @db.Text
+  sku         String? @unique @db.VarChar(100) // Артикул
+
+  // Цена и количество
+  price           Decimal  @db.Decimal(10, 2) // Цена за единицу
+  initialQuantity Decimal  @map("initial_quantity") @db.Decimal(10, 3) // Начальное количество
+  currentQuantity Decimal  @map("current_quantity") @db.Decimal(10, 3) // Текущее количество
+  minQuantity     Decimal? @map("min_quantity") @db.Decimal(10, 3) // Минимальный остаток для уведомления
+
+  // Изображения
+  imageUrl String? @map("image_url") @db.VarChar(500) // Основное изображение
+
+  // Статусы
+  isActive    Boolean @default(true) @map("is_active")
+  isAvailable Boolean @default(true) @map("is_available") // Доступен для заказа
+
+  // Метаданные
+  thc    Decimal? @db.Decimal(5, 2) // Процент THC
+  cbd    Decimal? @db.Decimal(5, 2) // Процент CBD
+  strain String?  @db.VarChar(100) // Сорт
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  createdBy String?  @map("created_by") // Employee ID
+  updatedBy String?  @map("updated_by") // Employee ID
+
+  // Связи
+  category        ProductCategory @relation(fields: [categoryId], references: [id])
+  measurementUnit MeasurementUnit @relation(fields: [measurementUnitId], references: [id])
+  images          ProductImage[]
+  orderItems      OrderItem[]
+  createdByEmployee Employee? @relation("ProductCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  updatedByEmployee Employee? @relation("ProductUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
+
+  @@index([categoryId])
+  @@index([measurementUnitId])
+  @@index([sku])
+  @@index([isActive])
+  @@index([isAvailable])
+  @@index([name])
+  @@map("products")
+}
+
+// Изображения товаров
+model ProductImage {
+  id          String   @id @default(uuid())
+  productId   String   @map("product_id")
+  storagePath String   @map("storage_path") @db.VarChar(500)
+  sortOrder   Int      @default(0) @map("sort_order")
+  isPrimary   Boolean  @default(false) @map("is_primary")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Связи
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([sortOrder])
+  @@map("product_images")
+}
+
+// ========================
+// Заказы
+// ========================
+
+// Заказы
+model Order {
+  id         String  @id @default(uuid())
+  memberId   String  @map("member_id")
+  employeeId String? @map("employee_id") // Сотрудник, обработавший заказ
+
+  // Номер заказа (автоинкремент — генерируется сервисом)
+  orderNumber String @unique @map("order_number") @db.VarChar(50) // Например: ORD-20260316-0001
+
+  // Статус заказа
+  status        String @default("pending") @db.VarChar(50) // pending, confirmed, preparing, ready, completed, cancelled
+  paymentStatus String @default("pending") @map("payment_status") @db.VarChar(50) // pending, paid, refunded
+
+  // Суммы
+  subtotal Decimal @db.Decimal(10, 2) // Сумма без скидок
+  discount Decimal @default(0) @db.Decimal(10, 2)
+  total    Decimal @db.Decimal(10, 2)
+
+  // Временные метки жизненного цикла
+  orderedAt   DateTime  @default(now()) @map("ordered_at")
+  confirmedAt DateTime? @map("confirmed_at")
+  preparedAt  DateTime? @map("prepared_at")
+  readyAt     DateTime? @map("ready_at")
+  completedAt DateTime? @map("completed_at")
+  cancelledAt DateTime? @map("cancelled_at")
+
+  // Примечания
+  notes      String? @db.Text // Примечания от члена
+  adminNotes String? @map("admin_notes") @db.Text // Примечания от сотрудника
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Связи
+  member       Member                @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  employee     Employee?             @relation("OrderEmployee", fields: [employeeId], references: [id], onDelete: SetNull)
+  items        OrderItem[]
+  transactions FinancialTransaction[]
+
+  @@index([memberId])
+  @@index([employeeId])
+  @@index([orderNumber])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([orderedAt])
+  @@map("orders")
+}
+
+// Позиции заказа
+model OrderItem {
+  id        String @id @default(uuid())
+  orderId   String @map("order_id")
+  productId String @map("product_id")
+
+  // Количество и цена
+  quantity   Decimal @db.Decimal(10, 3)
+  unitPrice  Decimal @map("unit_price") @db.Decimal(10, 2)  // Цена на момент заказа
+  totalPrice Decimal @map("total_price") @db.Decimal(10, 2) // quantity * unitPrice
+
+  // Примечания
+  notes String? @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Связи
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+// ========================
+// Финансовая система
+// ========================
+
+// Финансовые транзакции
+model FinancialTransaction {
+  id       String  @id @default(uuid())
+  orderId  String? @map("order_id")
+  memberId String? @map("member_id")
+
+  // Тип транзакции
+  type      String @db.VarChar(50) // "order_payment", "refund", "adjustment", "manual"
+  direction String @db.VarChar(20) // "income", "expense"
+
+  // Суммы
+  amount   Decimal @db.Decimal(10, 2)
+  currency String  @default("EUR") @db.VarChar(3)
+
+  // Метод оплаты
+  paymentMethod String? @map("payment_method") @db.VarChar(50) // "cash", "card", "crypto"
+
+  // Временные метки
+  transactionDate DateTime @default(now()) @map("transaction_date")
+  createdAt       DateTime @default(now()) @map("created_at")
+  createdBy       String?  @map("created_by") // Employee ID
+
+  // Примечания
+  description String? @db.Text
+  notes       String? @db.Text
+
+  // Связи
+  order             Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  member            Member?   @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  createdByEmployee Employee? @relation("TransactionCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([memberId])
+  @@index([type])
+  @@index([direction])
+  @@index([transactionDate])
+  @@index([createdBy])
+  @@map("financial_transactions")
 }

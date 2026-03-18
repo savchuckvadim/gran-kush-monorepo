@@ -11,8 +11,11 @@ export const ROUTES = {
     REGISTER: "/auth/register",
     CONFIRM_EMAIL: "/auth/confirm-email",
     FORGOT_PASSWORD: "/auth/forgot-password",
+    RESET_PASSWORD: "/auth/reset-password",
     PROFILE: "/profile",
     PROFILE_SETTINGS: "/profile/settings",
+    PROFILE_QR_CODE: "/profile/qr-code",
+    PROFILE_PRESENCE: "/profile/presence",
     PRIVACY: "/privacy",
     TERMS: "/terms",
 } as const;

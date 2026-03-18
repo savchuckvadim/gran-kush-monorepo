@@ -1,4 +1,9 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import {
+    BadRequestException,
+    ConflictException,
+    Injectable,
+    NotFoundException,
+} from "@nestjs/common";
 
 import { RegisterMemberDto } from "@members/api/dto/register-member.dto";
 import { DocumentRepository } from "@members/domain/repositories/document-repository.interface";
@@ -8,13 +13,13 @@ import { MemberMjStatusRepository } from "@members/domain/repositories/member-mj
 import { MemberRepository } from "@members/domain/repositories/member-repository.interface";
 import { MjStatusRepository } from "@members/domain/repositories/mj-status-repository.interface";
 import { SignatureRepository } from "@members/domain/repositories/signature-repository.interface";
+import { StorageType } from "@storage/domain/enums/storage-type.enum";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import { hash } from "bcrypt";
 
-import { StorageService } from "@modules/storage";
-import { StorageType } from "@storage/domain/enums/storage-type.enum";
 import { CrmMemberFullDto, CrmMemberUpdateDto } from "@modules/members/api/dto/crm-member.dto";
 import { CrmMemberFilesRequestDto } from "@modules/members/api/dto/crm-member-documents.dto";
+import { StorageService } from "@modules/storage";
 
 // interface UpdateCrmMemberDto extends CrmMemberUpdateDto  {
 //     name?: string;
@@ -51,7 +56,7 @@ export class MembersService {
         private readonly identityDocumentRepository: IdentityDocumentRepository,
         private readonly signatureRepository: SignatureRepository,
         private readonly storageService: StorageService
-    ) { }
+    ) {}
 
     private async hashPassword(password: string): Promise<string> {
         const hashFn = hash as unknown as (value: string, rounds: number) => Promise<string>;
@@ -269,8 +274,10 @@ export class MembersService {
         if (dto.name !== undefined) updatePayload.name = dto.name;
         if (dto.surname !== undefined && dto.surname !== null) updatePayload.surname = dto.surname;
         if (dto.phone !== undefined && dto.phone !== null) updatePayload.phone = dto.phone;
-        if (dto.birthday !== undefined && dto.birthday) updatePayload.birthday = new Date(dto.birthday);
-        if (dto.membershipNumber !== undefined && dto.membershipNumber !== null) updatePayload.membershipNumber = dto.membershipNumber;
+        if (dto.birthday !== undefined && dto.birthday)
+            updatePayload.birthday = new Date(dto.birthday);
+        if (dto.membershipNumber !== undefined && dto.membershipNumber !== null)
+            updatePayload.membershipNumber = dto.membershipNumber;
         if (dto.address !== undefined && dto.address !== null) updatePayload.address = dto.address;
         if (dto.status !== undefined && dto.status !== null) updatePayload.status = dto.status;
         if (dto.notes !== undefined && dto.notes !== null) updatePayload.notes = dto.notes;
@@ -299,13 +306,17 @@ export class MembersService {
         return this.memberRepository.findById(memberId);
     }
 
-    async updateCrmMemberFiles(memberId: string, dto: CrmMemberFilesRequestDto): Promise<CrmMemberFullDto> {
+    async updateCrmMemberFiles(
+        memberId: string,
+        dto: CrmMemberFilesRequestDto
+    ): Promise<CrmMemberFullDto> {
         const member = await this.memberRepository.findById(memberId);
         if (!member) {
             throw new NotFoundException("Member not found");
         }
 
-        const documentType = dto.documentType ?? member.memberDocuments[0]?.document.type ?? "passport";
+        const documentType =
+            dto.documentType ?? member.memberDocuments[0]?.document.type ?? "passport";
 
         if (dto.documentFirst) {
             const firstPath = await this.savePrivateDataUrl(
@@ -336,46 +347,60 @@ export class MembersService {
         }
 
         if (dto.signature) {
-            const signaturePath = await this.savePrivateDataUrl(dto.signature, "signature.png", memberId);
-            await this.signatureRepository.upsertByMemberId(memberId, { storagePath: signaturePath });
+            const signaturePath = await this.savePrivateDataUrl(
+                dto.signature,
+                "signature.png",
+                memberId
+            );
+            await this.signatureRepository.upsertByMemberId(memberId, {
+                storagePath: signaturePath,
+            });
         }
 
         const result = await this.memberRepository.findById(memberId);
         return {
             ...result,
-            identityDocuments: result?.identityDocuments.map((item) => ({
-                id: item.id,
-                type: item.type,
-                side: item.side,
-                storagePath: item.storagePath,
-                createdAt: item.createdAt.toISOString(),
-            })) ?? [],
-            signature: result?.signature ? {
-                id: result.signature.id,
-                storagePath: result.signature.storagePath,
-                createdAt: result.signature.createdAt.toISOString(),
-            } : null,
-            mjStatuses: result?.memberMjStatuses.map((item) => ({
-                id: item.mjStatus.id,
-                code: item.mjStatus.code,
-                name: item.mjStatus.name,
-            })) ?? [],
-            documents: result?.memberDocuments.map((item) => ({
-                id: item.id,
-                type: item.document.type,
-                name: item.document.name,
-                number: item.number,
-                createdAt: item.createdAt.toISOString(),
-            })) ?? [],
+            identityDocuments:
+                result?.identityDocuments.map((item) => ({
+                    id: item.id,
+                    type: item.type,
+                    side: item.side,
+                    storagePath: item.storagePath,
+                    createdAt: item.createdAt.toISOString(),
+                })) ?? [],
+            signature: result?.signature
+                ? {
+                      id: result.signature.id,
+                      storagePath: result.signature.storagePath,
+                      createdAt: result.signature.createdAt.toISOString(),
+                  }
+                : null,
+            mjStatuses:
+                result?.memberMjStatuses.map((item) => ({
+                    id: item.mjStatus.id,
+                    code: item.mjStatus.code,
+                    name: item.mjStatus.name,
+                })) ?? [],
+            documents:
+                result?.memberDocuments.map((item) => ({
+                    id: item.id,
+                    type: item.document.type,
+                    name: item.document.name,
+                    number: item.number,
+                    createdAt: item.createdAt.toISOString(),
+                })) ?? [],
             email: result?.user.email ?? "",
             emailConfirmed: false,
             updatedAt: result?.updatedAt?.toISOString() ?? "",
             createdAt: result?.createdAt?.toISOString() ?? "",
-
         } as CrmMemberFullDto;
     }
 
-    private async savePrivateDataUrl(dataUrl: string, fileName: string, memberId: string): Promise<string> {
+    private async savePrivateDataUrl(
+        dataUrl: string,
+        fileName: string,
+        memberId: string
+    ): Promise<string> {
         const dataUrlMatch = dataUrl.match(/^data:(?<mime>[-\w./+]+);base64,(?<payload>.+)$/);
 
         if (!dataUrlMatch?.groups?.payload || !dataUrlMatch.groups.mime) {

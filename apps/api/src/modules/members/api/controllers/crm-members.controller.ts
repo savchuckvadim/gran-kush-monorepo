@@ -11,27 +11,27 @@ import {
 } from "@nestjs/common";
 import { ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 
+import { Admin, AdminGuard, EmployeeJwtAuthGuard } from "@auth/employees";
 import { MembersService } from "@members/application/services/members.service";
 import { StorageService } from "@storage/application/services/storage.service";
 
-import { Public } from "@common/decorators/auth/public.decorator";
-import { EmployeeJwtAuthGuard } from "@modules/employees/infrastructure/guards/employee-jwt-auth.guard";
-import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
+import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+
 import { CrmMemberDto, CrmMemberFullDto, CrmMemberUpdateDto } from "../dto/crm-member.dto";
 import { CrmMemberFilesRequestDto } from "../dto/crm-member-documents.dto";
 
-@ApiTags("CRM Members (temporary public)")
+@ApiTags("CRM Members Management")
 @Controller("crm/members")
+@UseGuards(EmployeeJwtAuthGuard)
 export class CrmMembersController {
     constructor(
         private readonly membersService: MembersService,
         private readonly storageService: StorageService
-    ) { }
+    ) {}
 
     @Get()
-    @UseGuards(EmployeeJwtAuthGuard)
-    @ApiOperation({ summary: "List members for CRM preview (without authentication)" })
+    @ApiOperation({ summary: "List members for CRM (Employee access required)" })
     @ApiQuery({ name: "limit", required: false, type: Number, example: 100 })
     @ApiSuccessResponse(CrmMemberDto, {
         description: "List of members",
@@ -43,23 +43,25 @@ export class CrmMembersController {
         const take = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 100;
         const members = await this.membersService.findAll(take);
 
-        return members.map((member) => ({
-            id: member.id,
-            userId: member.userId,
-            email: member.user.email,
-            name: member.name,
-            surname: member.surname ?? null,
-            phone: member.phone ?? null,
-            status: member.status,
-            isActive: member.isActive,
-            emailConfirmed: false,
-            createdAt: member.createdAt.toISOString(),
-        } as CrmMemberDto));
+        return members.map(
+            (member) =>
+                ({
+                    id: member.id,
+                    userId: member.userId,
+                    email: member.user.email,
+                    name: member.name,
+                    surname: member.surname ?? null,
+                    phone: member.phone ?? null,
+                    status: member.status,
+                    isActive: member.isActive,
+                    emailConfirmed: false,
+                    createdAt: member.createdAt.toISOString(),
+                }) as CrmMemberDto
+        );
     }
 
     @Get(":id")
-    @Public()
-    @ApiOperation({ summary: "Get member details for CRM preview (without authentication)" })
+    @ApiOperation({ summary: "Get member details for CRM (Employee access required)" })
     @ApiSuccessResponse(CrmMemberFullDto, {
         description: "Member details",
     })
@@ -96,10 +98,10 @@ export class CrmMembersController {
             })),
             signature: member.signature
                 ? {
-                    id: member.signature.id,
-                    storagePath: member.signature.storagePath,
-                    createdAt: member.signature.createdAt.toISOString(),
-                }
+                      id: member.signature.id,
+                      storagePath: member.signature.storagePath,
+                      createdAt: member.signature.createdAt.toISOString(),
+                  }
                 : null,
             mjStatuses: member.memberMjStatuses.map((item) => ({
                 id: item.mjStatus.id,
@@ -117,8 +119,9 @@ export class CrmMembersController {
     }
 
     @Patch(":id")
-    @Public()
-    @ApiOperation({ summary: "Update member details from CRM (temporary no-auth)" })
+    @UseGuards(AdminGuard)
+    @Admin()
+    @ApiOperation({ summary: "Update member details from CRM (Admin only)" })
     @ApiSuccessResponse(CrmMemberFullDto, {
         description: "Member details",
     })
@@ -126,7 +129,7 @@ export class CrmMembersController {
     async update(
         @Param("id") id: string,
         @Body()
-        dto: CrmMemberUpdateDto 
+        dto: CrmMemberUpdateDto
     ) {
         const updated = await this.membersService.updateCrmMember(id, dto);
         if (!updated) {
@@ -136,8 +139,9 @@ export class CrmMembersController {
     }
 
     @Patch(":id/files")
-    @Public()
-    @ApiOperation({ summary: "Re-upload member files from CRM (temporary no-auth)" })
+    @UseGuards(AdminGuard)
+    @Admin()
+    @ApiOperation({ summary: "Re-upload member files from CRM (Admin only)" })
     @ApiSuccessResponse(CrmMemberFullDto, {
         description: "Member details",
     })
@@ -155,8 +159,7 @@ export class CrmMembersController {
     }
 
     @Get(":id/identity-documents/:documentId/preview")
-    @Public()
-    @ApiOperation({ summary: "Preview identity document image" })
+    @ApiOperation({ summary: "Preview identity document image (Employee access required)" })
     @ApiSuccessResponse(StreamableFile, {
         description: "Identity document image",
     })
@@ -179,8 +182,7 @@ export class CrmMembersController {
     }
 
     @Get(":id/signature/preview")
-    @Public()
-    @ApiOperation({ summary: "Preview signature image" })
+    @ApiOperation({ summary: "Preview signature image (Employee access required)" })
     @ApiSuccessResponse(StreamableFile, {
         description: "Signature image",
     })
@@ -200,7 +202,8 @@ export class CrmMembersController {
     private resolveMimeType(storagePath: string): string {
         const normalizedPath = storagePath.toLowerCase();
         if (normalizedPath.endsWith(".png")) return "image/png";
-        if (normalizedPath.endsWith(".jpg") || normalizedPath.endsWith(".jpeg")) return "image/jpeg";
+        if (normalizedPath.endsWith(".jpg") || normalizedPath.endsWith(".jpeg"))
+            return "image/jpeg";
         if (normalizedPath.endsWith(".webp")) return "image/webp";
         if (normalizedPath.endsWith(".gif")) return "image/gif";
         if (normalizedPath.endsWith(".pdf")) return "application/pdf";

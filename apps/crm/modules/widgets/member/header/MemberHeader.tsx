@@ -1,9 +1,13 @@
 'use client'
-import { CrmMemberDetails } from "@/modules/entities/member";
-import { Button } from "@workspace/ui";
-import { Link } from "lucide-react";
-import { MemberStatuses } from "./components/MemberStatuses";
 import { useTranslations } from "next-intl";
+
+import { Link } from "lucide-react";
+
+import { Button } from "@workspace/ui";
+
+import { CrmMemberDetails } from "@/modules/entities/member";
+
+import { MemberStatuses } from "./components/MemberStatuses";
 
 export interface IMemberHeaderProps {
     member: CrmMemberDetails;

@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
-import { IdentityDocument } from "@prisma/client";
 
 import { IdentityDocumentRepository } from "@members/domain/repositories/identity-document-repository.interface";
+import { IdentityDocument } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 

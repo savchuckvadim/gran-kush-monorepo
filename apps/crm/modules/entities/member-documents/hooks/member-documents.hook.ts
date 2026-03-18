@@ -1,10 +1,12 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { memberKeys } from "@/modules/entities/member";
 import { CrmMemberDetails } from "@/modules/entities/member";
+
 import {
     getIdentityDocumentPreview,
     getSignaturePreview,

@@ -11,10 +11,10 @@ import { z } from "zod";
 
 import { Button, FieldInput } from "@workspace/ui";
 
+import { $api } from "@/modules/shared";
 import { ROUTES } from "@/modules/shared/config/routes";
 // import { configureOpenApiClient, setSessionTokens } from "@/modules/shared/api/api";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
-import { $api } from "@/modules/shared";
 
 const loginSchema = z.object({
     email: z.string().email("Invalid email"),

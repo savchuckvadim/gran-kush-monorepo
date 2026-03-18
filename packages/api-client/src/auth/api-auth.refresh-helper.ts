@@ -12,7 +12,7 @@ export class ApiRefreshHelper {
     constructor(type: ApiAuthType, baseurl: string) {
         this.baseurl = baseurl;
         this.storage = new ApiTokensStorage(type);
-        this.refreshUrl = type === ApiAuthType.CRM ? "/crm/auth/refresh" : "/site/auth/refresh";
+        this.refreshUrl = type === ApiAuthType.CRM ? "/crm/auth/refresh" : "/lk/auth/refresh";
         this.type = type;
     }
 

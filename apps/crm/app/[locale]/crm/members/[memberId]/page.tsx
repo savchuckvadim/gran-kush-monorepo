@@ -1,6 +1,5 @@
-import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { getCrmMemberById } from "@/modules/entities/member/api/member.api";
+
 import { MemberPage } from "@/modules/pages";
 
 export default async function Page({

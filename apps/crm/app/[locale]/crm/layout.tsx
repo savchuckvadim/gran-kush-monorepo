@@ -1,4 +1,5 @@
-import { CrmShell } from "@/modules/widgets/crm-shell/crm-shell";
+import { AuthGuard } from "@/modules/features/auth";
+import { CrmShell } from "@/modules/widgets/crm-shell";
 
 export default async function CrmLayout({
     children,
@@ -9,5 +10,9 @@ export default async function CrmLayout({
 }) {
     const { locale } = await params;
 
-    return <CrmShell locale={locale}>{children}</CrmShell>;
+    return (
+        <AuthGuard locale={locale}>
+            <CrmShell locale={locale}>{children}</CrmShell>
+        </AuthGuard>
+    );
 }

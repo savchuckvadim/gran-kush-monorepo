@@ -1,7 +1,8 @@
 'use client'
+import { useTranslations } from "next-intl";
+
 import { CrmMemberDetails } from "@/modules/entities/member";
 import { MemberProfileEditModal } from "@/modules/features";
-import { useTranslations } from "next-intl";
 export interface IMemberProfileInfoProps {
     member: CrmMemberDetails;
 

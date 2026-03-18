@@ -1,5 +1,6 @@
-import { $api } from "@/modules/shared";
 import { SchemaCrmMemberDto, SchemaCrmMemberFullDto, SchemaCrmMemberUpdateDto } from "@workspace/api-client/core";
+
+import { $api } from "@/modules/shared";
 
 
 export interface CrmMemberListItem extends SchemaCrmMemberDto {

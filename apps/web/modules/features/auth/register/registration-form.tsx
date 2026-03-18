@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { AlertCircle, Loader2 } from "lucide-react";
 
 import {
     Button,
@@ -64,7 +64,6 @@ export function RegistrationForm() {
     const [signature, setSignature] = useState<string | null>(null);
     const [step, setStep] = useState<"form" | "registering" | "uploading" | "uploadError">("form");
     const [pendingUpload, setPendingUpload] = useState<{
-        accessToken: string;
         data: RegisterFormSubmitData;
         email: string;
     } | null>(null);
@@ -93,27 +92,22 @@ export function RegistrationForm() {
             signature: signature ?? data.signature,
         };
 
-        let registerResponse: Awaited<ReturnType<typeof registerMutation.mutateAsync>> | null = null;
         try {
             setStep("registering");
-            registerResponse = await registerMutation.mutateAsync(payload);
+            await registerMutation.mutateAsync(payload);
         } catch {
             setStep("form");
             return;
         }
 
         setPendingUpload({
-            accessToken: registerResponse.accessToken,
             data: payload,
             email: payload.email,
         });
 
         try {
             setStep("uploading");
-            await uploadMutation.mutateAsync({
-                accessToken: registerResponse.accessToken,
-                data: payload,
-            });
+            await uploadMutation.mutateAsync(payload);
         } catch {
             setStep("uploadError");
             return;
@@ -129,10 +123,7 @@ export function RegistrationForm() {
 
         try {
             setStep("uploading");
-            await uploadMutation.mutateAsync({
-                accessToken: pendingUpload.accessToken,
-                data: pendingUpload.data,
-            });
+            await uploadMutation.mutateAsync(pendingUpload.data);
             router.push(
                 localizedLink(`${ROUTES.CONFIRM_EMAIL}?email=${encodeURIComponent(pendingUpload.email)}`)
             );

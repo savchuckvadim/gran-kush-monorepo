@@ -99,6 +99,11 @@ export class UserPrismaRepository implements UserRepository {
         data: Partial<{
             passwordHash: string;
             isActive: boolean;
+            emailConfirmed: boolean;
+            emailVerificationToken: string | null;
+            emailVerificationExpiresAt: Date | null;
+            resetPasswordToken: string | null;
+            resetPasswordExpiresAt: Date | null;
         }>
     ): Promise<User> {
         const user = await this.prisma.user.update({
@@ -106,6 +111,20 @@ export class UserPrismaRepository implements UserRepository {
             data,
         });
         return this.mapToEntity(user);
+    }
+
+    async findByEmailVerificationToken(token: string): Promise<User | null> {
+        const user = await this.prisma.user.findUnique({
+            where: { emailVerificationToken: token },
+        });
+        return user ? this.mapToEntity(user) : null;
+    }
+
+    async findByResetPasswordToken(token: string): Promise<User | null> {
+        const user = await this.prisma.user.findUnique({
+            where: { resetPasswordToken: token },
+        });
+        return user ? this.mapToEntity(user) : null;
     }
 
     async delete(id: string): Promise<void> {
@@ -119,6 +138,11 @@ export class UserPrismaRepository implements UserRepository {
         email: string;
         passwordHash: string;
         isActive: boolean;
+        emailConfirmed: boolean;
+        emailVerificationToken: string | null;
+        emailVerificationExpiresAt: Date | null;
+        resetPasswordToken: string | null;
+        resetPasswordExpiresAt: Date | null;
         createdAt: Date;
         updatedAt: Date;
     }): User {
@@ -127,6 +151,11 @@ export class UserPrismaRepository implements UserRepository {
             email: user.email,
             passwordHash: user.passwordHash,
             isActive: user.isActive,
+            emailConfirmed: user.emailConfirmed,
+            emailVerificationToken: user.emailVerificationToken,
+            emailVerificationExpiresAt: user.emailVerificationExpiresAt,
+            resetPasswordToken: user.resetPasswordToken,
+            resetPasswordExpiresAt: user.resetPasswordExpiresAt,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
         });

@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
-import { Signature } from "@prisma/client";
 
 import { SignatureRepository } from "@members/domain/repositories/signature-repository.interface";
+import { Signature } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 

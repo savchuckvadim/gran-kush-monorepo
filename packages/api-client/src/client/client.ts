@@ -1,7 +1,8 @@
 import createClient from "openapi-fetch";
-import { paths } from "../schema/schema";
-import { ApiAuthType } from "../auth/api-auth.type";
+
 import { getAuthMiddleware } from "../auth/api-auth.middleware";
+import { ApiAuthType } from "../auth/api-auth.type";
+import { paths } from "../schema/schema";
 
 export const configureApiClient =
     (baseurl: string, type: ApiAuthType): ReturnType<typeof createClient<paths>> => {

@@ -1,6 +1,8 @@
 'use client'
-import { IdentityDocument } from "@/modules/entities/member";
 import Link from "next/link";
+
+import { IdentityDocument } from "@/modules/entities/member";
+
 import { MemberDocumentPreview } from "./MemberDocumentPreview";
 
 export interface IMemberDocumentCardProps {

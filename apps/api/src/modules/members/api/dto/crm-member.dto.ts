@@ -1,5 +1,6 @@
 import { ApiProperty, PartialType } from "@nestjs/swagger";
-import { IsOptional } from "class-validator";
+
+import { IsBoolean, IsOptional, IsString } from "class-validator";
 
 export class CrmMemberDto {
     @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174000", type: String })
@@ -53,7 +54,6 @@ export class CrmMemberIdentityDocumentDto {
     createdAt: string;
 }
 
-
 export class CrmMemberSignatureDto {
     @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174000", type: String })
     id: string;
@@ -72,8 +72,6 @@ export class CrmMemberMjStatusDto {
     @ApiProperty({ example: "name", type: String })
     name: string;
 }
-
-
 
 export class CrmMemberFullDto extends CrmMemberDto {
     @ApiProperty({ example: "2024-01-01T00:00:00.000Z", type: String })
@@ -96,37 +94,54 @@ export class CrmMemberFullDto extends CrmMemberDto {
     membershipNumber: string | null;
     @ApiProperty({ example: "Notes", type: String, nullable: true })
     notes: string | null;
-
 }
 
-export class CrmMemberUpdateDto extends PartialType(CrmMemberFullDto) implements Partial<CrmMemberFullDto> {
-    @ApiProperty({ example: "John", type: String })
+export class CrmMemberUpdateDto
+    extends PartialType(CrmMemberFullDto)
+    implements Partial<CrmMemberFullDto>
+{
+    @ApiProperty({ example: "1990-01-15", type: String, nullable: true })
     @IsOptional()
+    @IsString()
     birthday?: string | null;
+
     @ApiProperty({ example: "123 Main St", type: String, nullable: true })
     @IsOptional()
+    @IsString()
     address?: string | null;
 
     @ApiProperty({ example: "1234567890", type: String, nullable: true })
     @IsOptional()
+    @IsString()
     membershipNumber?: string | null;
+
     @ApiProperty({ example: "Notes", type: String, nullable: true })
     @IsOptional()
-    notes?: string | null;  
+    @IsString()
+    notes?: string | null;
+
     @ApiProperty({ example: true, type: Boolean })
     @IsOptional()
+    @IsBoolean()
     isMedical?: boolean;
+
     @ApiProperty({ example: true, type: Boolean })
     @IsOptional()
+    @IsBoolean()
     isMj?: boolean;
+
     @ApiProperty({ example: true, type: Boolean })
     @IsOptional()
+    @IsBoolean()
     isRecreation?: boolean;
 
     @ApiProperty({ example: "passport", type: String, nullable: true })
     @IsOptional()
+    @IsString()
     documentType?: string | null;
+
     @ApiProperty({ example: "1234567890", type: String, nullable: true })
     @IsOptional()
+    @IsString()
     documentNumber?: string | null;
 }

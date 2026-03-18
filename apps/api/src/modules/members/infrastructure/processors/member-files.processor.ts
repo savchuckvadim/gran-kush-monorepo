@@ -1,8 +1,6 @@
 import { OnWorkerEvent, Processor, WorkerHost } from "@nestjs/bullmq";
 import { Injectable, Logger } from "@nestjs/common";
 
-import { Job } from "bullmq";
-
 import { QueueMemberFilesPayload } from "@members/application/services/member-files.service";
 import { IdentityDocumentRepository } from "@members/domain/repositories/identity-document-repository.interface";
 import { SignatureRepository } from "@members/domain/repositories/signature-repository.interface";
@@ -12,6 +10,7 @@ import {
 } from "@members/events/member-files-events.constants";
 import { StorageService } from "@storage/application/services/storage.service";
 import { StorageType } from "@storage/domain/enums/storage-type.enum";
+import { Job } from "bullmq";
 
 @Processor(MEMBER_FILES_QUEUE_NAME)
 @Injectable()
@@ -34,7 +33,11 @@ export class MemberFilesProcessor extends WorkerHost {
         }
 
         if (documentType && documentFirst) {
-            const storagePath = await this.savePrivateDataUrl(documentFirst, memberId, "identity-first");
+            const storagePath = await this.savePrivateDataUrl(
+                documentFirst,
+                memberId,
+                "identity-first"
+            );
             await this.identityDocumentRepository.upsertByMemberTypeAndSide({
                 memberId,
                 type: documentType,

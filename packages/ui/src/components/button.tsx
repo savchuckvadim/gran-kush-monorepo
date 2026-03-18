@@ -58,6 +58,9 @@ function Button({
             data-slot="button"
             data-variant={variant}
             data-size={size}
+            style={{
+                cursor: "pointer",
+            }}
             className={cn(buttonVariants({ variant, size, className }))}
             {...props}
         />

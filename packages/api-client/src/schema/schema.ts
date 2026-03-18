@@ -21,6 +21,835 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/crm/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List members for CRM (Employee access required) */
+        get: operations["CrmMembers_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/members/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get member details for CRM (Employee access required) */
+        get: operations["CrmMembers_byId"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update member details from CRM (Admin only) */
+        patch: operations["CrmMembers_update"];
+        trace?: never;
+    };
+    "/crm/members/{id}/files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Re-upload member files from CRM (Admin only) */
+        patch: operations["CrmMembers_updateFiles"];
+        trace?: never;
+    };
+    "/crm/members/{id}/identity-documents/{documentId}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Preview identity document image (Employee access required) */
+        get: operations["CrmMembers_identityDocumentPreview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/members/{id}/signature/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Preview signature image (Employee access required) */
+        get: operations["CrmMembers_signaturePreview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/members/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get current member profile (Site - own data only) */
+        get: operations["LkMembers_getMe"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/catalog/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список товаров (с фильтрами и пагинацией) */
+        get: operations["CrmCatalog_listProducts"];
+        put?: never;
+        /** Создать товар (Admin) */
+        post: operations["CrmCatalog_createProduct"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/catalog/products/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Детали товара */
+        get: operations["CrmCatalog_getProduct"];
+        put?: never;
+        post?: never;
+        /** Удалить товар (Admin) */
+        delete: operations["CrmCatalog_deleteProduct"];
+        options?: never;
+        head?: never;
+        /** Обновить товар (Admin) */
+        patch: operations["CrmCatalog_updateProduct"];
+        trace?: never;
+    };
+    "/crm/catalog/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список категорий (плоский) */
+        get: operations["CrmCatalog_listCategories"];
+        put?: never;
+        /** Создать категорию (Admin) */
+        post: operations["CrmCatalog_createCategory"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/catalog/categories/tree": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Дерево категорий (иерархическое) */
+        get: operations["CrmCatalog_getCategoriesTree"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/catalog/categories/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Удалить категорию (Admin) */
+        delete: operations["CrmCatalog_deleteCategory"];
+        options?: never;
+        head?: never;
+        /** Обновить категорию (Admin) */
+        patch: operations["CrmCatalog_updateCategory"];
+        trace?: never;
+    };
+    "/crm/catalog/measurement-units": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список единиц измерения */
+        get: operations["CrmCatalog_listMeasurementUnits"];
+        put?: never;
+        /** Создать единицу измерения (Admin) */
+        post: operations["CrmCatalog_createMeasurementUnit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/catalog/measurement-units/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Удалить единицу измерения (Admin) */
+        delete: operations["CrmCatalog_deleteMeasurementUnit"];
+        options?: never;
+        head?: never;
+        /** Обновить единицу измерения (Admin) */
+        patch: operations["CrmCatalog_updateMeasurementUnit"];
+        trace?: never;
+    };
+    "/lk/catalog/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Каталог товаров (только активные и доступные)
+         * @description Возвращает только активные и доступные товары. В будущем добавится проверка присутствия в клубе.
+         */
+        get: operations["LkCatalog_getProducts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/catalog/products/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Детали товара */
+        get: operations["LkCatalog_getProduct"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/catalog/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список категорий */
+        get: operations["LkCatalog_getCategories"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/qr-codes/scan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Сканировать QR-код
+         * @description Валидация QR-кода при сканировании на стойке. Возвращает информацию об участнике или ошибку.
+         */
+        post: operations["CrmQrCodes_scanQrCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/qr-codes/member/{memberId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Получить QR-код участника */
+        get: operations["CrmQrCodes_getByMemberId"];
+        put?: never;
+        post?: never;
+        /**
+         * Отозвать QR-код участника
+         * @description Удаляет QR-код участника. После этого он не сможет входить по QR.
+         */
+        delete: operations["CrmQrCodes_revokeQrCode"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/qr-codes/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Сгенерировать / перегенерировать QR-код для участника
+         * @description Если у участника уже есть QR-код, он будет перегенерирован. Если нет — создан новый.
+         */
+        post: operations["CrmQrCodes_generateQrCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/qr-code": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Получить свой QR-код
+         * @description Возвращает QR-код текущего участника с зашифрованным payload. Payload нужно закодировать в QR-изображение на клиенте (qrcode.react).
+         */
+        get: operations["LkQrCodes_getMyQrCode"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/qr-code/regenerate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Запросить перегенерацию QR-кода
+         * @description Перегенерирует QR-код текущего участника. Старый QR-код перестанет работать.
+         */
+        post: operations["LkQrCodes_regenerateMyQrCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/presence/qr-scan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Сканирование QR на стойке (вход/выход)
+         * @description Если участник не в клубе — регистрирует вход. Если уже в клубе — регистрирует выход.
+         */
+        post: operations["CrmPresence_qrScan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/presence/manual/check-in": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ручной чек-ин участника (сотрудником) */
+        post: operations["CrmPresence_manualCheckIn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/presence/manual/check-out": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ручной чек-аут участника (сотрудником) */
+        post: operations["CrmPresence_manualCheckOut"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/presence/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список сессий присутствия (с фильтрами) */
+        get: operations["CrmPresence_listSessions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/presence/sessions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Детали сессии присутствия */
+        get: operations["CrmPresence_getSession"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/presence/currently-present": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Список текущих присутствующих
+         * @description Все участники, которые сейчас находятся в клубе.
+         */
+        get: operations["CrmPresence_getCurrentlyPresent"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/presence/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Статистика присутствия */
+        get: operations["CrmPresence_getStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/presence/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Мой текущий статус присутствия
+         * @description Возвращает true если участник сейчас в клубе (есть активная сессия).
+         */
+        get: operations["LkPresence_getMyPresenceStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/presence/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Моя история посещений
+         * @description Список всех сессий присутствия текущего участника.
+         */
+        get: operations["LkPresence_getMyPresenceHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список заказов (с фильтрами и пагинацией) */
+        get: operations["CrmOrders_listOrders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Детали заказа */
+        get: operations["CrmOrders_getOrder"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/orders/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Обновить статус заказа */
+        patch: operations["CrmOrders_updateStatus"];
+        trace?: never;
+    };
+    "/crm/orders/{id}/payment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Обновить статус оплаты */
+        patch: operations["CrmOrders_updatePaymentStatus"];
+        trace?: never;
+    };
+    "/lk/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Мои заказы
+         * @description Список заказов текущего члена клуба с пагинацией и фильтрами.
+         */
+        get: operations["LkOrders_listMyOrders"];
+        put?: never;
+        /**
+         * Создать заказ
+         * @description Член клуба оформляет заказ. Товары проверяются на наличие, рассчитывается стоимость, номер заказа генерируется автоматически.
+         */
+        post: operations["LkOrders_createOrder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Детали моего заказа
+         * @description Полная информация о заказе с позициями. Доступен только свой заказ.
+         */
+        get: operations["LkOrders_getMyOrder"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/orders/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Отменить заказ
+         * @description Отмена возможна только в статусе 'pending'. Товары возвращаются на склад.
+         */
+        patch: operations["LkOrders_cancelMyOrder"];
+        trace?: never;
+    };
+    "/crm/finance/transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список транзакций (с фильтрами и пагинацией) */
+        get: operations["CrmFinance_listTransactions"];
+        put?: never;
+        /**
+         * Создать ручную транзакцию (Admin)
+         * @description Ручное создание финансовой транзакции. Автоматические транзакции создаются при оплате/возврате заказов.
+         */
+        post: operations["CrmFinance_createTransaction"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/transactions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Детали транзакции */
+        get: operations["CrmFinance_getTransaction"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/reports/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Суммарная финансовая статистика
+         * @description Общий доход, расход и чистый итог за период. Если период не указан — за всё время.
+         */
+        get: operations["CrmFinance_getSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/reports/by-type": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Статистика по типам транзакций
+         * @description Группировка по типу и направлению транзакции за период.
+         */
+        get: operations["CrmFinance_getByType"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/reports/by-date": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Статистика по датам (для графиков)
+         * @description Доходы и расходы по дням за указанный период. Подходит для построения графиков.
+         */
+        get: operations["CrmFinance_getByDate"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/test/employees": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get paginated list of employees (public, no auth required) */
+        get: operations["Test_getEmployees"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/test/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get paginated list of members (public, no auth required) */
+        get: operations["Test_getMembers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["App_getHello"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/crm/auth/login": {
         parameters: {
             query?: never;
@@ -98,59 +927,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Register new Employee (CRM) */
+        /** Register new Employee (Admin only) */
         post: operations["EmployeeRegistration_register"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/lk/auth/member/check": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Check if user exists (for Member registration) */
-        post: operations["MembersAuth_checkUserExists"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/lk/auth/member/register": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Register new Member (Site) */
-        post: operations["MembersAuth_register"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/lk/auth/member/files": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Queue member documents/signature upload (Site) */
-        post: operations["MembersAuth_uploadFiles"];
         delete?: never;
         options?: never;
         head?: never;
@@ -225,42 +1003,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/crm/members": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List members for CRM preview (without authentication) */
-        get: operations["CrmMembers_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/crm/members/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get member details for CRM preview (without authentication) */
-        get: operations["CrmMembers_byId"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Update member details from CRM (temporary no-auth) */
-        patch: operations["CrmMembers_update"];
-        trace?: never;
-    };
-    "/crm/members/{id}/files": {
+    "/lk/auth/password/reset": {
         parameters: {
             query?: never;
             header?: never;
@@ -269,23 +1012,108 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post?: never;
+        /** Request password reset (send email with reset link) */
+        post: operations["MemberAuth_requestPasswordReset"];
         delete?: never;
         options?: never;
         head?: never;
-        /** Re-upload member files from CRM (temporary no-auth) */
-        patch: operations["CrmMembers_updateFiles"];
+        patch?: never;
         trace?: never;
     };
-    "/crm/members/{id}/identity-documents/{documentId}/preview": {
+    "/lk/auth/password/reset/confirm": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Preview identity document image */
-        get: operations["CrmMembers_identityDocumentPreview"];
+        get?: never;
+        put?: never;
+        /** Reset password using token from email */
+        post: operations["MemberAuth_confirmPasswordReset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/auth/member/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Check if user exists (for Member registration) */
+        post: operations["MemberRegistration_checkUserExists"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/auth/member/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register new Member (Site) */
+        post: operations["MemberRegistration_register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/auth/member/files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Queue member documents/signature upload (Site) */
+        post: operations["MemberRegistration_uploadFiles"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/auth/member/confirm-email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm email */
+        post: operations["MemberRegistration_confirmEmail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/verify/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Verify email by token (GET redirect from email link) */
+        get: operations["EmailVerification_verifyEmailGet"];
         put?: never;
         post?: never;
         delete?: never;
@@ -294,33 +1122,51 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/crm/members/{id}/signature/preview": {
+    "/auth/verify": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Preview signature image */
-        get: operations["CrmMembers_signaturePreview"];
+        get?: never;
         put?: never;
-        post?: never;
+        /** Verify email by token (POST) */
+        post: operations["EmailVerification_verifyEmailPost"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/": {
+    "/auth/password/reset/request": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["App_getHello"];
+        get?: never;
         put?: never;
-        post?: never;
+        /** Request password reset (send email with reset link) */
+        post: operations["EmailVerification_requestPasswordReset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/password/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reset password using token from email */
+        post: operations["EmailVerification_resetPassword"];
         delete?: never;
         options?: never;
         head?: never;
@@ -358,283 +1204,6 @@ export interface components {
              */
             surname: string;
         };
-        EmployeeLoginDto: {
-            /** @example employee@example.com */
-            email: string;
-            /** @example password123 */
-            password: string;
-        };
-        EmployeeAuthResponseDto: {
-            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
-            accessToken: string;
-            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
-            refreshToken: string;
-            /**
-             * @example {
-             *       "id": "123e4567-e89b-12d3-a456-426614174000",
-             *       "email": "employee@example.com",
-             *       "name": "John Employee",
-             *       "role": "manager"
-             *     }
-             */
-            employee: Record<string, never>;
-        };
-        ApiErrorResponseDto: {
-            /**
-             * @description Error message
-             * @example Validation failed
-             */
-            message: string;
-            /**
-             * @description Array of validation errors (for validation errors)
-             * @example [
-             *       "email must be an email",
-             *       "password must be longer than 8 characters"
-             *     ]
-             */
-            errors?: string[];
-        };
-        RefreshTokenDto: {
-            /**
-             * @description Refresh token
-             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-             */
-            refreshToken: string;
-        };
-        EmployeeRefreshTokenResponseDto: {
-            /**
-             * @description New access token
-             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-             */
-            accessToken: string;
-            /**
-             * @description New refresh token
-             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-             */
-            refreshToken: string;
-        };
-        EmployeeLogoutResponseDto: {
-            /**
-             * @description Logout message
-             * @example Logged out successfully
-             */
-            message: string;
-        };
-        EmployeeMeResponseDto: {
-            /** @example 123e4567-e89b-12d3-a456-426614174000 */
-            id: string;
-            /** @example employee@example.com */
-            email: string;
-            /** @example John Employee */
-            name: string;
-            /** @example +1234567890 */
-            phone?: string;
-            /** @example manager */
-            role: string;
-            /** @example Senior Manager */
-            position?: string;
-            /** @example Sales */
-            department?: string;
-            /** @example true */
-            isActive: boolean;
-            /**
-             * Format: date-time
-             * @example 2024-01-01T00:00:00.000Z
-             */
-            lastLoginAt?: string;
-            /**
-             * Format: date-time
-             * @example 2024-01-01T00:00:00.000Z
-             */
-            createdAt: string;
-            /**
-             * Format: date-time
-             * @example 2024-01-01T00:00:00.000Z
-             */
-            updatedAt: string;
-        };
-        RegisterEmployeeDto: {
-            /** @example employee@example.com */
-            email: string;
-            /**
-             * @description Password must contain uppercase, lowercase and number
-             * @example Password123
-             */
-            password: string;
-            /** @example John */
-            name: string;
-            /** @example Doe */
-            surname?: string;
-            /** @example +1234567890 */
-            phone?: string;
-            /**
-             * @example manager
-             * @enum {string}
-             */
-            role?: "employee" | "manager" | "admin";
-            /** @example Senior Manager */
-            position?: string;
-            /** @example Sales */
-            department?: string;
-        };
-        CheckUserExistsDto: {
-            /** @example user@example.com */
-            email: string;
-        };
-        CheckUserExistsResponseDto: {
-            /** @example true */
-            exists: boolean;
-            /** @example true */
-            hasEmployee?: boolean;
-            /** @example true */
-            hasMember?: boolean;
-            /** @example User already registered as Employee. Do you want to register as Member? */
-            message?: string;
-        };
-        RegisterMemberDto: {
-            /** @example user@example.com */
-            email: string;
-            /**
-             * @description Password must contain uppercase, lowercase and number
-             * @example Password123
-             */
-            password: string;
-            /** @example John */
-            name: string;
-            /** @example Doe */
-            surname?: string;
-            /** @example +1234567890 */
-            phone?: string;
-            /** @example 2005-11-16 */
-            birthday?: string;
-            /** @example ID */
-            documentType?: string;
-            /** @example 592-9185990 */
-            documentNumber?: string;
-            /** @example 123 Main St */
-            address?: string;
-            /** @example true */
-            isMedical?: boolean;
-            /** @example true */
-            isMj?: boolean;
-            /** @example true */
-            isRecreation?: boolean;
-        };
-        RegisterMemberResponseDto: {
-            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
-            accessToken: string;
-            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
-            refreshToken: string;
-            /**
-             * @description Created member identifier
-             * @example 123e4567-e89b-12d3-a456-426614174999
-             */
-            memberId: string;
-            /**
-             * @example {
-             *       "id": "123e4567-e89b-12d3-a456-426614174000",
-             *       "email": "user@example.com",
-             *       "name": "John",
-             *       "surname": "Doe"
-             *     }
-             */
-            user: Record<string, never>;
-            /**
-             * @example {
-             *       "message": "User already exists as Employee. Do you want to register as Member?",
-             *       "hasEmployee": true
-             *     }
-             */
-            warning?: Record<string, never>;
-        };
-        UploadMemberFilesDto: {
-            /**
-             * @description Document type. Required when any identity document side is provided.
-             * @example passport
-             */
-            documentType?: string;
-            /**
-             * @description Identity document first side as data URL (base64).
-             * @example data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
-             */
-            documentFirst?: string;
-            /**
-             * @description Identity document second side as data URL (base64).
-             * @example data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
-             */
-            documentSecond?: string;
-            /**
-             * @description Signature image as data URL (base64).
-             * @example data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
-             */
-            signature?: string;
-        };
-        UploadMemberFilesResponseDto: {
-            /** @example true */
-            queued: boolean;
-            /** @example 214 */
-            jobId: string;
-        };
-        LoginDto: {
-            /** @example user@example.com */
-            email: string;
-            /** @example Password123 */
-            password: string;
-        };
-        AuthResponseDto: {
-            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
-            accessToken: string;
-            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
-            refreshToken: string;
-            /**
-             * @example {
-             *       "id": "507f1f77bcf86cd799439011",
-             *       "email": "user@example.com"
-             *     }
-             */
-            user: Record<string, never>;
-        };
-        RefreshTokenResponseDto: {
-            /**
-             * @description New access token
-             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-             */
-            accessToken: string;
-            /**
-             * @description New refresh token
-             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-             */
-            refreshToken: string;
-        };
-        LogoutDto: {
-            /**
-             * @description Logout message
-             * @example Logged out successfully
-             */
-            message: string;
-        };
-        UserMeResponseDto: {
-            /** @example 507f1f77bcf86cd799439011 */
-            id: string;
-            /** @example user@example.com */
-            email: string;
-            /** @example John Doe */
-            name: string;
-            /** @example +1234567890 */
-            phone?: string;
-            /** @example true */
-            isActive: boolean;
-            /**
-             * Format: date-time
-             * @example 2024-01-01T00:00:00.000Z
-             */
-            createdAt: string;
-            /**
-             * Format: date-time
-             * @example 2024-01-01T00:00:00.000Z
-             */
-            updatedAt: string;
-        };
         CrmMemberDto: {
             /** @example 123e4567-e89b-12d3-a456-426614174000 */
             id: string;
@@ -656,6 +1225,21 @@ export interface components {
             emailConfirmed: boolean;
             /** @example 2024-01-01T00:00:00.000Z */
             createdAt: string;
+        };
+        ApiErrorResponseDto: {
+            /**
+             * @description Error message
+             * @example Validation failed
+             */
+            message: string;
+            /**
+             * @description Array of validation errors (for validation errors)
+             * @example [
+             *       "email must be an email",
+             *       "password must be longer than 8 characters"
+             *     ]
+             */
+            errors?: string[];
         };
         CrmMemberIdentityDocumentDto: {
             /** @example 123e4567-e89b-12d3-a456-426614174000 */
@@ -790,7 +1374,7 @@ export interface components {
              *     ]
              */
             documents?: components["schemas"]["CrmMemberDocumentDto"][];
-            /** @example John */
+            /** @example 1990-01-15 */
             birthday?: string | null;
             /** @example 123 Main St */
             address?: string | null;
@@ -832,6 +1416,1379 @@ export interface components {
             signature?: string;
         };
         StreamableFile: Record<string, never>;
+        ProductCategoryDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /**
+             * @description Уникальный код категории
+             * @example flower
+             */
+            code: string;
+            /**
+             * @description Название категории
+             * @example Цветы
+             */
+            name: string;
+            /** @example Категория цветочной продукции */
+            description?: string | null;
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            parentId?: string | null;
+            /**
+             * @description Порядок сортировки
+             * @example 0
+             */
+            sortOrder: number;
+            /** @example true */
+            isActive: boolean;
+            /** @example 2026-03-16T12:00:00.000Z */
+            createdAt: string;
+            /** @example 2026-03-16T12:00:00.000Z */
+            updatedAt: string;
+        };
+        MeasurementUnitDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /**
+             * @description Уникальный код единицы измерения
+             * @example g
+             */
+            code: string;
+            /**
+             * @description Название единицы измерения
+             * @example Грамм
+             */
+            name: string;
+            /**
+             * @description Описание
+             * @example Единица массы
+             */
+            description?: string | null;
+            /**
+             * @description Кастомная единица измерения
+             * @example false
+             */
+            isCustom: boolean;
+            /**
+             * @description Активна ли единица
+             * @example true
+             */
+            isActive: boolean;
+            /** @example 2026-03-16T12:00:00.000Z */
+            createdAt: string;
+            /** @example 2026-03-16T12:00:00.000Z */
+            updatedAt: string;
+        };
+        ProductListDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example OG Kush */
+            name: string;
+            /** @example SKU-001 */
+            sku?: string | null;
+            /** @example 15.5 */
+            price: number;
+            /** @example 100 */
+            currentQuantity: number;
+            /** @example true */
+            isActive: boolean;
+            /** @example true */
+            isAvailable: boolean;
+            /** @example /storage/products/img.jpg */
+            imageUrl?: string | null;
+            category: components["schemas"]["ProductCategoryDto"];
+            measurementUnit: components["schemas"]["MeasurementUnitDto"];
+            /** @example 2026-03-16T12:00:00.000Z */
+            createdAt: string;
+        };
+        PaginatedResponse_ProductListDto: {
+            /** @description Array of items */
+            items: components["schemas"]["ProductListDto"][];
+            /**
+             * @description Total number of items
+             * @example 100
+             */
+            total: number;
+            /**
+             * @description Current page number
+             * @example 1
+             */
+            page: number;
+            /**
+             * @description Items per page
+             * @example 10
+             */
+            limit: number;
+            /**
+             * @description Total number of pages
+             * @example 10
+             */
+            totalPages: number;
+        };
+        ProductImageDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example private/products/img.jpg */
+            storagePath: string;
+            /** @example 0 */
+            sortOrder: number;
+            /** @example true */
+            isPrimary: boolean;
+            /** @example 2026-03-16T12:00:00.000Z */
+            createdAt: string;
+        };
+        ProductDetailDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example OG Kush */
+            name: string;
+            /** @example SKU-001 */
+            sku?: string | null;
+            /** @example 15.5 */
+            price: number;
+            /** @example 100 */
+            currentQuantity: number;
+            /** @example true */
+            isActive: boolean;
+            /** @example true */
+            isAvailable: boolean;
+            /** @example /storage/products/img.jpg */
+            imageUrl?: string | null;
+            category: components["schemas"]["ProductCategoryDto"];
+            measurementUnit: components["schemas"]["MeasurementUnitDto"];
+            /** @example 2026-03-16T12:00:00.000Z */
+            createdAt: string;
+            /** @example Классический сорт */
+            description?: string | null;
+            /** @example 1000 */
+            initialQuantity: number;
+            /** @example 10 */
+            minQuantity?: number | null;
+            /** @example 22.5 */
+            thc?: number | null;
+            /** @example 0.5 */
+            cbd?: number | null;
+            /** @example Indica */
+            strain?: string | null;
+            images: components["schemas"]["ProductImageDto"][];
+            /** @example 2026-03-16T12:00:00.000Z */
+            updatedAt: string;
+        };
+        CreateProductDto: {
+            /**
+             * @description ID категории
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            categoryId: string;
+            /**
+             * @description ID единицы измерения
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            measurementUnitId: string;
+            /** @example OG Kush */
+            name: string;
+            /** @example Классический сорт */
+            description?: string;
+            /** @example SKU-001 */
+            sku?: string;
+            /**
+             * @description Цена за единицу
+             * @example 15.5
+             */
+            price: number;
+            /**
+             * @description Начальное количество
+             * @example 1000
+             */
+            initialQuantity: number;
+            /**
+             * @description Минимальный остаток для уведомления
+             * @example 10
+             */
+            minQuantity?: number;
+            /** @example /storage/products/img.jpg */
+            imageUrl?: string;
+            /** @example 22.5 */
+            thc?: number;
+            /** @example 0.5 */
+            cbd?: number;
+            /** @example Indica */
+            strain?: string;
+        };
+        UpdateProductDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            categoryId?: string;
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            measurementUnitId?: string;
+            /** @example OG Kush */
+            name?: string;
+            /** @example Классический сорт */
+            description?: string | null;
+            /** @example SKU-001 */
+            sku?: string | null;
+            /** @example 15.5 */
+            price?: number;
+            /** @example 1000 */
+            initialQuantity?: number;
+            /** @example 500 */
+            currentQuantity?: number;
+            /** @example 10 */
+            minQuantity?: number | null;
+            /** @example /storage/products/img.jpg */
+            imageUrl?: string | null;
+            /** @example true */
+            isActive?: boolean;
+            /** @example true */
+            isAvailable?: boolean;
+            /** @example 22.5 */
+            thc?: number | null;
+            /** @example 0.5 */
+            cbd?: number | null;
+            /** @example Indica */
+            strain?: string | null;
+        };
+        ProductCategoryTreeDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /**
+             * @description Уникальный код категории
+             * @example flower
+             */
+            code: string;
+            /**
+             * @description Название категории
+             * @example Цветы
+             */
+            name: string;
+            /** @example Категория цветочной продукции */
+            description?: string | null;
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            parentId?: string | null;
+            /**
+             * @description Порядок сортировки
+             * @example 0
+             */
+            sortOrder: number;
+            /** @example true */
+            isActive: boolean;
+            /** @example 2026-03-16T12:00:00.000Z */
+            createdAt: string;
+            /** @example 2026-03-16T12:00:00.000Z */
+            updatedAt: string;
+            /** @description Дочерние категории */
+            children?: components["schemas"]["ProductCategoryDto"][];
+        };
+        CreateProductCategoryDto: {
+            /** @example flower */
+            code: string;
+            /** @example Цветы */
+            name: string;
+            /** @example Категория цветочной продукции */
+            description?: string;
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            parentId?: string;
+            /**
+             * @default 0
+             * @example 0
+             */
+            sortOrder: number;
+        };
+        UpdateProductCategoryDto: {
+            /** @example flower */
+            code?: string;
+            /** @example Цветы */
+            name?: string;
+            /** @example Категория цветочной продукции */
+            description?: string | null;
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            parentId?: string | null;
+            /** @example 0 */
+            sortOrder?: number;
+            /** @example true */
+            isActive?: boolean;
+        };
+        CreateMeasurementUnitDto: {
+            /**
+             * @description Уникальный код единицы измерения
+             * @example g
+             */
+            code: string;
+            /**
+             * @description Название единицы измерения
+             * @example Грамм
+             */
+            name: string;
+            /** @example Единица массы */
+            description?: string;
+            /**
+             * @default false
+             * @example false
+             */
+            isCustom: boolean;
+        };
+        UpdateMeasurementUnitDto: {
+            /** @example g */
+            code?: string;
+            /** @example Грамм */
+            name?: string;
+            /** @example Единица массы */
+            description?: string | null;
+            /** @example false */
+            isCustom?: boolean;
+            /** @example true */
+            isActive?: boolean;
+        };
+        ScanQrCodeDto: {
+            /**
+             * @description Зашифрованный payload, полученный при сканировании QR-кода
+             * @example a1b2c3d4e5f6...
+             */
+            encryptedCode: string;
+        };
+        QrCodeMemberDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example John */
+            name: string;
+            /** @example Doe */
+            surname?: string | null;
+            /** @example MBR-0042 */
+            membershipNumber?: string | null;
+            /** @example true */
+            isActive: boolean;
+        };
+        QrCodeScanResultDto: {
+            /**
+             * @description QR-код валиден
+             * @example true
+             */
+            valid: boolean;
+            /**
+             * @description Причина ошибки
+             * @example QR-код истёк
+             */
+            error?: string;
+            /**
+             * @description ID члена клуба (если валиден)
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            memberId?: string;
+            member?: components["schemas"]["QrCodeMemberDto"];
+            /**
+             * @description ID QR-кода
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            qrCodeId?: string;
+        };
+        QrCodeDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            memberId: string;
+            /**
+             * @description Истёк ли QR-код
+             * @example false
+             */
+            isExpired: boolean;
+            /** @example 2026-06-16T00:00:00.000Z */
+            expiresAt: string;
+            /** @example 2026-03-16T14:30:00.000Z */
+            createdAt: string;
+            /** @example 2026-03-16T14:30:00.000Z */
+            updatedAt: string;
+            member?: components["schemas"]["QrCodeMemberDto"];
+        };
+        RegenerateQrCodeDto: {
+            /**
+             * @description ID члена клуба
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            memberId: string;
+        };
+        QrCodeWithPayloadDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            memberId: string;
+            /**
+             * @description Истёк ли QR-код
+             * @example false
+             */
+            isExpired: boolean;
+            /** @example 2026-06-16T00:00:00.000Z */
+            expiresAt: string;
+            /** @example 2026-03-16T14:30:00.000Z */
+            createdAt: string;
+            /** @example 2026-03-16T14:30:00.000Z */
+            updatedAt: string;
+            member?: components["schemas"]["QrCodeMemberDto"];
+            /**
+             * @description Зашифрованный payload — строка, которую нужно закодировать в QR-изображение на клиенте
+             * @example a1b2c3d4e5f6...
+             */
+            encryptedCode: string;
+        };
+        QrCheckInDto: {
+            /**
+             * @description Зашифрованный payload из QR-кода
+             * @example a1b2c3d4e5f6...
+             */
+            encryptedCode: string;
+        };
+        PresenceMemberDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example John */
+            name: string;
+            /** @example Doe */
+            surname?: string | null;
+            /** @example MBR-0042 */
+            membershipNumber?: string | null;
+            /** @example true */
+            isActive: boolean;
+        };
+        PresenceEmployeeDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example Admin */
+            name: string;
+            /** @example User */
+            surname?: string | null;
+        };
+        PresenceSessionDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            memberId: string;
+            /**
+             * @description Активна ли сессия (участник в клубе)
+             * @example true
+             */
+            isActive: boolean;
+            /**
+             * @example qr
+             * @enum {string}
+             */
+            entryMethod: "qr" | "manual_employee";
+            /**
+             * @example qr
+             * @enum {string}
+             */
+            exitMethod?: "qr" | "manual_employee" | "auto_cron";
+            /** @example 2026-03-16T10:00:00.000Z */
+            enteredAt: string;
+            /** @example 2026-03-16T18:00:00.000Z */
+            exitedAt?: string | null;
+            /**
+             * @description Длительность визита в минутах (только для завершённых)
+             * @example 480
+             */
+            durationMinutes?: number | null;
+            member?: components["schemas"]["PresenceMemberDto"];
+            employee?: components["schemas"]["PresenceEmployeeDto"] | null;
+            /** @example 2026-03-16T10:00:00.000Z */
+            createdAt: string;
+        };
+        CheckInResultDto: {
+            /**
+             * @description Тип действия: вход или выход
+             * @example entry
+             * @enum {string}
+             */
+            action: "entry" | "exit";
+            session: components["schemas"]["PresenceSessionDto"];
+            /** @example Участник отмечен на вход */
+            message?: string;
+        };
+        ManualCheckInDto: {
+            /**
+             * @description ID участника
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            memberId: string;
+        };
+        ManualCheckOutDto: {
+            /**
+             * @description ID участника
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            memberId: string;
+        };
+        PaginatedResponse_PresenceSessionDto: {
+            /** @description Array of items */
+            items: components["schemas"]["PresenceSessionDto"][];
+            /**
+             * @description Total number of items
+             * @example 100
+             */
+            total: number;
+            /**
+             * @description Current page number
+             * @example 1
+             */
+            page: number;
+            /**
+             * @description Items per page
+             * @example 10
+             */
+            limit: number;
+            /**
+             * @description Total number of pages
+             * @example 10
+             */
+            totalPages: number;
+        };
+        PresenceStatsDto: {
+            /**
+             * @description Текущее количество присутствующих
+             * @example 12
+             */
+            currentlyPresent: number;
+            /**
+             * @description Всего посещений за период
+             * @example 150
+             */
+            totalVisits: number;
+            /**
+             * @description Средняя длительность визита (мин)
+             * @example 120
+             */
+            avgDurationMinutes?: number | null;
+        };
+        OrderMemberDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example John */
+            name: string;
+            /** @example Doe */
+            surname?: string | null;
+            /** @example MBR-0042 */
+            membershipNumber?: string | null;
+        };
+        OrderEmployeeDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example Admin */
+            name: string;
+            /** @example User */
+            surname?: string | null;
+        };
+        OrderListDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example ORD-20260316-0001 */
+            orderNumber: string;
+            /**
+             * @example pending
+             * @enum {string}
+             */
+            status: "pending" | "confirmed" | "preparing" | "ready" | "completed" | "cancelled";
+            /**
+             * @example pending
+             * @enum {string}
+             */
+            paymentStatus: "pending" | "paid" | "refunded";
+            /** @example 38.75 */
+            subtotal: number;
+            /** @example 0 */
+            discount: number;
+            /** @example 38.75 */
+            total: number;
+            /**
+             * @description Количество позиций в заказе
+             * @example 3
+             */
+            itemsCount: number;
+            /** @example 2026-03-16T14:30:00.000Z */
+            orderedAt: string;
+            member: components["schemas"]["OrderMemberDto"];
+            employee?: components["schemas"]["OrderEmployeeDto"] | null;
+            /** @example 2026-03-16T14:30:00.000Z */
+            createdAt: string;
+        };
+        PaginatedResponse_OrderListDto: {
+            /** @description Array of items */
+            items: components["schemas"]["OrderListDto"][];
+            /**
+             * @description Total number of items
+             * @example 100
+             */
+            total: number;
+            /**
+             * @description Current page number
+             * @example 1
+             */
+            page: number;
+            /**
+             * @description Items per page
+             * @example 10
+             */
+            limit: number;
+            /**
+             * @description Total number of pages
+             * @example 10
+             */
+            totalPages: number;
+        };
+        OrderItemMeasurementUnitDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example gram */
+            name: string;
+            /** @example g */
+            code: string;
+        };
+        OrderItemProductDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example OG Kush */
+            name: string;
+            /** @example SKU-001 */
+            sku?: string | null;
+            /** @example /storage/products/img.jpg */
+            imageUrl?: string | null;
+            measurementUnit?: components["schemas"]["OrderItemMeasurementUnitDto"];
+        };
+        OrderItemDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            productId: string;
+            /**
+             * @description Количество
+             * @example 2.5
+             */
+            quantity: number;
+            /**
+             * @description Цена за единицу на момент заказа
+             * @example 15.5
+             */
+            unitPrice: number;
+            /**
+             * @description Итого по позиции
+             * @example 38.75
+             */
+            totalPrice: number;
+            /** @example Без стеблей */
+            notes?: string | null;
+            product: components["schemas"]["OrderItemProductDto"];
+        };
+        OrderDetailDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example ORD-20260316-0001 */
+            orderNumber: string;
+            /**
+             * @example pending
+             * @enum {string}
+             */
+            status: "pending" | "confirmed" | "preparing" | "ready" | "completed" | "cancelled";
+            /**
+             * @example pending
+             * @enum {string}
+             */
+            paymentStatus: "pending" | "paid" | "refunded";
+            /** @example 38.75 */
+            subtotal: number;
+            /** @example 0 */
+            discount: number;
+            /** @example 38.75 */
+            total: number;
+            /**
+             * @description Количество позиций в заказе
+             * @example 3
+             */
+            itemsCount: number;
+            /** @example 2026-03-16T14:30:00.000Z */
+            orderedAt: string;
+            member: components["schemas"]["OrderMemberDto"];
+            employee?: components["schemas"]["OrderEmployeeDto"] | null;
+            /** @example 2026-03-16T14:30:00.000Z */
+            createdAt: string;
+            /** @example Пожалуйста, побыстрее */
+            notes?: string | null;
+            /** @example VIP клиент, дать скидку */
+            adminNotes?: string | null;
+            /** @example 2026-03-16T14:35:00.000Z */
+            confirmedAt?: string | null;
+            /** @example 2026-03-16T14:40:00.000Z */
+            preparedAt?: string | null;
+            /** @example 2026-03-16T14:50:00.000Z */
+            readyAt?: string | null;
+            /** @example 2026-03-16T15:00:00.000Z */
+            completedAt?: string | null;
+            /** @example null */
+            cancelledAt?: string | null;
+            items: components["schemas"]["OrderItemDto"][];
+            /** @example 2026-03-16T14:30:00.000Z */
+            updatedAt: string;
+        };
+        UpdateOrderStatusDto: {
+            /**
+             * @description Новый статус заказа
+             * @example confirmed
+             * @enum {string}
+             */
+            status: "pending" | "confirmed" | "preparing" | "ready" | "completed" | "cancelled";
+            /**
+             * @description Примечание от сотрудника
+             * @example Подтверждён, начинаем готовить
+             */
+            adminNotes?: string;
+        };
+        UpdatePaymentStatusDto: {
+            /**
+             * @description Новый статус оплаты
+             * @example paid
+             * @enum {string}
+             */
+            paymentStatus: "pending" | "paid" | "refunded";
+            /**
+             * @description Способ оплаты ("cash", "card", "crypto")
+             * @example cash
+             */
+            paymentMethod?: string;
+        };
+        CreateOrderItemDto: {
+            /**
+             * @description ID товара
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            productId: string;
+            /**
+             * @description Количество
+             * @example 2.5
+             */
+            quantity: number;
+            /** @example Без стеблей */
+            notes?: string;
+        };
+        CreateOrderDto: {
+            /** @description Список позиций заказа (минимум 1) */
+            items: components["schemas"]["CreateOrderItemDto"][];
+            /** @example Побыстрее, пожалуйста */
+            notes?: string;
+        };
+        CancelOrderDto: {
+            /**
+             * @description Причина отмены
+             * @example Передумал
+             */
+            reason?: string;
+        };
+        TransactionOrderDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example ORD-20260316-0001 */
+            orderNumber: string;
+            /** @example completed */
+            status: string;
+        };
+        TransactionMemberDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example John */
+            name: string;
+            /** @example Doe */
+            surname?: string | null;
+            /** @example MBR-0042 */
+            membershipNumber?: string | null;
+        };
+        TransactionEmployeeDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example Admin */
+            name: string;
+            /** @example User */
+            surname?: string | null;
+        };
+        FinancialTransactionListDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /**
+             * @example order_payment
+             * @enum {string}
+             */
+            type: "order_payment" | "refund" | "adjustment" | "manual";
+            /**
+             * @example income
+             * @enum {string}
+             */
+            direction: "income" | "expense";
+            /** @example 38.75 */
+            amount: number;
+            /** @example EUR */
+            currency: string;
+            /**
+             * @example cash
+             * @enum {string}
+             */
+            paymentMethod?: "cash" | "card" | "crypto";
+            /** @example Оплата заказа ORD-20260316-0001 */
+            description?: string | null;
+            /** @example 2026-03-16T14:30:00.000Z */
+            transactionDate: string;
+            order?: components["schemas"]["TransactionOrderDto"] | null;
+            member?: components["schemas"]["TransactionMemberDto"] | null;
+            createdByEmployee?: components["schemas"]["TransactionEmployeeDto"] | null;
+            /** @example 2026-03-16T14:30:00.000Z */
+            createdAt: string;
+        };
+        PaginatedResponse_FinancialTransactionListDto: {
+            /** @description Array of items */
+            items: components["schemas"]["FinancialTransactionListDto"][];
+            /**
+             * @description Total number of items
+             * @example 100
+             */
+            total: number;
+            /**
+             * @description Current page number
+             * @example 1
+             */
+            page: number;
+            /**
+             * @description Items per page
+             * @example 10
+             */
+            limit: number;
+            /**
+             * @description Total number of pages
+             * @example 10
+             */
+            totalPages: number;
+        };
+        FinancialTransactionDetailDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /**
+             * @example order_payment
+             * @enum {string}
+             */
+            type: "order_payment" | "refund" | "adjustment" | "manual";
+            /**
+             * @example income
+             * @enum {string}
+             */
+            direction: "income" | "expense";
+            /** @example 38.75 */
+            amount: number;
+            /** @example EUR */
+            currency: string;
+            /**
+             * @example cash
+             * @enum {string}
+             */
+            paymentMethod?: "cash" | "card" | "crypto";
+            /** @example Оплата заказа ORD-20260316-0001 */
+            description?: string | null;
+            /** @example 2026-03-16T14:30:00.000Z */
+            transactionDate: string;
+            order?: components["schemas"]["TransactionOrderDto"] | null;
+            member?: components["schemas"]["TransactionMemberDto"] | null;
+            createdByEmployee?: components["schemas"]["TransactionEmployeeDto"] | null;
+            /** @example 2026-03-16T14:30:00.000Z */
+            createdAt: string;
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            orderId?: string | null;
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            memberId?: string | null;
+            /** @example Внутренний перевод */
+            notes?: string | null;
+        };
+        CreateFinancialTransactionDto: {
+            /**
+             * @description ID заказа (если транзакция привязана к заказу)
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            orderId?: string;
+            /**
+             * @description ID члена клуба
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            memberId?: string;
+            /**
+             * @description Тип транзакции
+             * @example manual
+             * @enum {string}
+             */
+            type: "order_payment" | "refund" | "adjustment" | "manual";
+            /**
+             * @description Направление: доход или расход
+             * @example income
+             * @enum {string}
+             */
+            direction: "income" | "expense";
+            /**
+             * @description Сумма транзакции
+             * @example 50
+             */
+            amount: number;
+            /**
+             * @default EUR
+             * @example EUR
+             */
+            currency: string;
+            /**
+             * @description Способ оплаты
+             * @example cash
+             * @enum {string}
+             */
+            paymentMethod?: "cash" | "card" | "crypto";
+            /** @example Оплата за доп. услуги */
+            description?: string;
+            /** @example Примечание для бухгалтерии */
+            notes?: string;
+        };
+        TransactionSummaryDto: {
+            /**
+             * @description Общий доход
+             * @example 5000
+             */
+            totalIncome: number;
+            /**
+             * @description Общие расходы
+             * @example 200
+             */
+            totalExpense: number;
+            /**
+             * @description Чистый итог (доход - расход)
+             * @example 4800
+             */
+            netTotal: number;
+            /**
+             * @description Количество транзакций
+             * @example 42
+             */
+            transactionCount: number;
+        };
+        TransactionGroupedByTypeDto: {
+            /**
+             * @example order_payment
+             * @enum {string}
+             */
+            type: "order_payment" | "refund" | "adjustment" | "manual";
+            /**
+             * @example income
+             * @enum {string}
+             */
+            direction: "income" | "expense";
+            /** @example 30 */
+            count: number;
+            /** @example 4500 */
+            totalAmount: number;
+        };
+        TransactionGroupedByDateDto: {
+            /** @example 2026-03-16 */
+            date: string;
+            /** @example 500 */
+            income: number;
+            /** @example 50 */
+            expense: number;
+            /** @example 450 */
+            net: number;
+            /** @example 8 */
+            count: number;
+        };
+        EmployeeListItemDto: {
+            /** @example 123e4567-e89b-12d3-a456-426614174000 */
+            id: string;
+            /** @example 123e4567-e89b-12d3-a456-426614174000 */
+            userId: string;
+            /** @example employee@example.com */
+            email: string;
+            /** @example John Employee */
+            name: string;
+            /** @example Doe */
+            surname?: string;
+            /** @example +1234567890 */
+            phone?: string;
+            /** @example manager */
+            role: string;
+            /** @example Senior Manager */
+            position?: string;
+            /** @example Sales */
+            department?: string;
+            /** @example true */
+            isActive: boolean;
+            /**
+             * Format: date-time
+             * @example 2024-01-01T00:00:00.000Z
+             */
+            lastLoginAt?: string;
+            /**
+             * Format: date-time
+             * @example 2024-01-01T00:00:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @example 2024-01-01T00:00:00.000Z
+             */
+            updatedAt: string;
+        };
+        PaginatedResponse_EmployeeListItemDto: {
+            /** @description Array of items */
+            items: components["schemas"]["EmployeeListItemDto"][];
+            /**
+             * @description Total number of items
+             * @example 100
+             */
+            total: number;
+            /**
+             * @description Current page number
+             * @example 1
+             */
+            page: number;
+            /**
+             * @description Items per page
+             * @example 10
+             */
+            limit: number;
+            /**
+             * @description Total number of pages
+             * @example 10
+             */
+            totalPages: number;
+        };
+        PaginatedResponse_CrmMemberDto: {
+            /** @description Array of items */
+            items: components["schemas"]["CrmMemberDto"][];
+            /**
+             * @description Total number of items
+             * @example 100
+             */
+            total: number;
+            /**
+             * @description Current page number
+             * @example 1
+             */
+            page: number;
+            /**
+             * @description Items per page
+             * @example 10
+             */
+            limit: number;
+            /**
+             * @description Total number of pages
+             * @example 10
+             */
+            totalPages: number;
+        };
+        EmployeeLoginDto: {
+            /** @example employee@example.com */
+            email: string;
+            /** @example password123 */
+            password: string;
+        };
+        EmployeeInfoDto: {
+            /** @example 123e4567-e89b-12d3-a456-426614174000 */
+            id: string;
+            /** @example employee@example.com */
+            email: string;
+            /** @example John Employee */
+            name: string;
+            /** @example manager */
+            role: string;
+        };
+        EmployeeAuthResponseDto: {
+            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
+            accessToken: string;
+            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
+            refreshToken: string;
+            employee: components["schemas"]["EmployeeInfoDto"];
+        };
+        RefreshTokenDto: {
+            /**
+             * @description Refresh token
+             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
+            refreshToken: string;
+        };
+        EmployeeRefreshTokenResponseDto: {
+            /**
+             * @description New access token
+             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
+            accessToken: string;
+            /**
+             * @description New refresh token
+             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
+            refreshToken: string;
+        };
+        EmployeeLogoutResponseDto: {
+            /**
+             * @description Logout message
+             * @example Logged out successfully
+             */
+            message: string;
+        };
+        EmployeeMeResponseDto: {
+            /** @example 123e4567-e89b-12d3-a456-426614174000 */
+            id: string;
+            /** @example employee@example.com */
+            email: string;
+            /** @example John Employee */
+            name: string;
+            /** @example +1234567890 */
+            phone?: string;
+            /** @example manager */
+            role: string;
+            /** @example Senior Manager */
+            position?: string;
+            /** @example Sales */
+            department?: string;
+            /** @example true */
+            isActive: boolean;
+            /**
+             * Format: date-time
+             * @example 2024-01-01T00:00:00.000Z
+             */
+            lastLoginAt?: string;
+            /**
+             * Format: date-time
+             * @example 2024-01-01T00:00:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @example 2024-01-01T00:00:00.000Z
+             */
+            updatedAt: string;
+        };
+        RegisterEmployeeDto: {
+            /** @example employee@example.com */
+            email: string;
+            /**
+             * @description Password must contain uppercase, lowercase and number
+             * @example Password123
+             */
+            password: string;
+            /** @example John */
+            name: string;
+            /** @example Doe */
+            surname?: string;
+            /** @example +1234567890 */
+            phone?: string;
+            /**
+             * @example manager
+             * @enum {string}
+             */
+            role?: "employee" | "manager" | "admin";
+            /** @example Senior Manager */
+            position?: string;
+            /** @example Sales */
+            department?: string;
+        };
+        MemberLoginDto: {
+            /** @example user@example.com */
+            email: string;
+            /** @example Password123 */
+            password: string;
+        };
+        MemberUserInfoDto: {
+            /** @example 507f1f77bcf86cd799439011 */
+            id: string;
+            /** @example user@example.com */
+            email: string;
+        };
+        MemberAuthResponseDto: {
+            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
+            accessToken: string;
+            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
+            refreshToken: string;
+            user: components["schemas"]["MemberUserInfoDto"];
+        };
+        MemberRefreshTokenResponseDto: {
+            /**
+             * @description New access token
+             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
+            accessToken: string;
+        };
+        MemberLogoutResponseDto: {
+            /**
+             * @description Logout message
+             * @example Logged out successfully
+             */
+            message: string;
+        };
+        MemberMeResponseDto: {
+            /** @example 123e4567-e89b-12d3-a456-426614174000 */
+            id: string;
+            /** @example user@example.com */
+            email: string;
+            /** @example John */
+            name: string;
+            /** @example +1234567890 */
+            phone?: string;
+            /** @example true */
+            isActive: boolean;
+            /**
+             * Format: date-time
+             * @example 2024-01-01T00:00:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @example 2024-01-01T00:00:00.000Z
+             */
+            updatedAt: string;
+        };
+        RequestPasswordResetDto: {
+            /** @example user@example.com */
+            email: string;
+        };
+        PasswordResetResponseDto: {
+            /** @example true */
+            success: boolean;
+            /** @example Password reset successfully */
+            message: string;
+        };
+        ResetPasswordDto: {
+            /**
+             * @description Password reset token from email
+             * @example abc123def456...
+             */
+            token: string;
+            /**
+             * @description New password (must contain uppercase, lowercase and number)
+             * @example NewPassword123
+             */
+            newPassword: string;
+        };
+        CheckUserExistsDto: {
+            /** @example user@example.com */
+            email: string;
+        };
+        CheckUserExistsResponseDto: {
+            /** @example true */
+            exists: boolean;
+            /** @example true */
+            hasEmployee?: boolean;
+            /** @example true */
+            hasMember?: boolean;
+            /** @example User already registered as Employee. Do you want to register as Member? */
+            message?: string;
+        };
+        RegisterMemberDto: {
+            /** @example user@example.com */
+            email: string;
+            /**
+             * @description Password must contain uppercase, lowercase and number
+             * @example Password123
+             */
+            password: string;
+            /** @example John */
+            name: string;
+            /** @example Doe */
+            surname?: string;
+            /** @example +1234567890 */
+            phone?: string;
+            /** @example 2005-11-16 */
+            birthday?: string;
+            /** @example ID */
+            documentType?: string;
+            /** @example 592-9185990 */
+            documentNumber?: string;
+            /** @example 123 Main St */
+            address?: string;
+            /** @example true */
+            isMedical?: boolean;
+            /** @example true */
+            isMj?: boolean;
+            /** @example true */
+            isRecreation?: boolean;
+        };
+        RegisteredUserInfoDto: {
+            /** @example 123e4567-e89b-12d3-a456-426614174000 */
+            id: string;
+            /** @example user@example.com */
+            email: string;
+            /** @example John */
+            name: string;
+            /** @example Doe */
+            surname?: string;
+        };
+        RegistrationWarningDto: {
+            /** @example User already exists as Employee. Do you want to register as Member? */
+            message: string;
+            /** @example true */
+            hasEmployee: boolean;
+        };
+        RegisterMemberResponseDto: {
+            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
+            accessToken: string;
+            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
+            refreshToken: string;
+            /**
+             * @description Created member identifier
+             * @example 123e4567-e89b-12d3-a456-426614174999
+             */
+            memberId: string;
+            user: components["schemas"]["RegisteredUserInfoDto"];
+            warning?: components["schemas"]["RegistrationWarningDto"];
+        };
+        UploadMemberFilesDto: {
+            /**
+             * @description Document type. Required when any identity document side is provided.
+             * @example passport
+             */
+            documentType?: string;
+            /**
+             * @description Identity document first side as data URL (base64).
+             * @example data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
+             */
+            documentFirst?: string;
+            /**
+             * @description Identity document second side as data URL (base64).
+             * @example data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
+             */
+            documentSecond?: string;
+            /**
+             * @description Signature image as data URL (base64).
+             * @example data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
+             */
+            signature?: string;
+        };
+        UploadMemberFilesResponseDto: {
+            /** @example true */
+            queued: boolean;
+            /** @example 214 */
+            jobId: string;
+        };
+        MemberConfirmEmailDto: {
+            /**
+             * @description Email verification token from email
+             * @example abc123def456...
+             */
+            token: string;
+        };
+        MemberConfirmEmailResponseDto: {
+            /**
+             * @description Email confirmed successfully
+             * @example true
+             */
+            success: boolean;
+            /**
+             * @description Email confirmed successfully
+             * @example Email confirmed successfully
+             */
+            message: string;
+        };
+        VerifyEmailResponseDto: {
+            /** @example true */
+            success: boolean;
+            /** @example Email confirmed successfully */
+            message: string;
+        };
+        VerifyEmailDto: {
+            /**
+             * @description Email verification token from email
+             * @example abc123def456...
+             */
+            token: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -840,26 +2797,8 @@ export interface components {
     pathItems: never;
 }
 export type SchemaSendEmailRequestDto = components['schemas']['SendEmailRequestDto'];
-export type SchemaEmployeeLoginDto = components['schemas']['EmployeeLoginDto'];
-export type SchemaEmployeeAuthResponseDto = components['schemas']['EmployeeAuthResponseDto'];
-export type SchemaApiErrorResponseDto = components['schemas']['ApiErrorResponseDto'];
-export type SchemaRefreshTokenDto = components['schemas']['RefreshTokenDto'];
-export type SchemaEmployeeRefreshTokenResponseDto = components['schemas']['EmployeeRefreshTokenResponseDto'];
-export type SchemaEmployeeLogoutResponseDto = components['schemas']['EmployeeLogoutResponseDto'];
-export type SchemaEmployeeMeResponseDto = components['schemas']['EmployeeMeResponseDto'];
-export type SchemaRegisterEmployeeDto = components['schemas']['RegisterEmployeeDto'];
-export type SchemaCheckUserExistsDto = components['schemas']['CheckUserExistsDto'];
-export type SchemaCheckUserExistsResponseDto = components['schemas']['CheckUserExistsResponseDto'];
-export type SchemaRegisterMemberDto = components['schemas']['RegisterMemberDto'];
-export type SchemaRegisterMemberResponseDto = components['schemas']['RegisterMemberResponseDto'];
-export type SchemaUploadMemberFilesDto = components['schemas']['UploadMemberFilesDto'];
-export type SchemaUploadMemberFilesResponseDto = components['schemas']['UploadMemberFilesResponseDto'];
-export type SchemaLoginDto = components['schemas']['LoginDto'];
-export type SchemaAuthResponseDto = components['schemas']['AuthResponseDto'];
-export type SchemaRefreshTokenResponseDto = components['schemas']['RefreshTokenResponseDto'];
-export type SchemaLogoutDto = components['schemas']['LogoutDto'];
-export type SchemaUserMeResponseDto = components['schemas']['UserMeResponseDto'];
 export type SchemaCrmMemberDto = components['schemas']['CrmMemberDto'];
+export type SchemaApiErrorResponseDto = components['schemas']['ApiErrorResponseDto'];
 export type SchemaCrmMemberIdentityDocumentDto = components['schemas']['CrmMemberIdentityDocumentDto'];
 export type SchemaCrmMemberSignatureDto = components['schemas']['CrmMemberSignatureDto'];
 export type SchemaCrmMemberMjStatusDto = components['schemas']['CrmMemberMjStatusDto'];
@@ -868,6 +2807,89 @@ export type SchemaCrmMemberFullDto = components['schemas']['CrmMemberFullDto'];
 export type SchemaCrmMemberUpdateDto = components['schemas']['CrmMemberUpdateDto'];
 export type SchemaCrmMemberFilesRequestDto = components['schemas']['CrmMemberFilesRequestDto'];
 export type SchemaStreamableFile = components['schemas']['StreamableFile'];
+export type SchemaProductCategoryDto = components['schemas']['ProductCategoryDto'];
+export type SchemaMeasurementUnitDto = components['schemas']['MeasurementUnitDto'];
+export type SchemaProductListDto = components['schemas']['ProductListDto'];
+export type SchemaPaginatedResponseProductListDto = components['schemas']['PaginatedResponse_ProductListDto'];
+export type SchemaProductImageDto = components['schemas']['ProductImageDto'];
+export type SchemaProductDetailDto = components['schemas']['ProductDetailDto'];
+export type SchemaCreateProductDto = components['schemas']['CreateProductDto'];
+export type SchemaUpdateProductDto = components['schemas']['UpdateProductDto'];
+export type SchemaProductCategoryTreeDto = components['schemas']['ProductCategoryTreeDto'];
+export type SchemaCreateProductCategoryDto = components['schemas']['CreateProductCategoryDto'];
+export type SchemaUpdateProductCategoryDto = components['schemas']['UpdateProductCategoryDto'];
+export type SchemaCreateMeasurementUnitDto = components['schemas']['CreateMeasurementUnitDto'];
+export type SchemaUpdateMeasurementUnitDto = components['schemas']['UpdateMeasurementUnitDto'];
+export type SchemaScanQrCodeDto = components['schemas']['ScanQrCodeDto'];
+export type SchemaQrCodeMemberDto = components['schemas']['QrCodeMemberDto'];
+export type SchemaQrCodeScanResultDto = components['schemas']['QrCodeScanResultDto'];
+export type SchemaQrCodeDto = components['schemas']['QrCodeDto'];
+export type SchemaRegenerateQrCodeDto = components['schemas']['RegenerateQrCodeDto'];
+export type SchemaQrCodeWithPayloadDto = components['schemas']['QrCodeWithPayloadDto'];
+export type SchemaQrCheckInDto = components['schemas']['QrCheckInDto'];
+export type SchemaPresenceMemberDto = components['schemas']['PresenceMemberDto'];
+export type SchemaPresenceEmployeeDto = components['schemas']['PresenceEmployeeDto'];
+export type SchemaPresenceSessionDto = components['schemas']['PresenceSessionDto'];
+export type SchemaCheckInResultDto = components['schemas']['CheckInResultDto'];
+export type SchemaManualCheckInDto = components['schemas']['ManualCheckInDto'];
+export type SchemaManualCheckOutDto = components['schemas']['ManualCheckOutDto'];
+export type SchemaPaginatedResponsePresenceSessionDto = components['schemas']['PaginatedResponse_PresenceSessionDto'];
+export type SchemaPresenceStatsDto = components['schemas']['PresenceStatsDto'];
+export type SchemaOrderMemberDto = components['schemas']['OrderMemberDto'];
+export type SchemaOrderEmployeeDto = components['schemas']['OrderEmployeeDto'];
+export type SchemaOrderListDto = components['schemas']['OrderListDto'];
+export type SchemaPaginatedResponseOrderListDto = components['schemas']['PaginatedResponse_OrderListDto'];
+export type SchemaOrderItemMeasurementUnitDto = components['schemas']['OrderItemMeasurementUnitDto'];
+export type SchemaOrderItemProductDto = components['schemas']['OrderItemProductDto'];
+export type SchemaOrderItemDto = components['schemas']['OrderItemDto'];
+export type SchemaOrderDetailDto = components['schemas']['OrderDetailDto'];
+export type SchemaUpdateOrderStatusDto = components['schemas']['UpdateOrderStatusDto'];
+export type SchemaUpdatePaymentStatusDto = components['schemas']['UpdatePaymentStatusDto'];
+export type SchemaCreateOrderItemDto = components['schemas']['CreateOrderItemDto'];
+export type SchemaCreateOrderDto = components['schemas']['CreateOrderDto'];
+export type SchemaCancelOrderDto = components['schemas']['CancelOrderDto'];
+export type SchemaTransactionOrderDto = components['schemas']['TransactionOrderDto'];
+export type SchemaTransactionMemberDto = components['schemas']['TransactionMemberDto'];
+export type SchemaTransactionEmployeeDto = components['schemas']['TransactionEmployeeDto'];
+export type SchemaFinancialTransactionListDto = components['schemas']['FinancialTransactionListDto'];
+export type SchemaPaginatedResponseFinancialTransactionListDto = components['schemas']['PaginatedResponse_FinancialTransactionListDto'];
+export type SchemaFinancialTransactionDetailDto = components['schemas']['FinancialTransactionDetailDto'];
+export type SchemaCreateFinancialTransactionDto = components['schemas']['CreateFinancialTransactionDto'];
+export type SchemaTransactionSummaryDto = components['schemas']['TransactionSummaryDto'];
+export type SchemaTransactionGroupedByTypeDto = components['schemas']['TransactionGroupedByTypeDto'];
+export type SchemaTransactionGroupedByDateDto = components['schemas']['TransactionGroupedByDateDto'];
+export type SchemaEmployeeListItemDto = components['schemas']['EmployeeListItemDto'];
+export type SchemaPaginatedResponseEmployeeListItemDto = components['schemas']['PaginatedResponse_EmployeeListItemDto'];
+export type SchemaPaginatedResponseCrmMemberDto = components['schemas']['PaginatedResponse_CrmMemberDto'];
+export type SchemaEmployeeLoginDto = components['schemas']['EmployeeLoginDto'];
+export type SchemaEmployeeInfoDto = components['schemas']['EmployeeInfoDto'];
+export type SchemaEmployeeAuthResponseDto = components['schemas']['EmployeeAuthResponseDto'];
+export type SchemaRefreshTokenDto = components['schemas']['RefreshTokenDto'];
+export type SchemaEmployeeRefreshTokenResponseDto = components['schemas']['EmployeeRefreshTokenResponseDto'];
+export type SchemaEmployeeLogoutResponseDto = components['schemas']['EmployeeLogoutResponseDto'];
+export type SchemaEmployeeMeResponseDto = components['schemas']['EmployeeMeResponseDto'];
+export type SchemaRegisterEmployeeDto = components['schemas']['RegisterEmployeeDto'];
+export type SchemaMemberLoginDto = components['schemas']['MemberLoginDto'];
+export type SchemaMemberUserInfoDto = components['schemas']['MemberUserInfoDto'];
+export type SchemaMemberAuthResponseDto = components['schemas']['MemberAuthResponseDto'];
+export type SchemaMemberRefreshTokenResponseDto = components['schemas']['MemberRefreshTokenResponseDto'];
+export type SchemaMemberLogoutResponseDto = components['schemas']['MemberLogoutResponseDto'];
+export type SchemaMemberMeResponseDto = components['schemas']['MemberMeResponseDto'];
+export type SchemaRequestPasswordResetDto = components['schemas']['RequestPasswordResetDto'];
+export type SchemaPasswordResetResponseDto = components['schemas']['PasswordResetResponseDto'];
+export type SchemaResetPasswordDto = components['schemas']['ResetPasswordDto'];
+export type SchemaCheckUserExistsDto = components['schemas']['CheckUserExistsDto'];
+export type SchemaCheckUserExistsResponseDto = components['schemas']['CheckUserExistsResponseDto'];
+export type SchemaRegisterMemberDto = components['schemas']['RegisterMemberDto'];
+export type SchemaRegisteredUserInfoDto = components['schemas']['RegisteredUserInfoDto'];
+export type SchemaRegistrationWarningDto = components['schemas']['RegistrationWarningDto'];
+export type SchemaRegisterMemberResponseDto = components['schemas']['RegisterMemberResponseDto'];
+export type SchemaUploadMemberFilesDto = components['schemas']['UploadMemberFilesDto'];
+export type SchemaUploadMemberFilesResponseDto = components['schemas']['UploadMemberFilesResponseDto'];
+export type SchemaMemberConfirmEmailDto = components['schemas']['MemberConfirmEmailDto'];
+export type SchemaMemberConfirmEmailResponseDto = components['schemas']['MemberConfirmEmailResponseDto'];
+export type SchemaVerifyEmailResponseDto = components['schemas']['VerifyEmailResponseDto'];
+export type SchemaVerifyEmailDto = components['schemas']['VerifyEmailDto'];
 export type $defs = Record<string, never>;
 export interface operations {
     Mail_sendMail: {
@@ -890,424 +2912,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": boolean;
-                };
-            };
-        };
-    };
-    EmployeeAuth_login: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["EmployeeLoginDto"];
-            };
-        };
-        responses: {
-            /** @description Employee logged in successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmployeeAuthResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    EmployeeAuth_refresh: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RefreshTokenDto"];
-            };
-        };
-        responses: {
-            /** @description Token refreshed successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmployeeRefreshTokenResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    EmployeeAuth_logout: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Logged out successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmployeeLogoutResponseDto"];
-                };
-            };
-        };
-    };
-    EmployeeAuth_getMe: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Current employee information */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmployeeMeResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    EmployeeRegistration_register: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RegisterEmployeeDto"];
-            };
-        };
-        responses: {
-            /** @description Employee registered successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmployeeAuthResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    MembersAuth_checkUserExists: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CheckUserExistsDto"];
-            };
-        };
-        responses: {
-            /** @description User existence check result */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CheckUserExistsResponseDto"];
-                };
-            };
-        };
-    };
-    MembersAuth_register: {
-        parameters: {
-            query: {
-                force: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RegisterMemberDto"];
-            };
-        };
-        responses: {
-            /** @description Member registered successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RegisterMemberResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    MembersAuth_uploadFiles: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UploadMemberFilesDto"];
-            };
-        };
-        responses: {
-            /** @description Member files were queued for asynchronous processing */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UploadMemberFilesResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    MemberAuth_login: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LoginDto"];
-            };
-        };
-        responses: {
-            /** @description Member logged in successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    MemberAuth_refresh: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RefreshTokenDto"];
-            };
-        };
-        responses: {
-            /** @description Token refreshed successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RefreshTokenResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    MemberAuth_logout: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Logged out successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LogoutDto"];
-                };
-            };
-        };
-    };
-    MemberAuth_getMe: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Current Member information */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UserMeResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
         };
@@ -1615,6 +3219,2427 @@ export interface operations {
             };
         };
     };
+    LkMembers_getMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Current member details */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CrmMemberFullDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmCatalog_listProducts: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                sortBy?: string;
+                sortOrder?: "asc" | "desc";
+                categoryId?: string;
+                isActive?: boolean;
+                isAvailable?: boolean;
+                /** @description Поиск по name, sku, strain */
+                search?: string;
+                /** @description Минимальная цена */
+                minPrice?: number;
+                /** @description Максимальная цена */
+                maxPrice?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated list of products */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_ProductListDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmCatalog_createProduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateProductDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductDetailDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmCatalog_getProduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductDetailDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmCatalog_deleteProduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmCatalog_updateProduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProductDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductDetailDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmCatalog_listCategories: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductCategoryDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmCatalog_createCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateProductCategoryDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductCategoryDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmCatalog_getCategoriesTree: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductCategoryTreeDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmCatalog_deleteCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmCatalog_updateCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProductCategoryDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductCategoryDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmCatalog_listMeasurementUnits: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeasurementUnitDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmCatalog_createMeasurementUnit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateMeasurementUnitDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeasurementUnitDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmCatalog_deleteMeasurementUnit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmCatalog_updateMeasurementUnit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMeasurementUnitDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeasurementUnitDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    LkCatalog_getProducts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductListDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    LkCatalog_getProduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductDetailDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    LkCatalog_getCategories: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductCategoryDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmQrCodes_scanQrCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScanQrCodeDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QrCodeScanResultDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmQrCodes_getByMemberId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                memberId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QrCodeDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmQrCodes_revokeQrCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                memberId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmQrCodes_generateQrCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegenerateQrCodeDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QrCodeDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    LkQrCodes_getMyQrCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QrCodeWithPayloadDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    LkQrCodes_regenerateMyQrCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QrCodeWithPayloadDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmPresence_qrScan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QrCheckInDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckInResultDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmPresence_manualCheckIn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ManualCheckInDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresenceSessionDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmPresence_manualCheckOut: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ManualCheckOutDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresenceSessionDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmPresence_listSessions: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                sortBy?: string;
+                sortOrder?: "asc" | "desc";
+                memberId?: string;
+                /** @description true = только присутствующие, false = только ушедшие */
+                isActive?: boolean;
+                entryMethod?: "qr" | "manual_employee";
+                startDate?: string;
+                endDate?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated list of presence sessions */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_PresenceSessionDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmPresence_getSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresenceSessionDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmPresence_getCurrentlyPresent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresenceSessionDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmPresence_getStats: {
+        parameters: {
+            query?: {
+                startDate?: string;
+                endDate?: string;
+                memberId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresenceStatsDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    LkPresence_getMyPresenceStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresenceSessionDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    LkPresence_getMyPresenceHistory: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                sortBy?: string;
+                sortOrder?: "asc" | "desc";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated list of presence history */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_PresenceSessionDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmOrders_listOrders: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                sortBy?: string;
+                sortOrder?: "asc" | "desc";
+                status?: "pending" | "confirmed" | "preparing" | "ready" | "completed" | "cancelled";
+                paymentStatus?: "pending" | "paid" | "refunded";
+                memberId?: string;
+                /** @description Поиск по номеру заказа */
+                search?: string;
+                /** @description Начало периода */
+                startDate?: string;
+                /** @description Конец периода */
+                endDate?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated list of orders */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_OrderListDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmOrders_getOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetailDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmOrders_updateStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateOrderStatusDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetailDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmOrders_updatePaymentStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePaymentStatusDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetailDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    LkOrders_listMyOrders: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                sortBy?: string;
+                sortOrder?: "asc" | "desc";
+                status?: "pending" | "confirmed" | "preparing" | "ready" | "completed" | "cancelled";
+                paymentStatus?: "pending" | "paid" | "refunded";
+                memberId?: string;
+                /** @description Поиск по номеру заказа */
+                search?: string;
+                /** @description Начало периода */
+                startDate?: string;
+                /** @description Конец периода */
+                endDate?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated list of member orders */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_OrderListDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    LkOrders_createOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateOrderDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetailDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    LkOrders_getMyOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetailDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    LkOrders_cancelMyOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CancelOrderDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetailDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmFinance_listTransactions: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                sortBy?: string;
+                sortOrder?: "asc" | "desc";
+                type?: "order_payment" | "refund" | "adjustment" | "manual";
+                direction?: "income" | "expense";
+                paymentMethod?: "cash" | "card" | "crypto";
+                memberId?: string;
+                orderId?: string;
+                /** @description Поиск по описанию/примечанию */
+                search?: string;
+                startDate?: string;
+                endDate?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated list of transactions */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_FinancialTransactionListDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmFinance_createTransaction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateFinancialTransactionDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FinancialTransactionDetailDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmFinance_getTransaction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FinancialTransactionDetailDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmFinance_getSummary: {
+        parameters: {
+            query: {
+                /** @description Начало периода (YYYY-MM-DD) */
+                startDate: string;
+                /** @description Конец периода (YYYY-MM-DD) */
+                endDate: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionSummaryDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmFinance_getByType: {
+        parameters: {
+            query: {
+                /** @description Начало периода (YYYY-MM-DD) */
+                startDate: string;
+                /** @description Конец периода (YYYY-MM-DD) */
+                endDate: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionGroupedByTypeDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmFinance_getByDate: {
+        parameters: {
+            query: {
+                /** @description Начало периода (YYYY-MM-DD) */
+                startDate: string;
+                /** @description Конец периода (YYYY-MM-DD) */
+                endDate: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionGroupedByDateDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    Test_getEmployees: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                sortBy?: string;
+                sortOrder?: "asc" | "desc";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated list of employees */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_EmployeeListItemDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    Test_getMembers: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                sortBy?: string;
+                sortOrder?: "asc" | "desc";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated list of members */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_CrmMemberDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
     App_getHello: {
         parameters: {
             query?: never;
@@ -1629,6 +5654,761 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    EmployeeAuth_login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmployeeLoginDto"];
+            };
+        };
+        responses: {
+            /** @description Employee logged in successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeAuthResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmployeeAuth_refresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshTokenDto"];
+            };
+        };
+        responses: {
+            /** @description Token refreshed successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeRefreshTokenResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmployeeAuth_logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Logged out successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeLogoutResponseDto"];
+                };
+            };
+        };
+    };
+    EmployeeAuth_getMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Current employee information */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeMeResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmployeeRegistration_register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterEmployeeDto"];
+            };
+        };
+        responses: {
+            /** @description Employee registered successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeAuthResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberAuth_login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MemberLoginDto"];
+            };
+        };
+        responses: {
+            /** @description Member logged in successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberAuthResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberAuth_refresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshTokenDto"];
+            };
+        };
+        responses: {
+            /** @description Token refreshed successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberRefreshTokenResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberAuth_logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Logged out successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberLogoutResponseDto"];
+                };
+            };
+        };
+    };
+    MemberAuth_getMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Current Member information */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberMeResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberAuth_requestPasswordReset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestPasswordResetDto"];
+            };
+        };
+        responses: {
+            /** @description Password reset email sent (if email exists) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PasswordResetResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberAuth_confirmPasswordReset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetPasswordDto"];
+            };
+        };
+        responses: {
+            /** @description Password reset successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PasswordResetResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberRegistration_checkUserExists: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckUserExistsDto"];
+            };
+        };
+        responses: {
+            /** @description User existence check result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckUserExistsResponseDto"];
+                };
+            };
+        };
+    };
+    MemberRegistration_register: {
+        parameters: {
+            query?: {
+                force?: "true" | "false";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterMemberDto"];
+            };
+        };
+        responses: {
+            /** @description Member registered successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegisterMemberResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberRegistration_uploadFiles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadMemberFilesDto"];
+            };
+        };
+        responses: {
+            /** @description Member files were queued for asynchronous processing */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadMemberFilesResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberRegistration_confirmEmail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MemberConfirmEmailDto"];
+            };
+        };
+        responses: {
+            /** @description Email confirmed successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberConfirmEmailResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmailVerification_verifyEmailGet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Email verified successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerifyEmailResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmailVerification_verifyEmailPost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyEmailDto"];
+            };
+        };
+        responses: {
+            /** @description Email verified successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerifyEmailResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmailVerification_requestPasswordReset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestPasswordResetDto"];
+            };
+        };
+        responses: {
+            /** @description Password reset email sent (if email exists) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PasswordResetResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmailVerification_resetPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetPasswordDto"];
+            };
+        };
+        responses: {
+            /** @description Password reset successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PasswordResetResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
             };
         };
     };

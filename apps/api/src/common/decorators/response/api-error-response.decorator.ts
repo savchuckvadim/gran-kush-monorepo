@@ -51,17 +51,17 @@ const ERROR_DECORATORS: Record<number, SwaggerErrorDecoratorFactory> = {
  */
 export const ApiErrorResponse = (statusCodes: number[]) => {
     const decorators = statusCodes.flatMap((code): SwaggerErrorDecorator[] => {
-            const decoratorFn = ERROR_DECORATORS[code];
-            if (!decoratorFn) {
-                return [];
-            }
-            return [
-                decoratorFn({
-                    description: ERROR_DESCRIPTIONS[code] || `Error ${code}`,
-                    type: ApiErrorResponseDto,
-                }),
-            ];
-        });
+        const decoratorFn = ERROR_DECORATORS[code];
+        if (!decoratorFn) {
+            return [];
+        }
+        return [
+            decoratorFn({
+                description: ERROR_DESCRIPTIONS[code] || `Error ${code}`,
+                type: ApiErrorResponseDto,
+            }),
+        ];
+    });
 
     return applyDecorators(...decorators);
 };

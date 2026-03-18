@@ -11,7 +11,15 @@ export abstract class UserRepository {
         data: Partial<{
             passwordHash: string;
             isActive: boolean;
+            emailConfirmed: boolean;
+            emailVerificationToken: string | null;
+            emailVerificationExpiresAt: Date | null;
+            resetPasswordToken: string | null;
+            resetPasswordExpiresAt: Date | null;
         }>
     ): Promise<User>;
+
+    abstract findByEmailVerificationToken(token: string): Promise<User | null>;
+    abstract findByResetPasswordToken(token: string): Promise<User | null>;
     abstract delete(id: string): Promise<void>;
 }

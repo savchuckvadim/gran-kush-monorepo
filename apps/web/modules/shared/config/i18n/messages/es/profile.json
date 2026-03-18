@@ -5,6 +5,9 @@
         "profile": "Perfil",
         "settings": "Configuración",
         "logout": "Cerrar sesión",
+        "loading": "Cargando...",
+        "phone": "Teléfono",
+        "inactiveMember": "Miembro Inactivo",
         "profileInformation": "Información del Perfil",
         "name": "Nombre",
         "email": "Correo electrónico",
@@ -12,6 +15,55 @@
         "activeMember": "Miembro Activo",
         "quickActions": "Acciones Rápidas",
         "completeRegistration": "Completar Registro",
-        "contactSupport": "Contactar Soporte"
+        "contactSupport": "Contactar Soporte",
+        "nav": {
+            "dashboard": "Panel",
+            "qrCode": "Código QR",
+            "presence": "Historial de Visitas",
+            "settings": "Configuración",
+            "logout": "Cerrar sesión",
+            "loggingOut": "Cerrando sesión..."
+        },
+        "dashboard": {
+            "qrCode": {
+                "title": "Mi Código QR",
+                "viewFull": "Ver Completo"
+            },
+            "viewHistory": "Historial de Visitas",
+            "settings": "Configuración"
+        },
+        "qrCode": {
+            "title": "Mi Código QR",
+            "subtitle": "Muestra este código QR al administrador al entrar al club",
+            "yourQrCode": "Tu Código QR",
+            "loading": "Cargando código QR...",
+            "error": "Error",
+            "notFound": "Código QR no encontrado",
+            "instruction": "Muestra este código QR al administrador al entrar al club",
+            "instructionDetail": "El código QR se utiliza para la entrada rápida al club. Muéstralo al administrador en el mostrador de registro.",
+            "regenerate": "Regenerar Código QR",
+            "regenerating": "Regenerando...",
+            "download": "Descargar"
+        },
+        "presence": {
+            "title": "Historial de Visitas",
+            "subtitle": "Ver tu historial de visitas al club",
+            "loading": "Cargando...",
+            "error": "Error",
+            "noHistory": "No hay historial de visitas",
+            "status": {
+                "present": "En el Club",
+                "notPresent": "No en el Club",
+                "enteredAt": "Entró a las"
+            },
+            "columns": {
+                "date": "Fecha",
+                "entryTime": "Hora de Entrada",
+                "exitTime": "Hora de Salida",
+                "duration": "Duración",
+                "status": "Estado"
+            },
+            "pagination": "Página {page} de {totalPages} (total {total} registros)"
+        }
     }
 }

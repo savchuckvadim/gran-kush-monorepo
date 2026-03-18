@@ -10,6 +10,7 @@
                 "products": "Products",
                 "orders": "Orders",
                 "attendance": "Attendance",
+                "finance": "Finance",
                 "employees": "Employees"
             }
         },
@@ -99,21 +100,267 @@
                     "documentSecond": "Document back side",
                     "signature": "Signature image"
                 }
+            },
+            "qrCode": {
+                "title": "QR Code",
+                "loading": "Loading QR code...",
+                "error": "Error",
+                "notFound": "QR code not found. Generate a new QR code for the member.",
+                "generate": "Generate QR Code",
+                "generating": "Generating...",
+                "regenerate": "Regenerate",
+                "regenerating": "Regenerating...",
+                "status": "Status",
+                "active": "Active",
+                "expired": "Expired",
+                "expiresAt": "Expires at",
+                "createdAt": "Created at",
+                "note": "QR code is used for member entry to the club. When regenerated, the old QR code will stop working."
+            }
+        },
+        "attendance": {
+            "title": "Attendance",
+            "subtitle": "Manage member presence: QR scanning, manual check-in/out, visit history",
+            "scanner": {
+                "scanButton": "Scan QR",
+                "title": "Scan QR Code",
+                "description": "Scan a member's QR code or enter the code manually",
+                "manualInput": "Enter code manually",
+                "manualPlaceholder": "Paste encrypted QR code...",
+                "submitScan": "Verify code",
+                "scanning": "Verifying...",
+                "scanError": "Failed to recognize QR code. Please try again.",
+                "entryConfirmed": "Entry confirmed",
+                "exitConfirmed": "Exit confirmed",
+                "memberName": "Member",
+                "enteredAt": "Entry time",
+                "exitedAt": "Exit time",
+                "duration": "Duration",
+                "minutes": "min",
+                "scanAnother": "Scan another",
+                "unknownMember": "Unknown member"
+            },
+            "present": {
+                "title": "Currently in club",
+                "loading": "Loading...",
+                "error": "Loading error",
+                "empty": "No one is currently in the club",
+                "since": "since",
+                "min": "min",
+                "checkOut": "Check out",
+                "unknownMember": "Unknown member"
+            },
+            "sessions": {
+                "title": "Visit history",
+                "loading": "Loading...",
+                "error": "Loading error",
+                "empty": "No visit records",
+                "colMember": "Member",
+                "colDate": "Date",
+                "colEntry": "Entry",
+                "colExit": "Exit",
+                "colDuration": "Duration",
+                "colMethod": "Method",
+                "colStatus": "Status",
+                "statusActive": "In club",
+                "statusClosed": "Completed",
+                "min": "min",
+                "page": "Page"
+            },
+            "stats": {
+                "title": "Statistics",
+                "loading": "Loading...",
+                "totalVisits": "Total visits",
+                "uniqueMembers": "Unique members",
+                "avgDuration": "Avg. duration",
+                "currentlyPresent": "Currently present",
+                "min": "min"
+            }
+        },
+        "products": {
+            "title": "Product catalog",
+            "subtitle": "Manage products, categories and measurement units",
+            "list": {
+                "loading": "Loading...",
+                "error": "Failed to load products",
+                "empty": "No products yet. Add your first product.",
+                "colProduct": "Product",
+                "colCategory": "Category",
+                "colPrice": "Price",
+                "colStock": "Stock",
+                "colStatus": "Status",
+                "colActions": "Actions",
+                "active": "Active",
+                "inactive": "Inactive",
+                "page": "Page",
+                "confirmDelete": "Are you sure you want to delete this product?"
+            },
+            "form": {
+                "createButton": "Add product",
+                "createTitle": "New product",
+                "name": "Name",
+                "description": "Description",
+                "sku": "SKU",
+                "category": "Category",
+                "selectCategory": "Select category",
+                "measurementUnit": "Measurement unit",
+                "selectUnit": "Select unit",
+                "price": "Price (€)",
+                "initialQuantity": "Initial quantity",
+                "thc": "THC (%)",
+                "cbd": "CBD (%)",
+                "strain": "Strain",
+                "creating": "Creating...",
+                "create": "Create product",
+                "createError": "Failed to create product"
+            },
+            "detail": {
+                "loading": "Loading...",
+                "error": "Product not found",
+                "editTitle": "Edit product",
+                "edit": "Edit",
+                "cancel": "Cancel",
+                "save": "Save",
+                "saveError": "Failed to save",
+                "name": "Name",
+                "description": "Description",
+                "sku": "SKU",
+                "category": "Category",
+                "selectCategory": "Select category",
+                "measurementUnit": "Measurement unit",
+                "selectUnit": "Select unit",
+                "price": "Price",
+                "stock": "Stock",
+                "currentQuantity": "Current stock",
+                "status": "Status",
+                "active": "Active",
+                "inactive": "Inactive",
+                "isActive": "Active",
+                "isAvailable": "Available for order",
+                "thc": "THC",
+                "cbd": "CBD",
+                "strain": "Strain"
+            }
+        },
+        "orders": {
+            "title": "Orders",
+            "subtitle": "Manage member orders: statuses, payments, details",
+            "list": {
+                "loading": "Loading...",
+                "error": "Loading error",
+                "empty": "No orders",
+                "allStatuses": "All",
+                "colOrder": "Order",
+                "colMember": "Member",
+                "colStatus": "Status",
+                "colPayment": "Payment",
+                "colTotal": "Total",
+                "colDate": "Date",
+                "colActions": "Actions",
+                "page": "Page",
+                "status": {
+                    "pending": "Pending",
+                    "confirmed": "Confirmed",
+                    "preparing": "Preparing",
+                    "ready": "Ready",
+                    "completed": "Completed",
+                    "cancelled": "Cancelled"
+                },
+                "payment": {
+                    "pending": "Unpaid",
+                    "paid": "Paid",
+                    "refunded": "Refunded"
+                }
+            },
+            "detail": {
+                "loading": "Loading...",
+                "error": "Order not found",
+                "orderTitle": "Order",
+                "info": "Information",
+                "member": "Member",
+                "total": "Total",
+                "subtotal": "Subtotal",
+                "discount": "Discount",
+                "notes": "Notes",
+                "adminNotes": "Admin notes",
+                "orderStatus": "Order status",
+                "paymentStatus": "Payment status",
+                "paymentMethod": "Payment method",
+                "items": "Order items",
+                "noItems": "No items",
+                "colProduct": "Product",
+                "colQty": "Qty",
+                "colPrice": "Price",
+                "colItemTotal": "Total",
+                "status": {
+                    "pending": "Pending",
+                    "confirmed": "Confirmed",
+                    "preparing": "Preparing",
+                    "ready": "Ready",
+                    "completed": "Completed",
+                    "cancelled": "Cancelled"
+                },
+                "payment": {
+                    "pending": "Unpaid",
+                    "paid": "Paid",
+                    "refunded": "Refunded"
+                },
+                "method": {
+                    "cash": "Cash",
+                    "card": "Card",
+                    "crypto": "Crypto"
+                }
+            }
+        },
+        "finance": {
+            "title": "Finance",
+            "subtitle": "Financial reports, transactions and analytics",
+            "summary": {
+                "loading": "Loading...",
+                "totalIncome": "Total income",
+                "totalExpense": "Total expense",
+                "netBalance": "Net balance"
+            },
+            "transactions": {
+                "title": "Transactions",
+                "loading": "Loading...",
+                "error": "Loading error",
+                "empty": "No transactions",
+                "all": "All",
+                "income": "Income",
+                "expense": "Expense",
+                "colDate": "Date",
+                "colType": "Type",
+                "colDirection": "Direction",
+                "colAmount": "Amount",
+                "colMethod": "Method",
+                "colDescription": "Description",
+                "page": "Page",
+                "type": {
+                    "order_payment": "Order payment",
+                    "refund": "Refund",
+                    "adjustment": "Adjustment",
+                    "manual": "Manual"
+                },
+                "method": {
+                    "cash": "Cash",
+                    "card": "Card",
+                    "crypto": "Crypto"
+                }
+            },
+            "reports": {
+                "loading": "Loading...",
+                "byTypeTitle": "By type",
+                "transactions": "transactions",
+                "type": {
+                    "order_payment": "Order payment",
+                    "refund": "Refund",
+                    "adjustment": "Adjustment",
+                    "manual": "Manual"
+                }
             }
         },
         "sections": {
-            "products": {
-                "title": "Products",
-                "description": "Placeholder section for product catalog and stock controls."
-            },
-            "orders": {
-                "title": "Orders",
-                "description": "Placeholder section for order list, statuses, and order details."
-            },
-            "attendance": {
-                "title": "Attendance",
-                "description": "Placeholder section for QR entry/exit scanner and time-in-club analytics."
-            },
             "employees": {
                 "title": "Employees",
                 "description": "Placeholder section for employee list, invitation flow, and admin role controls."

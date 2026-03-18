@@ -4,11 +4,8 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { UsersController } from "@users/api/controllers/users.controller";
 import { CreateUserDto } from "@users/api/dto/create-user.dto";
 import { UpdateUserDto } from "@users/api/dto/update-user.dto";
-import { UserQueryDto } from "@users/api/dto/user-query.dto";
 import { UserResponseDto } from "@users/api/dto/user-response.dto";
 import { UsersService } from "@users/application/services/users.service";
-
-import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 
 describe("UsersController", () => {
     let controller: UsersController;
@@ -16,24 +13,13 @@ describe("UsersController", () => {
     const mockUserResponse: UserResponseDto = {
         id: "507f1f77bcf86cd799439011",
         email: "test@example.com",
-        name: "Test User",
-        phone: "+1234567890",
         isActive: true,
         createdAt: new Date("2024-01-01"),
         updatedAt: new Date("2024-01-01"),
     };
 
-    const mockPaginatedResult: PaginatedResult<UserResponseDto> = {
-        items: [mockUserResponse],
-        total: 1,
-        page: 1,
-        limit: 10,
-        totalPages: 1,
-    };
-
     const mockUsersService = {
         create: jest.fn(),
-        findAll: jest.fn(),
         findById: jest.fn(),
         update: jest.fn(),
         delete: jest.fn(),
@@ -59,8 +45,6 @@ describe("UsersController", () => {
         const createDto: CreateUserDto = {
             email: "test@example.com",
             password: "password123",
-            name: "Test User",
-            phone: "+1234567890",
         };
 
         it("should create a user", async () => {
@@ -79,37 +63,6 @@ describe("UsersController", () => {
 
             await expect(controller.create(createDto)).rejects.toThrow(ConflictException);
             expect(mockUsersService.create).toHaveBeenCalledWith(createDto);
-        });
-    });
-
-    describe("findAll", () => {
-        const queryDto: UserQueryDto = {
-            page: 1,
-            limit: 10,
-        };
-
-        it("should return paginated users", async () => {
-            mockUsersService.findAll.mockResolvedValue(mockPaginatedResult);
-
-            const result = await controller.findAll(queryDto);
-
-            expect(mockUsersService.findAll).toHaveBeenCalledWith(queryDto);
-            expect(result).toEqual(mockPaginatedResult);
-            expect(result.items).toHaveLength(1);
-        });
-
-        it("should pass query parameters to service", async () => {
-            const searchQuery: UserQueryDto = {
-                ...queryDto,
-                search: "test",
-                isActive: true,
-            };
-
-            mockUsersService.findAll.mockResolvedValue(mockPaginatedResult);
-
-            await controller.findAll(searchQuery);
-
-            expect(mockUsersService.findAll).toHaveBeenCalledWith(searchQuery);
         });
     });
 
@@ -138,7 +91,7 @@ describe("UsersController", () => {
     describe("update", () => {
         const userId = "507f1f77bcf86cd799439011";
         const updateDto: UpdateUserDto = {
-            name: "Updated Name",
+            password: "newPassword123",
             isActive: false,
         };
 

@@ -3,7 +3,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
 import { ISendMailOptions, MailerService } from "@nestjs-modules/mailer";
-import { Member, User } from "@prisma/client";
+import { Employee, Member, User } from "@prisma/client";
 import { render } from "@react-email/components";
 import { Queue } from "bullmq";
 
@@ -28,8 +28,10 @@ export class MailService {
     private readonly logger = new Logger(MailService.name);
     private readonly smtpFrom: string;
     private readonly smtpFromName: string;
-    private readonly authCookieSpaDomain: string;
-    private readonly siteUrl: string;
+    // private readonly authCookieSpaDomain: string;
+    // private readonly siteUrl: string;
+    private readonly crmFrontendUrl: string;
+    private readonly siteFrontendUrl: string;
 
     constructor(
         private readonly mailerService: MailerService,
@@ -39,19 +41,19 @@ export class MailService {
         this.smtpFrom = this.configService.get<string>("SMTP_FROM") || DEFAULT_EMAIL_FROM;
         this.smtpFromName =
             this.configService.get<string>("SMTP_FROM_NAME") || DEFAULT_EMAIL_FROM_NAME;
-        this.authCookieSpaDomain = this.configService.get<string>("AUTH_COOKIE_SPA_DOMAIN") || "";
-        this.siteUrl = this.configService.get<string>("SITE_URL") || "";
+        // this.authCookieSpaDomain = this.configService.get<string>("AUTH_COOKIE_SPA_DOMAIN") || "";
+        // this.siteUrl = this.configService.get<string>("SITE_URL") || "";
+        this.crmFrontendUrl = this.configService.get<string>("CRM_FRONTEND_URL") || "";
+        this.siteFrontendUrl = this.configService.get<string>("SITE_FRONTEND_URL") || "";
     }
 
-    public async sendEmailVerification(
+    public async sendMamberEmailVerification(
         member: Member,
         user: User,
         token: string,
         language: SupportedLanguage = DEFAULT_LANGUAGE
     ) {
-        const baseUrl = this.authCookieSpaDomain
-            ? `https://${this.authCookieSpaDomain}`
-            : this.siteUrl || "";
+        const baseUrl = this.siteFrontendUrl;
 
         const html = await render(
             EmailVerificationTemplate({
@@ -85,15 +87,55 @@ export class MailService {
         return true;
     }
 
+    public async sendEmployeeEmailVerification(
+        employee: Employee,
+        user: User,
+        token: string,
+        language: SupportedLanguage = DEFAULT_LANGUAGE
+    ) {
+        const baseUrl = this.crmFrontendUrl;
+
+        const html = await render(
+            EmailVerificationTemplate({
+                name: employee.name,
+                surname: employee.surname,
+                token,
+                language: language,
+                baseUrl,
+            })
+        );
+
+        // Add email to queue for async processing
+        await this.queue.add(
+            MAIL_QUEUE_JOB_NAMES.SEND_EMAIL,
+            {
+                to: [user.email ?? DEFAULT_EMAIL_FROM],
+                subject: EMAIL_SUBJECTS.VERIFICATION[language],
+                html,
+                context: {
+                    name: employee.name,
+                },
+                emailType: EmailType.VERIFICATION,
+            },
+            {
+                removeOnComplete: JOB_OPTIONS.REMOVE_ON_COMPLETE,
+                removeOnFail: JOB_OPTIONS.REMOVE_ON_FAIL,
+            }
+        );
+
+        this.logger.log(`📬 Employee email verification queued for ${user.email}`);
+        return true;
+    }
+
     public async sendPasswordReset(
         user: User,
         name: string,
         surname: string,
         token: string,
-        language: SupportedLanguage = DEFAULT_LANGUAGE
+        language: SupportedLanguage = DEFAULT_LANGUAGE,
+        type: "crm" | "site" = "site"
     ) {
-        const baseUrl =
-            this.siteUrl || (this.authCookieSpaDomain ? `https://${this.authCookieSpaDomain}` : "");
+        const baseUrl = type === "crm" ? this.crmFrontendUrl : this.siteFrontendUrl;
 
         const html = await render(
             ResetPasswordTemplate({

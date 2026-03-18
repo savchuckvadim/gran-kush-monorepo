@@ -1,12 +1,11 @@
 import { InjectQueue } from "@nestjs/bullmq";
 import { BadRequestException, Injectable } from "@nestjs/common";
 
-import { Queue } from "bullmq";
-
 import {
     MEMBER_FILES_QUEUE_JOB_NAMES,
     MEMBER_FILES_QUEUE_NAME,
 } from "@members/events/member-files-events.constants";
+import { Queue } from "bullmq";
 
 export interface QueueMemberFilesPayload {
     memberId: string;
@@ -18,15 +17,24 @@ export interface QueueMemberFilesPayload {
 
 @Injectable()
 export class MemberFilesService {
-    constructor(@InjectQueue(MEMBER_FILES_QUEUE_NAME) private readonly queue: Queue) {}
+    constructor(
+        @InjectQueue(MEMBER_FILES_QUEUE_NAME)
+        private readonly queue: Queue
+    ) {}
 
-    async queueUpload(payload: QueueMemberFilesPayload): Promise<{ queued: boolean; jobId: string }> {
+    async queueUpload(
+        payload: QueueMemberFilesPayload
+    ): Promise<{ queued: boolean; jobId: string }> {
         if (!payload.documentFirst && !payload.documentSecond && !payload.signature) {
-            throw new BadRequestException("At least one file (document or signature) must be provided.");
+            throw new BadRequestException(
+                "At least one file (document or signature) must be provided."
+            );
         }
 
         if ((payload.documentFirst || payload.documentSecond) && !payload.documentType) {
-            throw new BadRequestException("documentType is required when identity documents are provided.");
+            throw new BadRequestException(
+                "documentType is required when identity documents are provided."
+            );
         }
 
         const job = await this.queue.add(MEMBER_FILES_QUEUE_JOB_NAMES.SAVE_MEMBER_FILES, payload, {
