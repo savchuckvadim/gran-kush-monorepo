@@ -1,5 +1,5 @@
 import type {
-    SchemaPaginatedResultPresenceSessionDto,
+    SchemaPaginatedResponsePresenceSessionDto,
     SchemaPresenceSessionDto,
 } from "@workspace/api-client/core";
 
@@ -18,7 +18,7 @@ export interface PresenceHistoryParams {
 /**
  * Get current member's presence status
  */
-export async function getMyPresenceStatus(): Promise<PresenceStatusResponse> {
+export async function getMyPresenceStatus(): Promise<SchemaPresenceSessionDto> {
     const response = await $api.GET("/lk/presence/status");
 
     if (!response.response.ok) {
@@ -26,7 +26,7 @@ export async function getMyPresenceStatus(): Promise<PresenceStatusResponse> {
         throw new Error(error || "Failed to get presence status");
     }
 
-    return response.data as PresenceStatusResponse;
+    return response.data as SchemaPresenceSessionDto;
 }
 
 /**
@@ -34,12 +34,12 @@ export async function getMyPresenceStatus(): Promise<PresenceStatusResponse> {
  */
 export async function getMyPresenceHistory(
     params: PresenceHistoryParams = {}
-): Promise<SchemaPaginatedResultPresenceSessionDto> {
+): Promise<SchemaPaginatedResponsePresenceSessionDto> {
     const response = await $api.GET("/lk/presence/history", {
         params: {
             query: {
-                page: params.page?.toString() ?? "1",
-                limit: params.limit?.toString() ?? "10",
+                page: params.page ?? 1 as number,
+                limit: params.limit ?? 10 as number ,
             },
         },
     });
@@ -49,5 +49,5 @@ export async function getMyPresenceHistory(
         throw new Error(error || "Failed to get presence history");
     }
 
-    return response.data as SchemaPaginatedResultPresenceSessionDto;
+    return response.data as SchemaPaginatedResponsePresenceSessionDto;
 }
