@@ -74,7 +74,6 @@ export async function getCrmMemberById(memberId: string): Promise<CrmMemberDetai
             path: { id: memberId },
         },
     });
-    
     if (!response.response.ok) {
         if (response.response.status === 404) {
             return null;

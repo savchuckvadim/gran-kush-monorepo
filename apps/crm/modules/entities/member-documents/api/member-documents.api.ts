@@ -25,13 +25,14 @@ export async function getIdentityDocumentPreview(memberId: string, documentId: s
                 documentId: documentId,
             },
         },
+        parseAs: 'blob',
     });
     
     if (!response.response.ok) {
         throw new Error(`Failed to fetch identity document preview: ${response.response.status}`);
     }
     
-    return await response.response.blob();
+    return response.data as Blob;
 }
 
 export async function getSignaturePreview(memberId: string): Promise<Blob> {
@@ -41,13 +42,14 @@ export async function getSignaturePreview(memberId: string): Promise<Blob> {
                 id: memberId,
             },
         },
+        parseAs: 'blob',
     });
     
     if (!response.response.ok) {
         throw new Error(`Failed to fetch signature preview: ${response.response.status}`);
     }
     
-    return await response.response.blob();
+    return response.data as Blob;
 }
 
 // Legacy functions for backward compatibility (return URL strings)

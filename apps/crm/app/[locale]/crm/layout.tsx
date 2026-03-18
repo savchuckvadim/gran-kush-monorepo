@@ -1,4 +1,4 @@
-import { AuthGuard } from "@/modules/features/auth";
+import { AuthProvider } from "@/modules/processes/auth";
 import { CrmShell } from "@/modules/widgets/crm-shell";
 
 export default async function CrmLayout({
@@ -11,8 +11,8 @@ export default async function CrmLayout({
     const { locale } = await params;
 
     return (
-        <AuthGuard locale={locale}>
+        <AuthProvider>
             <CrmShell locale={locale}>{children}</CrmShell>
-        </AuthGuard>
+        </AuthProvider>
     );
 }

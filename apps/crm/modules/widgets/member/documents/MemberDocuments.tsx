@@ -41,6 +41,7 @@ export function MemberDocuments({
                 <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {member.identityDocuments.map((doc) => (
                         <MemberDocumentCard
+                            key={doc.id}
                             memberId={member.id}
                             document={doc}
                             locale={locale}

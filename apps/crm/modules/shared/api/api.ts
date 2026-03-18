@@ -1,5 +1,6 @@
 import {
   ApiAuthType,
+  ApiTokensStorage,
   configureApiClient,
 } from "@workspace/api-client/core";
 
@@ -10,3 +11,5 @@ const client = configureApiClient(API_BASE_URL, API_AUTH_TYPE);
 
 
 export const $api: ReturnType<typeof configureApiClient> = client;
+
+export const apiTokensStorage = new ApiTokensStorage(API_AUTH_TYPE);
