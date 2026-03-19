@@ -41,7 +41,7 @@
             "notFound": "QR code not found",
             "instruction": "Show this QR code to the administrator when entering the club",
             "instructionDetail": "The QR code is used for quick entry to the club. Show it to the administrator at the registration desk.",
-            "regenerate": "Regenerate QR Code",
+            "regenerate": "Regenerate",
             "regenerating": "Regenerating...",
             "download": "Download"
         },

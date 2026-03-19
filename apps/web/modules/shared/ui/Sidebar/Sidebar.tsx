@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 
-import { Cannabis, Cat, ChevronRight, Home } from 'lucide-react';
+import { Cat, ChevronRight } from 'lucide-react';
 
 import { cn } from '@workspace/ui/lib/utils';
 
@@ -39,7 +39,7 @@ export function Sidebar({ title, items }: { title: string, items: ISidebarItem[]
                 className={cn(
                     'flex flex-col bg-card transition-all duration-300 ease-in-out',
                     // fixed на мобильных, relative на md+
-                    'fixed top-0 left-0 z-40 h-screen',
+                    'fixed top-0 left-0 z-40 h-dvh',
                     'md:relative md:z-auto md:h-auto md:min-h-screen',
                     // Мобильные: выезжает/прячется по isOpen
                     isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
@@ -60,7 +60,7 @@ export function Sidebar({ title, items }: { title: string, items: ISidebarItem[]
                 </div>
 
                 {/* Навигация */}
-                <nav className="flex-1 space-y-1 p-2 lg:p-4">
+                <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto p-2 lg:p-4">
                     {items.map((item) => (
                         <Link
                             key={item.id}
@@ -83,7 +83,7 @@ export function Sidebar({ title, items }: { title: string, items: ISidebarItem[]
                         </Link>
                     ))}
                 </nav>
-                <div className="mb-2 w-full px-2">
+                <div className="mb-2 w-full shrink-0 px-2">
                     <LogoutButton variant="outline" />
                 </div>
 

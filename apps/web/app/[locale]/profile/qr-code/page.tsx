@@ -49,7 +49,7 @@ export default function QrCodePage() {
                 <Card className="p-6">
                     <div className="mb-6 flex items-center justify-between">
                         <h2 className="text-lg font-semibold">{t("yourQrCode")}</h2>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
                             <RegenerateQrCodeButton size="sm" />
                             {qrCode?.encryptedCode && (
                                 <Button variant="outline" size="sm" onClick={handleDownload}>

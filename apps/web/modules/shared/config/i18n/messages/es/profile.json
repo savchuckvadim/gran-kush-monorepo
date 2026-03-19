@@ -41,7 +41,7 @@
             "notFound": "Código QR no encontrado",
             "instruction": "Muestra este código QR al administrador al entrar al club",
             "instructionDetail": "El código QR se utiliza para la entrada rápida al club. Muéstralo al administrador en el mostrador de registro.",
-            "regenerate": "Regenerar Código QR",
+            "regenerate": "Regenerar",
             "regenerating": "Regenerando...",
             "download": "Descargar"
         },

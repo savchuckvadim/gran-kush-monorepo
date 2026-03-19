@@ -1,10 +1,12 @@
 'use client';
 
+import { useTranslations } from "next-intl";
+
+import { LogOut } from "lucide-react";
+
 import { Button } from "@workspace/ui";
 
 import { useLogout } from "@/modules/entities/auth";
-import { useTranslations } from "next-intl";
-import { LogOut } from "lucide-react";
 
 export function LogoutButton({variant = "default"}: {variant?: "default" | "outline"}) {
     const { logout } = useLogout();

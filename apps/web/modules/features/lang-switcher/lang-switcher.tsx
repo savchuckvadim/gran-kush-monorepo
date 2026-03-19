@@ -36,13 +36,13 @@ export function LangSwitcher() {
         <Select value={locale} onValueChange={handleLocaleChange}>
             <SelectTrigger
                 size="sm"
-                className="gap-2 border-none shadow-none bg-transparent hover:bg-accent w-fit [&_[data-slot=select-value]]:hidden sm:[&_[data-slot=select-value]]:inline"
+                className="p-2 gap-2 border-none shadow-none bg-transparent hover:bg-accent w-fit [&_[data-slot=select-value]]:hidden sm:[&_[data-slot=select-value]]:inline"
                 aria-label="Change language"
             >
                 <Globe className="size-4 shrink-0" aria-hidden="true" />
                 <SelectValue />
             </SelectTrigger>
-            <SelectContent align="end" className="min-w-[120px]">
+            <SelectContent align="end" className="min-w-[120px] p-2">
                 {locales.map((loc) => (
                     <SelectItem key={loc} value={loc}>
                         {localeNames[loc]}
