@@ -24,6 +24,9 @@ export default async function CrmMemberDocumentsPage({
         notFound();
     }
 
+    const firstSideDocument = member.identityDocuments.find((doc) => doc.side === "first") ?? null;
+    const secondSideDocument = member.identityDocuments.find((doc) => doc.side === "second") ?? null;
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -47,43 +50,56 @@ export default async function CrmMemberDocumentsPage({
             <section className="rounded-lg border bg-background p-4">
                 <h2 className="mb-3 text-base font-medium">{t("documents")}</h2>
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                    {member.identityDocuments.map((doc) => (
-                        <div key={doc.id} className="overflow-hidden rounded-md border">
+                    {[
+                        { slot: "first" as const, doc: firstSideDocument },
+                        { slot: "second" as const, doc: secondSideDocument },
+                    ].map(({ slot, doc }) => (
+                        <div key={slot} className="overflow-hidden rounded-md border">
                             <div className="flex h-44 items-center justify-center bg-muted/30 p-2">
-                                <img
-                                    src={getIdentityDocumentPreviewUrl(memberId, doc.id)}
-                                    alt={`${doc.type}-${doc.side}`}
-                                    className="h-full w-full object-contain"
-                                />
+                                {doc ? (
+                                    <img
+                                        src={getIdentityDocumentPreviewUrl(memberId, doc.id)}
+                                        alt={`${doc.type}-${doc.side}`}
+                                        className="h-full w-full object-contain"
+                                    />
+                                ) : (
+                                    <div className="text-sm text-muted-foreground">{t("noIdentityDocuments")}</div>
+                                )}
                             </div>
                             <div className="space-y-1 p-3 text-sm">
                                 <div className="flex items-center justify-between gap-3">
                                     <span className="font-medium">
-                                        {doc.type} · {doc.side}
+                                        {doc ? `${doc.type} · ${doc.side}` : `${t("identityDocuments")} · ${slot}`}
                                     </span>
-                                    <span className="text-xs text-muted-foreground">{doc.id}</span>
+                                    <span className="text-xs text-muted-foreground">{doc?.id ?? "—"}</span>
                                 </div>
-                                <p className="text-xs text-muted-foreground">
-                                    {t("uploadedAt")}: {new Date(doc.createdAt).toLocaleString()}
-                                </p>
+                                {doc ? (
+                                    <p className="text-xs text-muted-foreground">
+                                        {t("uploadedAt")}: {new Date(doc.createdAt).toLocaleString()}
+                                    </p>
+                                ) : null}
                             </div>
                             <div className="flex flex-wrap gap-2 border-t p-3">
-                                <Button size="sm" variant="outline" asChild>
-                                    <Link href={`/${locale}/crm/members/${memberId}/documents/${doc.id}`}>
-                                        {t("openDocument")}
-                                    </Link>
-                                </Button>
-                                <Button size="sm" variant="outline" asChild>
-                                    <a href={getIdentityDocumentPreviewUrl(memberId, doc.id)} download>
-                                        {t("downloadDocument")}
-                                    </a>
-                                </Button>
+                                {doc ? (
+                                    <>
+                                        <Button size="sm" variant="outline" asChild>
+                                            <Link href={`/${locale}/crm/members/${memberId}/documents/${doc.id}`}>
+                                                {t("openDocument")}
+                                            </Link>
+                                        </Button>
+                                        <Button size="sm" variant="outline" asChild>
+                                            <a href={getIdentityDocumentPreviewUrl(memberId, doc.id)} download>
+                                                {t("downloadDocument")}
+                                            </a>
+                                        </Button>
+                                    </>
+                                ) : null}
                                 <MemberDocumentEditModal
                                     memberId={memberId}
                                     isSignature={false}
-                                    side={doc.side === "second" ? "second" : "first"}
-                                    initialDocumentType={doc.type}
-                                    currentPreviewUrl={getIdentityDocumentPreviewUrl(memberId, doc.id)}
+                                    side={slot}
+                                    initialDocumentType={doc?.type ?? "passport"}
+                                    currentPreviewUrl={doc ? getIdentityDocumentPreviewUrl(memberId, doc.id) : ""}
                                 />
                             </div>
                         </div>
@@ -126,8 +142,23 @@ export default async function CrmMemberDocumentsPage({
                             </div>
                         </div>
                     ) : (
-                        <div className="rounded-md border p-3 text-sm text-muted-foreground">
-                            {t("noSignature")}
+                        <div className="overflow-hidden rounded-md border">
+                            <div className="flex h-44 items-center justify-center bg-muted/30 p-2 text-sm text-muted-foreground">
+                                {t("noSignature")}
+                            </div>
+                            <div className="space-y-1 p-3 text-sm">
+                                <div className="flex items-center justify-between gap-3">
+                                    <span className="font-medium">{t("signatureTitle")}</span>
+                                    <span className="text-xs text-muted-foreground">—</span>
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap gap-2 border-t p-3">
+                                <MemberDocumentEditModal
+                                    memberId={memberId}
+                                    isSignature
+                                    currentPreviewUrl=""
+                                />
+                            </div>
                         </div>
                     )}
                 </div>

@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
 import { StorageType } from "@storage/domain/enums/storage-type.enum";
@@ -80,7 +80,7 @@ export class StorageService {
             return await fs.readFile(fullPath);
         } catch (error) {
             console.error(error);
-            throw new Error(`File not found: ${relativePath}`);
+            throw new NotFoundException(`File not found: ${relativePath}`);
         }
     }
 

@@ -20,12 +20,12 @@ export  function MemberStatuses({ member}: IMemberStatusesProps) {
             </span>
         ))}
         <span
-            className={`rounded-md px-2 py-1 text-xs ${member.emailConfirmed
+            className={`rounded-md px-2 py-1 text-xs ${member.isActive
                 ? "border border-green-500/30 bg-green-500/10 text-green-700"
                 : "border border-amber-500/30 bg-amber-500/10 text-amber-700"
                 }`}
         >
-            {member.emailConfirmed ? t("emailConfirmed") : t("emailNotConfirmed")}
+            {member.isActive ? t("emailConfirmed") : t("emailNotConfirmed")}
         </span>
     </div>
     )

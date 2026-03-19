@@ -4,13 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { Menu, X } from "lucide-react";
+import { Cat, Menu, Rabbit, X } from "lucide-react";
 
 import { Button, ThemeToggle } from "@workspace/ui";
 import { cn } from "@workspace/ui/lib/utils";
 
 import { LangSwitcher } from "@/modules/features";
-import { CrmSidebar } from "@/modules/processes";
+import { CrmSidebar, useAuth } from "@/modules/processes";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 import { useSidebar } from "@/modules/shared/ui/Sidebar";
@@ -25,14 +25,14 @@ export function CrmShell({ children }: CrmShellProps) {
     const pathname = usePathname();
     const { isOpen: isSidebarOpen, toggle: toggleSidebar } = useSidebar();
     const isCrm = pathname.includes(ROUTES.CRM_HOME);
-
+    const { currentUser } = useAuth()
     return (
         <div className="flex min-h-screen min-w-full flex-row">
             <CrmSidebar />
             <div className="flex flex-1 flex-col">
                 <header
                     className={cn(
-                        "sticky top-0 flex w-full justify-center border-b bg-background/80 backdrop-blur-sm",
+                        "sticky top-0 flex w-full justify-center  bg-background/80 backdrop-blur-sm",
                         isCrm ? "" : "z-50",
                     )}
                 >
@@ -50,19 +50,33 @@ export function CrmShell({ children }: CrmShellProps) {
                                     {isSidebarOpen ? <X className="size-6" /> : <Menu className="size-6" />}
                                 </Button>
                             )}
-                            <div className="flex items-center gap-2">
+                            {/* <div className="flex items-center gap-2">
                                 <span className="rounded bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
                                     {t("title")}
                                 </span>
                                 <span className="text-sm text-muted-foreground">{t("workspace")}</span>
-                            </div>
+                            </div> */}
                         </div>
 
                         <div className={cn("items-center gap-4 md:flex", isCrm ? "flex" : "hidden")}>
                             <LangSwitcher />
                             <ThemeToggle />
-                            <Button variant="outline" size="sm" asChild>
-                                <Link href={localizedLink(ROUTES.CRM_PROFILE)}>{t("profile")}</Link>
+                            <Button variant="outline" size="sm" asChild
+                                className="text-primary border-primary hover:bg-primary hover:text-background"
+                                style={{ cursor: 'pointer' }}>
+                                <Link href={localizedLink(ROUTES.CRM_PROFILE)}>
+                                    <div className="flex items-center gap-2">
+                                        <Rabbit className="size-4" />
+                                        <span>
+                                            {
+                                                currentUser
+                                                    ? currentUser.name
+                                                    : t("profile")
+
+                                            }
+                                        </span>
+                                    </div>
+                                </Link>
                             </Button>
                         </div>
                     </div>

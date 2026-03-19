@@ -11,7 +11,8 @@
                 "orders": "Pedidos",
                 "attendance": "Asistencia",
                 "finance": "Finanzas",
-                "employees": "Empleados"
+                "employees": "Empleados",
+                "settings": "Configuración"
             }
         },
         "members": {
@@ -26,6 +27,8 @@
                 "action": "Acción"
             },
             "openProfile": "Abrir perfil",
+            "viewModeTable": "Tabla",
+            "viewModeCards": "Tarjetas",
             "backToClients": "Volver a clientes",
             "backToProfile": "Volver al perfil",
             "profileTitle": "Perfil",
@@ -224,6 +227,8 @@
                 "thc": "THC (%)",
                 "cbd": "CBD (%)",
                 "strain": "Variedad",
+                "categoryRequiredHint": "Crea al menos una categoría en la configuración de CRM.",
+                "unitRequiredHint": "Agrega al menos una unidad de medida antes de crear productos.",
                 "creating": "Creando...",
                 "create": "Crear producto",
                 "createError": "No se pudo crear el producto"
@@ -378,6 +383,41 @@
             "employees": {
                 "title": "Empleados",
                 "description": "Sección placeholder para lista de empleados, invitaciones y control de roles admin."
+            },
+            "settings": {
+                "title": "Configuración",
+                "description": "Sección placeholder para ajustes de CRM y configuración del sistema.",
+                "categories": {
+                    "title": "Categorías de productos",
+                    "description": "Crear y organizar categorías para el catálogo de productos.",
+                    "fields": {
+                        "name": "Nombre de la categoría",
+                        "description": "Descripción",
+                        "parentCategory": "Categoría padre",
+                        "noParent": "Sin categoría padre"
+                    },
+                    "create": "Crear categoría",
+                    "creating": "Creando...",
+                    "createError": "No se pudo crear la categoría",
+                    "existing": "Categorías existentes",
+                    "loading": "Cargando categorías...",
+                    "empty": "Aún no hay categorías"
+                },
+                "measurementUnits": {
+                    "title": "Unidades de medida",
+                    "description": "Crear unidades usadas para cantidad y control de stock de productos.",
+                    "fields": {
+                        "name": "Nombre de unidad",
+                        "code": "Código de unidad",
+                        "codePlaceholder": "ej.: G, PCS, ML"
+                    },
+                    "create": "Crear unidad",
+                    "creating": "Creando...",
+                    "createError": "No se pudo crear la unidad de medida",
+                    "existing": "Unidades existentes",
+                    "loading": "Cargando unidades...",
+                    "empty": "Aún no hay unidades"
+                }
             },
             "profile": {
                 "title": "Perfil del empleado",

@@ -1,8 +1,9 @@
 "use client";
 
 import { ChangeEvent, useRef, useState } from "react";
+import Image from "next/image";
 import { usePathname,useRouter } from "next/navigation";
-import { useLocale,useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 
 import { Pencil, Upload } from "lucide-react";
 
@@ -32,7 +33,6 @@ export function MemberDocumentEditModal({
     const tEditor = useTranslations("crm.members.editor");
     const router = useRouter();
     const pathname = usePathname();
-    const locale = useLocale();
     const updateFilesMutation = useUpdateCrmMemberFiles();
     const [isOpen, setIsOpen] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -159,11 +159,20 @@ export function MemberDocumentEditModal({
                                     <FieldLabel>{t("newFile")}</FieldLabel>
                                     <FieldContent>
                                         <div className="mb-2 rounded-md border bg-muted/30 p-2">
-                                            <img
-                                                src={filePreview ?? currentPreviewUrl}
-                                                alt="document-preview"
-                                                className="h-44 w-full object-contain"
-                                            />
+                                            {filePreview || currentPreviewUrl ? (
+                                                <Image
+                                                    src={filePreview ?? currentPreviewUrl}
+                                                    alt="document-preview"
+                                                    width={800}
+                                                    height={352}
+                                                    unoptimized
+                                                    className="h-44 w-full object-contain"
+                                                />
+                                            ) : (
+                                                <div className="flex h-44 w-full items-center justify-center text-sm text-muted-foreground">
+                                                    {t("noIdentityDocuments")}
+                                                </div>
+                                            )}
                                         </div>
                                         <input
                                             ref={fileInputRef}
@@ -213,11 +222,17 @@ export function MemberDocumentEditModal({
                                         <FieldLabel>{t("newFile")}</FieldLabel>
                                         <FieldContent>
                                             <div className="mb-2 rounded-md border bg-muted/30 p-2">
-                                                <ThemedSignatureImage
-                                                    src={filePreview ?? currentPreviewUrl}
-                                                    alt="signature-preview"
-                                                    className="h-28 w-full object-contain"
-                                                />
+                                                {filePreview || currentPreviewUrl ? (
+                                                    <ThemedSignatureImage
+                                                        src={filePreview ?? currentPreviewUrl}
+                                                        alt="signature-preview"
+                                                        className="h-28 w-full object-contain"
+                                                    />
+                                                ) : (
+                                                    <div className="flex h-28 w-full items-center justify-center text-sm text-muted-foreground">
+                                                        {t("noSignature")}
+                                                    </div>
+                                                )}
                                             </div>
                                             <input
                                                 ref={fileInputRef}

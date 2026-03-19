@@ -9,9 +9,9 @@ import { ArrowLeft, Edit2, Loader2, Save, X } from "lucide-react";
 import type { SchemaUpdateProductDto } from "@workspace/api-client/core";
 import { Button, Card, FieldInput } from "@workspace/ui";
 
+import { useCategories } from "@/modules/entities/category";
+import { useMeasurementUnits } from "@/modules/entities/measurement-unit";
 import {
-    useCategories,
-    useMeasurementUnits,
     useProductDetail,
     useUpdateProduct,
 } from "@/modules/entities/product";

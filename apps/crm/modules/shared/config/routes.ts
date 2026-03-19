@@ -21,6 +21,7 @@ export const ROUTES = {
     CRM_FINANCE: "/crm/finance",
     CRM_EMPLOYEES: "/crm/employees",
     CRM_PROFILE: "/crm/profile",
+    CRM_SETTINGS: "/crm/settings",
     LOGIN: "/auth/login",
     REGISTER: "/auth/register",
 } as const;

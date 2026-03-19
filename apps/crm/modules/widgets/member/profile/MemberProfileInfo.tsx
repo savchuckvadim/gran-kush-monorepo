@@ -10,7 +10,7 @@ export interface IMemberProfileInfoProps {
 export function MemberProfileInfo({ member }: IMemberProfileInfoProps) {
     const t = useTranslations("crm.members");
     return (
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 lg:grid-cols-3">
             <section className="rounded-lg border bg-background p-4">
                 <div className="mb-3 flex items-center justify-between gap-2">
                     <h2 className="text-base font-medium">{t("profileTitle")}</h2>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { Cat, ChevronRight } from "lucide-react";
+import { Cannabis, Cat, ChevronRight } from "lucide-react";
 
 import { cn } from "@workspace/ui/lib/utils";
 
@@ -40,7 +40,7 @@ export function Sidebar({ title, items, homeHref, footer }: ISidebarProps) {
             >
                 <div className="flex h-16 items-center px-6 py-8 md:justify-center md:px-0 lg:justify-start lg:px-6">
                     <Link href={homeHref} className="flex items-center gap-2" onClick={close}>
-                        <Cat className="h-6 w-6 shrink-0 text-primary" />
+                        <Cannabis className="h-6 w-6 shrink-0 text-primary" />
                         <span className="text-lg font-bold md:hidden lg:block">{title}</span>
                     </Link>
                 </div>

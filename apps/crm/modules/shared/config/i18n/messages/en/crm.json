@@ -11,7 +11,8 @@
                 "orders": "Orders",
                 "attendance": "Attendance",
                 "finance": "Finance",
-                "employees": "Employees"
+                "employees": "Employees",
+                "settings": "Settings"
             }
         },
         "members": {
@@ -26,6 +27,8 @@
                 "action": "Action"
             },
             "openProfile": "Open profile",
+            "viewModeTable": "Table",
+            "viewModeCards": "Cards",
             "backToClients": "Back to clients",
             "backToProfile": "Back to profile",
             "profileTitle": "Profile",
@@ -224,6 +227,8 @@
                 "thc": "THC (%)",
                 "cbd": "CBD (%)",
                 "strain": "Strain",
+                "categoryRequiredHint": "Create at least one category in CRM settings.",
+                "unitRequiredHint": "Add at least one measurement unit before creating products.",
                 "creating": "Creating...",
                 "create": "Create product",
                 "createError": "Failed to create product"
@@ -378,6 +383,41 @@
             "employees": {
                 "title": "Employees",
                 "description": "Placeholder section for employee list, invitation flow, and admin role controls."
+            },
+            "settings": {
+                "title": "Settings",
+                "description": "Placeholder section for CRM settings and system configuration.",
+                "categories": {
+                    "title": "Product categories",
+                    "description": "Create and organize categories used in the product catalog.",
+                    "fields": {
+                        "name": "Category name",
+                        "description": "Description",
+                        "parentCategory": "Parent category",
+                        "noParent": "No parent category"
+                    },
+                    "create": "Create category",
+                    "creating": "Creating...",
+                    "createError": "Failed to create category",
+                    "existing": "Existing categories",
+                    "loading": "Loading categories...",
+                    "empty": "No categories yet"
+                },
+                "measurementUnits": {
+                    "title": "Measurement units",
+                    "description": "Create units used for product quantity and stock accounting.",
+                    "fields": {
+                        "name": "Unit name",
+                        "code": "Unit code",
+                        "codePlaceholder": "e.g. G, PCS, ML"
+                    },
+                    "create": "Create unit",
+                    "creating": "Creating...",
+                    "createError": "Failed to create measurement unit",
+                    "existing": "Existing units",
+                    "loading": "Loading units...",
+                    "empty": "No units yet"
+                }
             },
             "profile": {
                 "title": "Employee Profile",

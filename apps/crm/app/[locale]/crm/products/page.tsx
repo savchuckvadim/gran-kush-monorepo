@@ -5,8 +5,8 @@ import { useTranslations } from "next-intl";
 
 import { Package } from "lucide-react";
 
+import { CreateProductDialog } from "@/modules/features";
 import { ProductsTable } from "@/modules/widgets/products";
-import { ProductFormDialog } from "@/modules/widgets/products";
 
 export default function CrmProductsPage() {
     const t = useTranslations("crm.products");
@@ -23,7 +23,7 @@ export default function CrmProductsPage() {
                     </h1>
                     <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
                 </div>
-                <ProductFormDialog />
+                <CreateProductDialog />
             </div>
 
             <ProductsTable locale={locale} />
