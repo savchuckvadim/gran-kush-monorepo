@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { Camera, Keyboard, XCircle, Loader2 } from "lucide-react";
+import { Camera, Keyboard, Loader2,XCircle } from "lucide-react";
 
 import type { SchemaCheckInResultDto } from "@workspace/api-client/core";
 import {
@@ -15,10 +15,9 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@workspace/ui";
-
 import { cn } from "@workspace/ui/lib/utils";
 
-import { useQrPreview, useQrScan, type QrPreviewResult } from "@/modules/entities/presence";
+import { type QrPreviewResult,useQrPreview, useQrScan } from "@/modules/entities/presence";
 
 import { QrCameraScanner } from "./QrCameraScanner";
 import { QrPreviewCard } from "./QrPreviewCard";

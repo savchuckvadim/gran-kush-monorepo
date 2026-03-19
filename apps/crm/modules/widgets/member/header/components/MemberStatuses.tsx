@@ -5,9 +5,9 @@ import { CrmMemberDetails } from "@/modules/entities/member";
 
 export interface IMemberStatusesProps {
     member: CrmMemberDetails;
-    locale: string;
+
 }
-export  function MemberStatuses({ member, locale }: IMemberStatusesProps) {
+export  function MemberStatuses({ member}: IMemberStatusesProps) {
     const t = useTranslations("crm.members");
     return (
         <div className="mt-2 flex flex-wrap gap-2">

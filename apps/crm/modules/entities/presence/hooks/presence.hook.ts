@@ -8,9 +8,9 @@ import {
     getPresenceStats,
     manualCheckIn,
     manualCheckOut,
-    previewQrCodeScan,
     type PresenceSessionsFilter,
     type PresenceStatsFilter,
+    previewQrCodeScan,
     scanQrCodeForPresence,
 } from "../api/presence.api";
 

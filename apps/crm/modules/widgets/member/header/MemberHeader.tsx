@@ -21,7 +21,7 @@ export function MemberHeader({ member, locale }: IMemberHeaderProps) {
                 <h1 className="text-2xl font-semibold">
                     {member.name} {member.surname ?? ""}
                 </h1>
-                <MemberStatuses member={member} locale={locale} />
+                <MemberStatuses member={member}/>
                 <p className="text-sm text-muted-foreground">
                     {member.email} · {t("statusLabel")}: {member.status}
                 </p>

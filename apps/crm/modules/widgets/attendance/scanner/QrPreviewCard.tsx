@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import { LogIn, LogOut, Loader2, User, Hash } from "lucide-react";
+import { Hash,Loader2, LogIn, LogOut, User } from "lucide-react";
 
 import { Button } from "@workspace/ui";
 
