@@ -3,12 +3,13 @@
 import * as React from 'react';
 import Link from 'next/link';
 
-import { ChevronRight, Home } from 'lucide-react';
+import { Cannabis, Cat, ChevronRight, Home } from 'lucide-react';
 
 import { cn } from '@workspace/ui/lib/utils';
 
-import { useSidebar } from './sidebar-context';
+import { LogoutButton } from "@/modules/shared/ui";
 
+import { useSidebar } from './sidebar-context';
 
 export interface ISidebarItem {
     id: number;
@@ -53,7 +54,7 @@ export function Sidebar({ title, items }: { title: string, items: ISidebarItem[]
                         className="flex items-center gap-2"
                         onClick={close}
                     >
-                        <Home className="h-6 w-6 text-primary flex-shrink-0" />
+                        <Cat className="h-6 w-6 text-primary flex-shrink-0" />
                         <span className="text-lg font-bold md:hidden lg:block">{title}</span>
                     </Link>
                 </div>
@@ -82,6 +83,10 @@ export function Sidebar({ title, items }: { title: string, items: ISidebarItem[]
                         </Link>
                     ))}
                 </nav>
+                <div className="mb-2 w-full px-2">
+                    <LogoutButton variant="outline" />
+                </div>
+
             </aside>
         </>
     );

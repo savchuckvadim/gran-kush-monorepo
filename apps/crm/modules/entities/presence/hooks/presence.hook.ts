@@ -8,6 +8,7 @@ import {
     getPresenceStats,
     manualCheckIn,
     manualCheckOut,
+    previewQrCodeScan,
     type PresenceSessionsFilter,
     type PresenceStatsFilter,
     scanQrCodeForPresence,
@@ -48,6 +49,16 @@ export function usePresenceStats(filters?: PresenceStatsFilter) {
     return useQuery({
         queryKey: PRESENCE_KEYS.stats(filters),
         queryFn: () => getPresenceStats(filters),
+    });
+}
+
+/**
+ * Предпросмотр QR-кода (read-only, без записи присутствия).
+ * Возвращает информацию об участнике + предлагаемое действие.
+ */
+export function useQrPreview() {
+    return useMutation({
+        mutationFn: (encryptedCode: string) => previewQrCodeScan(encryptedCode),
     });
 }
 

@@ -25,47 +25,7 @@ export default function PersonalCabinetPage() {
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-4">
-                    {/* Sidebar Navigation */}
-                    {/* <div className="lg:col-span-1">
-                        <nav className="space-y-2">
-                            <Link
-                                href={localizedLink(ROUTES.PROFILE)}
-                                className="flex items-center gap-3 rounded-lg bg-muted px-4 py-3 text-sm font-medium transition-colors hover:bg-muted/80"
-                            >
-                                <User className="size-4" />
-                                {t("nav.dashboard")}
-                            </Link>
-                            <Link
-                                href={localizedLink(ROUTES.PROFILE_QR_CODE)}
-                                className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors hover:bg-muted"
-                            >
-                                <QrCode className="size-4" />
-                                {t("nav.qrCode")}
-                            </Link>
-                            <Link
-                                href={localizedLink(ROUTES.PROFILE_PRESENCE)}
-                                className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors hover:bg-muted"
-                            >
-                                <History className="size-4" />
-                                {t("nav.presence")}
-                            </Link>
-                            <Link
-                                href={localizedLink(ROUTES.PROFILE_SETTINGS)}
-                                className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors hover:bg-muted"
-                            >
-                                <Settings className="size-4" />
-                                {t("nav.settings")}
-                            </Link>
-                            <Button
-                                variant="ghost"
-                                className="w-full justify-start"
-                                onClick={handleLogout}
-                            >
-                                <LogOut className="mr-3 size-4" />
-                                {t("nav.logout")}
-                            </Button>
-                        </nav>
-                    </div> */}
+                  
 
                     {/* Main Content */}
                     <div className="lg:col-span-3 space-y-6">

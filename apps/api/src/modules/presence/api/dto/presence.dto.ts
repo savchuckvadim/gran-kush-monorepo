@@ -225,3 +225,45 @@ export class PresenceStatsQueryDto {
     @IsUUID()
     memberId?: string;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// QR Preview (read-only, без записи присутствия)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/** Результат предпросмотра QR-кода (без выполнения чек-ин/чек-аут) */
+export class QrPreviewResultDto {
+    @ApiProperty({
+        example: true,
+        type: Boolean,
+        description: "Валиден ли QR-код",
+    })
+    valid: boolean;
+
+    @ApiPropertyOptional({
+        example: "QR-код истёк",
+        type: String,
+        description: "Сообщение об ошибке (если valid = false)",
+    })
+    error?: string;
+
+    @ApiPropertyOptional({
+        type: () => PresenceMemberDto,
+        description: "Информация об участнике",
+    })
+    member?: PresenceMemberDto;
+
+    @ApiProperty({
+        example: false,
+        type: Boolean,
+        description: "Присутствует ли участник в клубе прямо сейчас",
+    })
+    isPresent: boolean;
+
+    @ApiProperty({
+        example: "entry",
+        type: String,
+        enum: ["entry", "exit"],
+        description: "Предлагаемое действие: вход (entry) или выход (exit)",
+    })
+    proposedAction: "entry" | "exit";
+}

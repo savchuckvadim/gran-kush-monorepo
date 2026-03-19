@@ -101,6 +101,7 @@ export function useLogout() {
     });
     const logout = () => {
         logoutMutation.mutate();
+        router.push(localizedLink(ROUTES.HOME));
     };
     return { logout };
 }

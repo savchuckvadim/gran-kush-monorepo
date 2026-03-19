@@ -22,6 +22,7 @@ import {
     PresenceStatsDto,
     PresenceStatsQueryDto,
     QrCheckInDto,
+    QrPreviewResultDto,
 } from "@presence/api/dto/presence.dto";
 import { mapPresenceSessionToDto } from "@presence/api/mappers";
 import { PresenceService } from "@presence/application/services/presence.service";
@@ -65,6 +66,21 @@ export class CrmPresenceController {
                     ? "Участник отмечен на вход"
                     : "Участник отмечен на выход",
         };
+    }
+
+    // ─── QR Preview (без записи) ─────────────────────────────────────────────
+
+    @Post("qr-preview")
+    @ApiOperation({
+        summary: "Предпросмотр QR-кода (без записи присутствия)",
+        description:
+            "Валидирует QR-код и возвращает информацию об участнике + " +
+            "предлагаемое действие (вход/выход). Запись в БД не выполняется.",
+    })
+    @ApiSuccessResponse(QrPreviewResultDto)
+    @ApiErrorResponse([400, 401, 403])
+    async previewQrScan(@Body() dto: QrCheckInDto): Promise<QrPreviewResultDto> {
+        return this.presenceService.previewQrScan(dto.encryptedCode);
     }
 
     // ─── Manual Check-in ─────────────────────────────────────────────────────

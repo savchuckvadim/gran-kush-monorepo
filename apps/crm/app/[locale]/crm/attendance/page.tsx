@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import {
@@ -11,6 +12,10 @@ import {
 
 export default function CrmAttendancePage() {
     const t = useTranslations("crm.attendance");
+    const searchParams = useSearchParams();
+
+    // Option B: код из QR-ссылки (/scan?code=...)
+    const autoScanCode = searchParams.get("scan") ?? undefined;
 
     return (
         <div className="space-y-6">
@@ -20,7 +25,7 @@ export default function CrmAttendancePage() {
                     <h1 className="text-2xl font-semibold">{t("title")}</h1>
                     <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
                 </div>
-                <QrScannerDialog />
+                <QrScannerDialog autoScanCode={autoScanCode} />
             </div>
 
             {/* Статистика */}

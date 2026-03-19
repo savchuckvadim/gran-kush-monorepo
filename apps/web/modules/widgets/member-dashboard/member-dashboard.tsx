@@ -18,7 +18,7 @@ export function MemberDashboard() {
     const localizedLink = useLocalizedLink();
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 container">
             {/* Current Presence Status */}
             <CurrentPresenceStatus />
 
@@ -29,7 +29,7 @@ export function MemberDashboard() {
                         <QrCode className="h-5 w-5 text-muted-foreground" />
                         <h2 className="text-lg font-semibold">{t("qrCode.title")}</h2>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                         <RegenerateQrCodeButton size="sm" />
                         <Button variant="outline" size="sm" asChild>
                             <Link href={localizedLink(`${ROUTES.PROFILE}/qr-code`)}>

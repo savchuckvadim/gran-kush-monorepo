@@ -1,10 +1,15 @@
 import { Injectable } from "@nestjs/common";
 
+import { Prisma } from "@prisma/client";
 import { QrCode } from "@qr-codes/domain/entity/qr-code.entity";
 import { QrCodeRepository } from "@qr-codes/domain/repositories/qr-code-repository.interface";
 import { QR_CODE_INCLUDE } from "@qr-codes/infrastructure/prisma-includes";
 
 import { PrismaService } from "@common/prisma/prisma.service";
+
+type QrCodeRow = Prisma.QrCodeGetPayload<{
+    include: typeof QR_CODE_INCLUDE;
+}>;
 
 @Injectable()
 export class QrCodePrismaRepository extends QrCodeRepository {
@@ -75,7 +80,7 @@ export class QrCodePrismaRepository extends QrCodeRepository {
 
     // ─── Маппинг ─────────────────────────────────────────────────────────────
 
-    private mapToEntity(row: any): QrCode {
+    private mapToEntity(row: QrCodeRow): QrCode {
         return new QrCode({
             id: row.id,
             memberId: row.memberId,

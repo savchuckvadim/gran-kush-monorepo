@@ -6,8 +6,7 @@ import { Button } from "@workspace/ui";
 import { useAuth } from "@/modules/processes";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
-
-import { LogoutButton } from "./logout-button";
+import { LogoutButton } from "@/modules/shared/ui";
 
 interface AuthButtonsProps {
     loginLabel: string;

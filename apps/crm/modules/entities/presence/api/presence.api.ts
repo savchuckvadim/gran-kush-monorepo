@@ -8,7 +8,27 @@ import type {
     SchemaQrCheckInDto,
 } from "@workspace/api-client/core";
 
-import { $api } from "@/modules/shared";
+import { $api, apiTokensStorage } from "@/modules/shared";
+
+// ─── Local types (до регенерации OpenAPI-схемы) ──────────────────────────────
+
+export interface QrPreviewMember {
+    id: string;
+    name: string;
+    surname?: string | null;
+    membershipNumber?: string | null;
+    isActive: boolean;
+}
+
+export interface QrPreviewResult {
+    valid: boolean;
+    error?: string;
+    member?: QrPreviewMember;
+    /** Присутствует ли участник в клубе прямо сейчас */
+    isPresent: boolean;
+    /** Предлагаемое действие: вход или выход */
+    proposedAction: "entry" | "exit";
+}
 
 // ─── Query params ────────────────────────────────────────────────────────────
 
@@ -42,6 +62,32 @@ export async function scanQrCodeForPresence(
     }
 
     return response.data as SchemaCheckInResultDto;
+}
+
+/**
+ * Предпросмотр QR-кода — только валидация и информация, без записи в БД.
+ * Возвращает данные участника + предлагаемое действие (вход/выход).
+ */
+export async function previewQrCodeScan(encryptedCode: string): Promise<QrPreviewResult> {
+    const token = apiTokensStorage.getAccessToken();
+
+    const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/crm/presence/qr-preview`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify({ encryptedCode }),
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(`QR preview failed: ${response.status}`);
+    }
+
+    return response.json() as Promise<QrPreviewResult>;
 }
 
 /**

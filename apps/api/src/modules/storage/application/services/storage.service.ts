@@ -79,6 +79,7 @@ export class StorageService {
         try {
             return await fs.readFile(fullPath);
         } catch (error) {
+            console.error(error);
             throw new Error(`File not found: ${relativePath}`);
         }
     }
@@ -92,6 +93,7 @@ export class StorageService {
         try {
             await fs.unlink(fullPath);
         } catch (error) {
+            console.error(error);
             // Игнорируем ошибку если файл уже удален
         }
     }

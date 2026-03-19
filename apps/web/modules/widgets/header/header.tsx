@@ -36,7 +36,12 @@ export function Header() {
     ];
 
     return (
-        <header className="sticky top-0 z-50 w-full flex justify-center bg-background/80 backdrop-blur-sm">
+        <header className={
+            cn(
+                "sticky top-0 w-full flex justify-center bg-background/80 backdrop-blur-sm",
+                isProfile ? "" : " z-50"
+            )
+        }>
             <div className="container flex h-16 items-center justify-between md:px-0 px-4">
                 <div className="flex items-center gap-6">
                     {/* Бургер для сайдбара — только на мобильных в профиле */}
@@ -59,7 +64,7 @@ export function Header() {
                     cn("md:flex items-center gap-4 ", isProfile ? "flex" : "hidden")
                 }>
                     <HeaderActions />
-                    <AuthButtons loginLabel={t("login")} registerLabel={t("register")} />
+                    {!isProfile && <AuthButtons loginLabel={t("login")} registerLabel={t("register")} />}
                 </div>
 
                 {!isProfile && <MobileMenu

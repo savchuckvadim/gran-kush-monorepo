@@ -1,4 +1,4 @@
-import { History, Home, QrCode, Settings } from "lucide-react";
+import { Cannabis, History, QrCode, Settings } from "lucide-react";
 
 import { ROUTES } from "@/modules/shared";
 
@@ -13,7 +13,7 @@ export const PROFILE_NAVIGATION: IProfileNavigation[] = [
         url: ROUTES.PROFILE,
         title: "Dashboard",
         isActive: false,
-        icon: <Home />,
+        icon: <Cannabis />,
     },
 
     {

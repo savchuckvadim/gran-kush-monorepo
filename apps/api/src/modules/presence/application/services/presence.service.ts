@@ -201,6 +201,53 @@ export class PresenceService {
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
+    // QR Preview (read-only — без записи, только информация)
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    /**
+     * Предпросмотр QR-кода на стойке.
+     * Валидирует QR, проверяет текущее присутствие и возвращает
+     * информацию о действии (вход/выход) — без записи в БД.
+     */
+    async previewQrScan(encryptedCode: string): Promise<{
+        valid: boolean;
+        error?: string;
+        member?: {
+            id: string;
+            name: string;
+            surname?: string | null;
+            membershipNumber?: string | null;
+            isActive: boolean;
+        };
+        isPresent: boolean;
+        proposedAction: "entry" | "exit";
+    }> {
+        // 1. Валидируем QR
+        const scanResult = await this.qrCodesService.validateScannedCode(encryptedCode);
+
+        if (!scanResult.valid) {
+            return {
+                valid: false,
+                error: scanResult.error,
+                isPresent: false,
+                proposedAction: "entry",
+            };
+        }
+
+        const memberId = scanResult.memberId!;
+
+        // 2. Проверяем текущую активную сессию (без создания)
+        const activeSession = await this.sessionRepository.findActiveByMemberId(memberId);
+
+        return {
+            valid: true,
+            member: scanResult.member,
+            isPresent: activeSession !== null,
+            proposedAction: activeSession ? "exit" : "entry",
+        };
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
     // Check if Member is Present (for other modules)
     // ═══════════════════════════════════════════════════════════════════════════
 
