@@ -17,7 +17,9 @@ export class ApiRefreshHelper {
     }
 
 
-    public async makeToken() {
+    public async makeToken(): Promise<void> {
+        // Important: callers rely on this method to *finish* refreshing tokens (or throw),
+        // so we must return/await the shared `refreshPromise`.
         if (!refreshPromise) {
             refreshPromise = (async () => {
                 const token = await this.refreshAccessToken();
@@ -35,21 +37,21 @@ export class ApiRefreshHelper {
                     this.storage.clearTokens();
                     throw new Error("Failed to refresh access token");
                 }
-                const { accessToken, refreshToken } = await response.json() as { accessToken: string, refreshToken: string };
+                const { accessToken, refreshToken } = (await response.json()) as { accessToken: string; refreshToken: string };
                 if (!accessToken) {
                     throw new Error("Failed to refresh access token");
                 }
                 this.storage.setAccessToken(accessToken);
                 this.storage.setRefreshToken(refreshToken);
-
-
             })();
+
             refreshPromise.finally(() => {
                 refreshPromise = null;
             });
         }
 
-    };
+        await refreshPromise;
+    }
 
     private async refreshAccessToken(): Promise<string | null> {
         if (!this.canUseBrowserStorage()) {

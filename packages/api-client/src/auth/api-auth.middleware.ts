@@ -68,6 +68,8 @@ export const getAuthMiddleware = (type: ApiAuthType, baseUrl: string): Middlewar
                 retryRequest.headers.set("Authorization", `Bearer ${accessToken}`);
                 return fetch(retryRequest);
             } catch {
+                // Refresh failed (e.g. refresh token missing). Clear stored tokens so client can redirect properly.
+                storage.clearTokens();
                 console.log(`Failed to refresh access token: catch`);
                 return response;
             }

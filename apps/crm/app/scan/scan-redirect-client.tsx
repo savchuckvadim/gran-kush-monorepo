@@ -13,17 +13,20 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { Loader2 } from "lucide-react";
 
+import { defaultLocale, locales } from "@/i18n";
 import { apiTokensStorage } from "@/modules/shared";
 
-
-const DEFAULT_LOCALE = "en";
 
 export function ScanRedirectClient() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
     useEffect(() => {
-        const code = searchParams.get("code");
+        const code = searchParams.get("code") ?? searchParams.get("scan");
+        const requestedLocale = searchParams.get("locale") ?? undefined;
+
+        const resolvedLocale =
+            requestedLocale && locales.includes(requestedLocale as (typeof locales)[number]) ? requestedLocale : defaultLocale;
 
         const hasCrmToken = typeof window !== "undefined" && !!apiTokensStorage.getAccessToken();
 
@@ -33,12 +36,13 @@ export function ScanRedirectClient() {
             return;
         }
 
-        const attendancePath = `/${DEFAULT_LOCALE}/crm/attendance`;
-        if (code) {
-            router.replace(`${attendancePath}?scan=${encodeURIComponent(code)}`);
-        } else {
+        const attendancePath = `/${resolvedLocale}/crm/attendance`;
+        if (!code) {
             router.replace(attendancePath);
+            return;
         }
+
+        router.replace(`${attendancePath}?scan=${encodeURIComponent(code)}`);
     }, [router, searchParams]);
 
     return (

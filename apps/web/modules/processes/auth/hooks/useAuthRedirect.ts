@@ -25,6 +25,17 @@ function getStatus(error: unknown): number | undefined {
     return typeof error === "object" && error ? (error as { status?: number }).status : undefined;
 }
 
+function isRefreshTokenMissing(error: unknown): boolean {
+    const message =
+        error instanceof Error
+            ? error.message
+            : typeof error === "object" && error && "message" in error
+              ? String((error as { message?: unknown }).message ?? "")
+              : "";
+
+    return /refresh token not found/i.test(message);
+}
+
 export function useAuthRedirects({ pathname, hydrated, hasAccessToken, queryClient, router, meQuery }: Params) {
     const localeLessPath = stripLocalePrefix(pathname);
     const protectedRoute = isProtectedRoute(localeLessPath);
@@ -48,7 +59,7 @@ export function useAuthRedirects({ pathname, hydrated, hasAccessToken, queryClie
         if (!meQuery.isError) return;
 
         const status = getStatus(meQuery.error);
-        if (status !== 401 && status !== 403) return;
+        if (status !== 401 && status !== 403 && !isRefreshTokenMissing(meQuery.error)) return;
 
         apiTokensStorage.clearTokens();
         queryClient.clear();

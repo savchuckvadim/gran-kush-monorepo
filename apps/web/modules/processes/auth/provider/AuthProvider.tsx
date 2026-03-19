@@ -36,7 +36,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const status =
         typeof meQuery.error === "object" && meQuery.error ? (meQuery.error as { status?: number }).status : undefined;
 
-    const isAuthError = hasAccessToken && meQuery.isError && (status === 401 || status === 403);
+    const errorMessage =
+        meQuery.error instanceof Error
+            ? meQuery.error.message
+            : typeof meQuery.error === "object" && meQuery.error && "message" in meQuery.error
+              ? String((meQuery.error as { message?: unknown }).message ?? "")
+              : "";
+
+    const isRefreshTokenMissing = /refresh token not found/i.test(errorMessage);
+
+    const isAuthError = hasAccessToken && meQuery.isError && (status === 401 || status === 403 || isRefreshTokenMissing);
 
     // Loading на protected страницах, пока:
     // - нет hydration (не можем прочитать localStorage)

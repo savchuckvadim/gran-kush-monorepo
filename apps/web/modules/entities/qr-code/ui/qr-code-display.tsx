@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 
 import { AlertCircle, Loader2 } from "lucide-react";
@@ -19,6 +19,7 @@ interface QrCodeDisplayProps {
  */
 export function QrCodeDisplay({ size = 256, className }: QrCodeDisplayProps) {
     const t = useTranslations("profile.qrCode");
+    const locale = useLocale();
     const { theme, resolvedTheme } = useTheme();
     const { data: qrCode, isLoading, error } = useMyQrCode();
 
@@ -55,10 +56,20 @@ export function QrCodeDisplay({ size = 256, className }: QrCodeDisplayProps) {
 
     const isDark = resolvedTheme === "dark" || theme === "dark";
 
+    const encryptedCode = qrCode.encryptedCode;
+
+    // We embed a CRM scan URL into the QR so that scanning produces a clear redirect flow.
+    // Your `web` env is expected to provide `NEXT_PUBLIC_CRM_URL` (CRM app base URL).
+    const crmBaseUrl = process.env.NEXT_PUBLIC_CRM_URL ?? "";
+    const localeParam = locale ? `&locale=${encodeURIComponent(locale)}` : "";
+    const crmScanUrl = crmBaseUrl
+        ? `${crmBaseUrl.replace(/\/$/, "")}/scan?code=${encodeURIComponent(encryptedCode)}${localeParam}`
+        : `/scan?code=${encodeURIComponent(encryptedCode)}${localeParam}`;
+
     return (
         <div className={className}>
             <QrCodeDisplayComponent
-                value={qrCode.encryptedCode}
+                value={crmScanUrl}
                 size={size}
                 level="H"
                 bgColor={isDark ? "#000000" : "#ffffff"}

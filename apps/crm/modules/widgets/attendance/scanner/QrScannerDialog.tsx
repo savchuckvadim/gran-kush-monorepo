@@ -42,6 +42,42 @@ interface QrScannerDialogProps {
     autoScanCode?: string;
 }
 
+function normalizeScannedPayload(raw: string): string {
+    const trimmed = raw.trim();
+    if (!trimmed) return trimmed;
+
+    // If QR already contains CRM scan link, prefer extracting the `code` param.
+    // Supports:
+    // - /scan?code=ENC
+    // - /scan?scan=ENC
+    // - https://crm-host/scan?code=ENC
+    // - /scan/ENC
+    if (/\/scan\b/i.test(trimmed)) {
+        // Query-string variant
+        const match = trimmed.match(/[?&](code|scan)=([^&#]+)/i);
+        if (match?.[2]) return decodeURIComponent(match[2]);
+
+        // Path variant: /scan/<code>
+        const pathMatch = trimmed.match(/\/scan\/([^/?#]+)/i);
+        if (pathMatch?.[1]) return decodeURIComponent(pathMatch[1]);
+    }
+
+    // If backend payload is stored as a URL in QR (e.g. ".../scan?code=..."),
+    // extract the actual payload value from query params.
+    try {
+        const url = new URL(trimmed, typeof window !== "undefined" ? window.location.origin : undefined);
+        return url.searchParams.get("code") ?? url.searchParams.get("scan") ?? trimmed;
+    } catch {
+        // not a valid URL, continue with regex fallback
+    }
+
+    // Fallback for cases where QR decoder returns something URL-like but URL() parsing fails.
+    const match = trimmed.match(/[?&](code|scan)=([^&#]+)/i);
+    if (match?.[2]) return decodeURIComponent(match[2]);
+
+    return trimmed;
+}
+
 export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
     const t = useTranslations("crm.attendance.scanner");
 
@@ -51,6 +87,9 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
     const [open, setOpen] = useState(false);
     const [step, setStep] = useState<ScanStep>("scan");
     const [tab, setTab] = useState<ScanTab>("camera");
+    // Перезапускаем QrCameraScanner, если декод пришел "кривой" (например, обрезанный строкой)
+    // и backend вернул невалидный QR.
+    const [cameraRestartKey, setCameraRestartKey] = useState(0);
     const [scannedCode, setScannedCode] = useState("");
     const [manualCode, setManualCode] = useState("");
     const [previewData, setPreviewData] = useState<QrPreviewResult | null>(null);
@@ -61,22 +100,34 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
 
     const handleCodeScanned = useCallback(
         async (code: string) => {
+            const payload = normalizeScannedPayload(code);
+            if (!payload) return;
+
+            // If QR contains a full/relative scan URL - redirect immediately.
+            // This makes the UX clear and lets `/scan` route do token-based redirection.
             const trimmed = code.trim();
-            if (!trimmed) return;
+            const looksLikeScanUrl = /^https?:\/\//i.test(trimmed) || trimmed.startsWith("/scan");
+            if (looksLikeScanUrl && /\/scan\b/i.test(trimmed)) {
+                window.location.replace(trimmed);
+                return;
+            }
 
             setValidationError(null);
-            setScannedCode(trimmed);
+            setScannedCode(payload);
 
             try {
-                const preview = await qrPreview.mutateAsync(trimmed);
+                const preview = await qrPreview.mutateAsync(payload);
                 if (!preview.valid) {
                     setValidationError(preview.error ?? t("scanError"));
+                    // Разрешаем повторный скан текущего QR: перезапустим декодер.
+                    setCameraRestartKey((v) => v + 1);
                     return;
                 }
                 setPreviewData(preview);
                 setStep("preview");
             } catch {
                 setValidationError(t("scanError"));
+                setCameraRestartKey((v) => v + 1);
             }
         },
         [qrPreview, t]
@@ -107,6 +158,7 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
         setPreviewData(null);
         setScanResult(null);
         setValidationError(null);
+        setCameraRestartKey((v) => v + 1);
         qrPreview.reset();
         qrScan.reset();
     }, [qrPreview, qrScan]);
@@ -122,11 +174,16 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
     // Option B: автоматическое открытие с предзаполненным кодом
     useEffect(() => {
         if (autoScanCode) {
-            setOpen(true);
-            setTab("manual");
-            setManualCode(autoScanCode);
+            // Деферим setState, чтобы не вызывать обновления синхронно внутри эффекта.
+            // И сразу запускаем preview, чтобы "скан" работал как ожидалось.
+            setTimeout(() => {
+                setOpen(true);
+                setTab("manual");
+                setManualCode(autoScanCode);
+                void handleCodeScanned(autoScanCode);
+            }, 0);
         }
-    }, [autoScanCode]);
+    }, [autoScanCode, handleCodeScanned]);
 
     return (
         <Dialog open={open} onOpenChange={handleClose}>
@@ -183,7 +240,7 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
                         {/* Камера */}
                         {tab === "camera" && (
                             <>
-                                <QrCameraScanner onScan={handleCodeScanned} />
+                                <QrCameraScanner key={cameraRestartKey} onScan={handleCodeScanned} />
                                 {qrPreview.isPending && (
                                     <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                                         <Loader2 className="h-4 w-4 animate-spin" />

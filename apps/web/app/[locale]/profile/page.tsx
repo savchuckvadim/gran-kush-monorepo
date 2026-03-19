@@ -18,14 +18,14 @@ export default function PersonalCabinetPage() {
 
     return (
         <div className="">
-            <div className="mx-auto max-w-7xl">
+            <div className="mx-auto max-w-7xl d-flex ">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold">{t("title")}</h1>
                     <p className="text-muted-foreground">{t("subtitle")}</p>
                 </div>
 
-                <div className="grid gap-6 lg:grid-cols-4">
-                  
+                {/* <div className="grid gap-6 lg:grid-cols-4"> */}
+                  <div className="d-flex flex-col gap-4 justify-center items-center">
 
                     {/* Main Content */}
                     <div className="lg:col-span-3 space-y-6">

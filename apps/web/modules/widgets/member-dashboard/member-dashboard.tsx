@@ -25,11 +25,11 @@ export function MemberDashboard() {
             {/* QR Code Section */}
             <Card className="p-6">
                 <div className="mb-4 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-between gap-2">
                         <QrCode className="h-5 w-5 text-muted-foreground" />
                         <h2 className="text-lg font-semibold">{t("qrCode.title")}</h2>
                     </div>
-                    <div className="flex gap-2 flex-wrap">
+                    <div className="flex justify-end gap-2 flex-wrap">
                         <RegenerateQrCodeButton size="sm" />
                         <Button variant="outline" size="sm" asChild>
                             <Link href={localizedLink(`${ROUTES.PROFILE}/qr-code`)}>
