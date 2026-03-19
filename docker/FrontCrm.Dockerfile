@@ -5,6 +5,12 @@ FROM node:20 AS base
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
+
+#ссылка на основной сайт
+ARG NEXT_PUBLIC_MAIN_SITE_URL
+ENV NEXT_PUBLIC_MAIN_SITE_URL=${NEXT_PUBLIC_MAIN_SITE_URL}
+
+
 WORKDIR /app
 
 # Установка PNPM
@@ -35,6 +41,7 @@ WORKDIR /app
 
 # На runtime уже не важно для NEXT_PUBLIC (оно вшито в бандл), но пусть будет доступно для любых client code/path.
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ENV NEXT_PUBLIC_MAIN_SITE_URL=${NEXT_PUBLIC_MAIN_SITE_URL}
 
 RUN npm install -g pnpm
 RUN pnpm add typescript

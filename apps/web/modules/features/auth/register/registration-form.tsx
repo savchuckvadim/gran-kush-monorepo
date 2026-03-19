@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Loader2 } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { FieldErrors, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import {
@@ -62,6 +62,11 @@ export function RegistrationForm() {
     const [documentFirst, setDocumentFirst] = useState<File | null>(null);
     const [documentSecond, setDocumentSecond] = useState<File | null>(null);
     const [signature, setSignature] = useState<string | null>(null);
+    const [toastMessage, setToastMessage] = useState<string | null>(null);
+    const [scrollRequest, setScrollRequest] = useState<{
+        id: number;
+        target: keyof RegistrationFormData | "serverError";
+    } | null>(null);
     const [step, setStep] = useState<"form" | "registering" | "uploading" | "uploadError">("form");
     const [pendingUpload, setPendingUpload] = useState<{
         data: RegisterFormSubmitData;
@@ -72,6 +77,7 @@ export function RegistrationForm() {
         register,
         handleSubmit,
         setValue,
+        setFocus,
         formState: { errors, isSubmitting },
     } = useForm<RegistrationFormValues, undefined, RegistrationFormData>({
         resolver: zodResolver(registrationSchema),
@@ -83,6 +89,77 @@ export function RegistrationForm() {
     });
 
     const { registerMutation, uploadMutation } = useSubmitRegister();
+    const formRef = useRef<HTMLFormElement | null>(null);
+    const serverErrorRef = useRef<HTMLDivElement | null>(null);
+    const signatureFieldRef = useRef<HTMLDivElement | null>(null);
+    const mjFieldRef = useRef<HTMLDivElement | null>(null);
+
+    const showToast = (message: string) => {
+        setToastMessage(message);
+    };
+
+    useEffect(() => {
+        if (!toastMessage) {
+            return;
+        }
+        const timeout = setTimeout(() => setToastMessage(null), 4000);
+        return () => clearTimeout(timeout);
+    }, [toastMessage]);
+
+    const triggerScrollTo = (target: keyof RegistrationFormData | "serverError") =>
+        setScrollRequest((prev) => ({ id: (prev?.id ?? 0) + 1, target }));
+
+    useEffect(() => {
+        if (!scrollRequest) {
+            return;
+        }
+        const scrollTarget = scrollRequest.target;
+
+        if (scrollTarget === "serverError") {
+            serverErrorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+            return;
+        }
+
+        const fieldElement = formRef.current?.querySelector(`[name="${String(scrollTarget)}"]`) as HTMLElement | null;
+        if (fieldElement) {
+            fieldElement.scrollIntoView({ behavior: "smooth", block: "center" });
+            if (scrollTarget !== "isMedical" && scrollTarget !== "isRecreation") {
+                setTimeout(() => setFocus(scrollTarget), 150);
+            }
+            return;
+        }
+
+        if (scrollTarget === "signature") {
+            signatureFieldRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+            return;
+        }
+
+        if (scrollTarget === "isMedical" || scrollTarget === "isRecreation" || scrollTarget === "isMj") {
+            mjFieldRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+    }, [scrollRequest, setFocus]);
+
+    const getFirstErrorField = (formErrors: FieldErrors<RegistrationFormData>): keyof RegistrationFormData | null => {
+        const fieldsOrder: (keyof RegistrationFormData)[] = [
+            "name",
+            "surname",
+            "email",
+            "phone",
+            "birthday",
+            "documentType",
+            "documentNumber",
+            "documentFirst",
+            "documentSecond",
+            "signature",
+            "password",
+            "repeatPassword",
+            "isMedical",
+            "isRecreation",
+            "isMj",
+        ];
+
+        return fieldsOrder.find((field) => !!formErrors[field]) ?? null;
+    };
 
     const onSubmit = async (data: RegistrationFormData) => {
         const payload: RegisterFormSubmitData = {
@@ -97,6 +174,9 @@ export function RegistrationForm() {
             await registerMutation.mutateAsync(payload);
         } catch {
             setStep("form");
+            const message = t("error") || "Registration failed. Please try again.";
+            showToast(message);
+            triggerScrollTo("serverError");
             return;
         }
 
@@ -114,6 +194,14 @@ export function RegistrationForm() {
         }
 
         router.push(localizedLink(`${ROUTES.CONFIRM_EMAIL}?email=${encodeURIComponent(payload.email)}`));
+    };
+
+    const onInvalid = (formErrors: FieldErrors<RegistrationFormData>) => {
+        const firstErrorField = getFirstErrorField(formErrors);
+        if (firstErrorField) {
+            triggerScrollTo(firstErrorField);
+        }
+        showToast(t("validationError") || "Please correct highlighted fields.");
     };
 
     const retryUpload = async () => {
@@ -176,9 +264,21 @@ export function RegistrationForm() {
     }
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <>
+            {toastMessage && (
+                <div className="fixed inset-x-4 bottom-4 z-50 md:inset-x-auto md:right-4 md:max-w-sm" aria-live="polite">
+                    <div className="rounded-lg border border-destructive bg-background p-3 text-sm text-foreground shadow-lg">
+                        {toastMessage}
+                    </div>
+                </div>
+            )}
+
+            <form ref={formRef} onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-6">
             {registerMutation.isError && (
-                <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
+                <div
+                    ref={serverErrorRef}
+                    className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive"
+                >
                     {t("error") || "Registration failed. Please try again."}
                 </div>
             )}
@@ -279,7 +379,7 @@ export function RegistrationForm() {
 
             <Field>
                 <FieldLabel>{t("signature")}</FieldLabel>
-                <FieldContent>
+                <FieldContent ref={signatureFieldRef}>
                     <SignatureCanvasField
                         value={signature || undefined}
                         onChange={(value) => {
@@ -316,7 +416,7 @@ export function RegistrationForm() {
 
             <Field>
                 <FieldLabel>{t("isMj")}</FieldLabel>
-                <FieldContent>
+                <FieldContent ref={mjFieldRef}>
                     <div className="space-y-3">
                         <label className="flex items-center gap-2">
                             <input
@@ -366,6 +466,7 @@ export function RegistrationForm() {
                     {t("login")}
                 </Link>
             </div>
-        </form>
+            </form>
+        </>
     );
 }

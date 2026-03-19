@@ -7,9 +7,9 @@ import { Cat, ChevronRight } from 'lucide-react';
 
 import { cn } from '@workspace/ui/lib/utils';
 
-import { LogoutButton } from "@/modules/shared/ui";
 
 import { useSidebar } from './sidebar-context';
+import { LogoutButton } from '../LogoutButton/logout-button';
 
 export interface ISidebarItem {
     id: number;
@@ -20,7 +20,12 @@ export interface ISidebarItem {
     icon: React.ReactNode;
 }
 
-export function Sidebar({ title, items }: { title: string, items: ISidebarItem[] }) {
+export interface ISidebarProps {
+    title: string;
+    items: ISidebarItem[];
+   
+}
+export function Sidebar({ title, items }: ISidebarProps) {
     const { isOpen, close } = useSidebar();
 
     return (
