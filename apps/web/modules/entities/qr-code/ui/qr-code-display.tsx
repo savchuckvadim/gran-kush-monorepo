@@ -61,10 +61,10 @@ export function QrCodeDisplay({ size = 256, className }: QrCodeDisplayProps) {
     // We embed a CRM scan URL into the QR so that scanning produces a clear redirect flow.
     // Your `web` env is expected to provide `NEXT_PUBLIC_CRM_URL` (CRM app base URL).
     const crmBaseUrl = process.env.NEXT_PUBLIC_CRM_URL ?? "";
-    const localeParam = locale ? `&locale=${encodeURIComponent(locale)}` : "";
+    const scanPath = locale ? `/${encodeURIComponent(locale)}/scan` : "/scan";
     const crmScanUrl = crmBaseUrl
-        ? `${crmBaseUrl.replace(/\/$/, "")}/scan?code=${encodeURIComponent(encryptedCode)}${localeParam}`
-        : `/scan?code=${encodeURIComponent(encryptedCode)}${localeParam}`;
+        ? `${crmBaseUrl.replace(/\/$/, "")}${scanPath}?code=${encodeURIComponent(encryptedCode)}`
+        : `${scanPath}?code=${encodeURIComponent(encryptedCode)}`;
 
     return (
         <div className={className}>

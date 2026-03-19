@@ -9,7 +9,7 @@
  */
 
 import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { Loader2 } from "lucide-react";
 
@@ -18,15 +18,30 @@ import { apiTokensStorage } from "@/modules/shared";
 
 
 export function ScanRedirectClient() {
+    const pathname = usePathname();
     const router = useRouter();
     const searchParams = useSearchParams();
 
     useEffect(() => {
         const code = searchParams.get("code") ?? searchParams.get("scan");
         const requestedLocale = searchParams.get("locale") ?? undefined;
+        const localeFromPath = pathname.split("/")[1];
+        const pathLocale =
+            localeFromPath && locales.includes(localeFromPath as (typeof locales)[number]) ? localeFromPath : undefined;
 
-        const resolvedLocale =
-            requestedLocale && locales.includes(requestedLocale as (typeof locales)[number]) ? requestedLocale : defaultLocale;
+        const resolvedLocale = pathLocale ?? (requestedLocale && locales.includes(requestedLocale as (typeof locales)[number])
+            ? requestedLocale
+            : defaultLocale);
+
+        // Canonical route for QR flow is /{locale}/scan.
+        // If someone opens legacy /scan, normalize URL first.
+        if (!pathLocale) {
+            const params = new URLSearchParams(searchParams.toString());
+            params.delete("locale");
+            const query = params.toString();
+            router.replace(`/${resolvedLocale}/scan${query ? `?${query}` : ""}`);
+            return;
+        }
 
         const hasCrmToken = typeof window !== "undefined" && !!apiTokensStorage.getAccessToken();
 
@@ -43,7 +58,7 @@ export function ScanRedirectClient() {
         }
 
         router.replace(`${attendancePath}?scan=${encodeURIComponent(code)}`);
-    }, [router, searchParams]);
+    }, [pathname, router, searchParams]);
 
     return (
         <div className="flex min-h-screen items-center justify-center">
