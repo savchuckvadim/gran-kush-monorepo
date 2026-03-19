@@ -1,6 +1,5 @@
 "use client";
 
-
 import { useTranslations } from "next-intl";
 
 import { Card } from "@workspace/ui";
@@ -10,10 +9,8 @@ import { MemberDashboard } from "@/modules/widgets/member-dashboard";
 
 export default function PersonalCabinetPage() {
     const t = useTranslations("profile");
- 
+    
     const { data: member, isLoading } = useMyMemberInfo();
-
-
 
 
     return (

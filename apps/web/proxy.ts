@@ -16,26 +16,21 @@ const intlMiddleware = createIntlMiddleware({
 /**
  * Protected routes that require authentication
  */
-const PROTECTED_ROUTES = [
-    "/profile",
-    "/profile/settings",
-    "/profile/qr-code",
-    "/profile/presence",
-];
+
 
 /**
  * Public routes that don't require authentication
  */
-const PUBLIC_ROUTES = [
-    "/",
-    "/about-us",
-    "/contacts",
-    "/auth/login",
-    "/auth/register",
-    "/auth/forgot-password",
-    "/auth/reset-password",
-    "/auth/confirm-email",
-];
+// const PUBLIC_ROUTES = [
+//     "/",
+//     "/about-us",
+//     "/contacts",
+//     "/auth/login",
+//     "/auth/register",
+//     "/auth/forgot-password",
+//     "/auth/reset-password",
+//     "/auth/confirm-email",
+// ];
 
 /**
  * Check if user is authenticated by checking for access token in cookies
@@ -54,18 +49,18 @@ const PUBLIC_ROUTES = [
 /**
  * Check if pathname matches a protected route pattern
  */
-function isProtectedRoute(pathname: string): boolean {
-    // Remove locale prefix if present
-    const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}(-[A-Z]{2})?/, "") || "/";
+// function isProtectedRoute(pathname: string): boolean {
+//     // Remove locale prefix if present
+//     const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}(-[A-Z]{2})?/, "") || "/";
     
-    return PROTECTED_ROUTES.some((route) => {
-        if (route === "/profile") {
-            // Match /profile and all sub-routes
-            return pathWithoutLocale === route || pathWithoutLocale.startsWith(`${route}/`);
-        }
-        return pathWithoutLocale === route || pathWithoutLocale.startsWith(`${route}/`);
-    });
-}
+//     return PROTECTED_ROUTES.some((route) => {
+//         if (route === "/profile") {
+//             // Match /profile and all sub-routes
+//             return pathWithoutLocale === route || pathWithoutLocale.startsWith(`${route}/`);
+//         }
+//         return pathWithoutLocale === route || pathWithoutLocale.startsWith(`${route}/`);
+//     });
+// }
 
 /**
  * Check if pathname matches a public route
@@ -92,7 +87,7 @@ export default function proxy(request: NextRequest) {
     }
 
     // Check authentication for protected routes
-    if (isProtectedRoute(pathname)) {
+    // if (isProtectedRoute(pathname)) {
         // if (!isAuthenticated(request)) {
         //     // Redirect to login page
         //     const locale = pathname.split("/")[1] || defaultLocale;
@@ -100,7 +95,7 @@ export default function proxy(request: NextRequest) {
         //     loginUrl.searchParams.set("redirect", pathname);
         //     return NextResponse.redirect(loginUrl);
         // }
-    }
+    // }
 
     // Handle internationalization
     const response = intlMiddleware(request);
