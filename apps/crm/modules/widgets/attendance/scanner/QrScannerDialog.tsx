@@ -146,20 +146,6 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
         handleCodeScanned(manualCode);
     }, [handleCodeScanned, manualCode]);
 
-    // ── Подтверждение: фактическая запись присутствия ─────────────────────────
-
-    const handleConfirm = useCallback(async () => {
-        try {
-            const result = await qrScan.mutateAsync(scannedCode);
-            setScanResult(result);
-            setStep("result");
-        } catch {
-            // ошибка — видна через qrScan.isError
-        }
-    }, [qrScan, scannedCode]);
-
-    // ── Сброс ─────────────────────────────────────────────────────────────────
-
     const handleReset = useCallback(() => {
         setStep("scan");
         setScannedCode("");
@@ -172,6 +158,25 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
         qrPreview.reset();
         qrScan.reset();
     }, [qrPreview, qrScan]);
+
+    // ── Подтверждение: фактическая запись присутствия ─────────────────────────
+    const handleConfirm = useCallback(async () => {
+        try {
+            const result = await qrScan.mutateAsync(scannedCode);
+            setScanResult(result);
+            setStep("result");
+
+            // Закрываем диалог после подтверждения присутствия/отсутствия,
+            // чтобы не оставлять пользователя внутри мастера сканирования.
+            // Небольшая задержка дает секунду увидеть результат (вход/выход).
+            window.setTimeout(() => {
+                setOpen(false);
+                handleReset();
+            }, 800);
+        } catch {
+            // ошибка — видна через qrScan.isError
+        }
+    }, [qrScan, scannedCode, handleReset]);
 
     const handleClose = useCallback(
         (isOpen: boolean) => {

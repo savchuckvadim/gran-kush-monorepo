@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import { Loader2 } from "lucide-react";
 
-import { ScanRedirectClient } from "@/app/scan/scan-redirect-client";
+import { ScanRedirectClient } from "@/modules/widgets";
 
 function ScanLoading() {
     return (
