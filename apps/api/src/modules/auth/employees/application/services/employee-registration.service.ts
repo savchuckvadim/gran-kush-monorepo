@@ -37,6 +37,7 @@ export class EmployeeRegistrationService {
             // Создаем Employee через репозиторий
             const employee = await this.employeeRepository.create({
                 userId: existingUser.id,
+                portalId: existingUser.portalId,
                 name: dto.name,
                 surname: dto.surname,
                 phone: dto.phone,
@@ -58,6 +59,7 @@ export class EmployeeRegistrationService {
         const user = await this.userRepository.create({
             email: dto.email,
             passwordHash,
+            portalId: undefined,
         });
 
         // Employee содержит все остальные данные через репозиторий

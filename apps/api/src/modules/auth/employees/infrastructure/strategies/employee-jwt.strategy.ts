@@ -12,6 +12,7 @@ interface EmployeeJwtPayload {
     email: string;
     name: string;
     role: string;
+    portalId?: string | null;
     type: "employee";
 }
 
@@ -26,7 +27,13 @@ export class EmployeeJwtStrategy extends PassportStrategy(Strategy, "employee-jw
             throw new Error(JWT_ERROR_MESSAGES.SECRET_NOT_CONFIGURED);
         }
         super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            jwtFromRequest: ExtractJwt.fromExtractors([
+                ExtractJwt.fromAuthHeaderAsBearerToken(),
+                (request: { cookies?: Record<string, unknown> }) => {
+                    const token = request?.cookies?.crm_access_token;
+                    return typeof token === "string" ? token : null;
+                },
+            ]),
             ignoreExpiration: false,
             secretOrKey,
             passReqToCallback: false,

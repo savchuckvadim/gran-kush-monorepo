@@ -134,6 +134,7 @@ export class MembersService {
             // Создаем Member через репозиторий
             const member = await this.memberRepository.create({
                 userId: existingUser.id,
+                portalId: existingUser.portalId,
                 name: dto.name,
                 surname: dto.surname,
                 phone: dto.phone,
@@ -162,11 +163,13 @@ export class MembersService {
         const user = await this.userRepository.create({
             email: dto.email,
             passwordHash,
+            portalId: undefined,
         });
 
         // Создаем Member через репозиторий
         const member = await this.memberRepository.create({
             userId: user.id,
+            portalId: user.portalId,
             name: dto.name,
             surname: dto.surname,
             phone: dto.phone,

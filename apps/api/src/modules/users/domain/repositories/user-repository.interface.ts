@@ -5,7 +5,11 @@ export abstract class UserRepository {
     abstract findByEmail(email: string): Promise<User | null>;
     abstract findByEmailWithRelations(email: string): Promise<UserWithRelations | null>;
     abstract existsByEmail(email: string): Promise<boolean>;
-    abstract create(data: { email: string; passwordHash: string }): Promise<User>;
+    abstract create(data: {
+        email: string;
+        passwordHash: string;
+        portalId?: string;
+    }): Promise<User>;
     abstract update(
         id: string,
         data: Partial<{

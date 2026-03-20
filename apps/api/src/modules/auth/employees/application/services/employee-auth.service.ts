@@ -16,6 +16,7 @@ interface EmployeeJwtPayload {
     email: string;
     name: string;
     role: string;
+    portalId?: string | null;
     type: "employee"; // Тип для различения от user токенов
 }
 
@@ -49,6 +50,7 @@ export class EmployeeAuthService {
                 email: employee.email,
                 name: employee.name,
                 role: employee.role,
+                portalId: employee.portalId,
             },
         };
     }
@@ -64,6 +66,9 @@ export class EmployeeAuthService {
         try {
             const employee = await this.employeesService.findById(payload.sub);
             if (!employee || !employee.isActive) {
+                return null;
+            }
+            if (payload.portalId && employee.portalId && payload.portalId !== employee.portalId) {
                 return null;
             }
             return employee;
@@ -91,6 +96,13 @@ export class EmployeeAuthService {
             const employee = await this.employeesService.findById(tokenRecord.employeeId);
             if (!employee) {
                 throw new UnauthorizedException();
+            }
+            if (
+                tokenRecord.portalId &&
+                employee.portalId &&
+                tokenRecord.portalId !== employee.portalId
+            ) {
+                throw new UnauthorizedException("Portal mismatch");
             }
             return await this.generateTokens(employee);
         } catch {
@@ -124,6 +136,7 @@ export class EmployeeAuthService {
             email: employee.email,
             name: employee.name,
             role: employee.role,
+            portalId: employee.portalId,
             type: "employee",
         };
 
@@ -162,6 +175,7 @@ export class EmployeeAuthService {
         await this.employeeTokenRepository.create({
             token: refreshToken,
             employeeId: employee.id,
+            portalId: employee.portalId,
             expiresAt,
         });
 

@@ -9,9 +9,63 @@ datasource db {
   provider = "postgresql"
 }
 
+enum PortalStatus {
+  active
+  suspended
+  archived
+}
+
+model Portal {
+  id          String       @id @default(uuid())
+  name        String       @unique @db.VarChar(40)
+  displayName String       @map("display_name") @db.VarChar(255)
+  status      PortalStatus @default(active)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  users         User[]
+  members       Member[]
+  employees     Employee[]
+  tokens        Token[]
+  employeeTokens EmployeeToken[]
+  authSessions  AuthSession[]
+
+  @@index([name])
+  @@index([status])
+  @@map("portals")
+}
+
+model AuthSession {
+  id               String    @id @default(uuid())
+  portalId         String    @map("portal_id")
+  userId           String?   @map("user_id")
+  employeeId       String?   @map("employee_id")
+  memberId         String?   @map("member_id")
+  refreshTokenHash String    @unique @map("refresh_token_hash") @db.VarChar(255)
+  expiresAt        DateTime  @map("expires_at")
+  revokedAt        DateTime? @map("revoked_at")
+  ipAddress        String?   @map("ip_address") @db.VarChar(100)
+  userAgent        String?   @map("user_agent") @db.VarChar(1000)
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  portal   Portal   @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  employee Employee? @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  member   Member?  @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  @@index([portalId])
+  @@index([userId])
+  @@index([employeeId])
+  @@index([memberId])
+  @@index([expiresAt])
+  @@map("auth_sessions")
+}
+
 // Модель пользователя (минимальная - только для аутентификации)
 model User {
   id                           String    @id @default(uuid())
+  portalId                     String?   @map("portal_id")
   email                        String    @unique @db.VarChar(255)
   passwordHash                 String    @map("password_hash") @db.VarChar(255)
   isActive                     Boolean   @default(false) @map("is_active") // По умолчанию false, активируется после подтверждения email
@@ -24,11 +78,14 @@ model User {
   updatedAt                    DateTime  @updatedAt @map("updated_at")
 
   // Связи
+  portal      Portal?   @relation(fields: [portalId], references: [id], onDelete: SetNull)
   tokens      Token[]
   member      Member?
   employee    Employee?
+  sessions    AuthSession[]
   storageFiles StorageFile[]
 
+  @@index([portalId])
   @@index([email])
   @@index([isActive])
   @@map("users")
@@ -39,13 +96,16 @@ model Token {
   id     String @id @default(uuid())
   token  String @unique @db.VarChar(500)
   userId String @map("user_id")
+  portalId String? @map("portal_id")
 
   expiresAt DateTime @map("expires_at")
   createdAt DateTime @default(now()) @map("created_at")
 
   // Связи
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  portal Portal? @relation(fields: [portalId], references: [id], onDelete: SetNull)
 
+  @@index([portalId])
   @@index([userId])
   @@index([token])
   @@index([expiresAt])
@@ -57,13 +117,16 @@ model EmployeeToken {
   id         String @id @default(uuid())
   token      String @unique @db.VarChar(500)
   employeeId String @map("employee_id")
+  portalId   String? @map("portal_id")
 
   expiresAt DateTime @map("expires_at")
   createdAt DateTime @default(now()) @map("created_at")
 
   // Связи
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  portal   Portal?  @relation(fields: [portalId], references: [id], onDelete: SetNull)
 
+  @@index([portalId])
   @@index([employeeId])
   @@index([token])
   @@index([expiresAt])
@@ -185,6 +248,7 @@ model MemberDocument {
 model Member {
   id               String    @id @default(uuid())
   userId           String    @unique @map("user_id") // Один User может иметь только одного Member
+  portalId         String?   @map("portal_id")
   // Личные данные
   name             String    @db.VarChar(255)
   surname          String?   @db.VarChar(255)
@@ -202,6 +266,7 @@ model Member {
   updatedAt        DateTime  @updatedAt @map("updated_at")
 
   // Связи
+  portal            Portal?             @relation(fields: [portalId], references: [id], onDelete: SetNull)
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   identityDocuments IdentityDocument[]
   signature         Signature?
@@ -211,7 +276,9 @@ model Member {
   presenceSessions  PresenceSession[]
   orders            Order[]
   financialTransactions FinancialTransaction[]
+  sessions          AuthSession[]
 
+  @@index([portalId])
   @@index([userId])
   @@index([membershipNumber])
   @@index([status])
@@ -223,6 +290,7 @@ model Member {
 model Employee {
   id          String    @id @default(uuid())
   userId      String    @unique @map("user_id") // Один User может иметь только одного Employee
+  portalId    String?   @map("portal_id")
   // Личные данные
   name        String    @db.VarChar(255)
   surname     String?   @db.VarChar(255)
@@ -237,14 +305,17 @@ model Employee {
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
   // Связи
+  portal            Portal?            @relation(fields: [portalId], references: [id], onDelete: SetNull)
   user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   tokens            EmployeeToken[]
+  sessions          AuthSession[]
   presenceSessions  PresenceSession[] @relation("PresenceEmployee") // Сессии, где сотрудник отметил вход/выход
   processedOrders   Order[]           @relation("OrderEmployee") // Заказы, обработанные сотрудником
   createdProducts   Product[]         @relation("ProductCreatedBy") // Товары, созданные сотрудником
   updatedProducts   Product[]         @relation("ProductUpdatedBy") // Товары, обновленные сотрудником
   financialTransactions FinancialTransaction[] @relation("TransactionCreatedBy") // Транзакции, созданные сотрудником
 
+  @@index([portalId])
   @@index([userId])
   @@index([role])
   @@index([isActive])

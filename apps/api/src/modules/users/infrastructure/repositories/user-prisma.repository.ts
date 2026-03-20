@@ -45,6 +45,7 @@ export class UserPrismaRepository implements UserRepository {
                 ? new Employee({
                       id: user.employee.id,
                       userId: user.employee.userId,
+                      portalId: user.employee.portalId || undefined,
                       name: user.employee.name,
                       surname: user.employee.surname || undefined,
                       phone: user.employee.phone || undefined,
@@ -61,6 +62,7 @@ export class UserPrismaRepository implements UserRepository {
                 ? new Member({
                       id: user.member.id,
                       userId: user.member.userId,
+                      portalId: user.member.portalId || undefined,
                       name: user.member.name,
                       surname: user.member.surname || undefined,
                       phone: user.member.phone || undefined,
@@ -84,9 +86,10 @@ export class UserPrismaRepository implements UserRepository {
         return !!user;
     }
 
-    async create(data: { email: string; passwordHash: string }): Promise<User> {
+    async create(data: { email: string; passwordHash: string; portalId?: string }): Promise<User> {
         const user = await this.prisma.user.create({
             data: {
+                portalId: data.portalId,
                 email: data.email.toLowerCase(),
                 passwordHash: data.passwordHash,
             },
@@ -97,6 +100,7 @@ export class UserPrismaRepository implements UserRepository {
     async update(
         id: string,
         data: Partial<{
+            portalId: string | null;
             passwordHash: string;
             isActive: boolean;
             emailConfirmed: boolean;
@@ -135,6 +139,7 @@ export class UserPrismaRepository implements UserRepository {
 
     private mapToEntity(user: {
         id: string;
+        portalId: string | null;
         email: string;
         passwordHash: string;
         isActive: boolean;
@@ -148,6 +153,7 @@ export class UserPrismaRepository implements UserRepository {
     }): User {
         return new User({
             id: user.id,
+            portalId: user.portalId || undefined,
             email: user.email,
             passwordHash: user.passwordHash,
             isActive: user.isActive,

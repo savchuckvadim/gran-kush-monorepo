@@ -11,6 +11,7 @@ interface MemberJwtPayload {
     sub: string;
     userId: string;
     email: string;
+    portalId?: string | null;
     type: "member";
 }
 
@@ -25,7 +26,13 @@ export class MemberJwtStrategy extends PassportStrategy(Strategy, "member-jwt") 
             throw new Error(JWT_ERROR_MESSAGES.SECRET_NOT_CONFIGURED);
         }
         super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            jwtFromRequest: ExtractJwt.fromExtractors([
+                ExtractJwt.fromAuthHeaderAsBearerToken(),
+                (request: { cookies?: Record<string, unknown> }) => {
+                    const token = request?.cookies?.site_access_token;
+                    return typeof token === "string" ? token : null;
+                },
+            ]),
             ignoreExpiration: false,
             secretOrKey,
             passReqToCallback: true,

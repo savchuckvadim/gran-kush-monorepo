@@ -5,13 +5,14 @@ import { IsOptional, IsString, Matches, MaxLength, MinLength } from "class-valid
 import { IsEmailWithLowerCase } from "@common/decorators/dto/is-email-with-lower-case.decorator";
 
 export class RegisterEmployeeDto {
-    @ApiProperty({ example: "employee@example.com" })
+    @ApiProperty({ example: "employee@example.com", type: String })
     @IsEmailWithLowerCase()
     email: string;
 
     @ApiProperty({
         example: "Password123",
         description: "Password must contain uppercase, lowercase and number",
+        type: String,
     })
     @IsString()
     @MinLength(8)
@@ -20,36 +21,36 @@ export class RegisterEmployeeDto {
     })
     password: string;
 
-    @ApiProperty({ example: "John" })
+    @ApiProperty({ example: "John", type: String })
     @IsString()
     @MinLength(2)
     @MaxLength(100)
     name: string;
 
-    @ApiPropertyOptional({ example: "Doe" })
+    @ApiPropertyOptional({ example: "Doe", type: String })
     @IsString()
     @IsOptional()
     @MaxLength(100)
     surname?: string;
 
-    @ApiPropertyOptional({ example: "+1234567890" })
+    @ApiPropertyOptional({ example: "+1234567890", type: String })
     @IsString()
     @IsOptional()
     @Matches(/^\+?[1-9]\d{1,14}$/)
     phone?: string;
 
-    @ApiPropertyOptional({ example: "manager", enum: ["employee", "manager", "admin"] })
+    @ApiPropertyOptional({ example: "manager", enum: ["employee", "manager", "admin"], type: String })
     @IsString()
     @IsOptional()
     role?: string;
 
-    @ApiPropertyOptional({ example: "Senior Manager" })
+    @ApiPropertyOptional({ example: "Senior Manager", type: String })
     @IsString()
     @IsOptional()
     @MaxLength(255)
     position?: string;
 
-    @ApiPropertyOptional({ example: "Sales" })
+    @ApiPropertyOptional({ example: "Sales", type: String })
     @IsString()
     @IsOptional()
     @MaxLength(255)

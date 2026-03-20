@@ -16,6 +16,7 @@ import { FinanceModule } from "./modules/finance/finance.module";
 import { MailModule } from "./modules/mail/mail.module";
 import { MembersModule } from "./modules/members/members.module";
 import { OrdersModule } from "./modules/orders/orders.module";
+import { PortalsModule } from "./modules/portals/portals.module";
 import { PresenceModule } from "./modules/presence/presence.module";
 import { QrCodesModule } from "./modules/qr-codes/qr-codes.module";
 import { StorageModule } from "./modules/storage/storage.module";
@@ -53,6 +54,7 @@ import { TestModule } from "./modules/test/test.module";
 
         // ─── Прочее ──────────────────────────────────────────────────
         StorageModule,
+        PortalsModule,
         TestModule,
     ],
     controllers: [AppController],

@@ -6,6 +6,7 @@ import { Prisma } from "@prisma/client";
 export class Member {
     id: string;
     userId: string;
+    portalId?: string;
     // Личные данные
     name: string;
     surname?: string;

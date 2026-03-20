@@ -5,5 +5,6 @@
 export interface JwtPayload {
     sub: string; // user id
     email: string;
+    portalId?: string | null;
     type?: "user"; // Тип для различения от employee токенов
 }

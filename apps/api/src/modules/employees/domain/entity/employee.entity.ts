@@ -5,6 +5,7 @@
 export class Employee {
     id: string;
     userId: string;
+    portalId?: string;
     email: string; // Из User
     passwordHash: string; // Из User
     // Личные данные

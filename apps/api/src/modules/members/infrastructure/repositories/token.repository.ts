@@ -12,7 +12,12 @@ import { PrismaService } from "@common/prisma/prisma.service";
 export class TokenPrismaRepository implements TokenRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    async create(data: { token: string; userId: string; expiresAt: Date }): Promise<Token> {
+    async create(data: {
+        token: string;
+        userId: string;
+        portalId?: string;
+        expiresAt: Date;
+    }): Promise<Token> {
         return this.prisma.token.create({
             data,
         });

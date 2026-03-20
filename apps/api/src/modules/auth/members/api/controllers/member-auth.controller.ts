@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
+import {
+    BadRequestException,
+    Body,
+    Controller,
+    Get,
+    Post,
+    Req,
+    Res,
+    UseGuards,
+} from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { CurrentMember } from "@auth/members/api/decorators/current-member.decorator";
@@ -13,9 +22,12 @@ import { MemberLocalAuthGuard } from "@auth/members/infrastructure/guards/member
 import { PasswordResetResponseDto } from "@auth/shared/api/dto/password-reset-response.dto";
 import { RequestPasswordResetDto } from "@auth/shared/api/dto/request-password-reset.dto";
 import { ResetPasswordDto } from "@auth/shared/api/dto/reset-password.dto";
+import { AuthCookieService } from "@auth/shared/application/services/auth-cookie.service";
+import { AuthSessionService } from "@auth/shared/application/services/auth-session.service";
 import { EmailVerificationService } from "@auth/shared/application/services/email-verification.service";
 import { MembersService } from "@members/application/services/members.service";
 import { Member } from "@members/domain/entity/member.entity";
+import type { Request, Response } from "express";
 
 import { Public } from "@common/decorators/auth/public.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
@@ -28,7 +40,9 @@ export class MemberAuthController {
     constructor(
         private readonly memberAuthService: MemberAuthService,
         private readonly membersService: MembersService,
-        private readonly emailVerificationService: EmailVerificationService
+        private readonly emailVerificationService: EmailVerificationService,
+        private readonly cookieService: AuthCookieService,
+        private readonly authSessionService: AuthSessionService
     ) {}
 
     @Post("login")
@@ -41,9 +55,27 @@ export class MemberAuthController {
     @ApiErrorResponse([400, 401])
     async login(
         @Body() dto: MemberLoginDto,
-        @CurrentMember() _member: Member
+        @CurrentMember() _member: Member,
+        @Req() request: Request,
+        @Res({ passthrough: true }) response: Response
     ): Promise<MemberAuthResponseDto> {
-        return this.memberAuthService.login(dto);
+        const authResult = await this.memberAuthService.login(dto);
+        this.cookieService.setAuthCookies(response, "site", authResult);
+
+        const member = await this.membersService.findByUserId(authResult.user.id);
+        if (member?.portalId) {
+            await this.authSessionService.createSession({
+                portalId: member.portalId,
+                userId: authResult.user.id,
+                memberId: member.id,
+                refreshToken: authResult.refreshToken,
+                expiresAt: this.resolveRefreshExpiry(),
+                userAgent: request.headers["user-agent"] || null,
+                ipAddress: request.ip || null,
+            });
+        }
+
+        return authResult;
     }
 
     @Post("refresh")
@@ -53,8 +85,27 @@ export class MemberAuthController {
         description: "Token refreshed successfully",
     })
     @ApiErrorResponse([400, 401])
-    async refresh(@Body() dto: RefreshTokenDto): Promise<MemberRefreshTokenResponseDto> {
-        return this.memberAuthService.refreshToken(dto.refreshToken);
+    async refresh(
+        @Body() dto: RefreshTokenDto,
+        @Req() request: Request,
+        @Res({ passthrough: true }) response: Response
+    ): Promise<MemberRefreshTokenResponseDto> {
+        const tokenFromCookie = this.cookieService.getRefreshTokenFromRequestCookies(
+            request.cookies as Record<string, unknown>,
+            "site"
+        );
+        const refreshToken = dto.refreshToken || tokenFromCookie;
+        if (!refreshToken) {
+            throw new BadRequestException("Refresh token is required");
+        }
+
+        const refreshed = await this.memberAuthService.refreshToken(refreshToken);
+        this.cookieService.setAuthCookies(response, "site", {
+            accessToken: refreshed.accessToken,
+            refreshToken,
+        });
+
+        return refreshed;
     }
 
     @Post("logout")
@@ -63,8 +114,21 @@ export class MemberAuthController {
     @ApiSuccessResponse(MemberLogoutResponseDto, {
         description: "Logged out successfully",
     })
-    async logout(@Body() body: { refreshToken: string }): Promise<MemberLogoutResponseDto> {
-        await this.memberAuthService.logout(body.refreshToken);
+    async logout(
+        @Body() body: { refreshToken?: string },
+        @Req() request: Request,
+        @Res({ passthrough: true }) response: Response
+    ): Promise<MemberLogoutResponseDto> {
+        const tokenFromCookie = this.cookieService.getRefreshTokenFromRequestCookies(
+            request.cookies as Record<string, unknown>,
+            "site"
+        );
+        const refreshToken = body.refreshToken || tokenFromCookie;
+        if (refreshToken) {
+            await this.memberAuthService.logout(refreshToken);
+            await this.authSessionService.revokeByRefreshToken(refreshToken);
+        }
+        this.cookieService.clearAuthCookies(response, "site");
         return { message: "Logged out successfully" };
     }
 
@@ -116,5 +180,11 @@ export class MemberAuthController {
     @ApiErrorResponse([400, 404, 401])
     async confirmPasswordReset(@Body() dto: ResetPasswordDto): Promise<PasswordResetResponseDto> {
         return this.emailVerificationService.resetPassword(dto.token, dto.newPassword);
+    }
+
+    private resolveRefreshExpiry(): Date {
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 7);
+        return expiresAt;
     }
 }

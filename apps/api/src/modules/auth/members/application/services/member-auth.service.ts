@@ -16,6 +16,7 @@ interface MemberJwtPayload {
     sub: string; // member id
     userId: string; // user id
     email: string;
+    portalId?: string | null;
     type: "member"; // Тип для различения от employee токенов
 }
 
@@ -107,6 +108,13 @@ export class MemberAuthService {
                     return null;
                 }
             }
+            if (
+                payload.portalId &&
+                memberData.portalId &&
+                payload.portalId !== memberData.portalId
+            ) {
+                return null;
+            }
 
             return this.mapToEntity(memberData);
         } catch {
@@ -139,6 +147,7 @@ export class MemberAuthService {
                 sub: member.id,
                 userId: tokenRecord.user.id,
                 email: tokenRecord.user.email,
+                portalId: member.portalId,
                 type: "member",
             };
 
@@ -179,7 +188,7 @@ export class MemberAuthService {
      * Генерация access и refresh токенов с сохранением в БД
      */
     async generateTokens(
-        member: { id: string; userId: string },
+        member: { id: string; userId: string; portalId?: string | null },
         user: { id: string; email: string }
     ): Promise<{
         accessToken: string;
@@ -189,6 +198,7 @@ export class MemberAuthService {
             sub: member.id,
             userId: user.id,
             email: user.email,
+            portalId: member.portalId,
             type: "member",
         };
 
@@ -227,6 +237,7 @@ export class MemberAuthService {
         await this.tokenRepository.create({
             token: refreshToken,
             userId: user.id,
+            portalId: member.portalId || undefined,
             expiresAt,
         });
 
@@ -239,6 +250,7 @@ export class MemberAuthService {
     private mapToEntity(member: {
         id: string;
         userId: string;
+        portalId: string | null;
         name: string;
         surname: string | null;
         phone: string | null;
@@ -254,6 +266,7 @@ export class MemberAuthService {
         return new Member({
             id: member.id,
             userId: member.userId,
+            portalId: member.portalId || undefined,
             name: member.name,
             surname: member.surname || undefined,
             phone: member.phone || undefined,

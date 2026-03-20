@@ -7,6 +7,7 @@ export abstract class MemberRepository {
     abstract count(): Promise<number>;
     abstract create(data: {
         userId: string;
+        portalId?: string;
         name: string;
         surname?: string;
         phone?: string;

@@ -8,7 +8,7 @@ import { PrismaService } from "@common/prisma/prisma.service";
 export class EmployeeTokenPrismaRepository implements EmployeeTokenRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    async create(data: { token: string; employeeId: string; expiresAt: Date }) {
+    async create(data: { token: string; employeeId: string; portalId?: string; expiresAt: Date }) {
         return this.prisma.employeeToken.create({
             data,
         });

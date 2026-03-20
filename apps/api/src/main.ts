@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
 
 import { setCorsConfig } from "@common/config/cors/cors.config";
+import { setAuthSessionConfig } from "@common/config/auth/auth-session.config";
 
 import { AppModule } from "./app.module";
 import { getSwaggerConfig } from "./common/config/swagger/swagger.config";
@@ -19,6 +20,8 @@ async function bootstrap() {
         })
     );
     const configService = app.get(ConfigService);
+
+    setAuthSessionConfig(configService, app);
     // Настройка CORS
     setCorsConfig(configService, app);
 

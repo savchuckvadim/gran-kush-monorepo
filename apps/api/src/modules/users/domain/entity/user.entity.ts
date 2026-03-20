@@ -7,6 +7,7 @@ import { Member } from "@members/domain/entity/member.entity";
  */
 export class User {
     id: string;
+    portalId?: string;
     email: string;
     passwordHash: string;
     isActive: boolean;

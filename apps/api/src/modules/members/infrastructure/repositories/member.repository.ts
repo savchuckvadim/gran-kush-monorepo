@@ -41,6 +41,7 @@ export class MemberPrismaRepository implements MemberRepository {
 
     async create(data: {
         userId: string;
+        portalId?: string;
         name: string;
         surname?: string;
         phone?: string;

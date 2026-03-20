@@ -52,6 +52,7 @@ export class EmployeePrismaRepository implements EmployeeRepository {
 
     async create(data: {
         userId: string;
+        portalId?: string;
         name: string;
         surname?: string;
         phone?: string;
@@ -91,6 +92,7 @@ export class EmployeePrismaRepository implements EmployeeRepository {
         employee: {
             id: string;
             userId: string;
+            portalId: string | null;
             name: string;
             surname: string | null;
             phone: string | null;
@@ -111,6 +113,7 @@ export class EmployeePrismaRepository implements EmployeeRepository {
         return new Employee({
             id: employee.id,
             userId: employee.userId,
+            portalId: employee.portalId || undefined,
             email: user.email,
             passwordHash: user.passwordHash,
             name: employee.name,

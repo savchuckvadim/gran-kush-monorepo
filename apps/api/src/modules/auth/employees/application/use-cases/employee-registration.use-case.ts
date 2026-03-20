@@ -49,6 +49,7 @@ export class EmployeeRegistrationUseCase {
                 email: employee.email,
                 name: employee.name,
                 role: employee.role,
+                portalId: employee.portalId,
             },
         };
     }
