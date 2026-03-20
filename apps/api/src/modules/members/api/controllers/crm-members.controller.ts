@@ -7,19 +7,23 @@ import {
     Patch,
     Query,
     StreamableFile,
+    UploadedFiles,
+    UseInterceptors,
     UseGuards,
 } from "@nestjs/common";
-import { ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 
 import { Admin, AdminGuard, EmployeeJwtAuthGuard } from "@auth/employees";
 import { MembersService } from "@members/application/services/members.service";
 import { StorageService } from "@storage/application/services/storage.service";
+import { FileFieldsInterceptor } from "@nestjs/platform-express";
 
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 
 import { CrmMemberDto, CrmMemberFullDto, CrmMemberUpdateDto } from "../dto/crm-member.dto";
 import { CrmMemberFilesRequestDto } from "../dto/crm-member-documents.dto";
+import { MulterFile } from "@storage/domain/interfaces/storage-file.interface";
 
 @ApiTags("CRM Members Management")
 @Controller("crm/members")
@@ -142,6 +146,25 @@ export class CrmMembersController {
     @UseGuards(AdminGuard)
     @Admin()
     @ApiOperation({ summary: "Re-upload member files from CRM (Admin only)" })
+    @ApiConsumes("multipart/form-data")
+    @ApiBody({
+        schema: {
+            type: "object",
+            properties: {
+                documentType: { type: "string" },
+                documentFirst: { type: "string", format: "binary" },
+                documentSecond: { type: "string", format: "binary" },
+                signature: { type: "string", format: "binary" },
+            },
+        },
+    })
+    @UseInterceptors(
+        FileFieldsInterceptor([
+            { name: "documentFirst", maxCount: 1 },
+            { name: "documentSecond", maxCount: 1 },
+            { name: "signature", maxCount: 1 },
+        ])
+    )
     @ApiSuccessResponse(CrmMemberFullDto, {
         description: "Member details",
     })
@@ -149,9 +172,15 @@ export class CrmMembersController {
     async updateFiles(
         @Param("id") id: string,
         @Body()
-        dto: CrmMemberFilesRequestDto
+        dto: CrmMemberFilesRequestDto,
+        @UploadedFiles()
+        files: {
+            documentFirst?: MulterFile[];
+            documentSecond?: MulterFile[];
+            signature?: MulterFile[];
+        }
     ) {
-        const updated = await this.membersService.updateCrmMemberFiles(id, dto);
+        const updated = await this.membersService.updateCrmMemberFiles(id, dto, files);
         if (!updated) {
             throw new NotFoundException("Member not found");
         }

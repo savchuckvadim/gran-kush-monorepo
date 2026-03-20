@@ -425,6 +425,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/crm/presence/qr-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Предпросмотр QR-кода (без записи присутствия)
+         * @description Валидирует QR-код и возвращает информацию об участнике + предлагаемое действие (вход/выход). Запись в БД не выполняется.
+         */
+        post: operations["CrmPresence_previewQrScan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/crm/presence/manual/check-in": {
         parameters: {
             query?: never;
@@ -1393,28 +1413,6 @@ export interface components {
             /** @example 1234567890 */
             documentNumber: string | null;
         };
-        CrmMemberFilesRequestDto: {
-            /**
-             * @description Document type. Required when any identity document side is provided.
-             * @example passport
-             */
-            documentType?: string;
-            /**
-             * @description Identity document first side as data URL (base64).
-             * @example data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
-             */
-            documentFirst?: string;
-            /**
-             * @description Identity document second side as data URL (base64).
-             * @example data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
-             */
-            documentSecond?: string;
-            /**
-             * @description Signature image as data URL (base64).
-             * @example data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
-             */
-            signature?: string;
-        };
         StreamableFile: Record<string, never>;
         ProductCategoryDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
@@ -1898,6 +1896,31 @@ export interface components {
             session: components["schemas"]["PresenceSessionDto"];
             /** @example Участник отмечен на вход */
             message?: string;
+        };
+        QrPreviewResultDto: {
+            /**
+             * @description Валиден ли QR-код
+             * @example true
+             */
+            valid: boolean;
+            /**
+             * @description Сообщение об ошибке (если valid = false)
+             * @example QR-код истёк
+             */
+            error?: string;
+            /** @description Информация об участнике */
+            member?: components["schemas"]["PresenceMemberDto"];
+            /**
+             * @description Присутствует ли участник в клубе прямо сейчас
+             * @example false
+             */
+            isPresent: boolean;
+            /**
+             * @description Предлагаемое действие: вход (entry) или выход (exit)
+             * @example entry
+             * @enum {string}
+             */
+            proposedAction: "entry" | "exit";
         };
         ManualCheckInDto: {
             /**
@@ -2805,7 +2828,6 @@ export type SchemaCrmMemberMjStatusDto = components['schemas']['CrmMemberMjStatu
 export type SchemaCrmMemberDocumentDto = components['schemas']['CrmMemberDocumentDto'];
 export type SchemaCrmMemberFullDto = components['schemas']['CrmMemberFullDto'];
 export type SchemaCrmMemberUpdateDto = components['schemas']['CrmMemberUpdateDto'];
-export type SchemaCrmMemberFilesRequestDto = components['schemas']['CrmMemberFilesRequestDto'];
 export type SchemaStreamableFile = components['schemas']['StreamableFile'];
 export type SchemaProductCategoryDto = components['schemas']['ProductCategoryDto'];
 export type SchemaMeasurementUnitDto = components['schemas']['MeasurementUnitDto'];
@@ -2831,6 +2853,7 @@ export type SchemaPresenceMemberDto = components['schemas']['PresenceMemberDto']
 export type SchemaPresenceEmployeeDto = components['schemas']['PresenceEmployeeDto'];
 export type SchemaPresenceSessionDto = components['schemas']['PresenceSessionDto'];
 export type SchemaCheckInResultDto = components['schemas']['CheckInResultDto'];
+export type SchemaQrPreviewResultDto = components['schemas']['QrPreviewResultDto'];
 export type SchemaManualCheckInDto = components['schemas']['ManualCheckInDto'];
 export type SchemaManualCheckOutDto = components['schemas']['ManualCheckOutDto'];
 export type SchemaPaginatedResponsePresenceSessionDto = components['schemas']['PaginatedResponse_PresenceSessionDto'];
@@ -3078,7 +3101,15 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CrmMemberFilesRequestDto"];
+                "multipart/form-data": {
+                    documentType?: string;
+                    /** Format: binary */
+                    documentFirst?: string;
+                    /** Format: binary */
+                    documentSecond?: string;
+                    /** Format: binary */
+                    signature?: string;
+                };
             };
         };
         responses: {
@@ -4442,6 +4473,57 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CheckInResultDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmPresence_previewQrScan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QrCheckInDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QrPreviewResultDto"];
                 };
             };
             /** @description Bad Request */

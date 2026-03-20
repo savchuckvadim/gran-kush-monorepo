@@ -43,7 +43,7 @@ export function MemberQrCodeCard({ memberId }: MemberQrCodeCardProps) {
 
     if (!qrCode) {
         return (
-            <Card className="p-4">
+            <Card className="p-4 ">
                 <div className="space-y-4">
                     <div className="flex items-center gap-2">
                         <QrCode className="h-5 w-5 text-muted-foreground" />
@@ -76,7 +76,7 @@ export function MemberQrCodeCard({ memberId }: MemberQrCodeCardProps) {
     const expiresAt = new Date(qrCode.expiresAt);
 
     return (
-        <Card className="p-4">
+        <Card className="p-4 h-full" >
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">

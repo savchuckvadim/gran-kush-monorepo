@@ -106,11 +106,11 @@ export class S3Service {
             ContentType: contentType,
         };
 
-        const wantsPublicRead =
-            isPublic &&
-            (process.env.AWS_S3_PUBLIC_READ === "true" ||
-                process.env.S3_OBJECT_ACL === "public-read" ||
-                process.env.S3_PUBLIC_READ === "true");
+        const wantsPublicRead = isPublic
+            // isPublic &&
+            // (process.env.AWS_S3_PUBLIC_READ === "true" ||
+            //     process.env.S3_OBJECT_ACL === "public-read" ||
+            //     process.env.S3_PUBLIC_READ === "true");
 
         if (wantsPublicRead) {
             input.ACL = "public-read";
@@ -146,73 +146,7 @@ export class S3Service {
         return { url: this.getPublicUrl(key) };
     }
 
-    /**
-     * Загружает аватар пользователя
-     */
-    async uploadAvatar(
-        file: { buffer: Buffer; originalname: string; mimetype: string },
-        userId: string
-    ): Promise<{ url: string }> {
-        this.validateS3Config();
-
-        const fileExtension = file.originalname.split(".").pop();
-        const fileName = `${userId}-${randomUUID()}.${fileExtension}`;
-        const key = `avatars/${fileName}`;
-        await this.uploadBuffer({
-            key,
-            buffer: file.buffer,
-            contentType: file.mimetype,
-            isPublic: true,
-        });
-
-        return { url: this.getPublicUrl(key) };
-    }
-
-    /**
-     * Загружает hero изображение пользователя
-     */
-    async uploadHero(
-        file: { buffer: Buffer; originalname: string; mimetype: string },
-        userId: string
-    ): Promise<{ url: string }> {
-        this.validateS3Config();
-
-        const fileExtension = file.originalname.split(".").pop();
-        const fileName = `${userId}-${randomUUID()}.${fileExtension}`;
-        const key = `hero/${fileName}`;
-        await this.uploadBuffer({
-            key,
-            buffer: file.buffer,
-            contentType: file.mimetype,
-            isPublic: true,
-        });
-
-        return { url: this.getPublicUrl(key) };
-    }
-
-    /**
-     * Загружает медиа файл для поста (изображение или видео)
-     */
-    async uploadPostMedia(
-        file: { buffer: Buffer; originalname: string; mimetype: string },
-        userId: string
-    ): Promise<{ url: string }> {
-        this.validateS3Config();
-
-        const fileExtension = file.originalname.split(".").pop();
-        const fileName = `${userId}-${randomUUID()}.${fileExtension}`;
-        const folder = file.mimetype.startsWith("video/") ? "posts/videos" : "posts/images";
-        const key = `${folder}/${fileName}`;
-        await this.uploadBuffer({
-            key,
-            buffer: file.buffer,
-            contentType: file.mimetype,
-            isPublic: true,
-        });
-
-        return { url: this.getPublicUrl(key) };
-    }
-
+   
     /**
      * Удаляет объект из S3 по ключу.
      */

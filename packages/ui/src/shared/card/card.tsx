@@ -63,7 +63,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
                         {description && <CardDescription>{description}</CardDescription>}
                     </CardHeader>
                 )}
-                <CardContent className={contentClassName}>{children}</CardContent>
+                <CardContent className={contentClassName ?? "px-0"}>{children}</CardContent>
             </UICard>
         );
     }

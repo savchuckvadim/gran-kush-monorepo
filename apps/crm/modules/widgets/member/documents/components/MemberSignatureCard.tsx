@@ -10,6 +10,7 @@ export interface IMemberSignatureCardProps {
     signatureTitle: string;
 }
 export function MemberSignatureCard({ memberId, locale, signatureTitle }: IMemberSignatureCardProps) {
+  
     return (
         <Link
             href={`/${locale}/crm/members/${memberId}/documents/signature`}

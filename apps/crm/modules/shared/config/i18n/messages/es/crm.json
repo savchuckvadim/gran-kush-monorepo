@@ -6,7 +6,7 @@
             "workspace": "Espacio de trabajo interno",
             "profile": "Perfil del empleado",
             "nav": {
-                "clients": "Clientes",
+                "clients": "Miembros",
                 "products": "Productos",
                 "orders": "Pedidos",
                 "attendance": "Asistencia",
@@ -16,7 +16,7 @@
             }
         },
         "members": {
-            "title": "Clientes",
+            "title": "Miembros",
             "subtitle": "Miembros del club creados (vista temporal sin autenticación)",
             "total": "{count} en total",
             "columns": {
@@ -29,7 +29,7 @@
             "openProfile": "Abrir perfil",
             "viewModeTable": "Tabla",
             "viewModeCards": "Tarjetas",
-            "backToClients": "Volver a clientes",
+            "backToClients": "Volver a miembros",
             "backToProfile": "Volver al perfil",
             "profileTitle": "Perfil",
             "notesTitle": "Notas",

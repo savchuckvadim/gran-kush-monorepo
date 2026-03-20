@@ -2,10 +2,10 @@
 
 import { useTranslations } from "next-intl";
 
+import { CrmLogoutButton } from "@/modules/shared";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 import { Sidebar } from "@/modules/shared/ui/Sidebar";
-import { CrmLogoutButton } from "@/modules/widgets/crm-shell/crm-logout-button";
 
 import { useCrmNavigation } from "./crm-navigation.hook";
 
