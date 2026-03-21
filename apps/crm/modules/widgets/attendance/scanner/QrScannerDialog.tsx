@@ -23,7 +23,7 @@ import { type QrPreviewResult, useQrPreview, useQrScan } from "@/modules/entitie
 import { QrPreviewCard } from "./QrPreviewCard";
 import { ScanResultCard } from "./ScanResultCard";
 import { QrCameraScannerYudiel } from "./QrCameraScannerYudiel";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useLocalizedLink } from "@/modules/shared";
 
 // ─── State machine ────────────────────────────────────────────────────────────
