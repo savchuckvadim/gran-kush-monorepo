@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
 import { AlertCircle, Camera } from "lucide-react";
@@ -53,6 +53,11 @@ export function QrCameraScannerYudiel({ onScan }: QrCameraScannerYudielProps) {
     const [ready, setReady] = useState(false);
     const scannedRef = useRef(false);
 
+    useEffect(() => {
+        // В этой версии библиотеки нет onLoad; считаем сканер "готовым" после монтирования.
+        setReady(true);
+    }, []);
+
     const constraints = useMemo<MediaTrackConstraints>(
         () => ({ facingMode: { ideal: "environment" } }),
         []
@@ -91,9 +96,6 @@ export function QrCameraScannerYudiel({ onScan }: QrCameraScannerYudielProps) {
                                 ? "Нет доступа к камере. Разрешите доступ в настройках браузера."
                                 : `Ошибка камеры: ${message}`
                         );
-                    }}
-                    onLoad={() => {
-                        setReady(true);
                     }}
                     styles={{
                         container: { width: "100%" },
