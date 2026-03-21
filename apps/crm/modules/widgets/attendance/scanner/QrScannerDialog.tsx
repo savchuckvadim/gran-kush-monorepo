@@ -67,7 +67,10 @@ function normalizeScannedPayload(raw: string): string {
     // If backend payload is stored as a URL in QR (e.g. ".../scan?code=..."),
     // extract the actual payload value from query params.
     try {
-        const url = new URL(trimmed, typeof window !== "undefined" ? window.location.origin : undefined);
+        const url = new URL(
+            trimmed,
+            typeof window !== "undefined" ? window.location.origin : undefined
+        );
         return url.searchParams.get("code") ?? url.searchParams.get("scan") ?? trimmed;
     } catch {
         // not a valid URL, continue with regex fallback
@@ -82,7 +85,7 @@ function normalizeScannedPayload(raw: string): string {
 
 export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
     const router = useRouter();
-    const getLocalizedPath = useLocalizedLink()
+    const getLocalizedPath = useLocalizedLink();
 
     const resultRedirect = useCallback(() => {
         const resultRedirectLink = getLocalizedPath("/crm/attendance");
@@ -231,9 +234,7 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
                         {step === "preview" && t("titlePreview")}
                         {step === "result" && t("titleResult")}
                     </DialogTitle>
-                    {step === "scan" && (
-                        <DialogDescription>{t("description")}</DialogDescription>
-                    )}
+                    {step === "scan" && <DialogDescription>{t("description")}</DialogDescription>}
                 </DialogHeader>
 
                 {/* ── Шаг 1: SCAN ─────────────────────────────────────────── */}
@@ -270,7 +271,10 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
                         {/* Камера */}
                         {tab === "camera" && (
                             <>
-                                <QrCameraScannerYudiel key={cameraRestartKey} onScan={handleCodeScanned} />
+                                <QrCameraScannerYudiel
+                                    key={cameraRestartKey}
+                                    onScan={handleCodeScanned}
+                                />
                                 {qrPreview.isPending && (
                                     <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                                         <Loader2 className="h-4 w-4 animate-spin" />
