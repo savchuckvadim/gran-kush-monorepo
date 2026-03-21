@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { Camera, Keyboard, Loader2, XCircle } from "lucide-react";
@@ -18,13 +19,11 @@ import {
 import { cn } from "@workspace/ui/lib/utils";
 
 import { type QrPreviewResult, useQrPreview, useQrScan } from "@/modules/entities/presence";
-
+import { useLocalizedLink } from "@/modules/shared";
 
 import { QrPreviewCard } from "./QrPreviewCard";
-import { ScanResultCard } from "./ScanResultCard";
 import { QrCameraScannerYudiel } from "./QrCameraScannerYudiel";
-import { useRouter } from "next/navigation";
-import { useLocalizedLink } from "@/modules/shared";
+import { ScanResultCard } from "./ScanResultCard";
 
 // ─── State machine ────────────────────────────────────────────────────────────
 
@@ -107,6 +106,7 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
     const [scanResult, setScanResult] = useState<SchemaCheckInResultDto | null>(null);
     const [validationError, setValidationError] = useState<string | null>(null);
     const [scanDebugMessage, setScanDebugMessage] = useState<string | null>(null);
+    const autoScanConsumedRef = useRef<string | null>(null);
 
     // ── Обработка считанного кода ─────────────────────────────────────────────
 
@@ -168,8 +168,7 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
         setCameraRestartKey((v) => v + 1);
         qrPreview.reset();
         qrScan.reset();
-        resultRedirect();
-    }, [qrPreview, qrScan, resultRedirect]);
+    }, [qrPreview, qrScan]);
 
     // ── Подтверждение: фактическая запись присутствия ─────────────────────────
     const handleConfirm = useCallback(async () => {
@@ -188,7 +187,6 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
             }, 800);
         } catch {
             // ошибка — видна через qrScan.isError
-            resultRedirect();
         }
     }, [qrScan, scannedCode, handleReset, resultRedirect]);
 
@@ -197,15 +195,15 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
             setOpen(isOpen);
             if (!isOpen) {
                 handleReset();
-                resultRedirect();
             }
         },
-        [handleReset, resultRedirect]
+        [handleReset]
     );
 
     // Option B: автоматическое открытие с предзаполненным кодом
     useEffect(() => {
-        if (autoScanCode) {
+        if (autoScanCode && autoScanConsumedRef.current !== autoScanCode) {
+            autoScanConsumedRef.current = autoScanCode;
             // Деферим setState, чтобы не вызывать обновления синхронно внутри эффекта.
             // И сразу запускаем preview, чтобы "скан" работал как ожидалось.
             setTimeout(() => {
