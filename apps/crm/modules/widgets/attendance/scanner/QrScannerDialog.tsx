@@ -22,6 +22,7 @@ import { type QrPreviewResult,useQrPreview, useQrScan } from "@/modules/entities
 import { QrCameraScanner } from "./QrCameraScanner";
 import { QrPreviewCard } from "./QrPreviewCard";
 import { ScanResultCard } from "./ScanResultCard";
+import { QrCameraScannerYudiel } from "./QrCameraScannerYudiel";
 
 // ─── State machine ────────────────────────────────────────────────────────────
 
@@ -255,7 +256,7 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
                         {/* Камера */}
                         {tab === "camera" && (
                             <>
-                                <QrCameraScanner key={cameraRestartKey} onScan={handleCodeScanned} />
+                                <QrCameraScannerYudiel key={cameraRestartKey} onScan={handleCodeScanned} />
                                 {qrPreview.isPending && (
                                     <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                                         <Loader2 className="h-4 w-4 animate-spin" />

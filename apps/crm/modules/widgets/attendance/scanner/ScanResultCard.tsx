@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import { CheckCircle, LogIn, LogOut, RotateCcw } from "lucide-react";
+import {  LogIn, LogOut, RotateCcw } from "lucide-react";
 
 import type { SchemaCheckInResultDto } from "@workspace/api-client/core";
 import { Button } from "@workspace/ui";
