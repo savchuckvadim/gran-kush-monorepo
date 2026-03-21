@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { Camera, Keyboard, Loader2,XCircle } from "lucide-react";
+import { Camera, Keyboard, Loader2, XCircle } from "lucide-react";
 
 import type { SchemaCheckInResultDto } from "@workspace/api-client/core";
 import {
@@ -17,12 +17,14 @@ import {
 } from "@workspace/ui";
 import { cn } from "@workspace/ui/lib/utils";
 
-import { type QrPreviewResult,useQrPreview, useQrScan } from "@/modules/entities/presence";
+import { type QrPreviewResult, useQrPreview, useQrScan } from "@/modules/entities/presence";
 
-import { QrCameraScanner } from "./QrCameraScanner";
+
 import { QrPreviewCard } from "./QrPreviewCard";
 import { ScanResultCard } from "./ScanResultCard";
 import { QrCameraScannerYudiel } from "./QrCameraScannerYudiel";
+import { useRouter } from "next/router";
+import { useLocalizedLink } from "@/modules/shared";
 
 // ─── State machine ────────────────────────────────────────────────────────────
 
@@ -80,6 +82,14 @@ function normalizeScannedPayload(raw: string): string {
 }
 
 export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
+    const router = useRouter();
+    const getLocalizedPath = useLocalizedLink()
+
+    const resultRedirect = useCallback(() => {
+        const resultRedirectLink = getLocalizedPath("/crm/attendance");
+
+        router.push(resultRedirectLink);
+    }, [getLocalizedPath, router]);
     const t = useTranslations("crm.attendance.scanner");
 
     const qrPreview = useQrPreview();
@@ -158,7 +168,8 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
         setCameraRestartKey((v) => v + 1);
         qrPreview.reset();
         qrScan.reset();
-    }, [qrPreview, qrScan]);
+        resultRedirect();
+    }, [qrPreview, qrScan, resultRedirect]);
 
     // ── Подтверждение: фактическая запись присутствия ─────────────────────────
     const handleConfirm = useCallback(async () => {
@@ -173,18 +184,23 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
             window.setTimeout(() => {
                 setOpen(false);
                 handleReset();
+                resultRedirect();
             }, 800);
         } catch {
             // ошибка — видна через qrScan.isError
+            resultRedirect();
         }
-    }, [qrScan, scannedCode, handleReset]);
+    }, [qrScan, scannedCode, handleReset, resultRedirect]);
 
     const handleClose = useCallback(
         (isOpen: boolean) => {
             setOpen(isOpen);
-            if (!isOpen) handleReset();
+            if (!isOpen) {
+                handleReset();
+                resultRedirect();
+            }
         },
-        [handleReset]
+        [handleReset, resultRedirect]
     );
 
     // Option B: автоматическое открытие с предзаполненным кодом
