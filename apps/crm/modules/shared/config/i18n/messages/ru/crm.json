@@ -6,7 +6,7 @@
             "workspace": "Внутреннее рабочее пространство",
             "profile": "Профиль сотрудника",
             "nav": {
-                "clients": "Клиенты",
+                "clients": "Участники",
                 "products": "Товары",
                 "orders": "Заказы",
                 "attendance": "Посещаемость",
@@ -16,7 +16,7 @@
             }
         },
         "members": {
-            "title": "Клиенты",
+            "title": "Участники",
             "subtitle": "Созданные члены клуба (временный просмотр без авторизации)",
             "total": "Всего: {count}",
             "columns": {
@@ -29,7 +29,7 @@
             "openProfile": "Открыть профиль",
             "viewModeTable": "Таблица",
             "viewModeCards": "Карточки",
-            "backToClients": "Назад к клиентам",
+            "backToClients": "Назад к участникам",
             "backToProfile": "Назад к профилю",
             "profileTitle": "Профиль",
             "notesTitle": "Заметки",

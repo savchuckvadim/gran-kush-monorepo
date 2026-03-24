@@ -49,6 +49,7 @@ export function MemberDocuments({
                     ))}
                     {member.signature && (
                         <MemberSignatureCard
+                  
                             memberId={member.id}
                             locale={locale}
                             signatureTitle={signatureTitle}

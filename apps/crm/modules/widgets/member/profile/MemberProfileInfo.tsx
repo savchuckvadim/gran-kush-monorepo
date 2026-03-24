@@ -1,6 +1,8 @@
 'use client'
 import { useTranslations } from "next-intl";
 
+import { Card } from "@workspace/ui";
+
 import { CrmMemberDetails } from "@/modules/entities/member";
 import { MemberProfileEditModal } from "@/modules/features";
 export interface IMemberProfileInfoProps {
@@ -10,8 +12,8 @@ export interface IMemberProfileInfoProps {
 export function MemberProfileInfo({ member }: IMemberProfileInfoProps) {
     const t = useTranslations("crm.members");
     return (
-        <div className="grid gap-4 grid-cols-1 lg:grid-cols-3">
-            <section className="rounded-lg border bg-background p-4">
+        <Card className="p-4 ">
+            <section className="">
                 <div className="mb-3 flex items-center justify-between gap-2">
                     <h2 className="text-base font-medium">{t("profileTitle")}</h2>
                     <MemberProfileEditModal member={member} />
@@ -51,11 +53,7 @@ export function MemberProfileInfo({ member }: IMemberProfileInfoProps) {
                     </div>
                 </dl>
             </section>
+        </Card>
 
-            <section className="rounded-lg border bg-background p-4">
-                <h2 className="mb-3 text-base font-medium">{t("notesTitle")}</h2>
-                <p className="text-sm text-muted-foreground">{member.notes ?? t("noNotes")}</p>
-            </section>
-        </div>
     )
 }

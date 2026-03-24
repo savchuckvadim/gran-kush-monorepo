@@ -65,18 +65,35 @@ export function getSignaturePreviewUrl(memberId: string): string {
 
 export interface UpdateCrmMemberFilesPayload {
     documentType?: string;
-    documentFirst?: string;
-    documentSecond?: string;
-    signature?: string;
+    documentFirst?: File | Blob;
+    documentSecond?: File | Blob;
+    signature?: File | Blob;
 }
 
 export async function updateCrmMemberFiles(
     memberId: string,
     payload: UpdateCrmMemberFilesPayload
 ): Promise<CrmMemberDetails> {
+    const formData = new FormData();
+
+    if (payload.documentType) formData.append("documentType", payload.documentType);
+
+    const appendIfPresent = (key: string, value: File | Blob | undefined, fallbackName: string) => {
+        if (!value) return;
+        if (value instanceof File) {
+            formData.append(key, value);
+            return;
+        }
+        formData.append(key, value, fallbackName);
+    };
+
+    appendIfPresent("documentFirst", payload.documentFirst, "document-first.png");
+    appendIfPresent("documentSecond", payload.documentSecond, "document-second.png");
+    appendIfPresent("signature", payload.signature, "signature.png");
+
     const member = await $api.PATCH('/crm/members/{id}/files', {
         params: { path: { id: memberId } },
-        body: payload as any,
+        body: formData as unknown as Record<string, unknown>,
     });
     return (member.data) as SchemaCrmMemberFullDto as CrmMemberDetails;
 }

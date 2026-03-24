@@ -6,7 +6,7 @@
             "workspace": "Internal workspace",
             "profile": "Employee profile",
             "nav": {
-                "clients": "Clients",
+                "clients": "Members",
                 "products": "Products",
                 "orders": "Orders",
                 "attendance": "Attendance",
@@ -16,7 +16,7 @@
             }
         },
         "members": {
-            "title": "Clients",
+            "title": "Members",
             "subtitle": "Created club members (temporary no-auth preview)",
             "total": "{count} total",
             "columns": {
@@ -29,7 +29,7 @@
             "openProfile": "Open profile",
             "viewModeTable": "Table",
             "viewModeCards": "Cards",
-            "backToClients": "Back to clients",
+            "backToClients": "Back to Members",
             "backToProfile": "Back to profile",
             "profileTitle": "Profile",
             "notesTitle": "Notes",

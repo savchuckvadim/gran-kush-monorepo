@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import type { Html5Qrcode } from "html5-qrcode";
 import { AlertCircle, Camera } from "lucide-react";
 
 interface QrCameraScannerProps {
@@ -31,8 +32,17 @@ export function QrCameraScanner({ onScan }: QrCameraScannerProps) {
 
     useEffect(() => {
         scannedRef.current = false;
-        let scanner: any = null;
+        let scanner: Html5Qrcode | null = null;
         let stopped = false;
+        const stopVideoTracks = () => {
+            const host = document.getElementById(divId);
+            const video = host?.querySelector("video") as HTMLVideoElement | null;
+            const stream = video?.srcObject as MediaStream | null;
+            stream?.getTracks().forEach((track) => track.stop());
+            if (video) {
+                video.srcObject = null;
+            }
+        };
 
         import("html5-qrcode")
             .then(({ Html5Qrcode }) => {
@@ -70,11 +80,23 @@ export function QrCameraScanner({ onScan }: QrCameraScannerProps) {
 
         return () => {
             stopped = true;
-            if (scanner) {
-                scanner
-                    .stop()
+            if (!scanner) {
+                stopVideoTracks();
+                return;
+            }
+
+            const clearScanner = () => {
+                Promise.resolve(scanner?.clear?.())
                     .catch(() => {})
-                    .finally(() => scanner.clear().catch(() => {}));
+                    .finally(stopVideoTracks);
+            };
+
+            try {
+                Promise.resolve(scanner.stop())
+                    .catch(() => {})
+                    .finally(clearScanner);
+            } catch {
+                clearScanner();
             }
         };
     }, [divId]);

@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { Camera, Keyboard, Loader2,XCircle } from "lucide-react";
+import { Camera, Keyboard, Loader2, XCircle } from "lucide-react";
 
 import type { SchemaCheckInResultDto } from "@workspace/api-client/core";
 import {
@@ -17,10 +18,11 @@ import {
 } from "@workspace/ui";
 import { cn } from "@workspace/ui/lib/utils";
 
-import { type QrPreviewResult,useQrPreview, useQrScan } from "@/modules/entities/presence";
+import { type QrPreviewResult, useQrPreview, useQrScan } from "@/modules/entities/presence";
+import { useLocalizedLink } from "@/modules/shared";
 
-import { QrCameraScanner } from "./QrCameraScanner";
 import { QrPreviewCard } from "./QrPreviewCard";
+import { QrCameraScannerYudiel } from "./QrCameraScannerYudiel";
 import { ScanResultCard } from "./ScanResultCard";
 
 // ─── State machine ────────────────────────────────────────────────────────────
@@ -65,7 +67,10 @@ function normalizeScannedPayload(raw: string): string {
     // If backend payload is stored as a URL in QR (e.g. ".../scan?code=..."),
     // extract the actual payload value from query params.
     try {
-        const url = new URL(trimmed, typeof window !== "undefined" ? window.location.origin : undefined);
+        const url = new URL(
+            trimmed,
+            typeof window !== "undefined" ? window.location.origin : undefined
+        );
         return url.searchParams.get("code") ?? url.searchParams.get("scan") ?? trimmed;
     } catch {
         // not a valid URL, continue with regex fallback
@@ -79,6 +84,14 @@ function normalizeScannedPayload(raw: string): string {
 }
 
 export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
+    const router = useRouter();
+    const getLocalizedPath = useLocalizedLink();
+
+    const resultRedirect = useCallback(() => {
+        const resultRedirectLink = getLocalizedPath("/crm/attendance");
+
+        router.push(resultRedirectLink);
+    }, [getLocalizedPath, router]);
     const t = useTranslations("crm.attendance.scanner");
 
     const qrPreview = useQrPreview();
@@ -96,6 +109,7 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
     const [scanResult, setScanResult] = useState<SchemaCheckInResultDto | null>(null);
     const [validationError, setValidationError] = useState<string | null>(null);
     const [scanDebugMessage, setScanDebugMessage] = useState<string | null>(null);
+    const autoScanConsumedRef = useRef<string | null>(null);
 
     // ── Обработка считанного кода ─────────────────────────────────────────────
 
@@ -146,20 +160,6 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
         handleCodeScanned(manualCode);
     }, [handleCodeScanned, manualCode]);
 
-    // ── Подтверждение: фактическая запись присутствия ─────────────────────────
-
-    const handleConfirm = useCallback(async () => {
-        try {
-            const result = await qrScan.mutateAsync(scannedCode);
-            setScanResult(result);
-            setStep("result");
-        } catch {
-            // ошибка — видна через qrScan.isError
-        }
-    }, [qrScan, scannedCode]);
-
-    // ── Сброс ─────────────────────────────────────────────────────────────────
-
     const handleReset = useCallback(() => {
         setStep("scan");
         setScannedCode("");
@@ -173,17 +173,40 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
         qrScan.reset();
     }, [qrPreview, qrScan]);
 
+    // ── Подтверждение: фактическая запись присутствия ─────────────────────────
+    const handleConfirm = useCallback(async () => {
+        try {
+            const result = await qrScan.mutateAsync(scannedCode);
+            setScanResult(result);
+            setStep("result");
+
+            // Закрываем диалог после подтверждения присутствия/отсутствия,
+            // чтобы не оставлять пользователя внутри мастера сканирования.
+            // Небольшая задержка дает секунду увидеть результат (вход/выход).
+            window.setTimeout(() => {
+                setOpen(false);
+                handleReset();
+                resultRedirect();
+            }, 800);
+        } catch {
+            // ошибка — видна через qrScan.isError
+        }
+    }, [qrScan, scannedCode, handleReset, resultRedirect]);
+
     const handleClose = useCallback(
         (isOpen: boolean) => {
             setOpen(isOpen);
-            if (!isOpen) handleReset();
+            if (!isOpen) {
+                handleReset();
+            }
         },
         [handleReset]
     );
 
     // Option B: автоматическое открытие с предзаполненным кодом
     useEffect(() => {
-        if (autoScanCode) {
+        if (autoScanCode && autoScanConsumedRef.current !== autoScanCode) {
+            autoScanConsumedRef.current = autoScanCode;
             // Деферим setState, чтобы не вызывать обновления синхронно внутри эффекта.
             // И сразу запускаем preview, чтобы "скан" работал как ожидалось.
             setTimeout(() => {
@@ -211,9 +234,7 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
                         {step === "preview" && t("titlePreview")}
                         {step === "result" && t("titleResult")}
                     </DialogTitle>
-                    {step === "scan" && (
-                        <DialogDescription>{t("description")}</DialogDescription>
-                    )}
+                    {step === "scan" && <DialogDescription>{t("description")}</DialogDescription>}
                 </DialogHeader>
 
                 {/* ── Шаг 1: SCAN ─────────────────────────────────────────── */}
@@ -250,7 +271,10 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
                         {/* Камера */}
                         {tab === "camera" && (
                             <>
-                                <QrCameraScanner key={cameraRestartKey} onScan={handleCodeScanned} />
+                                <QrCameraScannerYudiel
+                                    key={cameraRestartKey}
+                                    onScan={handleCodeScanned}
+                                />
                                 {qrPreview.isPending && (
                                     <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                                         <Loader2 className="h-4 w-4 animate-spin" />

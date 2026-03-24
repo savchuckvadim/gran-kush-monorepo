@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import { MemberDocumentPreviewClient } from "./MemberDocumentPreviewClient";
+import { MemberDocumentPreviewPage } from "@/modules/pages";
 
 export default async function CrmMemberDocumentPreviewPage({
     params,
@@ -11,13 +11,13 @@ export default async function CrmMemberDocumentPreviewPage({
     const t = await getTranslations("crm.members");
 
     return (
-        <MemberDocumentPreviewClient
+        <MemberDocumentPreviewPage
             locale={locale}
             memberId={memberId}
-            documentId={documentId}
+            documentType={documentId}
             previewTitle={t("singleDocumentPreviewTitle")}
-            backToDocumentsLabel={t("backToDocuments")}
-            downloadLabel={t("downloadDocument")}
+            // backToProfile={t("backToProfile")}
+            // downloadLabel={t("downloadDocument")}
         />
     );
 }

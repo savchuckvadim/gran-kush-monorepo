@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { Cat, Menu, Rabbit, X } from "lucide-react";
+import {  Menu, Rabbit, X } from "lucide-react";
 
 import { Button, ThemeToggle } from "@workspace/ui";
 import { cn } from "@workspace/ui/lib/utils";
@@ -29,7 +29,7 @@ export function CrmShell({ children }: CrmShellProps) {
     return (
         <div className="flex min-h-screen min-w-full flex-row">
             <CrmSidebar />
-            <div className="flex flex-1 flex-col">
+            <div className="flex flex-1 flex-col w-full justify-center">
                 <header
                     className={cn(
                         "sticky top-0 flex w-full justify-center  bg-background/80 backdrop-blur-sm",
@@ -82,7 +82,7 @@ export function CrmShell({ children }: CrmShellProps) {
                     </div>
                 </header>
 
-                <main className="container flex flex-1 flex-col p-3">{children}</main>
+                <main className="container mx-auto flex flex-1 flex-col p-3 pt-0">{children}</main>
             </div>
         </div>
     );

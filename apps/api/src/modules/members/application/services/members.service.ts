@@ -14,36 +14,13 @@ import { MemberRepository } from "@members/domain/repositories/member-repository
 import { MjStatusRepository } from "@members/domain/repositories/mj-status-repository.interface";
 import { SignatureRepository } from "@members/domain/repositories/signature-repository.interface";
 import { StorageType } from "@storage/domain/enums/storage-type.enum";
+import { MulterFile } from "@storage/domain/interfaces/storage-file.interface";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import { hash } from "bcrypt";
 
 import { CrmMemberFullDto, CrmMemberUpdateDto } from "@modules/members/api/dto/crm-member.dto";
 import { CrmMemberFilesRequestDto } from "@modules/members/api/dto/crm-member-documents.dto";
 import { StorageService } from "@modules/storage";
-
-// interface UpdateCrmMemberDto extends CrmMemberUpdateDto  {
-//     name?: string;
-//     surname?: string;
-//     phone?: string;
-//     birthday?: string;
-//     membershipNumber?: string;
-//     address?: string;
-//     status?: string;
-//     notes?: string;
-//     isMedical?: boolean;
-//     isMj?: boolean;
-//     isRecreation?: boolean;
-//     documentType?: string;
-//     documentNumber?: string;
-// }
-
-// interface UpdateCrmMemberFilesDto {
-//     documentType?: string;
-//     documentFirst?: string;
-//     documentSecond?: string;
-//     signature?: string;
-// }
-
 @Injectable()
 export class MembersService {
     constructor(
@@ -311,7 +288,12 @@ export class MembersService {
 
     async updateCrmMemberFiles(
         memberId: string,
-        dto: CrmMemberFilesRequestDto
+        dto: CrmMemberFilesRequestDto,
+        files: {
+            documentFirst?: MulterFile[];
+            documentSecond?: MulterFile[];
+            signature?: MulterFile[];
+        }
     ): Promise<CrmMemberFullDto> {
         const member = await this.memberRepository.findById(memberId);
         if (!member) {
@@ -321,10 +303,20 @@ export class MembersService {
         const documentType =
             dto.documentType ?? member.memberDocuments[0]?.document.type ?? "passport";
 
-        if (dto.documentFirst) {
-            const firstPath = await this.savePrivateDataUrl(
-                dto.documentFirst,
-                `identity-first-${documentType}.png`,
+        const documentFirst = files.documentFirst?.[0];
+        const documentSecond = files.documentSecond?.[0];
+        const signature = files.signature?.[0];
+
+        if (!documentFirst && !documentSecond && !signature) {
+            throw new BadRequestException(
+                "At least one file (document or signature) must be provided."
+            );
+        }
+
+        if (documentFirst) {
+            const firstPath = await this.savePrivateUploadedFile(
+                documentFirst,
+                `identity-first-${documentType}`,
                 memberId
             );
             await this.identityDocumentRepository.upsertByMemberTypeAndSide({
@@ -335,10 +327,10 @@ export class MembersService {
             });
         }
 
-        if (dto.documentSecond) {
-            const secondPath = await this.savePrivateDataUrl(
-                dto.documentSecond,
-                `identity-second-${documentType}.png`,
+        if (documentSecond) {
+            const secondPath = await this.savePrivateUploadedFile(
+                documentSecond,
+                `identity-second-${documentType}`,
                 memberId
             );
             await this.identityDocumentRepository.upsertByMemberTypeAndSide({
@@ -349,10 +341,10 @@ export class MembersService {
             });
         }
 
-        if (dto.signature) {
-            const signaturePath = await this.savePrivateDataUrl(
-                dto.signature,
-                "signature.png",
+        if (signature) {
+            const signaturePath = await this.savePrivateUploadedFile(
+                signature,
+                "signature",
                 memberId
             );
             await this.signatureRepository.upsertByMemberId(memberId, {
@@ -399,24 +391,30 @@ export class MembersService {
         } as CrmMemberFullDto;
     }
 
-    private async savePrivateDataUrl(
-        dataUrl: string,
-        fileName: string,
+    private getExtensionFromMime(mimeType: string): string {
+        const mimeToExtension: Record<string, string> = {
+            "image/jpeg": "jpg",
+            "image/jpg": "jpg",
+            "image/png": "png",
+            "image/webp": "webp",
+            "application/pdf": "pdf",
+        };
+
+        return mimeToExtension[mimeType] ?? "bin";
+    }
+
+    private async savePrivateUploadedFile(
+        file: MulterFile,
+        filePrefix: string,
         memberId: string
     ): Promise<string> {
-        const dataUrlMatch = dataUrl.match(/^data:(?<mime>[-\w./+]+);base64,(?<payload>.+)$/);
-
-        if (!dataUrlMatch?.groups?.payload || !dataUrlMatch.groups.mime) {
-            throw new BadRequestException("Invalid data URL format");
-        }
-
-        const buffer = Buffer.from(dataUrlMatch.groups.payload, "base64");
+        const extension = this.getExtensionFromMime(file.mimetype);
 
         const uploaded = await this.storageService.uploadFile(
             {
-                buffer,
-                originalname: fileName,
-                mimetype: dataUrlMatch.groups.mime,
+                buffer: file.buffer,
+                originalname: `${filePrefix}.${extension}`,
+                mimetype: file.mimetype,
             },
             `members/${memberId}`,
             StorageType.PRIVATE

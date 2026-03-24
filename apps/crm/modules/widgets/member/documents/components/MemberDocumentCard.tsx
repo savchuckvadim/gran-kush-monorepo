@@ -12,6 +12,7 @@ export interface IMemberDocumentCardProps {
 }
 
 export function MemberDocumentCard({ memberId, document, locale }: IMemberDocumentCardProps) {
+
     return (
         <Link
             key={document.id}

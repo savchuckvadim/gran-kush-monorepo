@@ -4,7 +4,6 @@
     "type": "module",
     "private": true,
     "scripts": {
-        "fetch:openapi": "node scripts/fetch-openapi.cjs",
         "generate": "pnpm openapi-typescript http://localhost:3000/docs-json -o ./src/schema/schema.ts --root-types",
         "generate:local": "npx openapi-typescript-codegen --input ./openapi.json --output ./src/generated --client fetch",
         "build": "tsc",

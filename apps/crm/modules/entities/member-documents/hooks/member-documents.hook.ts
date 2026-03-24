@@ -48,11 +48,17 @@ export function useIdentityDocumentPreview(memberId: string, documentId: string)
 
     // Cleanup blob URL on unmount or when blob changes
     useEffect(() => {
-        return () => {
-            if (blobUrl) {
-                URL.revokeObjectURL(blobUrl);
-            }
-        };
+        if (!blobUrl) return;
+        // Revoke with a delay to avoid breaking <img> loads during fast route transitions.
+        window.setTimeout(() => {
+            URL.revokeObjectURL(blobUrl);
+        }, 120_000);
+
+        // IMPORTANT:
+        // Do NOT revoke immediately in cleanup (no immediate revoke + no clearTimeout),
+        // otherwise the <img> that uses this blob URL can hit `ERR_FILE_NOT_FOUND`
+        // when the component rerenders/unmounts.
+        return () => {};
     }, [blobUrl]);
 
     return {
@@ -75,11 +81,12 @@ export function useSignaturePreview(memberId: string) {
 
     // Cleanup blob URL on unmount or when blob changes
     useEffect(() => {
-        return () => {
-            if (blobUrl) {
-                URL.revokeObjectURL(blobUrl);
-            }
-        };
+        if (!blobUrl) return;
+        window.setTimeout(() => {
+            URL.revokeObjectURL(blobUrl);
+        }, 120_000);
+
+        return () => {};
     }, [blobUrl]);
 
     return {
@@ -109,7 +116,10 @@ export function useUpdateCrmMemberFiles() {
             queryClient.invalidateQueries({ queryKey: memberDocumentsKeys.byMember(variables.memberId) });
             // Invalidate preview caches for this member
             queryClient.invalidateQueries({
-                queryKey: [...memberDocumentsKeys.previews(), variables.memberId],
+                queryKey: [...memberDocumentsKeys.previews(), "identity", variables.memberId],
+            });
+            queryClient.invalidateQueries({
+                queryKey: [...memberDocumentsKeys.previews(), "signature", variables.memberId],
             });
             // Update cache directly with returned data
             queryClient.setQueryData<CrmMemberDetails>(memberKeys.detail(variables.memberId), data);
