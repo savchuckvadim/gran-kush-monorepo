@@ -12,6 +12,13 @@ const getCorsConfig = (configService: ConfigService) => {
         origin: origins,
         methods: methods,
         credentials: true,
+        allowedHeaders: [
+            "Content-Type",
+            "Authorization",
+            "X-Portal-Id",
+            "X-Portal-Slug",
+            "X-Device-Id",
+        ],
     };
 };
 

@@ -70,9 +70,7 @@ export function ResetPasswordForm() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {mutation.isError && (
                 <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
-                    {mutation.error instanceof Error
-                        ? mutation.error.message
-                        : t("error")}
+                    {mutation.error instanceof Error ? mutation.error.message : t("error")}
                 </div>
             )}
 

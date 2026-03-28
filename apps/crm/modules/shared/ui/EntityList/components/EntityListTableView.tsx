@@ -2,7 +2,14 @@
 
 import * as React from "react";
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@workspace/ui/components/table";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@workspace/ui/components/table";
 import { cn } from "@workspace/ui/lib/utils";
 
 import type { EntityListTableColumn } from "../EntityList";
@@ -38,7 +45,9 @@ export function EntityListTableView<T>({
                                     {col.header}
                                 </TableHead>
                             ))}
-                            {canRenderActions && <TableHead className="text-right">Действия</TableHead>}
+                            {canRenderActions && (
+                                <TableHead className="text-right">Действия</TableHead>
+                            )}
                         </TableRow>
                     </TableHeader>
 
@@ -74,4 +83,3 @@ export function EntityListTableView<T>({
         </div>
     );
 }
-

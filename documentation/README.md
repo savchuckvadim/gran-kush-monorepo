@@ -19,15 +19,17 @@ Unified documentation for the platform split into three product areas:
 
 - [CRM Documentation](./crm/README.md)
 - Covers current CRM routes, member operations, employee auth integration, and implementation tasks
+- [Flexible CRM domain tasks (fields, statuses, settings, inventory, integrations)](./crm/FLEXIBLE_CRM_DOMAIN_TASKS.md) — roadmap: dynamic fields/statuses, portal settings, products, stock ledger, finance snapshots, attendance heatmap, external club site embeds
 
 ### 3) Backend
 
 - [Backend Documentation](./backend/README.md)
+- [HTTP API Contract](./backend/HTTP_API_CONTRACT.md) — errors, CORS, portal headers (`X-Portal-*`), web cookies vs mobile Bearer
 - Covers module architecture, API boundaries, migrations, bootstrap admin seed, and runtime setup
 
 ## Cross-Cutting Technical Docs
 
-- [Authentication System](./AUTHENTICATION.md) - dual auth model (`/lk/auth/*`, `/crm/auth/*`)
+- [Authentication System](./AUTHENTICATION.md) - dual auth model (`/lk/auth/*`, `/crm/auth/*`); **for cookie/mobile and tenant headers prefer [HTTP API Contract](./backend/HTTP_API_CONTRACT.md)**
 - [Storage Module](./STORAGE.md) - private/public file storage and member documents
 
 ## Current Status
@@ -64,5 +66,6 @@ Unified documentation for the platform split into three product areas:
   - **Implemented** for current behavior
   - **Planned** for future scope
 - Keep endpoints synchronized with backend source of truth:
-  - member: `/lk/auth/*`
-  - employee: `/crm/auth/*`
+  - member web: `/lk/auth/*`, mobile: `/lk/mobile/auth/*`
+  - employee web: `/crm/auth/*`, mobile: `/crm/mobile/auth/*`
+  - platform (onboarding): `/platform/portals/*`

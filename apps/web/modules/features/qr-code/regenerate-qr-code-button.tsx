@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import { Loader2,RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 
 import { Button } from "@workspace/ui";
 

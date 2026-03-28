@@ -72,9 +72,7 @@ export function SessionsTable() {
                 </div>
             )}
 
-            {error && (
-                <p className="py-4 text-sm text-destructive">{t("error")}</p>
-            )}
+            {error && <p className="py-4 text-sm text-destructive">{t("error")}</p>}
 
             {!isLoading && !error && sessions.length === 0 && (
                 <p className="py-8 text-center text-sm text-muted-foreground">{t("empty")}</p>

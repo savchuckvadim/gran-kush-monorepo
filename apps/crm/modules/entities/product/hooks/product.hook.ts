@@ -2,10 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import type {
-    SchemaCreateProductDto,
-    SchemaUpdateProductDto,
-} from "@workspace/api-client/core";
+import type { SchemaCreateProductDto, SchemaUpdateProductDto } from "@workspace/api-client/core";
 
 import {
     createProduct,

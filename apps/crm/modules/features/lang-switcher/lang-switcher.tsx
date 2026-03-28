@@ -53,9 +53,7 @@ export function LangSwitcher() {
                 type="button"
                 aria-label="Change language"
                 className="inline-flex items-center gap-2 rounded-md border-none bg-transparent p-3 py-1 text-sm hover:bg-accent"
-               
                 style={{
-             
                     cursor: "pointer",
                 }}
                 onClick={() => setIsOpen((prev) => !prev)}
@@ -73,7 +71,6 @@ export function LangSwitcher() {
                             type="button"
                             className="flex w-full items-center justify-between rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent"
                             style={{
-             
                                 cursor: "pointer",
                             }}
                             onClick={() => handleLocaleChange(loc)}

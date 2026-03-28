@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useEffect } from "react";
 import { redirect, useParams } from "next/navigation";
@@ -22,14 +22,12 @@ export default function ConfirmEmailPage() {
 
     if (data && data.success) {
         redirect(localizedLink(ROUTES.LOGIN));
-      
     }
     if (error) {
         return <div>Email not confirmed. Error: {error.message}</div>;
     }
 
     if (data && !data.success) {
-     
         return <div>Email not confirmed {data.message}</div>;
     }
 

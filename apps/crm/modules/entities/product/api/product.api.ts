@@ -62,9 +62,7 @@ export async function getProductById(id: string): Promise<SchemaProductDetailDto
 /**
  * Создать товар
  */
-export async function createProduct(
-    data: SchemaCreateProductDto
-): Promise<SchemaProductDetailDto> {
+export async function createProduct(data: SchemaCreateProductDto): Promise<SchemaProductDetailDto> {
     const response = await $api.POST("/crm/catalog/products", {
         body: data,
     });

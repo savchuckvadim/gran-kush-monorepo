@@ -15,7 +15,10 @@ export class EmployeeRegistrationService {
     /**
      * Создание Employee с User
      */
-    async createEmployee(dto: RegisterEmployeeDto): Promise<{
+    async createEmployee(
+        dto: RegisterEmployeeDto,
+        portalId: string
+    ): Promise<{
         userId: string;
         employeeId: string;
     }> {
@@ -28,16 +31,20 @@ export class EmployeeRegistrationService {
                 throw new ConflictException("User is already registered as Employee");
             }
 
+            if (existingUser.portalId && existingUser.portalId !== portalId) {
+                throw new ConflictException("User already belongs to another portal");
+            }
+
             // Если есть Member, но не Employee - можно создать Employee
             const passwordHash = await bcrypt.hash(dto.password, 10);
 
             // Обновляем только passwordHash в User через репозиторий
-            await this.userRepository.update(existingUser.id, { passwordHash });
+            await this.userRepository.update(existingUser.id, { passwordHash, portalId });
 
             // Создаем Employee через репозиторий
             const employee = await this.employeeRepository.create({
                 userId: existingUser.id,
-                portalId: existingUser.portalId,
+                portalId,
                 name: dto.name,
                 surname: dto.surname,
                 phone: dto.phone,
@@ -59,12 +66,13 @@ export class EmployeeRegistrationService {
         const user = await this.userRepository.create({
             email: dto.email,
             passwordHash,
-            portalId: undefined,
+            portalId,
         });
 
         // Employee содержит все остальные данные через репозиторий
         const employee = await this.employeeRepository.create({
             userId: user.id,
+            portalId,
             name: dto.name,
             surname: dto.surname,
             phone: dto.phone,

@@ -820,6 +820,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/platform/portals/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register new portal and root owner employee */
+        post: operations["PortalRegistration_register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/test/employees": {
         parameters: {
             query?: never;
@@ -879,7 +896,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Login employee (CRM) */
+        /** Login employee (CRM web, HttpOnly cookies) */
         post: operations["EmployeeAuth_login"];
         delete?: never;
         options?: never;
@@ -896,7 +913,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Refresh access token (CRM) */
+        /** Refresh tokens (cookie refresh only, empty body) */
         post: operations["EmployeeAuth_refresh"];
         delete?: never;
         options?: never;
@@ -913,7 +930,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Logout employee (CRM) */
+        /** Logout employee (CRM web) */
         post: operations["EmployeeAuth_logout"];
         delete?: never;
         options?: never;
@@ -928,8 +945,76 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get current employee (CRM) */
+        /** Get current employee (CRM web) */
         get: operations["EmployeeAuth_getMe"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/mobile/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Login employee (native: Bearer tokens in JSON, no cookies) */
+        post: operations["EmployeeMobileAuth_login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/mobile/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Refresh tokens (native: refresh token in body) */
+        post: operations["EmployeeMobileAuth_refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/mobile/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Logout (native) */
+        post: operations["EmployeeMobileAuth_logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/mobile/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get current employee (native) */
+        get: operations["EmployeeMobileAuth_getMe"];
         put?: never;
         post?: never;
         delete?: never;
@@ -964,7 +1049,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Login Member (Site) */
+        /** Login Member (site web, HttpOnly cookies) */
         post: operations["MemberAuth_login"];
         delete?: never;
         options?: never;
@@ -981,7 +1066,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Refresh access token (Site) */
+        /** Refresh tokens (cookie refresh only, empty body) */
         post: operations["MemberAuth_refresh"];
         delete?: never;
         options?: never;
@@ -998,7 +1083,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Logout Member (Site) */
+        /** Logout Member (site web) */
         post: operations["MemberAuth_logout"];
         delete?: never;
         options?: never;
@@ -1013,7 +1098,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get current Member (Site) */
+        /** Get current Member (site web) */
         get: operations["MemberAuth_getMe"];
         put?: never;
         post?: never;
@@ -1051,6 +1136,74 @@ export interface paths {
         put?: never;
         /** Reset password using token from email */
         post: operations["MemberAuth_confirmPasswordReset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/mobile/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Login Member (native: Bearer tokens in JSON) */
+        post: operations["MemberMobileAuth_login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/mobile/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Refresh tokens (native: refresh token in body) */
+        post: operations["MemberMobileAuth_refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/mobile/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Logout (native) */
+        post: operations["MemberMobileAuth_logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/mobile/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get current Member (native) */
+        get: operations["MemberMobileAuth_getMe"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2412,6 +2565,57 @@ export interface components {
             /** @example 8 */
             count: number;
         };
+        RegisterPortalDto: {
+            /**
+             * @description Unique portal slug. Allowed chars: a-z, 0-9, dash
+             * @example green-club
+             */
+            name: string;
+            /** @example Green Club */
+            displayName: string;
+            /** @example owner@greenclub.com */
+            email: string;
+            /**
+             * @description Password must contain uppercase, lowercase and number
+             * @example StrongPassword123
+             */
+            password: string;
+            /** @example Owner */
+            ownerName: string;
+            /** @example Surname */
+            ownerSurname?: string;
+        };
+        PortalInfoDto: {
+            /** @example f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f */
+            id: string;
+            /** @example green-club */
+            name: string;
+            /** @example Green Club */
+            displayName: string;
+            /** @example active */
+            status: string;
+        };
+        EmployeeInfoDto: {
+            /** @example 123e4567-e89b-12d3-a456-426614174000 */
+            id: string;
+            /** @example employee@example.com */
+            email: string;
+            /** @example John Employee */
+            name: string;
+            /** @example manager */
+            role: string;
+            /** @example f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f */
+            portalId?: string;
+        };
+        RegisterPortalResponseDto: {
+            portal: components["schemas"]["PortalInfoDto"];
+            owner: components["schemas"]["EmployeeInfoDto"];
+            /**
+             * @description Передавайте в X-Device-Id; токены выставлены в HttpOnly cookies
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            deviceId: string;
+        };
         EmployeeListItemDto: {
             /** @example 123e4567-e89b-12d3-a456-426614174000 */
             id: string;
@@ -2503,29 +2707,13 @@ export interface components {
             /** @example password123 */
             password: string;
         };
-        EmployeeInfoDto: {
-            /** @example 123e4567-e89b-12d3-a456-426614174000 */
-            id: string;
-            /** @example employee@example.com */
-            email: string;
-            /** @example John Employee */
-            name: string;
-            /** @example manager */
-            role: string;
-        };
-        EmployeeAuthResponseDto: {
-            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
-            accessToken: string;
-            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
-            refreshToken: string;
+        EmployeeWebLoginResponseDto: {
             employee: components["schemas"]["EmployeeInfoDto"];
-        };
-        RefreshTokenDto: {
             /**
-             * @description Refresh token
-             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+             * @description Сохраните и передавайте в заголовке X-Device-Id при следующих запросах
+             * @example 550e8400-e29b-41d4-a716-446655440000
              */
-            refreshToken: string;
+            deviceId: string;
         };
         EmployeeRefreshTokenResponseDto: {
             /**
@@ -2557,6 +2745,8 @@ export interface components {
             phone?: string;
             /** @example manager */
             role: string;
+            /** @example f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f */
+            portalId?: string;
             /** @example Senior Manager */
             position?: string;
             /** @example Sales */
@@ -2578,6 +2768,20 @@ export interface components {
              * @example 2024-01-01T00:00:00.000Z
              */
             updatedAt: string;
+        };
+        EmployeeAuthResponseDto: {
+            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
+            accessToken: string;
+            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
+            refreshToken: string;
+            employee: components["schemas"]["EmployeeInfoDto"];
+        };
+        RefreshTokenDto: {
+            /**
+             * @description Refresh token (optional when using HttpOnly cookie)
+             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
+            refreshToken?: string;
         };
         RegisterEmployeeDto: {
             /** @example employee@example.com */
@@ -2615,12 +2819,13 @@ export interface components {
             /** @example user@example.com */
             email: string;
         };
-        MemberAuthResponseDto: {
-            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
-            accessToken: string;
-            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
-            refreshToken: string;
+        MemberWebLoginResponseDto: {
             user: components["schemas"]["MemberUserInfoDto"];
+            /**
+             * @description Сохраните и передавайте в заголовке X-Device-Id при следующих запросах
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            deviceId: string;
         };
         MemberRefreshTokenResponseDto: {
             /**
@@ -2628,6 +2833,11 @@ export interface components {
              * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
              */
             accessToken: string;
+            /**
+             * @description New refresh token (rotation)
+             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
+            refreshToken: string;
         };
         MemberLogoutResponseDto: {
             /**
@@ -2679,6 +2889,13 @@ export interface components {
              * @example NewPassword123
              */
             newPassword: string;
+        };
+        MemberAuthResponseDto: {
+            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
+            accessToken: string;
+            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
+            refreshToken: string;
+            user: components["schemas"]["MemberUserInfoDto"];
         };
         CheckUserExistsDto: {
             /** @example user@example.com */
@@ -2881,26 +3098,31 @@ export type SchemaCreateFinancialTransactionDto = components['schemas']['CreateF
 export type SchemaTransactionSummaryDto = components['schemas']['TransactionSummaryDto'];
 export type SchemaTransactionGroupedByTypeDto = components['schemas']['TransactionGroupedByTypeDto'];
 export type SchemaTransactionGroupedByDateDto = components['schemas']['TransactionGroupedByDateDto'];
+export type SchemaRegisterPortalDto = components['schemas']['RegisterPortalDto'];
+export type SchemaPortalInfoDto = components['schemas']['PortalInfoDto'];
+export type SchemaEmployeeInfoDto = components['schemas']['EmployeeInfoDto'];
+export type SchemaRegisterPortalResponseDto = components['schemas']['RegisterPortalResponseDto'];
 export type SchemaEmployeeListItemDto = components['schemas']['EmployeeListItemDto'];
 export type SchemaPaginatedResponseEmployeeListItemDto = components['schemas']['PaginatedResponse_EmployeeListItemDto'];
 export type SchemaPaginatedResponseCrmMemberDto = components['schemas']['PaginatedResponse_CrmMemberDto'];
 export type SchemaEmployeeLoginDto = components['schemas']['EmployeeLoginDto'];
-export type SchemaEmployeeInfoDto = components['schemas']['EmployeeInfoDto'];
-export type SchemaEmployeeAuthResponseDto = components['schemas']['EmployeeAuthResponseDto'];
-export type SchemaRefreshTokenDto = components['schemas']['RefreshTokenDto'];
+export type SchemaEmployeeWebLoginResponseDto = components['schemas']['EmployeeWebLoginResponseDto'];
 export type SchemaEmployeeRefreshTokenResponseDto = components['schemas']['EmployeeRefreshTokenResponseDto'];
 export type SchemaEmployeeLogoutResponseDto = components['schemas']['EmployeeLogoutResponseDto'];
 export type SchemaEmployeeMeResponseDto = components['schemas']['EmployeeMeResponseDto'];
+export type SchemaEmployeeAuthResponseDto = components['schemas']['EmployeeAuthResponseDto'];
+export type SchemaRefreshTokenDto = components['schemas']['RefreshTokenDto'];
 export type SchemaRegisterEmployeeDto = components['schemas']['RegisterEmployeeDto'];
 export type SchemaMemberLoginDto = components['schemas']['MemberLoginDto'];
 export type SchemaMemberUserInfoDto = components['schemas']['MemberUserInfoDto'];
-export type SchemaMemberAuthResponseDto = components['schemas']['MemberAuthResponseDto'];
+export type SchemaMemberWebLoginResponseDto = components['schemas']['MemberWebLoginResponseDto'];
 export type SchemaMemberRefreshTokenResponseDto = components['schemas']['MemberRefreshTokenResponseDto'];
 export type SchemaMemberLogoutResponseDto = components['schemas']['MemberLogoutResponseDto'];
 export type SchemaMemberMeResponseDto = components['schemas']['MemberMeResponseDto'];
 export type SchemaRequestPasswordResetDto = components['schemas']['RequestPasswordResetDto'];
 export type SchemaPasswordResetResponseDto = components['schemas']['PasswordResetResponseDto'];
 export type SchemaResetPasswordDto = components['schemas']['ResetPasswordDto'];
+export type SchemaMemberAuthResponseDto = components['schemas']['MemberAuthResponseDto'];
 export type SchemaCheckUserExistsDto = components['schemas']['CheckUserExistsDto'];
 export type SchemaCheckUserExistsResponseDto = components['schemas']['CheckUserExistsResponseDto'];
 export type SchemaRegisterMemberDto = components['schemas']['RegisterMemberDto'];
@@ -5654,6 +5876,48 @@ export interface operations {
             };
         };
     };
+    PortalRegistration_register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterPortalDto"];
+            };
+        };
+        responses: {
+            /** @description Portal and owner created successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegisterPortalResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
     Test_getEmployees: {
         parameters: {
             query?: {
@@ -5758,7 +6022,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["EmployeeAuthResponseDto"];
+                    "application/json": components["schemas"]["EmployeeWebLoginResponseDto"];
                 };
             };
             /** @description Bad Request */
@@ -5788,11 +6052,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RefreshTokenDto"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Token refreshed successfully */
             200: {
@@ -5844,6 +6104,143 @@ export interface operations {
         };
     };
     EmployeeAuth_getMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Current employee information */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeMeResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmployeeMobileAuth_login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmployeeLoginDto"];
+            };
+        };
+        responses: {
+            /** @description Employee logged in successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeAuthResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmployeeMobileAuth_refresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshTokenDto"];
+            };
+        };
+        responses: {
+            /** @description Token refreshed successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeRefreshTokenResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmployeeMobileAuth_logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshTokenDto"];
+            };
+        };
+        responses: {
+            /** @description Logged out successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeLogoutResponseDto"];
+                };
+            };
+        };
+    };
+    EmployeeMobileAuth_getMe: {
         parameters: {
             query?: never;
             header?: never;
@@ -5951,7 +6348,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MemberAuthResponseDto"];
+                    "application/json": components["schemas"]["MemberWebLoginResponseDto"];
                 };
             };
             /** @description Bad Request */
@@ -5981,11 +6378,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RefreshTokenDto"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Token refreshed successfully */
             200: {
@@ -6140,6 +6533,143 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberMobileAuth_login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MemberLoginDto"];
+            };
+        };
+        responses: {
+            /** @description Member logged in successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberAuthResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberMobileAuth_refresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshTokenDto"];
+            };
+        };
+        responses: {
+            /** @description Token refreshed successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberRefreshTokenResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberMobileAuth_logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshTokenDto"];
+            };
+        };
+        responses: {
+            /** @description Logged out successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberLogoutResponseDto"];
+                };
+            };
+        };
+    };
+    MemberMobileAuth_getMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Current Member information */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberMeResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

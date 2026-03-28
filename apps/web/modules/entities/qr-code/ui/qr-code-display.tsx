@@ -76,9 +76,7 @@ export function QrCodeDisplay({ size = 256, className }: QrCodeDisplayProps) {
                 fgColor={isDark ? "#ffffff" : "#000000"}
                 includeMargin
             />
-            <p className="mt-4 text-center text-sm text-muted-foreground">
-                {t("instruction")}
-            </p>
+            <p className="mt-4 text-center text-sm text-muted-foreground">{t("instruction")}</p>
         </div>
     );
 }

@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import { Hash,Loader2, LogIn, LogOut, User } from "lucide-react";
+import { Hash, Loader2, LogIn, LogOut, User } from "lucide-react";
 
 import { Button } from "@workspace/ui";
 
@@ -24,9 +24,9 @@ export function QrPreviewCard({ preview, onConfirm, onCancel, isLoading }: QrPre
     const t = useTranslations("crm.attendance.scanner");
 
     const isEntry = preview.proposedAction === "entry";
-    const memberName = [preview.member?.name, preview.member?.surname]
-        .filter(Boolean)
-        .join(" ") || t("unknownMember");
+    const memberName =
+        [preview.member?.name, preview.member?.surname].filter(Boolean).join(" ") ||
+        t("unknownMember");
 
     return (
         <div className="space-y-4">
@@ -79,11 +79,7 @@ export function QrPreviewCard({ preview, onConfirm, onCancel, isLoading }: QrPre
                     <LogOut className="h-6 w-6 text-blue-600 shrink-0" />
                 )}
                 <div>
-                    <p
-                        className={`font-semibold ${
-                            isEntry ? "text-green-700" : "text-blue-700"
-                        }`}
-                    >
+                    <p className={`font-semibold ${isEntry ? "text-green-700" : "text-blue-700"}`}>
                         {isEntry ? t("actionEntry") : t("actionExit")}
                     </p>
                     <p className="text-xs text-muted-foreground mt-0.5">

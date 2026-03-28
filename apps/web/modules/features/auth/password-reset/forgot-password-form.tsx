@@ -53,9 +53,7 @@ export function ForgotPasswordForm() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {mutation.isError && (
                 <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
-                    {mutation.error instanceof Error
-                        ? mutation.error.message
-                        : t("error")}
+                    {mutation.error instanceof Error ? mutation.error.message : t("error")}
                 </div>
             )}
 
@@ -75,10 +73,7 @@ export function ForgotPasswordForm() {
             </Button>
 
             <div className="text-center text-sm text-muted-foreground">
-                <Link
-                    href={localizedLink(ROUTES.LOGIN)}
-                    className="text-primary hover:underline"
-                >
+                <Link href={localizedLink(ROUTES.LOGIN)} className="text-primary hover:underline">
                     {t("backToLogin")}
                 </Link>
             </div>

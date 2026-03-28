@@ -35,10 +35,5 @@ export function MemberDocumentPreview({
         );
     }
 
-    return (
-        <img src={previewUrl} alt={alt} className="h-full w-full object-contain" />
-    );
+    return <img src={previewUrl} alt={alt} className="h-full w-full object-contain" />;
 }
-
-
-

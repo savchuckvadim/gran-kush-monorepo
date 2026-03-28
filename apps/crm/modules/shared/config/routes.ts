@@ -14,9 +14,21 @@ export const ROUTES = {
     PRIVACY: "/privacy",
     TERMS: "/terms",
     CRM_HOME: "/crm",
-    CRM_MEMBERS: "/crm/members",
-    CRM_PRODUCTS: "/crm/products",
-    CRM_ORDERS: "/crm/orders",
+    /** Префикс раздела клиентов: list, details, new */
+    CRM_MEMBER_BASE: "/crm/member",
+    /** Список клиентов (member/list) */
+    CRM_MEMBERS: "/crm/member/list",
+    /** Префикс карточки клиента: `${ROUTES.CRM_MEMBER_DETAILS}/${id}` */
+    CRM_MEMBER_DETAILS: "/crm/member/details",
+    CRM_MEMBER_NEW: "/crm/member/new",
+    CRM_PRODUCT_BASE: "/crm/product",
+    /** Список товаров */
+    CRM_PRODUCTS: "/crm/product/list",
+    CRM_PRODUCT_DETAILS: "/crm/product/details",
+    CRM_ORDER_BASE: "/crm/order",
+    /** Список заказов */
+    CRM_ORDERS: "/crm/order/list",
+    CRM_ORDER_DETAILS: "/crm/order/details",
     CRM_ATTENDANCE: "/crm/attendance",
     CRM_FINANCE: "/crm/finance",
     CRM_EMPLOYEES: "/crm/employees",

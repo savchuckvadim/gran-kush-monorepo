@@ -21,8 +21,8 @@ import { cn } from "@workspace/ui/lib/utils";
 import { type QrPreviewResult, useQrPreview, useQrScan } from "@/modules/entities/presence";
 import { useLocalizedLink } from "@/modules/shared";
 
-import { QrPreviewCard } from "./QrPreviewCard";
 import { QrCameraScannerYudiel } from "./QrCameraScannerYudiel";
+import { QrPreviewCard } from "./QrPreviewCard";
 import { ScanResultCard } from "./ScanResultCard";
 
 // ─── State machine ────────────────────────────────────────────────────────────

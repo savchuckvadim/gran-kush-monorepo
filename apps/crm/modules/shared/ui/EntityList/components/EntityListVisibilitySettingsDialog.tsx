@@ -2,7 +2,15 @@
 
 import * as React from "react";
 
-import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@workspace/ui";
+import {
+    Button,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@workspace/ui";
 
 export function EntityListVisibilitySettingsDialog({
     isOpen,
@@ -37,7 +45,9 @@ export function EntityListVisibilitySettingsDialog({
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Поля</DialogTitle>
-                    <DialogDescription>Выберите, что показывать в карточках и/или таблице.</DialogDescription>
+                    <DialogDescription>
+                        Выберите, что показывать в карточках и/или таблице.
+                    </DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-4">
@@ -89,4 +99,3 @@ export function EntityListVisibilitySettingsDialog({
         </Dialog>
     );
 }
-

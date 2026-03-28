@@ -1,5 +1,4 @@
 export interface IMemberTimelineNote {
-
     id: string;
     title?: string;
     note: string;
@@ -12,5 +11,5 @@ export function MemberTimelineNote({ id, title, note, createdAt }: IMemberTimeli
             <span className="text-sm font-medium">{title ?? "-"}</span>
             <span className="text-sm text-muted-foreground">{note}</span>
         </li>
-    )
+    );
 }

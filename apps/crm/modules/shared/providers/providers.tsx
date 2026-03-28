@@ -5,6 +5,7 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { Toaster } from "sonner";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -26,6 +27,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 enableColorScheme
             >
                 {children}
+                <Toaster richColors closeButton />
             </NextThemesProvider>
             <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>

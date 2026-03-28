@@ -1,8 +1,8 @@
-import { Controller, Get, Query, UseGuards } from "@nestjs/common";
+import { Controller, Get, Query } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
+import { RequireMemberJwt } from "@auth/members";
 import { CurrentMember } from "@auth/members/api/decorators/current-member.decorator";
-import { MemberJwtAuthGuard } from "@auth/members/infrastructure/guards/member-jwt-auth.guard";
 import { Member } from "@members/domain/entity/member.entity";
 import { PresenceSessionDto } from "@presence/api/dto/presence.dto";
 import { mapPresenceSessionToDto } from "@presence/api/mappers";
@@ -21,7 +21,7 @@ import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 
 @ApiTags("LK Presence (Site)")
 @Controller("lk/presence")
-@UseGuards(MemberJwtAuthGuard)
+@RequireMemberJwt()
 @ApiBearerAuth()
 export class LkPresenceController {
     constructor(private readonly presenceService: PresenceService) {}

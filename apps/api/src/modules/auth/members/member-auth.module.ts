@@ -6,12 +6,15 @@ import { PassportModule } from "@nestjs/passport";
 
 import { JWT_DEFAULTS, JWT_ENV_KEYS } from "@auth/domain/constants/jwt.constants";
 import { MemberAuthController } from "@auth/members/api/controllers/member-auth.controller";
+import { MemberMobileAuthController } from "@auth/members/api/controllers/member-mobile-auth.controller";
 import { MemberRegistrationController } from "@auth/members/api/controllers/member-registration.controller";
 import { MemberAuthService } from "@auth/members/application/services/member-auth.service";
 import { MemberRegistrationService } from "@auth/members/application/services/member-registration.service";
 import { MemberJwtAuthGuard } from "@auth/members/infrastructure/guards/member-jwt-auth.guard";
+import { MemberJwtMobileAuthGuard } from "@auth/members/infrastructure/guards/member-jwt-mobile-auth.guard";
 import { MemberLocalAuthGuard } from "@auth/members/infrastructure/guards/member-local-auth.guard";
-import { MemberJwtStrategy } from "@auth/members/infrastructure/strategies/member-jwt.strategy";
+import { MemberJwtBearerStrategy } from "@auth/members/infrastructure/strategies/member-jwt-bearer.strategy";
+import { MemberJwtCookieStrategy } from "@auth/members/infrastructure/strategies/member-jwt-cookie.strategy";
 import { MemberLocalStrategy } from "@auth/members/infrastructure/strategies/member-local.strategy";
 import { SharedAuthModule } from "@auth/shared/shared-auth.module";
 import { MailModule } from "@mail/mail.module";
@@ -54,19 +57,22 @@ import { MemberRegistrationUseCase } from "./application/use-cases/member-regist
         MemberAuthService,
         MemberRegistrationService,
         MemberLocalStrategy,
-        MemberJwtStrategy,
+        MemberJwtCookieStrategy,
+        MemberJwtBearerStrategy,
         MemberJwtAuthGuard,
+        MemberJwtMobileAuthGuard,
         MemberLocalAuthGuard,
         {
             provide: TokenRepository,
             useClass: TokenPrismaRepository,
         },
     ],
-    controllers: [MemberAuthController, MemberRegistrationController],
+    controllers: [MemberAuthController, MemberMobileAuthController, MemberRegistrationController],
     exports: [
         MemberAuthService,
         MemberRegistrationService,
         MemberJwtAuthGuard,
+        MemberJwtMobileAuthGuard,
         MemberLocalAuthGuard,
     ],
 })

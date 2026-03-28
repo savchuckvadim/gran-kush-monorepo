@@ -53,4 +53,3 @@ export function EntityListPagination({ pagination }: { pagination: EntityListPag
         </div>
     );
 }
-

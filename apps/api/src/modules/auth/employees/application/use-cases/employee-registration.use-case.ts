@@ -6,6 +6,7 @@ import { EmployeeRegistrationService } from "@auth/employees/application/service
 import { EmailVerificationService } from "@auth/shared/application/services/email-verification.service";
 import { EmployeesService } from "@employees/application/services/employees.service";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
+import { randomUUID } from "crypto";
 
 import { EmployeeAuthResponseDto } from "@modules/employees/api/dto/employee-auth-response.dto";
 
@@ -19,9 +20,12 @@ export class EmployeeRegistrationUseCase {
         private readonly userRepository: UserRepository
     ) {}
 
-    async execute(dto: RegisterEmployeeDto): Promise<EmployeeAuthResponseDto> {
+    async execute(dto: RegisterEmployeeDto, portalId: string): Promise<EmployeeAuthResponseDto> {
         // Создаем Employee
-        const { userId, employeeId } = await this.employeeRegistrationService.createEmployee(dto);
+        const { userId, employeeId } = await this.employeeRegistrationService.createEmployee(
+            dto,
+            portalId
+        );
 
         // Получаем Employee для генерации токенов
         const employee = await this.employeesService.findById(employeeId);
@@ -30,8 +34,8 @@ export class EmployeeRegistrationUseCase {
             throw new BadRequestException("Failed to create employee");
         }
 
-        // Генерируем токены
-        const tokens = await this.employeeAuthService.generateTokens(employee);
+        const deviceId = randomUUID();
+        const tokens = await this.employeeAuthService.generateTokens(employee, deviceId);
 
         // Отправляем email для подтверждения
         const user = await this.userRepository.findById(userId);

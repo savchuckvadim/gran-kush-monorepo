@@ -7,12 +7,11 @@ import {
     Patch,
     Post,
     Query,
-    UseGuards,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
+import { RequireMemberJwt } from "@auth/members";
 import { CurrentMember } from "@auth/members/api/decorators/current-member.decorator";
-import { MemberJwtAuthGuard } from "@auth/members/infrastructure/guards/member-jwt-auth.guard";
 import { Member } from "@members/domain/entity/member.entity";
 import {
     CancelOrderDto,
@@ -37,7 +36,7 @@ import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 
 @ApiTags("LK Orders (Site)")
 @Controller("lk/orders")
-@UseGuards(MemberJwtAuthGuard)
+@RequireMemberJwt()
 @ApiBearerAuth()
 export class LkOrdersController {
     constructor(private readonly ordersService: OrdersService) {}

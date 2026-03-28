@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { History, QrCode, User } from "lucide-react";
 
-import { Button,Card } from "@workspace/ui";
+import { Button, Card } from "@workspace/ui";
 
 import { QrCodeDisplay } from "@/modules/entities/qr-code";
 import { CurrentPresenceStatus } from "@/modules/features/presence";

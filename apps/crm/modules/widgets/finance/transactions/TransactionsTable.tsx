@@ -8,7 +8,7 @@ import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import type { SchemaFinancialTransactionListDto } from "@workspace/api-client/core";
 import { Button, Card } from "@workspace/ui";
 
-import { type TransactionDirection,useTransactions } from "@/modules/entities/finance";
+import { type TransactionDirection, useTransactions } from "@/modules/entities/finance";
 
 function TransactionRow({ tx }: { tx: SchemaFinancialTransactionListDto }) {
     const t = useTranslations("crm.finance.transactions");
@@ -28,9 +28,7 @@ function TransactionRow({ tx }: { tx: SchemaFinancialTransactionListDto }) {
             <td className="px-3 py-2">
                 <span
                     className={`rounded-full px-2 py-0.5 text-xs ${
-                        isIncome
-                            ? "bg-green-500/10 text-green-700"
-                            : "bg-red-500/10 text-red-700"
+                        isIncome ? "bg-green-500/10 text-green-700" : "bg-red-500/10 text-red-700"
                     }`}
                 >
                     {isIncome ? t("income") : t("expense")}
@@ -44,9 +42,7 @@ function TransactionRow({ tx }: { tx: SchemaFinancialTransactionListDto }) {
             <td className="px-3 py-2 text-xs text-muted-foreground">
                 {tx.paymentMethod ? t(`method.${tx.paymentMethod}`) : "—"}
             </td>
-            <td className="px-3 py-2 text-xs text-muted-foreground">
-                {tx.description ?? "—"}
-            </td>
+            <td className="px-3 py-2 text-xs text-muted-foreground">{tx.description ?? "—"}</td>
         </tr>
     );
 }
@@ -116,7 +112,9 @@ export function TransactionsTable() {
                                     <th className="px-3 py-2 font-medium">{t("colDate")}</th>
                                     <th className="px-3 py-2 font-medium">{t("colType")}</th>
                                     <th className="px-3 py-2 font-medium">{t("colDirection")}</th>
-                                    <th className="px-3 py-2 text-right font-medium">{t("colAmount")}</th>
+                                    <th className="px-3 py-2 text-right font-medium">
+                                        {t("colAmount")}
+                                    </th>
                                     <th className="px-3 py-2 font-medium">{t("colMethod")}</th>
                                     <th className="px-3 py-2 font-medium">{t("colDescription")}</th>
                                 </tr>

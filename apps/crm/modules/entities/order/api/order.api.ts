@@ -7,7 +7,13 @@ import { $api } from "@/modules/shared";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-export type OrderStatus = "pending" | "confirmed" | "preparing" | "ready" | "completed" | "cancelled";
+export type OrderStatus =
+    | "pending"
+    | "confirmed"
+    | "preparing"
+    | "ready"
+    | "completed"
+    | "cancelled";
 export type PaymentStatus = "pending" | "paid" | "refunded";
 
 export interface OrdersFilter {

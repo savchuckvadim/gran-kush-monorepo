@@ -15,9 +15,15 @@ export function MemberTimeLine({ member }: { member: CrmMemberDetails }) {
             <h2 className="mb-3 text-base font-medium">{t("notesTitle")}</h2>
             <ul className="space-y-2">
                 {fakeDataNotes.map((note) => (
-                    <MemberTimelineNote key={note.id} id={note.id} title={note.title} note={note.note} createdAt={note.createdAt} />
+                    <MemberTimelineNote
+                        key={note.id}
+                        id={note.id}
+                        title={note.title}
+                        note={note.note}
+                        createdAt={note.createdAt}
+                    />
                 ))}
             </ul>
         </Card>
-    )
+    );
 }

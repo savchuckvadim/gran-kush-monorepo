@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import {  LogIn, LogOut, RotateCcw } from "lucide-react";
+import { LogIn, LogOut, RotateCcw } from "lucide-react";
 
 import type { SchemaCheckInResultDto } from "@workspace/api-client/core";
 import { Button } from "@workspace/ui";
@@ -42,7 +42,9 @@ export function ScanResultCard({ result, onReset }: ScanResultCardProps) {
                     <LogOut className="h-10 w-10 text-blue-600" />
                 )}
 
-                <p className={`text-lg font-semibold ${isEntry ? "text-green-700" : "text-blue-700"}`}>
+                <p
+                    className={`text-lg font-semibold ${isEntry ? "text-green-700" : "text-blue-700"}`}
+                >
                     {isEntry ? t("entryConfirmed") : t("exitConfirmed")}
                 </p>
 
@@ -73,7 +75,9 @@ export function ScanResultCard({ result, onReset }: ScanResultCardProps) {
                 {session?.durationMinutes != null && session.durationMinutes > 0 && (
                     <div className="flex justify-between gap-4">
                         <span className="text-muted-foreground">{t("duration")}</span>
-                        <span>{session.durationMinutes} {t("minutes")}</span>
+                        <span>
+                            {session.durationMinutes} {t("minutes")}
+                        </span>
                     </div>
                 )}
             </div>

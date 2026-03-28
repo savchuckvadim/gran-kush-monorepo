@@ -126,7 +126,9 @@ export function CreateProductDialog() {
                             ))}
                         </select>
                         {!isCategoriesLoading && !canSelectCategory && (
-                            <p className="text-xs text-muted-foreground">{t("categoryRequiredHint")}</p>
+                            <p className="text-xs text-muted-foreground">
+                                {t("categoryRequiredHint")}
+                            </p>
                         )}
                     </div>
 
@@ -162,7 +164,9 @@ export function CreateProductDialog() {
                             label={t("initialQuantity")}
                             type="number"
                             value={String(form.initialQuantity)}
-                            onChange={(e) => handleChange("initialQuantity", Number(e.target.value))}
+                            onChange={(e) =>
+                                handleChange("initialQuantity", Number(e.target.value))
+                            }
                             required
                         />
                     </div>
@@ -172,13 +176,17 @@ export function CreateProductDialog() {
                             label={t("thc")}
                             type="number"
                             value={String(form.thc ?? "")}
-                            onChange={(e) => handleChange("thc", e.target.value ? Number(e.target.value) : 0)}
+                            onChange={(e) =>
+                                handleChange("thc", e.target.value ? Number(e.target.value) : 0)
+                            }
                         />
                         <FieldInput
                             label={t("cbd")}
                             type="number"
                             value={String(form.cbd ?? "")}
-                            onChange={(e) => handleChange("cbd", e.target.value ? Number(e.target.value) : 0)}
+                            onChange={(e) =>
+                                handleChange("cbd", e.target.value ? Number(e.target.value) : 0)
+                            }
                         />
                         <FieldInput
                             label={t("strain")}

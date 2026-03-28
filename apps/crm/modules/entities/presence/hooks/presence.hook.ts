@@ -16,7 +16,8 @@ import {
 
 const PRESENCE_KEYS = {
     all: ["presence"] as const,
-    sessions: (filters?: PresenceSessionsFilter) => [...PRESENCE_KEYS.all, "sessions", filters] as const,
+    sessions: (filters?: PresenceSessionsFilter) =>
+        [...PRESENCE_KEYS.all, "sessions", filters] as const,
     currentlyPresent: () => [...PRESENCE_KEYS.all, "currently-present"] as const,
     stats: (filters?: PresenceStatsFilter) => [...PRESENCE_KEYS.all, "stats", filters] as const,
 };

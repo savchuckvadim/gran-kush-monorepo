@@ -36,12 +36,12 @@ export function Header() {
     ];
 
     return (
-        <header className={
-            cn(
+        <header
+            className={cn(
                 "sticky top-0 w-full flex justify-center bg-background/80 backdrop-blur-sm",
                 isProfile ? "" : " z-50"
-            )
-        }>
+            )}
+        >
             <div className="container flex h-16 items-center justify-between md:px-0 px-4">
                 <div className="flex items-center gap-6">
                     {/* Бургер для сайдбара — только на мобильных в профиле */}
@@ -60,22 +60,23 @@ export function Header() {
                     {!isProfile && <Logo companyName={tCommon("companyName")} />}
                     {!isProfile && <Navigation items={navigationItems} />}
                 </div>
-                <div className={
-                    cn("md:flex items-center gap-4 ", isProfile ? "flex" : "hidden")
-                }>
+                <div className={cn("md:flex items-center gap-4 ", isProfile ? "flex" : "hidden")}>
                     <HeaderActions />
-                    {!isProfile && <AuthButtons loginLabel={t("login")} registerLabel={t("register")} />}
+                    {!isProfile && (
+                        <AuthButtons loginLabel={t("login")} registerLabel={t("register")} />
+                    )}
                 </div>
 
-                {!isProfile && <MobileMenu
-                    isOpen={isMobileMenuOpen}
-                    onToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    navigationItems={navigationItems}
-                    loginLabel={t("login")}
-                    registerLabel={t("register")}
-                    currentPath={pathname}
-                />
-                }
+                {!isProfile && (
+                    <MobileMenu
+                        isOpen={isMobileMenuOpen}
+                        onToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        navigationItems={navigationItems}
+                        loginLabel={t("login")}
+                        registerLabel={t("register")}
+                        currentPath={pathname}
+                    />
+                )}
             </div>
         </header>
     );

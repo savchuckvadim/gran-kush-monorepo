@@ -1,6 +1,5 @@
 "use client";
 
-
 import { useTranslations } from "next-intl";
 
 import { Card } from "@workspace/ui";
@@ -10,11 +9,8 @@ import { MemberDashboard } from "@/modules/widgets/member-dashboard";
 
 export default function PersonalCabinetPage() {
     const t = useTranslations("profile");
- 
+
     const { data: member, isLoading } = useMyMemberInfo();
-
-
-
 
     return (
         <div className="">
@@ -25,20 +21,23 @@ export default function PersonalCabinetPage() {
                 </div>
 
                 {/* <div className="grid gap-6 lg:grid-cols-4"> */}
-                  <div className="d-flex flex-col gap-4 justify-center items-center">
-
+                <div className="d-flex flex-col gap-4 justify-center items-center">
                     {/* Main Content */}
                     <div className="lg:col-span-3 space-y-6">
                         {isLoading ? (
                             <Card className="p-6">
-                                <div className="text-center text-muted-foreground">{t("loading")}</div>
+                                <div className="text-center text-muted-foreground">
+                                    {t("loading")}
+                                </div>
                             </Card>
                         ) : (
                             <>
                                 {/* Member Info Card */}
                                 {member && (
                                     <Card className="p-6">
-                                        <h2 className="mb-4 text-xl font-semibold">{t("profileInformation")}</h2>
+                                        <h2 className="mb-4 text-xl font-semibold">
+                                            {t("profileInformation")}
+                                        </h2>
                                         <div className="space-y-4">
                                             <div>
                                                 <label className="text-sm font-medium text-muted-foreground">
@@ -65,7 +64,9 @@ export default function PersonalCabinetPage() {
                                                     {t("memberStatus")}
                                                 </label>
                                                 <p className="text-sm">
-                                                    {member.isActive ? t("activeMember") : t("inactiveMember")}
+                                                    {member.isActive
+                                                        ? t("activeMember")
+                                                        : t("inactiveMember")}
                                                 </p>
                                             </div>
                                         </div>

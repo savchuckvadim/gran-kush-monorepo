@@ -10,9 +10,7 @@ import { $api } from "@/modules/shared";
 /**
  * Получить QR-код участника
  */
-export async function getQrCodeByMemberId(
-    memberId: string
-): Promise<SchemaQrCodeDto | null> {
+export async function getQrCodeByMemberId(memberId: string): Promise<SchemaQrCodeDto | null> {
     const response = await $api.GET("/crm/qr-codes/member/{memberId}", {
         params: {
             path: { memberId },
@@ -32,9 +30,7 @@ export async function getQrCodeByMemberId(
 /**
  * Сгенерировать или перегенерировать QR-код для участника
  */
-export async function generateOrRegenerateQrCode(
-    memberId: string
-): Promise<SchemaQrCodeDto> {
+export async function generateOrRegenerateQrCode(memberId: string): Promise<SchemaQrCodeDto> {
     const response = await $api.POST("/crm/qr-codes/generate", {
         body: { memberId } satisfies SchemaRegenerateQrCodeDto,
     });
@@ -49,9 +45,7 @@ export async function generateOrRegenerateQrCode(
 /**
  * Сканировать QR-код (валидация)
  */
-export async function scanQrCode(
-    encryptedCode: string
-): Promise<SchemaQrCodeScanResultDto> {
+export async function scanQrCode(encryptedCode: string): Promise<SchemaQrCodeScanResultDto> {
     const response = await $api.POST("/crm/qr-codes/scan", {
         body: { encryptedCode } satisfies SchemaScanQrCodeDto,
     });

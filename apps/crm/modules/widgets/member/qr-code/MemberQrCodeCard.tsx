@@ -76,7 +76,7 @@ export function MemberQrCodeCard({ memberId }: MemberQrCodeCardProps) {
     const expiresAt = new Date(qrCode.expiresAt);
 
     return (
-        <Card className="p-4 h-full" >
+        <Card className="p-4 h-full">
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">

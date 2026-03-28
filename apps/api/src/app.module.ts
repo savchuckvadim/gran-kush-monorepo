@@ -16,6 +16,7 @@ import { FinanceModule } from "./modules/finance/finance.module";
 import { MailModule } from "./modules/mail/mail.module";
 import { MembersModule } from "./modules/members/members.module";
 import { OrdersModule } from "./modules/orders/orders.module";
+import { PortalContextModule } from "./modules/portals/portal-context.module";
 import { PortalsModule } from "./modules/portals/portals.module";
 import { PresenceModule } from "./modules/presence/presence.module";
 import { QrCodesModule } from "./modules/qr-codes/qr-codes.module";
@@ -30,6 +31,7 @@ import { TestModule } from "./modules/test/test.module";
             expandVariables: true,
         }),
         PrismaModule,
+        PortalContextModule,
         QueueModule, // Centralized queue configuration - imported once here
         TelegramModule, // Global telegram module
         MailModule, // Global mail module with queue processor

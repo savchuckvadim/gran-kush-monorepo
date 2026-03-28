@@ -16,7 +16,7 @@ interface AuthButtonsProps {
 export function AuthButtons({ loginLabel, registerLabel }: AuthButtonsProps) {
     const localizedLink = useLocalizedLink();
     const { isProtected, isAuthenticated } = useAuth();
-  
+
     if (!isProtected && isAuthenticated) {
         return (
             <div className="flex items-center gap-2" role="group" aria-label="Authentication">
@@ -28,9 +28,7 @@ export function AuthButtons({ loginLabel, registerLabel }: AuthButtonsProps) {
     }
 
     if (isProtected && isAuthenticated) {
-        return (
-            <LogoutButton />
-        );
+        return <LogoutButton />;
     }
 
     return (

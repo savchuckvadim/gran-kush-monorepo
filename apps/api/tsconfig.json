@@ -16,6 +16,8 @@
         "baseUrl": "./",
         "jsx": "react-jsx",
         "paths": {
+            "@portals": ["src/modules/portals"],
+            "@portals/*": ["src/modules/portals/*"],
             "@modules/*": ["src/modules/*"],
             "@modules": ["src/modules"],
             "@shared/*": ["src/modules/shared/*"],

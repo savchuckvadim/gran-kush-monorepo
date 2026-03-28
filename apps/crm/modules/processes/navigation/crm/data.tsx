@@ -1,4 +1,4 @@
-import { Cat, Gamepad2, Gem,  Hop, PiggyBank, Rabbit, Settings, } from "lucide-react";
+import { Cat, Gamepad2, Gem, Hop, PiggyBank, Rabbit, Settings } from "lucide-react";
 
 import { ROUTES } from "@/modules/shared/config/routes";
 
@@ -58,10 +58,9 @@ export const CRM_NAVIGATION: ICrmNavigation[] = [
         isActive: false,
         isAdmin: true,
         icon: <Rabbit />,
-
     },
     {
-        id: 6,
+        id: 7,
         code: "settings",
         url: ROUTES.CRM_SETTINGS,
         title: "Settings",

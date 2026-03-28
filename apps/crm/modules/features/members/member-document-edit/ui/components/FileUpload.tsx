@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useRef, useState } from "react";
 import { ChangeEvent } from "react";
@@ -7,9 +7,9 @@ import { useTranslations } from "next-intl";
 
 import { Upload } from "lucide-react";
 
-import { Button, Field } from "@workspace/ui"
-import { FieldLabel } from "@workspace/ui/components/field"
-import { FieldContent } from "@workspace/ui/components/field"
+import { Button, Field } from "@workspace/ui";
+import { FieldLabel } from "@workspace/ui/components/field";
+import { FieldContent } from "@workspace/ui/components/field";
 
 import { useIdentityDocumentPreview } from "@/modules/entities/member-documents";
 
@@ -23,7 +23,16 @@ export interface IFileUploadProps {
     setFile: (file: File | null) => void;
     handleFileChange: (event: ChangeEvent<HTMLInputElement>) => void;
 }
-export const FileUpload = ({ memberId, documentId, currentPreviewUrl, filePreview, fileInputRef, file, setFile, handleFileChange }: IFileUploadProps) => {
+export const FileUpload = ({
+    memberId,
+    documentId,
+    currentPreviewUrl,
+    filePreview,
+    fileInputRef,
+    file,
+    setFile,
+    handleFileChange,
+}: IFileUploadProps) => {
     const t = useTranslations("crm.members");
     const identityPreview = useIdentityDocumentPreview(memberId, documentId);
     return (
@@ -97,5 +106,5 @@ export const FileUpload = ({ memberId, documentId, currentPreviewUrl, filePrevie
                 </Button>
             </FieldContent>
         </Field>
-    )
-}
+    );
+};

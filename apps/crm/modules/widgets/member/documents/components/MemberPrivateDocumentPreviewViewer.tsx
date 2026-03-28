@@ -1,7 +1,10 @@
 "use client";
 
 import { ThemedSignatureImage } from "@/modules/entities/member";
-import { useIdentityDocumentPreview, useSignaturePreview } from "@/modules/entities/member-documents";
+import {
+    useIdentityDocumentPreview,
+    useSignaturePreview,
+} from "@/modules/entities/member-documents";
 
 export interface IMemberPrivateDocumentPreviewViewerProps {
     memberId: string;
@@ -71,8 +74,8 @@ export function MemberPrivateDocumentPreviewViewer({
         );
     }
     if (!previewUrl) return null;
-  
-    console.log("previewUrl", previewUrl);    
+
+    console.log("previewUrl", previewUrl);
     return (
         <img
             src={previewUrl}
@@ -81,4 +84,3 @@ export function MemberPrivateDocumentPreviewViewer({
         />
     );
 }
-

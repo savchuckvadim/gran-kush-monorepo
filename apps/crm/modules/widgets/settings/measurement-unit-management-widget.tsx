@@ -10,11 +10,13 @@ import { Button, Card, FieldInput } from "@workspace/ui";
 import { useCreateMeasurementUnit, useMeasurementUnits } from "@/modules/entities/measurement-unit";
 
 function toUnitCode(name: string): string {
-    return name
-        .trim()
-        .toUpperCase()
-        .replace(/[^A-Z0-9]+/g, "_")
-        .replace(/^_+|_+$/g, "") || "UNIT";
+    return (
+        name
+            .trim()
+            .toUpperCase()
+            .replace(/[^A-Z0-9]+/g, "_")
+            .replace(/^_+|_+$/g, "") || "UNIT"
+    );
 }
 
 export function MeasurementUnitManagementWidget() {

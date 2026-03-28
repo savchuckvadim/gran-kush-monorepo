@@ -1,18 +1,8 @@
-import {
-    Body,
-    Controller,
-    Get,
-    NotFoundException,
-    Param,
-    Patch,
-    Query,
-    UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Get, NotFoundException, Param, Patch, Query } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
+import { RequireEmployeeJwt } from "@auth/employees";
 import { CurrentEmployee } from "@auth/employees/api/decorators/current-employee.decorator";
-import { AdminGuard } from "@auth/employees/infrastructure/guards/admin.guard";
-import { EmployeeJwtAuthGuard } from "@auth/employees/infrastructure/guards/employee-jwt-auth.guard";
 import { Employee } from "@employees/domain/entity/employee.entity";
 import {
     OrderDetailDto,
@@ -37,7 +27,7 @@ import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 
 @ApiTags("CRM Orders")
 @Controller("crm/orders")
-@UseGuards(EmployeeJwtAuthGuard)
+@RequireEmployeeJwt()
 @ApiBearerAuth()
 export class CrmOrdersController {
     constructor(private readonly ordersService: OrdersService) {}

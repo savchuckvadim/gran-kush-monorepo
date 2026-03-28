@@ -4,7 +4,6 @@ import { JwtService } from "@nestjs/jwt";
 
 import { Employee } from "@employees/domain/entity/employee.entity";
 import { MailService } from "@mail/application/services/mail.service";
-import { Member } from "@members/domain/entity/member.entity";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import { randomBytes } from "crypto";
 
@@ -12,9 +11,7 @@ import { randomBytes } from "crypto";
 export class EmailVerificationService {
     constructor(
         private readonly userRepository: UserRepository,
-        private readonly mailService: MailService,
-        private readonly configService: ConfigService,
-        private readonly jwtService: JwtService
+        private readonly mailService: MailService
     ) {}
 
     /**

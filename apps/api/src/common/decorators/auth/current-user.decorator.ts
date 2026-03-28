@@ -9,12 +9,12 @@ interface RequestWithUser extends Request {
 
 /**
  * Декоратор для получения текущего пользователя из request
- * Используется вместе с JwtAuthGuard
+ * Устаревший декоратор; для CRM/ЛК используйте CurrentEmployee / CurrentMember
  *
  * @example
  * ```typescript
  * @Get('me')
- * @UseGuards(JwtAuthGuard)
+ * @UseGuards(...)
  * async getMe(@CurrentUser() user: User) {
  *   return user;
  * }
@@ -23,7 +23,7 @@ interface RequestWithUser extends Request {
  * @example
  * ```typescript
  * @Get('me')
- * @UseGuards(JwtAuthGuard)
+ * @UseGuards(...)
  * async getMe(@CurrentUser('id') userId: string) {
  *   return userId;
  * }

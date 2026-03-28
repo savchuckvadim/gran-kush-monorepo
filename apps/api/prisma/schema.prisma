@@ -15,74 +15,52 @@ enum PortalStatus {
   archived
 }
 
-model Portal {
-  id          String       @id @default(uuid())
-  name        String       @unique @db.VarChar(40)
-  displayName String       @map("display_name") @db.VarChar(255)
-  status      PortalStatus @default(active)
-  createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
+enum EmployeeRole {
+  portal_owner
+  employee
+  admin
+}
 
-  users         User[]
-  members       Member[]
-  employees     Employee[]
-  tokens        Token[]
+model Portal {
+  id          String         @id @default(uuid())
+  name        String         @unique @db.VarChar(40)
+  displayName String         @map("display_name") @db.VarChar(255)
+  status      PortalStatus   @default(active)
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+  type        PortalTypeEnum @default(CLUB) @map("type")
+
+  users          User[]
+  members        Member[]
+  employees      Employee[]
+  tokens         Token[]
   employeeTokens EmployeeToken[]
-  authSessions  AuthSession[]
 
   @@index([name])
   @@index([status])
   @@map("portals")
 }
 
-model AuthSession {
-  id               String    @id @default(uuid())
-  portalId         String    @map("portal_id")
-  userId           String?   @map("user_id")
-  employeeId       String?   @map("employee_id")
-  memberId         String?   @map("member_id")
-  refreshTokenHash String    @unique @map("refresh_token_hash") @db.VarChar(255)
-  expiresAt        DateTime  @map("expires_at")
-  revokedAt        DateTime? @map("revoked_at")
-  ipAddress        String?   @map("ip_address") @db.VarChar(100)
-  userAgent        String?   @map("user_agent") @db.VarChar(1000)
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
-
-  portal   Portal   @relation(fields: [portalId], references: [id], onDelete: Cascade)
-  user     User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  employee Employee? @relation(fields: [employeeId], references: [id], onDelete: SetNull)
-  member   Member?  @relation(fields: [memberId], references: [id], onDelete: SetNull)
-
-  @@index([portalId])
-  @@index([userId])
-  @@index([employeeId])
-  @@index([memberId])
-  @@index([expiresAt])
-  @@map("auth_sessions")
-}
-
 // Модель пользователя (минимальная - только для аутентификации)
 model User {
-  id                           String    @id @default(uuid())
-  portalId                     String?   @map("portal_id")
-  email                        String    @unique @db.VarChar(255)
-  passwordHash                 String    @map("password_hash") @db.VarChar(255)
-  isActive                     Boolean   @default(false) @map("is_active") // По умолчанию false, активируется после подтверждения email
-  emailConfirmed               Boolean   @default(false) @map("email_confirmed")
-  emailVerificationToken       String?   @unique @map("email_verification_token") @db.VarChar(255)
-  emailVerificationExpiresAt   DateTime? @map("email_verification_expires_at")
-  resetPasswordToken           String?   @unique @map("reset_password_token") @db.VarChar(255)
-  resetPasswordExpiresAt       DateTime? @map("reset_password_expires_at")
-  createdAt                    DateTime  @default(now()) @map("created_at")
-  updatedAt                    DateTime  @updatedAt @map("updated_at")
+  id                         String    @id @default(uuid())
+  portalId                   String?   @map("portal_id")
+  email                      String    @unique @db.VarChar(255)
+  passwordHash               String    @map("password_hash") @db.VarChar(255)
+  isActive                   Boolean   @default(false) @map("is_active") // По умолчанию false, активируется после подтверждения email
+  emailConfirmed             Boolean   @default(false) @map("email_confirmed")
+  emailVerificationToken     String?   @unique @map("email_verification_token") @db.VarChar(255)
+  emailVerificationExpiresAt DateTime? @map("email_verification_expires_at")
+  resetPasswordToken         String?   @unique @map("reset_password_token") @db.VarChar(255)
+  resetPasswordExpiresAt     DateTime? @map("reset_password_expires_at")
+  createdAt                  DateTime  @default(now()) @map("created_at")
+  updatedAt                  DateTime  @updatedAt @map("updated_at")
 
   // Связи
-  portal      Portal?   @relation(fields: [portalId], references: [id], onDelete: SetNull)
-  tokens      Token[]
-  member      Member?
-  employee    Employee?
-  sessions    AuthSession[]
+  portal       Portal?       @relation(fields: [portalId], references: [id], onDelete: SetNull)
+  tokens       Token[]
+  member       Member?
+  employee     Employee?
   storageFiles StorageFile[]
 
   @@index([portalId])
@@ -91,33 +69,38 @@ model User {
   @@map("users")
 }
 
-// Модель токенов пользователей (для refresh tokens)
+// Модель токенов пользователей (для refresh tokens; одна активная сессия на пару user + device)
 model Token {
-  id     String @id @default(uuid())
-  token  String @unique @db.VarChar(500)
-  userId String @map("user_id")
+  id       String  @id @default(uuid())
+  token    String  @unique @db.VarChar(500)
+  userId   String  @map("user_id")
+  deviceId String  @map("device_id") @db.VarChar(128)
   portalId String? @map("portal_id")
+  revoked  Boolean @default(false) @map("revoked")
 
   expiresAt DateTime @map("expires_at")
   createdAt DateTime @default(now()) @map("created_at")
 
   // Связи
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   portal Portal? @relation(fields: [portalId], references: [id], onDelete: SetNull)
 
   @@index([portalId])
   @@index([userId])
+  @@index([userId, deviceId])
   @@index([token])
   @@index([expiresAt])
   @@map("tokens")
 }
 
-// Модель токенов сотрудников (для refresh tokens)
+// Модель токенов сотрудников (для refresh tokens; одна активная сессия на пару employee + device)
 model EmployeeToken {
-  id         String @id @default(uuid())
-  token      String @unique @db.VarChar(500)
-  employeeId String @map("employee_id")
+  id         String  @id @default(uuid())
+  token      String  @unique @db.VarChar(500)
+  employeeId String  @map("employee_id")
+  deviceId   String  @map("device_id") @db.VarChar(128)
   portalId   String? @map("portal_id")
+  revoked    Boolean @default(false) @map("revoked")
 
   expiresAt DateTime @map("expires_at")
   createdAt DateTime @default(now()) @map("created_at")
@@ -128,6 +111,7 @@ model EmployeeToken {
 
   @@index([portalId])
   @@index([employeeId])
+  @@index([employeeId, deviceId])
   @@index([token])
   @@index([expiresAt])
   @@map("employee_tokens")
@@ -266,17 +250,16 @@ model Member {
   updatedAt        DateTime  @updatedAt @map("updated_at")
 
   // Связи
-  portal            Portal?             @relation(fields: [portalId], references: [id], onDelete: SetNull)
-  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  identityDocuments IdentityDocument[]
-  signature         Signature?
-  memberMjStatuses  MemberMjStatus[]
-  memberDocuments   MemberDocument[]
-  qrCode            QrCode?
-  presenceSessions  PresenceSession[]
-  orders            Order[]
+  portal                Portal?                @relation(fields: [portalId], references: [id], onDelete: SetNull)
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  identityDocuments     IdentityDocument[]
+  signature             Signature?
+  memberMjStatuses      MemberMjStatus[]
+  memberDocuments       MemberDocument[]
+  qrCode                QrCode?
+  presenceSessions      PresenceSession[]
+  orders                Order[]
   financialTransactions FinancialTransaction[]
-  sessions          AuthSession[]
 
   @@index([portalId])
   @@index([userId])
@@ -305,14 +288,13 @@ model Employee {
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
   // Связи
-  portal            Portal?            @relation(fields: [portalId], references: [id], onDelete: SetNull)
-  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tokens            EmployeeToken[]
-  sessions          AuthSession[]
-  presenceSessions  PresenceSession[] @relation("PresenceEmployee") // Сессии, где сотрудник отметил вход/выход
-  processedOrders   Order[]           @relation("OrderEmployee") // Заказы, обработанные сотрудником
-  createdProducts   Product[]         @relation("ProductCreatedBy") // Товары, созданные сотрудником
-  updatedProducts   Product[]         @relation("ProductUpdatedBy") // Товары, обновленные сотрудником
+  portal                Portal?                @relation(fields: [portalId], references: [id], onDelete: SetNull)
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokens                EmployeeToken[]
+  presenceSessions      PresenceSession[]      @relation("PresenceEmployee") // Сессии, где сотрудник отметил вход/выход
+  processedOrders       Order[]                @relation("OrderEmployee") // Заказы, обработанные сотрудником
+  createdProducts       Product[]              @relation("ProductCreatedBy") // Товары, созданные сотрудником
+  updatedProducts       Product[]              @relation("ProductUpdatedBy") // Товары, обновленные сотрудником
   financialTransactions FinancialTransaction[] @relation("TransactionCreatedBy") // Транзакции, созданные сотрудником
 
   @@index([portalId])
@@ -329,7 +311,7 @@ model StorageFile {
   originalName String   @map("original_name") @db.VarChar(255)
   fileName     String   @map("file_name") @db.VarChar(255)
   mimeType     String   @map("mime_type") @db.VarChar(100)
-  size         Int      // Размер в байтах
+  size         Int // Размер в байтах
   storageType  String   @map("storage_type") @db.VarChar(20) // public, private
   category     String   @db.VarChar(50) // member-document, member-signature, product-image, etc.
   path         String   @db.VarChar(500) // Относительный путь от корня storage
@@ -441,9 +423,9 @@ model ProductCategory {
 
 // Товары
 model Product {
-  id                String   @id @default(uuid())
-  categoryId        String   @map("category_id")
-  measurementUnitId String   @map("measurement_unit_id")
+  id                String @id @default(uuid())
+  categoryId        String @map("category_id")
+  measurementUnitId String @map("measurement_unit_id")
 
   // Основная информация
   name        String  @db.VarChar(255)
@@ -474,12 +456,12 @@ model Product {
   updatedBy String?  @map("updated_by") // Employee ID
 
   // Связи
-  category        ProductCategory @relation(fields: [categoryId], references: [id])
-  measurementUnit MeasurementUnit @relation(fields: [measurementUnitId], references: [id])
-  images          ProductImage[]
-  orderItems      OrderItem[]
-  createdByEmployee Employee? @relation("ProductCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
-  updatedByEmployee Employee? @relation("ProductUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
+  category          ProductCategory @relation(fields: [categoryId], references: [id])
+  measurementUnit   MeasurementUnit @relation(fields: [measurementUnitId], references: [id])
+  images            ProductImage[]
+  orderItems        OrderItem[]
+  createdByEmployee Employee?       @relation("ProductCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  updatedByEmployee Employee?       @relation("ProductUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
 
   @@index([categoryId])
   @@index([measurementUnitId])
@@ -545,8 +527,8 @@ model Order {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Связи
-  member       Member                @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  employee     Employee?             @relation("OrderEmployee", fields: [employeeId], references: [id], onDelete: SetNull)
+  member       Member                 @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  employee     Employee?              @relation("OrderEmployee", fields: [employeeId], references: [id], onDelete: SetNull)
   items        OrderItem[]
   transactions FinancialTransaction[]
 
@@ -567,7 +549,7 @@ model OrderItem {
 
   // Количество и цена
   quantity   Decimal @db.Decimal(10, 3)
-  unitPrice  Decimal @map("unit_price") @db.Decimal(10, 2)  // Цена на момент заказа
+  unitPrice  Decimal @map("unit_price") @db.Decimal(10, 2) // Цена на момент заказа
   totalPrice Decimal @map("total_price") @db.Decimal(10, 2) // quantity * unitPrice
 
   // Примечания
@@ -627,4 +609,10 @@ model FinancialTransaction {
   @@index([transactionDate])
   @@index([createdBy])
   @@map("financial_transactions")
+}
+
+enum PortalTypeEnum {
+  CLUB @map("club")
+  TATTOO_STUDIO @map("tattoo_studio")
+  BEAUTY_STUDIO @map("beauty_studio")
 }

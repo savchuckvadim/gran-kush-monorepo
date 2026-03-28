@@ -10,11 +10,13 @@ import { Button, Card, FieldInput } from "@workspace/ui";
 import { useCategories, useCreateCategory } from "@/modules/entities/category";
 
 function toCategoryCode(name: string): string {
-    return name
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "") || "category";
+    return (
+        name
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "") || "category"
+    );
 }
 
 export function CategoryManagementWidget() {
@@ -121,7 +123,10 @@ export function CategoryManagementWidget() {
                 ) : sortedCategories.length > 0 ? (
                     <ul className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
                         {sortedCategories.map((category) => (
-                            <li key={category.id} className="rounded border bg-background px-2 py-1.5">
+                            <li
+                                key={category.id}
+                                className="rounded border bg-background px-2 py-1.5"
+                            >
                                 {category.name}
                             </li>
                         ))}

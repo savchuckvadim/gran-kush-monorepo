@@ -5,10 +5,14 @@ import { notFound } from "next/navigation";
 
 import { useMemberDetails } from "@/modules/entities/member";
 import type { IdentityDocument } from "@/modules/entities/member-documents";
-import { MemberPrivateDocumentPreviewActions, MemberPrivateDocumentPreviewViewer } from "@/modules/widgets/member/documents/components";
+import { ROUTES } from "@/modules/shared/config/routes";
+import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
+import {
+    MemberPrivateDocumentPreviewActions,
+    MemberPrivateDocumentPreviewViewer,
+} from "@/modules/widgets/member/documents/components";
 
 export interface IMemberDocumentPreviewPageProps {
-    locale: string;
     memberId: string;
     documentType: string;
     // backToProfile: string;
@@ -17,17 +21,22 @@ export interface IMemberDocumentPreviewPageProps {
 }
 
 export function MemberDocumentPreviewPage({
-    locale,
     memberId,
     documentType,
     // backToProfile,
     // downloadLabel,
     previewTitle,
 }: IMemberDocumentPreviewPageProps) {
+    const toAppPath = useLocalizedLink();
     const { data: member, isLoading, error } = useMemberDetails(memberId);
-    
+    const memberProfilePath = toAppPath(`${ROUTES.CRM_MEMBER_DETAILS}/${memberId}`);
+
     if (isLoading) {
-        return <div className="flex min-h-[40vh] items-center justify-center text-muted-foreground">Loading...</div>;
+        return (
+            <div className="flex min-h-[40vh] items-center justify-center text-muted-foreground">
+                Loading...
+            </div>
+        );
     }
 
     if (error || !member) {
@@ -35,13 +44,15 @@ export function MemberDocumentPreviewPage({
     }
 
     const isSignature = documentType === "signature";
-    const identityDocument = member.identityDocuments.find((doc) => doc.id === documentType) ?? null;
+    const identityDocument =
+        member.identityDocuments.find((doc) => doc.id === documentType) ?? null;
     if (!isSignature && !identityDocument) notFound();
     if (isSignature && !member.signature) notFound();
 
     const identityDoc = identityDocument as IdentityDocument | null;
 
-    const isIdentityDocSide = (side: string): side is "first" | "second" => side === "first" || side === "second";
+    const isIdentityDocSide = (side: string): side is "first" | "second" =>
+        side === "first" || side === "second";
 
     const identityDocumentForActions =
         identityDoc && isIdentityDocSide(identityDoc.side)
@@ -60,7 +71,7 @@ export function MemberDocumentPreviewPage({
                     <h1 className="text-xl font-semibold">{previewTitle}</h1>
                     <p className="text-sm text-muted-foreground">
                         <Link
-                            href={`/${locale}/crm/members/${memberId}`}
+                            href={memberProfilePath}
                             className="font-medium text-foreground hover:underline"
                         >
                             {member.name} {member.surname ?? ""}
@@ -71,11 +82,9 @@ export function MemberDocumentPreviewPage({
 
                 <div className="flex gap-2">
                     <MemberPrivateDocumentPreviewActions
-                     
                         memberId={memberId}
                         documentId={documentType}
                         isSignature={isSignature}
-                        
                         identityDocument={identityDocumentForActions}
                         // downloadLabel={downloadLabel}
                     />
@@ -94,4 +103,3 @@ export function MemberDocumentPreviewPage({
         </div>
     );
 }
-

@@ -4,6 +4,8 @@
 
 The backend API is built with **NestJS 11**, following Domain-Driven Design (DDD) principles and Clean Architecture patterns. The API provides RESTful endpoints for the frontend applications and implements a robust authentication system, file storage, email processing, and queue-based async operations.
 
+**Current HTTP contract (errors, CORS, portal headers, cookies vs mobile):** [HTTP_API_CONTRACT.md](./HTTP_API_CONTRACT.md)
+
 ## Architecture
 
 ### Design Patterns
@@ -100,10 +102,11 @@ module-name/
 
 **API Endpoints**:
 - `POST /lk/auth/member/check` - Check if user exists for member registration
-- `POST /lk/auth/member/register` - Register new member account (without blocking file uploads)
+- `POST /lk/auth/member/register` - Register new member account (portal-scoped; `PortalId` from context)
 - `POST /lk/auth/member/files` - Queue private documents/signature upload (BullMQ)
-- `POST /lk/auth/login` - Member login
-- `POST /lk/auth/refresh` - Refresh member token
+- `POST /lk/auth/login` - Member login (web cookies under `lk/auth`)
+- `POST /lk/auth/refresh` - Refresh member session (cookie-based for web)
+- **Mobile:** `lk/mobile/auth` — Bearer-based flows parallel to web
 
 **Repositories**:
 - `MembersRepository`
@@ -112,7 +115,7 @@ module-name/
 - `MemberMjStatusRepository`
 - `MemberDocumentsRepository`
 
-**Guards**: `MemberAuthGuard`
+**Guards**: `MemberJwtAuthGuard` (and related local JWT guards per route)
 
 ### 3. Employees Module
 
@@ -130,59 +133,51 @@ module-name/
   - Work info: `role`, `position`, `department`
   - Status: `isActive`, `lastLoginAt`
 
-**API Endpoints**:
-- `POST /crm/auth/employee/register` - Register employee (bootstrap/invite flow)
-- `POST /crm/auth/login` - Employee login
-- `POST /crm/auth/refresh` - Refresh employee access token
-- `POST /crm/auth/logout` - Employee logout
-- `GET /crm/auth/me` - Current employee profile
+**API Endpoints (web, HttpOnly cookies)** — see `EmployeeAuthController` (`crm/auth`):
+- `POST /crm/auth/login` — sets access/refresh cookies; response body is profile-shaped (tokens are not returned in JSON for web)
+- `POST /crm/auth/refresh` — reads refresh cookie, rotates cookies
+- `POST /crm/auth/logout` — clears cookies
+- `GET /crm/auth/me` — session via cookie JWT
+
+**Mobile / Bearer** — `EmployeeMobileAuthController` (`crm/mobile/auth`): JSON tokens + `Authorization: Bearer`.
+
+**Registration (admin-only)** — `POST /crm/auth/employee/register` under `crm/auth/employee` (requires authenticated admin in portal context).
 
 **Repositories**:
 - `EmployeesRepository`
 - `EmployeeTokensRepository`
 
-**Guards**: `EmployeeAuthGuard`, `AdminGuard`
+**Guards**: `EmployeeJwtAuthGuard`, `AdminGuard` (and portal match where applicable)
 
 ### 4. Auth Module
 
 **Purpose**: Authentication and authorization
 
 **Key Features**:
-- Dual authentication system (Member/Employee)
-- JWT token generation and validation
-- Refresh token management
-- Password reset functionality
-- Email verification
+- Dual authentication system (Member/Employee), plus **portal** scoping for tenant data
+- JWT generation/validation; refresh persistence in DB
+- Password reset and email verification (shared controllers under `auth`)
 
-**Authentication Flows**:
+**Transport**: **Web** uses HttpOnly cookies (`crm/auth`, `lk/auth`); **mobile** uses separate route prefixes and Bearer tokens — details in [HTTP_API_CONTRACT.md](./HTTP_API_CONTRACT.md).
 
-1. **Member Authentication**:
-   - Login → Access token + Refresh token
-   - Token stored in `Token` table
-   - Separate token system from employees
-
-2. **Employee Authentication**:
-   - Login → Access token + Refresh token
-   - Token stored in `EmployeeToken` table
-   - Role-based access (employee, manager, admin)
-
-**API Endpoints**:
-- `POST /lk/auth/login` - Member login
+**API Endpoints (non-exhaustive)**:
+- `POST /lk/auth/login` - Member login (web cookies)
 - `POST /lk/auth/member/register` - Member registration
-- `POST /lk/auth/refresh` - Refresh member token
-- `POST /crm/auth/login` - Employee login
-- `POST /crm/auth/refresh` - Refresh employee token
+- `POST /lk/auth/refresh` - Refresh member session
+- `POST /crm/auth/login` - Employee login (web cookies)
+- `POST /crm/auth/refresh` - Refresh employee session
 - `POST /auth/password/reset` - Request password reset
 - `POST /auth/password/reset/confirm` - Confirm password reset
 
-**Strategies**:
-- `MemberJwtStrategy` - Member JWT validation
-- `EmployeeJwtStrategy` - Employee JWT validation
+**Strategies / guards** (names in `apps/api/src/modules/auth/.../infrastructure`):
+- Member: local + JWT (cookie and/or bearer strategies per route)
+- Employee: local + JWT (cookie and/or bearer strategies per route)
+- `AdminGuard` — admin-only employee actions
 
 **Guards**:
-- `MemberAuthGuard` - Member authentication
-- `EmployeeAuthGuard` - Employee authentication
-- `AdminGuard` - Admin role check
+- `MemberJwtAuthGuard` — member JWT routes
+- `EmployeeJwtAuthGuard` — employee JWT routes
+- `AdminGuard` — admin role check
 
 ### 5. Storage Module
 
@@ -220,7 +215,7 @@ module-name/
 **Purpose**: Email sending and template management
 
 **Key Features**:
-- Queue-based email sending (Bull)
+- Queue-based email sending (BullMQ)
 - Email templates (React components)
 - Email verification
 - Password reset emails
@@ -238,11 +233,20 @@ module-name/
 
 **API Endpoints**:
 - `POST /mail/send` - Send email (admin)
-- `POST /mail/verify` - Verify email address
 
-**Events**:
-- `MAIL_SEND_EVENT` - Email send event
-- `MAIL_VERIFY_EVENT` - Email verification event
+
+Email verification & password reset are handled in the **Auth module**:
+- `GET /auth/verify/:token`
+- `POST /auth/verify`
+- `POST /auth/password/reset/request`
+- `POST /auth/password/reset`
+
+**Queue-based flow (event-like)**:
+- Email sending is queued into the `mail` BullMQ queue.
+- Job name: `send-email` (see `MAIL_QUEUE_JOB_NAMES.SEND_EMAIL`).
+- After completion, `MailProcessor` checks `emailType` and triggers:
+  - Telegram notification for verification emails
+  - follow-up `portal-events` job for portal-registration email
 
 ## Common Modules
 
@@ -260,27 +264,26 @@ module-name/
 
 ### Queue Module
 
-**Purpose**: Async job processing with Bull
+**Purpose**: Async job processing with BullMQ
 
 **Features**:
-- Redis-based queue system
-- Job processing
-- Retry mechanisms
+- Redis-backed queues (BullMQ)
+- Job processing in worker(s)
+- Retry logic available via BullMQ job options (per `queue.add(...)`)
 - Job monitoring
 
 **Queues**:
 - `mail` - Email sending queue
 - `member-files` - Async member documents/signature processing queue
+- `portal-events` - Platform/portal registration flow (welcome email + admin notifications)
 
 ### Redis Module
 
-**Purpose**: Caching and session storage
+**Purpose**: Redis client infrastructure used by BullMQ queues
 
 **Features**:
-- Session management
-- API response caching
-- Rate limiting support
-- Cache invalidation
+- Current code uses Redis as the BullMQ backend connection.
+- App-level caching/rate-limiting/session storage is not implemented via `RedisService` in the visible code.
 
 **Service**: `RedisService`
 
@@ -318,21 +321,26 @@ module-name/
 
 ## Authentication & Authorization
 
-### Dual Authentication System
+### Multi-tenant portals
 
-The system implements two completely separate authentication flows:
+Members and employees belong to a **portal** (`portalId`). Requests can carry portal context via **`X-Portal-Id`** / **`X-Portal-Slug`** headers (see [HTTP_API_CONTRACT.md](./HTTP_API_CONTRACT.md)). After JWT validation, **`PortalTenantMatchGuard`** rejects cross-portal access when context is present.
+
+Platform onboarding: **`POST /platform/portals/register`** creates a portal and initial owner (public).
+
+### Dual principal types (Member vs Employee)
+
+The system implements two separate authentication **domains**:
 
 1. **Member Authentication**:
-   - Endpoints: `/lk/auth/*`
-   - Tokens: Stored in `tokens` table
-   - Guards: `MemberAuthGuard`
-   - Strategy: `MemberJwtStrategy`
+   - Web: `/lk/auth/*` (HttpOnly cookies for session)
+   - Mobile: `/lk/mobile/auth` (Bearer)
+   - Refresh tokens: stored in `tokens` (member/user scope as implemented)
 
 2. **Employee Authentication**:
-   - Endpoints: `/crm/auth/*`
-   - Tokens: Stored in `employee_tokens` table
-   - Guards: `EmployeeAuthGuard`, `AdminGuard`
-   - Strategy: `EmployeeJwtStrategy`
+   - Web: `/crm/auth/*` (HttpOnly cookies)
+   - Mobile: `/crm/mobile/auth` (Bearer)
+   - Refresh tokens: `employee_tokens` table
+   - Guards: `EmployeeJwtAuthGuard`, `AdminGuard`, plus portal match where applicable
 
 ### JWT Token System
 
@@ -350,32 +358,30 @@ The system implements two completely separate authentication flows:
 
 ## Queue System & Scalability
 
-### Bull Queue Integration
+### BullMQ Queue Integration
 
 **Purpose**: Async operation processing
 
 **Benefits**:
 - Non-blocking operations
-- Retry mechanisms
+- Retry logic via BullMQ job options / worker configuration
 - Job monitoring
 - Scalability
 
 **Current Queues**:
 - `mail` - Email sending
 - `member-files` - Async member documents/signature processing
+- `portal-events` - Portal registration notifications and follow-up events
 
 **Future Queues**:
 - Notification sending
 - Report generation
 - Data synchronization
 
-### Redis Caching
+### Redis / Queue Infrastructure
 
 **Usage**:
-- Session storage
-- API response caching
-- Rate limiting
-- Temporary data storage
+- BullMQ backend storage for queue state (via Redis client)
 
 ### Database Optimization
 
@@ -388,7 +394,8 @@ The system implements two completely separate authentication flows:
 
 ### Swagger/OpenAPI
 
-API documentation is available at `/api/docs` when running in development mode.
+- **UI**: `GET /docs`
+- **OpenAPI JSON** (codegen): `GET /docs-json`
 
 **Features**:
 - Interactive API explorer
@@ -396,28 +403,20 @@ API documentation is available at `/api/docs` when running in development mode.
 - Authentication testing
 - Example requests
 
-### Response Format
+### Error response format (HTTP errors)
 
-**Success Response**:
+Unhandled HTTP exceptions are normalized by **`GlobalExceptionFilter`** to JSON:
+
 ```json
 {
-  "success": true,
-  "data": { ... },
-  "message": "Operation successful"
+  "message": "Human-readable message",
+  "errors": []
 }
 ```
 
-**Error Response**:
-```json
-{
-  "success": false,
-  "error": {
-    "code": "ERROR_CODE",
-    "message": "Error message",
-    "details": { ... }
-  }
-}
-```
+**Validation** (`400`) uses `message: "Validation failed"` and `errors` as a **string array** of constraint messages. Clients should prefer displaying **`errors`** when non-empty, otherwise **`message`**. See [HTTP_API_CONTRACT.md](./HTTP_API_CONTRACT.md).
+
+Success payloads are **per controller/DTO** (not a global `{ success, data }` envelope unless a specific endpoint defines that shape).
 
 ## Security
 
@@ -541,7 +540,8 @@ Required environment variables:
 
 For detailed information about each module, see:
 
-- [Authentication System](../AUTHENTICATION.md)
+- [HTTP API Contract](./HTTP_API_CONTRACT.md) — errors, CORS, cookies, portal headers
+- [Authentication System](../AUTHENTICATION.md) — long-form flows (partially historical; cross-check with contract)
 - [Storage Module](../STORAGE.md)
 - [Module Development Principles](./MODULE_DEVELOPMENT_PRINCIPLES.md)
 - [Site Documentation](../site/README.md) - Frontend integration
@@ -565,13 +565,13 @@ For detailed information about each module, see:
 - **Performance**: Optimized queries
 - **Developer Experience**: Excellent tooling
 
-### Why Bull Queue?
+### Why BullMQ Queue?
 
 - **Redis Backend**: Fast and reliable
 - **Job Processing**: Robust job handling
 - **Monitoring**: Built-in monitoring tools
 - **Scalability**: Horizontal scaling support
-- **Retry Logic**: Automatic retry mechanisms
+- **Retry Logic**: Configurable per job via BullMQ job options (attempts/backoff); defaults depend on job configuration.
 
 ## Future Enhancements
 

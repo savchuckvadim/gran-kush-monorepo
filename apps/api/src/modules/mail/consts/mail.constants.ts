@@ -27,6 +27,11 @@ export const EMAIL_SUBJECTS = {
         es: "Restablecer contraseña",
         en: "Password Reset",
     },
+    PORTAL_REGISTRATION: {
+        ru: "Регистрация портала в CRM",
+        es: "Registro del portal en CRM",
+        en: "Portal registration in CRM",
+    },
 } as const;
 
 /**

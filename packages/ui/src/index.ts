@@ -1,8 +1,4 @@
-export { Alert, 
-    AlertAction,
-    AlertDescription,
-    AlertTitle,
-} from "./components/alert";
+export { Alert, AlertAction, AlertDescription, AlertTitle } from "./components/alert";
 export { Button, buttonVariants } from "./components/button";
 export {
     Dialog,

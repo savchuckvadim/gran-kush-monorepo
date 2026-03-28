@@ -47,7 +47,8 @@ export function useRegister() {
     const localizedLink = useLocalizedLink();
 
     return useMutation({
-        mutationFn: ({ data, force }: { data: RegisterRequest, force: boolean }) => registerMember(data, force),
+        mutationFn: ({ data, force }: { data: RegisterRequest; force: boolean }) =>
+            registerMember(data, force),
         onSuccess: (data, variables) => {
             // Redirect to email confirmation page
             router.push(

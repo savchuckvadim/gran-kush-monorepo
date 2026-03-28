@@ -1,16 +1,7 @@
-import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    NotFoundException,
-    Param,
-    Post,
-    UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Delete, Get, NotFoundException, Param, Post } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
-import { EmployeeJwtAuthGuard } from "@auth/employees/infrastructure/guards/employee-jwt-auth.guard";
+import { RequireEmployeeJwt } from "@auth/employees";
 import {
     QrCodeDto,
     QrCodeScanResultDto,
@@ -29,7 +20,7 @@ import { ApiSuccessResponse } from "@common/decorators/response/api-success-resp
 
 @ApiTags("CRM QR Codes")
 @Controller("crm/qr-codes")
-@UseGuards(EmployeeJwtAuthGuard)
+@RequireEmployeeJwt()
 @ApiBearerAuth()
 export class CrmQrCodesController {
     constructor(private readonly qrCodesService: QrCodesService) {}

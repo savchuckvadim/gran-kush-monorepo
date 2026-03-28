@@ -106,11 +106,11 @@ export class S3Service {
             ContentType: contentType,
         };
 
-        const wantsPublicRead = isPublic
-            // isPublic &&
-            // (process.env.AWS_S3_PUBLIC_READ === "true" ||
-            //     process.env.S3_OBJECT_ACL === "public-read" ||
-            //     process.env.S3_PUBLIC_READ === "true");
+        const wantsPublicRead = isPublic;
+        // isPublic &&
+        // (process.env.AWS_S3_PUBLIC_READ === "true" ||
+        //     process.env.S3_OBJECT_ACL === "public-read" ||
+        //     process.env.S3_PUBLIC_READ === "true");
 
         if (wantsPublicRead) {
             input.ACL = "public-read";
@@ -146,7 +146,6 @@ export class S3Service {
         return { url: this.getPublicUrl(key) };
     }
 
-   
     /**
      * Удаляет объект из S3 по ключу.
      */

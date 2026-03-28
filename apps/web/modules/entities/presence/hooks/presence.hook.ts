@@ -2,7 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { getMyPresenceHistory, getMyPresenceStatus, type PresenceHistoryParams } from "../api/presence.api";
+import {
+    getMyPresenceHistory,
+    getMyPresenceStatus,
+    type PresenceHistoryParams,
+} from "../api/presence.api";
 
 export const presenceKeys = {
     all: ["presence"] as const,

@@ -1,17 +1,24 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@workspace/ui";
 
 import { CrmMemberListItem, useCrmMembers } from "@/modules/entities/member";
 import { EntityList, EntityListTableColumn } from "@/modules/shared";
-import { useRouter } from "next/navigation";
+import { ROUTES } from "@/modules/shared/config/routes";
+import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
-export function MemberList({ locale }: { locale: string }) {
+import { MemberListCounter } from "./MemberListCounter";
+
+export function MemberList() {
     const t = useTranslations("crm.members");
     const { data: members, isLoading, error } = useCrmMembers();
     const router = useRouter();
+    const toAppPath = useLocalizedLink();
+    const makeMemberPath = (memberId: string) =>
+        toAppPath(`${ROUTES.CRM_MEMBER_DETAILS}/${memberId}`);
     if (isLoading) {
         return <div>Loading...</div>;
     }
@@ -45,27 +52,28 @@ export function MemberList({ locale }: { locale: string }) {
         {
             key: "action",
             header: t("columns.action"),
-            cell: (member: CrmMemberListItem) => <Button variant="outline" size="sm" asChild>
-                <Link href={`/${locale}/crm/members/${member.id}`}>
-                    {t("openProfile")}
-                </Link>
-            </Button>,
+            cell: (member: CrmMemberListItem) => (
+                <Button variant="outline" size="sm" asChild>
+                    <Link href={makeMemberPath(member.id)}>{t("openProfile")}</Link>
+                </Button>
+            ),
         },
     ] as EntityListTableColumn<CrmMemberListItem>[];
 
-
     return (
         <div className="space-y-3">
+            <div className="w-full flex items-center justify-end">
+            <MemberListCounter />
+            </div>
             <EntityList<CrmMemberListItem>
                 items={members ?? []}
                 getRowKey={(member) => member.id}
                 tableColumns={tableColumns}
                 isRowClickable={true}
                 onRowClick={(member) => {
-                    router.push(`/${locale}/crm/members/${member.id}`);
+                    router.push(makeMemberPath(member.id));
                 }}
             />
-           
         </div>
     );
 }

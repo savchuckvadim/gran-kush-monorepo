@@ -19,7 +19,6 @@ const queryClient = new QueryClient({
 export function Providers({ children }: { children: React.ReactNode }) {
     return (
         <QueryClientProvider client={queryClient}>
-
             <NextThemesProvider
                 attribute="class"
                 defaultTheme="dark"
@@ -27,11 +26,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 disableTransitionOnChange
                 enableColorScheme
             >
-                <AuthProvider>
-                    {children}
-                </AuthProvider>
+                <AuthProvider>{children}</AuthProvider>
             </NextThemesProvider>
-
         </QueryClientProvider>
     );
 }

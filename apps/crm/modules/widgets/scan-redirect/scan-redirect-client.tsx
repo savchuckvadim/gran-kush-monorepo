@@ -4,8 +4,8 @@
  * /scan — публичная страница для QR-ссылок (Option B).
  *
  * Сценарии:
- * - Сотрудник (есть CRM-токен) -> редирект на /[locale]/crm/attendance?scan=CODE
- * - Посторонний человек (нет токена) -> редирект на NEXT_PUBLIC_MAIN_SITE_URL
+ * - Любой вход -> редирект на /[locale]/[portal]/crm/attendance?scan=CODE
+ * - Дальше protected-route auth guard сам решает: пускать в CRM или отправлять на login
  */
 
 import { useEffect } from "react";
@@ -14,8 +14,6 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
 import { defaultLocale, locales } from "@/i18n";
-import { apiTokensStorage } from "@/modules/shared";
-
 
 export function ScanRedirectClient() {
     const pathname = usePathname();
@@ -25,15 +23,25 @@ export function ScanRedirectClient() {
     useEffect(() => {
         const code = searchParams.get("code") ?? searchParams.get("scan");
         const requestedLocale = searchParams.get("locale") ?? undefined;
-        const localeFromPath = pathname.split("/")[1];
+        const segments = pathname.split("/").filter(Boolean);
+        const firstSegment = segments[0];
+        const secondSegment = segments[1];
         const pathLocale =
-            localeFromPath && locales.includes(localeFromPath as (typeof locales)[number]) ? localeFromPath : undefined;
+            firstSegment && locales.includes(firstSegment as (typeof locales)[number])
+                ? firstSegment
+                : secondSegment && locales.includes(secondSegment as (typeof locales)[number])
+                  ? secondSegment
+                  : undefined;
+        const portalSlug =
+            pathLocale && secondSegment && secondSegment !== pathLocale ? secondSegment : null;
 
-        const resolvedLocale = pathLocale ?? (requestedLocale && locales.includes(requestedLocale as (typeof locales)[number])
-            ? requestedLocale
-            : defaultLocale);
+        const resolvedLocale =
+            pathLocale ??
+            (requestedLocale && locales.includes(requestedLocale as (typeof locales)[number])
+                ? requestedLocale
+                : defaultLocale);
 
-        // Canonical route for QR flow is /{locale}/scan.
+        // Canonical routes for QR flow are /{locale}/scan and /{locale}/{portal}/scan.
         // If someone opens legacy /scan, normalize URL first.
         if (!pathLocale) {
             const params = new URLSearchParams(searchParams.toString());
@@ -43,15 +51,9 @@ export function ScanRedirectClient() {
             return;
         }
 
-        const hasCrmToken = typeof window !== "undefined" && !!apiTokensStorage.getAccessToken();
-
-        if (!hasCrmToken) {
-            const mainSiteUrl = process.env.NEXT_PUBLIC_MAIN_SITE_URL || "https://google.com";
-            window.location.replace(mainSiteUrl);
-            return;
-        }
-
-        const attendancePath = `/${resolvedLocale}/crm/attendance`;
+        const attendancePath = portalSlug
+            ? `/${resolvedLocale}/${portalSlug}/crm/attendance`
+            : `/${resolvedLocale}/crm/attendance`;
         if (!code) {
             router.replace(attendancePath);
             return;

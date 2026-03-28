@@ -20,7 +20,7 @@ export class AdminGuard implements CanActivate {
             return true; // Если роль admin не требуется, просто пропускаем
         }
 
-        // Получаем Employee из запроса (должен быть установлен EmployeeJwtAuthGuard)
+        // Получаем Employee из запроса (должен быть установлен JWT-guard сотрудника)
         const request = context.switchToHttp().getRequest();
         const employee: Employee = request.user;
 

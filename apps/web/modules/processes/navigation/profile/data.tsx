@@ -4,8 +4,6 @@ import { ROUTES } from "@/modules/shared";
 
 import { IProfileNavigation } from "./profile-navigation.interface";
 
-
-
 export const PROFILE_NAVIGATION: IProfileNavigation[] = [
     {
         id: 1,
@@ -40,5 +38,4 @@ export const PROFILE_NAVIGATION: IProfileNavigation[] = [
         isActive: false,
         icon: <Settings />,
     },
-
 ];

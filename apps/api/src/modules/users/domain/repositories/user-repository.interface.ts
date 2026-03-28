@@ -13,6 +13,7 @@ export abstract class UserRepository {
     abstract update(
         id: string,
         data: Partial<{
+            portalId: string | null;
             passwordHash: string;
             isActive: boolean;
             emailConfirmed: boolean;

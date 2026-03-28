@@ -79,11 +79,12 @@ export class MembersService {
     }
 
     /**
-     * Создание Member с User
+     * Создание Member с User (всегда в рамках текущего портала из запроса).
      */
     async createMember(
         dto: RegisterMemberDto,
-        force: boolean = false
+        force: boolean = false,
+        portalId: string
     ): Promise<{
         userId: string;
         memberId: string;
@@ -97,6 +98,10 @@ export class MembersService {
                 throw new ConflictException("User is already registered as Member");
             }
 
+            if (existingUser.portalId && existingUser.portalId !== portalId) {
+                throw new ConflictException("User already belongs to another portal");
+            }
+
             // Если есть Employee, но не force - нужно подтверждение
             if (existingUser.employee && !force) {
                 throw new ConflictException(
@@ -106,12 +111,12 @@ export class MembersService {
 
             // Используем существующего User
             const passwordHash = await this.hashPassword(dto.password);
-            await this.userRepository.update(existingUser.id, { passwordHash });
+            await this.userRepository.update(existingUser.id, { passwordHash, portalId });
 
             // Создаем Member через репозиторий
             const member = await this.memberRepository.create({
                 userId: existingUser.id,
-                portalId: existingUser.portalId,
+                portalId,
                 name: dto.name,
                 surname: dto.surname,
                 phone: dto.phone,
@@ -140,13 +145,13 @@ export class MembersService {
         const user = await this.userRepository.create({
             email: dto.email,
             passwordHash,
-            portalId: undefined,
+            portalId,
         });
 
         // Создаем Member через репозиторий
         const member = await this.memberRepository.create({
             userId: user.id,
-            portalId: user.portalId,
+            portalId,
             name: dto.name,
             surname: dto.surname,
             phone: dto.phone,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { usePathname,useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { Pencil } from "lucide-react";
@@ -78,7 +78,12 @@ export function MemberProfileEditModal({ member }: MemberProfileEditModalProps) 
 
     return (
         <>
-            <Button size="icon" variant="outline" onClick={() => setIsOpen(true)} aria-label={t("startEdit")}>
+            <Button
+                size="icon"
+                variant="outline"
+                onClick={() => setIsOpen(true)}
+                aria-label={t("startEdit")}
+            >
                 <Pencil className="h-4 w-4" />
             </Button>
 
@@ -102,7 +107,9 @@ export function MemberProfileEditModal({ member }: MemberProfileEditModalProps) 
                             <FieldInput
                                 label={t("fields.name")}
                                 value={profileForm.name}
-                                onChange={(e) => setProfileForm((prev) => ({ ...prev, name: e.target.value }))}
+                                onChange={(e) =>
+                                    setProfileForm((prev) => ({ ...prev, name: e.target.value }))
+                                }
                             />
                             <FieldInput
                                 label={t("fields.surname")}
@@ -114,40 +121,56 @@ export function MemberProfileEditModal({ member }: MemberProfileEditModalProps) 
                             <FieldInput
                                 label={t("fields.phone")}
                                 value={profileForm.phone}
-                                onChange={(e) => setProfileForm((prev) => ({ ...prev, phone: e.target.value }))}
+                                onChange={(e) =>
+                                    setProfileForm((prev) => ({ ...prev, phone: e.target.value }))
+                                }
                             />
                             <FieldInput
                                 label={t("fields.birthday")}
                                 type="date"
                                 value={profileForm.birthday}
                                 onChange={(e) =>
-                                    setProfileForm((prev) => ({ ...prev, birthday: e.target.value }))
+                                    setProfileForm((prev) => ({
+                                        ...prev,
+                                        birthday: e.target.value,
+                                    }))
                                 }
                             />
                             <FieldInput
                                 label={t("fields.membershipNumber")}
                                 value={profileForm.membershipNumber}
                                 onChange={(e) =>
-                                    setProfileForm((prev) => ({ ...prev, membershipNumber: e.target.value }))
+                                    setProfileForm((prev) => ({
+                                        ...prev,
+                                        membershipNumber: e.target.value,
+                                    }))
                                 }
                             />
                             <FieldInput
                                 label={t("fields.status")}
                                 value={profileForm.status}
-                                onChange={(e) => setProfileForm((prev) => ({ ...prev, status: e.target.value }))}
+                                onChange={(e) =>
+                                    setProfileForm((prev) => ({ ...prev, status: e.target.value }))
+                                }
                             />
                             <FieldInput
                                 label={t("fields.documentType")}
                                 value={profileForm.documentType}
                                 onChange={(e) =>
-                                    setProfileForm((prev) => ({ ...prev, documentType: e.target.value }))
+                                    setProfileForm((prev) => ({
+                                        ...prev,
+                                        documentType: e.target.value,
+                                    }))
                                 }
                             />
                             <FieldInput
                                 label={t("fields.documentNumber")}
                                 value={profileForm.documentNumber}
                                 onChange={(e) =>
-                                    setProfileForm((prev) => ({ ...prev, documentNumber: e.target.value }))
+                                    setProfileForm((prev) => ({
+                                        ...prev,
+                                        documentNumber: e.target.value,
+                                    }))
                                 }
                             />
                         </div>
@@ -156,17 +179,23 @@ export function MemberProfileEditModal({ member }: MemberProfileEditModalProps) 
                             <FieldInput
                                 label={t("fields.address")}
                                 value={profileForm.address}
-                                onChange={(e) => setProfileForm((prev) => ({ ...prev, address: e.target.value }))}
+                                onChange={(e) =>
+                                    setProfileForm((prev) => ({ ...prev, address: e.target.value }))
+                                }
                             />
                         </div>
 
                         <div className="mt-3">
-                            <label className="mb-1 block text-sm font-medium">{t("fields.notes")}</label>
+                            <label className="mb-1 block text-sm font-medium">
+                                {t("fields.notes")}
+                            </label>
                             <textarea
                                 className="w-full rounded-md border bg-background p-2 text-sm"
                                 rows={3}
                                 value={profileForm.notes}
-                                onChange={(e) => setProfileForm((prev) => ({ ...prev, notes: e.target.value }))}
+                                onChange={(e) =>
+                                    setProfileForm((prev) => ({ ...prev, notes: e.target.value }))
+                                }
                             />
                         </div>
 
@@ -176,7 +205,10 @@ export function MemberProfileEditModal({ member }: MemberProfileEditModalProps) 
                                     type="checkbox"
                                     checked={profileForm.isMedical}
                                     onChange={(e) =>
-                                        setProfileForm((prev) => ({ ...prev, isMedical: e.target.checked }))
+                                        setProfileForm((prev) => ({
+                                            ...prev,
+                                            isMedical: e.target.checked,
+                                        }))
                                     }
                                 />
                                 {t("fields.isMedical")}
@@ -186,7 +218,10 @@ export function MemberProfileEditModal({ member }: MemberProfileEditModalProps) 
                                     type="checkbox"
                                     checked={profileForm.isMj}
                                     onChange={(e) =>
-                                        setProfileForm((prev) => ({ ...prev, isMj: e.target.checked }))
+                                        setProfileForm((prev) => ({
+                                            ...prev,
+                                            isMj: e.target.checked,
+                                        }))
                                     }
                                 />
                                 {t("fields.isMj")}

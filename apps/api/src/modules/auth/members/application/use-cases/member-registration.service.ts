@@ -6,6 +6,7 @@ import { MemberAuthService } from "@auth/members/application/services/member-aut
 import { MemberRegistrationService } from "@auth/members/application/services/member-registration.service";
 import { EmailVerificationService } from "@auth/shared/application/services/email-verification.service";
 import { MembersService } from "@members/application/services/members.service";
+import { randomUUID } from "crypto";
 
 @Injectable()
 export class MemberRegistrationUseCase {
@@ -18,10 +19,15 @@ export class MemberRegistrationUseCase {
 
     async execute(
         dto: RegisterMemberDto,
-        force: boolean = false
+        force: boolean = false,
+        portalId: string
     ): Promise<RegisterMemberResponseDto> {
         // Создаем Member
-        const { userId, memberId } = await this.memberRegistrationService.createMember(dto, force);
+        const { userId, memberId } = await this.memberRegistrationService.createMember(
+            dto,
+            force,
+            portalId
+        );
 
         // Получаем User и Member для генерации токенов
         const userWithMember = await this.membersService.findByUserId(userId);
@@ -29,10 +35,11 @@ export class MemberRegistrationUseCase {
             throw new Error("Failed to create member");
         }
 
-        // Генерируем токены
+        const deviceId = randomUUID();
         const tokens = await this.memberAuthService.generateTokens(
             userWithMember,
-            userWithMember.user
+            userWithMember.user,
+            deviceId
         );
 
         // Проверяем, был ли User уже Employee

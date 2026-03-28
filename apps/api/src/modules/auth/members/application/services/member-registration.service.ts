@@ -20,12 +20,13 @@ export class MemberRegistrationService {
      */
     async createMember(
         dto: RegisterMemberDto,
-        force: boolean = false
+        force: boolean = false,
+        portalId: string
     ): Promise<{
         userId: string;
         memberId: string;
     }> {
-        return this.membersService.createMember(dto, force);
+        return this.membersService.createMember(dto, force, portalId);
     }
 
     /**

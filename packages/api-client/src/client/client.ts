@@ -4,12 +4,22 @@ import { getAuthMiddleware } from "../auth/api-auth.middleware";
 import { ApiAuthType } from "../auth/api-auth.type";
 import { paths } from "../schema/schema";
 
-export const configureApiClient =
-    (baseurl: string, type: ApiAuthType): ReturnType<typeof createClient<paths>> => {
+export type ApiAuthStrategy = "token" | "cookie";
 
-        const client = createClient<paths>({ baseUrl: baseurl });
-        const authMiddleware = getAuthMiddleware(type, baseurl);
-        client.use(authMiddleware);
-        return client
-    };
-
+export const configureApiClient = (
+    baseurl: string,
+    type: ApiAuthType,
+    options?: { authStrategy?: ApiAuthStrategy }
+): ReturnType<typeof createClient<paths>> => {
+    const authStrategy = options?.authStrategy ?? "token";
+    const client = createClient<paths>({
+        baseUrl: baseurl,
+        fetch:
+            authStrategy === "cookie"
+                ? (request: Request) => fetch(request, { credentials: "include" })
+                : undefined,
+    });
+    const authMiddleware = getAuthMiddleware(type, baseurl, authStrategy);
+    client.use(authMiddleware);
+    return client;
+};

@@ -8,19 +8,35 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import type { SchemaOrderItemDto } from "@workspace/api-client/core";
 import { Button, Card } from "@workspace/ui";
 
-import { type OrderStatus, type PaymentStatus,useOrderDetail, useUpdateOrderStatus, useUpdatePaymentStatus } from "@/modules/entities/order";
+import {
+    type OrderStatus,
+    type PaymentStatus,
+    useOrderDetail,
+    useUpdateOrderStatus,
+    useUpdatePaymentStatus,
+} from "@/modules/entities/order";
+import { ROUTES } from "@/modules/shared/config/routes";
+import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
 interface OrderDetailCardProps {
     orderId: string;
-    locale: string;
 }
 
-const ORDER_STATUSES: OrderStatus[] = ["pending", "confirmed", "preparing", "ready", "completed", "cancelled"];
+const ORDER_STATUSES: OrderStatus[] = [
+    "pending",
+    "confirmed",
+    "preparing",
+    "ready",
+    "completed",
+    "cancelled",
+];
 const PAYMENT_STATUSES: PaymentStatus[] = ["pending", "paid", "refunded"];
 const PAYMENT_METHODS = ["cash", "card", "crypto"] as const;
 
-export function OrderDetailCard({ orderId, locale }: OrderDetailCardProps) {
+export function OrderDetailCard({ orderId }: OrderDetailCardProps) {
     const t = useTranslations("crm.orders.detail");
+    const toAppPath = useLocalizedLink();
+    const ordersPath = toAppPath(ROUTES.CRM_ORDERS);
     const { data: order, isLoading, error } = useOrderDetail(orderId);
     const updateStatus = useUpdateOrderStatus();
     const updatePayment = useUpdatePaymentStatus();
@@ -53,7 +69,7 @@ export function OrderDetailCard({ orderId, locale }: OrderDetailCardProps) {
             {/* Header */}
             <div className="flex items-center gap-3">
                 <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/${locale}/crm/orders`}>
+                    <Link href={ordersPath}>
                         <ArrowLeft className="h-4 w-4" />
                     </Link>
                 </Button>
@@ -132,7 +148,9 @@ export function OrderDetailCard({ orderId, locale }: OrderDetailCardProps) {
 
                     {order.paymentStatus === "paid" && (
                         <div className="flex flex-wrap gap-1">
-                            <span className="mr-2 text-xs text-muted-foreground">{t("paymentMethod")}:</span>
+                            <span className="mr-2 text-xs text-muted-foreground">
+                                {t("paymentMethod")}:
+                            </span>
                             {PAYMENT_METHODS.map((m) => (
                                 <Button
                                     key={m}
@@ -166,19 +184,24 @@ export function OrderDetailCard({ orderId, locale }: OrderDetailCardProps) {
                             <thead>
                                 <tr className="border-b text-xs text-muted-foreground">
                                     <th className="px-3 py-2 font-medium">{t("colProduct")}</th>
-                                    <th className="px-3 py-2 text-right font-medium">{t("colQty")}</th>
-                                    <th className="px-3 py-2 text-right font-medium">{t("colPrice")}</th>
-                                    <th className="px-3 py-2 text-right font-medium">{t("colItemTotal")}</th>
+                                    <th className="px-3 py-2 text-right font-medium">
+                                        {t("colQty")}
+                                    </th>
+                                    <th className="px-3 py-2 text-right font-medium">
+                                        {t("colPrice")}
+                                    </th>
+                                    <th className="px-3 py-2 text-right font-medium">
+                                        {t("colItemTotal")}
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {order.items.map((item: SchemaOrderItemDto) => (
                                     <tr key={item.id} className="border-b last:border-b-0">
-                                        <td className="px-3 py-2">
-                                            {item.product?.name ?? "—"}
-                                        </td>
+                                        <td className="px-3 py-2">{item.product?.name ?? "—"}</td>
                                         <td className="px-3 py-2 text-right">
-                                            {item.quantity} {item.product?.measurementUnit?.code ?? ""}
+                                            {item.quantity}{" "}
+                                            {item.product?.measurementUnit?.code ?? ""}
                                         </td>
                                         <td className="px-3 py-2 text-right font-mono">
                                             €{item.unitPrice}

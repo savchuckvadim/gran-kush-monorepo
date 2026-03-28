@@ -59,9 +59,7 @@ export async function getTransactions(
 /**
  * Детали транзакции
  */
-export async function getTransactionById(
-    id: string
-): Promise<SchemaFinancialTransactionDetailDto> {
+export async function getTransactionById(id: string): Promise<SchemaFinancialTransactionDetailDto> {
     const response = await $api.GET("/crm/finance/transactions/{id}", {
         params: { path: { id } },
     });

@@ -36,7 +36,14 @@ function isRefreshTokenMissing(error: unknown): boolean {
     return /refresh token not found/i.test(message);
 }
 
-export function useAuthRedirects({ pathname, hydrated, hasAccessToken, queryClient, router, meQuery }: Params) {
+export function useAuthRedirects({
+    pathname,
+    hydrated,
+    hasAccessToken,
+    queryClient,
+    router,
+    meQuery,
+}: Params) {
     const localeLessPath = stripLocalePrefix(pathname);
     const protectedRoute = isProtectedRoute(localeLessPath);
 
@@ -64,6 +71,14 @@ export function useAuthRedirects({ pathname, hydrated, hasAccessToken, queryClie
         apiTokensStorage.clearTokens();
         queryClient.clear();
         router.replace(loginUrl);
-    }, [hydrated, protectedRoute, hasAccessToken, loginUrl, router, meQuery.isError, meQuery.error, queryClient]);
+    }, [
+        hydrated,
+        protectedRoute,
+        hasAccessToken,
+        loginUrl,
+        router,
+        meQuery.isError,
+        meQuery.error,
+        queryClient,
+    ]);
 }
-

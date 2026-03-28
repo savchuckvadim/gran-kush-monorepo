@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { ThemedSignatureImage } from "@/modules/entities/member";
 import { useSignaturePreview } from "@/modules/entities/member-documents";
@@ -26,6 +26,10 @@ export function MemberSignaturePreview({ memberId }: IMemberSignaturePreviewProp
     }
 
     return (
-        <ThemedSignatureImage src={previewUrl} alt="signature" className="h-full w-full object-contain" />
+        <ThemedSignatureImage
+            src={previewUrl}
+            alt="signature"
+            className="h-full w-full object-contain"
+        />
     );
 }

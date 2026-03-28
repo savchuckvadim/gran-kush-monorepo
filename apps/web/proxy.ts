@@ -17,7 +17,6 @@ const intlMiddleware = createIntlMiddleware({
  * Protected routes that require authentication
  */
 
-
 /**
  * Public routes that don't require authentication
  */
@@ -42,7 +41,7 @@ const intlMiddleware = createIntlMiddleware({
 //     const accessToken = request.cookies.get("site.accessToken")?.value;
 //     // Also check for the token in Authorization header (for API calls)
 //     const authHeader = request.headers.get("authorization");
-    
+
 //     return !!accessToken || !!authHeader;
 // }
 
@@ -52,7 +51,7 @@ const intlMiddleware = createIntlMiddleware({
 // function isProtectedRoute(pathname: string): boolean {
 //     // Remove locale prefix if present
 //     const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}(-[A-Z]{2})?/, "") || "/";
-    
+
 //     return PROTECTED_ROUTES.some((route) => {
 //         if (route === "/profile") {
 //             // Match /profile and all sub-routes
@@ -88,13 +87,13 @@ export default function proxy(request: NextRequest) {
 
     // Check authentication for protected routes
     // if (isProtectedRoute(pathname)) {
-        // if (!isAuthenticated(request)) {
-        //     // Redirect to login page
-        //     const locale = pathname.split("/")[1] || defaultLocale;
-        //     const loginUrl = new URL(`/${locale}${ROUTES.LOGIN}`, request.url);
-        //     loginUrl.searchParams.set("redirect", pathname);
-        //     return NextResponse.redirect(loginUrl);
-        // }
+    // if (!isAuthenticated(request)) {
+    //     // Redirect to login page
+    //     const locale = pathname.split("/")[1] || defaultLocale;
+    //     const loginUrl = new URL(`/${locale}${ROUTES.LOGIN}`, request.url);
+    //     loginUrl.searchParams.set("redirect", pathname);
+    //     return NextResponse.redirect(loginUrl);
+    // }
     // }
 
     // Handle internationalization

@@ -19,10 +19,7 @@ import {
 } from "@/modules/entities/member-documents";
 import { EditMemberDocumentButton, isApiErrorWithStatus } from "@/modules/shared";
 
-import {
-    dataUrlToBlob,
-    fileToDataUrl,
-} from "../lib/utils";
+import { dataUrlToBlob, fileToDataUrl } from "../lib/utils";
 
 import { FileUpload } from "./components/FileUpload";
 import { SignatureUpload } from "./components/SignatureUpload";
@@ -63,11 +60,11 @@ export function MemberDocumentEditModal({
         // currentPreviewUrl example:
         //   /crm/members/{memberId}/identity-documents/{documentId}/preview
         // allow full URL + optional query/hash
-        const match = currentPreviewUrl.match(/identity-documents\/([^/?#]+)\/preview(?:[?#].*)?$/u);
+        const match = currentPreviewUrl.match(
+            /identity-documents\/([^/?#]+)\/preview(?:[?#].*)?$/u
+        );
         return match?.[1] ?? "";
     })();
-
-
 
     const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
         const selectedFile = event.target.files?.[0] ?? null;
@@ -170,7 +167,6 @@ export function MemberDocumentEditModal({
                                     setFile={setFile}
                                     handleFileChange={handleFileChange}
                                 />
-
                             </div>
                         ) : (
                             <div className="space-y-3">
@@ -201,7 +197,6 @@ export function MemberDocumentEditModal({
                                         setFile={setFile}
                                         handleFileChange={handleFileChange}
                                     />
-
                                 ) : (
                                     <SignatureCanvasField
                                         value={signatureDataUrl ?? undefined}

@@ -12,9 +12,9 @@ import {
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
+import { RequireEmployeeJwt } from "@auth/employees";
 import { CurrentEmployee } from "@auth/employees/api/decorators/current-employee.decorator";
 import { AdminGuard } from "@auth/employees/infrastructure/guards/admin.guard";
-import { EmployeeJwtAuthGuard } from "@auth/employees/infrastructure/guards/employee-jwt-auth.guard";
 import {
     CreateMeasurementUnitDto,
     MeasurementUnitDto,
@@ -58,7 +58,7 @@ import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 
 @ApiTags("CRM Catalog")
 @Controller("crm/catalog")
-@UseGuards(EmployeeJwtAuthGuard)
+@RequireEmployeeJwt()
 @ApiBearerAuth()
 export class CrmCatalogController {
     constructor(

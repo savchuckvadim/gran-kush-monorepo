@@ -10,11 +10,10 @@ export function useEmailConfirm(token: string) {
     useEffect(() => {
         setMounted(true);
     }, []);
-    return   useMutation({
+    return useMutation({
         mutationFn: async (token: string) => {
-            
             const data = await confirmEmail(token);
-           
+
             return data;
         },
         onSuccess: (data) => {
@@ -25,11 +24,7 @@ export function useEmailConfirm(token: string) {
             // }
         },
         onError: (error) => {
-           
             console.error(error);
-           
         },
     });
-
-  
 }

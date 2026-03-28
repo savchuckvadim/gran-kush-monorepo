@@ -5,10 +5,11 @@ import { AuthGuard } from "@nestjs/passport";
 import { ALLOW_UNCONFIRMED_KEY } from "@auth/members/api/decorators/allow-unconfirmed.decorator";
 import { Observable } from "rxjs";
 
+import { PASSPORT_JWT_STRATEGY } from "@common/auth";
 import { IS_PUBLIC_KEY } from "@common/decorators/auth/public.decorator";
 
 @Injectable()
-export class MemberJwtAuthGuard extends AuthGuard("member-jwt") {
+export class MemberJwtAuthGuard extends AuthGuard(PASSPORT_JWT_STRATEGY.MEMBER_COOKIE) {
     constructor(private reflector: Reflector) {
         super();
     }

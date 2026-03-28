@@ -45,9 +45,16 @@ export function EntityListCardsView<T>({
                     >
                         <div className="space-y-2 px-4">
                             {visibleFields.map((field) => (
-                                <div key={field.key} className="flex items-start justify-between gap-3">
-                                    <div className="text-xs text-muted-foreground">{field.label}</div>
-                                    <div className="text-sm font-medium text-right">{field.value(item)}</div>
+                                <div
+                                    key={field.key}
+                                    className="flex items-start justify-between gap-3"
+                                >
+                                    <div className="text-xs text-muted-foreground">
+                                        {field.label}
+                                    </div>
+                                    <div className="text-sm font-medium text-right">
+                                        {field.value(item)}
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -68,4 +75,3 @@ export function EntityListCardsView<T>({
         </div>
     );
 }
-

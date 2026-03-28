@@ -29,6 +29,7 @@ export const MAIL_WORKER_EVENTS = {
 export enum EmailType {
     VERIFICATION = "verification",
     PASSWORD_RESET = "password-reset",
+    PORTAL_REGISTRATION = "portal-registration",
     OTHER = "other",
 }
 
@@ -38,5 +39,6 @@ export enum EmailType {
 export const EMAIL_TYPE_LABELS: Record<EmailType, string> = {
     [EmailType.VERIFICATION]: "Email Verification",
     [EmailType.PASSWORD_RESET]: "Password Reset",
+    [EmailType.PORTAL_REGISTRATION]: "Portal Registration",
     [EmailType.OTHER]: "Other",
 } as const;

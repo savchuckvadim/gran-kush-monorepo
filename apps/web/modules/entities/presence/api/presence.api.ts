@@ -26,7 +26,7 @@ export async function getMyPresenceStatus(): Promise<PresenceStatusResponse> {
         throw new Error(error || "Failed to get presence status");
     }
     const data = response.data as SchemaPresenceSessionDto;
-    return {isPresent: data.isActive, currentSession: data} as PresenceStatusResponse;
+    return { isPresent: data.isActive, currentSession: data } as PresenceStatusResponse;
 }
 
 /**
@@ -38,8 +38,8 @@ export async function getMyPresenceHistory(
     const response = await $api.GET("/lk/presence/history", {
         params: {
             query: {
-                page: params.page ?? 1 as number,
-                limit: params.limit ?? 10 as number,
+                page: params.page ?? (1 as number),
+                limit: params.limit ?? (10 as number),
             },
         },
     });

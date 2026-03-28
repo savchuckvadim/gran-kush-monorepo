@@ -34,7 +34,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     const status =
-        typeof meQuery.error === "object" && meQuery.error ? (meQuery.error as { status?: number }).status : undefined;
+        typeof meQuery.error === "object" && meQuery.error
+            ? (meQuery.error as { status?: number }).status
+            : undefined;
 
     const errorMessage =
         meQuery.error instanceof Error
@@ -45,18 +47,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const isRefreshTokenMissing = /refresh token not found/i.test(errorMessage);
 
-    const isAuthError = hasAccessToken && meQuery.isError && (status === 401 || status === 403 || isRefreshTokenMissing);
+    const isAuthError =
+        hasAccessToken &&
+        meQuery.isError &&
+        (status === 401 || status === 403 || isRefreshTokenMissing);
 
     // Loading на protected страницах, пока:
     // - нет hydration (не можем прочитать localStorage)
     // - нет токена (будет редирект)
     // - /me выполняется или завершился 401/403 (будет редирект)
-    const shouldShowLoader = protectedRoute && (!hydrated || !hasAccessToken || meQuery.isPending || isAuthError);
+    const shouldShowLoader =
+        protectedRoute && (!hydrated || !hasAccessToken || meQuery.isPending || isAuthError);
 
     if (shouldShowLoader) {
         return <LoadingScreen />;
     }
-  
+
     const value: AuthContextValue = {
         currentUser: meQuery.data ?? null,
         isAuthenticated: !!meQuery.data,

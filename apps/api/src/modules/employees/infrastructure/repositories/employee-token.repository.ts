@@ -8,22 +8,49 @@ import { PrismaService } from "@common/prisma/prisma.service";
 export class EmployeeTokenPrismaRepository implements EmployeeTokenRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    async create(data: { token: string; employeeId: string; portalId?: string; expiresAt: Date }) {
+    async create(data: {
+        token: string;
+        employeeId: string;
+        deviceId: string;
+        portalId?: string;
+        expiresAt: Date;
+    }) {
         return this.prisma.employeeToken.create({
             data,
+            select: { id: true },
         });
     }
 
-    async findByToken(token: string) {
-        return this.prisma.employeeToken.findUnique({
-            where: { token },
-            include: { employee: { include: { user: true } } },
+    async findActiveByToken(token: string) {
+        return this.prisma.employeeToken.findFirst({
+            where: {
+                token,
+                revoked: false,
+                expiresAt: { gt: new Date() },
+            },
+            include: {
+                employee: {
+                    include: { user: true },
+                },
+            },
         });
     }
 
-    async findByEmployeeId(employeeId: string) {
-        return this.prisma.employeeToken.findMany({
-            where: { employeeId },
+    async revokeById(id: string): Promise<void> {
+        await this.prisma.employeeToken.update({
+            where: { id },
+            data: { revoked: true },
+        });
+    }
+
+    async revokeAllActiveForEmployeeDevice(employeeId: string, deviceId: string): Promise<void> {
+        await this.prisma.employeeToken.updateMany({
+            where: {
+                employeeId,
+                deviceId,
+                revoked: false,
+            },
+            data: { revoked: true },
         });
     }
 

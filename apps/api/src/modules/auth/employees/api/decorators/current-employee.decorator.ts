@@ -4,7 +4,7 @@ import { Employee } from "@employees/domain/entity/employee.entity";
 
 /**
  * Декоратор для получения текущего сотрудника из запроса
- * Используется вместе с EmployeeJwtAuthGuard
+ * Используется вместе с @RequireEmployeeJwt() (или мобильным Bearer-эквивалентом)
  */
 export const CurrentEmployee = createParamDecorator(
     (_data: unknown, ctx: ExecutionContext): Employee => {

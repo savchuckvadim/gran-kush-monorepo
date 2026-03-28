@@ -5,4 +5,3 @@ export * from "./products/product-detail";
 export * from "./scan-redirect/scan-redirect-client";
 export * from "./settings/category-management-widget";
 export * from "./settings/measurement-unit-management-widget";
-

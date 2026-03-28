@@ -1,10 +1,10 @@
-import { Body, Controller, Ip, Post, Req, Res } from "@nestjs/common";
+import { Body, Controller, Headers, Post, Res } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
-import { AuthCookieService } from "@auth/shared/application/services/auth-cookie.service";
-import { AuthSessionService } from "@auth/shared/application/services/auth-session.service";
-import type { Request, Response } from "express";
+import type { Response } from "express";
 
+import { AUTH_GLOBAL_SCOPE, resolveDeviceIdFromHeaders } from "@common/auth";
+import { AuthCookieService } from "@common/cookie/services/auth-cookie.service";
 import { Public } from "@common/decorators/auth/public.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
@@ -17,8 +17,7 @@ import { PortalRegistrationService } from "@modules/portals/application/services
 export class PortalRegistrationController {
     constructor(
         private readonly portalRegistrationService: PortalRegistrationService,
-        private readonly cookieService: AuthCookieService,
-        private readonly authSessionService: AuthSessionService
+        private readonly cookieService: AuthCookieService
     ) {}
 
     @Post("register")
@@ -30,20 +29,12 @@ export class PortalRegistrationController {
     @ApiErrorResponse([400, 409])
     async register(
         @Body() dto: RegisterPortalDto,
-        @Req() request: Request,
-        @Res({ passthrough: true }) response: Response,
-        @Ip() ip: string
+        @Headers() headers: Record<string, string | string[] | undefined>,
+        @Res({ passthrough: true }) response: Response
     ): Promise<RegisterPortalResponseDto> {
-        const result = await this.portalRegistrationService.registerPortal(dto);
-        this.cookieService.setAuthCookies(response, "crm", result.tokens);
-        await this.authSessionService.createSession({
-            portalId: result.portal.id,
-            employeeId: result.owner.id,
-            refreshToken: result.tokens.refreshToken,
-            expiresAt: this.resolveRefreshExpiry(),
-            ipAddress: ip,
-            userAgent: request.headers["user-agent"] || null,
-        });
+        const deviceId = resolveDeviceIdFromHeaders(headers);
+        const result = await this.portalRegistrationService.registerPortal(dto, deviceId);
+        this.cookieService.setAuthCookies(response, AUTH_GLOBAL_SCOPE.CRM, result.tokens);
 
         return {
             portal: result.portal,
@@ -53,13 +44,7 @@ export class PortalRegistrationController {
                 name: result.owner.name,
                 role: result.owner.role,
             },
-            accessToken: result.tokens.accessToken,
+            deviceId,
         };
-    }
-
-    private resolveRefreshExpiry(): Date {
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 7);
-        return expiresAt;
     }
 }

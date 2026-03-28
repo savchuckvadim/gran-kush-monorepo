@@ -33,7 +33,9 @@ export default async function LocaleLayout({
                     <ProfileSidebar />
                     <div className="flex flex-col flex-1">
                         <Header />
-                        <main className="mx-auto container p-3 flex flex-col justify-center">{children}</main>
+                        <main className="mx-auto container p-3 flex flex-col justify-center">
+                            {children}
+                        </main>
                     </div>
                 </div>
             </SidebarProvider>

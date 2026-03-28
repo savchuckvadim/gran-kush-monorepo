@@ -39,7 +39,11 @@ export class RegisterEmployeeDto {
     @Matches(/^\+?[1-9]\d{1,14}$/)
     phone?: string;
 
-    @ApiPropertyOptional({ example: "manager", enum: ["employee", "manager", "admin"], type: String })
+    @ApiPropertyOptional({
+        example: "manager",
+        enum: ["employee", "manager", "admin"],
+        type: String,
+    })
     @IsString()
     @IsOptional()
     role?: string;

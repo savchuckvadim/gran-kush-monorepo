@@ -2,8 +2,9 @@ import { ValidationPipe } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
 
+import cookieParser from "cookie-parser";
+
 import { setCorsConfig } from "@common/config/cors/cors.config";
-import { setAuthSessionConfig } from "@common/config/auth/auth-session.config";
 
 import { AppModule } from "./app.module";
 import { getSwaggerConfig } from "./common/config/swagger/swagger.config";
@@ -21,7 +22,7 @@ async function bootstrap() {
     );
     const configService = app.get(ConfigService);
 
-    setAuthSessionConfig(configService, app);
+    app.use(cookieParser(configService.get<string>("COOKIE_SECRET") || undefined));
     // Настройка CORS
     setCorsConfig(configService, app);
 

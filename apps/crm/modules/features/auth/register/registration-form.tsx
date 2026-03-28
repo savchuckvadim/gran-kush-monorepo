@@ -1,380 +1,170 @@
-// "use client";
+"use client";
 
-// import { useState } from "react";
-// import Link from "next/link";
-// import { useRouter } from "next/navigation";
-// import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-// import { zodResolver } from "@hookform/resolvers/zod";
-// import { useForm } from "react-hook-form";
-// import { z } from "zod";
-// import { AlertCircle, Loader2 } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
-// import {
-//     Button,
-//     FieldInput,
-//     FileUpload,
-//     SignatureCanvasField,
-// } from "@workspace/ui";
-// import { Field, FieldContent, FieldLabel } from "@workspace/ui/components/field";
+import { assertOpenApiOk, getApiErrorMessage } from "@workspace/api-client/core";
+import { Button, FieldInput } from "@workspace/ui";
 
-// import {
-//     RegisterFormSubmitData,
-//     useSubmitRegister,
-// } from "@/modules/features/auth/register/hooks/submit-register.hook";
-// import { ROUTES } from "@/modules/shared/config/routes";
-// import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
+import { getRouteContext } from "@/modules/processes/auth/utils/auth-routing";
+import { $api } from "@/modules/shared";
+import { ROUTES } from "@/modules/shared/config/routes";
+import { notifyApiError } from "@/modules/shared/lib/notify-api-error";
+import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
-// const registrationSchema = z
-//     .object({
-//         name: z.string().min(2, "Name must be at least 2 characters"),
-//         surname: z.string().min(2, "Surname must be at least 2 characters"),
-//         email: z.string().email("Invalid email"),
-//         phone: z.string().min(10, "Phone must be at least 10 characters"),
-//         birthday: z.string().min(1, "Birthday is required"),
-//         documentType: z.string().min(1, "Document type is required"),
-//         documentNumber: z.string().min(1, "Document number is required"),
-//         password: z.string().min(8, "Password must be at least 8 characters"),
-//         repeatPassword: z.string(),
-//         isMedical: z.boolean().default(false),
-//         isRecreation: z.boolean().default(false),
-//         isMj: z.boolean().default(false),
-//         documentFirst: z.instanceof(File).optional(),
-//         documentSecond: z.instanceof(File).optional(),
-//         signature: z.string().min(1, "Signature is required"),
-//     })
-//     .refine((data) => data.password === data.repeatPassword, {
-//         message: "Passwords don't match",
-//         path: ["repeatPassword"],
-//     })
-//     .refine((data) => data.isMedical || data.isRecreation, {
-//         message: "Specify the type of consumption",
-//         path: ["isMedical"],
-//     });
+const registrationSchema = z
+    .object({
+        displayName: z
+            .string()
+            .min(2, "Club display name is required")
+            .max(20, "Club display name must be less than 20 characters"),
+        ownerName: z
+            .string()
+            .min(2, "Owner name is required")
+            .max(20, "Owner name must be less than 20 characters"),
+        // ownerSurname: z.string().optional(),
+        email: z.string().email("Invalid email"),
+        password: z.string().min(8, "Password must be at least 8 characters"),
+        passwordConfirmation: z
+            .string()
+            .min(8, "Password confirmation must be at least 8 characters"),
+    })
+    .refine((data) => data.password === data.passwordConfirmation, {
+        message: "Passwords do not match",
+        path: ["passwordConfirmation"],
+    });
 
-// type RegistrationFormValues = z.input<typeof registrationSchema>;
-// type RegistrationFormData = z.output<typeof registrationSchema>;
+type RegistrationFormData = z.infer<typeof registrationSchema>;
 
-// export function RegistrationForm() {
-//     const t = useTranslations("auth.register");
-//     const localizedLink = useLocalizedLink();
-//     const router = useRouter();
-//     const [documentFirst, setDocumentFirst] = useState<File | null>(null);
-//     const [documentSecond, setDocumentSecond] = useState<File | null>(null);
-//     const [signature, setSignature] = useState<string | null>(null);
-//     const [step, setStep] = useState<"form" | "registering" | "uploading" | "uploadError">("form");
-//     const [pendingUpload, setPendingUpload] = useState<{
-//         accessToken: string;
-//         data: RegisterFormSubmitData;
-//         email: string;
-//     } | null>(null);
+function makePortalSlug(value: string): string {
+    return value
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9-]/g, "")
+        .replace(/-+/g, "-")
+        .replace(/^-+|-+$/g, "");
+}
 
-//     const {
-//         register,
-//         handleSubmit,
-//         setValue,
-//         formState: { errors, isSubmitting },
-//     } = useForm<RegistrationFormValues, undefined, RegistrationFormData>({
-//         resolver: zodResolver(registrationSchema),
-//         defaultValues: {
-//             isMedical: false,
-//             isRecreation: false,
-//             isMj: false,
-//         },
-//     });
+export function RegistrationForm() {
+    const router = useRouter();
+    const localizedLink = useLocalizedLink();
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+    } = useForm<RegistrationFormData>({
+        resolver: zodResolver(registrationSchema),
+    });
 
-//     const { registerMutation, uploadMutation } = useSubmitRegister();
+    const mutation = useMutation({
+        mutationFn: async (data: RegistrationFormData) => {
+            const generatedSlug = makePortalSlug(data.displayName);
+            if (generatedSlug.length < 3) {
+                throw new Error("Club name is too short to generate slug");
+            }
 
-//     const onSubmit = async (data: RegistrationFormData) => {
-//         const payload: RegisterFormSubmitData = {
-//             ...data,
-//             documentFirst: documentFirst ?? data.documentFirst,
-//             documentSecond: documentSecond ?? data.documentSecond,
-//             signature: signature ?? data.signature,
-//         };
+            const payload = {
+                name: generatedSlug,
+                displayName: data.displayName.trim(),
+                email: data.email.trim().toLowerCase(),
+                password: data.password,
+                ownerName: data.ownerName.trim(),
+                // ownerSurname: data.ownerSurname?.trim() || undefined,
+            };
 
-//         let registerResponse: Awaited<ReturnType<typeof registerMutation.mutateAsync>> | null = null;
-//         try {
-//             setStep("registering");
-//             registerResponse = await registerMutation.mutateAsync(payload);
-//         } catch {
-//             setStep("form");
-//             return;
-//         }
+            const postResult = await $api.POST("/platform/portals/register", { body: payload });
+            const apiData = await assertOpenApiOk(postResult);
 
-//         setPendingUpload({
-//             accessToken: registerResponse.accessToken,
-//             data: payload,
-//             email: payload.email,
-//         });
+            if (!apiData?.portal?.name) {
+                throw new Error("Registration succeeded but portal slug was not returned");
+            }
 
-//         try {
-//             setStep("uploading");
-//             await uploadMutation.mutateAsync({
-//                 accessToken: registerResponse.accessToken,
-//                 data: payload,
-//             });
-//         } catch {
-//             setStep("uploadError");
-//             return;
-//         }
+            return apiData.portal.name;
+        },
+        onError: (error) => {
+            notifyApiError(error, "Registration failed");
+        },
+        onSuccess: (portalSlug) => {
+            const { locale } = getRouteContext(window.location.pathname);
+            router.replace(`/${locale}/${portalSlug}${ROUTES.CRM_HOME}`);
+        },
+    });
 
-//         router.push(localizedLink(`${ROUTES.CONFIRM_EMAIL}?email=${encodeURIComponent(payload.email)}`));
-//     };
+    const onSubmit = (data: RegistrationFormData) => {
+        mutation.mutate(data);
+    };
 
-//     const retryUpload = async () => {
-//         if (!pendingUpload) {
-//             return;
-//         }
+    return (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {mutation.error && (
+                <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
+                    {getApiErrorMessage(mutation.error)}
+                </div>
+            )}
+            <FieldInput
+                label="Club display name"
+                type="text"
+                error={errors.displayName?.message}
+                required
+                {...register("displayName")}
+                placeholder="Green Club"
+            />
 
-//         try {
-//             setStep("uploading");
-//             await uploadMutation.mutateAsync({
-//                 accessToken: pendingUpload.accessToken,
-//                 data: pendingUpload.data,
-//             });
-//             router.push(
-//                 localizedLink(`${ROUTES.CONFIRM_EMAIL}?email=${encodeURIComponent(pendingUpload.email)}`)
-//             );
-//         } catch {
-//             setStep("uploadError");
-//         }
-//     };
+            <div className="grid gap-4 md:grid-cols-2">
+                <FieldInput
+                    label="Owner name"
+                    type="text"
+                    error={errors.ownerName?.message}
+                    required
+                    {...register("ownerName")}
+                    placeholder="John"
+                />
+                <FieldInput
+                    label="Email"
+                    type="email"
+                    error={errors.email?.message}
+                    required
+                    {...register("email")}
+                    placeholder="owner@greenclub.com"
+                />
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+                <FieldInput
+                    label="Password"
+                    type="password"
+                    error={errors.password?.message}
+                    required
+                    {...register("password")}
+                    placeholder="••••••••"
+                />
 
-//     if (step === "registering" || step === "uploading") {
-//         return (
-//             <div className="flex min-h-[320px] flex-col items-center justify-center gap-4 text-center">
-//                 <Loader2 className="size-8 animate-spin text-primary" />
-//                 <h3 className="text-lg font-semibold">
-//                     {step === "registering"
-//                         ? t("status.creatingAccountTitle")
-//                         : t("status.uploadingDocumentsTitle")}
-//                 </h3>
-//                 <p className="max-w-md text-sm text-muted-foreground">
-//                     {step === "registering"
-//                         ? t("status.creatingAccountDescription")
-//                         : t("status.uploadingDocumentsDescription")}
-//                 </p>
-//             </div>
-//         );
-//     }
+                <FieldInput
+                    label="Password confirmation"
+                    type="password"
+                    error={errors.passwordConfirmation?.message}
+                    required
+                    {...register("passwordConfirmation")}
+                    placeholder="••••••••"
+                />
+            </div>
+            <Button type="submit" className="w-full" disabled={isSubmitting || mutation.isPending}>
+                {isSubmitting || mutation.isPending
+                    ? "Creating portal..."
+                    : "Create portal and login"}
+            </Button>
 
-//     if (step === "uploadError") {
-//         return (
-//             <div className="flex min-h-[320px] flex-col items-center justify-center gap-4 text-center">
-//                 <AlertCircle className="size-8 text-destructive" />
-//                 <h3 className="text-lg font-semibold">{t("status.uploadErrorTitle")}</h3>
-//                 <p className="max-w-md text-sm text-muted-foreground">
-//                     {t("status.uploadErrorDescription")}
-//                 </p>
-//                 <div className="flex w-full max-w-sm flex-col gap-2">
-//                     <Button type="button" onClick={retryUpload} disabled={uploadMutation.isPending}>
-//                         {uploadMutation.isPending ? t("status.retrying") : t("status.retryUpload")}
-//                     </Button>
-//                     <Button
-//                         type="button"
-//                         variant="outline"
-//                         onClick={() => setStep("form")}
-//                         disabled={uploadMutation.isPending}
-//                     >
-//                         {t("status.backToForm")}
-//                     </Button>
-//                 </div>
-//             </div>
-//         );
-//     }
-
-//     return (
-//         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-//             {registerMutation.isError && (
-//                 <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
-//                     {t("error") || "Registration failed. Please try again."}
-//                 </div>
-//             )}
-
-//             <div className="grid gap-4 md:grid-cols-2">
-//                 <FieldInput
-//                     label={t("name")}
-//                     type="text"
-//                     error={errors.name?.message}
-//                     required
-//                     {...register("name")}
-//                     placeholder="John"
-//                 />
-
-//                 <FieldInput
-//                     label={t("surname")}
-//                     type="text"
-//                     error={errors.surname?.message}
-//                     required
-//                     {...register("surname")}
-//                     placeholder="Doe"
-//                 />
-//             </div>
-
-//             <FieldInput
-//                 label={t("email")}
-//                 type="email"
-//                 error={errors.email?.message}
-//                 required
-//                 {...register("email")}
-//                 placeholder="your.email@example.com"
-//             />
-
-//             <div className="grid gap-4 md:grid-cols-2">
-//                 <FieldInput
-//                     label={t("phone")}
-//                     type="tel"
-//                     error={errors.phone?.message}
-//                     required
-//                     {...register("phone")}
-//                     placeholder="+1234567890"
-//                 />
-
-//                 <FieldInput
-//                     label={t("birthday")}
-//                     type="date"
-//                     error={errors.birthday?.message}
-//                     required
-//                     {...register("birthday")}
-//                 />
-//             </div>
-
-//             <div className="grid gap-4 md:grid-cols-2">
-//                 <FieldInput
-//                     label={t("documentType")}
-//                     type="text"
-//                     error={errors.documentType?.message}
-//                     required
-//                     {...register("documentType")}
-//                     placeholder="Passport"
-//                 />
-
-//                 <FieldInput
-//                     label={t("documentNumber")}
-//                     type="text"
-//                     error={errors.documentNumber?.message}
-//                     required
-//                     {...register("documentNumber")}
-//                     placeholder="123456789"
-//                 />
-//             </div>
-
-//             <div className="grid gap-4 md:grid-cols-2">
-//                 <FileUpload
-//                     label={t("documentFirst")}
-//                     value={documentFirst}
-//                     onChange={(file) => {
-//                         setDocumentFirst(file);
-//                         if (file) setValue("documentFirst", file);
-//                     }}
-//                     error={errors.documentFirst?.message}
-//                     required
-//                     accept="image/*"
-//                 />
-
-//                 <FileUpload
-//                     label={t("documentSecond")}
-//                     value={documentSecond}
-//                     onChange={(file) => {
-//                         setDocumentSecond(file);
-//                         if (file) setValue("documentSecond", file);
-//                     }}
-//                     error={errors.documentSecond?.message}
-//                     required
-//                     accept="image/*"
-//                 />
-//             </div>
-
-//             <Field>
-//                 <FieldLabel>{t("signature")}</FieldLabel>
-//                 <FieldContent>
-//                     <SignatureCanvasField
-//                         value={signature || undefined}
-//                         onChange={(value) => {
-//                             setSignature(value);
-//                             if (value) setValue("signature", value);
-//                         }}
-//                         error={!!errors.signature}
-//                     />
-//                     {errors.signature && (
-//                         <p className="text-sm text-destructive">{errors.signature.message}</p>
-//                     )}
-//                 </FieldContent>
-//             </Field>
-
-//             <div className="grid gap-4 md:grid-cols-2">
-//                 <FieldInput
-//                     label={t("password")}
-//                     type="password"
-//                     error={errors.password?.message}
-//                     required
-//                     {...register("password")}
-//                     placeholder="••••••••"
-//                 />
-
-//                 <FieldInput
-//                     label={t("repeatPassword")}
-//                     type="password"
-//                     error={errors.repeatPassword?.message}
-//                     required
-//                     {...register("repeatPassword")}
-//                     placeholder="••••••••"
-//                 />
-//             </div>
-
-//             <Field>
-//                 <FieldLabel>{t("isMj")}</FieldLabel>
-//                 <FieldContent>
-//                     <div className="space-y-3">
-//                         <label className="flex items-center gap-2">
-//                             <input
-//                                 type="checkbox"
-//                                 {...register("isMedical")}
-//                                 className="rounded border-input"
-//                             />
-//                             <span className="text-sm">{t("isMedical")}</span>
-//                         </label>
-//                         <label className="flex items-center gap-2">
-//                             <input
-//                                 type="checkbox"
-//                                 {...register("isRecreation")}
-//                                 className="rounded border-input"
-//                             />
-//                             <span className="text-sm">{t("isRecreation")}</span>
-//                         </label>
-//                         {errors.isMedical && (
-//                             <p className="text-sm text-destructive">{errors.isMedical.message}</p>
-//                         )}
-//                     </div>
-//                 </FieldContent>
-//             </Field>
-
-//             <Button
-//                 type="submit"
-//                 className="w-full"
-//                 disabled={isSubmitting || registerMutation.isPending || uploadMutation.isPending}
-//             >
-//                 {isSubmitting || registerMutation.isPending ? t("submitting") : t("submit")}
-//             </Button>
-
-//             <div className="text-center text-sm text-muted-foreground">
-//                 {t("privacy")}{" "}
-//                 <Link href={localizedLink(ROUTES.TERMS)} className="text-primary hover:underline">
-//                     {t("terms")}
-//                 </Link>{" "}
-//                 {t("and")}{" "}
-//                 <Link href={localizedLink(ROUTES.PRIVACY)} className="text-primary hover:underline">
-//                     {t("privacyPolicy")}
-//                 </Link>
-//             </div>
-
-//             <div className="text-center text-sm text-muted-foreground">
-//                 {t("hasAccount")}{" "}
-//                 <Link href={localizedLink(ROUTES.LOGIN)} className="text-primary hover:underline">
-//                     {t("login")}
-//                 </Link>
-//             </div>
-//         </form>
-//     );
-// }
+            <div className="text-center text-sm text-muted-foreground">
+                Already have an account?{" "}
+                <Link href={localizedLink(ROUTES.LOGIN)} className="text-primary hover:underline">
+                    Login
+                </Link>
+            </div>
+        </form>
+    );
+}

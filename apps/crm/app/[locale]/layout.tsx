@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 
 import { locales } from "@/i18n";
+import { PortalProvider } from "@/modules/processes";
 
 // Force dynamic rendering to avoid cache conflicts
 export const dynamic = "force-dynamic";
@@ -24,8 +25,10 @@ export default async function LocaleLayout({
     const messages = await getMessages({ locale });
 
     return (
-        <NextIntlClientProvider locale={locale} messages={messages}>
-            <div className="min-h-screen">{children}</div>
-        </NextIntlClientProvider>
+        <PortalProvider portalSlug={null}>
+            <NextIntlClientProvider locale={locale} messages={messages}>
+                <div className="min-h-screen">{children}</div>
+            </NextIntlClientProvider>
+        </PortalProvider>
     );
 }

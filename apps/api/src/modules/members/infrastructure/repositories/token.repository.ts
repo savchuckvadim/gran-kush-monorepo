@@ -15,6 +15,7 @@ export class TokenPrismaRepository implements TokenRepository {
     async create(data: {
         token: string;
         userId: string;
+        deviceId: string;
         portalId?: string;
         expiresAt: Date;
     }): Promise<Token> {
@@ -23,16 +24,32 @@ export class TokenPrismaRepository implements TokenRepository {
         });
     }
 
-    async findByToken(token: string): Promise<TokenWithUserAndMember | null> {
-        return this.prisma.token.findUnique({
-            where: { token },
+    async findActiveByToken(token: string): Promise<TokenWithUserAndMember | null> {
+        return this.prisma.token.findFirst({
+            where: {
+                token,
+                revoked: false,
+                expiresAt: { gt: new Date() },
+            },
             include: { user: { include: { member: true } } },
         });
     }
 
-    async findByUserId(userId: string): Promise<Token[]> {
-        return this.prisma.token.findMany({
-            where: { userId },
+    async revokeById(id: string): Promise<void> {
+        await this.prisma.token.update({
+            where: { id },
+            data: { revoked: true },
+        });
+    }
+
+    async revokeAllActiveForUserDevice(userId: string, deviceId: string): Promise<void> {
+        await this.prisma.token.updateMany({
+            where: {
+                userId,
+                deviceId,
+                revoked: false,
+            },
+            data: { revoked: true },
         });
     }
 

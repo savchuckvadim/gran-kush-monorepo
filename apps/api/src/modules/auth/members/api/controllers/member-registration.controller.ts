@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Post, Query } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { AllowUnconfirmed } from "@auth/members/api/decorators/allow-unconfirmed.decorator";
@@ -9,6 +9,7 @@ import { RegisterMemberResponseDto } from "@auth/members/api/dto/register-member
 import { MemberRegistrationService } from "@auth/members/application/services/member-registration.service";
 import { Member } from "@members/domain/entity/member.entity";
 
+import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { Public } from "@common/decorators/auth/public.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
@@ -17,8 +18,8 @@ import { UploadMemberFilesResponseDto } from "@modules/members/api/dto/upload-me
 import { MemberFilesService } from "@modules/members/application/services/member-files.service";
 
 import { MemberRegistrationUseCase } from "../../application/use-cases/member-registration.service";
-import { MemberJwtAuthGuard } from "../../infrastructure/guards/member-jwt-auth.guard";
 import { CurrentMember } from "../decorators/current-member.decorator";
+import { RequireMemberJwt } from "../decorators/require-member-jwt.decorator";
 import {
     MemberConfirmEmailDto,
     MemberConfirmEmailResponseDto,
@@ -53,15 +54,16 @@ export class MemberRegistrationController {
     @ApiErrorResponse([400, 409])
     async register(
         @Body() dto: RegisterMemberDto,
-        @Query() query: RegisterQueryDto
+        @Query() query: RegisterQueryDto,
+        @PortalId() portalId: string
     ): Promise<RegisterMemberResponseDto> {
         const shouldForce = query.force === "true";
-        return this.memberRegistrationUseCase.execute(dto, shouldForce);
+        return this.memberRegistrationUseCase.execute(dto, shouldForce, portalId);
     }
 
     @Post("files")
     @AllowUnconfirmed()
-    @UseGuards(MemberJwtAuthGuard)
+    @RequireMemberJwt()
     @ApiOperation({ summary: "Queue member documents/signature upload (Site)" })
     @ApiSuccessResponse(UploadMemberFilesResponseDto, {
         status: 201,

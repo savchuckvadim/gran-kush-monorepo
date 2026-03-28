@@ -89,14 +89,13 @@ export async function confirmEmail(token: string): Promise<SchemaMemberConfirmEm
     const response = await $api.POST("/lk/auth/member/confirm-email", {
         body: { token },
     });
-   
+
     if (!response.response.ok) {
-       
         const err = (response as { error?: { message?: string } }).error;
-      
+
         throw new Error(err?.message ?? "Email confirmation failed");
     }
-  
+
     return response.data as SchemaMemberConfirmEmailResponseDto;
 }
 
@@ -141,7 +140,7 @@ export async function confirmPasswordReset(
  */
 export async function logoutMember(): Promise<void> {
     // Get refresh token from storage if not provided
-    const token =  apiTokensStorage.getRefreshToken();
+    const token = apiTokensStorage.getRefreshToken();
 
     if (!token) {
         // If no token, just clear storage

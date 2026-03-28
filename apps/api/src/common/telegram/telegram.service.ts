@@ -6,6 +6,13 @@ export interface EmailVerificationNotification {
     subject: string;
 }
 
+export interface PortalRegistrationNotification {
+    ownerEmail: string;
+    ownerName: string;
+    portalSlug: string;
+    portalDisplayName: string;
+}
+
 @Injectable()
 export class TelegramService {
     private readonly logger = new Logger(TelegramService.name);
@@ -87,5 +94,15 @@ export class TelegramService {
             );
             throw error;
         }
+    }
+
+    async sendPortalRegistrationNotification(data: PortalRegistrationNotification): Promise<void> {
+        const message = `🏢 *Portal registered*
+
+👤 Owner: ${data.ownerName} (${data.ownerEmail})
+🧾 Portal: ${data.portalDisplayName} (\`${data.portalSlug}\`)
+⏰ Time: ${new Date().toLocaleString()}`;
+
+        await this.sendMessage(message);
     }
 }

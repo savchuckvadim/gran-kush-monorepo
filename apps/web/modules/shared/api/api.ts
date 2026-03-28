@@ -1,9 +1,5 @@
-import {
-  ApiAuthType,
-  configureApiClient,
-} from "@workspace/api-client/core";
+import { ApiAuthType, configureApiClient } from "@workspace/api-client/core";
 import { ApiTokensStorage } from "@workspace/api-client/core";
-
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 const API_AUTH_TYPE = ApiAuthType.SITE;

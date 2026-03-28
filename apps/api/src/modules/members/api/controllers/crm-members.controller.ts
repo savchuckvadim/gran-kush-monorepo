@@ -8,26 +8,26 @@ import {
     Query,
     StreamableFile,
     UploadedFiles,
-    UseInterceptors,
     UseGuards,
+    UseInterceptors,
 } from "@nestjs/common";
+import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 
-import { Admin, AdminGuard, EmployeeJwtAuthGuard } from "@auth/employees";
+import { Admin, AdminGuard, RequireEmployeeJwt } from "@auth/employees";
 import { MembersService } from "@members/application/services/members.service";
 import { StorageService } from "@storage/application/services/storage.service";
-import { FileFieldsInterceptor } from "@nestjs/platform-express";
+import { MulterFile } from "@storage/domain/interfaces/storage-file.interface";
 
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 
 import { CrmMemberDto, CrmMemberFullDto, CrmMemberUpdateDto } from "../dto/crm-member.dto";
 import { CrmMemberFilesRequestDto } from "../dto/crm-member-documents.dto";
-import { MulterFile } from "@storage/domain/interfaces/storage-file.interface";
 
 @ApiTags("CRM Members Management")
 @Controller("crm/members")
-@UseGuards(EmployeeJwtAuthGuard)
+@RequireEmployeeJwt()
 export class CrmMembersController {
     constructor(
         private readonly membersService: MembersService,

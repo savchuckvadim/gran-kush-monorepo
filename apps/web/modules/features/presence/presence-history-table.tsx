@@ -66,10 +66,18 @@ export function PresenceHistoryTable({ page = 1, limit = 10 }: PresenceHistoryTa
                     <thead className="bg-muted/50">
                         <tr>
                             <th className="px-4 py-3 text-left font-medium">{t("columns.date")}</th>
-                            <th className="px-4 py-3 text-left font-medium">{t("columns.entryTime")}</th>
-                            <th className="px-4 py-3 text-left font-medium">{t("columns.exitTime")}</th>
-                            <th className="px-4 py-3 text-left font-medium">{t("columns.duration")}</th>
-                            <th className="px-4 py-3 text-left font-medium">{t("columns.status")}</th>
+                            <th className="px-4 py-3 text-left font-medium">
+                                {t("columns.entryTime")}
+                            </th>
+                            <th className="px-4 py-3 text-left font-medium">
+                                {t("columns.exitTime")}
+                            </th>
+                            <th className="px-4 py-3 text-left font-medium">
+                                {t("columns.duration")}
+                            </th>
+                            <th className="px-4 py-3 text-left font-medium">
+                                {t("columns.status")}
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -86,14 +94,17 @@ export function PresenceHistoryTable({ page = 1, limit = 10 }: PresenceHistoryTa
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-2">
                                             <Clock className="h-4 w-4 text-green-600" />
-                                            {formatDate(session.enteredAt).split(",")[1]?.trim() || "—"}
+                                            {formatDate(session.enteredAt).split(",")[1]?.trim() ||
+                                                "—"}
                                         </div>
                                     </td>
                                     <td className="px-4 py-3">
                                         {session.exitedAt ? (
                                             <div className="flex items-center gap-2">
                                                 <LogOut className="h-4 w-4 text-red-600" />
-                                                {formatDate(session.exitedAt).split(",")[1]?.trim() || "—"}
+                                                {formatDate(session.exitedAt)
+                                                    .split(",")[1]
+                                                    ?.trim() || "—"}
                                             </div>
                                         ) : (
                                             <span className="text-muted-foreground">—</span>

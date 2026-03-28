@@ -7,4 +7,11 @@ export class MemberRefreshTokenResponseDto {
         type: String,
     })
     accessToken: string;
+
+    @ApiProperty({
+        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        description: "New refresh token (rotation)",
+        type: String,
+    })
+    refreshToken: string;
 }

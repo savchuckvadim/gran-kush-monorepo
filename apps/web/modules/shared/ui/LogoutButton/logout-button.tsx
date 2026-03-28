@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useTranslations } from "next-intl";
 
@@ -8,7 +8,7 @@ import { Button } from "@workspace/ui";
 
 import { useLogout } from "@/modules/entities/auth";
 
-export function LogoutButton({variant = "default"}: {variant?: "default" | "outline"}) {
+export function LogoutButton({ variant = "default" }: { variant?: "default" | "outline" }) {
     const { logout } = useLogout();
     const t = useTranslations("profile");
     return (

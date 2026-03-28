@@ -1,7 +1,12 @@
 import { defaultLocale, locales } from "@/i18n";
 import { ROUTES } from "@/modules/shared/config/routes";
 
-export const PROTECTED_ROUTES = ["/profile", "/profile/settings", "/profile/qr-code", "/profile/presence"] as const;
+export const PROTECTED_ROUTES = [
+    "/profile",
+    "/profile/settings",
+    "/profile/qr-code",
+    "/profile/presence",
+] as const;
 
 export function stripLocalePrefix(pathname: string): string {
     // localePrefix: "always" => первый сегмент url - всегда locale
@@ -29,4 +34,3 @@ export function getLoginUrl(pathname: string): string {
     const locale = getLocaleFromPathname(pathname);
     return `/${locale}${ROUTES.LOGIN}`;
 }
-

@@ -1,7 +1,7 @@
-import { Controller, Get, NotFoundException, Param, UseGuards } from "@nestjs/common";
+import { Controller, Get, NotFoundException, Param } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
-import { MemberJwtAuthGuard } from "@auth/members/infrastructure/guards/member-jwt-auth.guard";
+import { RequireMemberJwt } from "@auth/members";
 import { ProductDetailDto, ProductListDto } from "@catalog/api/dto/product.dto";
 import { ProductCategoryDto } from "@catalog/api/dto/product-category.dto";
 import { mapCategoryToDto, mapProductToDetailDto, mapProductToListDto } from "@catalog/api/mappers";
@@ -19,7 +19,7 @@ import { ApiSuccessResponse } from "@common/decorators/response/api-success-resp
 
 @ApiTags("Member Catalog (Site - LK)")
 @Controller("lk/catalog")
-@UseGuards(MemberJwtAuthGuard)
+@RequireMemberJwt()
 @ApiBearerAuth()
 export class LkCatalogController {
     constructor(

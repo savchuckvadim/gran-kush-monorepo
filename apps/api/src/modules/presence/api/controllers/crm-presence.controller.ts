@@ -1,17 +1,8 @@
-import {
-    Body,
-    Controller,
-    Get,
-    NotFoundException,
-    Param,
-    Post,
-    Query,
-    UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Get, NotFoundException, Param, Post, Query } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
+import { RequireEmployeeJwt } from "@auth/employees";
 import { CurrentEmployee } from "@auth/employees/api/decorators/current-employee.decorator";
-import { EmployeeJwtAuthGuard } from "@auth/employees/infrastructure/guards/employee-jwt-auth.guard";
 import { Employee } from "@employees/domain/entity/employee.entity";
 import {
     CheckInResultDto,
@@ -40,7 +31,7 @@ import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 
 @ApiTags("CRM Presence")
 @Controller("crm/presence")
-@UseGuards(EmployeeJwtAuthGuard)
+@RequireEmployeeJwt()
 @ApiBearerAuth()
 export class CrmPresenceController {
     constructor(private readonly presenceService: PresenceService) {}

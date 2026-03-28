@@ -46,7 +46,7 @@
 
 Нужно поддержать два режима:
 
-1. **Slug mode**: `/{portalSlug}/{locale}/crm/...` и `/{portalSlug}/{locale}/profile/...`
+1. **Slug mode**: `/{portalSlug}/{locale}/crm/...` и `/{portalSlug}/{locale}/member/...`
 2. **Domain mode**: `https://club-domain.com/{locale}/...`
 
 Лучше заложить оба: slug как базовый, custom domain как платная/advanced опция.
@@ -153,6 +153,8 @@
 ---
 
 ## 8) Dynamic Fields и гибкая модель данных
+
+> **Детализированный backlog по полям, статусам, настройкам, товарам и складу:** см. [FLEXIBLE_CRM_DOMAIN_TASKS.md](./FLEXIBLE_CRM_DOMAIN_TASKS.md) (развитие этой секции в виде эпиков и чеклистов по слоям API/CRM).
 
 Ты правильно отметил: фиксированные DTO перестают подходить.
 

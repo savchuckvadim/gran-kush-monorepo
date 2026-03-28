@@ -4,10 +4,11 @@ import { AuthGuard } from "@nestjs/passport";
 
 import { Observable } from "rxjs";
 
+import { PASSPORT_JWT_STRATEGY } from "@common/auth";
 import { IS_PUBLIC_KEY } from "@common/decorators/auth/public.decorator";
 
 @Injectable()
-export class EmployeeJwtAuthGuard extends AuthGuard("employee-jwt") {
+export class EmployeeJwtAuthGuard extends AuthGuard(PASSPORT_JWT_STRATEGY.EMPLOYEE_COOKIE) {
     constructor(private reflector: Reflector) {
         super();
     }

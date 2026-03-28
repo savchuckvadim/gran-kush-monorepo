@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import { useTranslations } from "next-intl";
 
 import { Card } from "@workspace/ui";
@@ -7,7 +7,6 @@ import { CrmMemberDetails } from "@/modules/entities/member";
 import { MemberProfileEditModal } from "@/modules/features";
 export interface IMemberProfileInfoProps {
     member: CrmMemberDetails;
-
 }
 export function MemberProfileInfo({ member }: IMemberProfileInfoProps) {
     const t = useTranslations("crm.members");
@@ -33,7 +32,9 @@ export function MemberProfileInfo({ member }: IMemberProfileInfoProps) {
                     </div>
                     <div className="flex justify-between gap-4">
                         <dt className="text-muted-foreground">{t("birthday")}</dt>
-                        <dd>{member.birthday ? new Date(member.birthday).toLocaleDateString() : "—"}</dd>
+                        <dd>
+                            {member.birthday ? new Date(member.birthday).toLocaleDateString() : "—"}
+                        </dd>
                     </div>
                     <div className="flex justify-between gap-4">
                         <dt className="text-muted-foreground">{t("address")}</dt>
@@ -54,6 +55,5 @@ export function MemberProfileInfo({ member }: IMemberProfileInfoProps) {
                 </dl>
             </section>
         </Card>
-
-    )
+    );
 }

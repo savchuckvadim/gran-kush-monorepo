@@ -10,12 +10,7 @@ import { AlertCircle, Loader2 } from "lucide-react";
 import { FieldErrors, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import {
-    Button,
-    FieldInput,
-    FileUpload,
-    SignatureCanvasField,
-} from "@workspace/ui";
+import { Button, FieldInput, FileUpload, SignatureCanvasField } from "@workspace/ui";
 import { Field, FieldContent, FieldLabel } from "@workspace/ui/components/field";
 
 import {
@@ -120,7 +115,9 @@ export function RegistrationForm() {
             return;
         }
 
-        const fieldElement = formRef.current?.querySelector(`[name="${String(scrollTarget)}"]`) as HTMLElement | null;
+        const fieldElement = formRef.current?.querySelector(
+            `[name="${String(scrollTarget)}"]`
+        ) as HTMLElement | null;
         if (fieldElement) {
             fieldElement.scrollIntoView({ behavior: "smooth", block: "center" });
             if (scrollTarget !== "isMedical" && scrollTarget !== "isRecreation") {
@@ -134,12 +131,18 @@ export function RegistrationForm() {
             return;
         }
 
-        if (scrollTarget === "isMedical" || scrollTarget === "isRecreation" || scrollTarget === "isMj") {
+        if (
+            scrollTarget === "isMedical" ||
+            scrollTarget === "isRecreation" ||
+            scrollTarget === "isMj"
+        ) {
             mjFieldRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
         }
     }, [scrollRequest, setFocus]);
 
-    const getFirstErrorField = (formErrors: FieldErrors<RegistrationFormData>): keyof RegistrationFormData | null => {
+    const getFirstErrorField = (
+        formErrors: FieldErrors<RegistrationFormData>
+    ): keyof RegistrationFormData | null => {
         const fieldsOrder: (keyof RegistrationFormData)[] = [
             "name",
             "surname",
@@ -193,7 +196,9 @@ export function RegistrationForm() {
             return;
         }
 
-        router.push(localizedLink(`${ROUTES.CONFIRM_EMAIL}?email=${encodeURIComponent(payload.email)}`));
+        router.push(
+            localizedLink(`${ROUTES.CONFIRM_EMAIL}?email=${encodeURIComponent(payload.email)}`)
+        );
     };
 
     const onInvalid = (formErrors: FieldErrors<RegistrationFormData>) => {
@@ -213,7 +218,9 @@ export function RegistrationForm() {
             setStep("uploading");
             await uploadMutation.mutateAsync(pendingUpload.data);
             router.push(
-                localizedLink(`${ROUTES.CONFIRM_EMAIL}?email=${encodeURIComponent(pendingUpload.email)}`)
+                localizedLink(
+                    `${ROUTES.CONFIRM_EMAIL}?email=${encodeURIComponent(pendingUpload.email)}`
+                )
             );
         } catch {
             setStep("uploadError");
@@ -266,7 +273,10 @@ export function RegistrationForm() {
     return (
         <>
             {toastMessage && (
-                <div className="fixed inset-x-4 bottom-4 z-50 md:inset-x-auto md:right-4 md:max-w-sm" aria-live="polite">
+                <div
+                    className="fixed inset-x-4 bottom-4 z-50 md:inset-x-auto md:right-4 md:max-w-sm"
+                    aria-live="polite"
+                >
                     <div className="rounded-lg border border-destructive bg-background p-3 text-sm text-foreground shadow-lg">
                         {toastMessage}
                     </div>
@@ -274,198 +284,211 @@ export function RegistrationForm() {
             )}
 
             <form ref={formRef} onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-6">
-            {registerMutation.isError && (
-                <div
-                    ref={serverErrorRef}
-                    className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive"
-                >
-                    {t("error") || "Registration failed. Please try again."}
-                </div>
-            )}
-
-            <div className="grid gap-4 md:grid-cols-2">
-                <FieldInput
-                    label={t("name")}
-                    type="text"
-                    error={errors.name?.message}
-                    required
-                    {...register("name")}
-                    placeholder="John"
-                />
-
-                <FieldInput
-                    label={t("surname")}
-                    type="text"
-                    error={errors.surname?.message}
-                    required
-                    {...register("surname")}
-                    placeholder="Doe"
-                />
-            </div>
-
-            <FieldInput
-                label={t("email")}
-                type="email"
-                error={errors.email?.message}
-                required
-                {...register("email")}
-                placeholder="your.email@example.com"
-            />
-
-            <div className="grid gap-4 md:grid-cols-2">
-                <FieldInput
-                    label={t("phone")}
-                    type="tel"
-                    error={errors.phone?.message}
-                    required
-                    {...register("phone")}
-                    placeholder="+1234567890"
-                />
-
-                <FieldInput
-                    label={t("birthday")}
-                    type="date"
-                    error={errors.birthday?.message}
-                    required
-                    {...register("birthday")}
-                />
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-                <FieldInput
-                    label={t("documentType")}
-                    type="text"
-                    error={errors.documentType?.message}
-                    required
-                    {...register("documentType")}
-                    placeholder="Passport"
-                />
-
-                <FieldInput
-                    label={t("documentNumber")}
-                    type="text"
-                    error={errors.documentNumber?.message}
-                    required
-                    {...register("documentNumber")}
-                    placeholder="123456789"
-                />
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-                <FileUpload
-                    label={t("documentFirst")}
-                    value={documentFirst}
-                    onChange={(file) => {
-                        setDocumentFirst(file);
-                        if (file) setValue("documentFirst", file);
-                    }}
-                    error={errors.documentFirst?.message}
-                    required
-                    accept="image/*"
-                />
-
-                <FileUpload
-                    label={t("documentSecond")}
-                    value={documentSecond}
-                    onChange={(file) => {
-                        setDocumentSecond(file);
-                        if (file) setValue("documentSecond", file);
-                    }}
-                    error={errors.documentSecond?.message}
-                    required
-                    accept="image/*"
-                />
-            </div>
-
-            <Field>
-                <FieldLabel>{t("signature")}</FieldLabel>
-                <FieldContent ref={signatureFieldRef}>
-                    <SignatureCanvasField
-                        value={signature || undefined}
-                        onChange={(value) => {
-                            setSignature(value);
-                            if (value) setValue("signature", value);
-                        }}
-                        error={!!errors.signature}
-                    />
-                    {errors.signature && (
-                        <p className="text-sm text-destructive">{errors.signature.message}</p>
-                    )}
-                </FieldContent>
-            </Field>
-
-            <div className="grid gap-4 md:grid-cols-2">
-                <FieldInput
-                    label={t("password")}
-                    type="password"
-                    error={errors.password?.message}
-                    required
-                    {...register("password")}
-                    placeholder="••••••••"
-                />
-
-                <FieldInput
-                    label={t("repeatPassword")}
-                    type="password"
-                    error={errors.repeatPassword?.message}
-                    required
-                    {...register("repeatPassword")}
-                    placeholder="••••••••"
-                />
-            </div>
-
-            <Field>
-                <FieldLabel>{t("isMj")}</FieldLabel>
-                <FieldContent ref={mjFieldRef}>
-                    <div className="space-y-3">
-                        <label className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                {...register("isMedical")}
-                                className="rounded border-input"
-                            />
-                            <span className="text-sm">{t("isMedical")}</span>
-                        </label>
-                        <label className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                {...register("isRecreation")}
-                                className="rounded border-input"
-                            />
-                            <span className="text-sm">{t("isRecreation")}</span>
-                        </label>
-                        {errors.isMedical && (
-                            <p className="text-sm text-destructive">{errors.isMedical.message}</p>
-                        )}
+                {registerMutation.isError && (
+                    <div
+                        ref={serverErrorRef}
+                        className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive"
+                    >
+                        {t("error") || "Registration failed. Please try again."}
                     </div>
-                </FieldContent>
-            </Field>
+                )}
 
-            <Button
-                type="submit"
-                className="w-full"
-                disabled={isSubmitting || registerMutation.isPending || uploadMutation.isPending}
-            >
-                {isSubmitting || registerMutation.isPending ? t("submitting") : t("submit")}
-            </Button>
+                <div className="grid gap-4 md:grid-cols-2">
+                    <FieldInput
+                        label={t("name")}
+                        type="text"
+                        error={errors.name?.message}
+                        required
+                        {...register("name")}
+                        placeholder="John"
+                    />
 
-            <div className="text-center text-sm text-muted-foreground">
-                {t("privacy")}{" "}
-                <Link href={localizedLink(ROUTES.TERMS)} className="text-primary hover:underline">
-                    {t("terms")}
-                </Link>{" "}
-                {t("and")}{" "}
-                <Link href={localizedLink(ROUTES.PRIVACY)} className="text-primary hover:underline">
-                    {t("privacyPolicy")}
-                </Link>
-            </div>
+                    <FieldInput
+                        label={t("surname")}
+                        type="text"
+                        error={errors.surname?.message}
+                        required
+                        {...register("surname")}
+                        placeholder="Doe"
+                    />
+                </div>
 
-            <div className="text-center text-sm text-muted-foreground">
-                {t("hasAccount")}{" "}
-                <Link href={localizedLink(ROUTES.LOGIN)} className="text-primary hover:underline">
-                    {t("login")}
-                </Link>
-            </div>
+                <FieldInput
+                    label={t("email")}
+                    type="email"
+                    error={errors.email?.message}
+                    required
+                    {...register("email")}
+                    placeholder="your.email@example.com"
+                />
+
+                <div className="grid gap-4 md:grid-cols-2">
+                    <FieldInput
+                        label={t("phone")}
+                        type="tel"
+                        error={errors.phone?.message}
+                        required
+                        {...register("phone")}
+                        placeholder="+1234567890"
+                    />
+
+                    <FieldInput
+                        label={t("birthday")}
+                        type="date"
+                        error={errors.birthday?.message}
+                        required
+                        {...register("birthday")}
+                    />
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                    <FieldInput
+                        label={t("documentType")}
+                        type="text"
+                        error={errors.documentType?.message}
+                        required
+                        {...register("documentType")}
+                        placeholder="Passport"
+                    />
+
+                    <FieldInput
+                        label={t("documentNumber")}
+                        type="text"
+                        error={errors.documentNumber?.message}
+                        required
+                        {...register("documentNumber")}
+                        placeholder="123456789"
+                    />
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                    <FileUpload
+                        label={t("documentFirst")}
+                        value={documentFirst}
+                        onChange={(file) => {
+                            setDocumentFirst(file);
+                            if (file) setValue("documentFirst", file);
+                        }}
+                        error={errors.documentFirst?.message}
+                        required
+                        accept="image/*"
+                    />
+
+                    <FileUpload
+                        label={t("documentSecond")}
+                        value={documentSecond}
+                        onChange={(file) => {
+                            setDocumentSecond(file);
+                            if (file) setValue("documentSecond", file);
+                        }}
+                        error={errors.documentSecond?.message}
+                        required
+                        accept="image/*"
+                    />
+                </div>
+
+                <Field>
+                    <FieldLabel>{t("signature")}</FieldLabel>
+                    <FieldContent ref={signatureFieldRef}>
+                        <SignatureCanvasField
+                            value={signature || undefined}
+                            onChange={(value) => {
+                                setSignature(value);
+                                if (value) setValue("signature", value);
+                            }}
+                            error={!!errors.signature}
+                        />
+                        {errors.signature && (
+                            <p className="text-sm text-destructive">{errors.signature.message}</p>
+                        )}
+                    </FieldContent>
+                </Field>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                    <FieldInput
+                        label={t("password")}
+                        type="password"
+                        error={errors.password?.message}
+                        required
+                        {...register("password")}
+                        placeholder="••••••••"
+                    />
+
+                    <FieldInput
+                        label={t("repeatPassword")}
+                        type="password"
+                        error={errors.repeatPassword?.message}
+                        required
+                        {...register("repeatPassword")}
+                        placeholder="••••••••"
+                    />
+                </div>
+
+                <Field>
+                    <FieldLabel>{t("isMj")}</FieldLabel>
+                    <FieldContent ref={mjFieldRef}>
+                        <div className="space-y-3">
+                            <label className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    {...register("isMedical")}
+                                    className="rounded border-input"
+                                />
+                                <span className="text-sm">{t("isMedical")}</span>
+                            </label>
+                            <label className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    {...register("isRecreation")}
+                                    className="rounded border-input"
+                                />
+                                <span className="text-sm">{t("isRecreation")}</span>
+                            </label>
+                            {errors.isMedical && (
+                                <p className="text-sm text-destructive">
+                                    {errors.isMedical.message}
+                                </p>
+                            )}
+                        </div>
+                    </FieldContent>
+                </Field>
+
+                <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={
+                        isSubmitting || registerMutation.isPending || uploadMutation.isPending
+                    }
+                >
+                    {isSubmitting || registerMutation.isPending ? t("submitting") : t("submit")}
+                </Button>
+
+                <div className="text-center text-sm text-muted-foreground">
+                    {t("privacy")}{" "}
+                    <Link
+                        href={localizedLink(ROUTES.TERMS)}
+                        className="text-primary hover:underline"
+                    >
+                        {t("terms")}
+                    </Link>{" "}
+                    {t("and")}{" "}
+                    <Link
+                        href={localizedLink(ROUTES.PRIVACY)}
+                        className="text-primary hover:underline"
+                    >
+                        {t("privacyPolicy")}
+                    </Link>
+                </div>
+
+                <div className="text-center text-sm text-muted-foreground">
+                    {t("hasAccount")}{" "}
+                    <Link
+                        href={localizedLink(ROUTES.LOGIN)}
+                        className="text-primary hover:underline"
+                    >
+                        {t("login")}
+                    </Link>
+                </div>
             </form>
         </>
     );

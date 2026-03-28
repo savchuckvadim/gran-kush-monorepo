@@ -23,6 +23,9 @@ export class RegisterPortalResponseDto {
     @ApiProperty({ type: () => EmployeeInfoDto })
     owner: EmployeeInfoDto;
 
-    @ApiProperty({ example: "jwt-access-token", required: false, type: String })
-    accessToken?: string;
+    @ApiProperty({
+        example: "550e8400-e29b-41d4-a716-446655440000",
+        description: "Передавайте в X-Device-Id; токены выставлены в HttpOnly cookies",
+    })
+    deviceId: string;
 }

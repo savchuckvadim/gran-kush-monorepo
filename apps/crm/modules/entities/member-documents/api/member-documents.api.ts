@@ -1,4 +1,8 @@
-import { SchemaCrmMemberFullDto, SchemaCrmMemberIdentityDocumentDto, SchemaCrmMemberSignatureDto } from "@workspace/api-client/core";
+import {
+    SchemaCrmMemberFullDto,
+    SchemaCrmMemberIdentityDocumentDto,
+    SchemaCrmMemberSignatureDto,
+} from "@workspace/api-client/core";
 
 import { CrmMemberDetails } from "@/modules/entities/member/api/member.api";
 import { $api } from "@/modules/shared";
@@ -17,38 +21,41 @@ export interface Signature extends SchemaCrmMemberSignatureDto {
     createdAt: string;
 }
 
-export async function getIdentityDocumentPreview(memberId: string, documentId: string): Promise<Blob> {
-    const response = await $api.GET('/crm/members/{id}/identity-documents/{documentId}/preview', {
+export async function getIdentityDocumentPreview(
+    memberId: string,
+    documentId: string
+): Promise<Blob> {
+    const response = await $api.GET("/crm/members/{id}/identity-documents/{documentId}/preview", {
         params: {
             path: {
                 id: memberId,
                 documentId: documentId,
             },
         },
-        parseAs: 'blob',
+        parseAs: "blob",
     });
-    
+
     if (!response.response.ok) {
         throw new Error(`Failed to fetch identity document preview: ${response.response.status}`);
     }
-    
+
     return response.data as Blob;
 }
 
 export async function getSignaturePreview(memberId: string): Promise<Blob> {
-    const response = await $api.GET('/crm/members/{id}/signature/preview', {
+    const response = await $api.GET("/crm/members/{id}/signature/preview", {
         params: {
             path: {
                 id: memberId,
             },
         },
-        parseAs: 'blob',
+        parseAs: "blob",
     });
-    
+
     if (!response.response.ok) {
         throw new Error(`Failed to fetch signature preview: ${response.response.status}`);
     }
-    
+
     return response.data as Blob;
 }
 
@@ -91,9 +98,9 @@ export async function updateCrmMemberFiles(
     appendIfPresent("documentSecond", payload.documentSecond, "document-second.png");
     appendIfPresent("signature", payload.signature, "signature.png");
 
-    const member = await $api.PATCH('/crm/members/{id}/files', {
+    const member = await $api.PATCH("/crm/members/{id}/files", {
         params: { path: { id: memberId } },
         body: formData as unknown as Record<string, unknown>,
     });
-    return (member.data) as SchemaCrmMemberFullDto as CrmMemberDetails;
+    return member.data as SchemaCrmMemberFullDto as CrmMemberDetails;
 }

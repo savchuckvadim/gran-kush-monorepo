@@ -1,11 +1,18 @@
+import { InjectQueue } from "@nestjs/bullmq";
 import { ConflictException, Injectable } from "@nestjs/common";
 
 import { EmployeeAuthService } from "@auth/employees/application/services/employee-auth.service";
-import { Employee } from "@employees/domain/entity/employee.entity";
 import { hash } from "bcrypt";
+import { Queue } from "bullmq";
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { mapToEntity } from "@modules/employees";
 import { RegisterPortalDto } from "@modules/portals/api/dto/register-portal.dto";
+import {
+    PORTAL_EVENTS_JOB_NAMES,
+    PORTAL_EVENTS_QUEUE_NAME,
+    type PortalRegistrationInitPayload,
+} from "@modules/portals/events/portal-events.constants";
 
 type RegisterPortalResult = {
     portal: {
@@ -31,10 +38,11 @@ type RegisterPortalResult = {
 export class PortalRegistrationService {
     constructor(
         private readonly prisma: PrismaService,
-        private readonly employeeAuthService: EmployeeAuthService
+        private readonly employeeAuthService: EmployeeAuthService,
+        @InjectQueue(PORTAL_EVENTS_QUEUE_NAME) private readonly portalEventsQueue: Queue
     ) {}
 
-    async registerPortal(dto: RegisterPortalDto): Promise<RegisterPortalResult> {
+    async registerPortal(dto: RegisterPortalDto, deviceId: string): Promise<RegisterPortalResult> {
         const normalizedName = dto.name.trim().toLowerCase();
         const normalizedEmail = dto.email.trim().toLowerCase();
 
@@ -96,25 +104,28 @@ export class PortalRegistrationService {
             };
         });
 
-        const employeeEntity = new Employee({
-            id: created.employee.id,
-            userId: created.employee.userId,
-            portalId: created.employee.portalId || undefined,
-            email: created.employee.user.email,
-            passwordHash: created.employee.user.passwordHash,
-            name: created.employee.name,
-            surname: created.employee.surname || undefined,
-            phone: created.employee.phone || undefined,
-            role: created.employee.role,
-            position: created.employee.position || undefined,
-            department: created.employee.department || undefined,
-            isActive: created.employee.isActive,
-            lastLoginAt: created.employee.lastLoginAt || undefined,
-            createdAt: created.employee.createdAt,
-            updatedAt: created.employee.updatedAt,
-        });
+        const employeeEntity = mapToEntity(created.employee, created.employee.user);
 
-        const tokens = await this.employeeAuthService.generateTokens(employeeEntity);
+        const tokens = await this.employeeAuthService.generateTokens(employeeEntity, deviceId);
+
+        const initPayload: PortalRegistrationInitPayload = {
+            portalId: created.portal.id,
+            portalSlug: created.portal.name,
+            portalDisplayName: created.portal.displayName,
+            ownerId: created.employee.id,
+            ownerEmail: created.employee.user.email,
+            ownerName: created.employee.name,
+        };
+
+        // Portal events are processed asynchronously in PortalEventsProcessor.
+        await this.portalEventsQueue.add(
+            PORTAL_EVENTS_JOB_NAMES.PORTAL_REGISTRATION_INIT,
+            initPayload,
+            {
+                removeOnComplete: true,
+                removeOnFail: false,
+            }
+        );
 
         return {
             portal: {

@@ -21,4 +21,4 @@ export const fakeDataNotes = [
         note: "Member updated their profile",
         createdAt: new Date(),
     },
-]
+];

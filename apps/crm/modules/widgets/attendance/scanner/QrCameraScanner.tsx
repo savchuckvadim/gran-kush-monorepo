@@ -19,9 +19,7 @@ export function QrCameraScanner({ onScan }: QrCameraScannerProps) {
     const [ready, setReady] = useState(false);
 
     // Стабильный ID для div-контейнера (уникальный на экземпляр)
-    const [divId] = useState(
-        () => `qr-cam-${Math.random().toString(36).slice(2, 9)}`
-    );
+    const [divId] = useState(() => `qr-cam-${Math.random().toString(36).slice(2, 9)}`);
 
     // Ref для актуального коллбека (избегаем перезапуска effect при смене onScan)
     const onScanRef = useRef(onScan);

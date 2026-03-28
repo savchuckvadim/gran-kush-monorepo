@@ -1,22 +1,26 @@
-'use client'
+"use client";
 import Link from "next/link";
 
 import { IdentityDocument } from "@/modules/entities/member";
+import { ROUTES } from "@/modules/shared/config/routes";
+import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
 import { MemberDocumentPreview } from "./MemberDocumentPreview";
 
 export interface IMemberDocumentCardProps {
     memberId: string;
     document: IdentityDocument;
-    locale: string;
 }
 
-export function MemberDocumentCard({ memberId, document, locale }: IMemberDocumentCardProps) {
-
+export function MemberDocumentCard({ memberId, document }: IMemberDocumentCardProps) {
+    const toAppPath = useLocalizedLink();
+    const documentPath = toAppPath(
+        `${ROUTES.CRM_MEMBER_DETAILS}/${memberId}/documents/${document.id}`
+    );
     return (
         <Link
             key={document.id}
-            href={`/${locale}/crm/members/${memberId}/documents/${document.id}`}
+            href={documentPath}
             className="group overflow-hidden rounded-md border bg-muted/30"
         >
             <div className="flex h-40 w-full items-center justify-center bg-muted/30 p-2">
@@ -32,5 +36,5 @@ export function MemberDocumentCard({ memberId, document, locale }: IMemberDocume
                 {document.type} · {document.side}
             </div>
         </Link>
-    )
+    );
 }

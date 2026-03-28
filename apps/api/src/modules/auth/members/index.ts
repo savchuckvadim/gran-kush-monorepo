@@ -1,9 +1,14 @@
 // Guards
 export { MemberJwtAuthGuard } from "./infrastructure/guards/member-jwt-auth.guard";
+export { MemberJwtMobileAuthGuard } from "./infrastructure/guards/member-jwt-mobile-auth.guard";
 export { MemberLocalAuthGuard } from "./infrastructure/guards/member-local-auth.guard";
 
 // Decorators
 export { CurrentMember } from "./api/decorators/current-member.decorator";
+export {
+    RequireMemberJwt,
+    RequireMemberJwtMobile,
+} from "./api/decorators/require-member-jwt.decorator";
 
 // Services
 export { MemberAuthService } from "./application/services/member-auth.service";

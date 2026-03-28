@@ -5,6 +5,7 @@ import * as React from "react";
 import { Button } from "@workspace/ui";
 import { cn } from "@workspace/ui/lib/utils";
 
+import { readJsonArrayFromCookie, writeJsonArrayToCookie } from "../../lib/entity-list-prefs-cookie";
 import { useIsMobile } from "../../lib/use-is-mobile";
 
 import { EntityListCardsView } from "./components/EntityListCardsView";
@@ -58,8 +59,8 @@ export interface EntityListProps<T> {
     defaultViewMode?: EntityListViewMode; // default = "cards"
     enableViewToggle?: boolean; // default = true
 
-    // View actions
-    viewModeStorageKey?: string; // optional
+    /** Имя ключа (суффикс cookie); без префикса приложения */
+    viewModeStorageKey?: string;
 
     // Row click
     isRowClickable?: boolean;
@@ -84,27 +85,8 @@ export interface EntityListProps<T> {
     cardFields?: EntityListCardField<T>[];
     defaultVisibleCardFieldKeys?: string[];
 
-    // Visibility persistence
     enableVisibilitySettings?: boolean; // default = true
     visibilityStorageKey?: string;
-}
-
-function readJsonArray(storageKey: string, fallback: string[]): string[] {
-    if (typeof window === "undefined") return fallback;
-    try {
-        const raw = localStorage.getItem(storageKey);
-        if (!raw) return fallback;
-        const parsed = JSON.parse(raw);
-        if (!Array.isArray(parsed)) return fallback;
-        return parsed.filter((x) => typeof x === "string") as string[];
-    } catch {
-        return fallback;
-    }
-}
-
-function writeJsonArray(storageKey: string, value: string[]) {
-    if (typeof window === "undefined") return;
-    localStorage.setItem(storageKey, JSON.stringify(value));
 }
 
 function uniq<T>(arr: T[]): T[] {
@@ -149,50 +131,68 @@ export function EntityList<T>({
 }: EntityListProps<T>) {
     const isMobile = useIsMobile();
 
+    const coerceViewMode = (v: string | undefined, fallback: EntityListViewMode): EntityListViewMode =>
+        v === "table" || v === "cards" ? v : fallback;
+
     const viewStorageKey = viewModeStorageKey ? `${viewModeStorageKey}:view` : null;
     const [viewMode, setViewMode] = React.useState<EntityListViewMode>(() => {
-        if (typeof window !== "undefined" && viewStorageKey) {
-            return readJsonArray(viewStorageKey, [isMobile ? "cards" : defaultViewMode])[0] as EntityListViewMode;
+        const fallback = isMobile ? "cards" : defaultViewMode;
+        if (typeof document !== "undefined" && viewStorageKey) {
+            const raw = readJsonArrayFromCookie(viewStorageKey, [fallback])[0];
+            return coerceViewMode(raw, fallback);
         }
-        return isMobile ? "cards" : defaultViewMode;
+        return fallback;
     });
 
     React.useEffect(() => {
         if (!viewStorageKey) return;
-        writeJsonArray(viewStorageKey, [viewMode]);
+        writeJsonArrayToCookie(viewStorageKey, [viewMode]);
     }, [viewMode, viewStorageKey]);
 
     const resolvedTableColumns = tableColumns ?? [];
-    const resolvedCardFields = cardFields ?? (resolvedTableColumns.length ? resolvedTableColumns.map((c) => ({
-        key: c.key,
-        label: c.header,
-        value: (item: T) => c.cell(item),
-    })) : []);
+    const resolvedCardFields =
+        cardFields ??
+        (resolvedTableColumns.length
+            ? resolvedTableColumns.map((c) => ({
+                  key: c.key,
+                  label: c.header,
+                  value: (item: T) => c.cell(item),
+              }))
+            : []);
 
-    const storageTableColumnsKey = visibilityStorageKey ? `${visibilityStorageKey}:tableColumns` : null;
+    const storageTableColumnsKey = visibilityStorageKey
+        ? `${visibilityStorageKey}:tableColumns`
+        : null;
     const storageCardFieldsKey = visibilityStorageKey ? `${visibilityStorageKey}:cardFields` : null;
 
-    const defaultTableKeys = defaultVisibleTableColumnKeys ?? resolvedTableColumns.map((c) => c.key);
+    const defaultTableKeys =
+        defaultVisibleTableColumnKeys ?? resolvedTableColumns.map((c) => c.key);
     const defaultCardKeys = defaultVisibleCardFieldKeys ?? resolvedCardFields.map((f) => f.key);
 
     const [visibleTableColumnKeys, setVisibleTableColumnKeys] = React.useState<string[]>(() =>
-        storageTableColumnsKey ? readJsonArray(storageTableColumnsKey, defaultTableKeys) : uniq(defaultTableKeys)
+        storageTableColumnsKey
+            ? readJsonArrayFromCookie(storageTableColumnsKey, defaultTableKeys)
+            : uniq(defaultTableKeys)
     );
     const [visibleCardFieldKeys, setVisibleCardFieldKeys] = React.useState<string[]>(() =>
-        storageCardFieldsKey ? readJsonArray(storageCardFieldsKey, defaultCardKeys) : uniq(defaultCardKeys)
+        storageCardFieldsKey
+            ? readJsonArrayFromCookie(storageCardFieldsKey, defaultCardKeys)
+            : uniq(defaultCardKeys)
     );
 
     React.useEffect(() => {
         if (!storageTableColumnsKey) return;
-        writeJsonArray(storageTableColumnsKey, visibleTableColumnKeys);
+        writeJsonArrayToCookie(storageTableColumnsKey, visibleTableColumnKeys);
     }, [storageTableColumnsKey, visibleTableColumnKeys]);
 
     React.useEffect(() => {
         if (!storageCardFieldsKey) return;
-        writeJsonArray(storageCardFieldsKey, visibleCardFieldKeys);
+        writeJsonArrayToCookie(storageCardFieldsKey, visibleCardFieldKeys);
     }, [storageCardFieldsKey, visibleCardFieldKeys]);
 
-    const visibleColumns = resolvedTableColumns.filter((c) => visibleTableColumnKeys.includes(c.key));
+    const visibleColumns = resolvedTableColumns.filter((c) =>
+        visibleTableColumnKeys.includes(c.key)
+    );
     const visibleFields = resolvedCardFields.filter((f) => visibleCardFieldKeys.includes(f.key));
 
     const toggleKey = (key: string, setState: React.Dispatch<React.SetStateAction<string[]>>) => {
@@ -209,25 +209,41 @@ export function EntityList<T>({
 
     return (
         <div className="w-full">
-            {filterSlot ? <div className="mb-3">{filterSlot}</div> : reserveFilterSpace ? <div className="mb-3 h-12" /> : null}
+            {filterSlot ? (
+                <div className="mb-3">{filterSlot}</div>
+            ) : reserveFilterSpace ? (
+                <div className="mb-3 h-12" />
+            ) : null}
 
             {(title || enableViewToggle || enableVisibilitySettings) && (
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                     {title ? <div className="text-base font-semibold">{title}</div> : <div />}
 
                     <div className="flex items-center gap-2">
-                        {enableVisibilitySettings && visibilityStorageKey && (resolvedTableColumns.length || resolvedCardFields.length) && (
-                            <EntityListVisibilitySettingsDialog
-                                isOpen={isSettingsOpen}
-                                onOpenChange={setIsSettingsOpen}
-                                resolvedCardFields={resolvedCardFields.map((field) => ({ key: field.key, label: field.label }))}
-                                resolvedTableColumns={resolvedTableColumns.map((col) => ({ key: col.key, header: col.header }))}
-                                visibleCardFieldKeys={visibleCardFieldKeys}
-                                visibleTableColumnKeys={visibleTableColumnKeys}
-                                onToggleCardFieldKey={(key) => toggleKey(key, setVisibleCardFieldKeys)}
-                                onToggleTableColumnKey={(key) => toggleKey(key, setVisibleTableColumnKeys)}
-                            />
-                        )}
+                        {enableVisibilitySettings &&
+                            visibilityStorageKey &&
+                            (resolvedTableColumns.length || resolvedCardFields.length) && (
+                                <EntityListVisibilitySettingsDialog
+                                    isOpen={isSettingsOpen}
+                                    onOpenChange={setIsSettingsOpen}
+                                    resolvedCardFields={resolvedCardFields.map((field) => ({
+                                        key: field.key,
+                                        label: field.label,
+                                    }))}
+                                    resolvedTableColumns={resolvedTableColumns.map((col) => ({
+                                        key: col.key,
+                                        header: col.header,
+                                    }))}
+                                    visibleCardFieldKeys={visibleCardFieldKeys}
+                                    visibleTableColumnKeys={visibleTableColumnKeys}
+                                    onToggleCardFieldKey={(key) =>
+                                        toggleKey(key, setVisibleCardFieldKeys)
+                                    }
+                                    onToggleTableColumnKey={(key) =>
+                                        toggleKey(key, setVisibleTableColumnKeys)
+                                    }
+                                />
+                            )}
 
                         {enableViewToggle && (
                             <div className="inline-flex overflow-hidden rounded-lg border bg-background">
@@ -235,7 +251,10 @@ export function EntityList<T>({
                                     type="button"
                                     variant="ghost"
                                     size="sm"
-                                    className={cn("rounded-none border-0", viewMode === "cards" && "bg-muted")}
+                                    className={cn(
+                                        "rounded-none border-0",
+                                        viewMode === "cards" && "bg-muted"
+                                    )}
                                     onClick={() => setViewMode("cards")}
                                 >
                                     Карточки
@@ -244,7 +263,10 @@ export function EntityList<T>({
                                     type="button"
                                     variant="ghost"
                                     size="sm"
-                                    className={cn("rounded-none border-0", viewMode === "table" && "bg-muted")}
+                                    className={cn(
+                                        "rounded-none border-0",
+                                        viewMode === "table" && "bg-muted"
+                                    )}
                                     onClick={() => setViewMode("table")}
                                 >
                                     Таблица
@@ -256,11 +278,15 @@ export function EntityList<T>({
             )}
 
             {loading ? (
-                <div className="flex items-center justify-center py-12 text-muted-foreground">Загрузка...</div>
+                <div className="flex items-center justify-center py-12 text-muted-foreground">
+                    Загрузка...
+                </div>
             ) : error ? (
                 <div className="py-4 text-destructive">{error}</div>
             ) : items.length === 0 ? (
-                emptyState ?? <div className="py-8 text-center text-muted-foreground">Ничего не найдено</div>
+                (emptyState ?? (
+                    <div className="py-8 text-center text-muted-foreground">Ничего не найдено</div>
+                ))
             ) : viewMode === "table" ? (
                 <EntityListTableView
                     items={items}
@@ -286,4 +312,3 @@ export function EntityList<T>({
         </div>
     );
 }
-

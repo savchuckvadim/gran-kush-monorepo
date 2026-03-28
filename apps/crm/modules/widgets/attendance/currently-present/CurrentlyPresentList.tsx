@@ -73,9 +73,7 @@ export function CurrentlyPresentList() {
                 </div>
             )}
 
-            {error && (
-                <p className="py-4 text-sm text-destructive">{t("error")}</p>
-            )}
+            {error && <p className="py-4 text-sm text-destructive">{t("error")}</p>}
 
             {sessions && sessions.length === 0 && (
                 <p className="py-4 text-center text-sm text-muted-foreground">{t("empty")}</p>

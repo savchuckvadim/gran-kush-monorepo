@@ -8,7 +8,7 @@ import type {
     SchemaQrCheckInDto,
 } from "@workspace/api-client/core";
 
-import { $api, apiTokensStorage } from "@/modules/shared";
+import { $api } from "@/modules/shared";
 
 // ─── Local types (до регенерации OpenAPI-схемы) ──────────────────────────────
 
@@ -69,33 +69,21 @@ export async function scanQrCodeForPresence(
  * Возвращает данные участника + предлагаемое действие (вход/выход).
  */
 export async function previewQrCodeScan(encryptedCode: string): Promise<QrPreviewResult> {
-    const token = apiTokensStorage.getAccessToken();
+    const response = await $api.POST("/crm/presence/qr-preview", {
+        body: { encryptedCode },
+    });
 
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/crm/presence/qr-preview`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            body: JSON.stringify({ encryptedCode }),
-        }
-    );
-
-    if (!response.ok) {
-        throw new Error(`QR preview failed: ${response.status}`);
+    if (!response.response.ok) {
+        throw new Error(`QR preview failed: ${response.response.status}`);
     }
 
-    return response.json() as Promise<QrPreviewResult>;
+    return response.data as QrPreviewResult;
 }
 
 /**
  * Ручной чек-ин участника (сотрудником)
  */
-export async function manualCheckIn(
-    memberId: string
-): Promise<SchemaPresenceSessionDto> {
+export async function manualCheckIn(memberId: string): Promise<SchemaPresenceSessionDto> {
     const response = await $api.POST("/crm/presence/manual/check-in", {
         body: { memberId } satisfies SchemaManualCheckInDto,
     });
@@ -110,9 +98,7 @@ export async function manualCheckIn(
 /**
  * Ручной чек-аут участника (сотрудником)
  */
-export async function manualCheckOut(
-    memberId: string
-): Promise<SchemaPresenceSessionDto> {
+export async function manualCheckOut(memberId: string): Promise<SchemaPresenceSessionDto> {
     const response = await $api.POST("/crm/presence/manual/check-out", {
         body: { memberId } satisfies SchemaManualCheckOutDto,
     });
@@ -152,9 +138,7 @@ export async function getPresenceSessions(
 /**
  * Получить сессию по ID
  */
-export async function getPresenceSessionById(
-    id: string
-): Promise<SchemaPresenceSessionDto> {
+export async function getPresenceSessionById(id: string): Promise<SchemaPresenceSessionDto> {
     const response = await $api.GET("/crm/presence/sessions/{id}", {
         params: { path: { id } },
     });

@@ -2,9 +2,9 @@
 
 import { useTranslations } from "next-intl";
 
-import { CheckCircle2, Clock,XCircle } from "lucide-react";
+import { CheckCircle2, Clock, XCircle } from "lucide-react";
 
-import { Alert, AlertDescription,Card } from "@workspace/ui";
+import { Alert, AlertDescription, Card } from "@workspace/ui";
 
 import { useMyPresenceStatus } from "@/modules/entities/presence";
 
@@ -53,7 +53,8 @@ export function CurrentPresenceStatus() {
                         </p>
                         {currentSession && (
                             <p className="text-xs text-muted-foreground">
-                                {t("status.enteredAt")}: {new Date(currentSession.enteredAt).toLocaleString()}
+                                {t("status.enteredAt")}:{" "}
+                                {new Date(currentSession.enteredAt).toLocaleString()}
                             </p>
                         )}
                     </div>

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import {  Menu, Rabbit, X } from "lucide-react";
+import { Menu, Rabbit, X } from "lucide-react";
 
 import { Button, ThemeToggle } from "@workspace/ui";
 import { cn } from "@workspace/ui/lib/utils";
@@ -25,15 +25,15 @@ export function CrmShell({ children }: CrmShellProps) {
     const pathname = usePathname();
     const { isOpen: isSidebarOpen, toggle: toggleSidebar } = useSidebar();
     const isCrm = pathname.includes(ROUTES.CRM_HOME);
-    const { currentUser } = useAuth()
+    const { currentUser } = useAuth();
     return (
         <div className="flex min-h-screen min-w-full flex-row">
             <CrmSidebar />
             <div className="flex flex-1 flex-col w-full justify-center">
                 <header
                     className={cn(
-                        "sticky top-0 flex w-full justify-center  bg-background/80 backdrop-blur-sm",
-                        isCrm ? "" : "z-50",
+                        "  sticky top-0 flex w-full justify-center  bg-background/80 backdrop-blur-sm ",
+                        isCrm ? "" : "z-50"
                     )}
                 >
                     <div className="container flex h-16 items-center justify-between px-4 md:px-0">
@@ -47,7 +47,11 @@ export function CrmShell({ children }: CrmShellProps) {
                                     aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
                                     aria-expanded={isSidebarOpen}
                                 >
-                                    {isSidebarOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+                                    {isSidebarOpen ? (
+                                        <X className="size-6" />
+                                    ) : (
+                                        <Menu className="size-6" />
+                                    )}
                                 </Button>
                             )}
                             {/* <div className="flex items-center gap-2">
@@ -58,23 +62,22 @@ export function CrmShell({ children }: CrmShellProps) {
                             </div> */}
                         </div>
 
-                        <div className={cn("items-center gap-4 md:flex", isCrm ? "flex" : "hidden")}>
+                        <div
+                            className={cn("items-center gap-4 md:flex", isCrm ? "flex" : "hidden")}
+                        >
                             <LangSwitcher />
                             <ThemeToggle />
-                            <Button variant="outline" size="sm" asChild
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                asChild
                                 className="text-primary border-primary hover:bg-primary hover:text-background"
-                                style={{ cursor: 'pointer' }}>
+                                style={{ cursor: "pointer" }}
+                            >
                                 <Link href={localizedLink(ROUTES.CRM_PROFILE)}>
                                     <div className="flex items-center gap-2">
                                         <Rabbit className="size-4" />
-                                        <span>
-                                            {
-                                                currentUser
-                                                    ? currentUser.name
-                                                    : t("profile")
-
-                                            }
-                                        </span>
+                                        <span>{currentUser ? currentUser.name : t("profile")}</span>
                                     </div>
                                 </Link>
                             </Button>
@@ -82,7 +85,11 @@ export function CrmShell({ children }: CrmShellProps) {
                     </div>
                 </header>
 
-                <main className="container mx-auto flex flex-1 flex-col p-3 pt-0">{children}</main>
+                <main className="min-w-full  mx-auto flex flex-1 flex-col p-3 pt-4 bg-card-background rounded-tl-xl">
+                    <div className="container mx-auto flex flex-1 flex-col p-3 pt-0">
+                    {children}
+                    </div>
+                </main>
             </div>
         </div>
     );

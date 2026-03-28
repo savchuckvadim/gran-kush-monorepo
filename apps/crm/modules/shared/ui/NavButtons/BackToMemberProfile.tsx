@@ -1,37 +1,33 @@
-'use client'
-import { FC } from "react"
-import { useRouter } from "next/navigation"
-import { Locale, useLocale, useTranslations } from "next-intl"
+"use client";
+import { FC } from "react";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
-import { ArrowLeftIcon } from "lucide-react"
+import { ArrowLeftIcon } from "lucide-react";
 
-import { Button } from "@workspace/ui"
+import { Button } from "@workspace/ui";
 
-import { useIsMobile } from "../../lib"
+import { ROUTES } from "@/modules/shared/config/routes";
+import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
-
+import { useIsMobile } from "../../lib";
 
 export interface IBackToMememberProfileProps {
-    memberId: string
+    memberId: string;
 }
 export const BackToMememberProfile: FC<IBackToMememberProfileProps> = ({ memberId }) => {
-    const router = useRouter()
-    const locale = useLocale() as Locale;
-    const path = `/${locale}/crm/members/${memberId}/`
+    const router = useRouter();
+    const toAppPath = useLocalizedLink();
+    const path = toAppPath(`${ROUTES.CRM_MEMBER_DETAILS}/${memberId}`);
     const t = useTranslations("crm.members");
-    const backToProfile = t('backToProfile')
-    const isMobile = useIsMobile()
+    const backToProfile = t("backToProfile");
+    const isMobile = useIsMobile();
     return (
-
-        <Button variant="outline"
-            onClick={() => router.push(path)}
-        >
+        <Button variant="outline" onClick={() => router.push(path)}>
             <>
                 <ArrowLeftIcon className="w-4 h-4 mr-2" />
-                {!isMobile && <p>
-                    {backToProfile}
-                </p>}
+                {!isMobile && <p>{backToProfile}</p>}
             </>
         </Button>
-    )
-}
+    );
+};

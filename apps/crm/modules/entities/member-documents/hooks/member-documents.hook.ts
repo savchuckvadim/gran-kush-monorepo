@@ -113,7 +113,9 @@ export function useUpdateCrmMemberFiles() {
             // Also invalidate list
             queryClient.invalidateQueries({ queryKey: memberKeys.lists() });
             // Invalidate member documents cache
-            queryClient.invalidateQueries({ queryKey: memberDocumentsKeys.byMember(variables.memberId) });
+            queryClient.invalidateQueries({
+                queryKey: memberDocumentsKeys.byMember(variables.memberId),
+            });
             // Invalidate preview caches for this member
             queryClient.invalidateQueries({
                 queryKey: [...memberDocumentsKeys.previews(), "identity", variables.memberId],

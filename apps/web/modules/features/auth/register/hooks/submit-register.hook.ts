@@ -10,8 +10,6 @@ import {
 
 import { $api } from "@/modules/shared/api";
 
-
-
 export interface RegisterFormSubmitData {
     name: string;
     surname: string;
@@ -39,7 +37,9 @@ function toBase64(file: File): Promise<string> {
     });
 }
 
-async function mapToRegisterMemberDto(data: RegisterFormSubmitData): Promise<SchemaRegisterMemberDto> {
+async function mapToRegisterMemberDto(
+    data: RegisterFormSubmitData
+): Promise<SchemaRegisterMemberDto> {
     return {
         email: data.email,
         password: data.password,
@@ -55,7 +55,9 @@ async function mapToRegisterMemberDto(data: RegisterFormSubmitData): Promise<Sch
     };
 }
 
-async function mapToUploadMemberFilesDto(data: RegisterFormSubmitData): Promise<SchemaUploadMemberFilesDto> {
+async function mapToUploadMemberFilesDto(
+    data: RegisterFormSubmitData
+): Promise<SchemaUploadMemberFilesDto> {
     return {
         documentType: data.documentType,
         documentFirst: data.documentFirst ? await toBase64(data.documentFirst) : undefined,
@@ -65,10 +67,14 @@ async function mapToUploadMemberFilesDto(data: RegisterFormSubmitData): Promise<
 }
 
 export const useSubmitRegister = () => {
-    const registerMutation = useMutation<SchemaRegisterMemberResponseDto, Error, RegisterFormSubmitData>({
+    const registerMutation = useMutation<
+        SchemaRegisterMemberResponseDto,
+        Error,
+        RegisterFormSubmitData
+    >({
         mutationFn: async (data) => {
             const registerPayload = await mapToRegisterMemberDto(data);
-            const response = await $api.POST('/lk/auth/member/register', {
+            const response = await $api.POST("/lk/auth/member/register", {
                 params: {
                     query: {
                         force: "false",

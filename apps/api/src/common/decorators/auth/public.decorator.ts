@@ -7,7 +7,7 @@ export const IS_PUBLIC_KEY = "isPublic";
 
 /**
  * Декоратор для пометки публичных эндпоинтов (не требующих аутентификации)
- * Используется вместе с глобальным JwtAuthGuard
+ * Используется вместе с guard’ами Passport (@RequireEmployeeJwt / @RequireMemberJwt и т.д.)
  *
  * @example
  * ```typescript

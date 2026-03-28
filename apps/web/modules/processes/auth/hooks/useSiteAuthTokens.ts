@@ -14,4 +14,3 @@ export function useSiteAuthTokens() {
 
     return { hydrated, accessToken, hasAccessToken };
 }
-

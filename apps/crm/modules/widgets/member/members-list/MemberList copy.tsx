@@ -66,10 +66,18 @@ export function MemberList({ locale }: { locale: string }) {
                             <thead className="bg-muted/50">
                                 <tr className="text-left">
                                     <th className="px-3 py-2.5 font-medium">{t("columns.name")}</th>
-                                    <th className="px-3 py-2.5 font-medium">{t("columns.email")}</th>
-                                    <th className="hidden px-3 py-2.5 font-medium md:table-cell">{t("columns.phone")}</th>
-                                    <th className="px-3 py-2.5 font-medium">{t("columns.status")}</th>
-                                    <th className="px-3 py-2.5 font-medium text-right">{t("columns.action")}</th>
+                                    <th className="px-3 py-2.5 font-medium">
+                                        {t("columns.email")}
+                                    </th>
+                                    <th className="hidden px-3 py-2.5 font-medium md:table-cell">
+                                        {t("columns.phone")}
+                                    </th>
+                                    <th className="px-3 py-2.5 font-medium">
+                                        {t("columns.status")}
+                                    </th>
+                                    <th className="px-3 py-2.5 font-medium text-right">
+                                        {t("columns.action")}
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -110,7 +118,9 @@ export function MemberList({ locale }: { locale: string }) {
                                 <h3 className="font-medium leading-tight">
                                     {member.name} {member.surname ?? ""}
                                 </h3>
-                                <p className="text-sm text-muted-foreground break-all">{member.email}</p>
+                                <p className="text-sm text-muted-foreground break-all">
+                                    {member.email}
+                                </p>
                                 <p className="text-xs text-muted-foreground">
                                     {t("columns.phone")}: {member.phone ?? "—"}
                                 </p>

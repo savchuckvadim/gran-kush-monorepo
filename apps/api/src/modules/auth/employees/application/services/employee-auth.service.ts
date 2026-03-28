@@ -8,16 +8,17 @@ import { EmployeeLoginDto } from "@auth/employees/api/dto/employee-login.dto";
 import { EmployeeRefreshTokenResponseDto } from "@auth/employees/api/dto/employee-refresh-token-response.dto";
 import { EmployeesService } from "@employees/application/services/employees.service";
 import { Employee } from "@employees/domain/entity/employee.entity";
-import { EmployeeRepository } from "@employees/domain/repositories/employee-repository.interface";
 import { EmployeeTokenRepository } from "@employees/domain/repositories/employee-token-repository.interface";
 
+import { requireEmployeePortalId } from "@common/portal";
+
 interface EmployeeJwtPayload {
-    sub: string; // employee id
+    sub: string;
     email: string;
     name: string;
     role: string;
     portalId?: string | null;
-    type: "employee"; // Тип для различения от user токенов
+    type: "employee";
 }
 
 @Injectable()
@@ -26,22 +27,17 @@ export class EmployeeAuthService {
         private readonly employeesService: EmployeesService,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
-        private readonly employeeRepository: EmployeeRepository,
         private readonly employeeTokenRepository: EmployeeTokenRepository
     ) {}
 
-    /**
-     * Вход сотрудника
-     */
-    async login(dto: EmployeeLoginDto): Promise<EmployeeAuthResponseDto> {
+    async login(dto: EmployeeLoginDto, deviceId: string): Promise<EmployeeAuthResponseDto> {
         const employee = await this.employeesService.validateEmployee(dto.email, dto.password);
 
         if (!employee) {
             throw new UnauthorizedException("Invalid credentials");
         }
 
-        // Генерация токенов
-        const tokens = await this.generateTokens(employee);
+        const tokens = await this.generateTokens(employee, deviceId);
 
         return {
             ...tokens,
@@ -55,9 +51,6 @@ export class EmployeeAuthService {
         };
     }
 
-    /**
-     * Валидация JWT payload для сотрудника
-     */
     async validateJwtPayload(payload: EmployeeJwtPayload): Promise<Employee | null> {
         if (payload.type !== "employee") {
             return null;
@@ -78,14 +71,13 @@ export class EmployeeAuthService {
     }
 
     /**
-     * Обновление access token через refresh token
+     * Rotation: старый refresh для этого устройства снимается (revoke), выдаётся новая пара.
      */
     async refreshToken(refreshToken: string): Promise<EmployeeRefreshTokenResponseDto> {
         try {
-            // Проверяем refresh token в БД через репозиторий
-            const tokenRecord = await this.employeeTokenRepository.findByToken(refreshToken);
+            const tokenRecord = await this.employeeTokenRepository.findActiveByToken(refreshToken);
 
-            if (!tokenRecord || tokenRecord.expiresAt < new Date()) {
+            if (!tokenRecord) {
                 throw new UnauthorizedException("Invalid or expired refresh token");
             }
 
@@ -104,39 +96,36 @@ export class EmployeeAuthService {
             ) {
                 throw new UnauthorizedException("Portal mismatch");
             }
-            return await this.generateTokens(employee);
-        } catch {
+
+            return await this.generateTokens(employee, tokenRecord.deviceId);
+        } catch (e) {
+            if (e instanceof UnauthorizedException) throw e;
             throw new UnauthorizedException("Invalid refresh token");
         }
     }
 
-    /**
-     * Выход сотрудника (удаление refresh token)
-     */
     async logout(refreshToken: string): Promise<void> {
         await this.employeeTokenRepository.deleteByToken(refreshToken);
     }
 
-    /**
-     * Выход со всех устройств
-     */
     async logoutAll(employeeId: string): Promise<void> {
         await this.employeeTokenRepository.deleteByEmployeeId(employeeId);
     }
 
-    /**
-     * Генерация access и refresh токенов с сохранением в БД
-     */
-    async generateTokens(employee: Employee): Promise<{
+    async generateTokens(
+        employee: Employee,
+        deviceId: string
+    ): Promise<{
         accessToken: string;
         refreshToken: string;
     }> {
+        const portalId = requireEmployeePortalId(employee);
         const payload: EmployeeJwtPayload = {
             sub: employee.id,
             email: employee.email,
             name: employee.name,
             role: employee.role,
-            portalId: employee.portalId,
+            portalId,
             type: "employee",
         };
 
@@ -166,16 +155,17 @@ export class EmployeeAuthService {
             this.jwtService.signAsync(payload, refreshSignOptions),
         ]);
 
-        // Вычисляем дату истечения refresh token
         const expiresAt = new Date();
         const expiresInDays = parseInt(refreshTokenExpiresIn.replace("d", ""), 10) || 7;
         expiresAt.setDate(expiresAt.getDate() + expiresInDays);
 
-        // Сохраняем refresh token в БД через репозиторий
+        await this.employeeTokenRepository.revokeAllActiveForEmployeeDevice(employee.id, deviceId);
+
         await this.employeeTokenRepository.create({
             token: refreshToken,
             employeeId: employee.id,
-            portalId: employee.portalId,
+            deviceId,
+            portalId,
             expiresAt,
         });
 

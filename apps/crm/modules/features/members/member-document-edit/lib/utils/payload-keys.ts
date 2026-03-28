@@ -9,4 +9,3 @@ export type IdentityPayloadKey = (typeof identitySideToPayloadKey)[IdentitySide]
 export function getIdentityPayloadKey(side: IdentitySide): IdentityPayloadKey {
     return identitySideToPayloadKey[side];
 }
-

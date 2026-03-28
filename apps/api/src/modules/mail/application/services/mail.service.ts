@@ -21,6 +21,7 @@ import {
     MAIL_QUEUE_NAME,
 } from "../../events/mail-events.constants";
 import { EmailVerificationTemplate } from "../../templates/email-verification.template";
+import { PortalRegistrationTemplate } from "../../templates/portal-registration.template";
 import { ResetPasswordTemplate } from "../../templates/reset-password.template";
 
 @Injectable()
@@ -44,7 +45,7 @@ export class MailService {
         // this.authCookieSpaDomain = this.configService.get<string>("AUTH_COOKIE_SPA_DOMAIN") || "";
         // this.siteUrl = this.configService.get<string>("SITE_URL") || "";
         this.crmFrontendUrl = this.configService.get<string>("CRM_FRONTEND_URL") || "";
-        this.siteFrontendUrl = this.configService.get<string>("SITE_FRONTEND_URL") || "";
+        this.siteFrontendUrl = this.configService.get<string>("MEMBER_FRONTEND_URL") || "";
     }
 
     public async sendMamberEmailVerification(
@@ -169,6 +170,51 @@ export class MailService {
         return true;
     }
 
+    public async sendPortalRegistrationEmail(params: {
+        portal: { id: string; name: string; displayName: string };
+        owner: { id: string; email: string; name: string };
+        language?: SupportedLanguage;
+    }): Promise<boolean> {
+        const language = params.language || DEFAULT_LANGUAGE;
+        const baseUrl = this.crmFrontendUrl;
+        const loginLink = `${baseUrl}/${language}/${params.portal.name}/auth/login`;
+        const html = await render(
+            PortalRegistrationTemplate({
+                ownerName: params.owner.name,
+                portalDisplayName: params.portal.displayName,
+                loginLink,
+                language,
+                baseUrl,
+            })
+        );
+
+        await this.queue.add(
+            MAIL_QUEUE_JOB_NAMES.SEND_EMAIL,
+            {
+                to: [params.owner.email ?? DEFAULT_EMAIL_FROM],
+                subject: EMAIL_SUBJECTS.PORTAL_REGISTRATION[language],
+                html,
+                context: {
+                    portalId: params.portal.id,
+                    portalSlug: params.portal.name,
+                    portalDisplayName: params.portal.displayName,
+                    ownerEmail: params.owner.email,
+                    ownerName: params.owner.name,
+                    ownerId: params.owner.id,
+                    language,
+                },
+                emailType: EmailType.PORTAL_REGISTRATION,
+            },
+            {
+                removeOnComplete: JOB_OPTIONS.REMOVE_ON_COMPLETE,
+                removeOnFail: JOB_OPTIONS.REMOVE_ON_FAIL,
+            }
+        );
+
+        this.logger.log(`📬 Portal registration email queued for ${params.owner.email}`);
+        return true;
+    }
+
     async sendEmail(params: {
         subject: string;
         html: string;
@@ -180,7 +226,7 @@ export class MailService {
             cid?: string;
             contentType: string;
         }>;
-    }) {
+    }): Promise<boolean> {
         try {
             const from = `"${this.smtpFromName}" <${this.smtpFrom}>`;
 
@@ -199,22 +245,20 @@ export class MailService {
                 html: params.html,
                 attachments: params.attachments,
             };
-            const response = await this.mailerService.sendMail(sendMailParams);
+            await this.mailerService.sendMail(sendMailParams);
             this.logger.log(
                 `Email sent successfully to recipients with the following parameters : ${JSON.stringify(
                     sendMailParams
                 )}`,
-                response
+                undefined
             );
-            return {
-                ...response,
-                message: "Email sent successfully",
-            };
-        } catch (error) {
+            return true;
+        } catch (error: unknown) {
             this.logger.error(
                 `Error while sending mail with the following parameters : ${JSON.stringify(params)}`,
-                error
+                error instanceof Error ? error.stack : String(error)
             );
+            return false;
         }
     }
 }

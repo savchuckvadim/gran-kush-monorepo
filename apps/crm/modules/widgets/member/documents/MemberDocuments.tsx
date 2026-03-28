@@ -1,40 +1,42 @@
-'use client'
+"use client";
+import NextLink from "next/link";
 import { useTranslations } from "next-intl";
 
-import { Link, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 
 import { Button } from "@workspace/ui";
 
 import { CrmMemberDetails } from "@/modules/entities/member";
+import { ROUTES } from "@/modules/shared/config/routes";
+import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
 import { MemberDocumentCard } from "./components/MemberDocumentCard";
 import { MemberSignatureCard } from "./components/MemberSignatureCard";
 
 export interface IMemberDocumentsProps {
     member: CrmMemberDetails;
-    locale: string;
-
 }
-export function MemberDocuments({
-    member, locale,
-}: IMemberDocumentsProps) {
+export function MemberDocuments({ member }: IMemberDocumentsProps) {
     const t = useTranslations("crm.members");
+    const toAppPath = useLocalizedLink();
+    const memberDocumentsPath = toAppPath(
+        `${ROUTES.CRM_MEMBER_DETAILS}/${member.id}/documents`
+    );
 
-
-    const signatureTitle = t("signatureTitle")
-    const documentsTitle = t("documents")
-    const openDocumentsRoute = t("openDocumentsRoute")
+    const signatureTitle = t("signatureTitle");
+    const documentsTitle = t("documents");
+    const openDocumentsRoute = t("openDocumentsRoute");
     return (
         <section className="rounded-lg border bg-background p-4">
             <div className="mb-3 flex items-center justify-between gap-2">
                 <h2 className="text-base font-medium">{documentsTitle}</h2>
                 <Button variant="outline" size="sm" asChild>
-                    <Link href={`/${locale}/crm/members/${member.id}/documents`}>
+                    <NextLink href={memberDocumentsPath}>
                         <span className="inline-flex items-center gap-2">
                             <Pencil className="h-4 w-4" />
                             {openDocumentsRoute}
                         </span>
-                    </Link>
+                    </NextLink>
                 </Button>
             </div>
             {member.identityDocuments.length > 0 && (
@@ -44,20 +46,16 @@ export function MemberDocuments({
                             key={doc.id}
                             memberId={member.id}
                             document={doc}
-                            locale={locale}
                         />
                     ))}
                     {member.signature && (
                         <MemberSignatureCard
-                  
                             memberId={member.id}
-                            locale={locale}
                             signatureTitle={signatureTitle}
                         />
                     )}
                 </div>
             )}
-
         </section>
-    )
+    );
 }

@@ -12,12 +12,14 @@ import { TokenRepository } from "@members/domain/repositories/token-repository.i
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import * as bcrypt from "bcrypt";
 
+import { requireMemberPortalId } from "@common/portal";
+
 interface MemberJwtPayload {
-    sub: string; // member id
-    userId: string; // user id
+    sub: string;
+    userId: string;
     email: string;
     portalId?: string | null;
-    type: "member"; // Тип для различения от employee токенов
+    type: "member";
 }
 
 @Injectable()
@@ -30,18 +32,13 @@ export class MemberAuthService {
         private readonly memberRepository: MemberRepository
     ) {}
 
-    /**
-     * Вход Member
-     */
-    async login(dto: MemberLoginDto): Promise<MemberAuthResponseDto> {
-        // Получаем User и Member через репозиторий
+    async login(dto: MemberLoginDto, deviceId: string): Promise<MemberAuthResponseDto> {
         const user = await this.userRepository.findByEmailWithRelations(dto.email);
 
         if (!user || !user.member) {
             throw new UnauthorizedException("Invalid credentials");
         }
 
-        // Проверка активности (почта не подтверждена / член неактивен)
         if (!user.isActive) {
             throw new UnauthorizedException("Email not confirmed");
         }
@@ -49,14 +46,12 @@ export class MemberAuthService {
             throw new UnauthorizedException("Member is inactive");
         }
 
-        // Проверка пароля
         const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
         if (!isPasswordValid) {
             throw new UnauthorizedException("Invalid credentials");
         }
 
-        // Генерация токенов
-        const tokens = await this.generateTokens(user.member, user);
+        const tokens = await this.generateTokens(user.member, user, deviceId);
 
         return {
             ...tokens,
@@ -67,9 +62,6 @@ export class MemberAuthService {
         };
     }
 
-    /**
-     * Валидация пользователя для Local Strategy
-     */
     async validateMember(email: string, password: string): Promise<Member | null> {
         const user = await this.userRepository.findByEmailWithRelations(email);
 
@@ -85,10 +77,6 @@ export class MemberAuthService {
         return user.member;
     }
 
-    /**
-     * Валидация JWT payload для Member.
-     * @param allowUnconfirmed — если true, не проверять user.isActive (для post-registration эндпоинтов, например загрузка файлов)
-     */
     async validateJwtPayload(
         payload: MemberJwtPayload,
         allowUnconfirmed: boolean = false
@@ -122,15 +110,11 @@ export class MemberAuthService {
         }
     }
 
-    /**
-     * Обновление access token через refresh token
-     */
     async refreshToken(refreshToken: string): Promise<MemberRefreshTokenResponseDto> {
         try {
-            // Проверяем refresh token в БД через репозиторий
-            const tokenRecord = await this.tokenRepository.findByToken(refreshToken);
+            const tokenRecord = await this.tokenRepository.findActiveByToken(refreshToken);
 
-            if (!tokenRecord || tokenRecord.expiresAt < new Date()) {
+            if (!tokenRecord) {
                 throw new UnauthorizedException("Invalid or expired refresh token");
             }
 
@@ -143,62 +127,45 @@ export class MemberAuthService {
                 throw new UnauthorizedException();
             }
 
-            const payload: MemberJwtPayload = {
-                sub: member.id,
-                userId: tokenRecord.user.id,
-                email: tokenRecord.user.email,
-                portalId: member.portalId,
-                type: "member",
-            };
+            if (
+                tokenRecord.portalId &&
+                member.portalId &&
+                tokenRecord.portalId !== member.portalId
+            ) {
+                throw new UnauthorizedException("Portal mismatch");
+            }
 
-            const jwtSecret = this.configService.get<string>(JWT_ENV_KEYS.SECRET);
-            const accessTokenExpiresIn: string =
-                this.configService.get<string>(JWT_ENV_KEYS.ACCESS_TOKEN_EXPIRES_IN) ||
-                JWT_DEFAULTS.ACCESS_TOKEN_EXPIRES_IN;
-
-            const signOptions = {
-                secret: jwtSecret || JWT_DEFAULTS.SECRET,
-                expiresIn: accessTokenExpiresIn,
-            } as { secret: string; expiresIn: string };
-
-            // @ts-expect-error - JWT library type mismatch
-            const accessToken = await this.jwtService.signAsync(payload, signOptions);
-
-            return { accessToken };
-        } catch {
+            const user = tokenRecord.user;
+            const tokens = await this.generateTokens(member, user, tokenRecord.deviceId);
+            return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
+        } catch (e) {
+            if (e instanceof UnauthorizedException) throw e;
             throw new UnauthorizedException("Invalid refresh token");
         }
     }
 
-    /**
-     * Выход Member (удаление refresh token)
-     */
     async logout(refreshToken: string): Promise<void> {
         await this.tokenRepository.deleteByToken(refreshToken);
     }
 
-    /**
-     * Выход со всех устройств
-     */
     async logoutAll(userId: string): Promise<void> {
         await this.tokenRepository.deleteByUserId(userId);
     }
 
-    /**
-     * Генерация access и refresh токенов с сохранением в БД
-     */
     async generateTokens(
         member: { id: string; userId: string; portalId?: string | null },
-        user: { id: string; email: string }
+        user: { id: string; email: string },
+        deviceId: string
     ): Promise<{
         accessToken: string;
         refreshToken: string;
     }> {
+        const portalId = requireMemberPortalId(member);
         const payload: MemberJwtPayload = {
             sub: member.id,
             userId: user.id,
             email: user.email,
-            portalId: member.portalId,
+            portalId,
             type: "member",
         };
 
@@ -228,25 +195,23 @@ export class MemberAuthService {
             this.jwtService.signAsync(payload, refreshSignOptions),
         ]);
 
-        // Вычисляем дату истечения refresh token
         const expiresAt = new Date();
         const expiresInDays = parseInt(refreshTokenExpiresIn.replace("d", ""), 10) || 7;
         expiresAt.setDate(expiresAt.getDate() + expiresInDays);
 
-        // Сохраняем refresh token в БД через репозиторий
+        await this.tokenRepository.revokeAllActiveForUserDevice(user.id, deviceId);
+
         await this.tokenRepository.create({
             token: refreshToken,
             userId: user.id,
-            portalId: member.portalId || undefined,
+            deviceId,
+            portalId,
             expiresAt,
         });
 
         return { accessToken, refreshToken };
     }
 
-    /**
-     * Маппинг Prisma модели в Entity
-     */
     private mapToEntity(member: {
         id: string;
         userId: string;

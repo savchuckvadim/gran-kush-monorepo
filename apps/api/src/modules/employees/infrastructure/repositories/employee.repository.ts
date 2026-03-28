@@ -4,6 +4,7 @@ import { Employee } from "@employees/domain/entity/employee.entity";
 import { EmployeeRepository } from "@employees/domain/repositories/employee-repository.interface";
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { mapToEntity } from "@modules/employees/lib";
 
 @Injectable()
 export class EmployeePrismaRepository implements EmployeeRepository {
@@ -14,7 +15,7 @@ export class EmployeePrismaRepository implements EmployeeRepository {
             where: { id },
             include: { user: true },
         });
-        return employee ? this.mapToEntity(employee, employee.user) : null;
+        return employee ? mapToEntity(employee, employee.user) : null;
     }
 
     async findByUserId(userId: string): Promise<Employee | null> {
@@ -22,7 +23,7 @@ export class EmployeePrismaRepository implements EmployeeRepository {
             where: { userId },
             include: { user: true },
         });
-        return employee ? this.mapToEntity(employee, employee.user) : null;
+        return employee ? mapToEntity(employee, employee.user) : null;
     }
 
     async findByEmail(email: string): Promise<Employee | null> {
@@ -33,7 +34,7 @@ export class EmployeePrismaRepository implements EmployeeRepository {
         if (!user || !user.employee) {
             return null;
         }
-        return this.mapToEntity(user.employee, user);
+        return mapToEntity(user.employee, user);
     }
 
     async findAll(limit?: number, skip?: number): Promise<Employee[]> {
@@ -43,7 +44,7 @@ export class EmployeePrismaRepository implements EmployeeRepository {
             include: { user: true },
             orderBy: { createdAt: "desc" },
         });
-        return employees.map((emp) => this.mapToEntity(emp, emp.user));
+        return employees.map((emp) => mapToEntity(emp, emp.user));
     }
 
     async count(): Promise<number> {
@@ -64,7 +65,7 @@ export class EmployeePrismaRepository implements EmployeeRepository {
             data,
             include: { user: true },
         });
-        return this.mapToEntity(employee, employee.user);
+        return mapToEntity(employee, employee.user);
     }
 
     async update(
@@ -85,47 +86,6 @@ export class EmployeePrismaRepository implements EmployeeRepository {
             data,
             include: { user: true },
         });
-        return this.mapToEntity(employee, employee.user);
-    }
-
-    private mapToEntity(
-        employee: {
-            id: string;
-            userId: string;
-            portalId: string | null;
-            name: string;
-            surname: string | null;
-            phone: string | null;
-            role: string;
-            position: string | null;
-            department: string | null;
-            isActive: boolean;
-            lastLoginAt: Date | null;
-            createdAt: Date;
-            updatedAt: Date;
-        },
-        user: {
-            id: string;
-            email: string;
-            passwordHash: string;
-        }
-    ): Employee {
-        return new Employee({
-            id: employee.id,
-            userId: employee.userId,
-            portalId: employee.portalId || undefined,
-            email: user.email,
-            passwordHash: user.passwordHash,
-            name: employee.name,
-            surname: employee.surname || undefined,
-            phone: employee.phone || undefined,
-            role: employee.role,
-            position: employee.position || undefined,
-            department: employee.department || undefined,
-            isActive: employee.isActive,
-            lastLoginAt: employee.lastLoginAt || undefined,
-            createdAt: employee.createdAt,
-            updatedAt: employee.updatedAt,
-        });
+        return mapToEntity(employee, employee.user);
     }
 }

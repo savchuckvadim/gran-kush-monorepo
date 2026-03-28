@@ -1,8 +1,7 @@
-import { Controller, Get, UseGuards } from "@nestjs/common";
+import { Controller, Get } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
-import { CurrentMember } from "@auth/members";
-import { MemberJwtAuthGuard } from "@auth/members";
+import { CurrentMember, RequireMemberJwt } from "@auth/members";
 import { CrmMemberFullDto } from "@members/api/dto/crm-member.dto";
 import { MembersService } from "@members/application/services/members.service";
 import { Member } from "@members/domain/entity/member.entity";
@@ -12,7 +11,7 @@ import { ApiSuccessResponse } from "@common/decorators/response/api-success-resp
 
 @ApiTags("Member Profile (LK - Site)")
 @Controller("lk/members")
-@UseGuards(MemberJwtAuthGuard)
+@RequireMemberJwt()
 export class LkMembersController {
     constructor(private readonly membersService: MembersService) {}
 

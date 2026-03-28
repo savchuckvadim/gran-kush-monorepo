@@ -34,7 +34,10 @@ export function ReportByTypeCard() {
 
             <div className="space-y-3">
                 {items.map((item) => (
-                    <div key={item.type} className="flex items-center justify-between rounded-md border p-3">
+                    <div
+                        key={item.type}
+                        className="flex items-center justify-between rounded-md border p-3"
+                    >
                         <div>
                             <p className="text-sm font-medium">{t(`type.${item.type}`)}</p>
                             <p className="text-xs text-muted-foreground">

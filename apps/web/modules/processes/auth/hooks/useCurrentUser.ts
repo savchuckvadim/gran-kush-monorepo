@@ -11,11 +11,13 @@ export function useCurrentUserQuery(enabled: boolean) {
         queryFn: getMyMemberInfo,
         enabled,
         retry: (failureCount, error: unknown) => {
-            const status = typeof error === "object" && error ? (error as { status?: number }).status : undefined;
+            const status =
+                typeof error === "object" && error
+                    ? (error as { status?: number }).status
+                    : undefined;
             if (status === 401 || status === 403) return false;
             return failureCount < 2;
         },
         staleTime: 5 * 60 * 1000,
     });
 }
-

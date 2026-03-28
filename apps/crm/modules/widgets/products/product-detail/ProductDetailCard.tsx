@@ -11,18 +11,18 @@ import { Button, Card, FieldInput } from "@workspace/ui";
 
 import { useCategories } from "@/modules/entities/category";
 import { useMeasurementUnits } from "@/modules/entities/measurement-unit";
-import {
-    useProductDetail,
-    useUpdateProduct,
-} from "@/modules/entities/product";
+import { useProductDetail, useUpdateProduct } from "@/modules/entities/product";
+import { ROUTES } from "@/modules/shared/config/routes";
+import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
 interface ProductDetailCardProps {
     productId: string;
-    locale: string;
 }
 
-export function ProductDetailCard({ productId, locale }: ProductDetailCardProps) {
+export function ProductDetailCard({ productId }: ProductDetailCardProps) {
     const t = useTranslations("crm.products.detail");
+    const toAppPath = useLocalizedLink();
+    const productsPath = toAppPath(ROUTES.CRM_PRODUCTS);
     const { data: product, isLoading, error } = useProductDetail(productId);
     const updateMutation = useUpdateProduct();
     const { data: categories } = useCategories();
@@ -94,7 +94,7 @@ export function ProductDetailCard({ productId, locale }: ProductDetailCardProps)
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/${locale}/crm/products`}>
+                        <Link href={productsPath}>
                             <ArrowLeft className="h-4 w-4" />
                         </Link>
                     </Button>
@@ -207,10 +207,7 @@ export function ProductDetailCard({ productId, locale }: ProductDetailCardProps)
                                 type="number"
                                 value={String(form.thc ?? "")}
                                 onChange={(e) =>
-                                    handleChange(
-                                        "thc",
-                                        e.target.value ? Number(e.target.value) : 0
-                                    )
+                                    handleChange("thc", e.target.value ? Number(e.target.value) : 0)
                                 }
                             />
                             <FieldInput
@@ -218,10 +215,7 @@ export function ProductDetailCard({ productId, locale }: ProductDetailCardProps)
                                 type="number"
                                 value={String(form.cbd ?? "")}
                                 onChange={(e) =>
-                                    handleChange(
-                                        "cbd",
-                                        e.target.value ? Number(e.target.value) : 0
-                                    )
+                                    handleChange("cbd", e.target.value ? Number(e.target.value) : 0)
                                 }
                             />
                             <FieldInput
@@ -258,7 +252,10 @@ export function ProductDetailCard({ productId, locale }: ProductDetailCardProps)
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4 text-sm">
                             <InfoRow label={t("category")} value={product.category?.name ?? "—"} />
-                            <InfoRow label={t("measurementUnit")} value={product.measurementUnit?.name ?? "—"} />
+                            <InfoRow
+                                label={t("measurementUnit")}
+                                value={product.measurementUnit?.name ?? "—"}
+                            />
                             <InfoRow label={t("price")} value={`€${product.price}`} />
                             <InfoRow
                                 label={t("stock")}
@@ -269,14 +266,22 @@ export function ProductDetailCard({ productId, locale }: ProductDetailCardProps)
                                 label={t("status")}
                                 value={product.isActive ? t("active") : t("inactive")}
                             />
-                            {product.thc != null && <InfoRow label={t("thc")} value={`${product.thc}%`} />}
-                            {product.cbd != null && <InfoRow label={t("cbd")} value={`${product.cbd}%`} />}
-                            {product.strain && <InfoRow label={t("strain")} value={product.strain} />}
+                            {product.thc != null && (
+                                <InfoRow label={t("thc")} value={`${product.thc}%`} />
+                            )}
+                            {product.cbd != null && (
+                                <InfoRow label={t("cbd")} value={`${product.cbd}%`} />
+                            )}
+                            {product.strain && (
+                                <InfoRow label={t("strain")} value={product.strain} />
+                            )}
                         </div>
 
                         {product.description && (
                             <div className="space-y-1">
-                                <p className="text-sm font-medium text-muted-foreground">{t("description")}</p>
+                                <p className="text-sm font-medium text-muted-foreground">
+                                    {t("description")}
+                                </p>
                                 <p className="text-sm">{product.description}</p>
                             </div>
                         )}

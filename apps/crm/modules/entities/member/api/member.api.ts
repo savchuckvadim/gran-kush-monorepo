@@ -1,7 +1,10 @@
-import { SchemaCrmMemberDto, SchemaCrmMemberFullDto, SchemaCrmMemberUpdateDto } from "@workspace/api-client/core";
+import {
+    SchemaCrmMemberDto,
+    SchemaCrmMemberFullDto,
+    SchemaCrmMemberUpdateDto,
+} from "@workspace/api-client/core";
 
 import { $api } from "@/modules/shared";
-
 
 export interface CrmMemberListItem extends SchemaCrmMemberDto {
     id: string;
@@ -49,27 +52,25 @@ export interface CrmMemberDetails extends SchemaCrmMemberFullDto {
     }>;
 }
 
-
-
 export async function getCrmMembers(limit: number = 100): Promise<CrmMemberListItem[]> {
-    const response = await $api.GET('/crm/members', {
+    const response = await $api.GET("/crm/members", {
         params: {
             query: {
                 limit: limit,
             },
         },
     });
-    
+
     if (!response.response.ok) {
         throw new Error(`Failed to fetch members: ${response.response.status}`);
     }
-    
+
     const members = response.data as SchemaCrmMemberDto[];
     return members as CrmMemberListItem[];
 }
 
 export async function getCrmMemberById(memberId: string): Promise<CrmMemberDetails | null> {
-    const response = await $api.GET('/crm/members/{id}', {
+    const response = await $api.GET("/crm/members/{id}", {
         params: {
             path: { id: memberId },
         },
@@ -80,20 +81,21 @@ export async function getCrmMemberById(memberId: string): Promise<CrmMemberDetai
         }
         throw new Error(`Failed to fetch member: ${response.response.status}`);
     }
-    
+
     return response.data as SchemaCrmMemberFullDto as CrmMemberDetails;
 }
 
 export async function updateCrmMember(
     memberId: string,
-    payload: SchemaCrmMemberUpdateDto 
+    payload: SchemaCrmMemberUpdateDto
 ): Promise<CrmMemberDetails> {
     // return crmRequest<CrmMemberDetails>(`/crm/members/${memberId}`, {
     //     method: "PATCH",
     //     body: JSON.stringify(payload),
     // });
-    const member = $api.PATCH('/crm/members/{id}', {params: {path: {id: memberId}}, body: payload})
+    const member = $api.PATCH("/crm/members/{id}", {
+        params: { path: { id: memberId } },
+        body: payload,
+    });
     return (await member).data as CrmMemberDetails;
 }
-
-
