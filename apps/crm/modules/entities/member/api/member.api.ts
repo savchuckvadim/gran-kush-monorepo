@@ -1,63 +1,29 @@
 import {
     SchemaCrmMemberDto,
+    SchemaCrmMemberFieldsPatchDto,
     SchemaCrmMemberFullDto,
-    SchemaCrmMemberUpdateDto,
+    SchemaMemberLifecycleStatusItemDto,
 } from "@workspace/api-client/core";
 
 import { $api } from "@/modules/shared";
+import { CrmMemberDetails, CrmMemberListFilters, CrmMemberListItem } from "../type/member.type";
 
-export interface CrmMemberListItem extends SchemaCrmMemberDto {
-    id: string;
-    userId: string;
-    email: string;
-    name: string;
-    surname: string | null;
-    phone: string | null;
-    status: string;
-    isActive: boolean;
-    emailConfirmed: boolean;
-    createdAt: string;
-}
-export interface IdentityDocument {
-    id: string;
-    type: string;
-    side: string;
-    storagePath: string;
-    createdAt: string;
-}
-export interface IMemberSignature {
-    id: string;
-    storagePath: string;
-    createdAt: string;
-}
-export interface CrmMemberDetails extends SchemaCrmMemberFullDto {
-    birthday: string | null;
-    address: string | null;
-    membershipNumber: string | null;
-    notes: string | null;
-    updatedAt: string;
-    identityDocuments: Array<IdentityDocument>;
-    signature: IMemberSignature | null;
-    mjStatuses: Array<{
-        id: string;
-        code: string;
-        name: string;
-    }>;
-    documents: Array<{
-        id: string;
-        type: string;
-        name: string;
-        number: string | null;
-        createdAt: string;
-    }>;
-}
 
-export async function getCrmMembers(limit: number = 100): Promise<CrmMemberListItem[]> {
+
+export async function getCrmMembers(
+    limit: number = 100,
+    filters?: CrmMemberListFilters
+): Promise<CrmMemberListItem[]> {
     const response = await $api.GET("/crm/members", {
         params: {
             query: {
-                limit: limit,
-            },
+                limit,
+                ...(filters?.statusItemId ? { statusItemId: filters.statusItemId } : {}),
+                ...(filters?.filterFieldKey ? { filterFieldKey: filters.filterFieldKey } : {}),
+                ...(filters?.filterValue !== undefined && filters.filterValue !== ""
+                    ? { filterValue: filters.filterValue }
+                    : {}),
+            } as Record<string, string | number>,
         },
     });
 
@@ -82,12 +48,31 @@ export async function getCrmMemberById(memberId: string): Promise<CrmMemberDetai
         throw new Error(`Failed to fetch member: ${response.response.status}`);
     }
 
-    return response.data as SchemaCrmMemberFullDto as CrmMemberDetails;
+    return response.data as CrmMemberDetails;
 }
+
+// export async function fetchCrmMemberStatusItems(): Promise<
+//     SchemaMemberLifecycleStatusItemDto[]
+// > {
+//     const response = await $api.GET("/crm/settings/entities/member/status-items");
+//     const result = response.data
+//     if (!result) {
+//         throw new Error("Failed to fetch member status items");
+//     }
+//     return result;
+// }
+
+// export async function fetchCrmMemberFilterFields(): Promise<MemberFormSchemaField[]> {
+//     const response = await $api.GET("/crm/settings/entities/member/filter-fields");
+//     if (!response.response.ok) {
+//         throw new Error(`Failed to load filter fields: ${response.response.status}`);
+//     }
+//     return (response.data ?? []) as MemberFormSchemaField[];
+// }
 
 export async function updateCrmMember(
     memberId: string,
-    payload: SchemaCrmMemberUpdateDto
+    payload: SchemaCrmMemberFieldsPatchDto
 ): Promise<CrmMemberDetails> {
     // return crmRequest<CrmMemberDetails>(`/crm/members/${memberId}`, {
     //     method: "PATCH",

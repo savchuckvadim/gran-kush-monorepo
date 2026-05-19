@@ -5,9 +5,10 @@ import { UseFormSetError } from "react-hook-form";
 
 import { usePortal } from "@/modules/processes";
 import { getRouteContext } from "@/modules/processes/auth/utils/auth-routing";
-import { $api, ROUTES, useLocalizedLink } from "@/modules/shared";
+import { $api, ROUTES,  useLocalizedLink } from "@/modules/shared";
 
 import { LoginFormData } from "../type/login-form.type";
+import { setCrmPortalSlugForApiClient } from "@/modules/processes/portal/utils/crm-portal-context";
 
 export function useSubmitLoginForm(setError: UseFormSetError<LoginFormData>) {
     const { portalSlug } = usePortal();
@@ -20,16 +21,13 @@ export function useSubmitLoginForm(setError: UseFormSetError<LoginFormData>) {
             if (!effectivePortalSlug) {
                 throw new Error("Club is required");
             }
-            // configureOpenApiClient();
-            // return EmployeeAuthenticationCrmService.employeeAuthLogin(data as EmployeeLoginDto);
+            setCrmPortalSlugForApiClient(effectivePortalSlug);
             const response = await $api.POST("/crm/auth/login", {
                 body: {
                     email: data.email,
                     password: data.password,
                     domain: effectivePortalSlug,
-
                 },
-                headers: { "x-portal-slug": effectivePortalSlug },
             });
             if (!response.response.ok) {
                 throw new Error(`Login failed: ${response.response.status}`);

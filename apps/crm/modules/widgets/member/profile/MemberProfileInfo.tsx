@@ -8,8 +8,31 @@ import { MemberProfileEditModal } from "@/modules/features";
 export interface IMemberProfileInfoProps {
     member: CrmMemberDetails;
 }
+
+const CORE_FIELD_KEYS = new Set([
+    "first_name",
+    "last_name",
+    "phone",
+    "birthday",
+    "address",
+    "notes",
+]);
+
+function formatMemberFieldValue(value: unknown): string {
+    if (value === null || value === undefined) {
+        return "—";
+    }
+    if (typeof value === "object") {
+        return JSON.stringify(value);
+    }
+    return String(value);
+}
+
 export function MemberProfileInfo({ member }: IMemberProfileInfoProps) {
     const t = useTranslations("crm.members");
+    const extraFields =
+        member.fields?.filter((f) => !CORE_FIELD_KEYS.has(f.fieldKey)) ?? [];
+
     return (
         <Card className="p-4 ">
             <section className="">
@@ -53,6 +76,23 @@ export function MemberProfileInfo({ member }: IMemberProfileInfoProps) {
                         <dd>{new Date(member.updatedAt).toLocaleString()}</dd>
                     </div>
                 </dl>
+                {extraFields.length > 0 ? (
+                    <div className="mt-4 border-t pt-3">
+                        <h3 className="mb-2 text-sm font-medium">{t("additionalFieldsTitle")}</h3>
+                        <dl className="space-y-2 text-sm">
+                            {extraFields.map((f) => (
+                                <div key={f.fieldKey} className="flex justify-between gap-4">
+                                    <dt className="text-muted-foreground">
+                                        {f.label ?? f.fieldKey}
+                                    </dt>
+                                    <dd className="max-w-[60%] text-right break-words">
+                                        {formatMemberFieldValue(f.value)}
+                                    </dd>
+                                </div>
+                            ))}
+                        </dl>
+                    </div>
+                ) : null}
             </section>
         </Card>
     );

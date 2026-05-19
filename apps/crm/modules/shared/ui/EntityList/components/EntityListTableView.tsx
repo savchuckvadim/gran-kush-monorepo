@@ -13,7 +13,15 @@ import {
 import { cn } from "@workspace/ui/lib/utils";
 
 import type { EntityListTableColumn } from "../EntityList";
-
+export interface EntityListTableViewProps<T> {
+    items: T[];
+    getRowKey: (item: T) => string;
+    visibleColumns: EntityListTableColumn<T>[];
+    isRowClickable?: boolean;
+    onRowClick?: (item: T) => void;
+    renderRowActions?: (item: T) => React.ReactNode;
+    showRowActionsColumn?: boolean;
+}
 export function EntityListTableView<T>({
     items,
     getRowKey,
@@ -22,15 +30,7 @@ export function EntityListTableView<T>({
     onRowClick,
     renderRowActions,
     showRowActionsColumn,
-}: {
-    items: T[];
-    getRowKey: (item: T) => string;
-    visibleColumns: EntityListTableColumn<T>[];
-    isRowClickable?: boolean;
-    onRowClick?: (item: T) => void;
-    renderRowActions?: (item: T) => React.ReactNode;
-    showRowActionsColumn?: boolean;
-}) {
+}: EntityListTableViewProps<T>) {
     const canTableClick = Boolean(onRowClick && isRowClickable);
     const canRenderActions = Boolean(renderRowActions && showRowActionsColumn);
 

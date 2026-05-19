@@ -1,17 +1,16 @@
 import { Controller, Get, Query } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
-import { EmployeeListItemDto } from "@employees/api/dto/employee-list.dto";
-import { EmployeesService } from "@employees/application/services/employees.service";
-import { CrmMemberDto } from "@members/api/dto/crm-member.dto";
-import { MembersService } from "@members/application/services/members.service";
-
 import { Public } from "@common/decorators/auth/public.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { PaginationDto } from "@common/paginate/dto/pagination.dto";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
+import { EmployeeListItemDto } from "@modules/portal/crm/employees/api/dto/employee-list.dto";
+import { EmployeesService } from "@modules/portal/crm/employees/application/services/employees.service";
+import { CrmMemberDto } from "@modules/portal/crm/members/api/dto/crm-member.dto";
+import { MembersService } from "@modules/portal/crm/members/application/services/members.service";
 
 @ApiTags("Test (Public - No Authentication Required)")
 @Controller("test")
@@ -75,18 +74,7 @@ export class TestController {
             this.membersService.count(),
         ]);
 
-        const items = members.map((member) => ({
-            id: member.id,
-            userId: member.userId,
-            email: member.user.email,
-            name: member.name,
-            surname: member.surname ?? null,
-            phone: member.phone ?? null,
-            status: member.status,
-            isActive: member.isActive,
-            emailConfirmed: false, // User entity doesn't have emailConfirmed field
-            createdAt: member.createdAt.toISOString(),
-        }));
+        const items = members.map((member) => this.membersService.toCrmMemberListDto(member));
 
         return PaginationUtil.createPaginatedResult(items, total, page, limit);
     }

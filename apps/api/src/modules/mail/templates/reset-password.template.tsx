@@ -14,11 +14,11 @@ import {
     Tailwind,
     Text,
 } from "@react-email/components";
-import { User } from "@prisma/client";
 import { getVerificationEmailTexts } from "../lib/utils/template.util";
 
 interface ResetPasswordTemplateProps {
-    user: User;
+    /** Минимум для шаблона / логов (полный Prisma User не обязателен). */
+    user: { email: string };
     name: string;
     surname: string;
     token: string;

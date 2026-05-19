@@ -8,7 +8,7 @@ export function IsPassword(validationOptions?: ValidationOptions) {
             propertyName: propertyName,
             options: validationOptions,
             validator: {
-                validate(value: any, args: ValidationArguments) {
+                validate(value: unknown, _args: ValidationArguments) {
                     if (value === null || value === undefined) {
                         return true;
                     }

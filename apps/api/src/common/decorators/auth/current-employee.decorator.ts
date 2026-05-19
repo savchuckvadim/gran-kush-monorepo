@@ -1,6 +1,6 @@
 import { createParamDecorator, ExecutionContext } from "@nestjs/common";
 
-import { Employee } from "@employees/domain/entity/employee.entity";
+import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 
 /**
  * Декоратор для получения текущего сотрудника из запроса

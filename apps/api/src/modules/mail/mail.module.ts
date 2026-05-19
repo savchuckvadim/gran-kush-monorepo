@@ -6,7 +6,7 @@ import { MailerModule } from "@nestjs-modules/mailer";
 
 import { getMailerConfig } from "@common/config/mail/mailer.config";
 import { TelegramModule } from "@common/telegram/telegram.module";
-import { PORTAL_EVENTS_QUEUE_NAME } from "@modules/portals/events/portal-events.constants";
+import { PORTAL_EVENTS_QUEUE_NAME } from "@modules/portal/crm/portals/events/portal-events.constants";
 
 import { MailController } from "./api/controllers/mail.controller";
 import { MailService } from "./application/services/mail.service";

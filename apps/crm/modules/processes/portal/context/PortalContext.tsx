@@ -1,6 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { setCrmPortalSlugForApiClient } from "../utils/crm-portal-context";
+
+
 
 type PortalContextValue = {
     portalSlug: string | null;
@@ -25,6 +28,11 @@ export function PortalProvider({
         }),
         [normalizedPortalSlug]
     );
+
+    React.useEffect(() => {
+        setCrmPortalSlugForApiClient(normalizedPortalSlug);
+        // return () => setCrmPortalSlugForApiClient(null);
+    }, [normalizedPortalSlug]);
 
     return <PortalContext.Provider value={value}>{children}</PortalContext.Provider>;
 }

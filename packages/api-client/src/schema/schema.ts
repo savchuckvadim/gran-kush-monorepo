@@ -21,6 +21,759 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/platform/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Платформенный админ: вход (отдельный JWT) */
+        post: operations["PlatformAuth_login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/portals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список порталов и подписок */
+        get: operations["PlatformPortals_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/portals/{portalId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Портал по id */
+        get: operations["PlatformPortals_getOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/system/reference-data": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Засеять глобальные справочники (MjStatus и т.п.) из JSON
+         * @description Идемпотентно. Вызовите при первом входе в платформенную панель или после деплоя, если справочники пусты.
+         */
+        post: operations["PlatformReferenceData_seedReferenceData"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/test/employees": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get paginated list of employees (public, no auth required) */
+        get: operations["Test_getEmployees"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/test/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get paginated list of members (public, no auth required) */
+        get: operations["Test_getMembers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["App_getHello"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Login employee (CRM web, HttpOnly cookies) */
+        post: operations["EmployeeAuth_login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Refresh tokens (cookie refresh only, empty body) */
+        post: operations["EmployeeAuth_refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Logout employee (CRM web) */
+        post: operations["EmployeeAuth_logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get current employee (CRM web) */
+        get: operations["EmployeeAuth_getMe"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/mobile/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Login employee (native: Bearer tokens in JSON, no cookies) */
+        post: operations["EmployeeMobileAuth_login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/mobile/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Refresh tokens (native: refresh token in body) */
+        post: operations["EmployeeMobileAuth_refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/mobile/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Logout (native) */
+        post: operations["EmployeeMobileAuth_logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/mobile/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get current employee (native) */
+        get: operations["EmployeeMobileAuth_getMe"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/auth/employee/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register new Employee (Admin only) */
+        post: operations["EmployeeRegistration_register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Login Member (site web, HttpOnly cookies) */
+        post: operations["MemberAuth_login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Refresh tokens (cookie refresh only, empty body) */
+        post: operations["MemberAuth_refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Logout Member (site web) */
+        post: operations["MemberAuth_logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get current Member (site web) */
+        get: operations["MemberAuth_getMe"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/auth/password/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request password reset (send email with reset link) */
+        post: operations["MemberAuth_requestPasswordReset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/auth/password/reset/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reset password using token from email */
+        post: operations["MemberAuth_confirmPasswordReset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/mobile/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Login Member (native: Bearer tokens in JSON) */
+        post: operations["MemberMobileAuth_login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/mobile/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Refresh tokens (native: refresh token in body) */
+        post: operations["MemberMobileAuth_refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/mobile/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Logout (native) */
+        post: operations["MemberMobileAuth_logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/mobile/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get current Member (native) */
+        get: operations["MemberMobileAuth_getMe"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/auth/member/registration-schema": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public schema for dynamic member registration form */
+        get: operations["MemberRegistration_registrationSchema"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/auth/member/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Check if user exists (for Member registration) */
+        post: operations["MemberRegistration_checkUserExists"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/auth/member/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register new Member (Site) */
+        post: operations["MemberRegistration_register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/auth/member/files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Queue member documents/signature upload (Site) */
+        post: operations["MemberRegistration_uploadFiles"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/auth/member/confirm-email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm email */
+        post: operations["MemberRegistration_confirmEmail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/verify/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Verify email by token (GET redirect from email link) */
+        get: operations["EmailVerification_verifyEmailGet"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Verify email by token (POST) */
+        post: operations["EmailVerification_verifyEmailPost"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/password/reset/request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request password reset (send email with reset link) */
+        post: operations["EmailVerification_requestPasswordReset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/password/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reset password using token from email */
+        post: operations["EmailVerification_resetPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/settings/entities/member/form-schema/{purpose}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Member form schema for a purpose (CRM settings / builder) */
+        get: operations["CrmEntityFieldsSettings_memberFormSchema"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/settings/entities/member/filter-fields": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Member fields available for list filters */
+        get: operations["CrmEntityFieldsSettings_memberFilterFields"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/settings/entities/member/status-items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Member lifecycle status items (for filters and selects) */
+        get: operations["CrmEntityFieldsSettings_memberStatusItems"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/settings/entities/member/fields": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** All member field definitions for this portal */
+        get: operations["CrmEntityFieldsSettings_listMemberFields"];
+        put?: never;
+        /** Create a custom member field (portal admin) */
+        post: operations["CrmEntityFieldsSettings_createMemberField"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/settings/entities/member/fields/{fieldKey}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a custom member field (no system/immutable) */
+        delete: operations["CrmEntityFieldsSettings_deleteMemberField"];
+        options?: never;
+        head?: never;
+        /** Update a non-immutable member field */
+        patch: operations["CrmEntityFieldsSettings_updateMemberField"];
+        trace?: never;
+    };
+    "/crm/settings/entities/member/fields/{fieldKey}/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add enum/select option to a member field */
+        post: operations["CrmEntityFieldsSettings_addMemberFieldOption"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/settings/entities/member/forms/{purpose}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Replace member form layout items for a purpose */
+        patch: operations["CrmEntityFieldsSettings_updateMemberForm"];
+        trace?: never;
+    };
+    "/crm/settings/entities/order/stage-categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Order funnel categories and stages */
+        get: operations["CrmEntityFieldsSettings_orderStageCategories"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/entities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список определений сущностей портала */
+        get: operations["CrmEntityDefinitions_list"];
+        put?: never;
+        /** Создать кастомное определение сущности (не системное) */
+        post: operations["CrmEntityDefinitions_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/crm/members": {
         parameters: {
             query?: never;
@@ -30,6 +783,24 @@ export interface paths {
         };
         /** List members for CRM (Employee access required) */
         get: operations["CrmMembers_list"];
+        put?: never;
+        /** Create member from CRM (dynamic fields) */
+        post: operations["CrmMembers_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/members/form-schema": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Member form schema by purpose (for CRM dynamic forms) */
+        get: operations["CrmMembers_memberFormSchema"];
         put?: never;
         post?: never;
         delete?: never;
@@ -118,6 +889,23 @@ export interface paths {
         get: operations["LkMembers_getMe"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/portals/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register new portal and root owner employee */
+        post: operations["PortalRegistration_register"];
         delete?: never;
         options?: never;
         head?: never;
@@ -820,532 +1608,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/platform/portals/register": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Register new portal and root owner employee */
-        post: operations["PortalRegistration_register"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/test/employees": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get paginated list of employees (public, no auth required) */
-        get: operations["Test_getEmployees"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/test/members": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get paginated list of members (public, no auth required) */
-        get: operations["Test_getMembers"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["App_getHello"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/crm/auth/login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Login employee (CRM web, HttpOnly cookies) */
-        post: operations["EmployeeAuth_login"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/crm/auth/refresh": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Refresh tokens (cookie refresh only, empty body) */
-        post: operations["EmployeeAuth_refresh"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/crm/auth/logout": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Logout employee (CRM web) */
-        post: operations["EmployeeAuth_logout"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/crm/auth/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get current employee (CRM web) */
-        get: operations["EmployeeAuth_getMe"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/crm/mobile/auth/login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Login employee (native: Bearer tokens in JSON, no cookies) */
-        post: operations["EmployeeMobileAuth_login"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/crm/mobile/auth/refresh": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Refresh tokens (native: refresh token in body) */
-        post: operations["EmployeeMobileAuth_refresh"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/crm/mobile/auth/logout": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Logout (native) */
-        post: operations["EmployeeMobileAuth_logout"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/crm/mobile/auth/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get current employee (native) */
-        get: operations["EmployeeMobileAuth_getMe"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/crm/auth/employee/register": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Register new Employee (Admin only) */
-        post: operations["EmployeeRegistration_register"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/lk/auth/login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Login Member (site web, HttpOnly cookies) */
-        post: operations["MemberAuth_login"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/lk/auth/refresh": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Refresh tokens (cookie refresh only, empty body) */
-        post: operations["MemberAuth_refresh"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/lk/auth/logout": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Logout Member (site web) */
-        post: operations["MemberAuth_logout"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/lk/auth/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get current Member (site web) */
-        get: operations["MemberAuth_getMe"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/lk/auth/password/reset": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Request password reset (send email with reset link) */
-        post: operations["MemberAuth_requestPasswordReset"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/lk/auth/password/reset/confirm": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Reset password using token from email */
-        post: operations["MemberAuth_confirmPasswordReset"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/lk/mobile/auth/login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Login Member (native: Bearer tokens in JSON) */
-        post: operations["MemberMobileAuth_login"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/lk/mobile/auth/refresh": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Refresh tokens (native: refresh token in body) */
-        post: operations["MemberMobileAuth_refresh"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/lk/mobile/auth/logout": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Logout (native) */
-        post: operations["MemberMobileAuth_logout"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/lk/mobile/auth/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get current Member (native) */
-        get: operations["MemberMobileAuth_getMe"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/lk/auth/member/check": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Check if user exists (for Member registration) */
-        post: operations["MemberRegistration_checkUserExists"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/lk/auth/member/register": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Register new Member (Site) */
-        post: operations["MemberRegistration_register"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/lk/auth/member/files": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Queue member documents/signature upload (Site) */
-        post: operations["MemberRegistration_uploadFiles"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/lk/auth/member/confirm-email": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Confirm email */
-        post: operations["MemberRegistration_confirmEmail"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/verify/{token}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Verify email by token (GET redirect from email link) */
-        get: operations["EmailVerification_verifyEmailGet"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/verify": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Verify email by token (POST) */
-        post: operations["EmailVerification_verifyEmailPost"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/password/reset/request": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Request password reset (send email with reset link) */
-        post: operations["EmailVerification_requestPasswordReset"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/password/reset": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Reset password using token from email */
-        post: operations["EmailVerification_resetPassword"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1377,27 +1639,70 @@ export interface components {
              */
             surname: string;
         };
-        CrmMemberDto: {
+        PlatformLoginDto: {
+            email: string;
+            password: string;
+        };
+        EmployeeListItemDto: {
             /** @example 123e4567-e89b-12d3-a456-426614174000 */
             id: string;
             /** @example 123e4567-e89b-12d3-a456-426614174000 */
             userId: string;
-            /** @example user@example.com */
+            /** @example employee@example.com */
             email: string;
-            /** @example John */
+            /** @example John Employee */
             name: string;
             /** @example Doe */
-            surname: string | null;
+            surname?: string;
             /** @example +1234567890 */
-            phone: string | null;
-            /** @example active */
-            status: string;
+            phone?: string;
+            /** @example manager */
+            role: string;
+            /** @example Senior Manager */
+            position?: string;
+            /** @example Sales */
+            department?: string;
             /** @example true */
             isActive: boolean;
-            /** @example true */
-            emailConfirmed: boolean;
-            /** @example 2024-01-01T00:00:00.000Z */
+            /**
+             * Format: date-time
+             * @example 2024-01-01T00:00:00.000Z
+             */
+            lastLoginAt?: string;
+            /**
+             * Format: date-time
+             * @example 2024-01-01T00:00:00.000Z
+             */
             createdAt: string;
+            /**
+             * Format: date-time
+             * @example 2024-01-01T00:00:00.000Z
+             */
+            updatedAt: string;
+        };
+        PaginatedResponse_EmployeeListItemDto: {
+            /** @description Array of items */
+            items: components["schemas"]["EmployeeListItemDto"][];
+            /**
+             * @description Total number of items
+             * @example 100
+             */
+            total: number;
+            /**
+             * @description Current page number
+             * @example 1
+             */
+            page: number;
+            /**
+             * @description Items per page
+             * @example 10
+             */
+            limit: number;
+            /**
+             * @description Total number of pages
+             * @example 10
+             */
+            totalPages: number;
         };
         ApiErrorResponseDto: {
             /**
@@ -1413,6 +1718,674 @@ export interface components {
              *     ]
              */
             errors?: string[];
+        };
+        CrmMemberStatusDto: {
+            id: string;
+            key: string;
+            label: string;
+            color: string | null;
+        };
+        CrmMemberDto: {
+            /** @example 123e4567-e89b-12d3-a456-426614174000 */
+            id: string;
+            /** @example 123e4567-e89b-12d3-a456-426614174000 */
+            userId: string;
+            /** @example user@example.com */
+            email: string;
+            /** @example John */
+            name: string;
+            /** @example Doe */
+            surname: string | null;
+            /** @example +1234567890 */
+            phone: string | null;
+            /** @example inProgress */
+            status: string;
+            statusItem: components["schemas"]["CrmMemberStatusDto"] | null;
+            /** @example true */
+            isActive: boolean;
+            /** @example true */
+            emailConfirmed: boolean;
+            /** @example 2024-01-01T00:00:00.000Z */
+            createdAt: string;
+        };
+        PaginatedResponse_CrmMemberDto: {
+            /** @description Array of items */
+            items: components["schemas"]["CrmMemberDto"][];
+            /**
+             * @description Total number of items
+             * @example 100
+             */
+            total: number;
+            /**
+             * @description Current page number
+             * @example 1
+             */
+            page: number;
+            /**
+             * @description Items per page
+             * @example 10
+             */
+            limit: number;
+            /**
+             * @description Total number of pages
+             * @example 10
+             */
+            totalPages: number;
+        };
+        EmployeeLoginDto: {
+            /** @example employee@example.com */
+            email: string;
+            /** @example password123 */
+            password: string;
+        };
+        EmployeeInfoDto: {
+            /** @example 123e4567-e89b-12d3-a456-426614174000 */
+            id: string;
+            /** @example employee@example.com */
+            email: string;
+            /** @example John Employee */
+            name: string;
+            /** @example manager */
+            role: string;
+            /** @example f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f */
+            portalId?: string;
+        };
+        EmployeeWebLoginResponseDto: {
+            employee: components["schemas"]["EmployeeInfoDto"];
+            /**
+             * @description Сохраните и передавайте в заголовке X-Device-Id при следующих запросах
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            deviceId: string;
+        };
+        EmployeeRefreshTokenResponseDto: {
+            /**
+             * @description New access token
+             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
+            accessToken: string;
+            /**
+             * @description New refresh token
+             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
+            refreshToken: string;
+        };
+        EmployeeLogoutResponseDto: {
+            /**
+             * @description Logout message
+             * @example Logged out successfully
+             */
+            message: string;
+        };
+        EmployeeMeResponseDto: {
+            /** @example 123e4567-e89b-12d3-a456-426614174000 */
+            id: string;
+            /** @example employee@example.com */
+            email: string;
+            /** @example John Employee */
+            name: string;
+            /** @example +1234567890 */
+            phone?: string;
+            /** @example manager */
+            role: string;
+            /** @example f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f */
+            portalId?: string;
+            /** @example Senior Manager */
+            position?: string;
+            /** @example Sales */
+            department?: string;
+            /** @example true */
+            isActive: boolean;
+            /**
+             * Format: date-time
+             * @example 2024-01-01T00:00:00.000Z
+             */
+            lastLoginAt?: string;
+            /**
+             * Format: date-time
+             * @example 2024-01-01T00:00:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @example 2024-01-01T00:00:00.000Z
+             */
+            updatedAt: string;
+        };
+        EmployeeAuthResponseDto: {
+            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
+            accessToken: string;
+            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
+            refreshToken: string;
+            employee: components["schemas"]["EmployeeInfoDto"];
+        };
+        RefreshTokenDto: {
+            /**
+             * @description Refresh token (optional when using HttpOnly cookie)
+             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
+            refreshToken?: string;
+        };
+        RegisterEmployeeDto: {
+            /** @example employee@example.com */
+            email: string;
+            /**
+             * @description Password must contain uppercase, lowercase and number
+             * @example Password123
+             */
+            password: string;
+            /** @example John */
+            name: string;
+            /** @example Doe */
+            surname?: string;
+            /** @example +1234567890 */
+            phone?: string;
+            /**
+             * @example manager
+             * @enum {string}
+             */
+            role?: "employee" | "manager" | "admin";
+            /** @example Senior Manager */
+            position?: string;
+            /** @example Sales */
+            department?: string;
+        };
+        MemberLoginDto: {
+            /** @example user@example.com */
+            email: string;
+            /** @example Password123 */
+            password: string;
+        };
+        MemberUserInfoDto: {
+            /** @example 507f1f77bcf86cd799439011 */
+            id: string;
+            /** @example user@example.com */
+            email: string;
+        };
+        MemberWebLoginResponseDto: {
+            user: components["schemas"]["MemberUserInfoDto"];
+            /**
+             * @description Сохраните и передавайте в заголовке X-Device-Id при следующих запросах
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            deviceId: string;
+        };
+        MemberRefreshTokenResponseDto: {
+            /**
+             * @description New access token
+             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
+            accessToken: string;
+            /**
+             * @description New refresh token (rotation)
+             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
+            refreshToken: string;
+        };
+        MemberLogoutResponseDto: {
+            /**
+             * @description Logout message
+             * @example Logged out successfully
+             */
+            message: string;
+        };
+        MemberMeResponseDto: {
+            /** @example 123e4567-e89b-12d3-a456-426614174000 */
+            id: string;
+            /** @example user@example.com */
+            email: string;
+            /** @example John */
+            name: string;
+            /** @example +1234567890 */
+            phone?: string;
+            /** @example true */
+            isActive: boolean;
+            /**
+             * Format: date-time
+             * @example 2024-01-01T00:00:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @example 2024-01-01T00:00:00.000Z
+             */
+            updatedAt: string;
+        };
+        RequestPasswordResetDto: {
+            /** @example user@example.com */
+            email: string;
+        };
+        PasswordResetResponseDto: {
+            /** @example true */
+            success: boolean;
+            /** @example Password reset successfully */
+            message: string;
+        };
+        ResetPasswordDto: {
+            /**
+             * @description Password reset token from email
+             * @example abc123def456...
+             */
+            token: string;
+            /**
+             * @description New password (must contain uppercase, lowercase and number)
+             * @example NewPassword123
+             */
+            newPassword: string;
+        };
+        MemberAuthResponseDto: {
+            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
+            accessToken: string;
+            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
+            refreshToken: string;
+            user: components["schemas"]["MemberUserInfoDto"];
+        };
+        CheckUserExistsDto: {
+            /** @example user@example.com */
+            email: string;
+        };
+        CheckUserExistsResponseDto: {
+            /** @example true */
+            exists: boolean;
+            /** @example true */
+            hasEmployee?: boolean;
+            /** @example true */
+            hasMember?: boolean;
+            /** @example User already registered as Employee. Do you want to register as Member? */
+            message?: string;
+        };
+        DynamicMemberRegistrationDto: {
+            /** @example user@example.com */
+            email: string;
+            /**
+             * @description Password must contain uppercase, lowercase and number
+             * @example Password123
+             */
+            password: string;
+            /**
+             * @description Field values keyed by fieldKey (see registration-schema)
+             * @example {
+             *       "first_name": "John",
+             *       "last_name": "Doe"
+             *     }
+             */
+            fields: {
+                [key: string]: unknown;
+            };
+        };
+        RegisteredUserInfoDto: {
+            /** @example 123e4567-e89b-12d3-a456-426614174000 */
+            id: string;
+            /** @example user@example.com */
+            email: string;
+            /** @example John */
+            name: string;
+            /** @example Doe */
+            surname?: string;
+        };
+        RegistrationWarningDto: {
+            /** @example User already exists as Employee. Do you want to register as Member? */
+            message: string;
+            /** @example true */
+            hasEmployee: boolean;
+        };
+        RegisterMemberResponseDto: {
+            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
+            accessToken: string;
+            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
+            refreshToken: string;
+            /**
+             * @description Created member identifier
+             * @example 123e4567-e89b-12d3-a456-426614174999
+             */
+            memberId: string;
+            user: components["schemas"]["RegisteredUserInfoDto"];
+            warning?: components["schemas"]["RegistrationWarningDto"];
+        };
+        UploadMemberFilesDto: {
+            /**
+             * @description Document type. Required when any identity document side is provided.
+             * @example passport
+             */
+            documentType?: string;
+            /**
+             * @description Identity document first side as data URL (base64).
+             * @example data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
+             */
+            documentFirst?: string;
+            /**
+             * @description Identity document second side as data URL (base64).
+             * @example data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
+             */
+            documentSecond?: string;
+            /**
+             * @description Signature image as data URL (base64).
+             * @example data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
+             */
+            signature?: string;
+        };
+        UploadMemberFilesResponseDto: {
+            /** @example true */
+            queued: boolean;
+            /** @example 214 */
+            jobId: string;
+        };
+        MemberConfirmEmailDto: {
+            /**
+             * @description Email verification token from email
+             * @example abc123def456...
+             */
+            token: string;
+        };
+        MemberConfirmEmailResponseDto: {
+            /**
+             * @description Email confirmed successfully
+             * @example true
+             */
+            success: boolean;
+            /**
+             * @description Email confirmed successfully
+             * @example Email confirmed successfully
+             */
+            message: string;
+        };
+        VerifyEmailResponseDto: {
+            /** @example true */
+            success: boolean;
+            /** @example Email confirmed successfully */
+            message: string;
+        };
+        VerifyEmailDto: {
+            /**
+             * @description Email verification token from email
+             * @example abc123def456...
+             */
+            token: string;
+        };
+        FormFieldOptionSchemaDto: {
+            /** @example active */
+            valueKey: string;
+            /** @example Active */
+            label: string;
+            /** @example #000000 */
+            color?: string | null;
+            /** @example 1 */
+            sortOrder: number;
+        };
+        MemberFormFieldSchemaItemDto: {
+            /** @example name */
+            fieldKey: string;
+            /** @example text */
+            type: string;
+            /** @example Name */
+            label?: string | null;
+            /** @example Name */
+            helpText?: string | null;
+            /** @example true */
+            required: boolean;
+            /** @example true */
+            visible: boolean;
+            /** @example true */
+            readOnly: boolean;
+            /** @example true */
+            isMultiple: boolean;
+            sectionCode?: Record<string, never> | null;
+            /** @example 1 */
+            sortOrder: number;
+            validationJson?: {
+                [key: string]: unknown;
+            } | null;
+            defaultValueJson?: {
+                [key: string]: unknown;
+            } | null;
+            options: components["schemas"]["FormFieldOptionSchemaDto"][];
+        };
+        MemberFormSchemaResponseDto: {
+            /** @enum {string} */
+            purpose: "public_registration" | "crm_create" | "crm_detail" | "member_cabinet";
+            fields: components["schemas"]["MemberFormFieldSchemaItemDto"][];
+        };
+        MemberLifecycleStatusItemDto: {
+            /** @example 123 */
+            id: string;
+            /** @example active */
+            key: string;
+            /** @example Active */
+            label: string;
+            /** @example #000000 */
+            color?: string | null;
+            /** @example 1 */
+            sortOrder: number;
+        };
+        MemberFieldOptionResponseDto: {
+            /** @example 123 */
+            id: string;
+            /** @example 123 */
+            fieldDefinitionId: string;
+            /** @example active */
+            valueKey: string;
+            /** @example Active */
+            label: string;
+            /** @example 1 */
+            sortOrder: number;
+            /** @example #000000 */
+            color?: string | null;
+            /** @example true */
+            isActive: boolean;
+            /**
+             * Format: date-time
+             * @example 2021-01-01T00:00:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @example 2021-01-01T00:00:00.000Z
+             */
+            updatedAt: string;
+        };
+        MemberFieldDefinitionResponseDto: {
+            /** @example 123 */
+            id: string;
+            /** @example 123 */
+            entityDefinitionId: string;
+            /** @example name */
+            fieldKey: string;
+            /** @enum {string} */
+            type: "string" | "text" | "int" | "decimal" | "boolean" | "date" | "datetime" | "single_select" | "multi_select" | "email" | "phone" | "url" | "file" | "signature" | "document" | "relation";
+            /** @example Name */
+            label?: string | null;
+            /**
+             * @example {
+             *       "en": "Name"
+             *     }
+             */
+            labelI18n?: {
+                [key: string]: unknown;
+            } | null;
+            /** @example Name */
+            helpText?: string | null;
+            /** @example true */
+            isActive: boolean;
+            /** @example true */
+            isSystem: boolean;
+            /** @example true */
+            isImmutable: boolean;
+            deletableByPortal: boolean;
+            /** @example true */
+            customizableByPortal: boolean;
+            /** @example true */
+            hidden: boolean;
+            /** @example Name */
+            labelOverride?: string | null;
+            /** @example true */
+            readOnlyOverride: boolean;
+            defaultValueJson?: {
+                [key: string]: unknown;
+            } | null;
+            validationJson?: {
+                [key: string]: unknown;
+            } | null;
+            /** @example true */
+            isMultiple: boolean;
+            /** @example 1 */
+            sortOrder: number;
+            /** @example true */
+            showInFilters: boolean;
+            /**
+             * Format: date-time
+             * @example 2021-01-01T00:00:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @example 2021-01-01T00:00:00.000Z
+             */
+            updatedAt: string;
+            options: components["schemas"]["MemberFieldOptionResponseDto"][];
+        };
+        PortalFieldOptionInputDto: {
+            valueKey: string;
+            label: string;
+            color?: Record<string, never>;
+            /** @default 0 */
+            sortOrder: number;
+        };
+        CreatePortalMemberFieldDto: {
+            /** @example loyalty_tier */
+            fieldKey: string;
+            /** @enum {string} */
+            type: "string" | "text" | "int" | "decimal" | "boolean" | "date" | "datetime" | "single_select" | "multi_select" | "email" | "phone" | "url" | "file" | "signature" | "document" | "relation";
+            label: string;
+            helpText?: Record<string, never>;
+            isMultiple?: boolean;
+            showInFilters?: boolean;
+            /** @default 900 */
+            sortOrder: number;
+            validationJson?: {
+                [key: string]: unknown;
+            };
+            options?: components["schemas"]["PortalFieldOptionInputDto"][];
+        };
+        UpdatePortalMemberFieldDto: {
+            label?: Record<string, never>;
+            helpText?: Record<string, never>;
+            isActive?: boolean;
+            showInFilters?: boolean;
+            isMultiple?: boolean;
+            validationJson?: {
+                [key: string]: unknown;
+            };
+            sortOrder?: number;
+        };
+        DeleteMemberFieldResponseDto: {
+            /** @example true */
+            ok: boolean;
+        };
+        FormLayoutItemInputDto: {
+            fieldKey: string;
+            sortOrder: number;
+            required?: boolean;
+            /** @default true */
+            visible: boolean;
+            /** @default false */
+            readOnly: boolean;
+            sectionCode?: Record<string, never>;
+        };
+        UpdateMemberFormLayoutDto: {
+            items: components["schemas"]["FormLayoutItemInputDto"][];
+        };
+        MemberFormLayoutReplaceResponseDto: {
+            /**
+             * @example public_registration
+             * @enum {string}
+             */
+            purpose: "public_registration" | "crm_create" | "crm_detail" | "member_cabinet";
+            /** @description Число записей layout после замены */
+            replaced: number;
+        };
+        OrderStageResponseDto: {
+            /** @example 123 */
+            id: string;
+            /** @example 123 */
+            stageCategoryId: string;
+            /** @example Name */
+            name: string;
+            sortOrder: number;
+            /** @example #000000 */
+            color?: string | null;
+            /** @enum {string} */
+            semantic: "NEW" | "IN_PROGRESS" | "SUCCESS" | "FAILURE";
+            /** @example true */
+            isTerminalSuccess: boolean;
+            /** @example true */
+            isTerminalFailure: boolean;
+            /**
+             * Format: date-time
+             * @example 2021-01-01T00:00:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @example 2021-01-01T00:00:00.000Z
+             */
+            updatedAt: string;
+        };
+        OrderStageCategoryResponseDto: {
+            /** @example 123 */
+            id: string;
+            /** @example 123 */
+            portalId: string;
+            /** @example 123 */
+            entityDefinitionId: string;
+            /** @example name */
+            code: string;
+            /** @example Name */
+            name: string;
+            /** @example true */
+            isDefault: boolean;
+            /** @example true */
+            isSystem: boolean;
+            /** @example true */
+            hiddenInUi: boolean;
+            /**
+             * Format: date-time
+             * @example 2021-01-01T00:00:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @example 2021-01-01T00:00:00.000Z
+             */
+            updatedAt: string;
+            stages: components["schemas"]["OrderStageResponseDto"][];
+        };
+        CreateEntityDefinitionBodyDto: {
+            /**
+             * @description Уникальный код сущности (snake_case)
+             * @example vendor
+             */
+            code: string;
+            /** @example Поставщики */
+            name: string;
+        };
+        CrmCreateMemberDto: {
+            /** @example user@example.com */
+            email: string;
+            /**
+             * @description Password must contain uppercase, lowercase and number
+             * @example Password123
+             */
+            password: string;
+            /** @description Field values keyed by fieldKey */
+            fields: {
+                [key: string]: unknown;
+            };
+        };
+        CrmMemberDynamicFieldDto: {
+            fieldKey: string;
+            type: string;
+            label: string | null;
+            value: Record<string, never>;
         };
         CrmMemberIdentityDocumentDto: {
             /** @example 123e4567-e89b-12d3-a456-426614174000 */
@@ -1467,8 +2440,9 @@ export interface components {
             surname: string | null;
             /** @example +1234567890 */
             phone: string | null;
-            /** @example active */
+            /** @example inProgress */
             status: string;
+            statusItem: components["schemas"]["CrmMemberStatusDto"] | null;
             /** @example true */
             isActive: boolean;
             /** @example true */
@@ -1477,6 +2451,7 @@ export interface components {
             createdAt: string;
             /** @example 2024-01-01T00:00:00.000Z */
             updatedAt: string;
+            fields: components["schemas"]["CrmMemberDynamicFieldDto"][];
             /**
              * @example [
              *       null
@@ -1505,68 +2480,54 @@ export interface components {
             /** @example Notes */
             notes: string | null;
         };
-        CrmMemberUpdateDto: {
-            /** @example 123e4567-e89b-12d3-a456-426614174000 */
-            id?: string;
-            /** @example 123e4567-e89b-12d3-a456-426614174000 */
-            userId?: string;
-            /** @example user@example.com */
-            email?: string;
-            /** @example John */
-            name?: string;
-            /** @example Doe */
-            surname?: string | null;
-            /** @example +1234567890 */
-            phone?: string | null;
-            /** @example active */
-            status?: string;
-            /** @example true */
-            isActive?: boolean;
-            /** @example true */
-            emailConfirmed?: boolean;
-            /** @example 2024-01-01T00:00:00.000Z */
-            createdAt?: string;
-            /** @example 2024-01-01T00:00:00.000Z */
-            updatedAt?: string;
-            /**
-             * @example [
-             *       null
-             *     ]
-             */
-            identityDocuments?: components["schemas"]["CrmMemberIdentityDocumentDto"][];
-            signature?: components["schemas"]["CrmMemberSignatureDto"] | null;
-            /**
-             * @example [
-             *       null
-             *     ]
-             */
-            mjStatuses?: components["schemas"]["CrmMemberMjStatusDto"][];
-            /**
-             * @example [
-             *       null
-             *     ]
-             */
-            documents?: components["schemas"]["CrmMemberDocumentDto"][];
-            /** @example 1990-01-15 */
-            birthday?: string | null;
-            /** @example 123 Main St */
-            address?: string | null;
-            /** @example 1234567890 */
+        CrmMemberFieldsPatchDto: {
+            fields?: {
+                [key: string]: unknown;
+            };
+            statusItemId?: string;
             membershipNumber?: string | null;
-            /** @example Notes */
-            notes?: string | null;
-            /** @example true */
-            isMedical: boolean;
-            /** @example true */
-            isMj: boolean;
-            /** @example true */
-            isRecreation: boolean;
-            /** @example passport */
-            documentType: string | null;
-            /** @example 1234567890 */
-            documentNumber: string | null;
+            isActive?: boolean;
         };
         StreamableFile: Record<string, never>;
+        RegisterPortalDto: {
+            /**
+             * @description Unique portal slug. Allowed chars: a-z, 0-9, dash
+             * @example green-club
+             */
+            name: string;
+            /** @example Green Club */
+            displayName: string;
+            /** @example owner@greenclub.com */
+            email: string;
+            /**
+             * @description Password must contain uppercase, lowercase and number
+             * @example StrongPassword123
+             */
+            password: string;
+            /** @example Owner */
+            ownerName: string;
+            /** @example Surname */
+            ownerSurname?: string;
+        };
+        PortalInfoDto: {
+            /** @example f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f */
+            id: string;
+            /** @example green-club */
+            name: string;
+            /** @example Green Club */
+            displayName: string;
+            /** @example active */
+            status: string;
+        };
+        RegisterPortalResponseDto: {
+            portal: components["schemas"]["PortalInfoDto"];
+            owner: components["schemas"]["EmployeeInfoDto"];
+            /**
+             * @description Передавайте в X-Device-Id; токены выставлены в HttpOnly cookies
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            deviceId: string;
+        };
         ProductCategoryDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
             id: string;
@@ -1646,8 +2607,8 @@ export interface components {
             isAvailable: boolean;
             /** @example /storage/products/img.jpg */
             imageUrl?: string | null;
-            category: components["schemas"]["ProductCategoryDto"];
-            measurementUnit: components["schemas"]["MeasurementUnitDto"];
+            category?: components["schemas"]["ProductCategoryDto"];
+            measurementUnit?: components["schemas"]["MeasurementUnitDto"];
             /** @example 2026-03-16T12:00:00.000Z */
             createdAt: string;
         };
@@ -1704,8 +2665,8 @@ export interface components {
             isAvailable: boolean;
             /** @example /storage/products/img.jpg */
             imageUrl?: string | null;
-            category: components["schemas"]["ProductCategoryDto"];
-            measurementUnit: components["schemas"]["MeasurementUnitDto"];
+            category?: components["schemas"]["ProductCategoryDto"];
+            measurementUnit?: components["schemas"]["MeasurementUnitDto"];
             /** @example 2026-03-16T12:00:00.000Z */
             createdAt: string;
             /** @example Классический сорт */
@@ -2565,470 +3526,6 @@ export interface components {
             /** @example 8 */
             count: number;
         };
-        RegisterPortalDto: {
-            /**
-             * @description Unique portal slug. Allowed chars: a-z, 0-9, dash
-             * @example green-club
-             */
-            name: string;
-            /** @example Green Club */
-            displayName: string;
-            /** @example owner@greenclub.com */
-            email: string;
-            /**
-             * @description Password must contain uppercase, lowercase and number
-             * @example StrongPassword123
-             */
-            password: string;
-            /** @example Owner */
-            ownerName: string;
-            /** @example Surname */
-            ownerSurname?: string;
-        };
-        PortalInfoDto: {
-            /** @example f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f */
-            id: string;
-            /** @example green-club */
-            name: string;
-            /** @example Green Club */
-            displayName: string;
-            /** @example active */
-            status: string;
-        };
-        EmployeeInfoDto: {
-            /** @example 123e4567-e89b-12d3-a456-426614174000 */
-            id: string;
-            /** @example employee@example.com */
-            email: string;
-            /** @example John Employee */
-            name: string;
-            /** @example manager */
-            role: string;
-            /** @example f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f */
-            portalId?: string;
-        };
-        RegisterPortalResponseDto: {
-            portal: components["schemas"]["PortalInfoDto"];
-            owner: components["schemas"]["EmployeeInfoDto"];
-            /**
-             * @description Передавайте в X-Device-Id; токены выставлены в HttpOnly cookies
-             * @example 550e8400-e29b-41d4-a716-446655440000
-             */
-            deviceId: string;
-        };
-        EmployeeListItemDto: {
-            /** @example 123e4567-e89b-12d3-a456-426614174000 */
-            id: string;
-            /** @example 123e4567-e89b-12d3-a456-426614174000 */
-            userId: string;
-            /** @example employee@example.com */
-            email: string;
-            /** @example John Employee */
-            name: string;
-            /** @example Doe */
-            surname?: string;
-            /** @example +1234567890 */
-            phone?: string;
-            /** @example manager */
-            role: string;
-            /** @example Senior Manager */
-            position?: string;
-            /** @example Sales */
-            department?: string;
-            /** @example true */
-            isActive: boolean;
-            /**
-             * Format: date-time
-             * @example 2024-01-01T00:00:00.000Z
-             */
-            lastLoginAt?: string;
-            /**
-             * Format: date-time
-             * @example 2024-01-01T00:00:00.000Z
-             */
-            createdAt: string;
-            /**
-             * Format: date-time
-             * @example 2024-01-01T00:00:00.000Z
-             */
-            updatedAt: string;
-        };
-        PaginatedResponse_EmployeeListItemDto: {
-            /** @description Array of items */
-            items: components["schemas"]["EmployeeListItemDto"][];
-            /**
-             * @description Total number of items
-             * @example 100
-             */
-            total: number;
-            /**
-             * @description Current page number
-             * @example 1
-             */
-            page: number;
-            /**
-             * @description Items per page
-             * @example 10
-             */
-            limit: number;
-            /**
-             * @description Total number of pages
-             * @example 10
-             */
-            totalPages: number;
-        };
-        PaginatedResponse_CrmMemberDto: {
-            /** @description Array of items */
-            items: components["schemas"]["CrmMemberDto"][];
-            /**
-             * @description Total number of items
-             * @example 100
-             */
-            total: number;
-            /**
-             * @description Current page number
-             * @example 1
-             */
-            page: number;
-            /**
-             * @description Items per page
-             * @example 10
-             */
-            limit: number;
-            /**
-             * @description Total number of pages
-             * @example 10
-             */
-            totalPages: number;
-        };
-        EmployeeLoginDto: {
-            /** @example employee@example.com */
-            email: string;
-            /** @example password123 */
-            password: string;
-        };
-        EmployeeWebLoginResponseDto: {
-            employee: components["schemas"]["EmployeeInfoDto"];
-            /**
-             * @description Сохраните и передавайте в заголовке X-Device-Id при следующих запросах
-             * @example 550e8400-e29b-41d4-a716-446655440000
-             */
-            deviceId: string;
-        };
-        EmployeeRefreshTokenResponseDto: {
-            /**
-             * @description New access token
-             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-             */
-            accessToken: string;
-            /**
-             * @description New refresh token
-             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-             */
-            refreshToken: string;
-        };
-        EmployeeLogoutResponseDto: {
-            /**
-             * @description Logout message
-             * @example Logged out successfully
-             */
-            message: string;
-        };
-        EmployeeMeResponseDto: {
-            /** @example 123e4567-e89b-12d3-a456-426614174000 */
-            id: string;
-            /** @example employee@example.com */
-            email: string;
-            /** @example John Employee */
-            name: string;
-            /** @example +1234567890 */
-            phone?: string;
-            /** @example manager */
-            role: string;
-            /** @example f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f */
-            portalId?: string;
-            /** @example Senior Manager */
-            position?: string;
-            /** @example Sales */
-            department?: string;
-            /** @example true */
-            isActive: boolean;
-            /**
-             * Format: date-time
-             * @example 2024-01-01T00:00:00.000Z
-             */
-            lastLoginAt?: string;
-            /**
-             * Format: date-time
-             * @example 2024-01-01T00:00:00.000Z
-             */
-            createdAt: string;
-            /**
-             * Format: date-time
-             * @example 2024-01-01T00:00:00.000Z
-             */
-            updatedAt: string;
-        };
-        EmployeeAuthResponseDto: {
-            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
-            accessToken: string;
-            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
-            refreshToken: string;
-            employee: components["schemas"]["EmployeeInfoDto"];
-        };
-        RefreshTokenDto: {
-            /**
-             * @description Refresh token (optional when using HttpOnly cookie)
-             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-             */
-            refreshToken?: string;
-        };
-        RegisterEmployeeDto: {
-            /** @example employee@example.com */
-            email: string;
-            /**
-             * @description Password must contain uppercase, lowercase and number
-             * @example Password123
-             */
-            password: string;
-            /** @example John */
-            name: string;
-            /** @example Doe */
-            surname?: string;
-            /** @example +1234567890 */
-            phone?: string;
-            /**
-             * @example manager
-             * @enum {string}
-             */
-            role?: "employee" | "manager" | "admin";
-            /** @example Senior Manager */
-            position?: string;
-            /** @example Sales */
-            department?: string;
-        };
-        MemberLoginDto: {
-            /** @example user@example.com */
-            email: string;
-            /** @example Password123 */
-            password: string;
-        };
-        MemberUserInfoDto: {
-            /** @example 507f1f77bcf86cd799439011 */
-            id: string;
-            /** @example user@example.com */
-            email: string;
-        };
-        MemberWebLoginResponseDto: {
-            user: components["schemas"]["MemberUserInfoDto"];
-            /**
-             * @description Сохраните и передавайте в заголовке X-Device-Id при следующих запросах
-             * @example 550e8400-e29b-41d4-a716-446655440000
-             */
-            deviceId: string;
-        };
-        MemberRefreshTokenResponseDto: {
-            /**
-             * @description New access token
-             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-             */
-            accessToken: string;
-            /**
-             * @description New refresh token (rotation)
-             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-             */
-            refreshToken: string;
-        };
-        MemberLogoutResponseDto: {
-            /**
-             * @description Logout message
-             * @example Logged out successfully
-             */
-            message: string;
-        };
-        MemberMeResponseDto: {
-            /** @example 123e4567-e89b-12d3-a456-426614174000 */
-            id: string;
-            /** @example user@example.com */
-            email: string;
-            /** @example John */
-            name: string;
-            /** @example +1234567890 */
-            phone?: string;
-            /** @example true */
-            isActive: boolean;
-            /**
-             * Format: date-time
-             * @example 2024-01-01T00:00:00.000Z
-             */
-            createdAt: string;
-            /**
-             * Format: date-time
-             * @example 2024-01-01T00:00:00.000Z
-             */
-            updatedAt: string;
-        };
-        RequestPasswordResetDto: {
-            /** @example user@example.com */
-            email: string;
-        };
-        PasswordResetResponseDto: {
-            /** @example true */
-            success: boolean;
-            /** @example Password reset successfully */
-            message: string;
-        };
-        ResetPasswordDto: {
-            /**
-             * @description Password reset token from email
-             * @example abc123def456...
-             */
-            token: string;
-            /**
-             * @description New password (must contain uppercase, lowercase and number)
-             * @example NewPassword123
-             */
-            newPassword: string;
-        };
-        MemberAuthResponseDto: {
-            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
-            accessToken: string;
-            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
-            refreshToken: string;
-            user: components["schemas"]["MemberUserInfoDto"];
-        };
-        CheckUserExistsDto: {
-            /** @example user@example.com */
-            email: string;
-        };
-        CheckUserExistsResponseDto: {
-            /** @example true */
-            exists: boolean;
-            /** @example true */
-            hasEmployee?: boolean;
-            /** @example true */
-            hasMember?: boolean;
-            /** @example User already registered as Employee. Do you want to register as Member? */
-            message?: string;
-        };
-        RegisterMemberDto: {
-            /** @example user@example.com */
-            email: string;
-            /**
-             * @description Password must contain uppercase, lowercase and number
-             * @example Password123
-             */
-            password: string;
-            /** @example John */
-            name: string;
-            /** @example Doe */
-            surname?: string;
-            /** @example +1234567890 */
-            phone?: string;
-            /** @example 2005-11-16 */
-            birthday?: string;
-            /** @example ID */
-            documentType?: string;
-            /** @example 592-9185990 */
-            documentNumber?: string;
-            /** @example 123 Main St */
-            address?: string;
-            /** @example true */
-            isMedical?: boolean;
-            /** @example true */
-            isMj?: boolean;
-            /** @example true */
-            isRecreation?: boolean;
-        };
-        RegisteredUserInfoDto: {
-            /** @example 123e4567-e89b-12d3-a456-426614174000 */
-            id: string;
-            /** @example user@example.com */
-            email: string;
-            /** @example John */
-            name: string;
-            /** @example Doe */
-            surname?: string;
-        };
-        RegistrationWarningDto: {
-            /** @example User already exists as Employee. Do you want to register as Member? */
-            message: string;
-            /** @example true */
-            hasEmployee: boolean;
-        };
-        RegisterMemberResponseDto: {
-            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
-            accessToken: string;
-            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
-            refreshToken: string;
-            /**
-             * @description Created member identifier
-             * @example 123e4567-e89b-12d3-a456-426614174999
-             */
-            memberId: string;
-            user: components["schemas"]["RegisteredUserInfoDto"];
-            warning?: components["schemas"]["RegistrationWarningDto"];
-        };
-        UploadMemberFilesDto: {
-            /**
-             * @description Document type. Required when any identity document side is provided.
-             * @example passport
-             */
-            documentType?: string;
-            /**
-             * @description Identity document first side as data URL (base64).
-             * @example data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
-             */
-            documentFirst?: string;
-            /**
-             * @description Identity document second side as data URL (base64).
-             * @example data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
-             */
-            documentSecond?: string;
-            /**
-             * @description Signature image as data URL (base64).
-             * @example data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
-             */
-            signature?: string;
-        };
-        UploadMemberFilesResponseDto: {
-            /** @example true */
-            queued: boolean;
-            /** @example 214 */
-            jobId: string;
-        };
-        MemberConfirmEmailDto: {
-            /**
-             * @description Email verification token from email
-             * @example abc123def456...
-             */
-            token: string;
-        };
-        MemberConfirmEmailResponseDto: {
-            /**
-             * @description Email confirmed successfully
-             * @example true
-             */
-            success: boolean;
-            /**
-             * @description Email confirmed successfully
-             * @example Email confirmed successfully
-             */
-            message: string;
-        };
-        VerifyEmailResponseDto: {
-            /** @example true */
-            success: boolean;
-            /** @example Email confirmed successfully */
-            message: string;
-        };
-        VerifyEmailDto: {
-            /**
-             * @description Email verification token from email
-             * @example abc123def456...
-             */
-            token: string;
-        };
     };
     responses: never;
     parameters: never;
@@ -3037,15 +3534,72 @@ export interface components {
     pathItems: never;
 }
 export type SchemaSendEmailRequestDto = components['schemas']['SendEmailRequestDto'];
-export type SchemaCrmMemberDto = components['schemas']['CrmMemberDto'];
+export type SchemaPlatformLoginDto = components['schemas']['PlatformLoginDto'];
+export type SchemaEmployeeListItemDto = components['schemas']['EmployeeListItemDto'];
+export type SchemaPaginatedResponseEmployeeListItemDto = components['schemas']['PaginatedResponse_EmployeeListItemDto'];
 export type SchemaApiErrorResponseDto = components['schemas']['ApiErrorResponseDto'];
+export type SchemaCrmMemberStatusDto = components['schemas']['CrmMemberStatusDto'];
+export type SchemaCrmMemberDto = components['schemas']['CrmMemberDto'];
+export type SchemaPaginatedResponseCrmMemberDto = components['schemas']['PaginatedResponse_CrmMemberDto'];
+export type SchemaEmployeeLoginDto = components['schemas']['EmployeeLoginDto'];
+export type SchemaEmployeeInfoDto = components['schemas']['EmployeeInfoDto'];
+export type SchemaEmployeeWebLoginResponseDto = components['schemas']['EmployeeWebLoginResponseDto'];
+export type SchemaEmployeeRefreshTokenResponseDto = components['schemas']['EmployeeRefreshTokenResponseDto'];
+export type SchemaEmployeeLogoutResponseDto = components['schemas']['EmployeeLogoutResponseDto'];
+export type SchemaEmployeeMeResponseDto = components['schemas']['EmployeeMeResponseDto'];
+export type SchemaEmployeeAuthResponseDto = components['schemas']['EmployeeAuthResponseDto'];
+export type SchemaRefreshTokenDto = components['schemas']['RefreshTokenDto'];
+export type SchemaRegisterEmployeeDto = components['schemas']['RegisterEmployeeDto'];
+export type SchemaMemberLoginDto = components['schemas']['MemberLoginDto'];
+export type SchemaMemberUserInfoDto = components['schemas']['MemberUserInfoDto'];
+export type SchemaMemberWebLoginResponseDto = components['schemas']['MemberWebLoginResponseDto'];
+export type SchemaMemberRefreshTokenResponseDto = components['schemas']['MemberRefreshTokenResponseDto'];
+export type SchemaMemberLogoutResponseDto = components['schemas']['MemberLogoutResponseDto'];
+export type SchemaMemberMeResponseDto = components['schemas']['MemberMeResponseDto'];
+export type SchemaRequestPasswordResetDto = components['schemas']['RequestPasswordResetDto'];
+export type SchemaPasswordResetResponseDto = components['schemas']['PasswordResetResponseDto'];
+export type SchemaResetPasswordDto = components['schemas']['ResetPasswordDto'];
+export type SchemaMemberAuthResponseDto = components['schemas']['MemberAuthResponseDto'];
+export type SchemaCheckUserExistsDto = components['schemas']['CheckUserExistsDto'];
+export type SchemaCheckUserExistsResponseDto = components['schemas']['CheckUserExistsResponseDto'];
+export type SchemaDynamicMemberRegistrationDto = components['schemas']['DynamicMemberRegistrationDto'];
+export type SchemaRegisteredUserInfoDto = components['schemas']['RegisteredUserInfoDto'];
+export type SchemaRegistrationWarningDto = components['schemas']['RegistrationWarningDto'];
+export type SchemaRegisterMemberResponseDto = components['schemas']['RegisterMemberResponseDto'];
+export type SchemaUploadMemberFilesDto = components['schemas']['UploadMemberFilesDto'];
+export type SchemaUploadMemberFilesResponseDto = components['schemas']['UploadMemberFilesResponseDto'];
+export type SchemaMemberConfirmEmailDto = components['schemas']['MemberConfirmEmailDto'];
+export type SchemaMemberConfirmEmailResponseDto = components['schemas']['MemberConfirmEmailResponseDto'];
+export type SchemaVerifyEmailResponseDto = components['schemas']['VerifyEmailResponseDto'];
+export type SchemaVerifyEmailDto = components['schemas']['VerifyEmailDto'];
+export type SchemaFormFieldOptionSchemaDto = components['schemas']['FormFieldOptionSchemaDto'];
+export type SchemaMemberFormFieldSchemaItemDto = components['schemas']['MemberFormFieldSchemaItemDto'];
+export type SchemaMemberFormSchemaResponseDto = components['schemas']['MemberFormSchemaResponseDto'];
+export type SchemaMemberLifecycleStatusItemDto = components['schemas']['MemberLifecycleStatusItemDto'];
+export type SchemaMemberFieldOptionResponseDto = components['schemas']['MemberFieldOptionResponseDto'];
+export type SchemaMemberFieldDefinitionResponseDto = components['schemas']['MemberFieldDefinitionResponseDto'];
+export type SchemaPortalFieldOptionInputDto = components['schemas']['PortalFieldOptionInputDto'];
+export type SchemaCreatePortalMemberFieldDto = components['schemas']['CreatePortalMemberFieldDto'];
+export type SchemaUpdatePortalMemberFieldDto = components['schemas']['UpdatePortalMemberFieldDto'];
+export type SchemaDeleteMemberFieldResponseDto = components['schemas']['DeleteMemberFieldResponseDto'];
+export type SchemaFormLayoutItemInputDto = components['schemas']['FormLayoutItemInputDto'];
+export type SchemaUpdateMemberFormLayoutDto = components['schemas']['UpdateMemberFormLayoutDto'];
+export type SchemaMemberFormLayoutReplaceResponseDto = components['schemas']['MemberFormLayoutReplaceResponseDto'];
+export type SchemaOrderStageResponseDto = components['schemas']['OrderStageResponseDto'];
+export type SchemaOrderStageCategoryResponseDto = components['schemas']['OrderStageCategoryResponseDto'];
+export type SchemaCreateEntityDefinitionBodyDto = components['schemas']['CreateEntityDefinitionBodyDto'];
+export type SchemaCrmCreateMemberDto = components['schemas']['CrmCreateMemberDto'];
+export type SchemaCrmMemberDynamicFieldDto = components['schemas']['CrmMemberDynamicFieldDto'];
 export type SchemaCrmMemberIdentityDocumentDto = components['schemas']['CrmMemberIdentityDocumentDto'];
 export type SchemaCrmMemberSignatureDto = components['schemas']['CrmMemberSignatureDto'];
 export type SchemaCrmMemberMjStatusDto = components['schemas']['CrmMemberMjStatusDto'];
 export type SchemaCrmMemberDocumentDto = components['schemas']['CrmMemberDocumentDto'];
 export type SchemaCrmMemberFullDto = components['schemas']['CrmMemberFullDto'];
-export type SchemaCrmMemberUpdateDto = components['schemas']['CrmMemberUpdateDto'];
+export type SchemaCrmMemberFieldsPatchDto = components['schemas']['CrmMemberFieldsPatchDto'];
 export type SchemaStreamableFile = components['schemas']['StreamableFile'];
+export type SchemaRegisterPortalDto = components['schemas']['RegisterPortalDto'];
+export type SchemaPortalInfoDto = components['schemas']['PortalInfoDto'];
+export type SchemaRegisterPortalResponseDto = components['schemas']['RegisterPortalResponseDto'];
 export type SchemaProductCategoryDto = components['schemas']['ProductCategoryDto'];
 export type SchemaMeasurementUnitDto = components['schemas']['MeasurementUnitDto'];
 export type SchemaProductListDto = components['schemas']['ProductListDto'];
@@ -3098,43 +3652,6 @@ export type SchemaCreateFinancialTransactionDto = components['schemas']['CreateF
 export type SchemaTransactionSummaryDto = components['schemas']['TransactionSummaryDto'];
 export type SchemaTransactionGroupedByTypeDto = components['schemas']['TransactionGroupedByTypeDto'];
 export type SchemaTransactionGroupedByDateDto = components['schemas']['TransactionGroupedByDateDto'];
-export type SchemaRegisterPortalDto = components['schemas']['RegisterPortalDto'];
-export type SchemaPortalInfoDto = components['schemas']['PortalInfoDto'];
-export type SchemaEmployeeInfoDto = components['schemas']['EmployeeInfoDto'];
-export type SchemaRegisterPortalResponseDto = components['schemas']['RegisterPortalResponseDto'];
-export type SchemaEmployeeListItemDto = components['schemas']['EmployeeListItemDto'];
-export type SchemaPaginatedResponseEmployeeListItemDto = components['schemas']['PaginatedResponse_EmployeeListItemDto'];
-export type SchemaPaginatedResponseCrmMemberDto = components['schemas']['PaginatedResponse_CrmMemberDto'];
-export type SchemaEmployeeLoginDto = components['schemas']['EmployeeLoginDto'];
-export type SchemaEmployeeWebLoginResponseDto = components['schemas']['EmployeeWebLoginResponseDto'];
-export type SchemaEmployeeRefreshTokenResponseDto = components['schemas']['EmployeeRefreshTokenResponseDto'];
-export type SchemaEmployeeLogoutResponseDto = components['schemas']['EmployeeLogoutResponseDto'];
-export type SchemaEmployeeMeResponseDto = components['schemas']['EmployeeMeResponseDto'];
-export type SchemaEmployeeAuthResponseDto = components['schemas']['EmployeeAuthResponseDto'];
-export type SchemaRefreshTokenDto = components['schemas']['RefreshTokenDto'];
-export type SchemaRegisterEmployeeDto = components['schemas']['RegisterEmployeeDto'];
-export type SchemaMemberLoginDto = components['schemas']['MemberLoginDto'];
-export type SchemaMemberUserInfoDto = components['schemas']['MemberUserInfoDto'];
-export type SchemaMemberWebLoginResponseDto = components['schemas']['MemberWebLoginResponseDto'];
-export type SchemaMemberRefreshTokenResponseDto = components['schemas']['MemberRefreshTokenResponseDto'];
-export type SchemaMemberLogoutResponseDto = components['schemas']['MemberLogoutResponseDto'];
-export type SchemaMemberMeResponseDto = components['schemas']['MemberMeResponseDto'];
-export type SchemaRequestPasswordResetDto = components['schemas']['RequestPasswordResetDto'];
-export type SchemaPasswordResetResponseDto = components['schemas']['PasswordResetResponseDto'];
-export type SchemaResetPasswordDto = components['schemas']['ResetPasswordDto'];
-export type SchemaMemberAuthResponseDto = components['schemas']['MemberAuthResponseDto'];
-export type SchemaCheckUserExistsDto = components['schemas']['CheckUserExistsDto'];
-export type SchemaCheckUserExistsResponseDto = components['schemas']['CheckUserExistsResponseDto'];
-export type SchemaRegisterMemberDto = components['schemas']['RegisterMemberDto'];
-export type SchemaRegisteredUserInfoDto = components['schemas']['RegisteredUserInfoDto'];
-export type SchemaRegistrationWarningDto = components['schemas']['RegistrationWarningDto'];
-export type SchemaRegisterMemberResponseDto = components['schemas']['RegisterMemberResponseDto'];
-export type SchemaUploadMemberFilesDto = components['schemas']['UploadMemberFilesDto'];
-export type SchemaUploadMemberFilesResponseDto = components['schemas']['UploadMemberFilesResponseDto'];
-export type SchemaMemberConfirmEmailDto = components['schemas']['MemberConfirmEmailDto'];
-export type SchemaMemberConfirmEmailResponseDto = components['schemas']['MemberConfirmEmailResponseDto'];
-export type SchemaVerifyEmailResponseDto = components['schemas']['VerifyEmailResponseDto'];
-export type SchemaVerifyEmailDto = components['schemas']['VerifyEmailDto'];
 export type $defs = Record<string, never>;
 export interface operations {
     Mail_sendMail: {
@@ -3161,10 +3678,1807 @@ export interface operations {
             };
         };
     };
+    PlatformAuth_login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlatformLoginDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PlatformPortals_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PlatformPortals_getOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                portalId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PlatformReferenceData_seedReferenceData: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Test_getEmployees: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                sortBy?: string;
+                sortOrder?: "asc" | "desc";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated list of employees */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_EmployeeListItemDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    Test_getMembers: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                sortBy?: string;
+                sortOrder?: "asc" | "desc";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated list of members */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_CrmMemberDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    App_getHello: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EmployeeAuth_login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmployeeLoginDto"];
+            };
+        };
+        responses: {
+            /** @description Employee logged in successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeWebLoginResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmployeeAuth_refresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Token refreshed successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeRefreshTokenResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmployeeAuth_logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Logged out successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeLogoutResponseDto"];
+                };
+            };
+        };
+    };
+    EmployeeAuth_getMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Current employee information */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeMeResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmployeeMobileAuth_login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmployeeLoginDto"];
+            };
+        };
+        responses: {
+            /** @description Employee logged in successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeAuthResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmployeeMobileAuth_refresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshTokenDto"];
+            };
+        };
+        responses: {
+            /** @description Token refreshed successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeRefreshTokenResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmployeeMobileAuth_logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshTokenDto"];
+            };
+        };
+        responses: {
+            /** @description Logged out successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeLogoutResponseDto"];
+                };
+            };
+        };
+    };
+    EmployeeMobileAuth_getMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Current employee information */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeMeResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmployeeRegistration_register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterEmployeeDto"];
+            };
+        };
+        responses: {
+            /** @description Employee registered successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeAuthResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberAuth_login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MemberLoginDto"];
+            };
+        };
+        responses: {
+            /** @description Member logged in successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberWebLoginResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberAuth_refresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Token refreshed successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberRefreshTokenResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberAuth_logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Logged out successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberLogoutResponseDto"];
+                };
+            };
+        };
+    };
+    MemberAuth_getMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Current Member information */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberMeResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberAuth_requestPasswordReset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestPasswordResetDto"];
+            };
+        };
+        responses: {
+            /** @description Password reset email sent (if email exists) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PasswordResetResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberAuth_confirmPasswordReset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetPasswordDto"];
+            };
+        };
+        responses: {
+            /** @description Password reset successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PasswordResetResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberMobileAuth_login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MemberLoginDto"];
+            };
+        };
+        responses: {
+            /** @description Member logged in successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberAuthResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberMobileAuth_refresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshTokenDto"];
+            };
+        };
+        responses: {
+            /** @description Token refreshed successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberRefreshTokenResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberMobileAuth_logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshTokenDto"];
+            };
+        };
+        responses: {
+            /** @description Logged out successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberLogoutResponseDto"];
+                };
+            };
+        };
+    };
+    MemberMobileAuth_getMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Current Member information */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberMeResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberRegistration_registrationSchema: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Field definitions for registration */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    MemberRegistration_checkUserExists: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckUserExistsDto"];
+            };
+        };
+        responses: {
+            /** @description User existence check result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckUserExistsResponseDto"];
+                };
+            };
+        };
+    };
+    MemberRegistration_register: {
+        parameters: {
+            query?: {
+                force?: "true" | "false";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DynamicMemberRegistrationDto"];
+            };
+        };
+        responses: {
+            /** @description Member registered successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegisterMemberResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberRegistration_uploadFiles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadMemberFilesDto"];
+            };
+        };
+        responses: {
+            /** @description Member files were queued for asynchronous processing */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadMemberFilesResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberRegistration_confirmEmail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MemberConfirmEmailDto"];
+            };
+        };
+        responses: {
+            /** @description Email confirmed successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberConfirmEmailResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmailVerification_verifyEmailGet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Email verified successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerifyEmailResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmailVerification_verifyEmailPost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyEmailDto"];
+            };
+        };
+        responses: {
+            /** @description Email verified successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerifyEmailResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmailVerification_requestPasswordReset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestPasswordResetDto"];
+            };
+        };
+        responses: {
+            /** @description Password reset email sent (if email exists) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PasswordResetResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmailVerification_resetPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetPasswordDto"];
+            };
+        };
+        responses: {
+            /** @description Password reset successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PasswordResetResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEntityFieldsSettings_memberFormSchema: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                purpose: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberFormSchemaResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEntityFieldsSettings_memberFilterFields: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberFormFieldSchemaItemDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEntityFieldsSettings_memberStatusItems: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberLifecycleStatusItemDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEntityFieldsSettings_listMemberFields: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberFieldDefinitionResponseDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEntityFieldsSettings_createMemberField: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePortalMemberFieldDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberFieldDefinitionResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEntityFieldsSettings_deleteMemberField: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                fieldKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeleteMemberFieldResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEntityFieldsSettings_updateMemberField: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                fieldKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePortalMemberFieldDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberFieldDefinitionResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEntityFieldsSettings_addMemberFieldOption: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                fieldKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PortalFieldOptionInputDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberFieldOptionResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEntityFieldsSettings_updateMemberForm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                purpose: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMemberFormLayoutDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberFormLayoutReplaceResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEntityFieldsSettings_orderStageCategories: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderStageCategoryResponseDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEntityDefinitions_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEntityDefinitions_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateEntityDefinitionBodyDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
     CrmMembers_list: {
         parameters: {
             query?: {
                 limit?: number;
+                statusItemId?: string;
+                filterFieldKey?: string;
+                filterValue?: string;
             };
             header?: never;
             path?: never;
@@ -3201,6 +5515,115 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmMembers_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CrmCreateMemberDto"];
+            };
+        };
+        responses: {
+            /** @description Created member */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmMembers_memberFormSchema: {
+        parameters: {
+            query: {
+                purpose: "public_registration" | "crm_create" | "crm_detail" | "member_cabinet";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3270,7 +5693,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CrmMemberUpdateDto"];
+                "application/json": components["schemas"]["CrmMemberFieldsPatchDto"];
             };
         };
         responses: {
@@ -3501,6 +5924,48 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    PortalRegistration_register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterPortalDto"];
+            };
+        };
+        responses: {
+            /** @description Portal and owner created successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegisterPortalResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5867,1154 +8332,6 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    PortalRegistration_register: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RegisterPortalDto"];
-            };
-        };
-        responses: {
-            /** @description Portal and owner created successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RegisterPortalResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    Test_getEmployees: {
-        parameters: {
-            query?: {
-                page?: number;
-                limit?: number;
-                sortBy?: string;
-                sortOrder?: "asc" | "desc";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Paginated list of employees */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse_EmployeeListItemDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    Test_getMembers: {
-        parameters: {
-            query?: {
-                page?: number;
-                limit?: number;
-                sortBy?: string;
-                sortOrder?: "asc" | "desc";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Paginated list of members */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse_CrmMemberDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    App_getHello: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    EmployeeAuth_login: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["EmployeeLoginDto"];
-            };
-        };
-        responses: {
-            /** @description Employee logged in successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmployeeWebLoginResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    EmployeeAuth_refresh: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Token refreshed successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmployeeRefreshTokenResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    EmployeeAuth_logout: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Logged out successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmployeeLogoutResponseDto"];
-                };
-            };
-        };
-    };
-    EmployeeAuth_getMe: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Current employee information */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmployeeMeResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    EmployeeMobileAuth_login: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["EmployeeLoginDto"];
-            };
-        };
-        responses: {
-            /** @description Employee logged in successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmployeeAuthResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    EmployeeMobileAuth_refresh: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RefreshTokenDto"];
-            };
-        };
-        responses: {
-            /** @description Token refreshed successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmployeeRefreshTokenResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    EmployeeMobileAuth_logout: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RefreshTokenDto"];
-            };
-        };
-        responses: {
-            /** @description Logged out successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmployeeLogoutResponseDto"];
-                };
-            };
-        };
-    };
-    EmployeeMobileAuth_getMe: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Current employee information */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmployeeMeResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    EmployeeRegistration_register: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RegisterEmployeeDto"];
-            };
-        };
-        responses: {
-            /** @description Employee registered successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmployeeAuthResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    MemberAuth_login: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MemberLoginDto"];
-            };
-        };
-        responses: {
-            /** @description Member logged in successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MemberWebLoginResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    MemberAuth_refresh: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Token refreshed successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MemberRefreshTokenResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    MemberAuth_logout: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Logged out successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MemberLogoutResponseDto"];
-                };
-            };
-        };
-    };
-    MemberAuth_getMe: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Current Member information */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MemberMeResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    MemberAuth_requestPasswordReset: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RequestPasswordResetDto"];
-            };
-        };
-        responses: {
-            /** @description Password reset email sent (if email exists) */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PasswordResetResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    MemberAuth_confirmPasswordReset: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ResetPasswordDto"];
-            };
-        };
-        responses: {
-            /** @description Password reset successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PasswordResetResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    MemberMobileAuth_login: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MemberLoginDto"];
-            };
-        };
-        responses: {
-            /** @description Member logged in successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MemberAuthResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    MemberMobileAuth_refresh: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RefreshTokenDto"];
-            };
-        };
-        responses: {
-            /** @description Token refreshed successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MemberRefreshTokenResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    MemberMobileAuth_logout: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RefreshTokenDto"];
-            };
-        };
-        responses: {
-            /** @description Logged out successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MemberLogoutResponseDto"];
-                };
-            };
-        };
-    };
-    MemberMobileAuth_getMe: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Current Member information */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MemberMeResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    MemberRegistration_checkUserExists: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CheckUserExistsDto"];
-            };
-        };
-        responses: {
-            /** @description User existence check result */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CheckUserExistsResponseDto"];
-                };
-            };
-        };
-    };
-    MemberRegistration_register: {
-        parameters: {
-            query?: {
-                force?: "true" | "false";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RegisterMemberDto"];
-            };
-        };
-        responses: {
-            /** @description Member registered successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RegisterMemberResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    MemberRegistration_uploadFiles: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UploadMemberFilesDto"];
-            };
-        };
-        responses: {
-            /** @description Member files were queued for asynchronous processing */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UploadMemberFilesResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    MemberRegistration_confirmEmail: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MemberConfirmEmailDto"];
-            };
-        };
-        responses: {
-            /** @description Email confirmed successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MemberConfirmEmailResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    EmailVerification_verifyEmailGet: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                token: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Email verified successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["VerifyEmailResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    EmailVerification_verifyEmailPost: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["VerifyEmailDto"];
-            };
-        };
-        responses: {
-            /** @description Email verified successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["VerifyEmailResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    EmailVerification_requestPasswordReset: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RequestPasswordResetDto"];
-            };
-        };
-        responses: {
-            /** @description Password reset email sent (if email exists) */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PasswordResetResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    EmailVerification_resetPassword: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ResetPasswordDto"];
-            };
-        };
-        responses: {
-            /** @description Password reset successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PasswordResetResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Not Found */
-            404: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -7,7 +7,8 @@ import { TelegramService } from "@common/telegram/telegram.service";
 import {
     PORTAL_EVENTS_JOB_NAMES,
     PORTAL_EVENTS_QUEUE_NAME,
-} from "@modules/portals/events/portal-events.constants";
+    type PortalRegistrationEmailConfirmedPayload,
+} from "@modules/portal/crm/portals/events/portal-events.constants";
 
 import { MailService } from "../../application/services/mail.service";
 import { EmailType, MAIL_QUEUE_NAME, MAIL_WORKER_EVENTS } from "../../events/mail-events.constants";
@@ -16,7 +17,7 @@ export interface SendEmailJobData {
     to: string[];
     subject: string;
     html: string;
-    context?: Record<string, any>;
+    context?: Record<string, unknown>;
     emailType?: EmailType;
     attachments?: Array<{
         filename: string;
@@ -82,14 +83,23 @@ export class MailProcessor extends WorkerHost {
 
         if (emailType === EmailType.PORTAL_REGISTRATION) {
             try {
-                const payload = {
-                    portalId: (context as any)?.portalId ?? "",
-                    portalSlug: (context as any)?.portalSlug ?? "",
-                    portalDisplayName: (context as any)?.portalDisplayName ?? "",
-                    ownerId: (context as any)?.ownerId ?? "",
-                    ownerEmail: (context as any)?.ownerEmail ?? to[0],
-                    ownerName: (context as any)?.ownerName ?? "",
-                    language: (context as any)?.language,
+                const ctx: Record<string, unknown> = { ...(context ?? {}) };
+                const str = (k: string): string => {
+                    const v = ctx[k];
+                    return typeof v === "string" ? v : "";
+                };
+                const langRaw = ctx.language;
+                const payload: PortalRegistrationEmailConfirmedPayload = {
+                    portalId: str("portalId"),
+                    portalSlug: str("portalSlug"),
+                    portalDisplayName: str("portalDisplayName"),
+                    ownerId: str("ownerId"),
+                    ownerEmail: str("ownerEmail") || to[0] || "",
+                    ownerName: str("ownerName"),
+                    language:
+                        typeof langRaw === "string"
+                            ? (langRaw as PortalRegistrationEmailConfirmedPayload["language"])
+                            : undefined,
                     emailSentAt: new Date().toISOString(),
                 };
 
@@ -112,12 +122,12 @@ export class MailProcessor extends WorkerHost {
     }
 
     @OnWorkerEvent(MAIL_WORKER_EVENTS.FAILED)
-    async onFailed(job: Job<SendEmailJobData>, error: Error) {
+    onFailed(job: Job<SendEmailJobData>, error: Error): void {
         const { to } = job.data;
         this.logger.error(`❌ Email job failed for ${to.join(", ")}: ${error.message}`);
     }
 
-    async onStarted(job: Job<SendEmailJobData>) {
+    onStarted(job: Job<SendEmailJobData>): void {
         const { to, subject } = job.data;
         this.logger.log(`📧 Email job started for ${to.join(", ")}: ${subject}`);
     }

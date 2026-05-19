@@ -1,0 +1,17 @@
+{
+    "contacts": {
+        "title": "Contáctanos",
+        "subtitle": "Ponte en contacto con nosotros. Estamos aquí para ayudar.",
+        "email": "Correo electrónico",
+        "phone": "Teléfono",
+        "address": "Dirección",
+        "sendMessage": "Envíanos un mensaje",
+        "name": "Nombre",
+        "message": "Mensaje",
+        "send": "Enviar mensaje",
+        "emailPlaceholder": "example@email.com",
+        "emailValue": "info@grankush.com",
+        "phoneValue": "+1 (234) 567-890",
+        "addressValue": "123 Main Street\nCity, State 12345\nCountry"
+    }
+}

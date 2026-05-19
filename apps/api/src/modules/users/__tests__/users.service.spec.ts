@@ -161,13 +161,14 @@ describe("UsersService", () => {
             const result = await service.update(mockUser.id, updateDto);
 
             expect(mockUserRepository.findById).toHaveBeenCalledWith(mockUser.id);
-            expect(mockUserRepository.update).toHaveBeenCalledWith(
-                mockUser.id,
-                expect.objectContaining({
-                    passwordHash: expect.any(String),
-                    isActive: updateDto.isActive,
-                })
-            );
+            expect(mockUserRepository.update).toHaveBeenCalledTimes(1);
+            const [, payload] = mockUserRepository.update.mock.calls[0] as [
+                string,
+                { passwordHash: string; isActive: boolean },
+            ];
+            expect(typeof payload.passwordHash).toBe("string");
+            expect(payload.passwordHash.length).toBeGreaterThan(0);
+            expect(payload.isActive).toBe(updateDto.isActive);
             expect(result.isActive).toBe(updateDto.isActive);
         });
 

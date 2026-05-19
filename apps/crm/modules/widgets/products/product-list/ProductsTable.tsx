@@ -11,8 +11,8 @@ import type { SchemaProductListDto } from "@workspace/api-client/core";
 import { Button, Card } from "@workspace/ui";
 
 import { useDeleteProduct, useProducts } from "@/modules/entities/product";
-import { ROUTES } from "@/modules/shared/config/routes";
 import { EntityList, type EntityListTableColumn } from "@/modules/shared";
+import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
 export function ProductsTable() {

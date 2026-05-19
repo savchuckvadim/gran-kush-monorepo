@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
@@ -8,8 +8,7 @@ import { Pencil } from "lucide-react";
 
 import { Button, FieldInput } from "@workspace/ui";
 
-import { CrmMemberDetails } from "@/modules/entities/member/api/member.api";
-import { useUpdateCrmMember } from "@/modules/entities/member/hooks/member.hook";
+import { CrmMemberDetails, useMemberStatusItems, useUpdateCrmMember } from "@/modules/entities/member";
 
 interface MemberProfileEditModalProps {
     member: CrmMemberDetails;
@@ -33,18 +32,39 @@ export function MemberProfileEditModal({ member }: MemberProfileEditModalProps) 
     );
 
     const [profileForm, setProfileForm] = useState({
-        name: member.name,
-        surname: member.surname ?? "",
+        firstName: member.name,
+        lastName: member.surname ?? "",
         phone: member.phone ?? "",
         birthday: member.birthday ? member.birthday.slice(0, 10) : "",
         membershipNumber: member.membershipNumber ?? "",
         address: member.address ?? "",
-        status: member.status,
+        statusItemId: member.statusItem?.id ?? "",
         notes: member.notes ?? "",
         documentType: member.documents[0]?.type ?? "",
         documentNumber: member.documents[0]?.number ?? "",
         ...initialStatuses,
     });
+
+    const statusQuery = useMemberStatusItems(isOpen);
+
+    useEffect(() => {
+        if (!isOpen) {
+            return;
+        }
+        setProfileForm({
+            firstName: member.name,
+            lastName: member.surname ?? "",
+            phone: member.phone ?? "",
+            birthday: member.birthday ? member.birthday.slice(0, 10) : "",
+            membershipNumber: member.membershipNumber ?? "",
+            address: member.address ?? "",
+            statusItemId: member.statusItem?.id ?? "",
+            notes: member.notes ?? "",
+            documentType: member.documents[0]?.type ?? "",
+            documentNumber: member.documents[0]?.number ?? "",
+            ...initialStatuses,
+        });
+    }, [isOpen, member, initialStatuses]);
 
     const handleSave = async () => {
         setError(null);
@@ -52,23 +72,24 @@ export function MemberProfileEditModal({ member }: MemberProfileEditModalProps) 
             await updateMemberMutation.mutateAsync({
                 memberId: member.id,
                 payload: {
-                    name: profileForm.name,
-                    surname: profileForm.surname || undefined,
-                    phone: profileForm.phone || undefined,
-                    birthday: profileForm.birthday || undefined,
-                    membershipNumber: profileForm.membershipNumber || undefined,
-                    address: profileForm.address || undefined,
-                    status: profileForm.status || undefined,
-                    notes: profileForm.notes || undefined,
-                    isMedical: profileForm.isMedical,
-                    isMj: profileForm.isMj,
-                    isRecreation: profileForm.isRecreation,
-                    documentType: profileForm.documentType || null,
-                    documentNumber: profileForm.documentNumber || null,
+                    membershipNumber: profileForm.membershipNumber || null,
+                    statusItemId: profileForm.statusItemId || undefined,
+                    fields: {
+                        first_name: profileForm.firstName,
+                        last_name: profileForm.lastName || undefined,
+                        phone: profileForm.phone || undefined,
+                        birthday: profileForm.birthday || undefined,
+                        address: profileForm.address || undefined,
+                        notes: profileForm.notes || undefined,
+                        document_type: profileForm.documentType || undefined,
+                        document_number: profileForm.documentNumber || undefined,
+                        is_medical: profileForm.isMedical,
+                        is_mj: profileForm.isMj,
+                        is_recreation: profileForm.isRecreation,
+                    },
                 },
             });
             setIsOpen(false);
-            // Force refresh server components by pushing to the same path
             router.push(pathname);
             router.refresh();
         } catch {
@@ -106,16 +127,16 @@ export function MemberProfileEditModal({ member }: MemberProfileEditModalProps) 
                         <div className="grid gap-3 md:grid-cols-2">
                             <FieldInput
                                 label={t("fields.name")}
-                                value={profileForm.name}
+                                value={profileForm.firstName}
                                 onChange={(e) =>
-                                    setProfileForm((prev) => ({ ...prev, name: e.target.value }))
+                                    setProfileForm((prev) => ({ ...prev, firstName: e.target.value }))
                                 }
                             />
                             <FieldInput
                                 label={t("fields.surname")}
-                                value={profileForm.surname}
+                                value={profileForm.lastName}
                                 onChange={(e) =>
-                                    setProfileForm((prev) => ({ ...prev, surname: e.target.value }))
+                                    setProfileForm((prev) => ({ ...prev, lastName: e.target.value }))
                                 }
                             />
                             <FieldInput
@@ -146,13 +167,27 @@ export function MemberProfileEditModal({ member }: MemberProfileEditModalProps) 
                                     }))
                                 }
                             />
-                            <FieldInput
-                                label={t("fields.status")}
-                                value={profileForm.status}
-                                onChange={(e) =>
-                                    setProfileForm((prev) => ({ ...prev, status: e.target.value }))
-                                }
-                            />
+                            <div className="flex flex-col gap-1">
+                                <label className="text-sm font-medium">{t("fields.status")}</label>
+                                <select
+                                    className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                                    value={profileForm.statusItemId}
+                                    onChange={(e) =>
+                                        setProfileForm((prev) => ({
+                                            ...prev,
+                                            statusItemId: e.target.value,
+                                        }))
+                                    }
+                                    disabled={statusQuery.isPending || statusQuery.isError || statusQuery.isLoading}
+                                >
+                                    <option value="">—</option>
+                                    {(statusQuery.data ?? []).map((s) => (
+                                        <option key={s.id} value={s.id}>
+                                            {s.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                             <FieldInput
                                 label={t("fields.documentType")}
                                 value={profileForm.documentType}

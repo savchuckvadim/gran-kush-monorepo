@@ -21,6 +21,60 @@ enum EmployeeRole {
   admin
 }
 
+enum PortalFieldType {
+  string
+  text
+  int
+  decimal
+  boolean
+  date
+  datetime
+  single_select
+  multi_select
+  email
+  phone
+  url
+  file
+  signature
+  document
+  relation
+}
+
+enum FormPurpose {
+  public_registration
+  crm_create
+  crm_detail
+  member_cabinet
+}
+
+enum StageSemantic {
+  NEW
+  IN_PROGRESS
+  SUCCESS
+  FAILURE
+}
+
+enum PortalTypeEnum {
+  CLUB           @map("club")
+  TATTOO_STUDIO  @map("tattoo_studio")
+  BEAUTY_STUDIO  @map("beauty_studio")
+}
+
+enum SubscriptionStatus {
+  active
+  trialing
+  past_due
+  canceled
+  expired
+}
+
+enum PaymentStatus {
+  pending
+  succeeded
+  failed
+  refunded
+}
+
 model Portal {
   id          String         @id @default(uuid())
   name        String         @unique @db.VarChar(40)
@@ -30,24 +84,31 @@ model Portal {
   updatedAt   DateTime       @updatedAt @map("updated_at")
   type        PortalTypeEnum @default(CLUB) @map("type")
 
-  users          User[]
-  members        Member[]
-  employees      Employee[]
-  tokens         Token[]
-  employeeTokens EmployeeToken[]
+  users              User[]
+  members            Member[]
+  employees          Employee[]
+  tokens             Token[]
+  employeeTokens     EmployeeToken[]
+  entityDefinitions  EntityDefinition[]
+  entityRecords      EntityRecord[]
+  fieldValues        FieldValue[]
+  formDefinitions    FormDefinition[]
+  stageCategories    StageCategory[]
+  statusSets         StatusSet[]
+  subscription       PortalSubscription?
+  payments           Payment[]
 
   @@index([name])
   @@index([status])
   @@map("portals")
 }
 
-// Модель пользователя (минимальная - только для аутентификации)
 model User {
   id                         String    @id @default(uuid())
   portalId                   String?   @map("portal_id")
   email                      String    @unique @db.VarChar(255)
   passwordHash               String    @map("password_hash") @db.VarChar(255)
-  isActive                   Boolean   @default(false) @map("is_active") // По умолчанию false, активируется после подтверждения email
+  isActive                   Boolean   @default(false) @map("is_active")
   emailConfirmed             Boolean   @default(false) @map("email_confirmed")
   emailVerificationToken     String?   @unique @map("email_verification_token") @db.VarChar(255)
   emailVerificationExpiresAt DateTime? @map("email_verification_expires_at")
@@ -56,12 +117,12 @@ model User {
   createdAt                  DateTime  @default(now()) @map("created_at")
   updatedAt                  DateTime  @updatedAt @map("updated_at")
 
-  // Связи
-  portal       Portal?       @relation(fields: [portalId], references: [id], onDelete: SetNull)
-  tokens       Token[]
-  member       Member?
-  employee     Employee?
-  storageFiles StorageFile[]
+  portal        Portal?        @relation(fields: [portalId], references: [id], onDelete: SetNull)
+  tokens        Token[]
+  member        Member?
+  employee      Employee?
+  storageFiles  StorageFile[]
+  platformAdmin PlatformAdmin?
 
   @@index([portalId])
   @@index([email])
@@ -69,7 +130,39 @@ model User {
   @@map("users")
 }
 
-// Модель токенов пользователей (для refresh tokens; одна активная сессия на пару user + device)
+model PlatformAdmin {
+  id        String   @id @default(uuid())
+  userId    String   @unique @map("user_id")
+  role      String   @default("superadmin") @db.VarChar(50)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user   User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokens PlatformAdminToken[]
+
+  @@index([userId])
+  @@map("platform_admins")
+}
+
+model PlatformAdminToken {
+  id              String   @id @default(uuid())
+  token           String   @unique @db.VarChar(500)
+  platformAdminId String   @map("platform_admin_id")
+  deviceId        String   @map("device_id") @db.VarChar(128)
+  revoked         Boolean  @default(false) @map("revoked")
+  expiresAt       DateTime @map("expires_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  platformAdmin PlatformAdmin @relation(fields: [platformAdminId], references: [id], onDelete: Cascade)
+
+  @@index([platformAdminId])
+  @@index([platformAdminId, deviceId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("platform_admin_tokens")
+}
+
 model Token {
   id       String  @id @default(uuid())
   token    String  @unique @db.VarChar(500)
@@ -81,7 +174,6 @@ model Token {
   expiresAt DateTime @map("expires_at")
   createdAt DateTime @default(now()) @map("created_at")
 
-  // Связи
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   portal Portal? @relation(fields: [portalId], references: [id], onDelete: SetNull)
 
@@ -93,7 +185,6 @@ model Token {
   @@map("tokens")
 }
 
-// Модель токенов сотрудников (для refresh tokens; одна активная сессия на пару employee + device)
 model EmployeeToken {
   id         String  @id @default(uuid())
   token      String  @unique @db.VarChar(500)
@@ -105,7 +196,6 @@ model EmployeeToken {
   expiresAt DateTime @map("expires_at")
   createdAt DateTime @default(now()) @map("created_at")
 
-  // Связи
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   portal   Portal?  @relation(fields: [portalId], references: [id], onDelete: SetNull)
 
@@ -117,53 +207,498 @@ model EmployeeToken {
   @@map("employee_tokens")
 }
 
-// Модель документа удостоверения личности
-// Хранит переднюю (first) и заднюю (second) части документа
+// ========================
+// Platform billing
+// ========================
+
+model BillingPlan {
+  id           String   @id @default(uuid())
+  code         String   @unique @db.VarChar(80)
+  name         String   @db.VarChar(255)
+  priceAmount  Decimal  @map("price_amount") @db.Decimal(12, 2)
+  currency     String   @default("EUR") @db.VarChar(3)
+  interval     String   @default("month") @db.VarChar(20)
+  featuresJson Json     @map("features_json")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  subscriptions PortalSubscription[]
+
+  @@index([code])
+  @@map("billing_plans")
+}
+
+model PortalSubscription {
+  id                 String             @id @default(uuid())
+  portalId           String             @unique @map("portal_id")
+  planId             String             @map("plan_id")
+  status             SubscriptionStatus @default(trialing)
+  currentPeriodStart DateTime?          @map("current_period_start")
+  currentPeriodEnd   DateTime?          @map("current_period_end")
+  graceEndsAt        DateTime?          @map("grace_ends_at")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+
+  portal Portal      @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  plan   BillingPlan @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  @@index([planId])
+  @@index([status])
+  @@map("portal_subscriptions")
+}
+
+model Payment {
+  id         String        @id @default(uuid())
+  portalId   String        @map("portal_id")
+  amount     Decimal       @db.Decimal(12, 2)
+  currency   String        @default("EUR") @db.VarChar(3)
+  status     PaymentStatus @default(pending)
+  provider   String?       @db.VarChar(50)
+  externalId String?       @map("external_id") @db.VarChar(255)
+  paidAt     DateTime?     @map("paid_at")
+  createdAt  DateTime      @default(now()) @map("created_at")
+  updatedAt  DateTime      @updatedAt @map("updated_at")
+
+  portal Portal @relation(fields: [portalId], references: [id], onDelete: Cascade)
+
+  @@index([portalId])
+  @@index([status])
+  @@map("payments")
+}
+
+// ========================
+// Global templates (platform → portal provisioning)
+// ========================
+
+model GlobalEntityTemplate {
+  id                      String   @id @default(uuid())
+  code                    String   @unique @db.VarChar(80)
+  name                    String   @db.VarChar(255)
+  applicablePortalTypes   Json?    @map("applicable_portal_types")
+  modulesJson             Json?    @map("modules_json")
+  isActive                Boolean  @default(true) @map("is_active")
+  createdAt               DateTime @default(now()) @map("created_at")
+  updatedAt               DateTime @updatedAt @map("updated_at")
+
+  fieldTemplates           GlobalFieldTemplate[]
+  statusSetTemplates       GlobalStatusSetTemplate[]
+  stageCategoryTemplates   GlobalStageCategoryTemplate[]
+  entityDefinitions        EntityDefinition[]
+
+  @@map("global_entity_templates")
+}
+
+model GlobalFieldTemplate {
+  id                     String          @id @default(uuid())
+  globalEntityTemplateId String          @map("global_entity_template_id")
+  fieldKey               String          @map("field_key") @db.VarChar(120)
+  type                   PortalFieldType
+  label                  String?         @db.VarChar(255)
+  labelI18n              Json?           @map("label_i18n")
+  helpText               String?         @map("help_text") @db.Text
+  isSystem               Boolean         @default(false) @map("is_system")
+  isImmutable            Boolean         @default(false) @map("is_immutable")
+  deletableByPortal      Boolean         @default(true) @map("deletable_by_portal")
+  customizableByPortal   Boolean         @default(true) @map("customizable_by_portal")
+  defaultValueJson       Json?           @map("default_value_json")
+  validationJson         Json?           @map("validation_json")
+  isMultiple             Boolean         @default(false) @map("is_multiple")
+  sortOrder              Int             @default(0) @map("sort_order")
+  showInFilters          Boolean         @default(false) @map("show_in_filters")
+  createdAt              DateTime        @default(now()) @map("created_at")
+  updatedAt              DateTime        @updatedAt @map("updated_at")
+
+  globalEntityTemplate GlobalEntityTemplate      @relation(fields: [globalEntityTemplateId], references: [id], onDelete: Cascade)
+  options              GlobalFieldOptionTemplate[]
+
+  @@unique([globalEntityTemplateId, fieldKey])
+  @@index([globalEntityTemplateId])
+  @@map("global_field_templates")
+}
+
+model GlobalFieldOptionTemplate {
+  id                    String   @id @default(uuid())
+  globalFieldTemplateId String   @map("global_field_template_id")
+  valueKey              String   @map("value_key") @db.VarChar(120)
+  label                 String   @db.VarChar(255)
+  sortOrder             Int      @default(0) @map("sort_order")
+  color                 String?  @db.VarChar(32)
+  isActive              Boolean  @default(true) @map("is_active")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  globalFieldTemplate GlobalFieldTemplate @relation(fields: [globalFieldTemplateId], references: [id], onDelete: Cascade)
+
+  @@unique([globalFieldTemplateId, valueKey])
+  @@index([globalFieldTemplateId])
+  @@map("global_field_option_templates")
+}
+
+model GlobalStatusSetTemplate {
+  id                     String   @id @default(uuid())
+  globalEntityTemplateId String   @map("global_entity_template_id")
+  code                   String   @db.VarChar(80)
+  isSystem               Boolean  @default(false) @map("is_system")
+  isImmutable            Boolean  @default(false) @map("is_immutable")
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+
+  globalEntityTemplate GlobalEntityTemplate       @relation(fields: [globalEntityTemplateId], references: [id], onDelete: Cascade)
+  items                GlobalStatusItemTemplate[]
+
+  @@unique([globalEntityTemplateId, code])
+  @@index([globalEntityTemplateId])
+  @@map("global_status_set_templates")
+}
+
+model GlobalStatusItemTemplate {
+  id                        String   @id @default(uuid())
+  globalStatusSetTemplateId String   @map("global_status_set_template_id")
+  key                       String   @db.VarChar(80)
+  label                     String   @db.VarChar(255)
+  labelI18n                 Json?    @map("label_i18n")
+  color                     String?  @db.VarChar(32)
+  sortOrder                 Int      @default(0) @map("sort_order")
+  isActive                  Boolean  @default(true) @map("is_active")
+  isSystem                  Boolean  @default(false) @map("is_system")
+  semantic                  String?  @db.VarChar(32)
+  createdAt                 DateTime @default(now()) @map("created_at")
+  updatedAt                 DateTime @updatedAt @map("updated_at")
+
+  globalStatusSetTemplate GlobalStatusSetTemplate @relation(fields: [globalStatusSetTemplateId], references: [id], onDelete: Cascade)
+
+  @@unique([globalStatusSetTemplateId, key])
+  @@index([globalStatusSetTemplateId])
+  @@map("global_status_item_templates")
+}
+
+model GlobalStageCategoryTemplate {
+  id                     String   @id @default(uuid())
+  globalEntityTemplateId String   @map("global_entity_template_id")
+  code                   String   @db.VarChar(80)
+  name                   String   @db.VarChar(255)
+  isDefault              Boolean  @default(true) @map("is_default")
+  isSystem               Boolean  @default(false) @map("is_system")
+  hiddenInUi             Boolean  @default(false) @map("hidden_in_ui")
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+
+  globalEntityTemplate GlobalEntityTemplate  @relation(fields: [globalEntityTemplateId], references: [id], onDelete: Cascade)
+  stages               GlobalStageTemplate[]
+
+  @@unique([globalEntityTemplateId, code])
+  @@index([globalEntityTemplateId])
+  @@map("global_stage_category_templates")
+}
+
+model GlobalStageTemplate {
+  id                            String        @id @default(uuid())
+  globalStageCategoryTemplateId String        @map("global_stage_category_template_id")
+  name                          String        @db.VarChar(255)
+  sortOrder                     Int           @default(0) @map("sort_order")
+  color                         String?       @db.VarChar(32)
+  semantic                      StageSemantic
+  isTerminalSuccess             Boolean       @default(false) @map("is_terminal_success")
+  isTerminalFailure             Boolean       @default(false) @map("is_terminal_failure")
+  createdAt                     DateTime      @default(now()) @map("created_at")
+  updatedAt                     DateTime      @updatedAt @map("updated_at")
+
+  globalStageCategoryTemplate GlobalStageCategoryTemplate @relation(fields: [globalStageCategoryTemplateId], references: [id], onDelete: Cascade)
+
+  @@index([globalStageCategoryTemplateId])
+  @@map("global_stage_templates")
+}
+
+// ========================
+// Entity-first CRM core
+// ========================
+
+model EntityDefinition {
+  id                      String   @id @default(uuid())
+  portalId                String   @map("portal_id")
+  code                    String   @db.VarChar(80)
+  name                    String   @db.VarChar(255)
+  isSystem                Boolean  @default(false) @map("is_system")
+  isActive                Boolean  @default(true) @map("is_active")
+  applicablePortalTypes   Json?    @map("applicable_portal_types")
+  globalTemplateId        String?  @map("global_template_id")
+  createdAt               DateTime @default(now()) @map("created_at")
+  updatedAt               DateTime @updatedAt @map("updated_at")
+
+  portal           Portal                @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  globalTemplate   GlobalEntityTemplate? @relation(fields: [globalTemplateId], references: [id], onDelete: SetNull)
+  records          EntityRecord[]
+  fieldDefinitions FieldDefinition[]
+  formDefinitions  FormDefinition[]
+  statusSets       StatusSet[]
+  stageCategories  StageCategory[]
+
+  @@unique([portalId, code])
+  @@index([portalId])
+  @@index([globalTemplateId])
+  @@map("entity_definitions")
+}
+
+model EntityRecord {
+  id                 String   @id @default(uuid())
+  portalId           String   @map("portal_id")
+  entityDefinitionId String   @map("entity_definition_id")
+  statusItemId       String?  @map("status_item_id")
+  isActive           Boolean  @default(true) @map("is_active")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  portal             Portal             @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  entityDefinition   EntityDefinition   @relation(fields: [entityDefinitionId], references: [id], onDelete: Cascade)
+  statusItem         StatusItem?        @relation(fields: [statusItemId], references: [id], onDelete: SetNull)
+  fieldValues        FieldValue[]
+  member             Member?
+  identityDocuments  IdentityDocument[]
+  signature          Signature?
+  memberDocuments    MemberDocument[]
+  memberMjStatuses   MemberMjStatus[]
+  qrCode             QrCode?
+  presenceSessions   PresenceSession[]
+  ordersAsCustomer   Order[]            @relation("OrderCustomer")
+  financialTransactions FinancialTransaction[]
+
+  @@index([portalId, entityDefinitionId])
+  @@index([statusItemId])
+  @@map("entity_records")
+}
+
+model StatusSet {
+  id                 String   @id @default(uuid())
+  portalId           String   @map("portal_id")
+  entityDefinitionId String   @map("entity_definition_id")
+  code               String   @db.VarChar(80)
+  isSystem           Boolean  @default(false) @map("is_system")
+  isImmutable        Boolean  @default(false) @map("is_immutable")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  portal             Portal             @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  entityDefinition   EntityDefinition   @relation(fields: [entityDefinitionId], references: [id], onDelete: Cascade)
+  items              StatusItem[]
+
+  @@unique([portalId, entityDefinitionId, code])
+  @@index([portalId])
+  @@map("status_sets")
+}
+
+model StatusItem {
+  id          String    @id @default(uuid())
+  statusSetId String    @map("status_set_id")
+  key         String    @db.VarChar(80)
+  label       String    @db.VarChar(255)
+  labelI18n   Json?     @map("label_i18n")
+  color       String?   @db.VarChar(32)
+  sortOrder   Int       @default(0) @map("sort_order")
+  isActive    Boolean   @default(true) @map("is_active")
+  isSystem    Boolean   @default(false) @map("is_system")
+  semantic    String?   @db.VarChar(32)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  statusSet      StatusSet      @relation(fields: [statusSetId], references: [id], onDelete: Cascade)
+  entityRecords  EntityRecord[]
+
+  @@unique([statusSetId, key])
+  @@index([statusSetId])
+  @@map("status_items")
+}
+
+model FieldDefinition {
+  id                   String          @id @default(uuid())
+  entityDefinitionId   String          @map("entity_definition_id")
+  fieldKey             String          @map("field_key") @db.VarChar(120)
+  type                 PortalFieldType
+  label                String?         @db.VarChar(255)
+  labelI18n            Json?           @map("label_i18n")
+  helpText             String?         @map("help_text") @db.Text
+  isActive             Boolean         @default(true) @map("is_active")
+  isSystem             Boolean         @default(false) @map("is_system")
+  isImmutable          Boolean         @default(false) @map("is_immutable")
+  deletableByPortal    Boolean         @default(true) @map("deletable_by_portal")
+  customizableByPortal Boolean         @default(true) @map("customizable_by_portal")
+  hidden               Boolean         @default(false)
+  labelOverride        String?         @map("label_override") @db.VarChar(255)
+  readOnlyOverride     Boolean         @default(false) @map("read_only_override")
+  defaultValueJson     Json?           @map("default_value_json")
+  validationJson       Json?           @map("validation_json")
+  isMultiple           Boolean         @default(false) @map("is_multiple")
+  sortOrder            Int             @default(0) @map("sort_order")
+  showInFilters        Boolean         @default(false) @map("show_in_filters")
+  createdAt            DateTime        @default(now()) @map("created_at")
+  updatedAt            DateTime        @updatedAt @map("updated_at")
+
+  entityDefinition EntityDefinition     @relation(fields: [entityDefinitionId], references: [id], onDelete: Cascade)
+  options          FieldOption[]
+  formItems        FormDefinitionItem[]
+  fieldValues      FieldValue[]
+
+  @@unique([entityDefinitionId, fieldKey])
+  @@index([entityDefinitionId])
+  @@map("field_definitions")
+}
+
+model FieldOption {
+  id                String   @id @default(uuid())
+  fieldDefinitionId String   @map("field_definition_id")
+  valueKey          String   @map("value_key") @db.VarChar(120)
+  label             String   @db.VarChar(255)
+  sortOrder         Int      @default(0) @map("sort_order")
+  color             String?  @db.VarChar(32)
+  isActive          Boolean  @default(true) @map("is_active")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  fieldDefinition FieldDefinition @relation(fields: [fieldDefinitionId], references: [id], onDelete: Cascade)
+
+  @@unique([fieldDefinitionId, valueKey])
+  @@index([fieldDefinitionId])
+  @@map("field_options")
+}
+
+model FormDefinition {
+  id                 String      @id @default(uuid())
+  portalId           String      @map("portal_id")
+  entityDefinitionId String      @map("entity_definition_id")
+  purpose            FormPurpose
+  createdAt          DateTime    @default(now()) @map("created_at")
+  updatedAt          DateTime    @updatedAt @map("updated_at")
+
+  portal           Portal             @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  entityDefinition EntityDefinition   @relation(fields: [entityDefinitionId], references: [id], onDelete: Cascade)
+  items            FormDefinitionItem[]
+
+  @@unique([portalId, entityDefinitionId, purpose])
+  @@index([portalId])
+  @@map("form_definitions")
+}
+
+model FormDefinitionItem {
+  id               String   @id @default(uuid())
+  formDefinitionId String   @map("form_definition_id")
+  fieldDefinitionId String  @map("field_definition_id")
+  sortOrder        Int      @default(0) @map("sort_order")
+  required         Boolean  @default(false)
+  visible          Boolean  @default(true)
+  readOnly         Boolean  @default(false) @map("read_only")
+  sectionCode      String?  @map("section_code") @db.VarChar(80)
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  formDefinition    FormDefinition    @relation(fields: [formDefinitionId], references: [id], onDelete: Cascade)
+  fieldDefinition   FieldDefinition   @relation(fields: [fieldDefinitionId], references: [id], onDelete: Cascade)
+
+  @@unique([formDefinitionId, fieldDefinitionId])
+  @@index([formDefinitionId])
+  @@map("form_definition_items")
+}
+
+model FieldValue {
+  id                String   @id @default(uuid())
+  portalId          String   @map("portal_id")
+  entityRecordId    String   @map("entity_record_id")
+  fieldDefinitionId String   @map("field_definition_id")
+  valueIndex        Int      @default(0) @map("value_index")
+  valueJson         Json     @map("value_json")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  portal          Portal          @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  entityRecord    EntityRecord    @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
+  fieldDefinition FieldDefinition @relation(fields: [fieldDefinitionId], references: [id], onDelete: Cascade)
+
+  @@unique([entityRecordId, fieldDefinitionId, valueIndex])
+  @@index([portalId])
+  @@index([entityRecordId])
+  @@index([fieldDefinitionId])
+  @@map("field_values")
+}
+
+model StageCategory {
+  id                 String   @id @default(uuid())
+  portalId           String   @map("portal_id")
+  entityDefinitionId String   @map("entity_definition_id")
+  code               String   @db.VarChar(80)
+  name               String   @db.VarChar(255)
+  isDefault          Boolean  @default(true) @map("is_default")
+  isSystem           Boolean  @default(false) @map("is_system")
+  hiddenInUi         Boolean  @default(false) @map("hidden_in_ui")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  portal           Portal           @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  entityDefinition EntityDefinition @relation(fields: [entityDefinitionId], references: [id], onDelete: Cascade)
+  stages           Stage[]
+
+  @@unique([portalId, entityDefinitionId, code])
+  @@index([portalId])
+  @@map("stage_categories")
+}
+
+model Stage {
+  id                  String        @id @default(uuid())
+  stageCategoryId     String        @map("stage_category_id")
+  name                String        @db.VarChar(255)
+  sortOrder           Int           @default(0) @map("sort_order")
+  color               String?       @db.VarChar(32)
+  semantic            StageSemantic
+  isTerminalSuccess   Boolean       @default(false) @map("is_terminal_success")
+  isTerminalFailure   Boolean       @default(false) @map("is_terminal_failure")
+  createdAt           DateTime      @default(now()) @map("created_at")
+  updatedAt           DateTime      @updatedAt @map("updated_at")
+
+  stageCategory StageCategory @relation(fields: [stageCategoryId], references: [id], onDelete: Cascade)
+  orders        Order[]
+
+  @@index([stageCategoryId])
+  @@map("stages")
+}
+
 model IdentityDocument {
-  id          String   @id @default(uuid())
-  memberId    String   @map("member_id")
-  type        String   @db.VarChar(50) // ID, passport, etc. - тип документа
-  side        String   @db.VarChar(20) // first, second - сторона документа
-  storagePath String   @map("storage_path") @db.VarChar(500) // Путь в storage
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id             String   @id @default(uuid())
+  entityRecordId String   @map("entity_record_id")
+  type           String   @db.VarChar(50)
+  side           String   @db.VarChar(20)
+  storagePath    String   @map("storage_path") @db.VarChar(500)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
-  // Связи
-  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  entityRecord EntityRecord @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
 
-  @@unique([memberId, type, side]) // Один документ одного типа с одной стороной на члена
-  @@index([memberId])
+  @@unique([entityRecordId, type, side])
+  @@index([entityRecordId])
   @@index([type])
   @@index([side])
   @@map("identity_documents")
 }
 
-// Модель подписи члена клуба
 model Signature {
-  id          String   @id @default(uuid())
-  memberId    String   @unique @map("member_id")
-  storagePath String   @map("storage_path") @db.VarChar(500) // Путь к скан-картинке подписи
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id             String   @id @default(uuid())
+  entityRecordId String   @unique @map("entity_record_id")
+  storagePath    String   @map("storage_path") @db.VarChar(500)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
-  // Связи
-  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  entityRecord EntityRecord @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
 
-  @@index([memberId])
+  @@index([entityRecordId])
   @@map("signatures")
 }
 
-// Модель статуса употребления марихуаны
 model MjStatus {
   id          String   @id @default(uuid())
-  code        String   @unique @db.VarChar(50) // medical, mj, recreation
-  name        String   @db.VarChar(255) // Название статуса
+  code        String   @unique @db.VarChar(50)
+  name        String   @db.VarChar(255)
   description String?  @db.Text
   isActive    Boolean  @default(true) @map("is_active")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  // Связи
   memberMjStatuses MemberMjStatus[]
 
   @@index([code])
@@ -171,34 +706,30 @@ model MjStatus {
   @@map("mj_statuses")
 }
 
-// Связь Member и MjStatus (many-to-many)
 model MemberMjStatus {
-  id         String   @id @default(uuid())
-  memberId   String   @map("member_id")
-  mjStatusId String   @map("mj_status_id")
-  createdAt  DateTime @default(now()) @map("created_at")
+  id             String   @id @default(uuid())
+  entityRecordId String   @map("entity_record_id")
+  mjStatusId     String   @map("mj_status_id")
+  createdAt      DateTime @default(now()) @map("created_at")
 
-  // Связи
-  member   Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  mjStatus MjStatus @relation(fields: [mjStatusId], references: [id], onDelete: Cascade)
+  entityRecord EntityRecord @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
+  mjStatus     MjStatus     @relation(fields: [mjStatusId], references: [id], onDelete: Cascade)
 
-  @@unique([memberId, mjStatusId])
-  @@index([memberId])
+  @@unique([entityRecordId, mjStatusId])
+  @@index([entityRecordId])
   @@index([mjStatusId])
   @@map("member_mj_statuses")
 }
 
-// Модель документа (тип и номер)
 model Document {
   id          String   @id @default(uuid())
-  type        String   @unique @db.VarChar(50) // passport, id, driver_license, etc.
-  name        String   @db.VarChar(255) // Название типа документа
+  type        String   @unique @db.VarChar(50)
+  name        String   @db.VarChar(255)
   description String?  @db.Text
   isActive    Boolean  @default(true) @map("is_active")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  // Связи
   memberDocuments MemberDocument[]
 
   @@index([type])
@@ -206,80 +737,55 @@ model Document {
   @@map("documents")
 }
 
-// Связь Member и Document (many-to-many с дополнительными полями)
 model MemberDocument {
-  id         String    @id @default(uuid())
-  memberId   String    @map("member_id")
-  documentId String    @map("document_id")
-  number     String    @db.VarChar(100) // Номер документа
-  issuedAt   DateTime? @map("issued_at") @db.Date // Дата выдачи
-  expiresAt  DateTime? @map("expires_at") @db.Date // Дата истечения
-  issuedBy   String?   @map("issued_by") @db.VarChar(255) // Кем выдан
-  createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime  @updatedAt @map("updated_at")
+  id             String    @id @default(uuid())
+  entityRecordId String    @map("entity_record_id")
+  documentId     String    @map("document_id")
+  number         String    @db.VarChar(100)
+  issuedAt       DateTime? @map("issued_at") @db.Date
+  expiresAt      DateTime? @map("expires_at") @db.Date
+  issuedBy       String?   @map("issued_by") @db.VarChar(255)
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
-  // Связи
-  member   Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  entityRecord EntityRecord @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
+  document     Document     @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
-  @@index([memberId])
+  @@index([entityRecordId])
   @@index([documentId])
   @@index([number])
   @@map("member_documents")
 }
 
-// Модель члена клуба (расширяет пользователя)
 model Member {
-  id               String    @id @default(uuid())
-  userId           String    @unique @map("user_id") // Один User может иметь только одного Member
-  portalId         String?   @map("portal_id")
-  // Личные данные
-  name             String    @db.VarChar(255)
-  surname          String?   @db.VarChar(255)
-  phone            String?   @db.VarChar(20)
-  birthday         DateTime? @db.Date
-  // Данные членства
-  membershipNumber String?   @unique @map("membership_number") @db.VarChar(50)
-  address          String?   @db.Text
-  // Статус заявки/членства
-  status           String    @default("inProgress") @db.VarChar(50) // inProgress, approved, rejected, pending
-  // Дополнительные данные
-  notes            String?   @db.Text
-  isActive         Boolean   @default(true) @map("is_active")
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
+  id               String  @id @default(uuid())
+  userId           String  @unique @map("user_id")
+  portalId         String? @map("portal_id")
+  entityRecordId   String  @unique @map("entity_record_id")
+  membershipNumber String? @unique @map("membership_number") @db.VarChar(50)
+  isActive         Boolean @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
 
-  // Связи
-  portal                Portal?                @relation(fields: [portalId], references: [id], onDelete: SetNull)
-  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  identityDocuments     IdentityDocument[]
-  signature             Signature?
-  memberMjStatuses      MemberMjStatus[]
-  memberDocuments       MemberDocument[]
-  qrCode                QrCode?
-  presenceSessions      PresenceSession[]
-  orders                Order[]
-  financialTransactions FinancialTransaction[]
+  portal   Portal?      @relation(fields: [portalId], references: [id], onDelete: SetNull)
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profile  EntityRecord @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
 
   @@index([portalId])
   @@index([userId])
   @@index([membershipNumber])
-  @@index([status])
   @@index([isActive])
   @@map("members")
 }
 
-// Модель сотрудника (для входа в CRM)
 model Employee {
   id          String    @id @default(uuid())
-  userId      String    @unique @map("user_id") // Один User может иметь только одного Employee
+  userId      String    @unique @map("user_id")
   portalId    String?   @map("portal_id")
-  // Личные данные
   name        String    @db.VarChar(255)
   surname     String?   @db.VarChar(255)
   phone       String?   @db.VarChar(20)
-  // Рабочие данные
-  role        String    @default("employee") @db.VarChar(50) // employee, manager, admin (admin может входить в админку)
+  role        String    @default("employee") @db.VarChar(50)
   position    String?   @db.VarChar(255)
   department  String?   @db.VarChar(255)
   isActive    Boolean   @default(true) @map("is_active")
@@ -287,15 +793,14 @@ model Employee {
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  // Связи
   portal                Portal?                @relation(fields: [portalId], references: [id], onDelete: SetNull)
   user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
   tokens                EmployeeToken[]
-  presenceSessions      PresenceSession[]      @relation("PresenceEmployee") // Сессии, где сотрудник отметил вход/выход
-  processedOrders       Order[]                @relation("OrderEmployee") // Заказы, обработанные сотрудником
-  createdProducts       Product[]              @relation("ProductCreatedBy") // Товары, созданные сотрудником
-  updatedProducts       Product[]              @relation("ProductUpdatedBy") // Товары, обновленные сотрудником
-  financialTransactions FinancialTransaction[] @relation("TransactionCreatedBy") // Транзакции, созданные сотрудником
+  presenceSessions      PresenceSession[]      @relation("PresenceEmployee")
+  processedOrders       Order[]                @relation("OrderEmployee")
+  createdProducts       Product[]              @relation("ProductCreatedBy")
+  updatedProducts       Product[]              @relation("ProductUpdatedBy")
+  financialTransactions FinancialTransaction[] @relation("TransactionCreatedBy")
 
   @@index([portalId])
   @@index([userId])
@@ -304,22 +809,20 @@ model Employee {
   @@map("employees")
 }
 
-// Модель файлов в storage
 model StorageFile {
   id           String   @id @default(uuid())
   userId       String   @map("user_id")
   originalName String   @map("original_name") @db.VarChar(255)
   fileName     String   @map("file_name") @db.VarChar(255)
   mimeType     String   @map("mime_type") @db.VarChar(100)
-  size         Int // Размер в байтах
-  storageType  String   @map("storage_type") @db.VarChar(20) // public, private
-  category     String   @db.VarChar(50) // member-document, member-signature, product-image, etc.
-  path         String   @db.VarChar(500) // Относительный путь от корня storage
-  url          String   @db.VarChar(500) // Полный URL для доступа к файлу
+  size         Int
+  storageType  String   @map("storage_type") @db.VarChar(20)
+  category     String   @db.VarChar(50)
+  path         String   @db.VarChar(500)
+  url          String   @db.VarChar(500)
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  // Связи
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -329,67 +832,53 @@ model StorageFile {
   @@map("storage_files")
 }
 
-// ========================
-// QR-коды и присутствие
-// ========================
-
-// QR-код члена клуба
 model QrCode {
-  id            String   @id @default(uuid())
-  memberId      String   @unique @map("member_id")
-  encryptedCode String   @map("encrypted_code") @db.VarChar(1000) // Зашифрованный payload QR-кода
-  expiresAt     DateTime @map("expires_at") // Срок действия QR-кода
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id             String   @id @default(uuid())
+  entityRecordId String   @unique @map("entity_record_id")
+  encryptedCode  String   @map("encrypted_code") @db.VarChar(1000)
+  expiresAt      DateTime @map("expires_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
-  // Связи
-  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  entityRecord EntityRecord @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
 
-  @@index([memberId])
+  @@index([entityRecordId])
   @@index([encryptedCode])
   @@index([expiresAt])
   @@map("qr_codes")
 }
 
-// Сессия присутствия (каждый вход — новая сессия)
 model PresenceSession {
-  id          String    @id @default(uuid())
-  memberId    String    @map("member_id")
-  employeeId  String?   @map("employee_id") // Сотрудник, отметивший вход/выход вручную
-  enteredAt   DateTime  @default(now()) @map("entered_at")
-  exitedAt    DateTime? @map("exited_at")
-  entryMethod String    @map("entry_method") @db.VarChar(50) // "qr", "manual_employee"
-  exitMethod  String?   @map("exit_method") @db.VarChar(50) // "qr", "manual_employee", "auto_cron"
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  id             String    @id @default(uuid())
+  entityRecordId String    @map("entity_record_id")
+  employeeId     String?   @map("employee_id")
+  enteredAt      DateTime  @default(now()) @map("entered_at")
+  exitedAt       DateTime? @map("exited_at")
+  entryMethod    String    @map("entry_method") @db.VarChar(50)
+  exitMethod     String?   @map("exit_method") @db.VarChar(50)
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
-  // Связи
-  member   Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  employee Employee? @relation("PresenceEmployee", fields: [employeeId], references: [id], onDelete: SetNull)
+  entityRecord EntityRecord @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
+  employee     Employee?    @relation("PresenceEmployee", fields: [employeeId], references: [id], onDelete: SetNull)
 
-  @@index([memberId])
+  @@index([entityRecordId])
   @@index([employeeId])
   @@index([enteredAt])
   @@index([exitedAt])
   @@map("presence_sessions")
 }
 
-// ========================
-// Каталог товаров
-// ========================
-
-// Единицы измерения
 model MeasurementUnit {
   id          String   @id @default(uuid())
-  code        String   @unique @db.VarChar(50) // "g", "kg", "piece", "ml"
-  name        String   @db.VarChar(255) // "Грамм", "Килограмм", "Штука"
+  code        String   @unique @db.VarChar(50)
+  name        String   @db.VarChar(255)
   description String?  @db.Text
-  isCustom    Boolean  @default(false) @map("is_custom") // Кастомная единица
+  isCustom    Boolean  @default(false) @map("is_custom")
   isActive    Boolean  @default(true) @map("is_active")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  // Связи
   products Product[]
 
   @@index([code])
@@ -397,10 +886,9 @@ model MeasurementUnit {
   @@map("measurement_units")
 }
 
-// Категории товаров (иерархические)
 model ProductCategory {
   id          String   @id @default(uuid())
-  code        String   @unique @db.VarChar(50) // "flower", "edible", "concentrate"
+  code        String   @unique @db.VarChar(50)
   name        String   @db.VarChar(255)
   description String?  @db.Text
   parentId    String?  @map("parent_id")
@@ -409,7 +897,6 @@ model ProductCategory {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  // Связи
   parent   ProductCategory?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
   children ProductCategory[] @relation("CategoryTree")
   products Product[]
@@ -421,47 +908,34 @@ model ProductCategory {
   @@map("product_categories")
 }
 
-// Товары
 model Product {
-  id                String @id @default(uuid())
-  categoryId        String @map("category_id")
-  measurementUnitId String @map("measurement_unit_id")
+  id                String  @id @default(uuid())
+  categoryId        String  @map("category_id")
+  measurementUnitId String  @map("measurement_unit_id")
+  name              String  @db.VarChar(255)
+  description       String? @db.Text
+  sku               String? @unique @db.VarChar(100)
+  price             Decimal @db.Decimal(10, 2)
+  initialQuantity   Decimal @map("initial_quantity") @db.Decimal(10, 3)
+  currentQuantity   Decimal @map("current_quantity") @db.Decimal(10, 3)
+  minQuantity       Decimal? @map("min_quantity") @db.Decimal(10, 3)
+  imageUrl          String? @map("image_url") @db.VarChar(500)
+  isActive          Boolean @default(true) @map("is_active")
+  isAvailable       Boolean @default(true) @map("is_available")
+  thc               Decimal? @db.Decimal(5, 2)
+  cbd               Decimal? @db.Decimal(5, 2)
+  strain            String? @db.VarChar(100)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  createdBy         String?  @map("created_by")
+  updatedBy         String?  @map("updated_by")
 
-  // Основная информация
-  name        String  @db.VarChar(255)
-  description String? @db.Text
-  sku         String? @unique @db.VarChar(100) // Артикул
-
-  // Цена и количество
-  price           Decimal  @db.Decimal(10, 2) // Цена за единицу
-  initialQuantity Decimal  @map("initial_quantity") @db.Decimal(10, 3) // Начальное количество
-  currentQuantity Decimal  @map("current_quantity") @db.Decimal(10, 3) // Текущее количество
-  minQuantity     Decimal? @map("min_quantity") @db.Decimal(10, 3) // Минимальный остаток для уведомления
-
-  // Изображения
-  imageUrl String? @map("image_url") @db.VarChar(500) // Основное изображение
-
-  // Статусы
-  isActive    Boolean @default(true) @map("is_active")
-  isAvailable Boolean @default(true) @map("is_available") // Доступен для заказа
-
-  // Метаданные
-  thc    Decimal? @db.Decimal(5, 2) // Процент THC
-  cbd    Decimal? @db.Decimal(5, 2) // Процент CBD
-  strain String?  @db.VarChar(100) // Сорт
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  createdBy String?  @map("created_by") // Employee ID
-  updatedBy String?  @map("updated_by") // Employee ID
-
-  // Связи
-  category          ProductCategory @relation(fields: [categoryId], references: [id])
-  measurementUnit   MeasurementUnit @relation(fields: [measurementUnitId], references: [id])
-  images            ProductImage[]
-  orderItems        OrderItem[]
-  createdByEmployee Employee?       @relation("ProductCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
-  updatedByEmployee Employee?       @relation("ProductUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
+  category            ProductCategory @relation(fields: [categoryId], references: [id])
+  measurementUnit     MeasurementUnit @relation(fields: [measurementUnitId], references: [id])
+  images              ProductImage[]
+  orderItems          OrderItem[]
+  createdByEmployee   Employee?       @relation("ProductCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  updatedByEmployee   Employee?       @relation("ProductUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
 
   @@index([categoryId])
   @@index([measurementUnitId])
@@ -472,7 +946,6 @@ model Product {
   @@map("products")
 }
 
-// Изображения товаров
 model ProductImage {
   id          String   @id @default(uuid())
   productId   String   @map("product_id")
@@ -481,7 +954,6 @@ model ProductImage {
   isPrimary   Boolean  @default(false) @map("is_primary")
   createdAt   DateTime @default(now()) @map("created_at")
 
-  // Связи
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
@@ -489,76 +961,55 @@ model ProductImage {
   @@map("product_images")
 }
 
-// ========================
-// Заказы
-// ========================
-
-// Заказы
 model Order {
-  id         String  @id @default(uuid())
-  memberId   String  @map("member_id")
-  employeeId String? @map("employee_id") // Сотрудник, обработавший заказ
+  id                     String   @id @default(uuid())
+  customerEntityRecordId String   @map("customer_entity_record_id")
+  employeeId             String?  @map("employee_id")
+  orderNumber            String   @unique @map("order_number") @db.VarChar(50)
+  stageId                String?  @map("stage_id")
+  status                 String   @default("pending") @db.VarChar(50)
+  paymentStatus          String   @default("pending") @map("payment_status") @db.VarChar(50)
+  subtotal               Decimal  @db.Decimal(10, 2)
+  discount               Decimal  @default(0) @db.Decimal(10, 2)
+  total                  Decimal  @db.Decimal(10, 2)
+  orderedAt              DateTime @default(now()) @map("ordered_at")
+  confirmedAt            DateTime? @map("confirmed_at")
+  preparedAt             DateTime? @map("prepared_at")
+  readyAt                DateTime? @map("ready_at")
+  completedAt            DateTime? @map("completed_at")
+  cancelledAt            DateTime? @map("cancelled_at")
+  notes                  String?  @db.Text
+  adminNotes             String?  @map("admin_notes") @db.Text
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
 
-  // Номер заказа (автоинкремент — генерируется сервисом)
-  orderNumber String @unique @map("order_number") @db.VarChar(50) // Например: ORD-20260316-0001
+  customerEntity EntityRecord @relation("OrderCustomer", fields: [customerEntityRecordId], references: [id], onDelete: Cascade)
+  employee       Employee?    @relation("OrderEmployee", fields: [employeeId], references: [id], onDelete: SetNull)
+  stage          Stage?       @relation(fields: [stageId], references: [id], onDelete: SetNull)
+  items          OrderItem[]
+  transactions   FinancialTransaction[]
 
-  // Статус заказа
-  status        String @default("pending") @db.VarChar(50) // pending, confirmed, preparing, ready, completed, cancelled
-  paymentStatus String @default("pending") @map("payment_status") @db.VarChar(50) // pending, paid, refunded
-
-  // Суммы
-  subtotal Decimal @db.Decimal(10, 2) // Сумма без скидок
-  discount Decimal @default(0) @db.Decimal(10, 2)
-  total    Decimal @db.Decimal(10, 2)
-
-  // Временные метки жизненного цикла
-  orderedAt   DateTime  @default(now()) @map("ordered_at")
-  confirmedAt DateTime? @map("confirmed_at")
-  preparedAt  DateTime? @map("prepared_at")
-  readyAt     DateTime? @map("ready_at")
-  completedAt DateTime? @map("completed_at")
-  cancelledAt DateTime? @map("cancelled_at")
-
-  // Примечания
-  notes      String? @db.Text // Примечания от члена
-  adminNotes String? @map("admin_notes") @db.Text // Примечания от сотрудника
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  // Связи
-  member       Member                 @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  employee     Employee?              @relation("OrderEmployee", fields: [employeeId], references: [id], onDelete: SetNull)
-  items        OrderItem[]
-  transactions FinancialTransaction[]
-
-  @@index([memberId])
+  @@index([customerEntityRecordId])
   @@index([employeeId])
   @@index([orderNumber])
   @@index([status])
+  @@index([stageId])
   @@index([paymentStatus])
   @@index([orderedAt])
   @@map("orders")
 }
 
-// Позиции заказа
 model OrderItem {
-  id        String @id @default(uuid())
-  orderId   String @map("order_id")
-  productId String @map("product_id")
+  id         String   @id @default(uuid())
+  orderId    String   @map("order_id")
+  productId  String   @map("product_id")
+  quantity   Decimal  @db.Decimal(10, 3)
+  unitPrice  Decimal  @map("unit_price") @db.Decimal(10, 2)
+  totalPrice Decimal  @map("total_price") @db.Decimal(10, 2)
+  notes      String?  @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
-  // Количество и цена
-  quantity   Decimal @db.Decimal(10, 3)
-  unitPrice  Decimal @map("unit_price") @db.Decimal(10, 2) // Цена на момент заказа
-  totalPrice Decimal @map("total_price") @db.Decimal(10, 2) // quantity * unitPrice
-
-  // Примечания
-  notes String? @db.Text
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  // Связи
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id])
 
@@ -567,52 +1018,30 @@ model OrderItem {
   @@map("order_items")
 }
 
-// ========================
-// Финансовая система
-// ========================
-
-// Финансовые транзакции
 model FinancialTransaction {
-  id       String  @id @default(uuid())
-  orderId  String? @map("order_id")
-  memberId String? @map("member_id")
-
-  // Тип транзакции
-  type      String @db.VarChar(50) // "order_payment", "refund", "adjustment", "manual"
-  direction String @db.VarChar(20) // "income", "expense"
-
-  // Суммы
-  amount   Decimal @db.Decimal(10, 2)
-  currency String  @default("EUR") @db.VarChar(3)
-
-  // Метод оплаты
-  paymentMethod String? @map("payment_method") @db.VarChar(50) // "cash", "card", "crypto"
-
-  // Временные метки
+  id              String   @id @default(uuid())
+  orderId         String?  @map("order_id")
+  entityRecordId  String?  @map("entity_record_id")
+  type            String   @db.VarChar(50)
+  direction       String   @db.VarChar(20)
+  amount          Decimal  @db.Decimal(10, 2)
+  currency        String   @default("EUR") @db.VarChar(3)
+  paymentMethod   String?  @map("payment_method") @db.VarChar(50)
   transactionDate DateTime @default(now()) @map("transaction_date")
   createdAt       DateTime @default(now()) @map("created_at")
-  createdBy       String?  @map("created_by") // Employee ID
+  createdBy       String?  @map("created_by")
+  description     String?  @db.Text
+  notes           String?  @db.Text
 
-  // Примечания
-  description String? @db.Text
-  notes       String? @db.Text
-
-  // Связи
   order             Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
-  member            Member?   @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  entityRecord      EntityRecord? @relation(fields: [entityRecordId], references: [id], onDelete: SetNull)
   createdByEmployee Employee? @relation("TransactionCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
 
   @@index([orderId])
-  @@index([memberId])
+  @@index([entityRecordId])
   @@index([type])
   @@index([direction])
   @@index([transactionDate])
   @@index([createdBy])
   @@map("financial_transactions")
-}
-
-enum PortalTypeEnum {
-  CLUB @map("club")
-  TATTOO_STUDIO @map("tattoo_studio")
-  BEAUTY_STUDIO @map("beauty_studio")
 }

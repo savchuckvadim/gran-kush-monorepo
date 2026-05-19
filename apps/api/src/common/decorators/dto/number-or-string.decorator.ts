@@ -9,7 +9,7 @@ export function IsNumberOrString(validationOptions?: ValidationOptions) {
             propertyName: propertyName,
             options: validationOptions,
             validator: {
-                validate(value: any, args: ValidationArguments) {
+                validate(value: unknown, _args: ValidationArguments) {
                     return typeof value === "string" || typeof value === "number";
                 },
                 defaultMessage(args: ValidationArguments) {

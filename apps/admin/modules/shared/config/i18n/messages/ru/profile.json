@@ -1,0 +1,17 @@
+{
+    "profile": {
+        "title": "Личный кабинет",
+        "subtitle": "Управляйте своим аккаунтом и настройками",
+        "profile": "Профиль",
+        "settings": "Настройки",
+        "logout": "Выйти",
+        "profileInformation": "Информация о профиле",
+        "name": "Имя",
+        "email": "Email",
+        "memberStatus": "Статус участника",
+        "activeMember": "Активный участник",
+        "quickActions": "Быстрые действия",
+        "completeRegistration": "Завершить регистрацию",
+        "contactSupport": "Связаться с поддержкой"
+    }
+}

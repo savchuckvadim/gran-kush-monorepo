@@ -1,5 +1,5 @@
-import { Employee } from "@employees/domain/entity/employee.entity";
-import { Member } from "@members/domain/entity/member.entity";
+import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
+import { Member } from "@modules/portal/crm/members/domain/entity/member.entity";
 /**
  * Domain Entity - User
  * Минимальная модель - только для аутентификации

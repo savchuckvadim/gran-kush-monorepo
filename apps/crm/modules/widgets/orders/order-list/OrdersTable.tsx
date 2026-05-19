@@ -10,8 +10,8 @@ import type { SchemaOrderListDto } from "@workspace/api-client/core";
 import { Button, Card } from "@workspace/ui";
 
 import { type OrderStatus, useOrders } from "@/modules/entities/order";
-import { ROUTES } from "@/modules/shared/config/routes";
 import { EntityList, type EntityListTableColumn } from "@/modules/shared";
+import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
 const STATUS_COLORS: Record<string, string> = {

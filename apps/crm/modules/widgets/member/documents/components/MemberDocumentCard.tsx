@@ -28,12 +28,12 @@ export function MemberDocumentCard({ memberId, document }: IMemberDocumentCardPr
                     memberId={memberId}
                     documentId={document.id}
                     type={document.type}
-                    side={document.side}
-                    alt={`${document.type}-${document.side}`}
+                    side={document.side ?? "first"}
+                    alt={`${document.type}-${document.side ?? "side"}`}
                 />
             </div>
             <div className="border-t px-2 py-1 text-xs text-muted-foreground">
-                {document.type} · {document.side}
+                {document.type} · {document.side ?? "—"}
             </div>
         </Link>
     );

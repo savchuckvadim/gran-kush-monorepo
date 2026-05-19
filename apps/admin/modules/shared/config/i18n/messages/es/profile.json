@@ -1,0 +1,17 @@
+{
+    "profile": {
+        "title": "Cabina Personal",
+        "subtitle": "Administra tu cuenta y preferencias",
+        "profile": "Perfil",
+        "settings": "Configuración",
+        "logout": "Cerrar sesión",
+        "profileInformation": "Información del Perfil",
+        "name": "Nombre",
+        "email": "Correo electrónico",
+        "memberStatus": "Estado del Miembro",
+        "activeMember": "Miembro Activo",
+        "quickActions": "Acciones Rápidas",
+        "completeRegistration": "Completar Registro",
+        "contactSupport": "Contactar Soporte"
+    }
+}

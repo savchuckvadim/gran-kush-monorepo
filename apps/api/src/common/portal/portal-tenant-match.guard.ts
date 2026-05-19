@@ -1,8 +1,9 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common";
 
-import { Employee } from "@employees/domain/entity/employee.entity";
-import { Member } from "@members/domain/entity/member.entity";
 import type { Request } from "express";
+
+import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
+import { Member } from "@modules/portal/crm/members/domain/entity/member.entity";
 
 /**
  * После JWT: сравнивает portalId сущности с portalId запроса (из {@link PortalRequestContext}).

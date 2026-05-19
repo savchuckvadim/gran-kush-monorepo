@@ -17,7 +17,6 @@ import {
     ApiTags,
 } from "@nestjs/swagger";
 
-import { RequireEmployeeAdmin } from "@auth/employees";
 import { CreateUserDto } from "@users/api/dto/create-user.dto";
 import { UpdateUserDto } from "@users/api/dto/update-user.dto";
 import { UserResponseDto } from "@users/api/dto/user-response.dto";
@@ -26,6 +25,7 @@ import { UsersService } from "@users/application/services/users.service";
 import { Admin } from "@common/decorators/auth/admin.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { RequireEmployeeAdmin } from "@modules/portal/auth/employees";
 
 @ApiTags("Users (Admin only)")
 @Controller("users")

@@ -1,8 +1,10 @@
 import { Module } from "@nestjs/common";
 import { ScheduleModule } from "@nestjs/schedule";
 
-import { PresenceModule } from "@presence/presence.module";
+import { PrismaModule } from "@common/prisma/prisma.module";
+import { PresenceModule } from "@modules/portal/crm/presence/presence.module";
 
+import { BillingCronService } from "./services/billing-cron.service";
 import { PresenceCronService } from "./services/presence-cron.service";
 
 /**
@@ -14,7 +16,7 @@ import { PresenceCronService } from "./services/presence-cron.service";
  * Все cron-задачи используют Europe/Madrid (Испания) в качестве таймзоны.
  */
 @Module({
-    imports: [ScheduleModule.forRoot(), PresenceModule],
-    providers: [PresenceCronService],
+    imports: [ScheduleModule.forRoot(), PrismaModule, PresenceModule],
+    providers: [PresenceCronService, BillingCronService],
 })
 export class CronModule {}

@@ -22,13 +22,15 @@ export const getAuthMiddleware = (
                 // @ts-expect-error - _retryRequest is not a property of Request
                 request._retryRequest = request.clone();
                 return;
+            } else {
+                const accessToken = storage.getAccessToken();
+                if (accessToken) {
+                    request.headers.set("Authorization", `Bearer ${accessToken}`);
+                }
+                // @ts-expect-error - _retryRequest is not a property of Request
+                request._retryRequest = request.clone();
+                return;
             }
-            const accessToken = storage.getAccessToken();
-            if (accessToken) {
-                request.headers.set("Authorization", `Bearer ${accessToken}`);
-            }
-            // @ts-expect-error - _retryRequest is not a property of Request
-            request._retryRequest = request.clone();
         },
         onResponse: async ({ request, response }) => {
             if (response.ok) {

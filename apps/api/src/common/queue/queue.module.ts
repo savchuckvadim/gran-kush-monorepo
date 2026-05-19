@@ -19,7 +19,7 @@ import { RedisModule } from "@common/redis/redis.module";
 
                 // If URL is provided, parse it; otherwise use individual options
                 if (redisOptions.url) {
-                    const url = new URL(redisOptions.url);
+                    void new URL(redisOptions.url);
                     return {
                         connection: {
                             url: redisOptions.url,

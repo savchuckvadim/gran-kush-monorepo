@@ -1,0 +1,17 @@
+{
+    "navigation": {
+        "home": "Home",
+        "about": "About Us",
+        "contacts": "Contacts",
+        "login": "Login",
+        "register": "Register",
+        "profile": "Profile",
+        "settings": "Settings",
+        "logout": "Logout",
+        "privacy": "Privacy",
+        "terms": "Terms",
+        "navigationSection": "Navigation",
+        "accountSection": "Account",
+        "legalSection": "Legal"
+    }
+}

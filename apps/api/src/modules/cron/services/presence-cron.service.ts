@@ -1,7 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 
-import { PresenceService } from "@presence/application/services/presence.service";
+import { PresenceService } from "@modules/portal/crm/presence/application/services/presence.service";
 
 /**
  * Cron-задачи для модуля присутствия.

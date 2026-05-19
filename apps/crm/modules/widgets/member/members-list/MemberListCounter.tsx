@@ -2,11 +2,11 @@
 
 import { useTranslations } from "next-intl";
 
-import { useCrmMembers } from "@/modules/entities/member";
+import { type CrmMemberListFilters, useCrmMembers } from "@/modules/entities/member";
 
-export function MemberListCounter() {
+export function MemberListCounter({ filters }: { filters?: CrmMemberListFilters }) {
     const t = useTranslations("crm.members");
-    const { data: members, isLoading, error } = useCrmMembers();
+    const { data: members, isLoading, error } = useCrmMembers(100, filters);
 
     if (isLoading) {
         return <div>Loading...</div>;

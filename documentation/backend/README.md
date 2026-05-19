@@ -6,6 +6,8 @@ The backend API is built with **NestJS 11**, following Domain-Driven Design (DDD
 
 **Current HTTP contract (errors, CORS, portal headers, cookies vs mobile):** [HTTP_API_CONTRACT.md](./HTTP_API_CONTRACT.md)
 
+**Entity-first CRM, платформа, биллинг:** [ENTITY_PLATFORM_ARCHITECTURE.md](./ENTITY_PLATFORM_ARCHITECTURE.md)
+
 ## Architecture
 
 ### Design Patterns
@@ -19,6 +21,7 @@ The backend API is built with **NestJS 11**, following Domain-Driven Design (DDD
 
 ```
 apps/api/src/
+├── core/                # Ядро (расширяемый слой; см. ENTITY_PLATFORM_ARCHITECTURE.md)
 ├── common/              # Shared modules and utilities
 │   ├── config/         # Configuration (CORS, Mailer, Swagger)
 │   ├── decorators/      # Custom decorators (Auth, DTO, Response)
@@ -29,10 +32,10 @@ apps/api/src/
 │   ├── redis/          # Redis module and service
 │   └── telegram/       # Telegram integration
 ├── modules/            # Feature modules
-│   ├── auth/           # Authentication module
+│   ├── crm/            # CrmModule — порталы, CRM, каталог, заказы, …
+│   ├── platform/       # Platform admin JWT, список порталов
+│   ├── portal/         # auth (employee/member) + crm/* домены
 │   ├── users/          # User management
-│   ├── members/        # Member management
-│   ├── employees/      # Employee management
 │   ├── storage/        # File storage
 │   └── mail/           # Email service
 └── generated/          # Prisma generated types
@@ -85,6 +88,8 @@ module-name/
 
 **Purpose**: Club member management and registration
 
+**Field-driven profile (portal fields, forms, statuses):** see [MEMBER_AND_ENTITY_FIELDS.md](./MEMBER_AND_ENTITY_FIELDS.md).
+
 **Key Features**:
 - Member registration
 - Profile management
@@ -95,10 +100,8 @@ module-name/
 - Member-Document relationships
 
 **Domain Model**:
-- `Member` - Extended user with member-specific data
-  - Personal info: `name`, `surname`, `phone`, `birthday`
-  - Membership: `membershipNumber`, `address`, `status`
-  - Relations: `IdentityDocument[]`, `Signature`, `MemberMjStatus[]`, `MemberDocument[]`
+- `Member` - Core row: `userId`, `portalId`, `membershipNumber`, `statusItemId` (FK to `status_items`), `isActive`; profile attributes live in `field_values` keyed by `portal_field_definitions`
+  - Relations: `User`, `FieldValue[]`, `IdentityDocument[]`, `Signature`, `MemberMjStatus[]`, `MemberDocument[]`
 
 **API Endpoints**:
 - `POST /lk/auth/member/check` - Check if user exists for member registration

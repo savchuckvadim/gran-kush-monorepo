@@ -1,12 +1,12 @@
 import { Injectable } from "@nestjs/common";
 
-import { Employee } from "@employees/domain/entity/employee.entity";
-import { Member } from "@members/domain/entity/member.entity";
 import { UserWithRelations } from "@users/domain/entity/user.entity";
 import { User } from "@users/domain/entity/user.entity";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
+import { Member } from "@modules/portal/crm/members/domain/entity/member.entity";
 
 @Injectable()
 export class UserPrismaRepository implements UserRepository {
@@ -63,14 +63,8 @@ export class UserPrismaRepository implements UserRepository {
                       id: user.member.id,
                       userId: user.member.userId,
                       portalId: user.member.portalId || undefined,
-                      name: user.member.name,
-                      surname: user.member.surname || undefined,
-                      phone: user.member.phone || undefined,
-                      birthday: user.member.birthday || undefined,
+                      entityRecordId: user.member.entityRecordId,
                       membershipNumber: user.member.membershipNumber || undefined,
-                      address: user.member.address || undefined,
-                      status: user.member.status,
-                      notes: user.member.notes || undefined,
                       isActive: user.member.isActive,
                       createdAt: user.member.createdAt,
                       updatedAt: user.member.updatedAt,

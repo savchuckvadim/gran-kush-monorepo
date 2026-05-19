@@ -4,6 +4,8 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 import { hash } from "bcrypt";
 
+import { ensureMjStatusDefaults } from "../src/common/reference-data/mj-status.seed";
+
 function getRequiredEnv(name: string): string {
     const value = process.env[name];
     if (!value || value.trim().length === 0) {
@@ -28,82 +30,79 @@ function parseBooleanFlag(value: string | undefined, fallback: boolean): boolean
     return normalized === "1" || normalized === "true" || normalized === "yes";
 }
 
-async function seedBootstrapAdmin(): Promise<void> {
-    const isBootstrapEnabled = parseBooleanFlag(process.env.BOOTSTRAP_ADMIN_ENABLED, false);
-    if (!isBootstrapEnabled) {
-        console.log("[seed-admin] Skip: BOOTSTRAP_ADMIN_ENABLED is false");
+async function seedPlatformBootstrapAdmin(): Promise<void> {
+    const isEnabled = parseBooleanFlag(
+        process.env.PLATFORM_BOOTSTRAP_ENABLED ?? process.env.BOOTSTRAP_ADMIN_ENABLED,
+        false
+    );
+    if (!isEnabled) {
+        console.log(
+            "[seed-admin] Skip: PLATFORM_BOOTSTRAP_ENABLED / BOOTSTRAP_ADMIN_ENABLED is false"
+        );
         return;
     }
 
-    const adminEmail = getRequiredEnv("BOOTSTRAP_ADMIN_EMAIL");
-    const adminPassword = getRequiredEnv("BOOTSTRAP_ADMIN_PASSWORD");
-    const adminName = process.env.BOOTSTRAP_ADMIN_NAME?.trim() || "Root";
-    const adminSurname = process.env.BOOTSTRAP_ADMIN_SURNAME?.trim() || null;
-    const adminPhone = process.env.BOOTSTRAP_ADMIN_PHONE?.trim() || null;
-    const adminPosition = process.env.BOOTSTRAP_ADMIN_POSITION?.trim() || "Owner";
-    const adminDepartment = process.env.BOOTSTRAP_ADMIN_DEPARTMENT?.trim() || "Administration";
+    const adminEmailRaw =
+        process.env.PLATFORM_BOOTSTRAP_EMAIL?.trim() || process.env.BOOTSTRAP_ADMIN_EMAIL?.trim();
+    const adminPasswordRaw =
+        process.env.PLATFORM_BOOTSTRAP_PASSWORD?.trim() ||
+        process.env.BOOTSTRAP_ADMIN_PASSWORD?.trim();
+    if (!adminEmailRaw) {
+        throw new Error("Set PLATFORM_BOOTSTRAP_EMAIL or BOOTSTRAP_ADMIN_EMAIL");
+    }
+    if (!adminPasswordRaw) {
+        throw new Error("Set PLATFORM_BOOTSTRAP_PASSWORD or BOOTSTRAP_ADMIN_PASSWORD");
+    }
+    const adminEmail = adminEmailRaw;
+    const adminPassword = adminPasswordRaw;
 
     const shouldForcePasswordReset = parseBooleanFlag(
-        process.env.BOOTSTRAP_ADMIN_FORCE_PASSWORD_RESET,
+        process.env.PLATFORM_BOOTSTRAP_FORCE_PASSWORD_RESET ??
+            process.env.BOOTSTRAP_ADMIN_FORCE_PASSWORD_RESET,
         false
     );
-
-    const existingUser = await prisma.user.findUnique({
-        where: { email: adminEmail },
-        select: { id: true, email: true },
-    });
 
     const passwordHash = await hash(adminPassword, 10);
 
     const user = await prisma.user.upsert({
-        where: { email: adminEmail },
+        where: { email: adminEmail.toLowerCase() },
         update: {
             isActive: true,
+            portalId: null,
             ...(shouldForcePasswordReset ? { passwordHash } : {}),
         },
         create: {
-            email: adminEmail,
+            email: adminEmail.toLowerCase(),
             passwordHash,
             isActive: true,
+            emailConfirmed: true,
+            portalId: null,
         },
     });
 
-    const existingEmployee = await prisma.employee.findUnique({
-        where: { userId: user.id },
-        select: { id: true, role: true },
-    });
-
-    await prisma.employee.upsert({
+    await prisma.platformAdmin.upsert({
         where: { userId: user.id },
         update: {
-            name: adminName,
-            surname: adminSurname,
-            phone: adminPhone,
-            role: "admin",
-            position: adminPosition,
-            department: adminDepartment,
+            role: "superadmin",
             isActive: true,
         },
         create: {
             userId: user.id,
-            name: adminName,
-            surname: adminSurname,
-            phone: adminPhone,
-            role: "admin",
-            position: adminPosition,
-            department: adminDepartment,
+            role: "superadmin",
             isActive: true,
         },
     });
 
-    const userAction = existingUser ? "updated" : "created";
-    const employeeAction = existingEmployee ? "updated" : "created";
-    console.log(
-        `[seed-admin] Bootstrap admin ${userAction}/${employeeAction}: ${adminEmail} (role=admin)`
-    );
+    console.log(`[seed-admin] Platform admin upserted: ${adminEmail} (User ${user.id})`);
 }
 
-void seedBootstrapAdmin()
+async function run(): Promise<void> {
+    await seedPlatformBootstrapAdmin();
+    const n = await ensureMjStatusDefaults(prisma);
+    console.log(`[seed-admin] MJ reference statuses ensured (${n} rows)`);
+}
+
+void run()
     .catch((error: unknown) => {
         const message = error instanceof Error ? error.message : String(error);
         console.error(`[seed-admin] Failed: ${message}`);

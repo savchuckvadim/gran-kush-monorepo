@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 
-import { EmployeesModule } from "@employees/employees.module";
-import { MembersModule } from "@members/members.module";
+import { EmployeesModule } from "@modules/portal/crm/employees/employees.module";
+import { MembersModule } from "@modules/portal/crm/members/members.module";
 
 import { TestController } from "./test.controller";
 

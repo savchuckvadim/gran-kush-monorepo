@@ -1,0 +1,17 @@
+[
+    {
+        "code": "medical",
+        "name": "Medical use",
+        "description": "Справочник платформы: медицинское использование (consumption flags)."
+    },
+    {
+        "code": "mj",
+        "name": "MJ",
+        "description": "Справочник платформы: статус MJ."
+    },
+    {
+        "code": "recreation",
+        "name": "Recreation",
+        "description": "Справочник платформы: recreation."
+    }
+]

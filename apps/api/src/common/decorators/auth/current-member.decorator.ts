@@ -1,6 +1,6 @@
 import { createParamDecorator, ExecutionContext } from "@nestjs/common";
 
-import { Member } from "@members/domain/entity/member.entity";
+import { Member } from "@modules/portal/crm/members/domain/entity/member.entity";
 
 /**
  * Декоратор для получения текущего Member из запроса

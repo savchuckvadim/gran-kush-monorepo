@@ -3,7 +3,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
 import { ISendMailOptions, MailerService } from "@nestjs-modules/mailer";
-import { Employee, Member, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import { render } from "@react-email/components";
 import { Queue } from "bullmq";
 
@@ -49,8 +49,8 @@ export class MailService {
     }
 
     public async sendMamberEmailVerification(
-        member: Member,
-        user: User,
+        member: { name: string; surname: string | null },
+        user: Pick<User, "id" | "email">,
         token: string,
         language: SupportedLanguage = DEFAULT_LANGUAGE
     ) {
@@ -89,8 +89,8 @@ export class MailService {
     }
 
     public async sendEmployeeEmailVerification(
-        employee: Employee,
-        user: User,
+        employee: { name: string; surname?: string | null },
+        user: Pick<User, "id" | "email">,
         token: string,
         language: SupportedLanguage = DEFAULT_LANGUAGE
     ) {
@@ -129,7 +129,7 @@ export class MailService {
     }
 
     public async sendPasswordReset(
-        user: User,
+        user: Pick<User, "id" | "email">,
         name: string,
         surname: string,
         token: string,

@@ -14,6 +14,6 @@ export default async function PortalSegmentLayout({
     params: Promise<{ locale: string; portal: string }>;
 }) {
     const { portal } = await params;
-
+    console.log("portal", portal);
     return <PortalProvider portalSlug={portal}>{children}</PortalProvider>;
 }
