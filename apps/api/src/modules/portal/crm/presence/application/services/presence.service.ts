@@ -53,8 +53,13 @@ export class PresenceService {
         return this.sessionRepository.countCurrentlyPresent();
     }
 
-    async getStats(startDate?: Date, endDate?: Date, memberId?: string): Promise<PresenceStats> {
-        return this.sessionRepository.getStats(startDate, endDate, memberId);
+    async getStats(
+        startDate?: Date,
+        endDate?: Date,
+        memberId?: string,
+        portalId?: string
+    ): Promise<PresenceStats> {
+        return this.sessionRepository.getStats(startDate, endDate, memberId, portalId);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════

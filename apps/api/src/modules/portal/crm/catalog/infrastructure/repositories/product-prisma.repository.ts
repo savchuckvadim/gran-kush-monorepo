@@ -22,30 +22,31 @@ import {
 export class ProductPrismaRepository implements ProductRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    async findById(id: string): Promise<Product | null> {
-        const raw = await this.prisma.product.findUnique({
-            where: { id },
+    async findById(id: string, portalId: string): Promise<Product | null> {
+        const raw = await this.prisma.product.findFirst({
+            where: { id, portalId },
             include: PRODUCT_INCLUDE,
         });
         return raw ? this.mapToEntity(raw) : null;
     }
 
-    async findBySku(sku: string): Promise<Product | null> {
-        const raw = await this.prisma.product.findUnique({
-            where: { sku },
+    async findBySku(sku: string, portalId: string): Promise<Product | null> {
+        const raw = await this.prisma.product.findFirst({
+            where: { sku, portalId },
             include: PRODUCT_INCLUDE,
         });
         return raw ? this.mapToEntity(raw) : null;
     }
 
     async findAll(
+        portalId: string,
         filters?: ProductFilters,
         limit?: number,
         skip?: number,
         sortBy: string = "createdAt",
         sortOrder: "asc" | "desc" = "desc"
     ): Promise<Product[]> {
-        const where = this.buildWhere(filters);
+        const where = this.buildWhere(portalId, filters);
         const rows = await this.prisma.product.findMany({
             where,
             take: limit,
@@ -56,21 +57,22 @@ export class ProductPrismaRepository implements ProductRepository {
         return rows.map((r) => this.mapToEntity(r));
     }
 
-    async findActive(): Promise<Product[]> {
+    async findActive(portalId: string): Promise<Product[]> {
         const rows = await this.prisma.product.findMany({
-            where: { isActive: true, isAvailable: true },
+            where: { portalId, isActive: true, isAvailable: true },
             include: PRODUCT_INCLUDE,
             orderBy: { name: "asc" },
         });
         return rows.map((r) => this.mapToEntity(r));
     }
 
-    async count(filters?: ProductFilters): Promise<number> {
-        const where = this.buildWhere(filters);
+    async count(portalId: string, filters?: ProductFilters): Promise<number> {
+        const where = this.buildWhere(portalId, filters);
         return this.prisma.product.count({ where });
     }
 
     async create(data: {
+        portalId: string;
         categoryId: string;
         measurementUnitId: string;
         name: string;
@@ -128,10 +130,10 @@ export class ProductPrismaRepository implements ProductRepository {
 
     // ─────────────────────────────────── private ───────────────────────────────────
 
-    private buildWhere(filters?: ProductFilters): Prisma.ProductWhereInput {
-        if (!filters) return {};
+    private buildWhere(portalId: string, filters?: ProductFilters): Prisma.ProductWhereInput {
+        const where: Prisma.ProductWhereInput = { portalId };
 
-        const where: Prisma.ProductWhereInput = {};
+        if (!filters) return where;
 
         if (filters.categoryId) where.categoryId = filters.categoryId;
         if (filters.isActive !== undefined) where.isActive = filters.isActive;
@@ -162,6 +164,7 @@ export class ProductPrismaRepository implements ProductRepository {
     private mapToEntity(raw: ProductWithRelationsRow): Product {
         return new Product({
             id: raw.id,
+            portalId: raw.portalId,
             categoryId: raw.categoryId,
             measurementUnitId: raw.measurementUnitId,
             name: raw.name,

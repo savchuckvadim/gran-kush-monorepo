@@ -15,6 +15,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { PaginationDto } from "@common/paginate/dto/pagination.dto";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
@@ -73,6 +74,7 @@ export class CrmCatalogController {
     @ApiPaginatedResponse(ProductListDto, { description: "Paginated list of products" })
     @ApiErrorResponse([401, 403])
     async listProducts(
+        @PortalId() portalId: string,
         @Query() pagination: PaginationDto,
         @Query() filters: ProductFilterDto
     ): Promise<PaginatedResult<ProductListDto>> {
@@ -82,13 +84,14 @@ export class CrmCatalogController {
 
         const [products, total] = await Promise.all([
             this.productsService.findAll(
+                portalId,
                 filters,
                 limit,
                 skip,
                 pagination.sortBy,
                 pagination.sortOrder
             ),
-            this.productsService.count(filters),
+            this.productsService.count(portalId, filters),
         ]);
 
         const items = products.map(mapProductToListDto);
@@ -99,8 +102,11 @@ export class CrmCatalogController {
     @ApiOperation({ summary: "Детали товара" })
     @ApiSuccessResponse(ProductDetailDto)
     @ApiErrorResponse([401, 403, 404])
-    async getProduct(@Param("id") id: string): Promise<ProductDetailDto> {
-        const product = await this.productsService.findById(id);
+    async getProduct(
+        @Param("id") id: string,
+        @PortalId() portalId: string
+    ): Promise<ProductDetailDto> {
+        const product = await this.productsService.findById(id, portalId);
         if (!product) {
             throw new NotFoundException("Product not found");
         }
@@ -114,9 +120,10 @@ export class CrmCatalogController {
     @ApiErrorResponse([400, 401, 403, 404, 409])
     async createProduct(
         @Body() dto: CreateProductDto,
+        @PortalId() portalId: string,
         @CurrentEmployee() employee: Employee
     ): Promise<ProductDetailDto> {
-        const product = await this.productsService.create(dto, employee.id);
+        const product = await this.productsService.create(dto, portalId, employee.id);
         return mapProductToDetailDto(product);
     }
 
@@ -128,9 +135,10 @@ export class CrmCatalogController {
     async updateProduct(
         @Param("id") id: string,
         @Body() dto: UpdateProductDto,
+        @PortalId() portalId: string,
         @CurrentEmployee() employee: Employee
     ): Promise<ProductDetailDto> {
-        const product = await this.productsService.update(id, dto, employee.id);
+        const product = await this.productsService.update(id, dto, portalId, employee.id);
         return mapProductToDetailDto(product);
     }
 
@@ -138,8 +146,11 @@ export class CrmCatalogController {
     @UseGuards(AdminGuard)
     @ApiOperation({ summary: "Удалить товар (Admin)" })
     @ApiErrorResponse([401, 403, 404])
-    async deleteProduct(@Param("id") id: string): Promise<{ message: string }> {
-        await this.productsService.delete(id);
+    async deleteProduct(
+        @Param("id") id: string,
+        @PortalId() portalId: string
+    ): Promise<{ message: string }> {
+        await this.productsService.delete(id, portalId);
         return { message: "Product deleted successfully" };
     }
 
@@ -149,8 +160,8 @@ export class CrmCatalogController {
     @ApiOperation({ summary: "Список категорий (плоский)" })
     @ApiSuccessResponse(ProductCategoryDto, { isArray: true })
     @ApiErrorResponse([401, 403])
-    async listCategories(): Promise<ProductCategoryDto[]> {
-        const cats = await this.categoriesService.findAll();
+    async listCategories(@PortalId() portalId: string): Promise<ProductCategoryDto[]> {
+        const cats = await this.categoriesService.findAll(portalId);
         return cats.map(mapCategoryToDto);
     }
 
@@ -158,8 +169,8 @@ export class CrmCatalogController {
     @ApiOperation({ summary: "Дерево категорий (иерархическое)" })
     @ApiSuccessResponse(ProductCategoryTreeDto, { isArray: true })
     @ApiErrorResponse([401, 403])
-    async getCategoriesTree(): Promise<ProductCategoryTreeDto[]> {
-        const tree = await this.categoriesService.findTree();
+    async getCategoriesTree(@PortalId() portalId: string): Promise<ProductCategoryTreeDto[]> {
+        const tree = await this.categoriesService.findTree(portalId);
         return tree.map(mapCategoryToTreeDto);
     }
 
@@ -168,8 +179,11 @@ export class CrmCatalogController {
     @ApiOperation({ summary: "Создать категорию (Admin)" })
     @ApiSuccessResponse(ProductCategoryDto, { status: 201 })
     @ApiErrorResponse([400, 401, 403, 404, 409])
-    async createCategory(@Body() dto: CreateProductCategoryDto): Promise<ProductCategoryDto> {
-        const cat = await this.categoriesService.create(dto);
+    async createCategory(
+        @Body() dto: CreateProductCategoryDto,
+        @PortalId() portalId: string
+    ): Promise<ProductCategoryDto> {
+        const cat = await this.categoriesService.create(dto, portalId);
         return mapCategoryToDto(cat);
     }
 
@@ -180,9 +194,10 @@ export class CrmCatalogController {
     @ApiErrorResponse([400, 401, 403, 404, 409])
     async updateCategory(
         @Param("id") id: string,
-        @Body() dto: UpdateProductCategoryDto
+        @Body() dto: UpdateProductCategoryDto,
+        @PortalId() portalId: string
     ): Promise<ProductCategoryDto> {
-        const cat = await this.categoriesService.update(id, dto);
+        const cat = await this.categoriesService.update(id, dto, portalId);
         return mapCategoryToDto(cat);
     }
 
@@ -190,8 +205,11 @@ export class CrmCatalogController {
     @UseGuards(AdminGuard)
     @ApiOperation({ summary: "Удалить категорию (Admin)" })
     @ApiErrorResponse([401, 403, 404])
-    async deleteCategory(@Param("id") id: string): Promise<{ message: string }> {
-        await this.categoriesService.delete(id);
+    async deleteCategory(
+        @Param("id") id: string,
+        @PortalId() portalId: string
+    ): Promise<{ message: string }> {
+        await this.categoriesService.delete(id, portalId);
         return { message: "Category deleted successfully" };
     }
 

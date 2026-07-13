@@ -96,9 +96,9 @@ export class OrdersService {
      * - Генерирует уникальный номер заказа
      * - Списывает товар со склада
      */
-    async createOrder(memberId: string, dto: CreateOrderDto): Promise<Order> {
+    async createOrder(memberId: string, dto: CreateOrderDto, portalId: string): Promise<Order> {
         // 1. Проверить товары и собрать цены
-        const resolvedItems = await this.resolveOrderItems(dto.items);
+        const resolvedItems = await this.resolveOrderItems(dto.items, portalId);
 
         // 2. Рассчитать суммы
         const subtotal = resolvedItems.reduce((sum, item) => sum + item.totalPrice, 0);
@@ -130,6 +130,7 @@ export class OrdersService {
         for (const item of resolvedItems) {
             await this.productsService.adjustQuantity(
                 item.productId,
+                portalId,
                 new Prisma.Decimal(-item.quantity)
             );
         }
@@ -154,6 +155,7 @@ export class OrdersService {
         orderId: string,
         newStatus: OrderStatus,
         employeeId: string,
+        portalId: string,
         adminNotes?: string
     ): Promise<Order> {
         const order = await this.findByIdOrFail(orderId);
@@ -190,7 +192,7 @@ export class OrdersService {
             case OrderStatus.CANCELLED:
                 updateData.cancelledAt = now;
                 // Вернуть товары на склад при отмене сотрудником
-                await this.restoreProductQuantities(order);
+                await this.restoreProductQuantities(order, portalId);
                 break;
         }
 
@@ -250,7 +252,12 @@ export class OrdersService {
      * Отменить заказ (инициировано членом клуба).
      * Возможно только в статусе PENDING.
      */
-    async cancelOrderByMember(orderId: string, memberId: string, reason?: string): Promise<Order> {
+    async cancelOrderByMember(
+        orderId: string,
+        memberId: string,
+        portalId: string,
+        reason?: string
+    ): Promise<Order> {
         const order = await this.findByIdOrFail(orderId);
 
         // Проверить, что заказ принадлежит этому члену
@@ -267,7 +274,7 @@ export class OrdersService {
         }
 
         // Вернуть товары на склад
-        await this.restoreProductQuantities(order);
+        await this.restoreProductQuantities(order, portalId);
 
         const cancelStageId = await this.resolveStageIdForMemberOrder(
             memberId,
@@ -293,7 +300,7 @@ export class OrdersService {
     /**
      * Проверить товары, доступность и рассчитать цены.
      */
-    private async resolveOrderItems(items: CreateOrderItemDto[]): Promise<
+    private async resolveOrderItems(items: CreateOrderItemDto[], portalId: string): Promise<
         Array<{
             productId: string;
             quantity: number;
@@ -311,7 +318,7 @@ export class OrdersService {
         }> = [];
 
         for (const item of items) {
-            const product = await this.productsService.findById(item.productId);
+            const product = await this.productsService.findById(item.productId, portalId);
             if (!product) {
                 throw new NotFoundException(`Товар с ID "${item.productId}" не найден`);
             }
@@ -347,13 +354,14 @@ export class OrdersService {
     /**
      * Вернуть товары на склад при отмене заказа.
      */
-    private async restoreProductQuantities(order: Order): Promise<void> {
+    private async restoreProductQuantities(order: Order, portalId: string): Promise<void> {
         if (!order.items || order.items.length === 0) return;
 
         for (const item of order.items) {
             try {
                 await this.productsService.adjustQuantity(
                     item.productId,
+                    portalId,
                     new Prisma.Decimal(Number(item.quantity))
                 );
             } catch (error: unknown) {

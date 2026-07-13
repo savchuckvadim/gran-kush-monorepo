@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(Get-ChildItem -Path \"C:\\\\Projects\\\\Sites\\\\new-gran-kush\\\\gran-kush\" -Directory)",
-      "Bash(Select-Object -ExpandProperty Name)"
+      "Bash(Select-Object -ExpandProperty Name)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Projects\\\\Sites\\\\new-gran-kush\\\\gran-kush\\\\apps\\\\crm\\\\app\" -Recurse -Directory)",
+      "Bash(Sort-Object -Unique)",
+      "Bash(xargs grep -l \"register\\\\|create.*portal\")",
+      "Bash(grep -A5 'prisma.$transaction' 'c:\\\\Projects\\\\Sites\\\\new-gran-kush\\\\gran-kush\\\\apps\\\\api\\\\src\\\\modules\\\\portal\\\\crm\\\\portals\\\\application\\\\services\\\\portal-registration.service.ts')",
+      "Bash(pnpm --filter api exec tsc --noEmit)",
+      "Bash(npx prisma *)"
     ]
   }
 }

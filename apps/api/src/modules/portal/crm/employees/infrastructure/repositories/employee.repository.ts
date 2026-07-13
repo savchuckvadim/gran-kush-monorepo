@@ -2,7 +2,10 @@ import { Injectable } from "@nestjs/common";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
-import { EmployeeRepository } from "@modules/portal/crm/employees/domain/repositories/employee-repository.interface";
+import {
+    EmployeeFilters,
+    EmployeeRepository,
+} from "@modules/portal/crm/employees/domain/repositories/employee-repository.interface";
 import { mapToEntity } from "@modules/portal/crm/employees/lib";
 
 @Injectable()
@@ -48,6 +51,35 @@ export class EmployeePrismaRepository implements EmployeeRepository {
 
     async count(): Promise<number> {
         return this.prisma.employee.count();
+    }
+
+    async findAllByPortal(
+        portalId: string,
+        filters?: EmployeeFilters,
+        limit?: number,
+        skip?: number
+    ): Promise<Employee[]> {
+        const where = this.buildPortalWhere(portalId, filters);
+        const employees = await this.prisma.employee.findMany({
+            where,
+            take: limit,
+            skip,
+            include: { user: true },
+            orderBy: { createdAt: "desc" },
+        });
+        return employees.map((emp) => mapToEntity(emp, emp.user));
+    }
+
+    async countByPortal(portalId: string, filters?: EmployeeFilters): Promise<number> {
+        return this.prisma.employee.count({ where: this.buildPortalWhere(portalId, filters) });
+    }
+
+    private buildPortalWhere(portalId: string, filters?: EmployeeFilters) {
+        return {
+            portalId,
+            ...(filters?.role !== undefined && { role: filters.role }),
+            ...(filters?.isActive !== undefined && { isActive: filters.isActive }),
+        };
     }
 
     async create(data: {

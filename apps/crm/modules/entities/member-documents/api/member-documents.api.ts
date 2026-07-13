@@ -4,7 +4,7 @@ import {
     SchemaCrmMemberSignatureDto,
 } from "@workspace/api-client/core";
 
-import { CrmMemberDetails } from "@/modules/entities/member/api/member.api";
+import type { CrmMemberDetails } from "@/modules/entities/member";
 import { $api } from "@/modules/shared";
 
 export interface IdentityDocument extends SchemaCrmMemberIdentityDocumentDto {

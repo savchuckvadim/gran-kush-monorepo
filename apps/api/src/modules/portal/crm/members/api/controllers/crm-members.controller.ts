@@ -119,10 +119,13 @@ export class CrmMembersController {
         description: "Member details",
     })
     @ApiErrorResponse([401, 403, 400])
-    async byId(@Param("id") id: string): Promise<CrmMemberFullDto> {
+    async byId(
+        @Param("id") id: string,
+        @PortalId() portalId: string
+    ): Promise<CrmMemberFullDto> {
         const member = await this.membersService.findById(id);
 
-        if (!member) {
+        if (!member || member.portalId !== portalId) {
             throw new NotFoundException("Member not found");
         }
 
@@ -139,8 +142,13 @@ export class CrmMembersController {
     @ApiErrorResponse([401, 403, 400])
     async update(
         @Param("id") id: string,
-        @Body() dto: CrmMemberFieldsPatchDto
+        @Body() dto: CrmMemberFieldsPatchDto,
+        @PortalId() portalId: string
     ): Promise<CrmMemberFullDto> {
+        const existing = await this.membersService.findById(id);
+        if (!existing || existing.portalId !== portalId) {
+            throw new NotFoundException("Member not found");
+        }
         const updated = await this.membersService.updateCrmMember(id, dto);
         if (!updated) {
             throw new NotFoundException("Member not found");
@@ -184,8 +192,13 @@ export class CrmMembersController {
             documentFirst?: MulterFile[];
             documentSecond?: MulterFile[];
             signature?: MulterFile[];
-        }
+        },
+        @PortalId() portalId: string
     ): Promise<CrmMemberFullDto> {
+        const existing = await this.membersService.findById(id);
+        if (!existing || existing.portalId !== portalId) {
+            throw new NotFoundException("Member not found");
+        }
         return this.membersService.updateCrmMemberFiles(id, dto, files);
     }
 

@@ -9,7 +9,7 @@ export type ApiAuthStrategy = "token" | "cookie";
 export const configureApiClient = (
     baseurl: string,
     type: ApiAuthType,
-    options?: { authStrategy?: ApiAuthStrategy }
+    options?: { authStrategy?: ApiAuthStrategy; getPortalSlug?: () => string | null }
 ): ReturnType<typeof createClient<paths>> => {
     const authStrategy = options?.authStrategy ?? "token";
     const client = createClient<paths>({
@@ -19,7 +19,7 @@ export const configureApiClient = (
                 ? (request: Request) => fetch(request, { credentials: "include" })
                 : undefined,
     });
-    const authMiddleware = getAuthMiddleware(type, baseurl, authStrategy);
+    const authMiddleware = getAuthMiddleware(type, baseurl, authStrategy, options?.getPortalSlug);
     client.use(authMiddleware);
     return client;
 };

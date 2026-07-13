@@ -3,6 +3,7 @@ import { PresenceSession } from "@modules/portal/crm/presence/domain/entity/pres
 // ─── Фильтры ────────────────────────────────────────────────────────────────
 
 export interface PresenceFilters {
+    portalId?: string;
     memberId?: string;
     employeeId?: string;
     /** Только активные (не закрытые) */
@@ -71,5 +72,10 @@ export abstract class PresenceSessionRepository {
     abstract countCurrentlyPresent(): Promise<number>;
 
     /** Статистика за период */
-    abstract getStats(startDate?: Date, endDate?: Date, memberId?: string): Promise<PresenceStats>;
+    abstract getStats(
+        startDate?: Date,
+        endDate?: Date,
+        memberId?: string,
+        portalId?: string
+    ): Promise<PresenceStats>;
 }

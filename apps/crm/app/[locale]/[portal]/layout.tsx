@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { PortalProvider } from "@/modules/processes";
@@ -14,6 +15,14 @@ export default async function PortalSegmentLayout({
     params: Promise<{ locale: string; portal: string }>;
 }) {
     const { portal } = await params;
-    console.log("portal", portal);
+
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
+    const res = await fetch(`${apiUrl}/crm/portals/resolve?slug=${portal}`, {
+        next: { revalidate: 60 },
+    });
+    if (!res.ok) {
+        notFound();
+    }
+
     return <PortalProvider portalSlug={portal}>{children}</PortalProvider>;
 }

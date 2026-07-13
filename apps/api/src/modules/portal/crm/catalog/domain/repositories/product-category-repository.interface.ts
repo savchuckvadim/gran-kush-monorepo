@@ -1,12 +1,13 @@
 import { ProductCategory } from "@modules/portal/crm/catalog/domain/entity/product-category.entity";
 
 export abstract class ProductCategoryRepository {
-    abstract findById(id: string): Promise<ProductCategory | null>;
-    abstract findByCode(code: string): Promise<ProductCategory | null>;
-    abstract findAll(onlyActive?: boolean): Promise<ProductCategory[]>;
-    abstract findTree(): Promise<ProductCategory[]>; // Иерархическое дерево
-    abstract count(): Promise<number>;
+    abstract findById(id: string, portalId: string): Promise<ProductCategory | null>;
+    abstract findByCode(code: string, portalId: string): Promise<ProductCategory | null>;
+    abstract findAll(portalId: string, onlyActive?: boolean): Promise<ProductCategory[]>;
+    abstract findTree(portalId: string): Promise<ProductCategory[]>;
+    abstract count(portalId: string): Promise<number>;
     abstract create(data: {
+        portalId: string;
         code: string;
         name: string;
         description?: string;

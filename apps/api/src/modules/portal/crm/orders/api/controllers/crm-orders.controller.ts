@@ -4,6 +4,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { PaginationDto } from "@common/paginate/dto/pagination.dto";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
@@ -41,21 +42,24 @@ export class CrmOrdersController {
     @ApiErrorResponse([401, 403])
     async listOrders(
         @Query() pagination: PaginationDto,
-        @Query() filters: OrderFilterDto
+        @Query() filters: OrderFilterDto,
+        @PortalId() portalId: string
     ): Promise<PaginatedResult<OrderListDto>> {
         const page = pagination.page ?? 1;
         const limit = pagination.limit ?? 10;
         const skip = PaginationUtil.getSkip(page, limit);
 
+        const scopedFilters = { ...filters, portalId };
+
         const [orders, total] = await Promise.all([
             this.ordersService.findAll(
-                filters,
+                scopedFilters,
                 limit,
                 skip,
                 pagination.sortBy,
                 pagination.sortOrder
             ),
-            this.ordersService.count(filters),
+            this.ordersService.count(scopedFilters),
         ]);
 
         const items = orders.map(mapOrderToListDto);
@@ -68,9 +72,18 @@ export class CrmOrdersController {
     @ApiOperation({ summary: "Детали заказа" })
     @ApiSuccessResponse(OrderDetailDto)
     @ApiErrorResponse([401, 403, 404])
-    async getOrder(@Param("id") id: string): Promise<OrderDetailDto> {
+    async getOrder(@Param("id") id: string, @PortalId() portalId: string): Promise<OrderDetailDto> {
         const order = await this.ordersService.findById(id);
         if (!order) {
+            throw new NotFoundException("Заказ не найден");
+        }
+        // Verify the order's member belongs to the current portal
+        const portalOrders = await this.ordersService.findAll(
+            { portalId, memberId: order.memberId },
+            1,
+            0
+        );
+        if (portalOrders.length === 0) {
             throw new NotFoundException("Заказ не найден");
         }
         return mapOrderToDetailDto(order);
@@ -85,12 +98,14 @@ export class CrmOrdersController {
     async updateStatus(
         @Param("id") id: string,
         @Body() dto: UpdateOrderStatusDto,
-        @CurrentEmployee() employee: Employee
+        @CurrentEmployee() employee: Employee,
+        @PortalId() portalId: string
     ): Promise<OrderDetailDto> {
         const order = await this.ordersService.updateStatus(
             id,
             dto.status,
             employee.id,
+            portalId,
             dto.adminNotes
         );
         return mapOrderToDetailDto(order);

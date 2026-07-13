@@ -24,45 +24,46 @@ type CategoryNode = CategoryScalarRow & {
 export class ProductCategoryPrismaRepository implements ProductCategoryRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    async findById(id: string): Promise<ProductCategory | null> {
-        const cat = await this.prisma.productCategory.findUnique({
-            where: { id },
+    async findById(id: string, portalId: string): Promise<ProductCategory | null> {
+        const cat = await this.prisma.productCategory.findFirst({
+            where: { id, portalId },
             include: PRODUCT_CATEGORY_FULL_INCLUDE,
         });
         return cat ? this.mapToEntity(cat) : null;
     }
 
-    async findByCode(code: string): Promise<ProductCategory | null> {
+    async findByCode(code: string, portalId: string): Promise<ProductCategory | null> {
         const cat = await this.prisma.productCategory.findUnique({
-            where: { code },
+            where: { portalId_code: { portalId, code } },
             include: PRODUCT_CATEGORY_FULL_INCLUDE,
         });
         return cat ? this.mapToEntity(cat) : null;
     }
 
-    async findAll(onlyActive?: boolean): Promise<ProductCategory[]> {
+    async findAll(portalId: string, onlyActive?: boolean): Promise<ProductCategory[]> {
         const cats = await this.prisma.productCategory.findMany({
-            where: onlyActive ? { isActive: true } : undefined,
+            where: onlyActive ? { portalId, isActive: true } : { portalId },
             include: PRODUCT_CATEGORY_FULL_INCLUDE,
             orderBy: { sortOrder: "asc" },
         });
         return cats.map((c) => this.mapToEntity(c));
     }
 
-    async findTree(): Promise<ProductCategory[]> {
+    async findTree(portalId: string): Promise<ProductCategory[]> {
         const cats = await this.prisma.productCategory.findMany({
-            where: { parentId: null, isActive: true },
+            where: { portalId, parentId: null, isActive: true },
             include: PRODUCT_CATEGORY_TREE_ROOT_INCLUDE,
             orderBy: { sortOrder: "asc" },
         });
         return cats.map((c) => this.mapToEntity(c));
     }
 
-    async count(): Promise<number> {
-        return this.prisma.productCategory.count();
+    async count(portalId: string): Promise<number> {
+        return this.prisma.productCategory.count({ where: { portalId } });
     }
 
     async create(data: {
+        portalId: string;
         code: string;
         name: string;
         description?: string;
@@ -108,6 +109,7 @@ export class ProductCategoryPrismaRepository implements ProductCategoryRepositor
         const children = raw.children?.map((c) => this.mapCategoryNode(c)) ?? [];
         return new ProductCategory({
             id: raw.id,
+            portalId: raw.portalId,
             code: raw.code,
             name: raw.name,
             description: raw.description,

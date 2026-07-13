@@ -9,13 +9,19 @@ import { ApiAuthType } from "./api-auth.type";
 export const getAuthMiddleware = (
     type: ApiAuthType,
     baseUrl: string,
-    authStrategy: ApiAuthStrategy = "token"
+    authStrategy: ApiAuthStrategy = "token",
+    getPortalSlug?: () => string | null
 ): Middleware => {
     const refreshHelper = new ApiRefreshHelper(type, baseUrl, authStrategy);
     const storage = new ApiTokensStorage(type);
 
     const authMiddleware: Middleware = {
         onRequest: async ({ request }) => {
+            const slug = getPortalSlug?.();
+            if (slug) {
+                request.headers.set("X-Portal-Slug", slug);
+            }
+
             if (authStrategy === "cookie") {
                 // Do not set `request.credentials` — it is read-only on Request; cookie clients pass
                 // `credentials: "include"` in configureApiClient’s fetch wrapper instead.

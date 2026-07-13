@@ -1,9 +1,17 @@
-import { Injectable } from "@nestjs/common";
+import {
+    BadRequestException,
+    ForbiddenException,
+    Injectable,
+    NotFoundException,
+} from "@nestjs/common";
 
 import * as bcrypt from "bcrypt";
 
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
-import { EmployeeRepository } from "@modules/portal/crm/employees/domain/repositories/employee-repository.interface";
+import {
+    EmployeeFilters,
+    EmployeeRepository,
+} from "@modules/portal/crm/employees/domain/repositories/employee-repository.interface";
 
 @Injectable()
 export class EmployeesService {
@@ -56,5 +64,69 @@ export class EmployeesService {
      */
     async count(): Promise<number> {
         return this.employeeRepository.count();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Portal-scoped CRM methods
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    async findAllByPortal(
+        portalId: string,
+        filters?: EmployeeFilters,
+        limit?: number,
+        skip?: number
+    ): Promise<Employee[]> {
+        return this.employeeRepository.findAllByPortal(portalId, filters, limit, skip);
+    }
+
+    async countByPortal(portalId: string, filters?: EmployeeFilters): Promise<number> {
+        return this.employeeRepository.countByPortal(portalId, filters);
+    }
+
+    async findByIdInPortal(id: string, portalId: string): Promise<Employee> {
+        const employee = await this.employeeRepository.findById(id);
+        if (!employee || employee.portalId !== portalId) {
+            throw new NotFoundException(`Employee not found`);
+        }
+        return employee;
+    }
+
+    async updateEmployee(
+        id: string,
+        portalId: string,
+        actorId: string,
+        data: Partial<{
+            role: string;
+            position: string;
+            department: string;
+            isActive: boolean;
+        }>
+    ): Promise<Employee> {
+        const target = await this.findByIdInPortal(id, portalId);
+
+        if (id === actorId) {
+            throw new BadRequestException("Cannot modify your own account via this endpoint");
+        }
+        if (target.role === "portal_owner") {
+            throw new ForbiddenException("Cannot modify portal owner");
+        }
+        if (data.role === "portal_owner") {
+            throw new ForbiddenException("Cannot assign portal_owner role");
+        }
+
+        return this.employeeRepository.update(id, data);
+    }
+
+    async deactivateEmployee(id: string, portalId: string, actorId: string): Promise<Employee> {
+        const target = await this.findByIdInPortal(id, portalId);
+
+        if (id === actorId) {
+            throw new BadRequestException("Cannot deactivate your own account");
+        }
+        if (target.role === "portal_owner") {
+            throw new ForbiddenException("Cannot deactivate portal owner");
+        }
+
+        return this.employeeRepository.update(id, { isActive: false });
     }
 }

@@ -139,7 +139,12 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
         });
     }
 
-    async getStats(startDate?: Date, endDate?: Date, memberId?: string): Promise<PresenceStats> {
+    async getStats(
+        startDate?: Date,
+        endDate?: Date,
+        memberId?: string,
+        portalId?: string
+    ): Promise<PresenceStats> {
         const where: Prisma.PresenceSessionWhereInput = {};
         let entityRecordFilter: string | undefined;
         if (memberId) {
@@ -151,6 +156,8 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
         }
         if (entityRecordFilter) {
             where.entityRecordId = entityRecordFilter;
+        } else if (portalId) {
+            where.entityRecord = { member: { portalId } };
         }
         if (startDate || endDate) {
             where.enteredAt = {};
@@ -186,8 +193,13 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
 
         const where: Prisma.PresenceSessionWhereInput = {};
 
-        if (filters.memberId) {
-            where.entityRecord = { member: { id: filters.memberId } };
+        if (filters.portalId || filters.memberId) {
+            where.entityRecord = {
+                member: {
+                    ...(filters.portalId && { portalId: filters.portalId }),
+                    ...(filters.memberId && { id: filters.memberId }),
+                },
+            };
         }
         if (filters.employeeId) where.employeeId = filters.employeeId;
         if (filters.entryMethod) where.entryMethod = filters.entryMethod;

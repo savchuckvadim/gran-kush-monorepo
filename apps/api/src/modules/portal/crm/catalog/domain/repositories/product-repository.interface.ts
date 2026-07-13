@@ -14,18 +14,20 @@ export interface ProductFilters {
 }
 
 export abstract class ProductRepository {
-    abstract findById(id: string): Promise<Product | null>;
-    abstract findBySku(sku: string): Promise<Product | null>;
+    abstract findById(id: string, portalId: string): Promise<Product | null>;
+    abstract findBySku(sku: string, portalId: string): Promise<Product | null>;
     abstract findAll(
+        portalId: string,
         filters?: ProductFilters,
         limit?: number,
         skip?: number,
         sortBy?: string,
         sortOrder?: "asc" | "desc"
     ): Promise<Product[]>;
-    abstract findActive(): Promise<Product[]>; // Только активные и доступные
-    abstract count(filters?: ProductFilters): Promise<number>;
+    abstract findActive(portalId: string): Promise<Product[]>;
+    abstract count(portalId: string, filters?: ProductFilters): Promise<number>;
     abstract create(data: {
+        portalId: string;
         categoryId: string;
         measurementUnitId: string;
         name: string;

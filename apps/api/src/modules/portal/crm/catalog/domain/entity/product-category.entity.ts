@@ -3,6 +3,7 @@
  */
 export class ProductCategory {
     id: string;
+    portalId: string;
     code: string;
     name: string;
     description?: string | null;

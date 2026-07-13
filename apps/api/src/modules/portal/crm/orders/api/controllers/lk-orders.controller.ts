@@ -55,7 +55,7 @@ export class LkOrdersController {
         @Body() dto: CreateOrderDto,
         @CurrentMember() member: Member
     ): Promise<OrderDetailDto> {
-        const order = await this.ordersService.createOrder(member.id, dto);
+        const order = await this.ordersService.createOrder(member.id, dto, member.portalId!);
         return mapOrderToDetailDto(order);
     }
 
@@ -131,7 +131,12 @@ export class LkOrdersController {
         @Body() dto: CancelOrderDto,
         @CurrentMember() member: Member
     ): Promise<OrderDetailDto> {
-        const order = await this.ordersService.cancelOrderByMember(id, member.id, dto.reason);
+        const order = await this.ordersService.cancelOrderByMember(
+            id,
+            member.id,
+            member.portalId!,
+            dto.reason
+        );
         return mapOrderToDetailDto(order);
     }
 }

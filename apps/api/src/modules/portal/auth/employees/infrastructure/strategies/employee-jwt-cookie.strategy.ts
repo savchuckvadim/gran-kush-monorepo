@@ -22,7 +22,14 @@ interface EmployeeJwtPayload {
     type: "employee";
 }
 
-/** CRM веб: только HttpOnly cookie (без Bearer). */
+/**
+ * CRM веб: только HttpOnly cookie (без Bearer).
+ *
+ * Access token revocation: tokens are short-lived JWTs (15 min TTL) — not stored in DB.
+ * Per-request DB lookup is intentionally skipped for performance. Revocation is handled
+ * by revoking the refresh token on logout (stored in DB with `revoked: false` check).
+ * Maximum exposure window on logout = 15 minutes.
+ */
 @Injectable()
 export class EmployeeJwtCookieStrategy extends PassportStrategy(
     Strategy,

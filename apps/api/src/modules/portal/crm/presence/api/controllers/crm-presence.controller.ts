@@ -4,6 +4,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { PaginationDto } from "@common/paginate/dto/pagination.dto";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
@@ -111,21 +112,24 @@ export class CrmPresenceController {
     @ApiErrorResponse([401, 403])
     async listSessions(
         @Query() pagination: PaginationDto,
-        @Query() filters: PresenceFilterDto
+        @Query() filters: PresenceFilterDto,
+        @PortalId() portalId: string
     ): Promise<PaginatedResult<PresenceSessionDto>> {
         const page = pagination.page ?? 1;
         const limit = pagination.limit ?? 10;
         const skip = PaginationUtil.getSkip(page, limit);
 
+        const scopedFilters = { ...filters, portalId };
+
         const [sessions, total] = await Promise.all([
             this.presenceService.findAll(
-                filters,
+                scopedFilters,
                 limit,
                 skip,
                 pagination.sortBy,
                 pagination.sortOrder
             ),
-            this.presenceService.count(filters),
+            this.presenceService.count(scopedFilters),
         ]);
 
         const items = sessions.map(mapPresenceSessionToDto);
@@ -155,9 +159,9 @@ export class CrmPresenceController {
     })
     @ApiSuccessResponse(PresenceSessionDto, { isArray: true })
     @ApiErrorResponse([401, 403])
-    async getCurrentlyPresent(): Promise<PresenceSessionDto[]> {
+    async getCurrentlyPresent(@PortalId() portalId: string): Promise<PresenceSessionDto[]> {
         const sessions = await this.presenceService.findAll(
-            { isActive: true },
+            { isActive: true, portalId },
             100, // max 100
             0,
             "enteredAt",
@@ -172,7 +176,15 @@ export class CrmPresenceController {
     @ApiOperation({ summary: "Статистика присутствия" })
     @ApiSuccessResponse(PresenceStatsDto)
     @ApiErrorResponse([401, 403])
-    async getStats(@Query() query: PresenceStatsQueryDto): Promise<PresenceStatsDto> {
-        return this.presenceService.getStats(query.startDate, query.endDate, query.memberId);
+    async getStats(
+        @Query() query: PresenceStatsQueryDto,
+        @PortalId() portalId: string
+    ): Promise<PresenceStatsDto> {
+        return this.presenceService.getStats(
+            query.startDate,
+            query.endDate,
+            query.memberId,
+            portalId
+        );
     }
 }

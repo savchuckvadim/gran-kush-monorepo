@@ -11,6 +11,7 @@ import { ProductImage } from "./product-image.entity";
  */
 export class Product {
     id: string;
+    portalId: string;
     categoryId: string;
     measurementUnitId: string;
 

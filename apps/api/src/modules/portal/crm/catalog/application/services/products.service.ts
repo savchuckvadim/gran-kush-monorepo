@@ -28,26 +28,27 @@ export class ProductsService {
         private readonly unitRepository: MeasurementUnitRepository
     ) {}
 
-    async findById(id: string): Promise<Product | null> {
-        return this.productRepository.findById(id);
+    async findById(id: string, portalId: string): Promise<Product | null> {
+        return this.productRepository.findById(id, portalId);
     }
 
     async findAll(
+        portalId: string,
         filters?: ProductFilters,
         limit?: number,
         skip?: number,
         sortBy?: string,
         sortOrder?: "asc" | "desc"
     ): Promise<Product[]> {
-        return this.productRepository.findAll(filters, limit, skip, sortBy, sortOrder);
+        return this.productRepository.findAll(portalId, filters, limit, skip, sortBy, sortOrder);
     }
 
-    async findActive(): Promise<Product[]> {
-        return this.productRepository.findActive();
+    async findActive(portalId: string): Promise<Product[]> {
+        return this.productRepository.findActive(portalId);
     }
 
-    async count(filters?: ProductFilters): Promise<number> {
-        return this.productRepository.count(filters);
+    async count(portalId: string, filters?: ProductFilters): Promise<number> {
+        return this.productRepository.count(portalId, filters);
     }
 
     async create(
@@ -65,15 +66,14 @@ export class ProductsService {
             cbd?: number;
             strain?: string;
         },
+        portalId: string,
         employeeId: string
     ): Promise<Product> {
-        // Валидация категории
-        const category = await this.categoryRepository.findById(dto.categoryId);
+        const category = await this.categoryRepository.findById(dto.categoryId, portalId);
         if (!category) {
             throw new NotFoundException(`Category with id "${dto.categoryId}" not found`);
         }
 
-        // Валидация единицы измерения
         const unit = await this.unitRepository.findById(dto.measurementUnitId);
         if (!unit) {
             throw new NotFoundException(
@@ -81,15 +81,15 @@ export class ProductsService {
             );
         }
 
-        // Проверка уникальности SKU
         if (dto.sku) {
-            const existing = await this.productRepository.findBySku(dto.sku);
+            const existing = await this.productRepository.findBySku(dto.sku, portalId);
             if (existing) {
                 throw new ConflictException(`Product with SKU "${dto.sku}" already exists`);
             }
         }
 
         return this.productRepository.create({
+            portalId,
             categoryId: dto.categoryId,
             measurementUnitId: dto.measurementUnitId,
             name: dto.name,
@@ -97,7 +97,7 @@ export class ProductsService {
             sku: dto.sku,
             price: new Prisma.Decimal(dto.price),
             initialQuantity: new Prisma.Decimal(dto.initialQuantity),
-            currentQuantity: new Prisma.Decimal(dto.initialQuantity), // текущее = начальное при создании
+            currentQuantity: new Prisma.Decimal(dto.initialQuantity),
             minQuantity:
                 dto.minQuantity !== undefined ? new Prisma.Decimal(dto.minQuantity) : undefined,
             imageUrl: dto.imageUrl,
@@ -127,22 +127,21 @@ export class ProductsService {
             cbd: number | null;
             strain: string | null;
         }>,
+        portalId: string,
         employeeId: string
     ): Promise<Product> {
-        const product = await this.productRepository.findById(id);
+        const product = await this.productRepository.findById(id, portalId);
         if (!product) {
             throw new NotFoundException("Product not found");
         }
 
-        // Валидация при смене категории
         if (dto.categoryId) {
-            const category = await this.categoryRepository.findById(dto.categoryId);
+            const category = await this.categoryRepository.findById(dto.categoryId, portalId);
             if (!category) {
                 throw new NotFoundException(`Category with id "${dto.categoryId}" not found`);
             }
         }
 
-        // Валидация при смене единицы измерения
         if (dto.measurementUnitId) {
             const unit = await this.unitRepository.findById(dto.measurementUnitId);
             if (!unit) {
@@ -152,16 +151,14 @@ export class ProductsService {
             }
         }
 
-        // Проверка уникальности SKU при обновлении
         if (dto.sku && dto.sku !== product.sku) {
-            const existing = await this.productRepository.findBySku(dto.sku);
+            const existing = await this.productRepository.findBySku(dto.sku, portalId);
             if (existing) {
                 throw new ConflictException(`Product with SKU "${dto.sku}" already exists`);
             }
         }
 
-        // Конвертация number → Decimal
-        const data: Record<string, any> = { updatedBy: employeeId };
+        const data: Record<string, unknown> = { updatedBy: employeeId };
         if (dto.categoryId !== undefined) data.categoryId = dto.categoryId;
         if (dto.measurementUnitId !== undefined) data.measurementUnitId = dto.measurementUnitId;
         if (dto.name !== undefined) data.name = dto.name;
@@ -185,8 +182,8 @@ export class ProductsService {
         return this.productRepository.update(id, data);
     }
 
-    async delete(id: string): Promise<void> {
-        const product = await this.productRepository.findById(id);
+    async delete(id: string, portalId: string): Promise<void> {
+        const product = await this.productRepository.findById(id, portalId);
         if (!product) {
             throw new NotFoundException("Product not found");
         }
@@ -194,11 +191,11 @@ export class ProductsService {
     }
 
     /**
-     * Обновить количество товара (при заказе или возврате)
+     * Обновить количество товара (при заказе или возврате).
      * @param delta — отрицательный = списание, положительный = возврат
      */
-    async adjustQuantity(productId: string, delta: Decimal): Promise<Product> {
-        const product = await this.productRepository.findById(productId);
+    async adjustQuantity(productId: string, portalId: string, delta: Decimal): Promise<Product> {
+        const product = await this.productRepository.findById(productId, portalId);
         if (!product) {
             throw new NotFoundException("Product not found");
         }
@@ -216,14 +213,13 @@ export class ProductsService {
             isAvailable: newQuantity.greaterThan(0),
         });
 
-        // Логируем предупреждение при низком остатке
         if (
             product.minQuantity &&
             newQuantity.lessThanOrEqualTo(product.minQuantity) &&
             product.currentQuantity.greaterThan(product.minQuantity)
         ) {
             this.logger.warn(
-                `⚠️ Low stock alert: Product "${product.name}" (${product.id}) quantity ` +
+                `Low stock alert: Product "${product.name}" (${product.id}) quantity ` +
                     `${newQuantity.toString()} ≤ min ${product.minQuantity.toString()}`
             );
         }

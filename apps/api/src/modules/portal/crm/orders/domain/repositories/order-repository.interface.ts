@@ -3,6 +3,7 @@ import { Order } from "@modules/portal/crm/orders/domain/entity/order.entity";
 // ─── Фильтры для выборки заказов ────────────────────────────────────────────
 
 export interface OrderFilters {
+    portalId?: string;
     memberId?: string;
     employeeId?: string;
     status?: string;

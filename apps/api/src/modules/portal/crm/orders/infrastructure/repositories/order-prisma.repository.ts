@@ -200,8 +200,13 @@ export class OrderPrismaRepository extends OrderRepository {
 
         const where: Prisma.OrderWhereInput = {};
 
-        if (filters.memberId) {
-            where.customerEntity = { member: { id: filters.memberId } };
+        if (filters.portalId || filters.memberId) {
+            where.customerEntity = {
+                member: {
+                    ...(filters.portalId && { portalId: filters.portalId }),
+                    ...(filters.memberId && { id: filters.memberId }),
+                },
+            };
         }
         if (filters.employeeId) where.employeeId = filters.employeeId;
         if (filters.status) where.status = filters.status;
