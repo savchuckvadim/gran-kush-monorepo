@@ -3,9 +3,6 @@ import createIntlMiddleware from "next-intl/middleware";
 
 import { defaultLocale, locales } from "./i18n";
 
-/**
- * Определяет locale из Accept-Language header или cookie
- */
 const intlMiddleware = createIntlMiddleware({
     locales,
     defaultLocale,
@@ -13,65 +10,25 @@ const intlMiddleware = createIntlMiddleware({
     localeDetection: false,
 });
 
-/**
- * Protected routes that require authentication
- */
+const MEMBER_ACCESS_COOKIE = "member_access_token";
+const MEMBER_REFRESH_COOKIE = "member_refresh_token";
 
-/**
- * Public routes that don't require authentication
- */
-// const PUBLIC_ROUTES = [
-//     "/",
-//     "/about-us",
-//     "/contacts",
-//     "/auth/login",
-//     "/auth/register",
-//     "/auth/forgot-password",
-//     "/auth/reset-password",
-//     "/auth/confirm-email",
-// ];
+const PROTECTED_PREFIX = "/profile";
+const AUTH_PREFIX = "/auth";
 
-/**
- * Check if user is authenticated by checking for access token in cookies
- * Note: In Next.js 16, we can't access localStorage in proxy, so we check cookies
- * The API client should set cookies when tokens are stored
- */
-// function isAuthenticated(request: NextRequest): boolean {
-//     // Check for access token cookie (set by API client or manually)
-//     const accessToken = request.cookies.get("site.accessToken")?.value;
-//     // Also check for the token in Authorization header (for API calls)
-//     const authHeader = request.headers.get("authorization");
+function stripLocalePrefix(pathname: string): string {
+    // localePrefix: "always" => первый сегмент url - всегда locale
+    return pathname.replace(/^\/[a-z]{2}(-[A-Z]{2})?/, "") || "/";
+}
 
-//     return !!accessToken || !!authHeader;
-// }
+function getLocaleFromPathname(pathname: string): string {
+    const maybeLocale = pathname.split("/")[1];
+    if (maybeLocale && locales.includes(maybeLocale as (typeof locales)[number])) {
+        return maybeLocale;
+    }
+    return defaultLocale;
+}
 
-/**
- * Check if pathname matches a protected route pattern
- */
-// function isProtectedRoute(pathname: string): boolean {
-//     // Remove locale prefix if present
-//     const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}(-[A-Z]{2})?/, "") || "/";
-
-//     return PROTECTED_ROUTES.some((route) => {
-//         if (route === "/profile") {
-//             // Match /profile and all sub-routes
-//             return pathWithoutLocale === route || pathWithoutLocale.startsWith(`${route}/`);
-//         }
-//         return pathWithoutLocale === route || pathWithoutLocale.startsWith(`${route}/`);
-//     });
-// }
-
-/**
- * Check if pathname matches a public route
- */
-// function isPublicRoute(pathname: string): boolean {
-//     const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}(-[A-Z]{2})?/, "") || "/";
-//     return PUBLIC_ROUTES.some((route) => pathWithoutLocale === route || pathWithoutLocale.startsWith(`${route}/`));
-// }
-
-/**
- * Next.js 16: proxy для обработки locale в URL и защиты маршрутов
- */
 export default function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
@@ -85,38 +42,35 @@ export default function proxy(request: NextRequest) {
         return NextResponse.next();
     }
 
-    // Check authentication for protected routes
-    // if (isProtectedRoute(pathname)) {
-    // if (!isAuthenticated(request)) {
-    //     // Redirect to login page
-    //     const locale = pathname.split("/")[1] || defaultLocale;
-    //     const loginUrl = new URL(`/${locale}${ROUTES.LOGIN}`, request.url);
-    //     loginUrl.searchParams.set("redirect", pathname);
-    //     return NextResponse.redirect(loginUrl);
-    // }
-    // }
+    const localeLessPath = stripLocalePrefix(pathname);
+    const locale = getLocaleFromPathname(pathname);
+    // Access-cookie живёт 15 минут; живой refresh-cookie означает,
+    // что клиент восстановит сессию через /lk/auth/refresh
+    const hasAuthCookie =
+        request.cookies.has(MEMBER_ACCESS_COOKIE) || request.cookies.has(MEMBER_REFRESH_COOKIE);
 
-    // Handle internationalization
-    const response = intlMiddleware(request);
+    // Защищённые LK-маршруты — без cookie редиректим на login
+    if (
+        (localeLessPath === PROTECTED_PREFIX ||
+            localeLessPath.startsWith(`${PROTECTED_PREFIX}/`)) &&
+        !hasAuthCookie
+    ) {
+        const loginUrl = new URL(`/${locale}/auth/login`, request.url);
+        loginUrl.searchParams.set("from", pathname);
+        return NextResponse.redirect(loginUrl);
+    }
 
-    return response;
+    // Авторизованный пользователь на login/register — редирект в профиль
+    if (
+        hasAuthCookie &&
+        (localeLessPath === `${AUTH_PREFIX}/login` || localeLessPath === `${AUTH_PREFIX}/register`)
+    ) {
+        return NextResponse.redirect(new URL(`/${locale}${PROTECTED_PREFIX}`, request.url));
+    }
+
+    return intlMiddleware(request);
 }
 
 export const config = {
-    // Match all pathnames except for
-    // - API routes (/api)
-    // - Next.js internals (_next)
-    // - Static files (.*\\.*)
-    // - Vercel internals (_vercel)
-    matcher: [
-        /*
-         * Match all request paths except for the ones starting with:
-         * - api (API routes)
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
-         * - files with extensions (e.g. .png, .jpg, .svg)
-         */
-        "/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)",
-    ],
+    matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };

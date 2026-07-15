@@ -1,15 +1,10 @@
 import {
-    ApiAuthType,
-    ApiTokensStorage,
-    type SchemaMemberAuthResponseDto,
     SchemaMemberConfirmEmailResponseDto,
     type SchemaPasswordResetResponseDto,
     type SchemaRegisterMemberResponseDto,
 } from "@workspace/api-client/core";
 
 import { $api } from "@/modules/shared/api";
-
-export const apiTokensStorage = new ApiTokensStorage(ApiAuthType.SITE);
 
 export interface LoginRequest {
     email: string;
@@ -43,19 +38,19 @@ export interface PasswordResetConfirm {
 }
 
 /**
- * Login member
+ * Login member (токены приходят в HttpOnly cookies, тело содержит user + deviceId)
  */
-export async function loginMember(data: LoginRequest): Promise<SchemaMemberAuthResponseDto> {
+export async function loginMember(data: LoginRequest) {
     const response = await $api.POST("/lk/auth/login", {
         body: data,
     });
 
-    if (!response.response.ok) {
+    if (!response.response.ok || !response.data) {
         const err = (response as { error?: { message?: string } }).error;
         throw new Error(err?.message ?? "Login failed");
     }
 
-    return response.data as SchemaMemberAuthResponseDto;
+    return response.data;
 }
 
 /**
@@ -139,21 +134,8 @@ export async function confirmPasswordReset(
  * Logout member
  */
 export async function logoutMember(): Promise<void> {
-    // Get refresh token from storage if not provided
-    const token = apiTokensStorage.getRefreshToken();
-
-    if (!token) {
-        // If no token, just clear storage
-        apiTokensStorage.clearTokens();
-        return;
-    }
-
-    const response = await $api.POST("/lk/auth/logout", {
-        body: { refreshToken: token } as any,
-    });
-
-    // Clear tokens regardless of response
-    apiTokensStorage.clearTokens();
+    // Refresh-токен читается бэкендом из HttpOnly cookie, тело не нужно
+    const response = await $api.POST("/lk/auth/logout");
 
     if (!response.response.ok) {
         const err = (response as { error?: { message?: string } }).error;
