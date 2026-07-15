@@ -28,11 +28,14 @@ export interface PresenceStats {
 // ─── Интерфейс репозитория ──────────────────────────────────────────────────
 
 export abstract class PresenceSessionRepository {
-    /** Найти сессию по ID */
-    abstract findById(id: string): Promise<PresenceSession | null>;
+    /** Найти сессию по ID (при указании portalId — только в рамках портала) */
+    abstract findById(id: string, portalId?: string): Promise<PresenceSession | null>;
 
-    /** Найти активную (незакрытую) сессию участника */
-    abstract findActiveByMemberId(memberId: string): Promise<PresenceSession | null>;
+    /** Найти активную (незакрытую) сессию участника (при указании portalId — участник должен принадлежать порталу) */
+    abstract findActiveByMemberId(
+        memberId: string,
+        portalId?: string
+    ): Promise<PresenceSession | null>;
 
     /** Все сессии с фильтрами, пагинацией и сортировкой */
     abstract findAll(
@@ -46,11 +49,12 @@ export abstract class PresenceSessionRepository {
     /** Подсчёт сессий */
     abstract count(filters?: PresenceFilters): Promise<number>;
 
-    /** Создать запись о входе */
+    /** Создать запись о входе (при указании portalId — участник должен принадлежать порталу) */
     abstract createEntry(data: {
         memberId: string;
         employeeId?: string;
         entryMethod: string;
+        portalId?: string;
     }): Promise<PresenceSession>;
 
     /** Закрыть сессию (выход) */
@@ -68,8 +72,8 @@ export abstract class PresenceSessionRepository {
     /** Массовое закрытие сессий (для auto_cron) */
     abstract closeMany(ids: string[], exitMethod: string): Promise<number>;
 
-    /** Текущее количество присутствующих */
-    abstract countCurrentlyPresent(): Promise<number>;
+    /** Текущее количество присутствующих (при указании portalId — только в рамках портала) */
+    abstract countCurrentlyPresent(portalId?: string): Promise<number>;
 
     /** Статистика за период */
     abstract getStats(

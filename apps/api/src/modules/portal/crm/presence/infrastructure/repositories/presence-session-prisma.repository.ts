@@ -21,9 +21,9 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
         super();
     }
 
-    private async entityRecordIdForMember(memberId: string): Promise<string> {
-        const m = await this.prisma.member.findUnique({
-            where: { id: memberId },
+    private async entityRecordIdForMember(memberId: string, portalId?: string): Promise<string> {
+        const m = await this.prisma.member.findFirst({
+            where: { id: memberId, ...(portalId && { portalId }) },
             select: { entityRecordId: true },
         });
         if (!m) {
@@ -32,16 +32,19 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
         return m.entityRecordId;
     }
 
-    async findById(id: string): Promise<PresenceSession | null> {
-        const row = await this.prisma.presenceSession.findUnique({
-            where: { id },
+    async findById(id: string, portalId?: string): Promise<PresenceSession | null> {
+        const row = await this.prisma.presenceSession.findFirst({
+            where: { id, ...(portalId && { entityRecord: { portalId } }) },
             include: SESSION_INCLUDE,
         });
         return row ? this.mapToEntity(row) : null;
     }
 
-    async findActiveByMemberId(memberId: string): Promise<PresenceSession | null> {
-        const entityRecordId = await this.entityRecordIdForMember(memberId);
+    async findActiveByMemberId(
+        memberId: string,
+        portalId?: string
+    ): Promise<PresenceSession | null> {
+        const entityRecordId = await this.entityRecordIdForMember(memberId, portalId);
         const row = await this.prisma.presenceSession.findFirst({
             where: { entityRecordId, exitedAt: null },
             include: SESSION_INCLUDE,
@@ -80,8 +83,9 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
         memberId: string;
         employeeId?: string;
         entryMethod: string;
+        portalId?: string;
     }): Promise<PresenceSession> {
-        const entityRecordId = await this.entityRecordIdForMember(data.memberId);
+        const entityRecordId = await this.entityRecordIdForMember(data.memberId, data.portalId);
         const row = await this.prisma.presenceSession.create({
             data: {
                 entityRecordId,
@@ -133,9 +137,9 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
         return result.count;
     }
 
-    async countCurrentlyPresent(): Promise<number> {
+    async countCurrentlyPresent(portalId?: string): Promise<number> {
         return this.prisma.presenceSession.count({
-            where: { exitedAt: null },
+            where: { exitedAt: null, ...(portalId && { entityRecord: { portalId } }) },
         });
     }
 
@@ -148,8 +152,8 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
         const where: Prisma.PresenceSessionWhereInput = {};
         let entityRecordFilter: string | undefined;
         if (memberId) {
-            const m = await this.prisma.member.findUnique({
-                where: { id: memberId },
+            const m = await this.prisma.member.findFirst({
+                where: { id: memberId, ...(portalId && { portalId }) },
                 select: { entityRecordId: true },
             });
             entityRecordFilter = m?.entityRecordId;
@@ -157,7 +161,11 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
         if (entityRecordFilter) {
             where.entityRecordId = entityRecordFilter;
         } else if (portalId) {
-            where.entityRecord = { member: { portalId } };
+            where.entityRecord = { portalId };
+        }
+        if (memberId && !entityRecordFilter) {
+            // Участник не найден в рамках портала — статистика пуста
+            return { currentlyPresent: 0, totalVisits: 0, avgDurationMinutes: null };
         }
         if (startDate || endDate) {
             where.enteredAt = {};
@@ -166,7 +174,7 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
         }
 
         const [currentlyPresent, totalVisits, avgResult] = await Promise.all([
-            this.countCurrentlyPresent(),
+            this.countCurrentlyPresent(portalId),
             this.prisma.presenceSession.count({ where }),
             this.prisma.$queryRaw<Array<{ avg_duration: number | null }>>`
                 SELECT
@@ -176,6 +184,7 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
                 ${startDate ? Prisma.sql`AND entered_at >= ${startDate}` : Prisma.empty}
                 ${endDate ? Prisma.sql`AND entered_at <= ${endDate}` : Prisma.empty}
                 ${entityRecordFilter ? Prisma.sql`AND entity_record_id = ${entityRecordFilter}` : Prisma.empty}
+                ${portalId ? Prisma.sql`AND entity_record_id IN (SELECT id FROM entity_records WHERE portal_id = ${portalId})` : Prisma.empty}
             `,
         ]);
 
@@ -195,10 +204,8 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
 
         if (filters.portalId || filters.memberId) {
             where.entityRecord = {
-                member: {
-                    ...(filters.portalId && { portalId: filters.portalId }),
-                    ...(filters.memberId && { id: filters.memberId }),
-                },
+                ...(filters.portalId && { portalId: filters.portalId }),
+                ...(filters.memberId && { member: { id: filters.memberId } }),
             };
         }
         if (filters.employeeId) where.employeeId = filters.employeeId;

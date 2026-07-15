@@ -47,8 +47,11 @@ export class CrmPresenceController {
     })
     @ApiSuccessResponse(CheckInResultDto)
     @ApiErrorResponse([400, 401, 403])
-    async qrScan(@Body() dto: QrCheckInDto): Promise<CheckInResultDto> {
-        const result = await this.presenceService.handleQrScan(dto.encryptedCode);
+    async qrScan(
+        @Body() dto: QrCheckInDto,
+        @PortalId() portalId: string
+    ): Promise<CheckInResultDto> {
+        const result = await this.presenceService.handleQrScan(dto.encryptedCode, portalId);
         return {
             action: result.action,
             session: mapPresenceSessionToDto(result.session),
@@ -70,8 +73,11 @@ export class CrmPresenceController {
     })
     @ApiSuccessResponse(QrPreviewResultDto)
     @ApiErrorResponse([400, 401, 403])
-    async previewQrScan(@Body() dto: QrCheckInDto): Promise<QrPreviewResultDto> {
-        return this.presenceService.previewQrScan(dto.encryptedCode);
+    async previewQrScan(
+        @Body() dto: QrCheckInDto,
+        @PortalId() portalId: string
+    ): Promise<QrPreviewResultDto> {
+        return this.presenceService.previewQrScan(dto.encryptedCode, portalId);
     }
 
     // ─── Manual Check-in ─────────────────────────────────────────────────────
@@ -82,9 +88,14 @@ export class CrmPresenceController {
     @ApiErrorResponse([400, 401, 403, 404])
     async manualCheckIn(
         @Body() dto: ManualCheckInDto,
-        @CurrentEmployee() employee: Employee
+        @CurrentEmployee() employee: Employee,
+        @PortalId() portalId: string
     ): Promise<PresenceSessionDto> {
-        const session = await this.presenceService.manualCheckIn(dto.memberId, employee.id);
+        const session = await this.presenceService.manualCheckIn(
+            dto.memberId,
+            employee.id,
+            portalId
+        );
         return mapPresenceSessionToDto(session);
     }
 
@@ -96,9 +107,14 @@ export class CrmPresenceController {
     @ApiErrorResponse([400, 401, 403])
     async manualCheckOut(
         @Body() dto: ManualCheckOutDto,
-        @CurrentEmployee() employee: Employee
+        @CurrentEmployee() employee: Employee,
+        @PortalId() portalId: string
     ): Promise<PresenceSessionDto> {
-        const session = await this.presenceService.manualCheckOut(dto.memberId, employee.id);
+        const session = await this.presenceService.manualCheckOut(
+            dto.memberId,
+            employee.id,
+            portalId
+        );
         return mapPresenceSessionToDto(session);
     }
 
@@ -142,8 +158,11 @@ export class CrmPresenceController {
     @ApiOperation({ summary: "Детали сессии присутствия" })
     @ApiSuccessResponse(PresenceSessionDto)
     @ApiErrorResponse([401, 403, 404])
-    async getSession(@Param("id") id: string): Promise<PresenceSessionDto> {
-        const session = await this.presenceService.findById(id);
+    async getSession(
+        @Param("id") id: string,
+        @PortalId() portalId: string
+    ): Promise<PresenceSessionDto> {
+        const session = await this.presenceService.findById(id, portalId);
         if (!session) {
             throw new NotFoundException("Сессия не найдена");
         }

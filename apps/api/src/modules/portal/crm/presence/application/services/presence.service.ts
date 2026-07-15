@@ -27,12 +27,15 @@ export class PresenceService {
     // Queries
     // ═══════════════════════════════════════════════════════════════════════════
 
-    async findById(id: string): Promise<PresenceSession | null> {
-        return this.sessionRepository.findById(id);
+    async findById(id: string, portalId?: string): Promise<PresenceSession | null> {
+        return this.sessionRepository.findById(id, portalId);
     }
 
-    async findActiveByMemberId(memberId: string): Promise<PresenceSession | null> {
-        return this.sessionRepository.findActiveByMemberId(memberId);
+    async findActiveByMemberId(
+        memberId: string,
+        portalId?: string
+    ): Promise<PresenceSession | null> {
+        return this.sessionRepository.findActiveByMemberId(memberId, portalId);
     }
 
     async findAll(
@@ -49,8 +52,8 @@ export class PresenceService {
         return this.sessionRepository.count(filters);
     }
 
-    async countCurrentlyPresent(): Promise<number> {
-        return this.sessionRepository.countCurrentlyPresent();
+    async countCurrentlyPresent(portalId?: string): Promise<number> {
+        return this.sessionRepository.countCurrentlyPresent(portalId);
     }
 
     async getStats(
@@ -71,7 +74,10 @@ export class PresenceService {
      * Если участник не в клубе → check-in (вход).
      * Если участник в клубе → check-out (выход).
      */
-    async handleQrScan(encryptedCode: string): Promise<{
+    async handleQrScan(
+        encryptedCode: string,
+        portalId: string
+    ): Promise<{
         action: "entry" | "exit";
         session: PresenceSession;
     }> {
@@ -84,8 +90,11 @@ export class PresenceService {
 
         const memberId = scanResult.memberId!;
 
-        // 2. Проверяем, есть ли активная сессия
-        const activeSession = await this.sessionRepository.findActiveByMemberId(memberId);
+        // 2. Проверяем, есть ли активная сессия (участник должен принадлежать порталу)
+        const activeSession = await this.sessionRepository.findActiveByMemberId(
+            memberId,
+            portalId
+        );
 
         if (activeSession) {
             // Выход
@@ -105,6 +114,7 @@ export class PresenceService {
         const session = await this.sessionRepository.createEntry({
             memberId,
             entryMethod: EntryMethod.QR,
+            portalId,
         });
 
         this.logger.log(`🚪 Вход (QR): участник ${memberId}`);
@@ -119,10 +129,14 @@ export class PresenceService {
     /**
      * Ручной чек-ин сотрудником CRM.
      */
-    async manualCheckIn(memberId: string, employeeId: string): Promise<PresenceSession> {
-        // Проверяем участника
+    async manualCheckIn(
+        memberId: string,
+        employeeId: string,
+        portalId: string
+    ): Promise<PresenceSession> {
+        // Проверяем участника (в рамках портала)
         const member = await this.membersService.findById(memberId);
-        if (!member) {
+        if (!member || member.portalId !== portalId) {
             throw new NotFoundException(`Участник "${memberId}" не найден`);
         }
         if (!member.isActive) {
@@ -130,7 +144,7 @@ export class PresenceService {
         }
 
         // Проверяем, нет ли уже активной сессии
-        const existing = await this.sessionRepository.findActiveByMemberId(memberId);
+        const existing = await this.sessionRepository.findActiveByMemberId(memberId, portalId);
         if (existing) {
             throw new BadRequestException(`Участник уже отмечен на вход (сессия ${existing.id})`);
         }
@@ -139,6 +153,7 @@ export class PresenceService {
             memberId,
             employeeId,
             entryMethod: EntryMethod.MANUAL_EMPLOYEE,
+            portalId,
         });
 
         this.logger.log(`🚪 Вход (ручной): участник ${memberId}, сотрудник ${employeeId}`);
@@ -153,8 +168,15 @@ export class PresenceService {
     /**
      * Ручной чек-аут сотрудником CRM.
      */
-    async manualCheckOut(memberId: string, employeeId: string): Promise<PresenceSession> {
-        const activeSession = await this.sessionRepository.findActiveByMemberId(memberId);
+    async manualCheckOut(
+        memberId: string,
+        employeeId: string,
+        portalId: string
+    ): Promise<PresenceSession> {
+        const activeSession = await this.sessionRepository.findActiveByMemberId(
+            memberId,
+            portalId
+        );
 
         if (!activeSession) {
             throw new BadRequestException(
@@ -208,7 +230,10 @@ export class PresenceService {
      * Валидирует QR, проверяет текущее присутствие и возвращает
      * информацию о действии (вход/выход) — без записи в БД.
      */
-    async previewQrScan(encryptedCode: string): Promise<{
+    async previewQrScan(
+        encryptedCode: string,
+        portalId: string
+    ): Promise<{
         valid: boolean;
         error?: string;
         member?: {
@@ -235,8 +260,21 @@ export class PresenceService {
 
         const memberId = scanResult.memberId!;
 
-        // 2. Проверяем текущую активную сессию (без создания)
-        const activeSession = await this.sessionRepository.findActiveByMemberId(memberId);
+        // 2. Проверяем текущую активную сессию (без создания), участник должен принадлежать порталу
+        let activeSession: PresenceSession | null;
+        try {
+            activeSession = await this.sessionRepository.findActiveByMemberId(memberId, portalId);
+        } catch (error) {
+            if (error instanceof NotFoundException) {
+                return {
+                    valid: false,
+                    error: "Участник не найден",
+                    isPresent: false,
+                    proposedAction: "entry",
+                };
+            }
+            throw error;
+        }
 
         return {
             valid: true,
@@ -254,8 +292,8 @@ export class PresenceService {
      * Проверить, присутствует ли участник в клубе.
      * Используется в PresenceGuard и при создании заказа.
      */
-    async isMemberPresent(memberId: string): Promise<boolean> {
-        const session = await this.sessionRepository.findActiveByMemberId(memberId);
+    async isMemberPresent(memberId: string, portalId?: string): Promise<boolean> {
+        const session = await this.sessionRepository.findActiveByMemberId(memberId, portalId);
         return session !== null;
     }
 }
