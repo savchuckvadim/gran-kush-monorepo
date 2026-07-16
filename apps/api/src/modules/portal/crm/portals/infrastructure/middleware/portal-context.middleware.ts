@@ -15,7 +15,9 @@ export class PortalContextMiddleware implements NestMiddleware {
     constructor(private readonly portalResolution: PortalResolutionService) {}
 
     async use(req: Request, _res: Response, next: NextFunction): Promise<void> {
-        const path = this.normalizePath(req.path);
+        // req.path внутри смонтированного middleware обрезан до mount point ("/"),
+        // поэтому используем originalUrl
+        const path = this.normalizePath(req.originalUrl.split("?")[0]);
 
         if (!this.requiresPortalContext(path)) {
             return next();

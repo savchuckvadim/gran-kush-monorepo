@@ -17,6 +17,7 @@ import { PortalContextMiddleware } from "./infrastructure/middleware/portal-cont
 })
 export class PortalContextModule implements NestModule {
     configure(consumer: MiddlewareConsumer): void {
-        consumer.apply(PortalContextMiddleware).forRoutes("*");
+        // Express 5 (path-to-regexp v8): голый "*" не матчит ни один путь
+        consumer.apply(PortalContextMiddleware).forRoutes("{*splat}");
     }
 }

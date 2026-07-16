@@ -21,8 +21,8 @@ export class PortalCrmSubscriptionGuard implements CanActivate {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const http = context.switchToHttp();
-        const req = http.getRequest<{ portalId?: string }>();
-        const portalId = req.portalId;
+        const req = http.getRequest<{ portalContext?: { portalId?: string } }>();
+        const portalId = req.portalContext?.portalId;
         if (!portalId) {
             return true;
         }
