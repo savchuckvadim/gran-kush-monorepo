@@ -11,6 +11,7 @@ import { RequireUserJwt } from "@modules/portal/auth/members/api/decorators/requ
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 
 import { MySpendingResponseDto, SpendingByPortalDto } from "../dto/public-portals.dto";
+import { PORTAL_SUMMARY_SELECT } from "@modules/portal/crm/portals/infrastructure/prisma-includes/portal-summary.select";
 
 /** Кросс-клубные траты member: агрегация заказов по всем его membership-мостам. */
 @ApiTags("LK Spending")
@@ -26,27 +27,34 @@ export class LkSpendingController {
     async mySpending(@CurrentAuthUser() user: AuthenticatedUser): Promise<MySpendingResponseDto> {
         const members = await this.prisma.member.findMany({
             where: { userId: user.userId },
-            include: { portal: { select: { id: true, name: true, displayName: true } } },
+            include: { portal: { select: PORTAL_SUMMARY_SELECT } },
         });
+
+        const grouped = members.length
+            ? await this.prisma.order.groupBy({
+                  by: ["memberId"],
+                  where: { memberId: { in: members.map((m) => m.id) } },
+                  _sum: { total: true },
+                  _count: { _all: true },
+              })
+            : [];
+        const aggByMemberId = new Map(grouped.map((g) => [g.memberId, g]));
 
         const byPortal: SpendingByPortalDto[] = [];
         let grandTotal = new Prisma.Decimal(0);
         let totalOrders = 0;
 
         for (const member of members) {
-            const agg = await this.prisma.order.aggregate({
-                where: { memberId: member.id },
-                _sum: { total: true },
-                _count: { _all: true },
-            });
-            const totalSpent = agg._sum.total ?? new Prisma.Decimal(0);
+            const agg = aggByMemberId.get(member.id);
+            const totalSpent = agg?._sum.total ?? new Prisma.Decimal(0);
+            const ordersCount = agg?._count._all ?? 0;
             grandTotal = grandTotal.add(totalSpent);
-            totalOrders += agg._count._all;
+            totalOrders += ordersCount;
             byPortal.push({
                 portalId: member.portalId,
                 slug: member.portal.name,
                 displayName: member.portal.displayName,
-                ordersCount: agg._count._all,
+                ordersCount,
                 totalSpent: totalSpent.toFixed(2),
             });
         }

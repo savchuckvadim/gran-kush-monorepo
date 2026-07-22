@@ -11,6 +11,7 @@ import { RequireUserJwt } from "@modules/portal/auth/members/api/decorators/requ
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 import { JoinPortalService } from "@modules/portal/crm/members/application/services/join-portal.service";
 import { PortalResolutionService } from "@modules/portal/crm/portals/application/services/portal-resolution.service";
+import { PORTAL_SUMMARY_SELECT } from "@modules/portal/crm/portals/infrastructure/prisma-includes/portal-summary.select";
 
 import {
     JoinPortalDto,
@@ -35,7 +36,7 @@ export class LkPortalsController {
     async myClubs(@CurrentAuthUser() user: AuthenticatedUser): Promise<MyClubsResponseDto> {
         const members = await this.prisma.member.findMany({
             where: { userId: user.userId },
-            include: { portal: { select: { id: true, name: true, displayName: true } } },
+            include: { portal: { select: PORTAL_SUMMARY_SELECT } },
             orderBy: { createdAt: "desc" },
         });
         return {

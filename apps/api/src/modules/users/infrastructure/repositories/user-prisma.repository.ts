@@ -43,6 +43,26 @@ export class UserPrismaRepository implements UserRepository {
         return user ? this.mapToEntityWithMemberships(user) : null;
     }
 
+    async findMembershipCountsByEmail(
+        email: string
+    ): Promise<{ hasPassword: boolean; memberships: number; employments: number } | null> {
+        const user = await this.prisma.user.findUnique({
+            where: { email: email.toLowerCase() },
+            select: {
+                passwordHash: true,
+                _count: { select: { members: true, employees: true } },
+            },
+        });
+        if (!user) {
+            return null;
+        }
+        return {
+            hasPassword: user.passwordHash !== null,
+            memberships: user._count.members,
+            employments: user._count.employees,
+        };
+    }
+
     async findByIdWithMemberships(id: string): Promise<UserWithMemberships | null> {
         const user = await this.prisma.user.findUnique({
             where: { id },

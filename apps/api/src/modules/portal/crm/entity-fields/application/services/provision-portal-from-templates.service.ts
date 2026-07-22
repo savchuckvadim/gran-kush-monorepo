@@ -168,13 +168,13 @@ export class ProvisionPortalFromTemplatesService {
                     purpose,
                 },
             });
-            for (const ft of sortedFields) {
+            const items = sortedFields.flatMap((ft) => {
                 const fieldDefinitionId = fieldIdByKey.get(ft.fieldKey);
                 if (!fieldDefinitionId) {
-                    continue;
+                    return [];
                 }
-                await db.formDefinitionItem.create({
-                    data: {
+                return [
+                    {
                         formDefinitionId: form.id,
                         fieldDefinitionId,
                         sortOrder: ft.sortOrder,
@@ -182,7 +182,10 @@ export class ProvisionPortalFromTemplatesService {
                         visible: true,
                         readOnly: false,
                     },
-                });
+                ];
+            });
+            if (items.length > 0) {
+                await db.formDefinitionItem.createMany({ data: items });
             }
         }
 

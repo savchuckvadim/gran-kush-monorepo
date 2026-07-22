@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 
 import { PrismaModule } from "@common/prisma/prisma.module";
+import { PortalContextModule } from "@modules/portal/crm/portals/portal-context.module";
 
 import { CrmPortalSettingsController } from "./api/controllers/crm-portal-settings.controller";
 import { LkReviewsController } from "./api/controllers/lk-reviews.controller";
@@ -9,7 +10,7 @@ import { PublicPortalsController } from "./api/controllers/public-portals.contro
 
 /** Публичная витрина (карта клубов), отзывы, кросс-клубные траты, настройки портала. */
 @Module({
-    imports: [PrismaModule],
+    imports: [PrismaModule, PortalContextModule],
     controllers: [
         PublicPortalsController,
         LkReviewsController,

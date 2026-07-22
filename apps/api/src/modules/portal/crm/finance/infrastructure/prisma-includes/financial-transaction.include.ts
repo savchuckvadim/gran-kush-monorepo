@@ -1,5 +1,7 @@
 import { Prisma } from "@prisma/client";
 
+import { PROFILE_NAME_FIELD_VALUES } from "@modules/portal/crm/entity-fields/lib/profile-name.select";
+
 export const TRANSACTION_INCLUDE = {
     order: {
         select: {
@@ -16,12 +18,7 @@ export const TRANSACTION_INCLUDE = {
                     membershipNumber: true,
                 },
             },
-            fieldValues: {
-                select: {
-                    valueJson: true,
-                    fieldDefinition: { select: { fieldKey: true } },
-                },
-            },
+            fieldValues: PROFILE_NAME_FIELD_VALUES,
         },
     },
     createdByEmployee: {

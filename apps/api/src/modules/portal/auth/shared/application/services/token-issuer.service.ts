@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { JwtService } from "@nestjs/jwt";
+import { JwtService, JwtSignOptions } from "@nestjs/jwt";
 
 import { PrincipalType } from "@prisma/client";
 
@@ -18,6 +18,8 @@ export interface TokenPair {
     accessToken: string;
     refreshToken: string;
 }
+
+const toPrincipalType = (type: AuthPrincipalType): PrincipalType => PrincipalType[type];
 
 /**
  * Выпуск и ротация глобальных (не привязанных к порталу) JWT-пар
@@ -45,13 +47,13 @@ export class TokenIssuerService {
         const { accessToken, refreshToken, refreshExpiresAt } = await this.signPair(payload);
 
         await this.refreshTokenRepository.revokeAllActiveForUserDevice(
-            principalType as PrincipalType,
+            toPrincipalType(principalType),
             user.id,
             deviceId
         );
         await this.refreshTokenRepository.create({
             token: refreshToken,
-            principalType: principalType as PrincipalType,
+            principalType: toPrincipalType(principalType),
             userId: user.id,
             deviceId,
             expiresAt: refreshExpiresAt,
@@ -70,7 +72,7 @@ export class TokenIssuerService {
     ): Promise<{ tokens: TokenPair; tokenRecord: RefreshTokenWithUser }> {
         const tokenRecord = await this.refreshTokenRepository.findActiveByToken(
             refreshToken,
-            principalType as PrincipalType
+            toPrincipalType(principalType)
         );
         if (!tokenRecord || !tokenRecord.user) {
             throw new UnauthorizedException("Invalid or expired refresh token");
@@ -93,7 +95,7 @@ export class TokenIssuerService {
     }
 
     async revokeAllForUser(userId: string, principalType: AuthPrincipalType): Promise<void> {
-        await this.refreshTokenRepository.deleteByUser(principalType as PrincipalType, userId);
+        await this.refreshTokenRepository.deleteByUser(toPrincipalType(principalType), userId);
     }
 
     private async signPair(
@@ -109,20 +111,19 @@ export class TokenIssuerService {
             this.configService.get<string>(JWT_ENV_KEYS.REFRESH_TOKEN_EXPIRES_IN) ||
             JWT_DEFAULTS.REFRESH_TOKEN_EXPIRES_IN;
 
-        const signOptions = {
+        // env-строка вида "15m"/"7d" — до ms.StringValue сужается только кастом
+        const signOptions: JwtSignOptions = {
             secret: jwtSecret || JWT_DEFAULTS.SECRET,
-            expiresIn: accessTokenExpiresIn,
-        } as { secret: string; expiresIn: string };
-        const refreshSignOptions = {
+            expiresIn: accessTokenExpiresIn as JwtSignOptions["expiresIn"],
+        };
+        const refreshSignOptions: JwtSignOptions = {
             secret: refreshSecret || JWT_DEFAULTS.SECRET,
-            expiresIn: refreshTokenExpiresIn,
-        } as { secret: string; expiresIn: string };
+            expiresIn: refreshTokenExpiresIn as JwtSignOptions["expiresIn"],
+        };
 
         const [accessToken, refreshToken] = await Promise.all([
-            // @ts-expect-error - JWT library type mismatch
-            this.jwtService.signAsync(payload, signOptions),
-            // @ts-expect-error - JWT library type mismatch
-            this.jwtService.signAsync(payload, refreshSignOptions),
+            this.jwtService.signAsync({ ...payload }, signOptions),
+            this.jwtService.signAsync({ ...payload }, refreshSignOptions),
         ]);
 
         const refreshExpiresAt = new Date();

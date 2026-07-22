@@ -2843,6 +2843,16 @@ export interface components {
             updatedAt: string;
             stages: components["schemas"]["OrderStageResponseDto"][];
         };
+        EntityDefinitionSummaryDto: {
+            id: string;
+            /** @example vendor */
+            code: string;
+            /** @example Поставщики */
+            name: string;
+            isSystem: boolean;
+            isActive: boolean;
+            createdAt: string;
+        };
         CreateEntityDefinitionBodyDto: {
             /**
              * @description Уникальный код сущности (snake_case)
@@ -4389,6 +4399,7 @@ export type SchemaUpdateMemberFormLayoutDto = components['schemas']['UpdateMembe
 export type SchemaMemberFormLayoutReplaceResponseDto = components['schemas']['MemberFormLayoutReplaceResponseDto'];
 export type SchemaOrderStageResponseDto = components['schemas']['OrderStageResponseDto'];
 export type SchemaOrderStageCategoryResponseDto = components['schemas']['OrderStageCategoryResponseDto'];
+export type SchemaEntityDefinitionSummaryDto = components['schemas']['EntityDefinitionSummaryDto'];
 export type SchemaCreateEntityDefinitionBodyDto = components['schemas']['CreateEntityDefinitionBodyDto'];
 export type SchemaCrmCreateMemberDto = components['schemas']['CrmCreateMemberDto'];
 export type SchemaCrmCreateMemberResponseDto = components['schemas']['CrmCreateMemberResponseDto'];
@@ -6707,7 +6718,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>[];
+                    "application/json": components["schemas"]["EntityDefinitionSummaryDto"][];
                 };
             };
             /** @description Unauthorized */
@@ -6749,7 +6760,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["EntityDefinitionSummaryDto"];
                 };
             };
             /** @description Unauthorized */

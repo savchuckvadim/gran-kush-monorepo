@@ -1,7 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 
-import { MemberJoinSource, UserAccountStatus, UserDocument, UserSignature } from "@prisma/client";
+import { MemberJoinSource, UserDocument, UserSignature } from "@prisma/client";
 import { MulterFile } from "@storage/domain/interfaces/storage-file.interface";
+import { AccountProvisioningService } from "@users/application/services/account-provisioning.service";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 
 import { PrismaService } from "@common/prisma/prisma.service";
@@ -41,6 +42,7 @@ export class MembersService {
     constructor(
         private readonly memberRepository: MemberRepository,
         private readonly userRepository: UserRepository,
+        private readonly accountProvisioning: AccountProvisioningService,
         private readonly userDocumentRepository: UserDocumentRepository,
         private readonly userSignatureRepository: UserSignatureRepository,
         private readonly accountDocuments: AccountDocumentsService,
@@ -153,9 +155,9 @@ export class MembersService {
         employments: number;
         message?: string;
     }> {
-        const user = await this.userRepository.findByEmailWithMemberships(email);
+        const counts = await this.userRepository.findMembershipCountsByEmail(email);
 
-        if (!user) {
+        if (!counts) {
             return {
                 exists: false,
                 hasPassword: false,
@@ -166,13 +168,10 @@ export class MembersService {
 
         return {
             exists: true,
-            hasPassword: user.passwordHash !== null,
-            memberships: user.members.length,
-            employments: user.employees.length,
-            message:
-                user.passwordHash === null
-                    ? "Account was created by a club and awaits claiming"
-                    : undefined,
+            ...counts,
+            message: counts.hasPassword
+                ? undefined
+                : "Account was created by a club and awaits claiming",
         };
     }
 
@@ -186,18 +185,9 @@ export class MembersService {
         portalId: string,
         createdByEmployeeId?: string
     ): Promise<{ userId: string; memberId: string; isNewUser: boolean }> {
-        let user = await this.userRepository.findByEmail(dto.email);
-        let isNewUser = false;
-        if (!user) {
-            user = await this.userRepository.create({
-                email: dto.email,
-                passwordHash: null,
-                status: UserAccountStatus.pending_claim,
-                isActive: false,
-                emailConfirmed: false,
-            });
-            isNewUser = true;
-        }
+        const { user, isNewUser } = await this.accountProvisioning.ensurePendingClaimUser(
+            dto.email
+        );
 
         const member = await this.joinPortalService.joinPortal({
             userId: user.id,

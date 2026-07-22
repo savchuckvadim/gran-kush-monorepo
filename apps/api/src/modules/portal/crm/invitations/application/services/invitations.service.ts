@@ -5,9 +5,8 @@ import {
     NotFoundException,
 } from "@nestjs/common";
 
-import { EmployeeInvitation, InvitationStatus, UserAccountStatus } from "@prisma/client";
-import { UserRepository } from "@users/domain/repositories/user-repository.interface";
-import * as bcrypt from "bcrypt";
+import { EmployeeInvitation, InvitationStatus } from "@prisma/client";
+import { AccountProvisioningService } from "@users/application/services/account-provisioning.service";
 import { randomBytes, randomUUID } from "crypto";
 
 import { PrismaService } from "@common/prisma/prisma.service";
@@ -15,6 +14,7 @@ import { EmployeeAuthService } from "@modules/portal/auth/employees/application/
 import { EmployeesService } from "@modules/portal/crm/employees/application/services/employees.service";
 
 import { AcceptInvitationResponseDto, CreateInvitationDto } from "../../api/dto/invitation.dto";
+import { PORTAL_SUMMARY_SELECT } from "@modules/portal/crm/portals/infrastructure/prisma-includes/portal-summary.select";
 
 const INVITATION_TTL_DAYS = 7;
 
@@ -26,7 +26,7 @@ type InvitationWithPortal = EmployeeInvitation & {
 export class InvitationsService {
     constructor(
         private readonly prisma: PrismaService,
-        private readonly userRepository: UserRepository,
+        private readonly accountProvisioning: AccountProvisioningService,
         private readonly employeesService: EmployeesService,
         private readonly employeeAuthService: EmployeeAuthService
     ) {}
@@ -97,7 +97,7 @@ export class InvitationsService {
     async getActiveByToken(token: string): Promise<InvitationWithPortal> {
         const invitation = await this.prisma.employeeInvitation.findUnique({
             where: { token },
-            include: { portal: { select: { id: true, name: true, displayName: true } } },
+            include: { portal: { select: PORTAL_SUMMARY_SELECT } },
         });
         if (!invitation || invitation.status !== InvitationStatus.pending) {
             throw new NotFoundException("Invitation not found or no longer active");
@@ -118,33 +118,12 @@ export class InvitationsService {
     ): Promise<AcceptInvitationResponseDto> {
         const invitation = await this.getActiveByToken(token);
 
-        let user = await this.userRepository.findByEmail(invitation.email);
-
-        if (!user) {
-            if (!dto.password) {
-                throw new BadRequestException("Password is required to create an account");
-            }
-            const passwordHash = await bcrypt.hash(dto.password, 10);
-            // Ссылка-приглашение пришла на email → владение адресом подтверждено
-            user = await this.userRepository.create({
-                email: invitation.email,
-                passwordHash,
-                status: UserAccountStatus.active,
-                isActive: true,
-                emailConfirmed: true,
-            });
-        } else if (user.passwordHash === null) {
-            if (!dto.password) {
-                throw new BadRequestException("Password is required to claim this account");
-            }
-            const passwordHash = await bcrypt.hash(dto.password, 10);
-            user = await this.userRepository.update(user.id, {
-                passwordHash,
-                status: UserAccountStatus.active,
-                isActive: true,
-                emailConfirmed: true,
-            });
-        }
+        // Ссылка-приглашение пришла на email → владение адресом подтверждено
+        const { user } = await this.accountProvisioning.ensureUserWithPassword(
+            invitation.email,
+            dto.password,
+            { emailVerified: true }
+        );
 
         const { employee } = await this.employeesService.create(
             {

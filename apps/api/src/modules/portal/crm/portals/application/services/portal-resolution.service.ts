@@ -22,14 +22,7 @@ export class PortalResolutionService {
         return null;
     }
 
-    private ensureActive(
-        portal: {
-            id: string;
-            name: string;
-            displayName: string;
-            status: PortalStatus;
-        } | null
-    ) {
+    private ensureActive<T extends { status: PortalStatus }>(portal: T | null): T {
         if (!portal) {
             throw new NotFoundException("Portal not found");
         }

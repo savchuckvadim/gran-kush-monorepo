@@ -7,6 +7,7 @@ import { Public } from "@common/decorators/auth/public.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { PrismaService } from "@common/prisma/prisma.service";
+import { PortalResolutionService } from "@modules/portal/crm/portals/application/services/portal-resolution.service";
 
 import { PublicPortalMapItemDto, PublicPortalsMapResponseDto } from "../dto/public-portals.dto";
 
@@ -14,7 +15,10 @@ import { PublicPortalMapItemDto, PublicPortalsMapResponseDto } from "../dto/publ
 @Controller("public/portals")
 @Public()
 export class PublicPortalsController {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly portalResolution: PortalResolutionService
+    ) {}
 
     @Get("map")
     @ApiOperation({ summary: "Клубы, опубликованные на карте, со средним рейтингом" })
@@ -43,9 +47,7 @@ export class PublicPortalsController {
     @ApiSuccessResponse(PublicPortalMapItemDto)
     @ApiErrorResponse([404])
     async bySlug(@Param("slug") slug: string): Promise<PublicPortalMapItemDto> {
-        const portal = await this.prisma.portal.findFirst({
-            where: { name: slug.toLowerCase(), status: PortalStatus.active },
-        });
+        const portal = await this.portalResolution.findActiveByIdOrSlug(undefined, slug);
         if (!portal) {
             throw new NotFoundException("Portal not found");
         }

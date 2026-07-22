@@ -9,6 +9,7 @@ import { RequireEmployeeUserJwt } from "@modules/portal/auth/employees/api/decor
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 
 import { MyPortalsResponseDto } from "../dto/lk-portals.dto";
+import { PORTAL_SUMMARY_SELECT } from "@modules/portal/crm/portals/infrastructure/prisma-includes/portal-summary.select";
 
 @ApiTags("CRM My Portals")
 @Controller("crm/my-portals")
@@ -23,7 +24,7 @@ export class CrmMyPortalsController {
     async myPortals(@CurrentAuthUser() user: AuthenticatedUser): Promise<MyPortalsResponseDto> {
         const employees = await this.prisma.employee.findMany({
             where: { userId: user.userId, isActive: true },
-            include: { portal: { select: { id: true, name: true, displayName: true } } },
+            include: { portal: { select: PORTAL_SUMMARY_SELECT } },
             orderBy: { createdAt: "asc" },
         });
         return {

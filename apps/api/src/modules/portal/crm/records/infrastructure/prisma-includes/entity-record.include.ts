@@ -9,7 +9,19 @@ export const ENTITY_RECORD_INCLUDE = {
     statusItem: { select: { id: true, key: true, label: true, color: true } },
     fieldValues: {
         orderBy: [{ fieldDefinitionId: "asc" as const }, { valueIndex: "asc" as const }],
-        include: { fieldDefinition: true },
+        include: {
+            fieldDefinition: {
+                select: {
+                    id: true,
+                    fieldKey: true,
+                    type: true,
+                    label: true,
+                    labelOverride: true,
+                    isMultiple: true,
+                    sortOrder: true,
+                },
+            },
+        },
     },
     relationsAsSource: {
         orderBy: { sortOrder: "asc" as const },

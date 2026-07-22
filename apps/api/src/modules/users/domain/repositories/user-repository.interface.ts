@@ -6,6 +6,9 @@ export abstract class UserRepository {
     abstract findById(id: string): Promise<User | null>;
     abstract findByEmail(email: string): Promise<User | null>;
     abstract findByEmailWithMemberships(email: string): Promise<UserWithMemberships | null>;
+    abstract findMembershipCountsByEmail(
+        email: string
+    ): Promise<{ hasPassword: boolean; memberships: number; employments: number } | null>;
     abstract findByIdWithMemberships(id: string): Promise<UserWithMemberships | null>;
     abstract existsByEmail(email: string): Promise<boolean>;
     abstract create(data: {

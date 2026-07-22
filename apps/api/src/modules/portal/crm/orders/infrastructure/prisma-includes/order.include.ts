@@ -1,5 +1,7 @@
 import { Prisma } from "@prisma/client";
 
+import { PROFILE_NAME_FIELD_VALUES } from "@modules/portal/crm/entity-fields/lib/profile-name.select";
+
 /**
  * Стандартный include: заказ, позиции, EntityRecord со стадией (источник правды статуса),
  * member-мост с профильными полями, employee с профильными полями.
@@ -34,14 +36,7 @@ export const ORDER_INCLUDE = {
             id: true,
             membershipNumber: true,
             profile: {
-                select: {
-                    fieldValues: {
-                        select: {
-                            valueJson: true,
-                            fieldDefinition: { select: { fieldKey: true } },
-                        },
-                    },
-                },
+                select: { fieldValues: PROFILE_NAME_FIELD_VALUES },
             },
         },
     },
@@ -50,14 +45,7 @@ export const ORDER_INCLUDE = {
             id: true,
             role: true,
             profile: {
-                select: {
-                    fieldValues: {
-                        select: {
-                            valueJson: true,
-                            fieldDefinition: { select: { fieldKey: true } },
-                        },
-                    },
-                },
+                select: { fieldValues: PROFILE_NAME_FIELD_VALUES },
             },
         },
     },

@@ -3,6 +3,7 @@ import { ConflictException, Injectable } from "@nestjs/common";
 import { EmployeeRole, Prisma } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { FieldValuesService } from "@modules/portal/crm/entity-fields/application/services/field-values.service";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import {
     EmployeeFilters,
@@ -52,7 +53,10 @@ function mapRow(row: EmployeeWithProfileRow): EmployeeWithProfile {
 
 @Injectable()
 export class EmployeePrismaRepository implements EmployeeRepository {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly fieldValues: FieldValuesService
+    ) {}
 
     async findByIdForPortal(id: string, portalId: string): Promise<EmployeeWithProfile | null> {
         const row = await this.prisma.employee.findFirst({
@@ -143,7 +147,13 @@ export class EmployeePrismaRepository implements EmployeeRepository {
                     invitationId: data.invitationId ?? null,
                 },
             });
-            await this.writeFieldValues(tx, def.id, record.id, data.portalId, data.fields);
+            await this.fieldValues.upsertRecordFieldValues(
+                data.portalId,
+                ENTITY_DEFINITION_CODES.EMPLOYEE,
+                record.id,
+                data.fields,
+                tx
+            );
             return tx.employee.findUniqueOrThrow({
                 where: { id: employee.id },
                 include: employeeWithProfileInclude,
@@ -178,12 +188,13 @@ export class EmployeePrismaRepository implements EmployeeRepository {
                 where: { id, portalId },
                 select: { entityRecordId: true },
             });
-            const def = await tx.entityDefinition.findUniqueOrThrow({
-                where: {
-                    portalId_code: { portalId, code: ENTITY_DEFINITION_CODES.EMPLOYEE },
-                },
-            });
-            await this.writeFieldValues(tx, def.id, employee.entityRecordId, portalId, fields);
+            await this.fieldValues.upsertRecordFieldValues(
+                portalId,
+                ENTITY_DEFINITION_CODES.EMPLOYEE,
+                employee.entityRecordId,
+                fields,
+                tx
+            );
             return tx.employee.findUniqueOrThrow({
                 where: { id },
                 include: employeeWithProfileInclude,
@@ -192,49 +203,4 @@ export class EmployeePrismaRepository implements EmployeeRepository {
         return mapRow(row);
     }
 
-    private async writeFieldValues(
-        tx: Prisma.TransactionClient,
-        entityDefinitionId: string,
-        entityRecordId: string,
-        portalId: string,
-        fields: Record<string, unknown>
-    ): Promise<void> {
-        const keys = Object.keys(fields);
-        if (keys.length === 0) {
-            return;
-        }
-        const definitions = await tx.fieldDefinition.findMany({
-            where: { entityDefinitionId, fieldKey: { in: keys }, isActive: true },
-            select: { id: true, fieldKey: true },
-        });
-        for (const def of definitions) {
-            const value = fields[def.fieldKey];
-            if (value === undefined) {
-                continue;
-            }
-            if (value === null) {
-                await tx.fieldValue.deleteMany({
-                    where: { entityRecordId, fieldDefinitionId: def.id },
-                });
-                continue;
-            }
-            await tx.fieldValue.upsert({
-                where: {
-                    entityRecordId_fieldDefinitionId_valueIndex: {
-                        entityRecordId,
-                        fieldDefinitionId: def.id,
-                        valueIndex: 0,
-                    },
-                },
-                update: { valueJson: value as Prisma.InputJsonValue },
-                create: {
-                    portalId,
-                    entityRecordId,
-                    fieldDefinitionId: def.id,
-                    valueIndex: 0,
-                    valueJson: value as Prisma.InputJsonValue,
-                },
-            });
-        }
-    }
 }

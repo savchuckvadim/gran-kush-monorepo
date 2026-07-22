@@ -76,47 +76,45 @@ export class FieldValuesService {
         });
         const defByKey = new Map(defs.map((d) => [d.fieldKey, d]));
 
+        const touchedDefIds: string[] = [];
+        const rows: Prisma.FieldValueCreateManyInput[] = [];
         for (const [fieldKey, raw] of Object.entries(values)) {
             const def = defByKey.get(fieldKey);
             if (!def) {
                 continue;
             }
-
-            await db.fieldValue.deleteMany({
-                where: {
-                    entityRecordId,
-                    fieldDefinitionId: def.id,
-                },
-            });
-
+            touchedDefIds.push(def.id);
             if (raw === undefined || raw === null) {
                 continue;
             }
-
-            if (def.isMultiple && Array.isArray(raw)) {
-                let idx = 0;
-                for (const item of raw) {
-                    await db.fieldValue.create({
-                        data: {
-                            portalId,
-                            entityRecordId,
-                            fieldDefinitionId: def.id,
-                            valueIndex: idx++,
-                            valueJson: this.toJson(item),
-                        },
-                    });
-                }
-            } else {
-                await db.fieldValue.create({
-                    data: {
-                        portalId,
-                        entityRecordId,
-                        fieldDefinitionId: def.id,
-                        valueIndex: 0,
-                        valueJson: this.toJson(raw),
-                    },
+            const items = def.isMultiple && Array.isArray(raw) ? raw : [raw];
+            items.forEach((item, valueIndex) => {
+                rows.push({
+                    portalId,
+                    entityRecordId,
+                    fieldDefinitionId: def.id,
+                    valueIndex,
+                    valueJson: this.toJson(item),
                 });
+            });
+        }
+        if (touchedDefIds.length === 0) {
+            return;
+        }
+
+        const write = async (client: Tx): Promise<void> => {
+            await client.fieldValue.deleteMany({
+                where: { entityRecordId, fieldDefinitionId: { in: touchedDefIds } },
+            });
+            if (rows.length > 0) {
+                await client.fieldValue.createMany({ data: rows });
             }
+        };
+
+        if (tx) {
+            await write(tx);
+        } else {
+            await this.prisma.$transaction(write);
         }
     }
 

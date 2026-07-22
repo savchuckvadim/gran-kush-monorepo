@@ -5,8 +5,8 @@ import {
     NotFoundException,
 } from "@nestjs/common";
 
-import { EmployeeRole, UserAccountStatus } from "@prisma/client";
-import { UserRepository } from "@users/domain/repositories/user-repository.interface";
+import { EmployeeRole } from "@prisma/client";
+import { AccountProvisioningService } from "@users/application/services/account-provisioning.service";
 
 import {
     EmployeeFilters,
@@ -25,7 +25,7 @@ export interface CreateEmployeeInput {
 export class EmployeesService {
     constructor(
         private readonly employeeRepository: EmployeeRepository,
-        private readonly userRepository: UserRepository
+        private readonly accountProvisioning: AccountProvisioningService
     ) {}
 
     async findAllByPortal(
@@ -68,18 +68,9 @@ export class EmployeesService {
             throw new ForbiddenException("Cannot assign portal_owner role");
         }
 
-        let user = await this.userRepository.findByEmail(input.email);
-        let isNewUser = false;
-        if (!user) {
-            user = await this.userRepository.create({
-                email: input.email,
-                passwordHash: null,
-                status: UserAccountStatus.pending_claim,
-                isActive: false,
-                emailConfirmed: false,
-            });
-            isNewUser = true;
-        }
+        const { user, isNewUser } = await this.accountProvisioning.ensurePendingClaimUser(
+            input.email
+        );
 
         const employee = await this.employeeRepository.createWithProfile({
             userId: user.id,

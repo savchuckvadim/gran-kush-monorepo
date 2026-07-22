@@ -217,9 +217,17 @@ export const GLOBAL_ENTITY_TEMPLATE_SEEDS: GlobalEntityTemplateSeed[] = [
 export async function ensureGlobalEntityTemplates(db: Db): Promise<void> {
     const portalTypesJson = ALL_PORTAL_TYPES as unknown as Prisma.InputJsonValue;
 
+    const existingCodes = new Set(
+        (
+            await db.globalEntityTemplate.findMany({
+                where: { code: { in: GLOBAL_ENTITY_TEMPLATE_SEEDS.map((s) => s.code) } },
+                select: { code: true },
+            })
+        ).map((t) => t.code)
+    );
+
     for (const seed of GLOBAL_ENTITY_TEMPLATE_SEEDS) {
-        const existing = await db.globalEntityTemplate.findUnique({ where: { code: seed.code } });
-        if (existing) {
+        if (existingCodes.has(seed.code)) {
             continue;
         }
 
