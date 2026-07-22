@@ -18,11 +18,17 @@ export class DynamicPayloadValidatorService {
         purpose: FormPurpose,
         payload: Record<string, unknown>
     ): Promise<Record<string, unknown>> {
-        const { fields } = await this.formSchema.getFormSchema(
-            portalId,
-            ENTITY_DEFINITION_CODES.MEMBER,
-            purpose
-        );
+        return this.validatePayload(portalId, ENTITY_DEFINITION_CODES.MEMBER, purpose, payload);
+    }
+
+    /** Универсальная валидация payload по форме любой сущности. */
+    async validatePayload(
+        portalId: string,
+        entityCode: string,
+        purpose: FormPurpose,
+        payload: Record<string, unknown>
+    ): Promise<Record<string, unknown>> {
+        const { fields } = await this.formSchema.getFormSchema(portalId, entityCode, purpose);
         const result: Record<string, unknown> = {};
 
         for (const item of fields) {
@@ -56,23 +62,32 @@ export class DynamicPayloadValidatorService {
         portalId: string,
         payload: Record<string, unknown>
     ): Promise<Record<string, unknown>> {
+        return this.validatePartialUpdate(portalId, ENTITY_DEFINITION_CODES.MEMBER, payload);
+    }
+
+    /** Универсальная частичная валидация полей любой сущности (без формы). */
+    async validatePartialUpdate(
+        portalId: string,
+        entityCode: string,
+        payload: Record<string, unknown>
+    ): Promise<Record<string, unknown>> {
         const keys = Object.keys(payload);
         if (keys.length === 0) {
             return {};
         }
 
-        const memberDef = await this.prisma.entityDefinition.findUnique({
+        const entityDef = await this.prisma.entityDefinition.findUnique({
             where: {
-                portalId_code: { portalId, code: ENTITY_DEFINITION_CODES.MEMBER },
+                portalId_code: { portalId, code: entityCode },
             },
         });
-        if (!memberDef) {
-            throw new BadRequestException("Member entity is not configured for this portal");
+        if (!entityDef) {
+            throw new BadRequestException(`Entity "${entityCode}" is not configured for this portal`);
         }
 
         const defs = await this.prisma.fieldDefinition.findMany({
             where: {
-                entityDefinitionId: memberDef.id,
+                entityDefinitionId: entityDef.id,
                 fieldKey: { in: keys },
                 isActive: true,
             },
@@ -111,11 +126,26 @@ export class DynamicPayloadValidatorService {
         const rules = item.validationJson as Record<string, unknown> | null;
 
         switch (type) {
+            case PortalFieldType.document:
+            case PortalFieldType.signature: {
+                // Файлы живут на аккаунте (UserDocument/UserSignature);
+                // в FieldValue хранится маркер: { fromAccount: true } или строка-ссылка
+                if (typeof raw === "object" && raw !== null && !Array.isArray(raw)) {
+                    return raw;
+                }
+                if (typeof raw === "boolean") {
+                    return { fromAccount: raw };
+                }
+                if (typeof raw !== "string") {
+                    throw new BadRequestException(
+                        `Field "${key}" must be a string or account reference object`
+                    );
+                }
+                return raw;
+            }
             case PortalFieldType.string:
             case PortalFieldType.text:
-            case PortalFieldType.document:
-            case PortalFieldType.file:
-            case PortalFieldType.signature: {
+            case PortalFieldType.file: {
                 if (typeof raw !== "string") {
                     throw new BadRequestException(`Field "${key}" must be a string`);
                 }

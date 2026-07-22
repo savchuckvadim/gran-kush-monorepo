@@ -1,12 +1,13 @@
 import { InjectQueue } from "@nestjs/bullmq";
 import { ConflictException, Injectable } from "@nestjs/common";
 
+import { EmployeeRole } from "@prisma/client";
 import { hash } from "bcrypt";
 import { Queue } from "bullmq";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
-import { mapToEntity } from "@modules/portal/crm/employees";
+import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 import { PortalEntityMetadataService } from "@modules/portal/crm/entity-fields/application/services/portal-entity-metadata.service";
 import { RegisterPortalDto } from "@modules/portal/crm/portals/api/dto/register-portal.dto";
 import {
@@ -27,7 +28,7 @@ type RegisterPortalResult = {
         email: string;
         name: string;
         role: string;
-        portalId: string | null;
+        portalId: string;
     };
     tokens: {
         accessToken: string;
@@ -58,7 +59,7 @@ export class PortalRegistrationService {
 
         const existingUser = await this.prisma.user.findUnique({
             where: { email: normalizedEmail },
-            select: { id: true },
+            select: { id: true, passwordHash: true },
         });
         if (existingUser) {
             throw new ConflictException("User with this email already exists");
@@ -78,7 +79,6 @@ export class PortalRegistrationService {
 
             const user = await tx.user.create({
                 data: {
-                    portalId: portal.id,
                     email: normalizedEmail,
                     passwordHash,
                     isActive: true,
@@ -86,15 +86,27 @@ export class PortalRegistrationService {
                 },
             });
 
+            const employeeDef = await tx.entityDefinition.findUniqueOrThrow({
+                where: {
+                    portalId_code: {
+                        portalId: portal.id,
+                        code: ENTITY_DEFINITION_CODES.EMPLOYEE,
+                    },
+                },
+            });
+            const record = await tx.entityRecord.create({
+                data: {
+                    portalId: portal.id,
+                    entityDefinitionId: employeeDef.id,
+                },
+            });
+
             const employee = await tx.employee.create({
                 data: {
                     portalId: portal.id,
                     userId: user.id,
-                    name: dto.ownerName.trim(),
-                    surname: dto.ownerSurname?.trim() || null,
-                    role: "portal_owner",
-                    position: "Owner",
-                    department: "Management",
+                    entityRecordId: record.id,
+                    role: EmployeeRole.portal_owner,
                     isActive: true,
                 },
                 include: {
@@ -102,15 +114,43 @@ export class PortalRegistrationService {
                 },
             });
 
+            const ownerFields: Record<string, string> = {
+                first_name: dto.ownerName.trim(),
+                ...(dto.ownerSurname?.trim() ? { last_name: dto.ownerSurname.trim() } : {}),
+            };
+            for (const [fieldKey, value] of Object.entries(ownerFields)) {
+                const fieldDef = await tx.fieldDefinition.findUnique({
+                    where: {
+                        entityDefinitionId_fieldKey: {
+                            entityDefinitionId: employeeDef.id,
+                            fieldKey,
+                        },
+                    },
+                    select: { id: true },
+                });
+                if (fieldDef) {
+                    await tx.fieldValue.create({
+                        data: {
+                            portalId: portal.id,
+                            entityRecordId: record.id,
+                            fieldDefinitionId: fieldDef.id,
+                            valueIndex: 0,
+                            valueJson: value,
+                        },
+                    });
+                }
+            }
+
             return {
                 portal,
                 employee,
             };
         });
 
-        const employeeEntity = mapToEntity(created.employee, created.employee.user);
-
-        const tokens = await this.employeeAuthService.generateTokens(employeeEntity, deviceId);
+        const tokens = await this.employeeAuthService.generateTokens(
+            { id: created.employee.user.id, email: created.employee.user.email },
+            deviceId
+        );
 
         const initPayload: PortalRegistrationInitPayload = {
             portalId: created.portal.id,
@@ -118,7 +158,7 @@ export class PortalRegistrationService {
             portalDisplayName: created.portal.displayName,
             ownerId: created.employee.id,
             ownerEmail: created.employee.user.email,
-            ownerName: created.employee.name,
+            ownerName: dto.ownerName.trim(),
         };
 
         // Portal events are processed asynchronously in PortalEventsProcessor.
@@ -141,7 +181,7 @@ export class PortalRegistrationService {
             owner: {
                 id: created.employee.id,
                 email: created.employee.user.email,
-                name: created.employee.name,
+                name: dto.ownerName.trim(),
                 role: created.employee.role,
                 portalId: created.employee.portalId,
             },

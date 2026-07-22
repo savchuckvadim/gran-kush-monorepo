@@ -1,4 +1,4 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get, NotFoundException } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
@@ -21,10 +21,13 @@ export class LkMembersController {
     })
     @ApiErrorResponse([401, 404])
     async getMe(@CurrentMember() member: Member): Promise<CrmMemberFullDto> {
-        const fullMember = await this.membersService.findById(member.id);
+        const fullMember = await this.membersService.findByIdForPortal(
+            member.id,
+            member.portalId
+        );
 
         if (!fullMember) {
-            throw new Error("Member not found");
+            throw new NotFoundException("Member not found");
         }
 
         return this.membersService.toCrmMemberFullDto(fullMember);

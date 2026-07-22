@@ -37,8 +37,8 @@ import { FormLayoutSettingsService } from "@modules/portal/crm/entity-fields/app
 import { FormSchemaService } from "@modules/portal/crm/entity-fields/application/services/form-schema.service";
 import { OrderStagesService } from "@modules/portal/crm/entity-fields/application/services/order-stages.service";
 import { PortalFieldSettingsService } from "@modules/portal/crm/entity-fields/application/services/portal-field-settings.service";
-import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 
+/** Конструктор полей/форм/стадий: универсальные маршруты по коду сущности (member/order/product/смарт-процессы). */
 @ApiTags("CRM Entity fields (settings)")
 @Controller("crm/settings/entities")
 @RequireEmployeeJwt()
@@ -47,32 +47,14 @@ export class CrmEntityFieldsSettingsController {
         private readonly formSchema: FormSchemaService,
         private readonly portalFields: PortalFieldSettingsService,
         private readonly formLayout: FormLayoutSettingsService,
-        private readonly orderStages: OrderStagesService
+        private readonly stages: OrderStagesService
     ) {}
 
-    @Get("member/form-schema/:purpose")
-    @ApiOperation({ summary: "Member form schema for a purpose (CRM settings / builder)" })
-    @ApiSuccessResponse(MemberFormSchemaResponseDto)
-    @ApiErrorResponse([401, 403, 404])
-    async memberFormSchema(
-        @PortalId() portalId: string,
-        @Param("purpose") purposeParam: string
-    ): Promise<MemberFormSchemaResponseDto> {
+    private parsePurpose(purposeParam: string): FormPurpose {
         if (!Object.values(FormPurpose).includes(purposeParam as FormPurpose)) {
             throw new BadRequestException(`Invalid form purpose: ${purposeParam}`);
         }
-        const purpose = purposeParam as FormPurpose;
-        return this.formSchema.getFormSchema(portalId, ENTITY_DEFINITION_CODES.MEMBER, purpose);
-    }
-
-    @Get("member/filter-fields")
-    @ApiOperation({ summary: "Member fields available for list filters" })
-    @ApiSuccessResponse(MemberFormFieldSchemaItemDto, { isArray: true })
-    @ApiErrorResponse([401, 403])
-    async memberFilterFields(
-        @PortalId() portalId: string
-    ): Promise<MemberFormFieldSchemaItemDto[]> {
-        return this.formSchema.getFilterableMemberFields(portalId);
+        return purposeParam as FormPurpose;
     }
 
     @Get("member/status-items")
@@ -83,99 +65,127 @@ export class CrmEntityFieldsSettingsController {
         return await this.formSchema.getMemberLifecycleStatusItems(portalId);
     }
 
-    @Get("member/fields")
-    @ApiOperation({ summary: "All member field definitions for this portal" })
+    @Get(":code/form-schema/:purpose")
+    @ApiOperation({ summary: "Entity form schema for a purpose (CRM settings / builder)" })
+    @ApiSuccessResponse(MemberFormSchemaResponseDto)
+    @ApiErrorResponse([401, 403, 404])
+    async entityFormSchema(
+        @PortalId() portalId: string,
+        @Param("code") code: string,
+        @Param("purpose") purposeParam: string
+    ): Promise<MemberFormSchemaResponseDto> {
+        return this.formSchema.getFormSchema(portalId, code, this.parsePurpose(purposeParam));
+    }
+
+    @Get(":code/filter-fields")
+    @ApiOperation({ summary: "Entity fields available for list filters" })
+    @ApiSuccessResponse(MemberFormFieldSchemaItemDto, { isArray: true })
+    @ApiErrorResponse([401, 403])
+    async entityFilterFields(
+        @PortalId() portalId: string,
+        @Param("code") code: string
+    ): Promise<MemberFormFieldSchemaItemDto[]> {
+        return this.formSchema.getFilterableFields(portalId, code);
+    }
+
+    @Get(":code/fields")
+    @ApiOperation({ summary: "All field definitions of the entity for this portal" })
     @ApiSuccessResponse(MemberFieldDefinitionResponseDto, { isArray: true })
     @ApiErrorResponse([401, 403])
-    async listMemberFields(
-        @PortalId() portalId: string
+    async listFields(
+        @PortalId() portalId: string,
+        @Param("code") code: string
     ): Promise<MemberFieldDefinitionResponseDto[]> {
-        return this.portalFields.listMemberDefinitions(portalId);
+        return this.portalFields.listDefinitions(portalId, code);
     }
 
-    @Post("member/fields")
+    @Post(":code/fields")
     @UseGuards(AdminGuard)
     @Admin()
-    @ApiOperation({ summary: "Create a custom member field (portal admin)" })
+    @ApiOperation({ summary: "Create a custom field (portal admin)" })
     @ApiSuccessResponse(MemberFieldDefinitionResponseDto)
     @ApiErrorResponse([401, 403, 400, 409])
-    async createMemberField(
+    async createField(
         @PortalId() portalId: string,
+        @Param("code") code: string,
         @Body() dto: CreatePortalMemberFieldDto
     ): Promise<MemberFieldDefinitionResponseDto> {
-        return this.portalFields.createMemberDefinition(portalId, dto);
+        return this.portalFields.createDefinition(portalId, code, dto);
     }
 
-    @Patch("member/fields/:fieldKey")
+    @Patch(":code/fields/:fieldKey")
     @UseGuards(AdminGuard)
     @Admin()
-    @ApiOperation({ summary: "Update a non-immutable member field" })
+    @ApiOperation({ summary: "Update a non-immutable field" })
     @ApiSuccessResponse(MemberFieldDefinitionResponseDto)
     @ApiErrorResponse([401, 403, 404, 400])
-    async updateMemberField(
+    async updateField(
         @PortalId() portalId: string,
+        @Param("code") code: string,
         @Param("fieldKey") fieldKey: string,
         @Body() dto: UpdatePortalMemberFieldDto
     ): Promise<MemberFieldDefinitionResponseDto> {
-        return this.portalFields.updateMemberDefinition(portalId, fieldKey, dto);
+        return this.portalFields.updateDefinition(portalId, code, fieldKey, dto);
     }
 
-    @Delete("member/fields/:fieldKey")
+    @Delete(":code/fields/:fieldKey")
     @UseGuards(AdminGuard)
     @Admin()
-    @ApiOperation({ summary: "Delete a custom member field (no system/immutable)" })
+    @ApiOperation({ summary: "Delete a custom field (no system/immutable)" })
     @ApiSuccessResponse(DeleteMemberFieldResponseDto)
     @ApiErrorResponse([401, 403, 404, 400])
-    async deleteMemberField(
+    async deleteField(
         @PortalId() portalId: string,
+        @Param("code") code: string,
         @Param("fieldKey") fieldKey: string
     ): Promise<DeleteMemberFieldResponseDto> {
-        await this.portalFields.deleteMemberDefinition(portalId, fieldKey);
+        await this.portalFields.deleteDefinition(portalId, code, fieldKey);
         return { ok: true };
     }
 
-    @Post("member/fields/:fieldKey/options")
+    @Post(":code/fields/:fieldKey/options")
     @UseGuards(AdminGuard)
     @Admin()
-    @ApiOperation({ summary: "Add enum/select option to a member field" })
+    @ApiOperation({ summary: "Add enum/select option to a field" })
     @ApiSuccessResponse(MemberFieldOptionResponseDto)
     @ApiErrorResponse([401, 403, 404, 409])
-    async addMemberFieldOption(
+    async addFieldOption(
         @PortalId() portalId: string,
+        @Param("code") code: string,
         @Param("fieldKey") fieldKey: string,
         @Body() dto: PortalFieldOptionInputDto
     ): Promise<MemberFieldOptionResponseDto> {
-        return this.portalFields.addMemberFieldOption(portalId, fieldKey, dto);
+        return this.portalFields.addFieldOption(portalId, code, fieldKey, dto);
     }
 
-    @Patch("member/forms/:purpose")
+    @Patch(":code/forms/:purpose")
     @UseGuards(AdminGuard)
     @Admin()
-    @ApiOperation({ summary: "Replace member form layout items for a purpose" })
+    @ApiOperation({ summary: "Replace form layout items for a purpose" })
     @ApiSuccessResponse(MemberFormLayoutReplaceResponseDto)
     @ApiErrorResponse([401, 403, 404, 400])
-    async updateMemberForm(
+    async updateForm(
         @PortalId() portalId: string,
+        @Param("code") code: string,
         @Param("purpose") purposeParam: string,
         @Body() dto: UpdateMemberFormLayoutDto
     ): Promise<MemberFormLayoutReplaceResponseDto> {
-        if (!Object.values(FormPurpose).includes(purposeParam as FormPurpose)) {
-            throw new BadRequestException(`Invalid form purpose: ${purposeParam}`);
-        }
-        return this.formLayout.replaceMemberFormLayout(
+        return this.formLayout.replaceFormLayout(
             portalId,
-            purposeParam as FormPurpose,
+            code,
+            this.parsePurpose(purposeParam),
             dto.items
         );
     }
 
-    @Get("order/stage-categories")
-    @ApiOperation({ summary: "Order funnel categories and stages" })
+    @Get(":code/stage-categories")
+    @ApiOperation({ summary: "Entity funnel categories and stages" })
     @ApiSuccessResponse(OrderStageCategoryResponseDto, { isArray: true })
     @ApiErrorResponse([401, 403])
-    async orderStageCategories(
-        @PortalId() portalId: string
+    async stageCategories(
+        @PortalId() portalId: string,
+        @Param("code") code: string
     ): Promise<OrderStageCategoryResponseDto[]> {
-        return this.orderStages.listOrderStageCategories(portalId);
+        return this.stages.listStageCategories(portalId, code);
     }
 }

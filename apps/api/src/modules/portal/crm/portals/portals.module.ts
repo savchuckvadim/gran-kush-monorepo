@@ -5,6 +5,9 @@ import { PrismaModule } from "@common/prisma/prisma.module";
 import { EmployeeAuthModule } from "@modules/portal/auth/employees/employee-auth.module";
 import { SharedAuthModule } from "@modules/portal/auth/shared/shared-auth.module";
 import { EntityFieldsModule } from "@modules/portal/crm/entity-fields/entity-fields.module";
+import { MembersModule } from "@modules/portal/crm/members/members.module";
+import { CrmMyPortalsController } from "@modules/portal/crm/portals/api/controllers/crm-my-portals.controller";
+import { LkPortalsController } from "@modules/portal/crm/portals/api/controllers/lk-portals.controller";
 import { PortalRegistrationController } from "@modules/portal/crm/portals/api/controllers/portal-registration.controller";
 import { PortalResolveController } from "@modules/portal/crm/portals/api/controllers/portal-resolve.controller";
 import { PortalRegistrationService } from "@modules/portal/crm/portals/application/services/portal-registration.service";
@@ -17,11 +20,17 @@ import { PortalEventsProcessor } from "@modules/portal/crm/portals/infrastructur
         EntityFieldsModule,
         EmployeeAuthModule,
         SharedAuthModule,
+        MembersModule,
         BullModule.registerQueue({
             name: PORTAL_EVENTS_QUEUE_NAME,
         }),
     ],
-    controllers: [PortalRegistrationController, PortalResolveController],
+    controllers: [
+        PortalRegistrationController,
+        PortalResolveController,
+        LkPortalsController,
+        CrmMyPortalsController,
+    ],
     providers: [PortalRegistrationService, PortalEventsProcessor],
     exports: [PortalRegistrationService],
 })

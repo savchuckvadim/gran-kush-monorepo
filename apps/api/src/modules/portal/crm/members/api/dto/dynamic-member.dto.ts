@@ -1,10 +1,10 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
-import { IsObject, IsString, Matches, MinLength } from "class-validator";
+import { IsObject, IsOptional, IsString, Matches, MinLength } from "class-validator";
 
 import { IsEmailWithLowerCase } from "@common/decorators/dto/is-email-with-lower-case.decorator";
 
-/** Регистрация / создание member: учётные данные + динамические поля по схеме портала. */
+/** Учётные данные глобального аккаунта. */
 export class DynamicMemberCredentialsDto {
     @ApiProperty({ example: "user@example.com", type: String })
     @IsEmailWithLowerCase()
@@ -24,18 +24,28 @@ export class DynamicMemberCredentialsDto {
 }
 
 export class DynamicMemberRegistrationDto extends DynamicMemberCredentialsDto {
-    @ApiProperty({
-        description: "Field values keyed by fieldKey (see registration-schema)",
+    @ApiPropertyOptional({
+        description:
+            "Field values keyed by fieldKey (see registration-schema). Обязательны только при регистрации в контексте портала",
         type: "object",
         additionalProperties: true,
         example: { first_name: "John", last_name: "Doe" },
     })
+    @IsOptional()
     @IsObject()
-    fields: Record<string, unknown>;
+    fields?: Record<string, unknown>;
 }
 
-/** CRM: создание member тем же контрактом; пароль задаёт сотрудник. */
-export class CrmCreateMemberDto extends DynamicMemberCredentialsDto {
+/**
+ * CRM: сотрудник создаёт member по email (без пароля).
+ * Если аккаунта нет — он создаётся в статусе pending_claim,
+ * пользователь позже клеймит его при регистрации.
+ */
+export class CrmCreateMemberDto {
+    @ApiProperty({ example: "user@example.com", type: String })
+    @IsEmailWithLowerCase()
+    email: string;
+
     @ApiProperty({
         description: "Field values keyed by fieldKey",
         type: "object",
@@ -43,4 +53,18 @@ export class CrmCreateMemberDto extends DynamicMemberCredentialsDto {
     })
     @IsObject()
     fields: Record<string, unknown>;
+}
+
+export class CrmCreateMemberResponseDto {
+    @ApiProperty({ type: String })
+    userId: string;
+
+    @ApiProperty({ type: String })
+    memberId: string;
+
+    @ApiProperty({
+        type: Boolean,
+        description: "true если аккаунт создан сейчас и ждёт клейма",
+    })
+    isNewUser: boolean;
 }

@@ -1,13 +1,13 @@
 import { OnWorkerEvent, Processor, WorkerHost } from "@nestjs/bullmq";
 import { Injectable, Logger } from "@nestjs/common";
 
-import { StorageService } from "@storage/application/services/storage.service";
-import { StorageType } from "@storage/domain/enums/storage-type.enum";
+import { UserDocumentSide } from "@prisma/client";
 import { Job } from "bullmq";
 
+import { AccountFilesService } from "@modules/account/application/services/account-files.service";
+import { UserDocumentRepository } from "@modules/account/domain/repositories/user-document-repository.interface";
+import { UserSignatureRepository } from "@modules/account/domain/repositories/user-signature-repository.interface";
 import { QueueMemberFilesPayload } from "@modules/portal/crm/members/application/services/member-files.service";
-import { IdentityDocumentRepository } from "@modules/portal/crm/members/domain/repositories/identity-document-repository.interface";
-import { SignatureRepository } from "@modules/portal/crm/members/domain/repositories/signature-repository.interface";
 import {
     MEMBER_FILES_QUEUE_NAME,
     MEMBER_FILES_WORKER_EVENTS,
@@ -19,51 +19,55 @@ export class MemberFilesProcessor extends WorkerHost {
     private readonly logger = new Logger(MemberFilesProcessor.name);
 
     constructor(
-        private readonly storageService: StorageService,
-        private readonly identityDocumentRepository: IdentityDocumentRepository,
-        private readonly signatureRepository: SignatureRepository
+        private readonly accountFiles: AccountFilesService,
+        private readonly userDocumentRepository: UserDocumentRepository,
+        private readonly userSignatureRepository: UserSignatureRepository
     ) {
         super();
     }
 
     async process(job: Job<QueueMemberFilesPayload>): Promise<void> {
-        const { memberId, documentType, documentFirst, documentSecond, signature } = job.data;
+        const { userId, documentType, documentFirst, documentSecond, signature } = job.data;
 
         if ((documentFirst || documentSecond) && !documentType) {
             throw new Error("documentType is required when identity documents are provided.");
         }
 
         if (documentType && documentFirst) {
-            const storagePath = await this.savePrivateDataUrl(
+            const storagePath = await this.accountFiles.savePrivateDataUrl(
                 documentFirst,
-                memberId,
-                "identity-first"
+                userId,
+                `document-${documentType}-front`
             );
-            await this.identityDocumentRepository.upsertByMemberTypeAndSide({
-                memberId,
+            await this.userDocumentRepository.upsertByUserTypeSide({
+                userId,
                 type: documentType,
-                side: "first",
+                side: UserDocumentSide.front,
                 storagePath,
             });
         }
 
         if (documentType && documentSecond) {
-            const storagePath = await this.savePrivateDataUrl(
+            const storagePath = await this.accountFiles.savePrivateDataUrl(
                 documentSecond,
-                memberId,
-                "identity-second"
+                userId,
+                `document-${documentType}-back`
             );
-            await this.identityDocumentRepository.upsertByMemberTypeAndSide({
-                memberId,
+            await this.userDocumentRepository.upsertByUserTypeSide({
+                userId,
                 type: documentType,
-                side: "second",
+                side: UserDocumentSide.back,
                 storagePath,
             });
         }
 
         if (signature) {
-            const storagePath = await this.savePrivateDataUrl(signature, memberId, "signature");
-            await this.signatureRepository.upsertByMemberId(memberId, { storagePath });
+            const storagePath = await this.accountFiles.savePrivateDataUrl(
+                signature,
+                userId,
+                "signature"
+            );
+            await this.userSignatureRepository.upsertByUser({ userId, storagePath });
         }
     }
 
@@ -75,52 +79,5 @@ export class MemberFilesProcessor extends WorkerHost {
     @OnWorkerEvent(MEMBER_FILES_WORKER_EVENTS.FAILED)
     onFailed(job: Job<QueueMemberFilesPayload>, error: Error) {
         this.logger.error(`Member files job failed: ${job.id}: ${error.message}`);
-    }
-
-    private async savePrivateDataUrl(
-        dataUrl: string,
-        memberId: string,
-        filePrefix: string
-    ): Promise<string> {
-        const parsed = this.parseDataUrl(dataUrl);
-        const folder = `members/${memberId}`;
-        const extension = this.getExtensionFromMime(parsed.mimeType);
-
-        const result = await this.storageService.uploadFile(
-            {
-                buffer: parsed.buffer,
-                originalname: `${filePrefix}.${extension}`,
-                mimetype: parsed.mimeType,
-            },
-            folder,
-            StorageType.PRIVATE
-        );
-
-        return result.relativePath;
-    }
-
-    private parseDataUrl(dataUrl: string): { mimeType: string; buffer: Buffer } {
-        const match = /^data:(?<mimeType>[\w.+-]+\/[\w.+-]+);base64,(?<base64>.+)$/u.exec(dataUrl);
-
-        if (!match?.groups?.mimeType || !match.groups.base64) {
-            throw new Error("Invalid file format. Expected data URL with base64 payload.");
-        }
-
-        return {
-            mimeType: match.groups.mimeType,
-            buffer: Buffer.from(match.groups.base64, "base64"),
-        };
-    }
-
-    private getExtensionFromMime(mimeType: string): string {
-        const mimeToExtension: Record<string, string> = {
-            "image/jpeg": "jpg",
-            "image/jpg": "jpg",
-            "image/png": "png",
-            "image/webp": "webp",
-            "application/pdf": "pdf",
-        };
-
-        return mimeToExtension[mimeType] ?? "bin";
     }
 }

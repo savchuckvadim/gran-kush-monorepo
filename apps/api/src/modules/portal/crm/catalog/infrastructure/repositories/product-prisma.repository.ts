@@ -5,6 +5,7 @@ import { Prisma } from "@prisma/client";
 type Decimal = Prisma.Decimal;
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 import { MeasurementUnit } from "@modules/portal/crm/catalog/domain/entity/measurement-unit.entity";
 import { Product } from "@modules/portal/crm/catalog/domain/entity/product.entity";
 import { ProductCategory } from "@modules/portal/crm/catalog/domain/entity/product-category.entity";
@@ -88,9 +89,25 @@ export class ProductPrismaRepository implements ProductRepository {
         strain?: string;
         createdBy?: string;
     }): Promise<Product> {
-        const raw = await this.prisma.product.create({
-            data,
-            include: PRODUCT_INCLUDE,
+        const raw = await this.prisma.$transaction(async (tx) => {
+            const productDef = await tx.entityDefinition.findUniqueOrThrow({
+                where: {
+                    portalId_code: {
+                        portalId: data.portalId,
+                        code: ENTITY_DEFINITION_CODES.PRODUCT,
+                    },
+                },
+            });
+            const record = await tx.entityRecord.create({
+                data: {
+                    portalId: data.portalId,
+                    entityDefinitionId: productDef.id,
+                },
+            });
+            return tx.product.create({
+                data: { ...data, entityRecordId: record.id },
+                include: PRODUCT_INCLUDE,
+            });
         });
         return this.mapToEntity(raw);
     }

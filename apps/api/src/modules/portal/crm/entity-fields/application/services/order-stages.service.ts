@@ -62,18 +62,74 @@ export class OrderStagesService {
     }
 
     async listOrderStageCategories(portalId: string): Promise<OrderStageCategoryWithStages[]> {
-        const orderDef = await this.prisma.entityDefinition.findUnique({
+        return this.listStageCategories(portalId, ENTITY_DEFINITION_CODES.ORDER);
+    }
+
+    /** Воронки любой сущности портала (для конструктора и kanban). */
+    async listStageCategories(
+        portalId: string,
+        entityCode: string
+    ): Promise<OrderStageCategoryWithStages[]> {
+        const entityDef = await this.prisma.entityDefinition.findUnique({
             where: {
-                portalId_code: { portalId, code: ENTITY_DEFINITION_CODES.ORDER },
+                portalId_code: { portalId, code: entityCode },
             },
             select: { id: true },
         });
-        if (!orderDef) {
+        if (!entityDef) {
             return [];
         }
         return this.prisma.stageCategory.findMany({
-            where: { portalId, entityDefinitionId: orderDef.id },
+            where: { portalId, entityDefinitionId: entityDef.id },
             orderBy: [{ isDefault: "desc" }, { name: "asc" }],
+            include: {
+                stages: { orderBy: { sortOrder: "asc" } },
+            },
+        });
+    }
+
+    /** Создать воронку со стадиями для сущности (конструктор). */
+    async createStageCategory(
+        portalId: string,
+        entityCode: string,
+        input: {
+            code: string;
+            name: string;
+            stages: {
+                name: string;
+                sortOrder: number;
+                color?: string | null;
+                semantic: "NEW" | "IN_PROGRESS" | "SUCCESS" | "FAILURE";
+                isTerminalSuccess?: boolean;
+                isTerminalFailure?: boolean;
+            }[];
+        }
+    ): Promise<OrderStageCategoryWithStages> {
+        const entityDef = await this.prisma.entityDefinition.findUniqueOrThrow({
+            where: {
+                portalId_code: { portalId, code: entityCode },
+            },
+            select: { id: true },
+        });
+        return this.prisma.stageCategory.create({
+            data: {
+                portalId,
+                entityDefinitionId: entityDef.id,
+                code: input.code,
+                name: input.name,
+                isDefault: false,
+                isSystem: false,
+                stages: {
+                    create: input.stages.map((s) => ({
+                        name: s.name,
+                        sortOrder: s.sortOrder,
+                        color: s.color ?? null,
+                        semantic: s.semantic,
+                        isTerminalSuccess: s.isTerminalSuccess ?? false,
+                        isTerminalFailure: s.isTerminalFailure ?? false,
+                    })),
+                },
+            },
             include: {
                 stages: { orderBy: { sortOrder: "asc" } },
             },

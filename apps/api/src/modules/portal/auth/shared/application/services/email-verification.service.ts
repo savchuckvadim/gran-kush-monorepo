@@ -4,19 +4,11 @@ import { MailService } from "@mail/application/services/mail.service";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import { randomBytes } from "crypto";
 
-import { PrismaService } from "@common/prisma/prisma.service";
-import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
-import {
-    buildMemberFieldMap,
-    getMemberDisplayNameParts,
-} from "@modules/portal/crm/entity-fields/lib/member-field-values";
-
 @Injectable()
 export class EmailVerificationService {
     constructor(
         private readonly userRepository: UserRepository,
-        private readonly mailService: MailService,
-        private readonly prisma: PrismaService
+        private readonly mailService: MailService
     ) {}
 
     /**
@@ -34,53 +26,28 @@ export class EmailVerificationService {
     }
 
     /**
-     * Отправка email для подтверждения при регистрации члена
+     * Отправка письма подтверждения глобальному аккаунту.
      */
-    async sendMemberVerificationEmail(
-        member: { id: string; userId: string; name: string; surname: string | null },
-        user: { id: string; email: string }
-    ): Promise<void> {
+    async sendVerificationEmailToUserId(userId: string): Promise<void> {
+        const user = await this.userRepository.findById(userId);
+        if (!user || user.emailConfirmed) {
+            return;
+        }
+
         const token = this.generateVerificationToken();
         const expiresAt = new Date();
-        expiresAt.setHours(expiresAt.getHours() + 24); // Токен действителен 24 часа
+        expiresAt.setHours(expiresAt.getHours() + 24);
 
-        // Сохраняем токен в User
         await this.userRepository.update(user.id, {
             emailVerificationToken: token,
             emailVerificationExpiresAt: expiresAt,
         });
 
-        // Отправляем email
         await this.mailService.sendMamberEmailVerification(
             {
-                name: member.name,
-                surname: member.surname,
+                name: user.displayName ?? user.email,
+                surname: null,
             },
-            user,
-            token
-        );
-    }
-
-    /**
-     * Отправка email для подтверждения при регистрации сотрудника
-     */
-    async sendEmployeeVerificationEmail(
-        employee: Employee,
-        user: { id: string; email: string }
-    ): Promise<void> {
-        const token = this.generateVerificationToken();
-        const expiresAt = new Date();
-        expiresAt.setHours(expiresAt.getHours() + 24); // Токен действителен 24 часа
-
-        // Сохраняем токен в User
-        await this.userRepository.update(user.id, {
-            emailVerificationToken: token,
-            emailVerificationExpiresAt: expiresAt,
-        });
-
-        // Отправляем email (используем имя сотрудника)
-        await this.mailService.sendEmployeeEmailVerification(
-            { name: employee.name, surname: employee.surname ?? null },
             { id: user.id, email: user.email },
             token
         );
@@ -139,52 +106,15 @@ export class EmailVerificationService {
         const expiresAt = new Date();
         expiresAt.setHours(expiresAt.getHours() + 1); // Токен действителен 1 час
 
-        // Сохраняем токен в User
         await this.userRepository.update(user.id, {
             resetPasswordToken: token,
             resetPasswordExpiresAt: expiresAt,
         });
 
-        const userWithRelations = await this.userRepository.findByEmailWithRelations(email);
-        let name = "";
-        let surname = "";
-        if (userWithRelations?.member) {
-            const m = await this.prisma.member.findUnique({
-                where: { id: userWithRelations.member.id },
-                select: {
-                    profile: {
-                        select: {
-                            fieldValues: {
-                                select: {
-                                    valueJson: true,
-                                    fieldDefinition: { select: { fieldKey: true } },
-                                },
-                            },
-                        },
-                    },
-                },
-            });
-            if (m?.profile?.fieldValues?.length) {
-                const fieldMap = buildMemberFieldMap(
-                    m.profile.fieldValues.map((fv) => ({
-                        valueJson: fv.valueJson,
-                        fieldDefinition: fv.fieldDefinition,
-                    }))
-                );
-                const parts = getMemberDisplayNameParts(fieldMap);
-                name = parts.firstName;
-                surname = parts.lastName ?? "";
-            }
-        } else if (userWithRelations?.employee) {
-            name = userWithRelations.employee.name ?? "";
-            surname = userWithRelations.employee.surname ?? "";
-        }
-
-        // Отправляем email
         await this.mailService.sendPasswordReset(
             { id: user.id, email: user.email },
-            name,
-            surname || "",
+            user.displayName ?? user.email,
+            "",
             token
         );
 

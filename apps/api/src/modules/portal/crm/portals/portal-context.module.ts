@@ -1,19 +1,19 @@
 import { Global, MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 
-import { PortalTenantMatchGuard } from "@common/portal";
+import { MembershipGuard } from "@common/portal";
 import { PrismaModule } from "@common/prisma/prisma.module";
 
 import { PortalResolutionService } from "./application/services/portal-resolution.service";
 import { PortalContextMiddleware } from "./infrastructure/middleware/portal-context.middleware";
 
 /**
- * Глобальный tenant-контекст: middleware резолва портала + guard сверки с JWT.
+ * Глобальный tenant-контекст: middleware резолва портала + guard membership.
  */
 @Global()
 @Module({
     imports: [PrismaModule],
-    providers: [PortalResolutionService, PortalContextMiddleware, PortalTenantMatchGuard],
-    exports: [PortalResolutionService, PortalTenantMatchGuard],
+    providers: [PortalResolutionService, PortalContextMiddleware, MembershipGuard],
+    exports: [PortalResolutionService, MembershipGuard],
 })
 export class PortalContextModule implements NestModule {
     configure(consumer: MiddlewareConsumer): void {

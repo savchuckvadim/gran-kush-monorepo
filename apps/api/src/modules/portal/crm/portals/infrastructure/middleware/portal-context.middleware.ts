@@ -34,6 +34,9 @@ export class PortalContextMiddleware implements NestMiddleware {
                   : undefined;
 
         if (!portalId && !slug) {
+            if (this.portalContextOptional(path)) {
+                return next();
+            }
             return next(
                 new BadRequestException(
                     `Missing portal: send ${PORTAL_HTTP_HEADERS.PORTAL_ID} or ${PORTAL_HTTP_HEADERS.PORTAL_SLUG}`
@@ -64,7 +67,7 @@ export class PortalContextMiddleware implements NestMiddleware {
         return path;
     }
 
-    /** Маршруты, где обязателен tenant (как в MULTITENANT_* playbook). */
+    /** Маршруты, где middleware вообще участвует (резолвит контекст при наличии заголовков). */
     private requiresPortalContext(path: string): boolean {
         if (path.startsWith("/platform/")) {
             return false;
@@ -81,6 +84,35 @@ export class PortalContextMiddleware implements NestMiddleware {
         if (path.startsWith("/auth")) {
             return false;
         }
-        return path.startsWith("/crm/") || path.startsWith("/lk/") || path.startsWith("/users/");
+        return (
+            path.startsWith("/crm/") ||
+            path.startsWith("/lk/") ||
+            path.startsWith("/users/") ||
+            path.startsWith("/public/")
+        );
+    }
+
+    /**
+     * Глобальные маршруты: заголовки X-Portal-* необязательны
+     * (auth, аккаунт, «мои клубы/порталы», кросс-клубные экраны).
+     */
+    private portalContextOptional(path: string): boolean {
+        const optionalPrefixes = [
+            "/crm/my-portals",
+            "/crm/auth/login",
+            "/crm/auth/refresh",
+            "/crm/auth/logout",
+            "/crm/auth/me",
+            "/crm/mobile/auth",
+            "/lk/auth",
+            "/lk/mobile/auth",
+            "/lk/account",
+            "/lk/portals",
+            "/lk/spending",
+            "/lk/reviews",
+            "/users/",
+            "/public/",
+        ];
+        return optionalPrefixes.some((prefix) => path.startsWith(prefix));
     }
 }

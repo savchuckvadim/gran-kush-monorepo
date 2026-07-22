@@ -1,90 +1,37 @@
-import { ConflictException, Injectable } from "@nestjs/common";
-
-import { UserRepository } from "@users/domain/repositories/user-repository.interface";
-import * as bcrypt from "bcrypt";
+import { Injectable } from "@nestjs/common";
 
 import { RegisterEmployeeDto } from "@modules/portal/auth/employees/api/dto/register-employee.dto";
-import { EmployeeRepository } from "@modules/portal/crm/employees/domain/repositories/employee-repository.interface";
+import { EmployeesService } from "@modules/portal/crm/employees/application/services/employees.service";
 
+/**
+ * CRM: создание сотрудника (admin). Пароль не задаётся — если аккаунта нет,
+ * он создаётся в статусе pending_claim и клеймится пользователем позже.
+ */
 @Injectable()
 export class EmployeeRegistrationService {
-    constructor(
-        private readonly employeeRepository: EmployeeRepository,
-        private readonly userRepository: UserRepository
-    ) {}
+    constructor(private readonly employeesService: EmployeesService) {}
 
-    /**
-     * Создание Employee с User
-     */
     async createEmployee(
         dto: RegisterEmployeeDto,
         portalId: string
     ): Promise<{
         userId: string;
         employeeId: string;
+        isNewUser: boolean;
     }> {
-        // Проверяем существование пользователя через репозиторий
-        const existingUser = await this.userRepository.findByEmailWithRelations(dto.email);
-
-        if (existingUser) {
-            // Если уже есть Employee - ошибка
-            if (existingUser.employee) {
-                throw new ConflictException("User is already registered as Employee");
-            }
-
-            if (existingUser.portalId && existingUser.portalId !== portalId) {
-                throw new ConflictException("User already belongs to another portal");
-            }
-
-            // Если есть Member, но не Employee - можно создать Employee
-            const passwordHash = await bcrypt.hash(dto.password, 10);
-
-            // Обновляем только passwordHash в User через репозиторий
-            await this.userRepository.update(existingUser.id, { passwordHash, portalId });
-
-            // Создаем Employee через репозиторий
-            const employee = await this.employeeRepository.create({
-                userId: existingUser.id,
-                portalId,
-                name: dto.name,
-                surname: dto.surname,
-                phone: dto.phone,
-                role: dto.role || "employee",
-                position: dto.position,
-                department: dto.department,
-            });
-
-            return {
-                userId: existingUser.id,
-                employeeId: employee.id,
-            };
-        }
-
-        // Создаем нового User и Employee
-        const passwordHash = await bcrypt.hash(dto.password, 10);
-
-        // User содержит только email и passwordHash через репозиторий
-        const user = await this.userRepository.create({
-            email: dto.email,
-            passwordHash,
-            portalId,
-        });
-
-        // Employee содержит все остальные данные через репозиторий
-        const employee = await this.employeeRepository.create({
-            userId: user.id,
-            portalId,
-            name: dto.name,
-            surname: dto.surname,
-            phone: dto.phone,
-            role: dto.role || "employee",
-            position: dto.position,
-            department: dto.department,
-        });
+        const { employee, isNewUser } = await this.employeesService.create(
+            {
+                email: dto.email,
+                role: dto.role,
+                fields: dto.fields ?? {},
+            },
+            portalId
+        );
 
         return {
-            userId: user.id,
-            employeeId: employee.id,
+            userId: employee.employee.userId,
+            employeeId: employee.employee.id,
+            isNewUser,
         };
     }
 }

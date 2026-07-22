@@ -1,21 +1,16 @@
-import {
-    BadRequestException,
-    ConflictException,
-    Injectable,
-    NotFoundException,
-} from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 
-import { FormPurpose } from "@prisma/client";
-import { StorageType } from "@storage/domain/enums/storage-type.enum";
+import { MemberJoinSource, UserAccountStatus, UserDocument, UserSignature } from "@prisma/client";
 import { MulterFile } from "@storage/domain/interfaces/storage-file.interface";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
-import { hash } from "bcrypt";
 
 import { PrismaService } from "@common/prisma/prisma.service";
-import { ensureMjStatusDefaults } from "@common/reference-data/mj-status.seed";
+import { AccountDocumentsService } from "@modules/account/application/services/account-documents.service";
+import { AccountFilesService } from "@modules/account/application/services/account-files.service";
+import { UserDocumentRepository } from "@modules/account/domain/repositories/user-document-repository.interface";
+import { UserSignatureRepository } from "@modules/account/domain/repositories/user-signature-repository.interface";
 import { DynamicPayloadValidatorService } from "@modules/portal/crm/entity-fields/application/services/dynamic-payload-validator.service";
 import { FieldValuesService } from "@modules/portal/crm/entity-fields/application/services/field-values.service";
-import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 import { MEMBER_FIELD_KEYS } from "@modules/portal/crm/entity-fields/constants/member-field-keys";
 import {
     buildMemberFieldMap,
@@ -24,78 +19,37 @@ import {
     jsonValueToScalar,
 } from "@modules/portal/crm/entity-fields/lib/member-field-values";
 import {
-    CrmMemberDocumentDto,
+    CrmMemberAccountDocumentDto,
     CrmMemberDto,
     CrmMemberDynamicFieldDto,
+    CrmMemberFieldsPatchDto,
     CrmMemberFullDto,
-    CrmMemberIdentityDocumentDto,
-    CrmMemberMjStatusDto,
-    CrmMemberSignatureDto,
     CrmMemberStatusDto,
 } from "@modules/portal/crm/members/api/dto/crm-member.dto";
 import { CrmMemberFilesRequestDto } from "@modules/portal/crm/members/api/dto/crm-member-documents.dto";
-import { DynamicMemberCredentialsDto } from "@modules/portal/crm/members/api/dto/dynamic-member.dto";
 import { MemberWithRelations } from "@modules/portal/crm/members/domain/entity/member.entity";
-import { DocumentRepository } from "@modules/portal/crm/members/domain/repositories/document-repository.interface";
-import { IdentityDocumentRepository } from "@modules/portal/crm/members/domain/repositories/identity-document-repository.interface";
-import { MemberDocumentRepository } from "@modules/portal/crm/members/domain/repositories/member-document-repository.interface";
-import { MemberMjStatusRepository } from "@modules/portal/crm/members/domain/repositories/member-mj-status-repository.interface";
+import { JoinPortalService } from "@modules/portal/crm/members/application/services/join-portal.service";
 import {
     MemberListFilters,
     MemberRepository,
 } from "@modules/portal/crm/members/domain/repositories/member-repository.interface";
-import { MjStatusRepository } from "@modules/portal/crm/members/domain/repositories/mj-status-repository.interface";
-import { SignatureRepository } from "@modules/portal/crm/members/domain/repositories/signature-repository.interface";
-import { StorageService } from "@modules/storage";
+
+import { UserDocumentSide } from "@prisma/client";
 
 @Injectable()
 export class MembersService {
     constructor(
         private readonly memberRepository: MemberRepository,
         private readonly userRepository: UserRepository,
-        private readonly mjStatusRepository: MjStatusRepository,
-        private readonly memberMjStatusRepository: MemberMjStatusRepository,
-        private readonly documentRepository: DocumentRepository,
-        private readonly memberDocumentRepository: MemberDocumentRepository,
-        private readonly identityDocumentRepository: IdentityDocumentRepository,
-        private readonly signatureRepository: SignatureRepository,
-        private readonly storageService: StorageService,
+        private readonly userDocumentRepository: UserDocumentRepository,
+        private readonly userSignatureRepository: UserSignatureRepository,
+        private readonly accountDocuments: AccountDocumentsService,
+        private readonly accountFiles: AccountFilesService,
+        private readonly joinPortalService: JoinPortalService,
         private readonly prisma: PrismaService,
         private readonly dynamicValidator: DynamicPayloadValidatorService,
         private readonly fieldValues: FieldValuesService
     ) {}
-
-    private async hashPassword(password: string): Promise<string> {
-        const hashFn = hash as unknown as (value: string, rounds: number) => Promise<string>;
-        return hashFn(password, 10);
-    }
-
-    private async resolveDefaultMemberStatusItemId(portalId: string): Promise<string> {
-        const memberDef = await this.prisma.entityDefinition.findUnique({
-            where: {
-                portalId_code: { portalId, code: ENTITY_DEFINITION_CODES.MEMBER },
-            },
-            select: { id: true },
-        });
-        if (!memberDef) {
-            throw new BadRequestException("Portal member entity is not configured");
-        }
-        const item = await this.prisma.statusItem.findFirst({
-            where: {
-                key: "inProgress",
-                statusSet: {
-                    portalId,
-                    code: "member_lifecycle",
-                    entityDefinitionId: memberDef.id,
-                },
-            },
-            select: { id: true },
-        });
-        if (!item) {
-            throw new BadRequestException("Portal member statuses are not configured");
-        }
-        return item.id;
-    }
 
     private fieldRows(member: MemberWithRelations) {
         return member.profile.fieldValues.map((fv) => ({
@@ -151,8 +105,12 @@ export class MembersService {
             value: jsonValueToScalar(f.value as never),
         }));
 
-        const birthday = fieldValueToOptionalDateString(birthdayRaw);
+        const [accountDocuments, signature] = await Promise.all([
+            this.userDocumentRepository.findAllByUser(member.userId),
+            this.userSignatureRepository.findByUser(member.userId),
+        ]);
 
+        const birthday = fieldValueToOptionalDateString(birthdayRaw);
         const st = this.mapStatus(member.profile.statusItem);
 
         return {
@@ -169,38 +127,8 @@ export class MembersService {
             createdAt: member.createdAt.toISOString(),
             updatedAt: member.updatedAt.toISOString(),
             fields,
-            identityDocuments: member.profile.identityDocuments.map(
-                (doc): CrmMemberIdentityDocumentDto => ({
-                    id: doc.id,
-                    type: doc.type,
-                    side: doc.side,
-                    storagePath: doc.storagePath,
-                    createdAt: doc.createdAt.toISOString(),
-                })
-            ),
-            signature: member.profile.signature
-                ? ({
-                      id: member.profile.signature.id,
-                      storagePath: member.profile.signature.storagePath,
-                      createdAt: member.profile.signature.createdAt.toISOString(),
-                  } satisfies CrmMemberSignatureDto)
-                : null,
-            mjStatuses: member.profile.memberMjStatuses.map(
-                (item): CrmMemberMjStatusDto => ({
-                    id: item.mjStatus.id,
-                    code: item.mjStatus.code,
-                    name: item.mjStatus.name,
-                })
-            ),
-            documents: member.profile.memberDocuments.map(
-                (item): CrmMemberDocumentDto => ({
-                    id: item.document.id,
-                    type: item.document.type,
-                    name: item.document.name,
-                    number: item.number,
-                    createdAt: item.createdAt.toISOString(),
-                })
-            ),
+            documents: accountDocuments.map((doc) => this.toAccountDocumentDto(doc)),
+            hasSignature: signature !== null,
             birthday,
             address: typeof address === "string" ? address : null,
             membershipNumber: member.membershipNumber ?? null,
@@ -208,211 +136,110 @@ export class MembersService {
         };
     }
 
+    private toAccountDocumentDto(doc: UserDocument): CrmMemberAccountDocumentDto {
+        return {
+            id: doc.id,
+            type: doc.type,
+            side: doc.side,
+            number: doc.number,
+            createdAt: doc.createdAt.toISOString(),
+        };
+    }
+
     async checkUserExists(email: string): Promise<{
         exists: boolean;
-        hasEmployee: boolean;
-        hasMember: boolean;
+        hasPassword: boolean;
+        memberships: number;
+        employments: number;
         message?: string;
     }> {
-        const user = await this.userRepository.findByEmailWithRelations(email);
+        const user = await this.userRepository.findByEmailWithMemberships(email);
 
         if (!user) {
             return {
                 exists: false,
-                hasEmployee: false,
-                hasMember: false,
+                hasPassword: false,
+                memberships: 0,
+                employments: 0,
             };
-        }
-
-        const hasEmployee = !!user.employee;
-        const hasMember = !!user.member;
-
-        let message: string | undefined;
-        if (hasEmployee && !hasMember) {
-            message =
-                "You are already registered as an Employee. Do you want to register as a Member?";
-        } else if (hasMember) {
-            message = "You are already registered as a Member.";
         }
 
         return {
             exists: true,
-            hasEmployee,
-            hasMember,
-            message,
+            hasPassword: user.passwordHash !== null,
+            memberships: user.members.length,
+            employments: user.employees.length,
+            message:
+                user.passwordHash === null
+                    ? "Account was created by a club and awaits claiming"
+                    : undefined,
         };
     }
 
     /**
-     * Создание Member + User; поля валидируются по схеме портала (purpose).
+     * CRM: сотрудник добавляет member по email.
+     * Если User с таким email нет — создаётся аккаунт со статусом pending_claim
+     * (пользователь позже клеймит его, установив пароль при регистрации).
      */
-    async createMemberWithDynamicFields(
-        dto: DynamicMemberCredentialsDto & { fields: Record<string, unknown> },
-        force: boolean,
+    async createFromCrm(
+        dto: { email: string; fields: Record<string, unknown> },
         portalId: string,
-        purpose: FormPurpose
-    ): Promise<{
-        userId: string;
-        memberId: string;
-    }> {
-        const validatedFields = await this.dynamicValidator.validateMemberPayload(
-            portalId,
-            purpose,
-            dto.fields
-        );
-
-        const statusItemId = await this.resolveDefaultMemberStatusItemId(portalId);
-
-        const existingUser = await this.userRepository.findByEmailWithRelations(dto.email);
-
-        if (existingUser) {
-            if (existingUser.member) {
-                throw new ConflictException("User is already registered as Member");
-            }
-
-            if (existingUser.portalId && existingUser.portalId !== portalId) {
-                throw new ConflictException("User already belongs to another portal");
-            }
-
-            if (existingUser.employee && !force) {
-                throw new ConflictException(
-                    "User already exists as Employee. Please confirm registration as Member."
-                );
-            }
-
-            const passwordHash = await this.hashPassword(dto.password);
-            await this.userRepository.update(existingUser.id, { passwordHash, portalId });
-
-            const member = await this.memberRepository.create({
-                userId: existingUser.id,
-                portalId,
-                statusItemId,
+        createdByEmployeeId?: string
+    ): Promise<{ userId: string; memberId: string; isNewUser: boolean }> {
+        let user = await this.userRepository.findByEmail(dto.email);
+        let isNewUser = false;
+        if (!user) {
+            user = await this.userRepository.create({
+                email: dto.email,
+                passwordHash: null,
+                status: UserAccountStatus.pending_claim,
+                isActive: false,
+                emailConfirmed: false,
             });
-
-            await this.fieldValues.upsertMemberFieldValues(portalId, member.id, validatedFields);
-            await this.applyPostFieldSideEffects(member.id, validatedFields);
-
-            return {
-                userId: existingUser.id,
-                memberId: member.id,
-            };
+            isNewUser = true;
         }
 
-        const passwordHash = await this.hashPassword(dto.password);
-        const user = await this.userRepository.create({
-            email: dto.email,
-            passwordHash,
-            portalId,
-        });
-
-        const member = await this.memberRepository.create({
+        const member = await this.joinPortalService.joinPortal({
             userId: user.id,
             portalId,
-            statusItemId,
+            fields: dto.fields,
+            joinSource: MemberJoinSource.crm,
+            createdByEmployeeId,
         });
 
-        await this.fieldValues.upsertMemberFieldValues(portalId, member.id, validatedFields);
-        await this.applyPostFieldSideEffects(member.id, validatedFields);
-
-        return {
-            userId: user.id,
-            memberId: member.id,
-        };
+        return { userId: user.id, memberId: member.id, isNewUser };
     }
 
-    private async applyPostFieldSideEffects(
-        memberId: string,
-        fields: Record<string, unknown>
-    ): Promise<void> {
-        const medical = fields[MEMBER_FIELD_KEYS.IS_MEDICAL];
-        const mj = fields[MEMBER_FIELD_KEYS.IS_MJ];
-        const rec = fields[MEMBER_FIELD_KEYS.IS_RECREATION];
-
-        if (medical !== undefined || mj !== undefined || rec !== undefined) {
-            await this.memberMjStatusRepository.deleteByMemberId(memberId);
-            const flags = {
-                isMedical: medical === true,
-                isMj: mj === true,
-                isRecreation: rec === true,
-            };
-            await this.syncMjStatuses(memberId, flags);
-        }
-
-        const docType = fields[MEMBER_FIELD_KEYS.DOCUMENT_TYPE];
-        const docNum = fields[MEMBER_FIELD_KEYS.DOCUMENT_NUMBER];
-        if (typeof docType === "string" && typeof docNum === "string" && docType && docNum) {
-            await this.memberDocumentRepository.deleteByMemberId(memberId);
-            await this.createDocument(memberId, docType, docNum);
-        }
+    async findByUserAndPortal(userId: string, portalId: string) {
+        return this.memberRepository.findByUserAndPortal(userId, portalId);
     }
 
-    private async syncMjStatuses(
-        memberId: string,
-        flags: { isMedical: boolean; isMj: boolean; isRecreation: boolean }
+    async findByIdForPortal(id: string, portalId: string) {
+        return this.memberRepository.findByIdForPortal(id, portalId);
+    }
+
+    /** Без tenant-скоупа — только для внутренних сервисов (QR и т.п.) */
+    async findByIdUnscoped(id: string) {
+        return this.memberRepository.findByIdUnscoped(id);
+    }
+
+    async findAllByPortal(
+        portalId: string,
+        limit?: number,
+        skip?: number,
+        filters?: MemberListFilters
     ) {
-        await ensureMjStatusDefaults(this.prisma);
-
-        const codes: string[] = [];
-        if (flags.isMedical) codes.push("medical");
-        if (flags.isMj) codes.push("mj");
-        if (flags.isRecreation) codes.push("recreation");
-
-        for (const code of codes) {
-            const mjStatus = await this.mjStatusRepository.findByCode(code);
-            if (!mjStatus) {
-                throw new BadRequestException(
-                    `MJ status "${code}" отсутствует в справочнике. Выполните POST /platform/system/reference-data (платформа) или prisma:seed:admin.`
-                );
-            }
-            await this.memberMjStatusRepository.create({
-                memberId,
-                mjStatusId: mjStatus.id,
-            });
-        }
+        return this.memberRepository.findAllByPortal(portalId, limit, skip, filters);
     }
 
-    private async createDocument(memberId: string, documentType: string, documentNumber: string) {
-        let document = await this.documentRepository.findByType(documentType);
-        if (!document) {
-            document = await this.documentRepository.create({
-                type: documentType,
-                name: documentType,
-            });
-        }
-        await this.memberDocumentRepository.create({
-            memberId,
-            documentId: document.id,
-            number: documentNumber,
-        });
+    async countByPortal(portalId: string): Promise<number> {
+        return this.memberRepository.countByPortal(portalId);
     }
 
-    async findByUserId(userId: string) {
-        return this.memberRepository.findByUserId(userId);
-    }
-
-    async findById(id: string) {
-        return this.memberRepository.findById(id);
-    }
-
-    async findAll(limit?: number, skip?: number, filters?: MemberListFilters) {
-        return this.memberRepository.findAll(limit, skip, filters);
-    }
-
-    async count(): Promise<number> {
-        return this.memberRepository.count();
-    }
-
-    async updateCrmMember(
-        memberId: string,
-        dto: import("@modules/portal/crm/members/api/dto/crm-member.dto").CrmMemberFieldsPatchDto
-    ) {
-        const member = await this.memberRepository.findById(memberId);
+    async updateCrmMember(memberId: string, portalId: string, dto: CrmMemberFieldsPatchDto) {
+        const member = await this.memberRepository.findByIdForPortal(memberId, portalId);
         if (!member) {
             throw new NotFoundException("Member not found");
-        }
-        const portalId = member.portalId;
-        if (!portalId) {
-            throw new BadRequestException("Member has no portal");
         }
 
         if (dto.fields && Object.keys(dto.fields).length > 0) {
@@ -421,7 +248,6 @@ export class MembersService {
                 dto.fields
             );
             await this.fieldValues.upsertMemberFieldValues(portalId, memberId, validated);
-            await this.applyPostFieldSideEffects(memberId, validated);
         }
 
         if (dto.statusItemId !== undefined) {
@@ -447,11 +273,13 @@ export class MembersService {
             await this.memberRepository.update(memberId, updatePayload);
         }
 
-        return this.memberRepository.findById(memberId);
+        return this.memberRepository.findByIdForPortal(memberId, portalId);
     }
 
+    /** CRM: загрузка документов/подписи member — файлы сохраняются в его аккаунт (User). */
     async updateCrmMemberFiles(
         memberId: string,
+        portalId: string,
         dto: CrmMemberFilesRequestDto,
         files: {
             documentFirst?: MulterFile[];
@@ -459,13 +287,12 @@ export class MembersService {
             signature?: MulterFile[];
         }
     ): Promise<CrmMemberFullDto> {
-        const member = await this.memberRepository.findById(memberId);
+        const member = await this.memberRepository.findByIdForPortal(memberId, portalId);
         if (!member) {
             throw new NotFoundException("Member not found");
         }
 
-        const documentType =
-            dto.documentType ?? member.profile.memberDocuments[0]?.document.type ?? "passport";
+        const documentType = dto.documentType ?? "passport";
 
         const documentFirst = files.documentFirst?.[0];
         const documentSecond = files.documentSecond?.[0];
@@ -478,80 +305,78 @@ export class MembersService {
         }
 
         if (documentFirst) {
-            const firstPath = await this.savePrivateUploadedFile(
-                documentFirst,
-                `identity-first-${documentType}`,
-                memberId
+            const storagePath = await this.accountFiles.savePrivateBuffer(
+                { buffer: documentFirst.buffer, mimetype: documentFirst.mimetype },
+                member.userId,
+                `document-${documentType}-front`
             );
-            await this.identityDocumentRepository.upsertByMemberTypeAndSide({
-                memberId,
+            await this.userDocumentRepository.upsertByUserTypeSide({
+                userId: member.userId,
                 type: documentType,
-                side: "first",
-                storagePath: firstPath,
+                side: UserDocumentSide.front,
+                storagePath,
             });
         }
 
         if (documentSecond) {
-            const secondPath = await this.savePrivateUploadedFile(
-                documentSecond,
-                `identity-second-${documentType}`,
-                memberId
+            const storagePath = await this.accountFiles.savePrivateBuffer(
+                { buffer: documentSecond.buffer, mimetype: documentSecond.mimetype },
+                member.userId,
+                `document-${documentType}-back`
             );
-            await this.identityDocumentRepository.upsertByMemberTypeAndSide({
-                memberId,
+            await this.userDocumentRepository.upsertByUserTypeSide({
+                userId: member.userId,
                 type: documentType,
-                side: "second",
-                storagePath: secondPath,
+                side: UserDocumentSide.back,
+                storagePath,
             });
         }
 
         if (signature) {
-            const signaturePath = await this.savePrivateUploadedFile(
-                signature,
-                "signature",
-                memberId
+            const storagePath = await this.accountFiles.savePrivateBuffer(
+                { buffer: signature.buffer, mimetype: signature.mimetype },
+                member.userId,
+                "signature"
             );
-            await this.signatureRepository.upsertByMemberId(memberId, {
-                storagePath: signaturePath,
+            await this.userSignatureRepository.upsertByUser({
+                userId: member.userId,
+                storagePath,
             });
         }
 
-        const result = await this.memberRepository.findById(memberId);
+        const result = await this.memberRepository.findByIdForPortal(memberId, portalId);
         if (!result) {
             throw new NotFoundException("Member not found");
         }
         return this.toCrmMemberFullDto(result);
     }
 
-    private getExtensionFromMime(mimeType: string): string {
-        const mimeToExtension: Record<string, string> = {
-            "image/jpeg": "jpg",
-            "image/jpg": "jpg",
-            "image/png": "png",
-            "image/webp": "webp",
-            "application/pdf": "pdf",
-        };
-
-        return mimeToExtension[mimeType] ?? "bin";
+    /** Приватные превью для CRM: документ/подпись читаются из аккаунта member'а */
+    async getMemberAccountDocument(
+        memberId: string,
+        portalId: string,
+        documentId: string
+    ): Promise<UserDocument> {
+        const member = await this.memberRepository.findByIdForPortal(memberId, portalId);
+        if (!member) {
+            throw new NotFoundException("Member not found");
+        }
+        const doc = await this.userDocumentRepository.findById(documentId);
+        if (!doc || doc.userId !== member.userId) {
+            throw new NotFoundException("Document not found");
+        }
+        return doc;
     }
 
-    private async savePrivateUploadedFile(
-        file: MulterFile,
-        filePrefix: string,
-        memberId: string
-    ): Promise<string> {
-        const extension = this.getExtensionFromMime(file.mimetype);
-
-        const uploaded = await this.storageService.uploadFile(
-            {
-                buffer: file.buffer,
-                originalname: `${filePrefix}.${extension}`,
-                mimetype: file.mimetype,
-            },
-            `members/${memberId}`,
-            StorageType.PRIVATE
-        );
-
-        return uploaded.relativePath;
+    async getMemberAccountSignature(memberId: string, portalId: string): Promise<UserSignature> {
+        const member = await this.memberRepository.findByIdForPortal(memberId, portalId);
+        if (!member) {
+            throw new NotFoundException("Member not found");
+        }
+        const signature = await this.userSignatureRepository.findByUser(member.userId);
+        if (!signature) {
+            throw new NotFoundException("Signature not found");
+        }
+        return signature;
     }
 }

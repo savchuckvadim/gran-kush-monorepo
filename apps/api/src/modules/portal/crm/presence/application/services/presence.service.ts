@@ -135,8 +135,8 @@ export class PresenceService {
         portalId: string
     ): Promise<PresenceSession> {
         // Проверяем участника (в рамках портала)
-        const member = await this.membersService.findById(memberId);
-        if (!member || member.portalId !== portalId) {
+        const member = await this.membersService.findByIdForPortal(memberId, portalId);
+        if (!member) {
             throw new NotFoundException(`Участник "${memberId}" не найден`);
         }
         if (!member.isActive) {

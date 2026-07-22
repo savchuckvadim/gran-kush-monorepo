@@ -5,7 +5,6 @@ export const TRANSACTION_INCLUDE = {
         select: {
             id: true,
             orderNumber: true,
-            status: true,
         },
     },
     entityRecord: {
@@ -28,8 +27,7 @@ export const TRANSACTION_INCLUDE = {
     createdByEmployee: {
         select: {
             id: true,
-            name: true,
-            surname: true,
+            role: true,
         },
     },
 } satisfies Prisma.FinancialTransactionInclude;

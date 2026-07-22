@@ -1,62 +1,41 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
-import { IsOptional, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { EmployeeRole } from "@prisma/client";
+import { IsEnum, IsObject, IsOptional } from "class-validator";
 
 import { IsEmailWithLowerCase } from "@common/decorators/dto/is-email-with-lower-case.decorator";
 
+/**
+ * Создание сотрудника admin'ом. Пароль не задаётся: если аккаунта нет,
+ * он создаётся в статусе pending_claim и клеймится пользователем позже.
+ */
 export class RegisterEmployeeDto {
     @ApiProperty({ example: "employee@example.com", type: String })
     @IsEmailWithLowerCase()
     email: string;
 
-    @ApiProperty({
-        example: "Password123",
-        description: "Password must contain uppercase, lowercase and number",
-        type: String,
-    })
-    @IsString()
-    @MinLength(8)
-    @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
-        message: "Password must contain uppercase, lowercase and number",
-    })
-    password: string;
-
-    @ApiProperty({ example: "John", type: String })
-    @IsString()
-    @MinLength(2)
-    @MaxLength(100)
-    name: string;
-
-    @ApiPropertyOptional({ example: "Doe", type: String })
-    @IsString()
-    @IsOptional()
-    @MaxLength(100)
-    surname?: string;
-
-    @ApiPropertyOptional({ example: "+1234567890", type: String })
-    @IsString()
-    @IsOptional()
-    @Matches(/^\+?[1-9]\d{1,14}$/)
-    phone?: string;
+    @ApiProperty({ enum: EmployeeRole, example: EmployeeRole.employee })
+    @IsEnum(EmployeeRole)
+    role: EmployeeRole;
 
     @ApiPropertyOptional({
-        example: "manager",
-        enum: ["employee", "manager", "admin"],
-        type: String,
+        type: "object",
+        additionalProperties: true,
+        description: "Динамические поля профиля (fieldKey → value)",
+        example: { first_name: "John", last_name: "Doe" },
     })
-    @IsString()
     @IsOptional()
-    role?: string;
+    @IsObject()
+    fields?: Record<string, unknown>;
+}
 
-    @ApiPropertyOptional({ example: "Senior Manager", type: String })
-    @IsString()
-    @IsOptional()
-    @MaxLength(255)
-    position?: string;
+export class RegisterEmployeeResponseDto {
+    @ApiProperty({ type: String })
+    userId: string;
 
-    @ApiPropertyOptional({ example: "Sales", type: String })
-    @IsString()
-    @IsOptional()
-    @MaxLength(255)
-    department?: string;
+    @ApiProperty({ type: String })
+    employeeId: string;
+
+    @ApiProperty({ type: Boolean, description: "true если аккаунт создан сейчас и ждёт клейма" })
+    isNewUser: boolean;
 }

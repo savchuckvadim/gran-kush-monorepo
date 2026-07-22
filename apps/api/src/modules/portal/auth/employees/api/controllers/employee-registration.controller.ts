@@ -2,14 +2,14 @@ import { Body, Controller, Post } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { Admin } from "@common/decorators/auth/admin.decorator";
+import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
-import { requireEmployeePortalId } from "@common/portal";
-import { CurrentEmployee } from "@modules/portal/auth/employees/api/decorators/current-employee.decorator";
 import { RequireEmployeeAdmin } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
-import { EmployeeAuthResponseDto } from "@modules/portal/auth/employees/api/dto/employee-auth-response.dto";
-import { RegisterEmployeeDto } from "@modules/portal/auth/employees/api/dto/register-employee.dto";
-import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
+import {
+    RegisterEmployeeDto,
+    RegisterEmployeeResponseDto,
+} from "@modules/portal/auth/employees/api/dto/register-employee.dto";
 
 import { EmployeeRegistrationUseCase } from "../../application/use-cases/employee-registration.use-case";
 
@@ -21,17 +21,16 @@ export class EmployeeRegistrationController {
 
     @Post("register")
     @Admin()
-    @ApiOperation({ summary: "Register new Employee (Admin only)" })
-    @ApiSuccessResponse(EmployeeAuthResponseDto, {
+    @ApiOperation({ summary: "Register new Employee (Admin only, account claimed later)" })
+    @ApiSuccessResponse(RegisterEmployeeResponseDto, {
         status: 201,
         description: "Employee registered successfully",
     })
     @ApiErrorResponse([400, 401, 403, 409])
     async register(
         @Body() dto: RegisterEmployeeDto,
-        @CurrentEmployee() actor: Employee
-    ): Promise<EmployeeAuthResponseDto> {
-        const portalId = requireEmployeePortalId(actor);
+        @PortalId() portalId: string
+    ): Promise<RegisterEmployeeResponseDto> {
         return this.employeeRegistrationUseCase.execute(dto, portalId);
     }
 }

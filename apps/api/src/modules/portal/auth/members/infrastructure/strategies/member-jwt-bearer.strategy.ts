@@ -9,16 +9,9 @@ import {
     JWT_ENV_KEYS,
     JWT_ERROR_MESSAGES,
 } from "@modules/portal/auth/domain/constants/jwt.constants";
+import { AuthJwtPayload } from "@modules/portal/auth/domain/interfaces/jwt-payload.interface";
 import { MemberAuthService } from "@modules/portal/auth/members/application/services/member-auth.service";
-import { Member } from "@modules/portal/crm/members/domain/entity/member.entity";
-
-interface MemberJwtPayload {
-    sub: string;
-    userId: string;
-    email: string;
-    portalId?: string | null;
-    type: "member";
-}
+import { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 
 /** Нативное приложение ЛК: только Authorization: Bearer. */
 @Injectable()
@@ -28,7 +21,7 @@ export class MemberJwtBearerStrategy extends PassportStrategy(
 ) {
     constructor(
         private readonly memberAuthService: MemberAuthService,
-        private readonly configService: ConfigService
+        configService: ConfigService
     ) {
         const secretOrKey = configService.get<string>(JWT_ENV_KEYS.SECRET);
         if (!secretOrKey) {
@@ -47,19 +40,15 @@ export class MemberJwtBearerStrategy extends PassportStrategy(
 
     async validate(
         req: { allowUnconfirmed?: boolean },
-        payload: MemberJwtPayload
-    ): Promise<Member> {
+        payload: AuthJwtPayload
+    ): Promise<AuthenticatedUser> {
         const allowUnconfirmed = req?.allowUnconfirmed === true;
-        const member = await this.memberAuthService.validateJwtPayload(payload, allowUnconfirmed);
+        const user = await this.memberAuthService.validateJwtPayload(payload, allowUnconfirmed);
 
-        if (!member) {
-            throw new UnauthorizedException("Member not found or inactive");
+        if (!user) {
+            throw new UnauthorizedException("User not found or inactive");
         }
 
-        if (!member.isActive && !allowUnconfirmed) {
-            throw new UnauthorizedException("Member is not active");
-        }
-
-        return member;
+        return user;
     }
 }

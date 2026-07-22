@@ -3,6 +3,7 @@ import { Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 import {
     buildMemberFieldMap,
     type FieldRow,
@@ -55,7 +56,7 @@ export class OrderPrismaRepository extends OrderRepository {
     // ─── Поиск по номеру заказа ──────────────────────────────────────────────
 
     async findByOrderNumber(orderNumber: string): Promise<Order | null> {
-        const row = await this.prisma.order.findUnique({
+        const row = await this.prisma.order.findFirst({
             where: { orderNumber },
             include: ORDER_INCLUDE,
         });
@@ -92,38 +93,61 @@ export class OrderPrismaRepository extends OrderRepository {
         return this.prisma.order.count({ where });
     }
 
-    // ─── Создание заказа (транзакционно) ─────────────────────────────────────
+    // ─── Создание заказа (транзакционно: EntityRecord + Order) ───────────────
 
     async create(data: CreateOrderInput): Promise<Order> {
         const member = await this.prisma.member.findUnique({
             where: { id: data.memberId },
-            select: { entityRecordId: true },
+            select: { id: true, portalId: true },
         });
         if (!member) {
             throw new Error(`Member ${data.memberId} not found for order create`);
         }
-        const row = await this.prisma.order.create({
-            data: {
-                customerEntityRecordId: member.entityRecordId,
-                orderNumber: data.orderNumber,
-                status: data.status,
-                stageId: data.stageId ?? undefined,
-                paymentStatus: data.paymentStatus,
-                subtotal: new Prisma.Decimal(data.subtotal),
-                discount: new Prisma.Decimal(data.discount),
-                total: new Prisma.Decimal(data.total),
-                notes: data.notes,
-                items: {
-                    create: data.items.map((item) => ({
-                        productId: item.productId,
-                        quantity: new Prisma.Decimal(item.quantity),
-                        unitPrice: new Prisma.Decimal(item.unitPrice),
-                        totalPrice: new Prisma.Decimal(item.totalPrice),
-                        notes: item.notes,
-                    })),
+
+        const row = await this.prisma.$transaction(async (tx) => {
+            const orderDef = await tx.entityDefinition.findUniqueOrThrow({
+                where: {
+                    portalId_code: {
+                        portalId: member.portalId,
+                        code: ENTITY_DEFINITION_CODES.ORDER,
+                    },
                 },
-            },
-            include: ORDER_INCLUDE,
+            });
+
+            const stageId =
+                data.stageId ?? (await this.resolveDefaultStageId(tx, member.portalId, orderDef.id));
+
+            const record = await tx.entityRecord.create({
+                data: {
+                    portalId: member.portalId,
+                    entityDefinitionId: orderDef.id,
+                    stageId: stageId ?? null,
+                },
+            });
+
+            return tx.order.create({
+                data: {
+                    portalId: member.portalId,
+                    entityRecordId: record.id,
+                    memberId: member.id,
+                    orderNumber: data.orderNumber,
+                    paymentStatus: data.paymentStatus,
+                    subtotal: new Prisma.Decimal(data.subtotal),
+                    discount: new Prisma.Decimal(data.discount),
+                    total: new Prisma.Decimal(data.total),
+                    notes: data.notes,
+                    items: {
+                        create: data.items.map((item) => ({
+                            productId: item.productId,
+                            quantity: new Prisma.Decimal(item.quantity),
+                            unitPrice: new Prisma.Decimal(item.unitPrice),
+                            totalPrice: new Prisma.Decimal(item.totalPrice),
+                            notes: item.notes,
+                        })),
+                    },
+                },
+                include: ORDER_INCLUDE,
+            });
         });
 
         return this.mapToEntity(row);
@@ -141,14 +165,6 @@ export class OrderPrismaRepository extends OrderRepository {
                 updateData.employee = { connect: { id: data.employeeId } };
             }
         }
-        if (data.status !== undefined) updateData.status = data.status;
-        if (data.stageId !== undefined) {
-            if (data.stageId === null) {
-                updateData.stage = { disconnect: true };
-            } else {
-                updateData.stage = { connect: { id: data.stageId } };
-            }
-        }
         if (data.paymentStatus !== undefined) updateData.paymentStatus = data.paymentStatus;
         if (data.confirmedAt !== undefined) updateData.confirmedAt = data.confirmedAt;
         if (data.preparedAt !== undefined) updateData.preparedAt = data.preparedAt;
@@ -159,10 +175,23 @@ export class OrderPrismaRepository extends OrderRepository {
         if (data.discount !== undefined) updateData.discount = new Prisma.Decimal(data.discount);
         if (data.total !== undefined) updateData.total = new Prisma.Decimal(data.total);
 
-        const row = await this.prisma.order.update({
-            where: { id },
-            data: updateData,
-            include: ORDER_INCLUDE,
+        const row = await this.prisma.$transaction(async (tx) => {
+            // Стадия — единственный источник правды статуса, живёт на EntityRecord
+            if (data.stageId !== undefined) {
+                const order = await tx.order.findUniqueOrThrow({
+                    where: { id },
+                    select: { entityRecordId: true },
+                });
+                await tx.entityRecord.update({
+                    where: { id: order.entityRecordId },
+                    data: { stageId: data.stageId },
+                });
+            }
+            return tx.order.update({
+                where: { id },
+                data: updateData,
+                include: ORDER_INCLUDE,
+            });
         });
 
         return this.mapToEntity(row);
@@ -195,21 +224,38 @@ export class OrderPrismaRepository extends OrderRepository {
     // Private helpers
     // ═══════════════════════════════════════════════════════════════════════════
 
+    private async resolveDefaultStageId(
+        tx: Prisma.TransactionClient,
+        portalId: string,
+        entityDefinitionId: string
+    ): Promise<string | null> {
+        const stage = await tx.stage.findFirst({
+            where: {
+                stageCategory: {
+                    portalId,
+                    entityDefinitionId,
+                    isDefault: true,
+                },
+            },
+            orderBy: { sortOrder: "asc" },
+            select: { id: true },
+        });
+        return stage?.id ?? null;
+    }
+
     private buildWhere(filters?: OrderFilters): Prisma.OrderWhereInput {
         if (!filters) return {};
 
         const where: Prisma.OrderWhereInput = {};
 
-        if (filters.portalId || filters.memberId) {
-            where.customerEntity = {
-                member: {
-                    ...(filters.portalId && { portalId: filters.portalId }),
-                    ...(filters.memberId && { id: filters.memberId }),
-                },
+        if (filters.portalId) where.portalId = filters.portalId;
+        if (filters.memberId) where.memberId = filters.memberId;
+        if (filters.employeeId) where.employeeId = filters.employeeId;
+        if (filters.status) {
+            where.entityRecord = {
+                stage: { name: { equals: filters.status, mode: "insensitive" } },
             };
         }
-        if (filters.employeeId) where.employeeId = filters.employeeId;
-        if (filters.status) where.status = filters.status;
         if (filters.paymentStatus) where.paymentStatus = filters.paymentStatus;
 
         // Поиск по номеру заказа
@@ -236,8 +282,6 @@ export class OrderPrismaRepository extends OrderRepository {
         switch (sortBy) {
             case "orderNumber":
                 return { orderNumber: order };
-            case "status":
-                return { status: order };
             case "total":
                 return { total: order };
             case "orderedAt":
@@ -250,14 +294,13 @@ export class OrderPrismaRepository extends OrderRepository {
     // ─── Маппинг Prisma → Domain Entity ─────────────────────────────────────
 
     private mapToEntity(row: OrderWithRelations): Order {
-        const statusFromStage =
-            row.stage?.name != null ? String(row.stage.name).toLowerCase() : row.status;
-
-        const memberIdForDomain = row.customerEntity?.member?.id ?? row.customerEntityRecordId;
+        const statusFromStage = row.entityRecord?.stage?.name
+            ? String(row.entityRecord.stage.name).toLowerCase()
+            : OrderStatus.PENDING;
 
         const order = new Order({
             id: row.id,
-            memberId: memberIdForDomain,
+            memberId: row.memberId,
             employeeId: row.employeeId,
             orderNumber: row.orderNumber,
             status: coerceOrderStatus(statusFromStage),
@@ -277,10 +320,9 @@ export class OrderPrismaRepository extends OrderRepository {
             updatedAt: row.updatedAt,
         });
 
-        if (row.customerEntity?.member) {
-            const m = row.customerEntity.member;
+        if (row.member) {
             const fieldMap = buildMemberFieldMap(
-                (row.customerEntity.fieldValues ?? []).map(
+                (row.member.profile?.fieldValues ?? []).map(
                     (fv): FieldRow => ({
                         valueJson: fv.valueJson,
                         fieldDefinition: fv.fieldDefinition,
@@ -289,19 +331,28 @@ export class OrderPrismaRepository extends OrderRepository {
             );
             const { firstName, lastName } = getMemberDisplayNameParts(fieldMap);
             order.member = {
-                id: m.id,
+                id: row.member.id,
                 name: firstName,
                 surname: lastName,
-                membershipNumber: m.membershipNumber,
+                membershipNumber: row.member.membershipNumber,
             };
         }
 
-        // Employee
+        // Employee (имя — из профильных EAV-полей)
         if (row.employee) {
+            const fieldMap = buildMemberFieldMap(
+                (row.employee.profile?.fieldValues ?? []).map(
+                    (fv): FieldRow => ({
+                        valueJson: fv.valueJson,
+                        fieldDefinition: fv.fieldDefinition,
+                    })
+                )
+            );
+            const { firstName, lastName } = getMemberDisplayNameParts(fieldMap);
             order.employee = {
                 id: row.employee.id,
-                name: row.employee.name,
-                surname: row.employee.surname,
+                name: firstName,
+                surname: lastName,
             };
         }
 

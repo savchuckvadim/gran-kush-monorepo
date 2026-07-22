@@ -30,7 +30,12 @@ export class PlatformAuthService {
             include: { platformAdmin: true },
         });
 
-        if (!user?.platformAdmin || !user.isActive || !user.platformAdmin.isActive) {
+        if (
+            !user?.platformAdmin ||
+            !user.isActive ||
+            !user.platformAdmin.isActive ||
+            !user.passwordHash
+        ) {
             throw new UnauthorizedException("Invalid credentials");
         }
 

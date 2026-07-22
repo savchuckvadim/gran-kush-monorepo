@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
+import { UserDocumentSide } from "@prisma/client";
 import { IsBoolean, IsObject, IsOptional, IsString } from "class-validator";
 
 export class CrmMemberStatusDto {
@@ -20,7 +21,7 @@ export class CrmMemberDynamicFieldDto {
     type: string;
     @ApiProperty({ type: String, nullable: true })
     label: string | null;
-    @ApiProperty()
+    @ApiProperty({ type: Object })
     value: unknown;
 }
 
@@ -51,52 +52,18 @@ export class CrmMemberDto {
     createdAt: string;
 }
 
-export class CrmMemberDocumentDto {
+/** Документ аккаунта (UserDocument) member'а — общий для всех клубов. */
+export class CrmMemberAccountDocumentDto {
     @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174000", type: String })
     id: string;
     @ApiProperty({ example: "passport", type: String })
     type: string;
-    @ApiProperty({ example: "name", type: String })
-    name: string;
-    @ApiProperty({ example: "1234567890", type: String, nullable: true })
-    @IsOptional()
+    @ApiProperty({ enum: UserDocumentSide, example: UserDocumentSide.front })
+    side: UserDocumentSide;
+    @ApiProperty({ example: "AB1234567", type: String, nullable: true })
     number: string | null;
-
     @ApiProperty({ example: "2024-01-01T00:00:00.000Z", type: String })
     createdAt: string;
-}
-
-export class CrmMemberIdentityDocumentDto {
-    @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174000", type: String })
-    id: string;
-    @ApiProperty({ example: "passport", type: String })
-    type: string;
-    @ApiProperty({ example: "front", type: String, nullable: true })
-    @IsOptional()
-    side: string;
-    @ApiProperty({ example: "https://example.com/storage/path.jpg", type: String })
-    storagePath: string;
-    @ApiProperty({ example: "2024-01-01T00:00:00.000Z", type: String })
-    createdAt: string;
-}
-
-export class CrmMemberSignatureDto {
-    @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174000", type: String })
-    id: string;
-
-    @ApiProperty({ example: "https://example.com/storage/path.jpg", type: String })
-    storagePath: string;
-    @ApiProperty({ example: "2024-01-01T00:00:00.000Z", type: String })
-    createdAt: string;
-}
-
-export class CrmMemberMjStatusDto {
-    @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174000", type: String })
-    id: string;
-    @ApiProperty({ example: "code", type: String })
-    code: string;
-    @ApiProperty({ example: "name", type: String })
-    name: string;
 }
 
 export class CrmMemberFullDto extends CrmMemberDto {
@@ -104,15 +71,10 @@ export class CrmMemberFullDto extends CrmMemberDto {
     updatedAt: string;
     @ApiProperty({ type: [CrmMemberDynamicFieldDto] })
     fields: CrmMemberDynamicFieldDto[];
-    @ApiProperty({ example: [CrmMemberIdentityDocumentDto], type: [CrmMemberIdentityDocumentDto] })
-    identityDocuments: CrmMemberIdentityDocumentDto[];
-    @ApiProperty({ example: CrmMemberSignatureDto, type: CrmMemberSignatureDto, nullable: true })
-    @IsOptional()
-    signature?: CrmMemberSignatureDto | null;
-    @ApiProperty({ example: [CrmMemberMjStatusDto], type: [CrmMemberMjStatusDto] })
-    mjStatuses: CrmMemberMjStatusDto[];
-    @ApiProperty({ example: [CrmMemberDocumentDto], type: [CrmMemberDocumentDto] })
-    documents: CrmMemberDocumentDto[];
+    @ApiProperty({ type: [CrmMemberAccountDocumentDto] })
+    documents: CrmMemberAccountDocumentDto[];
+    @ApiProperty({ example: true, type: Boolean })
+    hasSignature: boolean;
 
     @ApiProperty({ example: "2024-01-01T00:00:00.000Z", type: String, nullable: true })
     birthday: string | null;

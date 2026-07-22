@@ -17,24 +17,24 @@ import {
 } from "class-validator";
 
 export class PortalFieldOptionInputDto {
-    @ApiProperty()
+    @ApiProperty({ type: String })
     @IsString()
     @MaxLength(120)
     @Matches(/^[a-z0-9_]+$/)
     valueKey: string;
 
-    @ApiProperty()
+    @ApiProperty({ type: String })
     @IsString()
     @MaxLength(255)
     label: string;
 
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ type: String, nullable: true })
     @IsOptional()
     @IsString()
     @MaxLength(32)
     color?: string | null;
 
-    @ApiPropertyOptional({ default: 0 })
+    @ApiPropertyOptional({ type: Number, default: 0 })
     @IsOptional()
     @IsInt()
     @Min(0)
@@ -42,7 +42,7 @@ export class PortalFieldOptionInputDto {
 }
 
 export class CreatePortalMemberFieldDto {
-    @ApiProperty({ example: "loyalty_tier" })
+    @ApiProperty({ type: String, example: "loyalty_tier" })
     @IsString()
     @MaxLength(120)
     @Matches(/^[a-z][a-z0-9_]*$/)
@@ -52,27 +52,27 @@ export class CreatePortalMemberFieldDto {
     @IsEnum(PortalFieldType)
     type: PortalFieldType;
 
-    @ApiProperty()
+    @ApiProperty({ type: String })
     @IsString()
     @MaxLength(255)
     label: string;
 
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ type: String, nullable: true })
     @IsOptional()
     @IsString()
     helpText?: string | null;
 
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ type: Boolean })
     @IsOptional()
     @IsBoolean()
     isMultiple?: boolean;
 
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ type: Boolean })
     @IsOptional()
     @IsBoolean()
     showInFilters?: boolean;
 
-    @ApiPropertyOptional({ default: 900 })
+    @ApiPropertyOptional({ type: Number, default: 900 })
     @IsOptional()
     @IsInt()
     @Min(0)
@@ -92,28 +92,28 @@ export class CreatePortalMemberFieldDto {
 }
 
 export class UpdatePortalMemberFieldDto {
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ type: String, nullable: true })
     @IsOptional()
     @IsString()
     @MaxLength(255)
     label?: string | null;
 
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ type: String, nullable: true })
     @IsOptional()
     @IsString()
     helpText?: string | null;
 
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ type: Boolean })
     @IsOptional()
     @IsBoolean()
     isActive?: boolean;
 
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ type: Boolean })
     @IsOptional()
     @IsBoolean()
     showInFilters?: boolean;
 
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ type: Boolean })
     @IsOptional()
     @IsBoolean()
     isMultiple?: boolean;
@@ -123,7 +123,7 @@ export class UpdatePortalMemberFieldDto {
     @IsObject()
     validationJson?: Record<string, unknown> | null;
 
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ type: Number })
     @IsOptional()
     @IsInt()
     @Min(0)
@@ -131,31 +131,31 @@ export class UpdatePortalMemberFieldDto {
 }
 
 export class FormLayoutItemInputDto {
-    @ApiProperty()
+    @ApiProperty({ type: String })
     @IsString()
     fieldKey: string;
 
-    @ApiProperty()
+    @ApiProperty({ type: Number })
     @IsInt()
     @Min(0)
     sortOrder: number;
 
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ type: Boolean })
     @IsOptional()
     @IsBoolean()
     required?: boolean;
 
-    @ApiPropertyOptional({ default: true })
+    @ApiPropertyOptional({ type: Boolean, default: true })
     @IsOptional()
     @IsBoolean()
     visible?: boolean;
 
-    @ApiPropertyOptional({ default: false })
+    @ApiPropertyOptional({ type: Boolean, default: false })
     @IsOptional()
     @IsBoolean()
     readOnly?: boolean;
 
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({ type: String, nullable: true })
     @IsOptional()
     @IsString()
     @MaxLength(80)

@@ -1,27 +1,29 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
 
-import { IsBoolean, IsOptional, IsString, MinLength } from "class-validator";
+import { EmployeeRole } from "@prisma/client";
+import { IsBoolean, IsEnum, IsObject, IsOptional } from "class-validator";
 
 export class UpdateEmployeeDto {
-    @ApiPropertyOptional({ example: "manager", description: "Employee role (cannot be portal_owner)" })
+    @ApiPropertyOptional({
+        enum: EmployeeRole,
+        example: EmployeeRole.manager,
+        description: "Employee role (cannot be portal_owner)",
+    })
     @IsOptional()
-    @IsString()
-    role?: string;
+    @IsEnum(EmployeeRole)
+    role?: EmployeeRole;
 
-    @ApiPropertyOptional({ example: "Senior Manager" })
-    @IsOptional()
-    @IsString()
-    @MinLength(1)
-    position?: string;
-
-    @ApiPropertyOptional({ example: "Sales" })
-    @IsOptional()
-    @IsString()
-    @MinLength(1)
-    department?: string;
-
-    @ApiPropertyOptional({ example: true })
+    @ApiPropertyOptional({ type: Boolean, example: true })
     @IsOptional()
     @IsBoolean()
     isActive?: boolean;
+
+    @ApiPropertyOptional({
+        type: "object",
+        additionalProperties: true,
+        description: "Динамические поля профиля (fieldKey → value)",
+    })
+    @IsOptional()
+    @IsObject()
+    fields?: Record<string, unknown>;
 }

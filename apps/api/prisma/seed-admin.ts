@@ -4,7 +4,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 import { hash } from "bcrypt";
 
-import { ensureMjStatusDefaults } from "../src/common/reference-data/mj-status.seed";
+import { ensureGlobalEntityTemplates } from "../src/common/reference-data/global-templates.seed";
 
 function getRequiredEnv(name: string): string {
     const value = process.env[name];
@@ -68,7 +68,6 @@ async function seedPlatformBootstrapAdmin(): Promise<void> {
         where: { email: adminEmail.toLowerCase() },
         update: {
             isActive: true,
-            portalId: null,
             ...(shouldForcePasswordReset ? { passwordHash } : {}),
         },
         create: {
@@ -76,7 +75,6 @@ async function seedPlatformBootstrapAdmin(): Promise<void> {
             passwordHash,
             isActive: true,
             emailConfirmed: true,
-            portalId: null,
         },
     });
 
@@ -98,8 +96,8 @@ async function seedPlatformBootstrapAdmin(): Promise<void> {
 
 async function run(): Promise<void> {
     await seedPlatformBootstrapAdmin();
-    const n = await ensureMjStatusDefaults(prisma);
-    console.log(`[seed-admin] MJ reference statuses ensured (${n} rows)`);
+    await ensureGlobalEntityTemplates(prisma);
+    console.log("[seed-admin] Global entity templates ensured");
 }
 
 void run()

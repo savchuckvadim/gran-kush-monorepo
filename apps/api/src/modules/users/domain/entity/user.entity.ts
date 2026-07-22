@@ -1,15 +1,20 @@
+import { UserAccountStatus } from "@prisma/client";
+
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import { Member } from "@modules/portal/crm/members/domain/entity/member.entity";
+
 /**
  * Domain Entity - User
- * Минимальная модель - только для аутентификации
- * Все остальные данные в Member или Employee
+ * Глобальный аккаунт (без привязки к порталу).
+ * Роли в порталах — мосты Member[]/Employee[].
  */
 export class User {
     id: string;
-    portalId?: string;
     email: string;
-    passwordHash: string;
+    /** null → аккаунт создан сотрудником и ждёт клейма (pending_claim) */
+    passwordHash: string | null;
+    status: UserAccountStatus;
+    displayName?: string;
     isActive: boolean;
     emailConfirmed: boolean;
     emailVerificationToken?: string | null;
@@ -24,7 +29,7 @@ export class User {
     }
 }
 
-export class UserWithRelations extends User {
-    employee: Employee | null;
-    member: Member | null;
+export class UserWithMemberships extends User {
+    employees: Employee[];
+    members: Member[];
 }

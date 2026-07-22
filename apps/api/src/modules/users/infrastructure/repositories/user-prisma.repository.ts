@@ -1,12 +1,21 @@
 import { Injectable } from "@nestjs/common";
 
-import { UserWithRelations } from "@users/domain/entity/user.entity";
-import { User } from "@users/domain/entity/user.entity";
+import { Prisma, UserAccountStatus } from "@prisma/client";
+import { User, UserWithMemberships } from "@users/domain/entity/user.entity";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import { Member } from "@modules/portal/crm/members/domain/entity/member.entity";
+
+const userWithMembershipsInclude = {
+    employees: true,
+    members: true,
+} as const satisfies Prisma.UserInclude;
+
+type UserWithMembershipsRow = Prisma.UserGetPayload<{
+    include: typeof userWithMembershipsInclude;
+}>;
 
 @Injectable()
 export class UserPrismaRepository implements UserRepository {
@@ -26,51 +35,20 @@ export class UserPrismaRepository implements UserRepository {
         return user ? this.mapToEntity(user) : null;
     }
 
-    async findByEmailWithRelations(email: string): Promise<UserWithRelations | null> {
+    async findByEmailWithMemberships(email: string): Promise<UserWithMemberships | null> {
         const user = await this.prisma.user.findUnique({
             where: { email: email.toLowerCase() },
-            include: {
-                employee: true,
-                member: true,
-            },
+            include: userWithMembershipsInclude,
         });
+        return user ? this.mapToEntityWithMemberships(user) : null;
+    }
 
-        if (!user) {
-            return null;
-        }
-
-        return {
-            ...this.mapToEntity(user),
-            employee: user.employee
-                ? new Employee({
-                      id: user.employee.id,
-                      userId: user.employee.userId,
-                      portalId: user.employee.portalId || undefined,
-                      name: user.employee.name,
-                      surname: user.employee.surname || undefined,
-                      phone: user.employee.phone || undefined,
-                      role: user.employee.role,
-                      position: user.employee.position || undefined,
-                      department: user.employee.department || undefined,
-                      isActive: user.employee.isActive,
-                      lastLoginAt: user.employee.lastLoginAt || undefined,
-                      createdAt: user.employee.createdAt,
-                      updatedAt: user.employee.updatedAt,
-                  })
-                : null,
-            member: user.member
-                ? new Member({
-                      id: user.member.id,
-                      userId: user.member.userId,
-                      portalId: user.member.portalId || undefined,
-                      entityRecordId: user.member.entityRecordId,
-                      membershipNumber: user.member.membershipNumber || undefined,
-                      isActive: user.member.isActive,
-                      createdAt: user.member.createdAt,
-                      updatedAt: user.member.updatedAt,
-                  })
-                : null,
-        };
+    async findByIdWithMemberships(id: string): Promise<UserWithMemberships | null> {
+        const user = await this.prisma.user.findUnique({
+            where: { id },
+            include: userWithMembershipsInclude,
+        });
+        return user ? this.mapToEntityWithMemberships(user) : null;
     }
 
     async existsByEmail(email: string): Promise<boolean> {
@@ -80,12 +58,24 @@ export class UserPrismaRepository implements UserRepository {
         return !!user;
     }
 
-    async create(data: { email: string; passwordHash: string; portalId?: string }): Promise<User> {
+    async create(data: {
+        email: string;
+        passwordHash: string | null;
+        status?: UserAccountStatus;
+        displayName?: string;
+        isActive?: boolean;
+        emailConfirmed?: boolean;
+    }): Promise<User> {
         const user = await this.prisma.user.create({
             data: {
-                portalId: data.portalId,
                 email: data.email.toLowerCase(),
                 passwordHash: data.passwordHash,
+                status: data.status ?? UserAccountStatus.active,
+                displayName: data.displayName,
+                ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
+                ...(data.emailConfirmed !== undefined
+                    ? { emailConfirmed: data.emailConfirmed }
+                    : {}),
             },
         });
         return this.mapToEntity(user);
@@ -94,8 +84,9 @@ export class UserPrismaRepository implements UserRepository {
     async update(
         id: string,
         data: Partial<{
-            portalId: string | null;
             passwordHash: string;
+            status: UserAccountStatus;
+            displayName: string | null;
             isActive: boolean;
             emailConfirmed: boolean;
             emailVerificationToken: string | null;
@@ -131,11 +122,48 @@ export class UserPrismaRepository implements UserRepository {
         });
     }
 
+    private mapToEntityWithMemberships(user: UserWithMembershipsRow): UserWithMemberships {
+        const base = this.mapToEntity(user);
+        const withMemberships = new UserWithMemberships(base);
+        withMemberships.employees = user.employees.map(
+            (e) =>
+                new Employee({
+                    id: e.id,
+                    userId: e.userId,
+                    portalId: e.portalId,
+                    entityRecordId: e.entityRecordId,
+                    email: user.email,
+                    role: e.role,
+                    isActive: e.isActive,
+                    lastLoginAt: e.lastLoginAt ?? undefined,
+                    createdAt: e.createdAt,
+                    updatedAt: e.updatedAt,
+                })
+        );
+        withMemberships.members = user.members.map(
+            (m) =>
+                new Member({
+                    id: m.id,
+                    userId: m.userId,
+                    portalId: m.portalId,
+                    entityRecordId: m.entityRecordId,
+                    membershipNumber: m.membershipNumber ?? undefined,
+                    isActive: m.isActive,
+                    joinSource: m.joinSource,
+                    claimedAt: m.claimedAt ?? undefined,
+                    createdAt: m.createdAt,
+                    updatedAt: m.updatedAt,
+                })
+        );
+        return withMemberships;
+    }
+
     private mapToEntity(user: {
         id: string;
-        portalId: string | null;
         email: string;
-        passwordHash: string;
+        passwordHash: string | null;
+        status: UserAccountStatus;
+        displayName: string | null;
         isActive: boolean;
         emailConfirmed: boolean;
         emailVerificationToken: string | null;
@@ -147,9 +175,10 @@ export class UserPrismaRepository implements UserRepository {
     }): User {
         return new User({
             id: user.id,
-            portalId: user.portalId || undefined,
             email: user.email,
             passwordHash: user.passwordHash,
+            status: user.status,
+            displayName: user.displayName ?? undefined,
             isActive: user.isActive,
             emailConfirmed: user.emailConfirmed,
             emailVerificationToken: user.emailVerificationToken,

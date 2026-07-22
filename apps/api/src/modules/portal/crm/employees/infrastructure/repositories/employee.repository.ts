@@ -1,56 +1,76 @@
-import { Injectable } from "@nestjs/common";
+import { ConflictException, Injectable } from "@nestjs/common";
+
+import { EmployeeRole, Prisma } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import {
     EmployeeFilters,
     EmployeeRepository,
+    EmployeeWithProfile,
 } from "@modules/portal/crm/employees/domain/repositories/employee-repository.interface";
-import { mapToEntity } from "@modules/portal/crm/employees/lib";
+import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
+
+const employeeWithProfileInclude = {
+    user: true,
+    profile: {
+        include: {
+            fieldValues: {
+                orderBy: [{ fieldDefinitionId: "asc" as const }, { valueIndex: "asc" as const }],
+                include: { fieldDefinition: true },
+            },
+        },
+    },
+} as const satisfies Prisma.EmployeeInclude;
+
+type EmployeeWithProfileRow = Prisma.EmployeeGetPayload<{
+    include: typeof employeeWithProfileInclude;
+}>;
+
+function mapRow(row: EmployeeWithProfileRow): EmployeeWithProfile {
+    return {
+        employee: new Employee({
+            id: row.id,
+            userId: row.userId,
+            portalId: row.portalId,
+            entityRecordId: row.entityRecordId,
+            email: row.user.email,
+            role: row.role,
+            isActive: row.isActive,
+            lastLoginAt: row.lastLoginAt ?? undefined,
+            createdAt: row.createdAt,
+            updatedAt: row.updatedAt,
+        }),
+        fields: row.profile.fieldValues.map((fv) => ({
+            fieldKey: fv.fieldDefinition.fieldKey,
+            type: fv.fieldDefinition.type,
+            label: fv.fieldDefinition.labelOverride ?? fv.fieldDefinition.label,
+            value: fv.valueJson,
+        })),
+    };
+}
 
 @Injectable()
 export class EmployeePrismaRepository implements EmployeeRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    async findById(id: string): Promise<Employee | null> {
-        const employee = await this.prisma.employee.findUnique({
-            where: { id },
-            include: { user: true },
+    async findByIdForPortal(id: string, portalId: string): Promise<EmployeeWithProfile | null> {
+        const row = await this.prisma.employee.findFirst({
+            where: { id, portalId },
+            include: employeeWithProfileInclude,
         });
-        return employee ? mapToEntity(employee, employee.user) : null;
+        return row ? mapRow(row) : null;
     }
 
-    async findByUserId(userId: string): Promise<Employee | null> {
-        const employee = await this.prisma.employee.findUnique({
-            where: { userId },
-            include: { user: true },
+    async findByUserAndPortal(
+        userId: string,
+        portalId: string
+    ): Promise<EmployeeWithProfile | null> {
+        const row = await this.prisma.employee.findUnique({
+            where: { userId_portalId: { userId, portalId } },
+            include: employeeWithProfileInclude,
         });
-        return employee ? mapToEntity(employee, employee.user) : null;
-    }
-
-    async findByEmail(email: string): Promise<Employee | null> {
-        const user = await this.prisma.user.findUnique({
-            where: { email: email.toLowerCase() },
-            include: { employee: true },
-        });
-        if (!user || !user.employee) {
-            return null;
-        }
-        return mapToEntity(user.employee, user);
-    }
-
-    async findAll(limit?: number, skip?: number): Promise<Employee[]> {
-        const employees = await this.prisma.employee.findMany({
-            take: limit,
-            skip: skip,
-            include: { user: true },
-            orderBy: { createdAt: "desc" },
-        });
-        return employees.map((emp) => mapToEntity(emp, emp.user));
-    }
-
-    async count(): Promise<number> {
-        return this.prisma.employee.count();
+        return row ? mapRow(row) : null;
     }
 
     async findAllByPortal(
@@ -58,23 +78,25 @@ export class EmployeePrismaRepository implements EmployeeRepository {
         filters?: EmployeeFilters,
         limit?: number,
         skip?: number
-    ): Promise<Employee[]> {
-        const where = this.buildPortalWhere(portalId, filters);
-        const employees = await this.prisma.employee.findMany({
-            where,
+    ): Promise<EmployeeWithProfile[]> {
+        const rows = await this.prisma.employee.findMany({
+            where: this.buildPortalWhere(portalId, filters),
             take: limit,
             skip,
-            include: { user: true },
+            include: employeeWithProfileInclude,
             orderBy: { createdAt: "desc" },
         });
-        return employees.map((emp) => mapToEntity(emp, emp.user));
+        return rows.map(mapRow);
     }
 
     async countByPortal(portalId: string, filters?: EmployeeFilters): Promise<number> {
         return this.prisma.employee.count({ where: this.buildPortalWhere(portalId, filters) });
     }
 
-    private buildPortalWhere(portalId: string, filters?: EmployeeFilters) {
+    private buildPortalWhere(
+        portalId: string,
+        filters?: EmployeeFilters
+    ): Prisma.EmployeeWhereInput {
         return {
             portalId,
             ...(filters?.role !== undefined && { role: filters.role }),
@@ -82,41 +104,137 @@ export class EmployeePrismaRepository implements EmployeeRepository {
         };
     }
 
-    async create(data: {
+    async createWithProfile(data: {
         userId: string;
-        portalId?: string;
-        name: string;
-        surname?: string;
-        phone?: string;
-        role?: string;
-        position?: string;
-        department?: string;
-    }): Promise<Employee> {
-        const employee = await this.prisma.employee.create({
-            data,
-            include: { user: true },
+        portalId: string;
+        role: EmployeeRole;
+        invitationId?: string;
+        fields: Record<string, unknown>;
+    }): Promise<EmployeeWithProfile> {
+        const existing = await this.prisma.employee.findUnique({
+            where: { userId_portalId: { userId: data.userId, portalId: data.portalId } },
+            select: { id: true },
         });
-        return mapToEntity(employee, employee.user);
+        if (existing) {
+            throw new ConflictException("User is already an employee of this portal");
+        }
+
+        const row = await this.prisma.$transaction(async (tx) => {
+            const def = await tx.entityDefinition.findUniqueOrThrow({
+                where: {
+                    portalId_code: {
+                        portalId: data.portalId,
+                        code: ENTITY_DEFINITION_CODES.EMPLOYEE,
+                    },
+                },
+            });
+            const record = await tx.entityRecord.create({
+                data: {
+                    portalId: data.portalId,
+                    entityDefinitionId: def.id,
+                },
+            });
+            const employee = await tx.employee.create({
+                data: {
+                    userId: data.userId,
+                    portalId: data.portalId,
+                    entityRecordId: record.id,
+                    role: data.role,
+                    invitationId: data.invitationId ?? null,
+                },
+            });
+            await this.writeFieldValues(tx, def.id, record.id, data.portalId, data.fields);
+            return tx.employee.findUniqueOrThrow({
+                where: { id: employee.id },
+                include: employeeWithProfileInclude,
+            });
+        });
+        return mapRow(row);
     }
 
-    async update(
+    async updateBridge(
         id: string,
         data: Partial<{
-            name: string;
-            surname: string;
-            phone: string;
-            role: string;
-            position: string;
-            department: string;
+            role: EmployeeRole;
             isActive: boolean;
             lastLoginAt: Date;
         }>
-    ): Promise<Employee> {
-        const employee = await this.prisma.employee.update({
+    ): Promise<EmployeeWithProfile> {
+        const row = await this.prisma.employee.update({
             where: { id },
             data,
-            include: { user: true },
+            include: employeeWithProfileInclude,
         });
-        return mapToEntity(employee, employee.user);
+        return mapRow(row);
+    }
+
+    async updateProfileFields(
+        id: string,
+        portalId: string,
+        fields: Record<string, unknown>
+    ): Promise<EmployeeWithProfile> {
+        const row = await this.prisma.$transaction(async (tx) => {
+            const employee = await tx.employee.findFirstOrThrow({
+                where: { id, portalId },
+                select: { entityRecordId: true },
+            });
+            const def = await tx.entityDefinition.findUniqueOrThrow({
+                where: {
+                    portalId_code: { portalId, code: ENTITY_DEFINITION_CODES.EMPLOYEE },
+                },
+            });
+            await this.writeFieldValues(tx, def.id, employee.entityRecordId, portalId, fields);
+            return tx.employee.findUniqueOrThrow({
+                where: { id },
+                include: employeeWithProfileInclude,
+            });
+        });
+        return mapRow(row);
+    }
+
+    private async writeFieldValues(
+        tx: Prisma.TransactionClient,
+        entityDefinitionId: string,
+        entityRecordId: string,
+        portalId: string,
+        fields: Record<string, unknown>
+    ): Promise<void> {
+        const keys = Object.keys(fields);
+        if (keys.length === 0) {
+            return;
+        }
+        const definitions = await tx.fieldDefinition.findMany({
+            where: { entityDefinitionId, fieldKey: { in: keys }, isActive: true },
+            select: { id: true, fieldKey: true },
+        });
+        for (const def of definitions) {
+            const value = fields[def.fieldKey];
+            if (value === undefined) {
+                continue;
+            }
+            if (value === null) {
+                await tx.fieldValue.deleteMany({
+                    where: { entityRecordId, fieldDefinitionId: def.id },
+                });
+                continue;
+            }
+            await tx.fieldValue.upsert({
+                where: {
+                    entityRecordId_fieldDefinitionId_valueIndex: {
+                        entityRecordId,
+                        fieldDefinitionId: def.id,
+                        valueIndex: 0,
+                    },
+                },
+                update: { valueJson: value as Prisma.InputJsonValue },
+                create: {
+                    portalId,
+                    entityRecordId,
+                    fieldDefinitionId: def.id,
+                    valueIndex: 0,
+                    valueJson: value as Prisma.InputJsonValue,
+                },
+            });
+        }
     }
 }

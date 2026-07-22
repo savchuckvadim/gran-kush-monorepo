@@ -1,9 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
 
 export class UploadMemberFilesResponseDto {
-    @ApiProperty({ example: true })
+    @ApiProperty({ type: Boolean, example: true })
     queued: boolean;
 
-    @ApiProperty({ example: "214" })
+    @ApiProperty({ type: String, example: "214" })
     jobId: string;
 }

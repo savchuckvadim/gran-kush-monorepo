@@ -9,14 +9,14 @@ export enum SortOrder {
 }
 
 export class PaginationDto {
-    @ApiPropertyOptional({ default: 1, minimum: 1 })
+    @ApiPropertyOptional({ type: Number, default: 1, minimum: 1 })
     @IsOptional()
     @Type(() => Number)
     @IsInt()
     @Min(1)
     page?: number = 1;
 
-    @ApiPropertyOptional({ default: 10, minimum: 1, maximum: 100 })
+    @ApiPropertyOptional({ type: Number, default: 10, minimum: 1, maximum: 100 })
     @IsOptional()
     @Type(() => Number)
     @IsInt()
@@ -24,7 +24,7 @@ export class PaginationDto {
     @Max(100)
     limit?: number = 10;
 
-    @ApiPropertyOptional({ default: "createdAt" })
+    @ApiPropertyOptional({ type: String, default: "createdAt" })
     @IsOptional()
     @IsString()
     sortBy?: string = "createdAt";

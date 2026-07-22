@@ -4,6 +4,7 @@ import { ConfigModule } from "@nestjs/config";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { PrismaModule } from "./common/prisma/prisma.module";
+import { AccountModule } from "./modules/account/account.module";
 import { QueueModule } from "./common/queue/queue.module";
 import { TelegramModule } from "./common/telegram/telegram.module";
 import { CoreModule } from "./core/core.module";
@@ -14,7 +15,6 @@ import { MailModule } from "./modules/mail/mail.module";
 import { PlatformModule } from "./modules/platform/platform.module";
 import { AuthModule } from "./modules/portal/auth/auth.module";
 import { StorageModule } from "./modules/storage/storage.module";
-import { TestModule } from "./modules/test/test.module";
 
 @Module({
     imports: [
@@ -30,11 +30,11 @@ import { TestModule } from "./modules/test/test.module";
         MailModule,
         EncryptionModule,
         AuthModule,
+        AccountModule,
         CrmModule,
         PlatformModule,
         CronModule,
         StorageModule,
-        TestModule,
     ],
     controllers: [AppController],
     providers: [AppService],

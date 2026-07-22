@@ -102,10 +102,15 @@ export class FormSchemaService {
     }
 
     async getFilterableMemberFields(portalId: string): Promise<FormFieldSchemaItem[]> {
-        const entityDefinitionId = await this.getEntityDefinitionId(
-            portalId,
-            ENTITY_DEFINITION_CODES.MEMBER
-        );
+        return this.getFilterableFields(portalId, ENTITY_DEFINITION_CODES.MEMBER);
+    }
+
+    /** Фильтруемые поля любой сущности портала. */
+    async getFilterableFields(
+        portalId: string,
+        entityCode: string
+    ): Promise<FormFieldSchemaItem[]> {
+        const entityDefinitionId = await this.getEntityDefinitionId(portalId, entityCode);
         const defs = await this.prisma.fieldDefinition.findMany({
             where: {
                 entityDefinitionId,

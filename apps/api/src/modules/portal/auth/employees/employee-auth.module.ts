@@ -4,8 +4,7 @@ import { JwtModule, JwtModuleOptions } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
 
 import { MailModule } from "@mail/mail.module";
-import { UserRepository } from "@users/domain/repositories/user-repository.interface";
-import { UserPrismaRepository } from "@users/infrastructure/repositories/user-prisma.repository";
+import { UsersModule } from "@users/users.module";
 
 import { PASSPORT_JWT_STRATEGY } from "@common/auth";
 import { PortalCrmSubscriptionGuard } from "@common/guards/portal-crm-subscription.guard";
@@ -19,16 +18,10 @@ import { EmployeeRegistrationService } from "@modules/portal/auth/employees/appl
 import { AdminGuard } from "@modules/portal/auth/employees/infrastructure/guards/admin.guard";
 import { EmployeeJwtAuthGuard } from "@modules/portal/auth/employees/infrastructure/guards/employee-jwt-auth.guard";
 import { EmployeeJwtMobileAuthGuard } from "@modules/portal/auth/employees/infrastructure/guards/employee-jwt-mobile-auth.guard";
-import { EmployeeLocalAuthGuard } from "@modules/portal/auth/employees/infrastructure/guards/employee-local-auth.guard";
 import { EmployeeJwtBearerStrategy } from "@modules/portal/auth/employees/infrastructure/strategies/employee-jwt-bearer.strategy";
 import { EmployeeJwtCookieStrategy } from "@modules/portal/auth/employees/infrastructure/strategies/employee-jwt-cookie.strategy";
-import { EmployeeLocalStrategy } from "@modules/portal/auth/employees/infrastructure/strategies/employee-local.strategy";
 import { SharedAuthModule } from "@modules/portal/auth/shared/shared-auth.module";
-import { EmployeesService } from "@modules/portal/crm/employees/application/services/employees.service";
-import { EmployeeRepository } from "@modules/portal/crm/employees/domain/repositories/employee-repository.interface";
-import { EmployeeTokenRepository } from "@modules/portal/crm/employees/domain/repositories/employee-token-repository.interface";
-import { EmployeePrismaRepository } from "@modules/portal/crm/employees/infrastructure/repositories/employee.repository";
-import { EmployeeTokenPrismaRepository } from "@modules/portal/crm/employees/infrastructure/repositories/employee-token.repository";
+import { EmployeesModule } from "@modules/portal/crm/employees/employees.module";
 
 import { EmployeeRegistrationUseCase } from "./application/use-cases/employee-registration.use-case";
 
@@ -37,6 +30,8 @@ import { EmployeeRegistrationUseCase } from "./application/use-cases/employee-re
         PrismaModule,
         MailModule,
         SharedAuthModule,
+        UsersModule,
+        EmployeesModule,
         PassportModule.register({ defaultStrategy: PASSPORT_JWT_STRATEGY.EMPLOYEE_COOKIE }),
         JwtModule.registerAsync({
             imports: [ConfigModule],
@@ -58,27 +53,12 @@ import { EmployeeRegistrationUseCase } from "./application/use-cases/employee-re
         EmployeeRegistrationUseCase,
         EmployeeAuthService,
         EmployeeRegistrationService,
-        EmployeeLocalStrategy,
         EmployeeJwtCookieStrategy,
         EmployeeJwtBearerStrategy,
         EmployeeJwtAuthGuard,
         EmployeeJwtMobileAuthGuard,
-        EmployeeLocalAuthGuard,
         AdminGuard,
         PortalCrmSubscriptionGuard,
-        EmployeesService, // Нужен для валидации
-        {
-            provide: EmployeeRepository,
-            useClass: EmployeePrismaRepository,
-        },
-        {
-            provide: EmployeeTokenRepository,
-            useClass: EmployeeTokenPrismaRepository,
-        },
-        {
-            provide: UserRepository,
-            useClass: UserPrismaRepository,
-        },
     ],
     controllers: [
         EmployeeAuthController,
@@ -90,7 +70,6 @@ import { EmployeeRegistrationUseCase } from "./application/use-cases/employee-re
         EmployeeRegistrationService,
         EmployeeJwtAuthGuard,
         EmployeeJwtMobileAuthGuard,
-        EmployeeLocalAuthGuard,
         AdminGuard,
     ],
 })

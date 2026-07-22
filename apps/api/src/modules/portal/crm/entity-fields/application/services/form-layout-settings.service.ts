@@ -4,27 +4,28 @@ import { FormPurpose } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 import type { FormLayoutItemInputDto } from "@modules/portal/crm/entity-fields/api/dto/portal-field-settings.dto";
-import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 
 @Injectable()
 export class FormLayoutSettingsService {
     constructor(private readonly prisma: PrismaService) {}
 
-    async replaceMemberFormLayout(
+    /** Полная замена layout формы (purpose) любой сущности портала. */
+    async replaceFormLayout(
         portalId: string,
+        entityCode: string,
         purpose: FormPurpose,
         items: FormLayoutItemInputDto[]
     ): Promise<{ purpose: FormPurpose; replaced: number }> {
         const ed = await this.prisma.entityDefinition.findUnique({
             where: {
-                portalId_code: { portalId, code: ENTITY_DEFINITION_CODES.MEMBER },
+                portalId_code: { portalId, code: entityCode },
             },
         });
         if (!ed) {
-            throw new NotFoundException("Member entity not found");
+            throw new NotFoundException(`Entity "${entityCode}" not found`);
         }
 
-        const form = await this.prisma.formDefinition.findUnique({
+        const form = await this.prisma.formDefinition.upsert({
             where: {
                 portalId_entityDefinitionId_purpose: {
                     portalId,
@@ -32,10 +33,13 @@ export class FormLayoutSettingsService {
                     purpose,
                 },
             },
+            update: {},
+            create: {
+                portalId,
+                entityDefinitionId: ed.id,
+                purpose,
+            },
         });
-        if (!form) {
-            throw new NotFoundException(`Form for purpose ${purpose} not found`);
-        }
 
         await this.prisma.$transaction(async (tx) => {
             await tx.formDefinitionItem.deleteMany({ where: { formDefinitionId: form.id } });

@@ -33,6 +33,7 @@ describe("Cross-portal isolation (e2e)", () => {
 
     // Данные портала B, к которым портал A не должен иметь доступ
     let memberBId: string;
+    let memberUserId: string;
     let sessionBId: string;
     let billingPlanId: string;
 
@@ -85,13 +86,13 @@ describe("Cross-portal isolation (e2e)", () => {
 
         const memberUser = await prisma.user.create({
             data: {
-                portalId: portalB.id,
                 email: `member-b-${suffix}@test.local`,
                 passwordHash: "not-a-real-hash",
                 isActive: true,
                 emailConfirmed: true,
             },
         });
+        memberUserId = memberUser.id;
 
         const member = await prisma.member.create({
             data: {
@@ -203,6 +204,44 @@ describe("Cross-portal isolation (e2e)", () => {
             .set("X-Portal-Slug", portalA.slug);
         expect(res.status).toBe(200);
         expect(JSON.stringify(res.body)).not.toContain(sessionBId);
+    });
+
+    it("allows the same user to be a member of two portals (multi-portal bridge)", async () => {
+        const memberDefinitionA = await prisma.entityDefinition.findFirst({
+            where: { portalId: portalA.id, code: "member" },
+            select: { id: true },
+        });
+        expect(memberDefinitionA).not.toBeNull();
+
+        const recordA = await prisma.entityRecord.create({
+            data: {
+                portalId: portalA.id,
+                entityDefinitionId: memberDefinitionA!.id,
+            },
+        });
+
+        const memberA = await prisma.member.create({
+            data: {
+                userId: memberUserId,
+                portalId: portalA.id,
+                entityRecordId: recordA.id,
+                isActive: true,
+            },
+        });
+
+        const memberships = await prisma.member.findMany({ where: { userId: memberUserId } });
+        expect(memberships).toHaveLength(2);
+        expect(new Set(memberships.map((m) => m.portalId))).toEqual(
+            new Set([portalA.id, portalB.id])
+        );
+
+        // Сотрудник портала A видит member-мост A, но не мост B того же user
+        const res = await request(app.getHttpServer())
+            .get(`/crm/members/${memberA.id}`)
+            .set("Cookie", portalA.cookies)
+            .set("X-Portal-Slug", portalA.slug);
+        expect(res.status).toBe(200);
+        expect(res.body.data?.id ?? res.body.id).toBe(memberA.id);
     });
 
     describe("subscription gate", () => {

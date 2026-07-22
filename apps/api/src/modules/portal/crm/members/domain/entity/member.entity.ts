@@ -1,16 +1,19 @@
-import { Prisma } from "@prisma/client";
+import { MemberJoinSource, Prisma } from "@prisma/client";
 
 /**
  * Domain Entity - Member
- * Профильные данные в FieldValue привязаны к EntityRecord (profile); Member — мост User ↔ запись.
+ * Мост User ↔ Portal ↔ EntityRecord: один user может быть member в нескольких порталах.
+ * Профильные данные живут в FieldValue профильной EntityRecord.
  */
 export class Member {
     id: string;
     userId: string;
-    portalId?: string;
+    portalId: string;
     entityRecordId: string;
     membershipNumber?: string;
     isActive: boolean;
+    joinSource: MemberJoinSource;
+    claimedAt?: Date;
     createdAt: Date;
     updatedAt: Date;
 
@@ -28,10 +31,6 @@ export const memberWithRelationsInclude = {
                 orderBy: [{ fieldDefinitionId: "asc" as const }, { valueIndex: "asc" as const }],
                 include: { fieldDefinition: true },
             },
-            identityDocuments: true,
-            signature: true,
-            memberMjStatuses: { include: { mjStatus: true } },
-            memberDocuments: { include: { document: true } },
         },
     },
 } as const satisfies Prisma.MemberInclude;

@@ -8,13 +8,13 @@ export enum EmailTemplate {
 }
 
 export class SendEmailRequestDto {
-    @ApiProperty({ description: "Email", example: "test@example.com" })
+    @ApiProperty({ type: String, description: "Email", example: "test@example.com" })
     @IsString()
     @IsNotEmpty()
     @IsEmail()
     email: string;
 
-    @ApiProperty({
+    @ApiProperty({ type: String,
         description: "Subject",
         example: "Welcome to the realm of NestJS",
     })
@@ -23,19 +23,19 @@ export class SendEmailRequestDto {
     @IsString()
     subject: string;
 
-    @ApiProperty({ description: "Template", example: "text" })
+    @ApiProperty({ type: String, description: "Template", example: "text" })
     @IsString()
     @IsNotEmpty()
     @IsString()
     body: string;
 
-    @ApiProperty({ description: "Name", example: "John" })
+    @ApiProperty({ type: String, description: "Name", example: "John" })
     @IsString()
     @IsNotEmpty()
     @IsString()
     name: string;
 
-    @ApiProperty({ description: "Surname", example: "Doe" })
+    @ApiProperty({ type: String, description: "Surname", example: "Doe" })
     @IsString()
     @IsNotEmpty()
     @IsString()
@@ -43,7 +43,7 @@ export class SendEmailRequestDto {
 }
 
 export class SendEmailOfferRequestDto {
-    @ApiProperty({ description: "Email", example: "test@example.com" })
+    @ApiProperty({ type: String, description: "Email", example: "test@example.com" })
     @IsString()
     @IsNotEmpty()
     @IsEmail()

@@ -62,7 +62,7 @@ export class MemberFormFieldSchemaItemDto {
     @ApiProperty({ example: true, type: Boolean })
     isMultiple: boolean;
 
-    @ApiPropertyOptional({ nullable: true })
+    @ApiPropertyOptional({ type: String, nullable: true })
     sectionCode: string | null;
 
     @ApiProperty({ example: 1, type: Number })
@@ -151,7 +151,7 @@ export class MemberFieldDefinitionResponseDto {
     @ApiProperty({ example: true, type: Boolean })
     isImmutable: boolean;
 
-    @ApiProperty()
+    @ApiProperty({ type: Boolean })
     deletableByPortal: boolean;
 
     @ApiProperty({ example: true, type: Boolean })
@@ -202,7 +202,7 @@ export class MemberFormLayoutReplaceResponseDto {
     @ApiProperty({ enum: FormPurpose, example: "public_registration" })
     purpose: FormPurpose;
 
-    @ApiProperty({ description: "Число записей layout после замены" })
+    @ApiProperty({ type: Number, description: "Число записей layout после замены" })
     replaced: number;
 }
 
@@ -216,7 +216,7 @@ export class OrderStageResponseDto {
     @ApiProperty({ example: "Name", type: String })
     name: string;
 
-    @ApiProperty()
+    @ApiProperty({ type: Number })
     sortOrder: number;
 
     @ApiPropertyOptional({ nullable: true, example: "#000000", type: String, required: false })

@@ -5,77 +5,35 @@ import {
     NotFoundException,
 } from "@nestjs/common";
 
-import * as bcrypt from "bcrypt";
+import { EmployeeRole, UserAccountStatus } from "@prisma/client";
+import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 
-import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import {
     EmployeeFilters,
     EmployeeRepository,
+    EmployeeWithProfile,
 } from "@modules/portal/crm/employees/domain/repositories/employee-repository.interface";
+
+export interface CreateEmployeeInput {
+    email: string;
+    role: EmployeeRole;
+    fields: Record<string, unknown>;
+    invitationId?: string;
+}
 
 @Injectable()
 export class EmployeesService {
-    constructor(private readonly employeeRepository: EmployeeRepository) {}
-
-    /**
-     * Найти сотрудника по email для аутентификации
-     */
-    async findByEmailForAuth(email: string): Promise<Employee | null> {
-        return this.employeeRepository.findByEmail(email);
-    }
-
-    /**
-     * Найти сотрудника по ID
-     */
-    async findById(id: string): Promise<Employee | null> {
-        return this.employeeRepository.findById(id);
-    }
-
-    /**
-     * Валидация сотрудника (email и пароль)
-     */
-    async validateEmployee(email: string, password: string): Promise<Employee | null> {
-        const employee = await this.employeeRepository.findByEmail(email);
-
-        if (!employee) {
-            return null;
-        }
-
-        const isPasswordValid = await bcrypt.compare(password, employee.passwordHash);
-        if (!isPasswordValid || !employee.isActive) {
-            return null;
-        }
-
-        // Обновляем время последнего входа через репозиторий
-        await this.employeeRepository.update(employee.id, { lastLoginAt: new Date() });
-
-        return this.employeeRepository.findById(employee.id);
-    }
-
-    /**
-     * Получить список всех сотрудников
-     */
-    async findAll(limit?: number, skip?: number): Promise<Employee[]> {
-        return this.employeeRepository.findAll(limit, skip);
-    }
-
-    /**
-     * Получить общее количество сотрудников
-     */
-    async count(): Promise<number> {
-        return this.employeeRepository.count();
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    // Portal-scoped CRM methods
-    // ═══════════════════════════════════════════════════════════════════════════
+    constructor(
+        private readonly employeeRepository: EmployeeRepository,
+        private readonly userRepository: UserRepository
+    ) {}
 
     async findAllByPortal(
         portalId: string,
         filters?: EmployeeFilters,
         limit?: number,
         skip?: number
-    ): Promise<Employee[]> {
+    ): Promise<EmployeeWithProfile[]> {
         return this.employeeRepository.findAllByPortal(portalId, filters, limit, skip);
     }
 
@@ -83,50 +41,125 @@ export class EmployeesService {
         return this.employeeRepository.countByPortal(portalId, filters);
     }
 
-    async findByIdInPortal(id: string, portalId: string): Promise<Employee> {
-        const employee = await this.employeeRepository.findById(id);
-        if (!employee || employee.portalId !== portalId) {
-            throw new NotFoundException(`Employee not found`);
+    async findByIdInPortal(id: string, portalId: string): Promise<EmployeeWithProfile> {
+        const employee = await this.employeeRepository.findByIdForPortal(id, portalId);
+        if (!employee) {
+            throw new NotFoundException("Employee not found");
         }
         return employee;
+    }
+
+    async findByUserAndPortal(
+        userId: string,
+        portalId: string
+    ): Promise<EmployeeWithProfile | null> {
+        return this.employeeRepository.findByUserAndPortal(userId, portalId);
+    }
+
+    /**
+     * Создание сотрудника по email: если аккаунта нет — создаётся pending_claim
+     * (пользователь клеймит его позже, установив пароль при регистрации).
+     */
+    async create(
+        input: CreateEmployeeInput,
+        portalId: string
+    ): Promise<{ employee: EmployeeWithProfile; isNewUser: boolean }> {
+        if (input.role === EmployeeRole.portal_owner) {
+            throw new ForbiddenException("Cannot assign portal_owner role");
+        }
+
+        let user = await this.userRepository.findByEmail(input.email);
+        let isNewUser = false;
+        if (!user) {
+            user = await this.userRepository.create({
+                email: input.email,
+                passwordHash: null,
+                status: UserAccountStatus.pending_claim,
+                isActive: false,
+                emailConfirmed: false,
+            });
+            isNewUser = true;
+        }
+
+        const employee = await this.employeeRepository.createWithProfile({
+            userId: user.id,
+            portalId,
+            role: input.role,
+            invitationId: input.invitationId,
+            fields: input.fields,
+        });
+
+        return { employee, isNewUser };
+    }
+
+    /** Внутренний метод (онбординг портала): создать owner-моста без проверок роли. */
+    async createOwner(
+        userId: string,
+        portalId: string,
+        fields: Record<string, unknown>
+    ): Promise<EmployeeWithProfile> {
+        return this.employeeRepository.createWithProfile({
+            userId,
+            portalId,
+            role: EmployeeRole.portal_owner,
+            fields,
+        });
     }
 
     async updateEmployee(
         id: string,
         portalId: string,
         actorId: string,
-        data: Partial<{
-            role: string;
-            position: string;
-            department: string;
-            isActive: boolean;
-        }>
-    ): Promise<Employee> {
+        data: {
+            role?: EmployeeRole;
+            isActive?: boolean;
+            fields?: Record<string, unknown>;
+        }
+    ): Promise<EmployeeWithProfile> {
         const target = await this.findByIdInPortal(id, portalId);
 
         if (id === actorId) {
             throw new BadRequestException("Cannot modify your own account via this endpoint");
         }
-        if (target.role === "portal_owner") {
+        if (target.employee.role === EmployeeRole.portal_owner) {
             throw new ForbiddenException("Cannot modify portal owner");
         }
-        if (data.role === "portal_owner") {
+        if (data.role === EmployeeRole.portal_owner) {
             throw new ForbiddenException("Cannot assign portal_owner role");
         }
 
-        return this.employeeRepository.update(id, data);
+        if (data.fields && Object.keys(data.fields).length > 0) {
+            await this.employeeRepository.updateProfileFields(id, portalId, data.fields);
+        }
+
+        if (data.role !== undefined || data.isActive !== undefined) {
+            return this.employeeRepository.updateBridge(id, {
+                ...(data.role !== undefined ? { role: data.role } : {}),
+                ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
+            });
+        }
+
+        return this.findByIdInPortal(id, portalId);
     }
 
-    async deactivateEmployee(id: string, portalId: string, actorId: string): Promise<Employee> {
+    async deactivateEmployee(
+        id: string,
+        portalId: string,
+        actorId: string
+    ): Promise<EmployeeWithProfile> {
         const target = await this.findByIdInPortal(id, portalId);
 
         if (id === actorId) {
             throw new BadRequestException("Cannot deactivate your own account");
         }
-        if (target.role === "portal_owner") {
+        if (target.employee.role === EmployeeRole.portal_owner) {
             throw new ForbiddenException("Cannot deactivate portal owner");
         }
 
-        return this.employeeRepository.update(id, { isActive: false });
+        return this.employeeRepository.updateBridge(id, { isActive: false });
+    }
+
+    async touchLastLogin(id: string): Promise<void> {
+        await this.employeeRepository.updateBridge(id, { lastLoginAt: new Date() });
     }
 }

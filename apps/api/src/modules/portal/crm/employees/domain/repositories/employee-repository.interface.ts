@@ -1,43 +1,55 @@
+import { EmployeeRole } from "@prisma/client";
+
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 
 export interface EmployeeFilters {
-    role?: string;
+    role?: EmployeeRole;
     isActive?: boolean;
 }
 
+export interface EmployeeProfileField {
+    fieldKey: string;
+    type: string;
+    label: string | null;
+    value: unknown;
+}
+
+export interface EmployeeWithProfile {
+    employee: Employee;
+    fields: EmployeeProfileField[];
+}
+
 export abstract class EmployeeRepository {
-    abstract findById(id: string): Promise<Employee | null>;
-    abstract findByEmail(email: string): Promise<Employee | null>;
-    abstract findAll(limit?: number, skip?: number): Promise<Employee[]>;
-    abstract count(): Promise<number>;
+    abstract findByIdForPortal(id: string, portalId: string): Promise<EmployeeWithProfile | null>;
+    abstract findByUserAndPortal(
+        userId: string,
+        portalId: string
+    ): Promise<EmployeeWithProfile | null>;
     abstract findAllByPortal(
         portalId: string,
         filters?: EmployeeFilters,
         limit?: number,
         skip?: number
-    ): Promise<Employee[]>;
+    ): Promise<EmployeeWithProfile[]>;
     abstract countByPortal(portalId: string, filters?: EmployeeFilters): Promise<number>;
-    abstract create(data: {
+    abstract createWithProfile(data: {
         userId: string;
-        portalId?: string;
-        name: string;
-        surname?: string;
-        phone?: string;
-        role?: string;
-        position?: string;
-        department?: string;
-    }): Promise<Employee>;
-    abstract update(
+        portalId: string;
+        role: EmployeeRole;
+        invitationId?: string;
+        fields: Record<string, unknown>;
+    }): Promise<EmployeeWithProfile>;
+    abstract updateBridge(
         id: string,
         data: Partial<{
-            name: string;
-            surname: string;
-            phone: string;
-            role: string;
-            position: string;
-            department: string;
+            role: EmployeeRole;
             isActive: boolean;
             lastLoginAt: Date;
         }>
-    ): Promise<Employee>;
+    ): Promise<EmployeeWithProfile>;
+    abstract updateProfileFields(
+        id: string,
+        portalId: string,
+        fields: Record<string, unknown>
+    ): Promise<EmployeeWithProfile>;
 }

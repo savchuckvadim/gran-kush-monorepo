@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 
-import { Prisma } from "@prisma/client";
+import { MemberJoinSource, Prisma } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
@@ -36,32 +36,24 @@ function parseFilterJsonValue(raw: string): Prisma.InputJsonValue {
 export class MemberPrismaRepository implements MemberRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    async findAll(
+    async findAllByPortal(
+        portalId: string,
         limit: number = 100,
         skip?: number,
         filters?: MemberListFilters
     ): Promise<MemberWithRelations[]> {
-        const where: Prisma.MemberWhereInput = {};
-
-        if (filters?.portalId) {
-            where.portalId = filters.portalId;
-        }
+        const where: Prisma.MemberWhereInput = { portalId };
 
         const profileFilter: Prisma.EntityRecordWhereInput = {};
         if (filters?.statusItemId) {
             profileFilter.statusItemId = filters.statusItemId;
         }
 
-        if (
-            filters?.portalId &&
-            filters.filterFieldKey &&
-            filters.filterValue !== undefined &&
-            filters.filterValue !== ""
-        ) {
+        if (filters?.filterFieldKey && filters.filterValue !== undefined && filters.filterValue !== "") {
             const memberDef = await this.prisma.entityDefinition.findUnique({
                 where: {
                     portalId_code: {
-                        portalId: filters.portalId,
+                        portalId,
                         code: ENTITY_DEFINITION_CODES.MEMBER,
                     },
                 },
@@ -101,56 +93,77 @@ export class MemberPrismaRepository implements MemberRepository {
         });
     }
 
-    async count(): Promise<number> {
-        return this.prisma.member.count();
+    async countByPortal(portalId: string): Promise<number> {
+        return this.prisma.member.count({ where: { portalId } });
     }
 
-    async findById(id: string): Promise<MemberWithRelations | null> {
+    async findByIdForPortal(id: string, portalId: string): Promise<MemberWithRelations | null> {
+        return this.prisma.member.findFirst({
+            where: { id, portalId },
+            include: memberWithRelationsInclude,
+        });
+    }
+
+    async findByIdUnscoped(id: string): Promise<MemberWithRelations | null> {
         return this.prisma.member.findUnique({
             where: { id },
             include: memberWithRelationsInclude,
         });
     }
 
-    async findByUserId(userId: string): Promise<MemberWithRelations | null> {
+    async findByUserAndPortal(
+        userId: string,
+        portalId: string
+    ): Promise<MemberWithRelations | null> {
         return this.prisma.member.findUnique({
+            where: { userId_portalId: { userId, portalId } },
+            include: memberWithRelationsInclude,
+        });
+    }
+
+    async findAllByUser(userId: string): Promise<MemberWithRelations[]> {
+        return this.prisma.member.findMany({
             where: { userId },
+            orderBy: { createdAt: "desc" },
             include: memberWithRelationsInclude,
         });
     }
 
     async create(data: {
         userId: string;
-        portalId?: string;
+        portalId: string;
         membershipNumber?: string;
         statusItemId?: string;
+        joinSource?: MemberJoinSource;
+        registrationLinkId?: string;
+        createdByEmployeeId?: string;
     }): Promise<MemberWithRelations> {
-        const portalId = data.portalId;
-        if (!portalId) {
-            throw new Error("Member create requires portalId to provision EntityRecord");
-        }
         return this.prisma.$transaction(async (tx) => {
             const def = await tx.entityDefinition.findUniqueOrThrow({
                 where: {
                     portalId_code: {
-                        portalId,
+                        portalId: data.portalId,
                         code: ENTITY_DEFINITION_CODES.MEMBER,
                     },
                 },
             });
             const record = await tx.entityRecord.create({
                 data: {
-                    portalId,
+                    portalId: data.portalId,
                     entityDefinitionId: def.id,
                     statusItemId: data.statusItemId ?? null,
+                    createdByEmployeeId: data.createdByEmployeeId ?? null,
                 },
             });
             return tx.member.create({
                 data: {
                     userId: data.userId,
-                    portalId,
+                    portalId: data.portalId,
                     entityRecordId: record.id,
                     membershipNumber: data.membershipNumber,
+                    joinSource: data.joinSource ?? MemberJoinSource.self,
+                    registrationLinkId: data.registrationLinkId ?? null,
+                    createdByEmployeeId: data.createdByEmployeeId ?? null,
                 },
                 include: memberWithRelationsInclude,
             });
@@ -162,6 +175,7 @@ export class MemberPrismaRepository implements MemberRepository {
         data: Partial<{
             membershipNumber: string | null;
             isActive: boolean;
+            claimedAt: Date;
         }>
     ): Promise<MemberWithRelations> {
         return this.prisma.member.update({

@@ -75,16 +75,29 @@ export class FinancialTransactionPrismaRepository extends FinancialTransactionRe
 
     async create(data: CreateTransactionInput): Promise<FinancialTransaction> {
         let entityRecordId: string | null = null;
+        let portalId: string | null = null;
         if (data.memberId) {
             const m = await this.prisma.member.findUnique({
                 where: { id: data.memberId },
-                select: { entityRecordId: true },
+                select: { entityRecordId: true, portalId: true },
             });
             entityRecordId = m?.entityRecordId ?? null;
+            portalId = m?.portalId ?? null;
+        }
+        if (!portalId && data.orderId) {
+            const o = await this.prisma.order.findUnique({
+                where: { id: data.orderId },
+                select: { portalId: true },
+            });
+            portalId = o?.portalId ?? null;
+        }
+        if (!portalId) {
+            throw new Error("Cannot resolve portal for financial transaction");
         }
 
         const row = await this.prisma.financialTransaction.create({
             data: {
+                portalId,
                 orderId: data.orderId,
                 entityRecordId,
                 type: data.type,

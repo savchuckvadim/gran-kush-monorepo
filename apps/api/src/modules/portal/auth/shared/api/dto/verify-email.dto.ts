@@ -3,7 +3,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsString } from "class-validator";
 
 export class VerifyEmailDto {
-    @ApiProperty({
+    @ApiProperty({ type: String,
         example: "abc123def456...",
         description: "Email verification token from email",
     })

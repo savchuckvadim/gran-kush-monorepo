@@ -34,7 +34,6 @@ export class AuthCookieService {
     clearAuthCookies(response: Response, scope: AUTH_GLOBAL_SCOPE): void {
         const names = this.configCookieService.getCookieNames(scope);
         const domain = this.configCookieService.getDomain(scope);
-        console.log("domain", domain);
         const clearOptions = {
             path: "/",
             domain: domain || undefined,

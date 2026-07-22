@@ -20,13 +20,18 @@ import { FormPurpose } from "@prisma/client";
 import { StorageService } from "@storage/application/services/storage.service";
 import { MulterFile } from "@storage/domain/interfaces/storage-file.interface";
 
+import { CurrentPrincipal } from "@common/decorators/auth/current-principal.decorator";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import type { PortalPrincipal } from "@common/portal";
 import { Admin, AdminGuard, RequireEmployeeJwt } from "@modules/portal/auth/employees";
 import { FormSchemaService } from "@modules/portal/crm/entity-fields/application/services/form-schema.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
-import { CrmCreateMemberDto } from "@modules/portal/crm/members/api/dto/dynamic-member.dto";
+import {
+    CrmCreateMemberDto,
+    CrmCreateMemberResponseDto,
+} from "@modules/portal/crm/members/api/dto/dynamic-member.dto";
 import { MembersService } from "@modules/portal/crm/members/application/services/members.service";
 
 import { CrmMemberDto, CrmMemberFieldsPatchDto, CrmMemberFullDto } from "../dto/crm-member.dto";
@@ -43,24 +48,17 @@ export class CrmMembersController {
     ) {}
 
     @Post()
-    @ApiOperation({ summary: "Create member from CRM (dynamic fields)" })
-    @ApiSuccessResponse(Object, { description: "Created member" })
+    @ApiOperation({
+        summary: "Create member from CRM (email + dynamic fields, account claimed later)",
+    })
+    @ApiSuccessResponse(CrmCreateMemberResponseDto, { description: "Created member" })
     @ApiErrorResponse([401, 403, 400, 409])
     async create(
         @Body() dto: CrmCreateMemberDto,
-        @PortalId() portalId: string
-    ): Promise<CrmMemberFullDto> {
-        const { memberId } = await this.membersService.createMemberWithDynamicFields(
-            dto,
-            false,
-            portalId,
-            FormPurpose.crm_create
-        );
-        const member = await this.membersService.findById(memberId);
-        if (!member) {
-            throw new NotFoundException("Member not found after create");
-        }
-        return this.membersService.toCrmMemberFullDto(member);
+        @PortalId() portalId: string,
+        @CurrentPrincipal() principal: PortalPrincipal
+    ): Promise<CrmCreateMemberResponseDto> {
+        return this.membersService.createFromCrm(dto, portalId, principal.membershipId);
     }
 
     @Get()
@@ -83,8 +81,7 @@ export class CrmMembersController {
     ): Promise<CrmMemberDto[]> {
         const parsedLimit = Number.parseInt(limit ?? "", 10);
         const take = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 100;
-        const members = await this.membersService.findAll(take, undefined, {
-            portalId,
+        const members = await this.membersService.findAllByPortal(portalId, take, undefined, {
             ...(statusItemId && { statusItemId }),
             ...(filterFieldKey &&
                 filterValue !== undefined &&
@@ -119,13 +116,10 @@ export class CrmMembersController {
         description: "Member details",
     })
     @ApiErrorResponse([401, 403, 400])
-    async byId(
-        @Param("id") id: string,
-        @PortalId() portalId: string
-    ): Promise<CrmMemberFullDto> {
-        const member = await this.membersService.findById(id);
+    async byId(@Param("id") id: string, @PortalId() portalId: string): Promise<CrmMemberFullDto> {
+        const member = await this.membersService.findByIdForPortal(id, portalId);
 
-        if (!member || member.portalId !== portalId) {
+        if (!member) {
             throw new NotFoundException("Member not found");
         }
 
@@ -145,11 +139,7 @@ export class CrmMembersController {
         @Body() dto: CrmMemberFieldsPatchDto,
         @PortalId() portalId: string
     ): Promise<CrmMemberFullDto> {
-        const existing = await this.membersService.findById(id);
-        if (!existing || existing.portalId !== portalId) {
-            throw new NotFoundException("Member not found");
-        }
-        const updated = await this.membersService.updateCrmMember(id, dto);
+        const updated = await this.membersService.updateCrmMember(id, portalId, dto);
         if (!updated) {
             throw new NotFoundException("Member not found");
         }
@@ -159,7 +149,7 @@ export class CrmMembersController {
     @Patch(":id/files")
     @UseGuards(AdminGuard)
     @Admin()
-    @ApiOperation({ summary: "Re-upload member files from CRM (Admin only)" })
+    @ApiOperation({ summary: "Re-upload member files from CRM (saved to member account)" })
     @ApiConsumes("multipart/form-data")
     @ApiBody({
         schema: {
@@ -195,29 +185,25 @@ export class CrmMembersController {
         },
         @PortalId() portalId: string
     ): Promise<CrmMemberFullDto> {
-        const existing = await this.membersService.findById(id);
-        if (!existing || existing.portalId !== portalId) {
-            throw new NotFoundException("Member not found");
-        }
-        return this.membersService.updateCrmMemberFiles(id, dto, files);
+        return this.membersService.updateCrmMemberFiles(id, portalId, dto, files);
     }
 
-    @Get(":id/identity-documents/:documentId/preview")
-    @ApiOperation({ summary: "Preview identity document image (Employee access required)" })
+    @Get(":id/documents/:documentId/preview")
+    @ApiOperation({ summary: "Preview member account document (Employee access required)" })
     @ApiSuccessResponse(StreamableFile, {
-        description: "Identity document image",
+        description: "Document image",
     })
-    @ApiErrorResponse([401, 403, 400])
-    async identityDocumentPreview(
+    @ApiErrorResponse([401, 403, 404])
+    async documentPreview(
         @Param("id") memberId: string,
-        @Param("documentId") documentId: string
+        @Param("documentId") documentId: string,
+        @PortalId() portalId: string
     ): Promise<StreamableFile> {
-        const member = await this.membersService.findById(memberId);
-        const document = member?.profile.identityDocuments.find((doc) => doc.id === documentId);
-
-        if (!document) {
-            throw new NotFoundException("Identity document not found");
-        }
+        const document = await this.membersService.getMemberAccountDocument(
+            memberId,
+            portalId,
+            documentId
+        );
 
         const fileBuffer = await this.storageService.getFile(document.storagePath);
         return new StreamableFile(fileBuffer, {
@@ -226,20 +212,20 @@ export class CrmMembersController {
     }
 
     @Get(":id/signature/preview")
-    @ApiOperation({ summary: "Preview signature image (Employee access required)" })
+    @ApiOperation({ summary: "Preview member signature (Employee access required)" })
     @ApiSuccessResponse(StreamableFile, {
         description: "Signature image",
     })
-    @ApiErrorResponse([401, 403, 400])
-    async signaturePreview(@Param("id") memberId: string): Promise<StreamableFile> {
-        const member = await this.membersService.findById(memberId);
-        if (!member?.profile.signature) {
-            throw new NotFoundException("Signature not found");
-        }
+    @ApiErrorResponse([401, 403, 404])
+    async signaturePreview(
+        @Param("id") memberId: string,
+        @PortalId() portalId: string
+    ): Promise<StreamableFile> {
+        const signature = await this.membersService.getMemberAccountSignature(memberId, portalId);
 
-        const fileBuffer = await this.storageService.getFile(member.profile.signature.storagePath);
+        const fileBuffer = await this.storageService.getFile(signature.storagePath);
         return new StreamableFile(fileBuffer, {
-            type: this.resolveMimeType(member.profile.signature.storagePath),
+            type: this.resolveMimeType(signature.storagePath),
         });
     }
 

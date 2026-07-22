@@ -4,35 +4,38 @@ import {
     Controller,
     Get,
     Headers,
+    NotFoundException,
     Post,
-    UseGuards,
 } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
+import { UserRepository } from "@users/domain/repositories/user-repository.interface";
+
 import { resolveDeviceIdFromHeaders } from "@common/auth";
+import { CurrentAuthUser } from "@common/decorators/auth/current-auth-user.decorator";
 import { Public } from "@common/decorators/auth/public.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { RefreshTokenDto } from "@modules/portal/auth/api/dto/refresh-token.dto";
-import { CurrentEmployee } from "@modules/portal/auth/employees/api/decorators/current-employee.decorator";
-import { RequireEmployeeJwtMobile } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
+import { RequireEmployeeUserJwtMobile } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
 import { EmployeeAuthResponseDto } from "@modules/portal/auth/employees/api/dto/employee-auth-response.dto";
 import { EmployeeLoginDto } from "@modules/portal/auth/employees/api/dto/employee-login.dto";
 import { EmployeeLogoutResponseDto } from "@modules/portal/auth/employees/api/dto/employee-logout-response.dto";
 import { EmployeeMeResponseDto } from "@modules/portal/auth/employees/api/dto/employee-me-response.dto";
 import { EmployeeRefreshTokenResponseDto } from "@modules/portal/auth/employees/api/dto/employee-refresh-token-response.dto";
 import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
-import { EmployeeLocalAuthGuard } from "@modules/portal/auth/employees/infrastructure/guards/employee-local-auth.guard";
-import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
+import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 
 @ApiTags("Employee Authentication (CRM Mobile / Native)")
 @Controller("crm/mobile/auth")
 export class EmployeeMobileAuthController {
-    constructor(private readonly employeeAuthService: EmployeeAuthService) {}
+    constructor(
+        private readonly employeeAuthService: EmployeeAuthService,
+        private readonly userRepository: UserRepository
+    ) {}
 
     @Post("login")
     @Public()
-    @UseGuards(EmployeeLocalAuthGuard)
     @ApiOperation({ summary: "Login employee (native: Bearer tokens in JSON, no cookies)" })
     @ApiSuccessResponse(EmployeeAuthResponseDto, {
         description: "Employee logged in successfully",
@@ -40,7 +43,6 @@ export class EmployeeMobileAuthController {
     @ApiErrorResponse([400, 401])
     async login(
         @Body() dto: EmployeeLoginDto,
-        @CurrentEmployee() _employee,
         @Headers() headers: Record<string, string | string[] | undefined>
     ): Promise<EmployeeAuthResponseDto> {
         const deviceId = resolveDeviceIdFromHeaders(headers);
@@ -75,27 +77,26 @@ export class EmployeeMobileAuthController {
     }
 
     @Get("me")
-    @RequireEmployeeJwtMobile()
-    @ApiOperation({ summary: "Get current employee (native)" })
+    @RequireEmployeeUserJwtMobile()
+    @ApiOperation({ summary: "Get current account with employments (native, global)" })
     @ApiSuccessResponse(EmployeeMeResponseDto, {
-        description: "Current employee information",
+        description: "Current employee account information",
     })
     @ApiErrorResponse([401])
-    getMe(@CurrentEmployee() employee): EmployeeMeResponseDto {
-        const emp = employee as Employee;
+    async getMe(@CurrentAuthUser() authUser: AuthenticatedUser): Promise<EmployeeMeResponseDto> {
+        const user = await this.userRepository.findByIdWithMemberships(authUser.userId);
+        if (!user) {
+            throw new NotFoundException("User not found");
+        }
         return {
-            id: emp.id,
-            email: emp.email,
-            name: emp.name,
-            phone: emp.phone,
-            role: emp.role,
-            portalId: emp.portalId,
-            position: emp.position,
-            department: emp.department,
-            isActive: emp.isActive,
-            lastLoginAt: emp.lastLoginAt,
-            createdAt: emp.createdAt,
-            updatedAt: emp.updatedAt,
+            id: user.id,
+            email: user.email,
+            employments: user.employees.map((e) => ({
+                portalId: e.portalId,
+                employeeId: e.id,
+                role: e.role,
+                isActive: e.isActive,
+            })),
         };
     }
 }

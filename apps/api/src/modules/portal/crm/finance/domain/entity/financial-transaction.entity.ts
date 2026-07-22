@@ -61,7 +61,6 @@ export class FinancialTransaction {
     order?: {
         id: string;
         orderNumber: string;
-        status: string;
     } | null;
     member?: {
         id: string;
@@ -71,8 +70,7 @@ export class FinancialTransaction {
     } | null;
     createdByEmployee?: {
         id: string;
-        name: string;
-        surname?: string | null;
+        role: string;
     } | null;
 
     constructor(partial: Partial<FinancialTransaction>) {

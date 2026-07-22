@@ -12,30 +12,33 @@ import type {
     CreatePortalMemberFieldDto,
     UpdatePortalMemberFieldDto,
 } from "@modules/portal/crm/entity-fields/api/dto/portal-field-settings.dto";
-import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 
 export type MemberFieldDefinitionWithOptions = Prisma.FieldDefinitionGetPayload<{
     include: { options: { orderBy: { sortOrder: "asc" } } };
 }>;
 
+/** CRUD пользовательских полей любой сущности портала (конструктор). */
 @Injectable()
 export class PortalFieldSettingsService {
     constructor(private readonly prisma: PrismaService) {}
 
-    private async memberEntityDefinitionId(portalId: string): Promise<string> {
+    private async entityDefinitionId(portalId: string, entityCode: string): Promise<string> {
         const ed = await this.prisma.entityDefinition.findUnique({
             where: {
-                portalId_code: { portalId, code: ENTITY_DEFINITION_CODES.MEMBER },
+                portalId_code: { portalId, code: entityCode },
             },
         });
         if (!ed) {
-            throw new NotFoundException("Member entity definition not found for portal");
+            throw new NotFoundException(`Entity "${entityCode}" definition not found for portal`);
         }
         return ed.id;
     }
 
-    async listMemberDefinitions(portalId: string): Promise<MemberFieldDefinitionWithOptions[]> {
-        const entityDefinitionId = await this.memberEntityDefinitionId(portalId);
+    async listDefinitions(
+        portalId: string,
+        entityCode: string
+    ): Promise<MemberFieldDefinitionWithOptions[]> {
+        const entityDefinitionId = await this.entityDefinitionId(portalId, entityCode);
         return this.prisma.fieldDefinition.findMany({
             where: { entityDefinitionId },
             orderBy: [{ sortOrder: "asc" }, { fieldKey: "asc" }],
@@ -45,11 +48,12 @@ export class PortalFieldSettingsService {
         });
     }
 
-    async createMemberDefinition(
+    async createDefinition(
         portalId: string,
+        entityCode: string,
         dto: CreatePortalMemberFieldDto
     ): Promise<MemberFieldDefinitionWithOptions> {
-        const entityDefinitionId = await this.memberEntityDefinitionId(portalId);
+        const entityDefinitionId = await this.entityDefinitionId(portalId, entityCode);
         try {
             return await this.prisma.fieldDefinition.create({
                 data: {
@@ -88,12 +92,13 @@ export class PortalFieldSettingsService {
         }
     }
 
-    async updateMemberDefinition(
+    async updateDefinition(
         portalId: string,
+        entityCode: string,
         fieldKey: string,
         dto: UpdatePortalMemberFieldDto
     ) {
-        const entityDefinitionId = await this.memberEntityDefinitionId(portalId);
+        const entityDefinitionId = await this.entityDefinitionId(portalId, entityCode);
         const def = await this.prisma.fieldDefinition.findUnique({
             where: {
                 entityDefinitionId_fieldKey: { entityDefinitionId, fieldKey },
@@ -129,8 +134,8 @@ export class PortalFieldSettingsService {
         });
     }
 
-    async deleteMemberDefinition(portalId: string, fieldKey: string) {
-        const entityDefinitionId = await this.memberEntityDefinitionId(portalId);
+    async deleteDefinition(portalId: string, entityCode: string, fieldKey: string) {
+        const entityDefinitionId = await this.entityDefinitionId(portalId, entityCode);
         const def = await this.prisma.fieldDefinition.findUnique({
             where: {
                 entityDefinitionId_fieldKey: { entityDefinitionId, fieldKey },
@@ -151,12 +156,13 @@ export class PortalFieldSettingsService {
         ]);
     }
 
-    async addMemberFieldOption(
+    async addFieldOption(
         portalId: string,
+        entityCode: string,
         fieldKey: string,
         input: { valueKey: string; label: string; color?: string | null; sortOrder?: number }
     ): Promise<FieldOption> {
-        const entityDefinitionId = await this.memberEntityDefinitionId(portalId);
+        const entityDefinitionId = await this.entityDefinitionId(portalId, entityCode);
         const def = await this.prisma.fieldDefinition.findUnique({
             where: {
                 entityDefinitionId_fieldKey: { entityDefinitionId, fieldKey },

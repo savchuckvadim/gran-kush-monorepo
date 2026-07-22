@@ -10,20 +10,13 @@ import {
     JWT_ENV_KEYS,
     JWT_ERROR_MESSAGES,
 } from "@modules/portal/auth/domain/constants/jwt.constants";
+import { AuthJwtPayload } from "@modules/portal/auth/domain/interfaces/jwt-payload.interface";
 import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
-import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
-
-interface EmployeeJwtPayload {
-    sub: string;
-    email: string;
-    name: string;
-    role: string;
-    portalId?: string | null;
-    type: "employee";
-}
+import { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 
 /**
  * CRM веб: только HttpOnly cookie (без Bearer).
+ * Токен глобальный (без portalId); employment резолвит MembershipGuard.
  *
  * Access token revocation: tokens are short-lived JWTs (15 min TTL) — not stored in DB.
  * Per-request DB lookup is intentionally skipped for performance. Revocation is handled
@@ -63,13 +56,13 @@ export class EmployeeJwtCookieStrategy extends PassportStrategy(
         /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
     }
 
-    async validate(payload: EmployeeJwtPayload): Promise<Employee> {
-        const employee = await this.employeeAuthService.validateJwtPayload(payload);
+    async validate(payload: AuthJwtPayload): Promise<AuthenticatedUser> {
+        const user = await this.employeeAuthService.validateJwtPayload(payload);
 
-        if (!employee) {
-            throw new UnauthorizedException("Employee not found or inactive");
+        if (!user) {
+            throw new UnauthorizedException("User not found or inactive");
         }
 
-        return employee;
+        return user;
     }
 }

@@ -42,8 +42,7 @@ export class PresenceSession {
     };
     employee?: {
         id: string;
-        name: string;
-        surname?: string | null;
+        role: string;
     };
 
     constructor(partial: Partial<PresenceSession>) {

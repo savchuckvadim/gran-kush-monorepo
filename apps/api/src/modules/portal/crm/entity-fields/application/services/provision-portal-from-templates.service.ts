@@ -1,187 +1,22 @@
 import { Injectable } from "@nestjs/common";
 
-import {
-    FormPurpose,
-    PortalFieldType,
-    PortalTypeEnum,
-    Prisma,
-    SubscriptionStatus,
-} from "@prisma/client";
+import { FormPurpose, PortalTypeEnum, Prisma, SubscriptionStatus } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { ensureGlobalEntityTemplates } from "@common/reference-data/global-templates.seed";
 
 import { ENTITY_DEFINITION_CODES } from "../../constants/entity-definition-codes";
 
 type Tx = Prisma.TransactionClient;
 
-const ALL_PORTAL_TYPES: PortalTypeEnum[] = [
-    PortalTypeEnum.CLUB,
-    PortalTypeEnum.TATTOO_STUDIO,
-    PortalTypeEnum.BEAUTY_STUDIO,
-];
-
-const MEMBER_LIFECYCLE_ITEMS: {
-    key: string;
-    label: string;
-    color: string | null;
-    sortOrder: number;
-}[] = [
-    { key: "inProgress", label: "In progress", color: "#64748b", sortOrder: 0 },
-    { key: "pending", label: "Pending", color: "#ca8a04", sortOrder: 1 },
-    { key: "approved", label: "Approved", color: "#16a34a", sortOrder: 2 },
-    { key: "rejected", label: "Rejected", color: "#dc2626", sortOrder: 3 },
-];
-
-const MEMBER_FIELD_SEED: {
-    fieldKey: string;
-    type: PortalFieldType;
-    label: string;
-    sortOrder: number;
-    showInFilters: boolean;
-}[] = [
-    {
-        fieldKey: "first_name",
-        type: PortalFieldType.string,
-        label: "First name",
-        sortOrder: 0,
-        showInFilters: true,
-    },
-    {
-        fieldKey: "last_name",
-        type: PortalFieldType.string,
-        label: "Last name",
-        sortOrder: 1,
-        showInFilters: false,
-    },
-    {
-        fieldKey: "phone",
-        type: PortalFieldType.phone,
-        label: "Phone",
-        sortOrder: 2,
-        showInFilters: true,
-    },
-    {
-        fieldKey: "birthday",
-        type: PortalFieldType.date,
-        label: "Birthday",
-        sortOrder: 3,
-        showInFilters: false,
-    },
-    {
-        fieldKey: "address",
-        type: PortalFieldType.text,
-        label: "Address",
-        sortOrder: 4,
-        showInFilters: false,
-    },
-    {
-        fieldKey: "notes",
-        type: PortalFieldType.text,
-        label: "Notes",
-        sortOrder: 5,
-        showInFilters: false,
-    },
-    {
-        fieldKey: "document_type",
-        type: PortalFieldType.string,
-        label: "Document type",
-        sortOrder: 6,
-        showInFilters: false,
-    },
-    {
-        fieldKey: "document_number",
-        type: PortalFieldType.string,
-        label: "Document number",
-        sortOrder: 7,
-        showInFilters: false,
-    },
-    {
-        fieldKey: "is_medical",
-        type: PortalFieldType.boolean,
-        label: "Medical use",
-        sortOrder: 8,
-        showInFilters: false,
-    },
-    {
-        fieldKey: "is_mj",
-        type: PortalFieldType.boolean,
-        label: "MJ",
-        sortOrder: 9,
-        showInFilters: false,
-    },
-    {
-        fieldKey: "is_recreation",
-        type: PortalFieldType.boolean,
-        label: "Recreation",
-        sortOrder: 10,
-        showInFilters: false,
-    },
-];
-
-const ORDER_STAGES: {
-    name: string;
-    sortOrder: number;
-    color: string | null;
-    semantic: "NEW" | "IN_PROGRESS" | "SUCCESS" | "FAILURE";
-    isTerminalSuccess: boolean;
-    isTerminalFailure: boolean;
-}[] = [
-    {
-        name: "Pending",
-        sortOrder: 0,
-        color: "#64748b",
-        semantic: "NEW",
-        isTerminalSuccess: false,
-        isTerminalFailure: false,
-    },
-    {
-        name: "Confirmed",
-        sortOrder: 1,
-        color: "#2563eb",
-        semantic: "IN_PROGRESS",
-        isTerminalSuccess: false,
-        isTerminalFailure: false,
-    },
-    {
-        name: "Preparing",
-        sortOrder: 2,
-        color: "#7c3aed",
-        semantic: "IN_PROGRESS",
-        isTerminalSuccess: false,
-        isTerminalFailure: false,
-    },
-    {
-        name: "Ready",
-        sortOrder: 3,
-        color: "#ca8a04",
-        semantic: "IN_PROGRESS",
-        isTerminalSuccess: false,
-        isTerminalFailure: false,
-    },
-    {
-        name: "Completed",
-        sortOrder: 4,
-        color: "#16a34a",
-        semantic: "SUCCESS",
-        isTerminalSuccess: true,
-        isTerminalFailure: false,
-    },
-    {
-        name: "Cancelled",
-        sortOrder: 5,
-        color: "#dc2626",
-        semantic: "FAILURE",
-        isTerminalSuccess: false,
-        isTerminalFailure: true,
-    },
-];
-
-const FORM_PURPOSES: FormPurpose[] = [
+const ALL_FORM_PURPOSES: FormPurpose[] = [
     FormPurpose.public_registration,
     FormPurpose.crm_create,
     FormPurpose.crm_detail,
     FormPurpose.member_cabinet,
 ];
+
+const CRM_FORM_PURPOSES: FormPurpose[] = [FormPurpose.crm_create, FormPurpose.crm_detail];
 
 type GlobalTemplateFull = Prisma.GlobalEntityTemplateGetPayload<{
     include: {
@@ -197,7 +32,7 @@ export class ProvisionPortalFromTemplatesService {
 
     async provisionPortal(portalId: string, portalType: PortalTypeEnum, tx?: Tx): Promise<void> {
         const db = tx ?? this.prisma;
-        await this.ensureGlobalTemplates(db);
+        await ensureGlobalEntityTemplates(db);
         await this.ensureDefaultBillingPlan(db);
 
         const templates = await db.globalEntityTemplate.findMany({
@@ -298,6 +133,7 @@ export class ProvisionPortalFromTemplatesService {
                     isImmutable: ft.isImmutable,
                     deletableByPortal: ft.deletableByPortal,
                     customizableByPortal: ft.customizableByPortal,
+                    documentType: ft.documentType,
                     ...(ft.defaultValueJson != null
                         ? { defaultValueJson: ft.defaultValueJson as Prisma.InputJsonValue }
                         : {}),
@@ -321,36 +157,32 @@ export class ProvisionPortalFromTemplatesService {
             fieldIdByKey.set(ft.fieldKey, fd.id);
         }
 
-        if (gt.code === ENTITY_DEFINITION_CODES.MEMBER) {
-            const sortedFields = [...gt.fieldTemplates].sort((a, b) => a.sortOrder - b.sortOrder);
-            for (const purpose of FORM_PURPOSES) {
-                const form = await db.formDefinition.create({
+        const purposes =
+            gt.code === ENTITY_DEFINITION_CODES.MEMBER ? ALL_FORM_PURPOSES : CRM_FORM_PURPOSES;
+        const sortedFields = [...gt.fieldTemplates].sort((a, b) => a.sortOrder - b.sortOrder);
+        for (const purpose of purposes) {
+            const form = await db.formDefinition.create({
+                data: {
+                    portalId,
+                    entityDefinitionId: ed.id,
+                    purpose,
+                },
+            });
+            for (const ft of sortedFields) {
+                const fieldDefinitionId = fieldIdByKey.get(ft.fieldKey);
+                if (!fieldDefinitionId) {
+                    continue;
+                }
+                await db.formDefinitionItem.create({
                     data: {
-                        portalId,
-                        entityDefinitionId: ed.id,
-                        purpose,
+                        formDefinitionId: form.id,
+                        fieldDefinitionId,
+                        sortOrder: ft.sortOrder,
+                        required: this.isRequiredInPurpose(ft.validationJson, purpose),
+                        visible: true,
+                        readOnly: false,
                     },
                 });
-                for (const ft of sortedFields) {
-                    const fieldDefinitionId = fieldIdByKey.get(ft.fieldKey);
-                    if (!fieldDefinitionId) {
-                        continue;
-                    }
-                    const required =
-                        (purpose === FormPurpose.public_registration ||
-                            purpose === FormPurpose.crm_create) &&
-                        ft.fieldKey === "first_name";
-                    await db.formDefinitionItem.create({
-                        data: {
-                            formDefinitionId: form.id,
-                            fieldDefinitionId,
-                            sortOrder: ft.sortOrder,
-                            required,
-                            visible: true,
-                            readOnly: false,
-                        },
-                    });
-                }
             }
         }
 
@@ -379,85 +211,15 @@ export class ProvisionPortalFromTemplatesService {
         }
     }
 
-    private async ensureGlobalTemplates(db: Tx): Promise<void> {
-        const existing = await db.globalEntityTemplate.findUnique({
-            where: { code: ENTITY_DEFINITION_CODES.MEMBER },
-        });
-        if (existing) {
-            return;
+    private isRequiredInPurpose(
+        validationJson: Prisma.JsonValue | null | undefined,
+        purpose: FormPurpose
+    ): boolean {
+        if (validationJson == null || typeof validationJson !== "object") {
+            return false;
         }
-
-        const portalTypesJson = ALL_PORTAL_TYPES as unknown as Prisma.InputJsonValue;
-
-        await db.globalEntityTemplate.create({
-            data: {
-                code: ENTITY_DEFINITION_CODES.MEMBER,
-                name: "Member",
-                applicablePortalTypes: portalTypesJson,
-                modulesJson: ["crm"] as unknown as Prisma.InputJsonValue,
-                statusSetTemplates: {
-                    create: [
-                        {
-                            code: "member_lifecycle",
-                            isSystem: true,
-                            isImmutable: true,
-                            items: {
-                                create: MEMBER_LIFECYCLE_ITEMS.map((i) => ({
-                                    key: i.key,
-                                    label: i.label,
-                                    color: i.color,
-                                    sortOrder: i.sortOrder,
-                                    isSystem: true,
-                                })),
-                            },
-                        },
-                    ],
-                },
-                fieldTemplates: {
-                    create: MEMBER_FIELD_SEED.map((f) => ({
-                        fieldKey: f.fieldKey,
-                        type: f.type,
-                        label: f.label,
-                        isSystem: true,
-                        isImmutable: true,
-                        deletableByPortal: false,
-                        customizableByPortal: true,
-                        sortOrder: f.sortOrder,
-                        showInFilters: f.showInFilters,
-                    })),
-                },
-            },
-        });
-
-        await db.globalEntityTemplate.create({
-            data: {
-                code: ENTITY_DEFINITION_CODES.ORDER,
-                name: "Order",
-                applicablePortalTypes: portalTypesJson,
-                modulesJson: ["crm"] as unknown as Prisma.InputJsonValue,
-                stageCategoryTemplates: {
-                    create: [
-                        {
-                            code: "default",
-                            name: "Default funnel",
-                            isDefault: true,
-                            isSystem: true,
-                            hiddenInUi: false,
-                            stages: {
-                                create: ORDER_STAGES.map((s) => ({
-                                    name: s.name,
-                                    sortOrder: s.sortOrder,
-                                    color: s.color,
-                                    semantic: s.semantic,
-                                    isTerminalSuccess: s.isTerminalSuccess,
-                                    isTerminalFailure: s.isTerminalFailure,
-                                })),
-                            },
-                        },
-                    ],
-                },
-            },
-        });
+        const required = (validationJson as Record<string, unknown>)["requiredInPurposes"];
+        return Array.isArray(required) && required.includes(purpose);
     }
 
     private async ensureDefaultBillingPlan(db: Tx): Promise<void> {

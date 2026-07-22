@@ -50,8 +50,6 @@ export class ConfigCookieService {
             MEMBER_AUTH_COOKIE_DOMAIN_ENV_KEY
         );
         this.crmDomain = this.configService.getOrThrow<string>(CRM_AUTH_COOKIE_DOMAIN_ENV_KEY);
-        console.log("this.profileDomain", this.profileDomain);
-        console.log("this.crmDomain", this.crmDomain);
     }
 
     public getCookieConfig(scope: AUTH_GLOBAL_SCOPE): {
@@ -60,7 +58,6 @@ export class ConfigCookieService {
     } {
         const secure = this.isSecureCookies();
         const domain = this.getDomain(scope);
-        console.log("domain  = this.getDomain", domain);
         const accessConfig: CookieOptions = {
             httpOnly: true,
             secure,
@@ -108,7 +105,6 @@ export class ConfigCookieService {
     }
 
     public getDomain(scope: AUTH_GLOBAL_SCOPE): string {
-        console.log("scope", scope);
         return scope === AUTH_GLOBAL_SCOPE.SITE ? this.profileDomain : this.crmDomain;
     }
 

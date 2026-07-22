@@ -13,7 +13,6 @@ export function createRedisOptions(configService: ConfigService): {
     const host = configService.get<string>("REDIS_HOST") ?? "redis";
     const port = parseInt(configService.get<string>("REDIS_PORT") ?? "6379", 10);
     const password = configService.get<string>("REDIS_PASSWORD") || "";
-    console.log("url", url, "host", host, "port", port, "password", password);
     return {
         url,
         host,

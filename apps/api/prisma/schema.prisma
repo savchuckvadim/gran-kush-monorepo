@@ -1,5 +1,7 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Prisma schema — entity-first multi-portal platform.
+// Core idea: User is a global account; Member/Employee are per-portal bridges
+// to EntityRecord (EAV). Profile attributes live in FieldValue, operational
+// columns stay on bridge tables.
 
 generator client {
   provider = "prisma-client-js"
@@ -9,16 +11,52 @@ datasource db {
   provider = "postgresql"
 }
 
+// ========================
+// Enums
+// ========================
+
 enum PortalStatus {
   active
   suspended
   archived
 }
 
+enum PortalTypeEnum {
+  CLUB          @map("club")
+  TATTOO_STUDIO @map("tattoo_studio")
+  BEAUTY_STUDIO @map("beauty_studio")
+}
+
+enum UserAccountStatus {
+  active
+  pending_claim
+  blocked
+}
+
+enum PrincipalType {
+  member
+  employee
+  platform_admin
+}
+
 enum EmployeeRole {
   portal_owner
-  employee
   admin
+  manager
+  employee
+}
+
+enum MemberJoinSource {
+  self
+  registration_link
+  kiosk
+  crm
+}
+
+enum UserDocumentSide {
+  front
+  back
+  single
 }
 
 enum PortalFieldType {
@@ -54,10 +92,16 @@ enum StageSemantic {
   FAILURE
 }
 
-enum PortalTypeEnum {
-  CLUB           @map("club")
-  TATTOO_STUDIO  @map("tattoo_studio")
-  BEAUTY_STUDIO  @map("beauty_studio")
+enum RegistrationLinkKind {
+  public_link
+  kiosk
+}
+
+enum InvitationStatus {
+  pending
+  accepted
+  revoked
+  expired
 }
 
 enum SubscriptionStatus {
@@ -75,62 +119,119 @@ enum PaymentStatus {
   refunded
 }
 
-model Portal {
-  id          String         @id @default(uuid())
-  name        String         @unique @db.VarChar(40)
-  displayName String         @map("display_name") @db.VarChar(255)
-  status      PortalStatus   @default(active)
-  createdAt   DateTime       @default(now()) @map("created_at")
-  updatedAt   DateTime       @updatedAt @map("updated_at")
-  type        PortalTypeEnum @default(CLUB) @map("type")
+// ========================
+// Portal (tenant)
+// ========================
 
-  users              User[]
-  members            Member[]
-  employees          Employee[]
-  tokens             Token[]
-  employeeTokens     EmployeeToken[]
-  entityDefinitions  EntityDefinition[]
-  entityRecords      EntityRecord[]
-  fieldValues        FieldValue[]
-  formDefinitions    FormDefinition[]
-  stageCategories    StageCategory[]
-  statusSets         StatusSet[]
-  subscription       PortalSubscription?
-  payments           Payment[]
-  productCategories  ProductCategory[]
-  products           Product[]
-  storageFiles       StorageFile[]
+model Portal {
+  id                String         @id @default(uuid())
+  name              String         @unique @db.VarChar(40)
+  displayName       String         @map("display_name") @db.VarChar(255)
+  status            PortalStatus   @default(active)
+  type              PortalTypeEnum @default(CLUB) @map("type")
+  publicDescription String?        @map("public_description") @db.Text
+  coverImageUrl     String?        @map("cover_image_url") @db.VarChar(500)
+  address           String?        @db.VarChar(500)
+  city              String?        @db.VarChar(120)
+  country           String?        @db.VarChar(120)
+  latitude          Decimal?       @db.Decimal(9, 6)
+  longitude         Decimal?       @db.Decimal(9, 6)
+  isListedOnMap     Boolean        @default(false) @map("is_listed_on_map")
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+
+  members             Member[]
+  employees           Employee[]
+  entityDefinitions   EntityDefinition[]
+  entityRecords       EntityRecord[]
+  fieldValues         FieldValue[]
+  formDefinitions     FormDefinition[]
+  stageCategories     StageCategory[]
+  statusSets          StatusSet[]
+  recordRelations     RecordRelation[]
+  subscription        PortalSubscription?
+  payments            Payment[]
+  productCategories   ProductCategory[]
+  products            Product[]
+  orders              Order[]
+  financialTransactions FinancialTransaction[]
+  storageFiles        StorageFile[]
+  registrationLinks   RegistrationLink[]
+  employeeInvitations EmployeeInvitation[]
+  portalReviews       PortalReview[]
+  productReviews      ProductReview[]
 
   @@index([name])
   @@index([status])
+  @@index([isListedOnMap])
   @@map("portals")
 }
 
+// ========================
+// Identity (global account)
+// ========================
+
 model User {
-  id                         String    @id @default(uuid())
-  portalId                   String?   @map("portal_id")
-  email                      String    @unique @db.VarChar(255)
-  passwordHash               String    @map("password_hash") @db.VarChar(255)
-  isActive                   Boolean   @default(false) @map("is_active")
-  emailConfirmed             Boolean   @default(false) @map("email_confirmed")
-  emailVerificationToken     String?   @unique @map("email_verification_token") @db.VarChar(255)
-  emailVerificationExpiresAt DateTime? @map("email_verification_expires_at")
-  resetPasswordToken         String?   @unique @map("reset_password_token") @db.VarChar(255)
-  resetPasswordExpiresAt     DateTime? @map("reset_password_expires_at")
-  createdAt                  DateTime  @default(now()) @map("created_at")
-  updatedAt                  DateTime  @updatedAt @map("updated_at")
+  id                         String            @id @default(uuid())
+  email                      String            @unique @db.VarChar(255)
+  passwordHash               String?           @map("password_hash") @db.VarChar(255)
+  status                     UserAccountStatus @default(active)
+  displayName                String?           @map("display_name") @db.VarChar(255)
+  isActive                   Boolean           @default(false) @map("is_active")
+  emailConfirmed             Boolean           @default(false) @map("email_confirmed")
+  emailVerificationToken     String?           @unique @map("email_verification_token") @db.VarChar(255)
+  emailVerificationExpiresAt DateTime?         @map("email_verification_expires_at")
+  resetPasswordToken         String?           @unique @map("reset_password_token") @db.VarChar(255)
+  resetPasswordExpiresAt     DateTime?         @map("reset_password_expires_at")
+  createdAt                  DateTime          @default(now()) @map("created_at")
+  updatedAt                  DateTime          @updatedAt @map("updated_at")
 
-  portal        Portal?        @relation(fields: [portalId], references: [id], onDelete: SetNull)
-  tokens        Token[]
-  member        Member?
-  employee      Employee?
-  storageFiles  StorageFile[]
-  platformAdmin PlatformAdmin?
+  members        Member[]
+  employees      Employee[]
+  platformAdmin  PlatformAdmin?
+  refreshTokens  RefreshToken[]
+  storageFiles   StorageFile[]
+  documents      UserDocument[]
+  signature      UserSignature?
+  portalReviews  PortalReview[]
+  productReviews ProductReview[]
 
-  @@index([portalId])
   @@index([email])
+  @@index([status])
   @@index([isActive])
   @@map("users")
+}
+
+model UserDocument {
+  id          String           @id @default(uuid())
+  userId      String           @map("user_id")
+  type        String           @db.VarChar(50)
+  side        UserDocumentSide @default(single)
+  number      String?          @db.VarChar(100)
+  meta        Json?
+  storagePath String           @map("storage_path") @db.VarChar(500)
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type, side])
+  @@index([userId])
+  @@index([type])
+  @@map("user_documents")
+}
+
+model UserSignature {
+  id          String   @id @default(uuid())
+  userId      String   @unique @map("user_id")
+  storagePath String   @map("storage_path") @db.VarChar(500)
+  signedAt    DateTime @default(now()) @map("signed_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_signatures")
 }
 
 model PlatformAdmin {
@@ -141,73 +242,102 @@ model PlatformAdmin {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user   User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tokens PlatformAdminToken[]
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokens RefreshToken[]
 
   @@index([userId])
   @@map("platform_admins")
 }
 
-model PlatformAdminToken {
-  id              String   @id @default(uuid())
-  token           String   @unique @db.VarChar(500)
-  platformAdminId String   @map("platform_admin_id")
-  deviceId        String   @map("device_id") @db.VarChar(128)
-  revoked         Boolean  @default(false) @map("revoked")
-  expiresAt       DateTime @map("expires_at")
-  createdAt       DateTime @default(now()) @map("created_at")
+model RefreshToken {
+  id              String        @id @default(uuid())
+  token           String        @unique @db.VarChar(500)
+  principalType   PrincipalType @map("principal_type")
+  userId          String?       @map("user_id")
+  platformAdminId String?       @map("platform_admin_id")
+  deviceId        String        @map("device_id") @db.VarChar(128)
+  revoked         Boolean       @default(false)
+  expiresAt       DateTime      @map("expires_at")
+  createdAt       DateTime      @default(now()) @map("created_at")
 
-  platformAdmin PlatformAdmin @relation(fields: [platformAdminId], references: [id], onDelete: Cascade)
+  user          User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platformAdmin PlatformAdmin? @relation(fields: [platformAdminId], references: [id], onDelete: Cascade)
 
+  @@unique([principalType, userId, deviceId])
+  @@unique([principalType, platformAdminId, deviceId])
+  @@index([userId])
   @@index([platformAdminId])
-  @@index([platformAdminId, deviceId])
   @@index([token])
   @@index([expiresAt])
-  @@map("platform_admin_tokens")
+  @@map("refresh_tokens")
 }
 
-model Token {
-  id       String  @id @default(uuid())
-  token    String  @unique @db.VarChar(500)
-  userId   String  @map("user_id")
-  deviceId String  @map("device_id") @db.VarChar(128)
-  portalId String? @map("portal_id")
-  revoked  Boolean @default(false) @map("revoked")
+// ========================
+// Membership bridges
+// ========================
 
-  expiresAt DateTime @map("expires_at")
-  createdAt DateTime @default(now()) @map("created_at")
+model Member {
+  id                  String           @id @default(uuid())
+  userId              String           @map("user_id")
+  portalId            String           @map("portal_id")
+  entityRecordId      String           @unique @map("entity_record_id")
+  membershipNumber    String?          @map("membership_number") @db.VarChar(50)
+  isActive            Boolean          @default(true) @map("is_active")
+  joinSource          MemberJoinSource @default(self) @map("join_source")
+  registrationLinkId  String?          @map("registration_link_id")
+  createdByEmployeeId String?          @map("created_by_employee_id")
+  claimedAt           DateTime?        @map("claimed_at")
+  createdAt           DateTime         @default(now()) @map("created_at")
+  updatedAt           DateTime         @updatedAt @map("updated_at")
 
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  portal Portal? @relation(fields: [portalId], references: [id], onDelete: SetNull)
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  portal            Portal            @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  profile           EntityRecord      @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
+  registrationLink  RegistrationLink? @relation(fields: [registrationLinkId], references: [id], onDelete: SetNull)
+  createdByEmployee Employee?         @relation("MemberCreatedBy", fields: [createdByEmployeeId], references: [id], onDelete: SetNull)
+  orders            Order[]
 
+  @@unique([userId, portalId])
+  @@unique([portalId, membershipNumber])
   @@index([portalId])
   @@index([userId])
-  @@index([userId, deviceId])
-  @@index([token])
-  @@index([expiresAt])
-  @@map("tokens")
+  @@index([isActive])
+  @@map("members")
 }
 
-model EmployeeToken {
-  id         String  @id @default(uuid())
-  token      String  @unique @db.VarChar(500)
-  employeeId String  @map("employee_id")
-  deviceId   String  @map("device_id") @db.VarChar(128)
-  portalId   String? @map("portal_id")
-  revoked    Boolean @default(false) @map("revoked")
+model Employee {
+  id             String       @id @default(uuid())
+  userId         String       @map("user_id")
+  portalId       String       @map("portal_id")
+  entityRecordId String       @unique @map("entity_record_id")
+  role           EmployeeRole @default(employee)
+  isActive       Boolean      @default(true) @map("is_active")
+  invitationId   String?      @map("invitation_id")
+  lastLoginAt    DateTime?    @map("last_login_at")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
 
-  expiresAt DateTime @map("expires_at")
-  createdAt DateTime @default(now()) @map("created_at")
+  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  portal     Portal              @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  profile    EntityRecord        @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
+  invitation EmployeeInvitation? @relation(fields: [invitationId], references: [id], onDelete: SetNull)
 
-  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  portal   Portal?  @relation(fields: [portalId], references: [id], onDelete: SetNull)
+  createdMembers        Member[]               @relation("MemberCreatedBy")
+  createdRecords        EntityRecord[]         @relation("RecordCreatedBy")
+  presenceSessions      PresenceSession[]      @relation("PresenceEmployee")
+  processedOrders       Order[]                @relation("OrderEmployee")
+  createdProducts       Product[]              @relation("ProductCreatedBy")
+  updatedProducts       Product[]              @relation("ProductUpdatedBy")
+  financialTransactions FinancialTransaction[] @relation("TransactionCreatedBy")
+  registrationLinks     RegistrationLink[]     @relation("RegistrationLinkCreatedBy")
+  sentInvitations       EmployeeInvitation[]   @relation("InvitationInvitedBy")
 
+  @@unique([userId, portalId])
   @@index([portalId])
-  @@index([employeeId])
-  @@index([employeeId, deviceId])
-  @@index([token])
-  @@index([expiresAt])
-  @@map("employee_tokens")
+  @@index([userId])
+  @@index([role])
+  @@index([isActive])
+  @@map("employees")
 }
 
 // ========================
@@ -275,19 +405,19 @@ model Payment {
 // ========================
 
 model GlobalEntityTemplate {
-  id                      String   @id @default(uuid())
-  code                    String   @unique @db.VarChar(80)
-  name                    String   @db.VarChar(255)
-  applicablePortalTypes   Json?    @map("applicable_portal_types")
-  modulesJson             Json?    @map("modules_json")
-  isActive                Boolean  @default(true) @map("is_active")
-  createdAt               DateTime @default(now()) @map("created_at")
-  updatedAt               DateTime @updatedAt @map("updated_at")
+  id                    String   @id @default(uuid())
+  code                  String   @unique @db.VarChar(80)
+  name                  String   @db.VarChar(255)
+  applicablePortalTypes Json?    @map("applicable_portal_types")
+  modulesJson           Json?    @map("modules_json")
+  isActive              Boolean  @default(true) @map("is_active")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
 
-  fieldTemplates           GlobalFieldTemplate[]
-  statusSetTemplates       GlobalStatusSetTemplate[]
-  stageCategoryTemplates   GlobalStageCategoryTemplate[]
-  entityDefinitions        EntityDefinition[]
+  fieldTemplates         GlobalFieldTemplate[]
+  statusSetTemplates     GlobalStatusSetTemplate[]
+  stageCategoryTemplates GlobalStageCategoryTemplate[]
+  entityDefinitions      EntityDefinition[]
 
   @@map("global_entity_templates")
 }
@@ -304,6 +434,7 @@ model GlobalFieldTemplate {
   isImmutable            Boolean         @default(false) @map("is_immutable")
   deletableByPortal      Boolean         @default(true) @map("deletable_by_portal")
   customizableByPortal   Boolean         @default(true) @map("customizable_by_portal")
+  documentType           String?         @map("document_type") @db.VarChar(50)
   defaultValueJson       Json?           @map("default_value_json")
   validationJson         Json?           @map("validation_json")
   isMultiple             Boolean         @default(false) @map("is_multiple")
@@ -312,7 +443,7 @@ model GlobalFieldTemplate {
   createdAt              DateTime        @default(now()) @map("created_at")
   updatedAt              DateTime        @updatedAt @map("updated_at")
 
-  globalEntityTemplate GlobalEntityTemplate      @relation(fields: [globalEntityTemplateId], references: [id], onDelete: Cascade)
+  globalEntityTemplate GlobalEntityTemplate        @relation(fields: [globalEntityTemplateId], references: [id], onDelete: Cascade)
   options              GlobalFieldOptionTemplate[]
 
   @@unique([globalEntityTemplateId, fieldKey])
@@ -418,24 +549,28 @@ model GlobalStageTemplate {
 // ========================
 
 model EntityDefinition {
-  id                      String   @id @default(uuid())
-  portalId                String   @map("portal_id")
-  code                    String   @db.VarChar(80)
-  name                    String   @db.VarChar(255)
-  isSystem                Boolean  @default(false) @map("is_system")
-  isActive                Boolean  @default(true) @map("is_active")
-  applicablePortalTypes   Json?    @map("applicable_portal_types")
-  globalTemplateId        String?  @map("global_template_id")
-  createdAt               DateTime @default(now()) @map("created_at")
-  updatedAt               DateTime @updatedAt @map("updated_at")
+  id                    String   @id @default(uuid())
+  portalId              String   @map("portal_id")
+  code                  String   @db.VarChar(80)
+  name                  String   @db.VarChar(255)
+  icon                  String?  @db.VarChar(80)
+  color                 String?  @db.VarChar(32)
+  isSystem              Boolean  @default(false) @map("is_system")
+  isActive              Boolean  @default(true) @map("is_active")
+  applicablePortalTypes Json?    @map("applicable_portal_types")
+  globalTemplateId      String?  @map("global_template_id")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
 
   portal           Portal                @relation(fields: [portalId], references: [id], onDelete: Cascade)
   globalTemplate   GlobalEntityTemplate? @relation(fields: [globalTemplateId], references: [id], onDelete: SetNull)
   records          EntityRecord[]
   fieldDefinitions FieldDefinition[]
+  relationSources  FieldDefinition[]     @relation("FieldRelationTarget")
   formDefinitions  FormDefinition[]
   statusSets       StatusSet[]
   stageCategories  StageCategory[]
+  registrationLinks RegistrationLink[]
 
   @@unique([portalId, code])
   @@index([portalId])
@@ -444,30 +579,36 @@ model EntityDefinition {
 }
 
 model EntityRecord {
-  id                 String   @id @default(uuid())
-  portalId           String   @map("portal_id")
-  entityDefinitionId String   @map("entity_definition_id")
-  statusItemId       String?  @map("status_item_id")
-  isActive           Boolean  @default(true) @map("is_active")
-  createdAt          DateTime @default(now()) @map("created_at")
-  updatedAt          DateTime @updatedAt @map("updated_at")
+  id                  String   @id @default(uuid())
+  portalId            String   @map("portal_id")
+  entityDefinitionId  String   @map("entity_definition_id")
+  statusItemId        String?  @map("status_item_id")
+  stageId             String?  @map("stage_id")
+  isActive            Boolean  @default(true) @map("is_active")
+  createdByEmployeeId String?  @map("created_by_employee_id")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
 
-  portal             Portal             @relation(fields: [portalId], references: [id], onDelete: Cascade)
-  entityDefinition   EntityDefinition   @relation(fields: [entityDefinitionId], references: [id], onDelete: Cascade)
-  statusItem         StatusItem?        @relation(fields: [statusItemId], references: [id], onDelete: SetNull)
-  fieldValues        FieldValue[]
-  member             Member?
-  identityDocuments  IdentityDocument[]
-  signature          Signature?
-  memberDocuments    MemberDocument[]
-  memberMjStatuses   MemberMjStatus[]
-  qrCode             QrCode?
-  presenceSessions   PresenceSession[]
-  ordersAsCustomer   Order[]            @relation("OrderCustomer")
+  portal            Portal           @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  entityDefinition  EntityDefinition @relation(fields: [entityDefinitionId], references: [id], onDelete: Cascade)
+  statusItem        StatusItem?      @relation(fields: [statusItemId], references: [id], onDelete: SetNull)
+  stage             Stage?           @relation(fields: [stageId], references: [id], onDelete: SetNull)
+  createdByEmployee Employee?        @relation("RecordCreatedBy", fields: [createdByEmployeeId], references: [id], onDelete: SetNull)
+
+  fieldValues           FieldValue[]
+  member                Member?
+  employee              Employee?
+  order                 Order?
+  product               Product?
+  qrCode                QrCode?
+  presenceSessions      PresenceSession[]
   financialTransactions FinancialTransaction[]
+  relationsAsSource     RecordRelation[]       @relation("RelationSource")
+  relationsAsTarget     RecordRelation[]       @relation("RelationTarget")
 
   @@index([portalId, entityDefinitionId])
   @@index([statusItemId])
+  @@index([stageId])
   @@map("entity_records")
 }
 
@@ -481,9 +622,9 @@ model StatusSet {
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
 
-  portal             Portal             @relation(fields: [portalId], references: [id], onDelete: Cascade)
-  entityDefinition   EntityDefinition   @relation(fields: [entityDefinitionId], references: [id], onDelete: Cascade)
-  items              StatusItem[]
+  portal           Portal           @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  entityDefinition EntityDefinition @relation(fields: [entityDefinitionId], references: [id], onDelete: Cascade)
+  items            StatusItem[]
 
   @@unique([portalId, entityDefinitionId, code])
   @@index([portalId])
@@ -491,21 +632,21 @@ model StatusSet {
 }
 
 model StatusItem {
-  id          String    @id @default(uuid())
-  statusSetId String    @map("status_set_id")
-  key         String    @db.VarChar(80)
-  label       String    @db.VarChar(255)
-  labelI18n   Json?     @map("label_i18n")
-  color       String?   @db.VarChar(32)
-  sortOrder   Int       @default(0) @map("sort_order")
-  isActive    Boolean   @default(true) @map("is_active")
-  isSystem    Boolean   @default(false) @map("is_system")
-  semantic    String?   @db.VarChar(32)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  id          String   @id @default(uuid())
+  statusSetId String   @map("status_set_id")
+  key         String   @db.VarChar(80)
+  label       String   @db.VarChar(255)
+  labelI18n   Json?    @map("label_i18n")
+  color       String?  @db.VarChar(32)
+  sortOrder   Int      @default(0) @map("sort_order")
+  isActive    Boolean  @default(true) @map("is_active")
+  isSystem    Boolean  @default(false) @map("is_system")
+  semantic    String?  @db.VarChar(32)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
-  statusSet      StatusSet      @relation(fields: [statusSetId], references: [id], onDelete: Cascade)
-  entityRecords  EntityRecord[]
+  statusSet     StatusSet      @relation(fields: [statusSetId], references: [id], onDelete: Cascade)
+  entityRecords EntityRecord[]
 
   @@unique([statusSetId, key])
   @@index([statusSetId])
@@ -513,36 +654,41 @@ model StatusItem {
 }
 
 model FieldDefinition {
-  id                   String          @id @default(uuid())
-  entityDefinitionId   String          @map("entity_definition_id")
-  fieldKey             String          @map("field_key") @db.VarChar(120)
-  type                 PortalFieldType
-  label                String?         @db.VarChar(255)
-  labelI18n            Json?           @map("label_i18n")
-  helpText             String?         @map("help_text") @db.Text
-  isActive             Boolean         @default(true) @map("is_active")
-  isSystem             Boolean         @default(false) @map("is_system")
-  isImmutable          Boolean         @default(false) @map("is_immutable")
-  deletableByPortal    Boolean         @default(true) @map("deletable_by_portal")
-  customizableByPortal Boolean         @default(true) @map("customizable_by_portal")
-  hidden               Boolean         @default(false)
-  labelOverride        String?         @map("label_override") @db.VarChar(255)
-  readOnlyOverride     Boolean         @default(false) @map("read_only_override")
-  defaultValueJson     Json?           @map("default_value_json")
-  validationJson       Json?           @map("validation_json")
-  isMultiple           Boolean         @default(false) @map("is_multiple")
-  sortOrder            Int             @default(0) @map("sort_order")
-  showInFilters        Boolean         @default(false) @map("show_in_filters")
-  createdAt            DateTime        @default(now()) @map("created_at")
-  updatedAt            DateTime        @updatedAt @map("updated_at")
+  id                               String          @id @default(uuid())
+  entityDefinitionId               String          @map("entity_definition_id")
+  fieldKey                         String          @map("field_key") @db.VarChar(120)
+  type                             PortalFieldType
+  label                            String?         @db.VarChar(255)
+  labelI18n                        Json?           @map("label_i18n")
+  helpText                         String?         @map("help_text") @db.Text
+  isActive                         Boolean         @default(true) @map("is_active")
+  isSystem                         Boolean         @default(false) @map("is_system")
+  isImmutable                      Boolean         @default(false) @map("is_immutable")
+  deletableByPortal                Boolean         @default(true) @map("deletable_by_portal")
+  customizableByPortal             Boolean         @default(true) @map("customizable_by_portal")
+  hidden                           Boolean         @default(false)
+  labelOverride                    String?         @map("label_override") @db.VarChar(255)
+  readOnlyOverride                 Boolean         @default(false) @map("read_only_override")
+  documentType                     String?         @map("document_type") @db.VarChar(50)
+  relationTargetEntityDefinitionId String?         @map("relation_target_entity_definition_id")
+  defaultValueJson                 Json?           @map("default_value_json")
+  validationJson                   Json?           @map("validation_json")
+  isMultiple                       Boolean         @default(false) @map("is_multiple")
+  sortOrder                        Int             @default(0) @map("sort_order")
+  showInFilters                    Boolean         @default(false) @map("show_in_filters")
+  createdAt                        DateTime        @default(now()) @map("created_at")
+  updatedAt                        DateTime        @updatedAt @map("updated_at")
 
-  entityDefinition EntityDefinition     @relation(fields: [entityDefinitionId], references: [id], onDelete: Cascade)
-  options          FieldOption[]
-  formItems        FormDefinitionItem[]
-  fieldValues      FieldValue[]
+  entityDefinition       EntityDefinition     @relation(fields: [entityDefinitionId], references: [id], onDelete: Cascade)
+  relationTargetEntity   EntityDefinition?    @relation("FieldRelationTarget", fields: [relationTargetEntityDefinitionId], references: [id], onDelete: SetNull)
+  options                FieldOption[]
+  formItems              FormDefinitionItem[]
+  fieldValues            FieldValue[]
+  recordRelations        RecordRelation[]
 
   @@unique([entityDefinitionId, fieldKey])
   @@index([entityDefinitionId])
+  @@index([relationTargetEntityDefinitionId])
   @@map("field_definitions")
 }
 
@@ -572,9 +718,10 @@ model FormDefinition {
   createdAt          DateTime    @default(now()) @map("created_at")
   updatedAt          DateTime    @updatedAt @map("updated_at")
 
-  portal           Portal             @relation(fields: [portalId], references: [id], onDelete: Cascade)
-  entityDefinition EntityDefinition   @relation(fields: [entityDefinitionId], references: [id], onDelete: Cascade)
-  items            FormDefinitionItem[]
+  portal            Portal               @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  entityDefinition  EntityDefinition     @relation(fields: [entityDefinitionId], references: [id], onDelete: Cascade)
+  items             FormDefinitionItem[]
+  registrationLinks RegistrationLink[]
 
   @@unique([portalId, entityDefinitionId, purpose])
   @@index([portalId])
@@ -582,19 +729,19 @@ model FormDefinition {
 }
 
 model FormDefinitionItem {
-  id               String   @id @default(uuid())
-  formDefinitionId String   @map("form_definition_id")
-  fieldDefinitionId String  @map("field_definition_id")
-  sortOrder        Int      @default(0) @map("sort_order")
-  required         Boolean  @default(false)
-  visible          Boolean  @default(true)
-  readOnly         Boolean  @default(false) @map("read_only")
-  sectionCode      String?  @map("section_code") @db.VarChar(80)
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  id                String   @id @default(uuid())
+  formDefinitionId  String   @map("form_definition_id")
+  fieldDefinitionId String   @map("field_definition_id")
+  sortOrder         Int      @default(0) @map("sort_order")
+  required          Boolean  @default(false)
+  visible           Boolean  @default(true)
+  readOnly          Boolean  @default(false) @map("read_only")
+  sectionCode       String?  @map("section_code") @db.VarChar(80)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
 
-  formDefinition    FormDefinition    @relation(fields: [formDefinitionId], references: [id], onDelete: Cascade)
-  fieldDefinition   FieldDefinition   @relation(fields: [fieldDefinitionId], references: [id], onDelete: Cascade)
+  formDefinition  FormDefinition  @relation(fields: [formDefinitionId], references: [id], onDelete: Cascade)
+  fieldDefinition FieldDefinition @relation(fields: [fieldDefinitionId], references: [id], onDelete: Cascade)
 
   @@unique([formDefinitionId, fieldDefinitionId])
   @@index([formDefinitionId])
@@ -622,6 +769,27 @@ model FieldValue {
   @@map("field_values")
 }
 
+model RecordRelation {
+  id                String   @id @default(uuid())
+  portalId          String   @map("portal_id")
+  fieldDefinitionId String   @map("field_definition_id")
+  sourceRecordId    String   @map("source_record_id")
+  targetRecordId    String   @map("target_record_id")
+  sortOrder         Int      @default(0) @map("sort_order")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  portal          Portal          @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  fieldDefinition FieldDefinition @relation(fields: [fieldDefinitionId], references: [id], onDelete: Cascade)
+  sourceRecord    EntityRecord    @relation("RelationSource", fields: [sourceRecordId], references: [id], onDelete: Cascade)
+  targetRecord    EntityRecord    @relation("RelationTarget", fields: [targetRecordId], references: [id], onDelete: Cascade)
+
+  @@unique([fieldDefinitionId, sourceRecordId, targetRecordId])
+  @@index([sourceRecordId])
+  @@index([targetRecordId])
+  @@index([portalId])
+  @@map("record_relations")
+}
+
 model StageCategory {
   id                 String   @id @default(uuid())
   portalId           String   @map("portal_id")
@@ -644,173 +812,122 @@ model StageCategory {
 }
 
 model Stage {
-  id                  String        @id @default(uuid())
-  stageCategoryId     String        @map("stage_category_id")
-  name                String        @db.VarChar(255)
-  sortOrder           Int           @default(0) @map("sort_order")
-  color               String?       @db.VarChar(32)
-  semantic            StageSemantic
-  isTerminalSuccess   Boolean       @default(false) @map("is_terminal_success")
-  isTerminalFailure   Boolean       @default(false) @map("is_terminal_failure")
-  createdAt           DateTime      @default(now()) @map("created_at")
-  updatedAt           DateTime      @updatedAt @map("updated_at")
+  id                String        @id @default(uuid())
+  stageCategoryId   String        @map("stage_category_id")
+  name              String        @db.VarChar(255)
+  sortOrder         Int           @default(0) @map("sort_order")
+  color             String?       @db.VarChar(32)
+  semantic          StageSemantic
+  isTerminalSuccess Boolean       @default(false) @map("is_terminal_success")
+  isTerminalFailure Boolean       @default(false) @map("is_terminal_failure")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
 
-  stageCategory StageCategory @relation(fields: [stageCategoryId], references: [id], onDelete: Cascade)
-  orders        Order[]
+  stageCategory StageCategory  @relation(fields: [stageCategoryId], references: [id], onDelete: Cascade)
+  entityRecords EntityRecord[]
 
   @@index([stageCategoryId])
   @@map("stages")
 }
 
-model IdentityDocument {
-  id             String   @id @default(uuid())
-  entityRecordId String   @map("entity_record_id")
-  type           String   @db.VarChar(50)
-  side           String   @db.VarChar(20)
-  storagePath    String   @map("storage_path") @db.VarChar(500)
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+// ========================
+// Registration links & invitations
+// ========================
 
-  entityRecord EntityRecord @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
+model RegistrationLink {
+  id                  String               @id @default(uuid())
+  portalId            String               @map("portal_id")
+  entityDefinitionId  String               @map("entity_definition_id")
+  formDefinitionId    String?              @map("form_definition_id")
+  token               String               @unique @db.VarChar(64)
+  name                String               @db.VarChar(255)
+  kind                RegistrationLinkKind @default(public_link)
+  isActive            Boolean              @default(true) @map("is_active")
+  expiresAt           DateTime?            @map("expires_at")
+  maxUses             Int?                 @map("max_uses")
+  usesCount           Int                  @default(0) @map("uses_count")
+  createdByEmployeeId String?              @map("created_by_employee_id")
+  createdAt           DateTime             @default(now()) @map("created_at")
+  updatedAt           DateTime             @updatedAt @map("updated_at")
 
-  @@unique([entityRecordId, type, side])
-  @@index([entityRecordId])
-  @@index([type])
-  @@index([side])
-  @@map("identity_documents")
-}
-
-model Signature {
-  id             String   @id @default(uuid())
-  entityRecordId String   @unique @map("entity_record_id")
-  storagePath    String   @map("storage_path") @db.VarChar(500)
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
-
-  entityRecord EntityRecord @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
-
-  @@index([entityRecordId])
-  @@map("signatures")
-}
-
-model MjStatus {
-  id          String   @id @default(uuid())
-  code        String   @unique @db.VarChar(50)
-  name        String   @db.VarChar(255)
-  description String?  @db.Text
-  isActive    Boolean  @default(true) @map("is_active")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  memberMjStatuses MemberMjStatus[]
-
-  @@index([code])
-  @@index([isActive])
-  @@map("mj_statuses")
-}
-
-model MemberMjStatus {
-  id             String   @id @default(uuid())
-  entityRecordId String   @map("entity_record_id")
-  mjStatusId     String   @map("mj_status_id")
-  createdAt      DateTime @default(now()) @map("created_at")
-
-  entityRecord EntityRecord @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
-  mjStatus     MjStatus     @relation(fields: [mjStatusId], references: [id], onDelete: Cascade)
-
-  @@unique([entityRecordId, mjStatusId])
-  @@index([entityRecordId])
-  @@index([mjStatusId])
-  @@map("member_mj_statuses")
-}
-
-model Document {
-  id          String   @id @default(uuid())
-  type        String   @unique @db.VarChar(50)
-  name        String   @db.VarChar(255)
-  description String?  @db.Text
-  isActive    Boolean  @default(true) @map("is_active")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  memberDocuments MemberDocument[]
-
-  @@index([type])
-  @@index([isActive])
-  @@map("documents")
-}
-
-model MemberDocument {
-  id             String    @id @default(uuid())
-  entityRecordId String    @map("entity_record_id")
-  documentId     String    @map("document_id")
-  number         String    @db.VarChar(100)
-  issuedAt       DateTime? @map("issued_at") @db.Date
-  expiresAt      DateTime? @map("expires_at") @db.Date
-  issuedBy       String?   @map("issued_by") @db.VarChar(255)
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
-
-  entityRecord EntityRecord @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
-  document     Document     @relation(fields: [documentId], references: [id], onDelete: Cascade)
-
-  @@index([entityRecordId])
-  @@index([documentId])
-  @@index([number])
-  @@map("member_documents")
-}
-
-model Member {
-  id               String  @id @default(uuid())
-  userId           String  @unique @map("user_id")
-  portalId         String? @map("portal_id")
-  entityRecordId   String  @unique @map("entity_record_id")
-  membershipNumber String? @unique @map("membership_number") @db.VarChar(50)
-  isActive         Boolean @default(true) @map("is_active")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
-
-  portal   Portal?      @relation(fields: [portalId], references: [id], onDelete: SetNull)
-  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  profile  EntityRecord @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
+  portal            Portal           @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  entityDefinition  EntityDefinition @relation(fields: [entityDefinitionId], references: [id], onDelete: Cascade)
+  formDefinition    FormDefinition?  @relation(fields: [formDefinitionId], references: [id], onDelete: SetNull)
+  createdByEmployee Employee?        @relation("RegistrationLinkCreatedBy", fields: [createdByEmployeeId], references: [id], onDelete: SetNull)
+  members           Member[]
 
   @@index([portalId])
-  @@index([userId])
-  @@index([membershipNumber])
-  @@index([isActive])
-  @@map("members")
+  @@index([token])
+  @@map("registration_links")
 }
 
-model Employee {
-  id          String    @id @default(uuid())
-  userId      String    @unique @map("user_id")
-  portalId    String?   @map("portal_id")
-  name        String    @db.VarChar(255)
-  surname     String?   @db.VarChar(255)
-  phone       String?   @db.VarChar(20)
-  role        String    @default("employee") @db.VarChar(50)
-  position    String?   @db.VarChar(255)
-  department  String?   @db.VarChar(255)
-  isActive    Boolean   @default(true) @map("is_active")
-  lastLoginAt DateTime? @map("last_login_at")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+model EmployeeInvitation {
+  id                  String           @id @default(uuid())
+  portalId            String           @map("portal_id")
+  email               String           @db.VarChar(255)
+  role                EmployeeRole     @default(employee)
+  token               String           @unique @db.VarChar(64)
+  status              InvitationStatus @default(pending)
+  invitedByEmployeeId String?          @map("invited_by_employee_id")
+  expiresAt           DateTime         @map("expires_at")
+  acceptedAt          DateTime?        @map("accepted_at")
+  acceptedUserId      String?          @map("accepted_user_id")
+  createdAt           DateTime         @default(now()) @map("created_at")
+  updatedAt           DateTime         @updatedAt @map("updated_at")
 
-  portal                Portal?                @relation(fields: [portalId], references: [id], onDelete: SetNull)
-  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tokens                EmployeeToken[]
-  presenceSessions      PresenceSession[]      @relation("PresenceEmployee")
-  processedOrders       Order[]                @relation("OrderEmployee")
-  createdProducts       Product[]              @relation("ProductCreatedBy")
-  updatedProducts       Product[]              @relation("ProductUpdatedBy")
-  financialTransactions FinancialTransaction[] @relation("TransactionCreatedBy")
+  portal            Portal     @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  invitedByEmployee Employee?  @relation("InvitationInvitedBy", fields: [invitedByEmployeeId], references: [id], onDelete: SetNull)
+  employees         Employee[]
 
+  @@index([portalId, email])
+  @@index([token])
+  @@map("employee_invitations")
+}
+
+// ========================
+// Reviews (member ratings)
+// ========================
+
+model PortalReview {
+  id        String   @id @default(uuid())
+  portalId  String   @map("portal_id")
+  userId    String   @map("user_id")
+  score     Int
+  comment   String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  portal Portal @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([portalId, userId])
   @@index([portalId])
-  @@index([userId])
-  @@index([role])
-  @@index([isActive])
-  @@map("employees")
+  @@map("portal_reviews")
 }
+
+model ProductReview {
+  id        String   @id @default(uuid())
+  portalId  String   @map("portal_id")
+  productId String   @map("product_id")
+  userId    String   @map("user_id")
+  score     Int
+  comment   String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  portal  Portal  @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId])
+  @@index([portalId])
+  @@index([productId])
+  @@map("product_reviews")
+}
+
+// ========================
+// Storage / QR / presence
+// ========================
 
 model StorageFile {
   id           String   @id @default(uuid())
@@ -875,6 +992,10 @@ model PresenceSession {
   @@map("presence_sessions")
 }
 
+// ========================
+// Catalog
+// ========================
+
 model MeasurementUnit {
   id          String   @id @default(uuid())
   code        String   @unique @db.VarChar(50)
@@ -919,35 +1040,38 @@ model ProductCategory {
 }
 
 model Product {
-  id                String  @id @default(uuid())
-  portalId          String  @map("portal_id")
-  categoryId        String  @map("category_id")
-  measurementUnitId String  @map("measurement_unit_id")
-  name              String  @db.VarChar(255)
-  description       String? @db.Text
-  sku               String? @db.VarChar(100)
-  price             Decimal @db.Decimal(10, 2)
-  initialQuantity   Decimal @map("initial_quantity") @db.Decimal(10, 3)
-  currentQuantity   Decimal @map("current_quantity") @db.Decimal(10, 3)
+  id                String   @id @default(uuid())
+  portalId          String   @map("portal_id")
+  entityRecordId    String   @unique @map("entity_record_id")
+  categoryId        String   @map("category_id")
+  measurementUnitId String   @map("measurement_unit_id")
+  name              String   @db.VarChar(255)
+  description       String?  @db.Text
+  sku               String?  @db.VarChar(100)
+  price             Decimal  @db.Decimal(10, 2)
+  initialQuantity   Decimal  @map("initial_quantity") @db.Decimal(10, 3)
+  currentQuantity   Decimal  @map("current_quantity") @db.Decimal(10, 3)
   minQuantity       Decimal? @map("min_quantity") @db.Decimal(10, 3)
-  imageUrl          String? @map("image_url") @db.VarChar(500)
-  isActive          Boolean @default(true) @map("is_active")
-  isAvailable       Boolean @default(true) @map("is_available")
+  imageUrl          String?  @map("image_url") @db.VarChar(500)
+  isActive          Boolean  @default(true) @map("is_active")
+  isAvailable       Boolean  @default(true) @map("is_available")
   thc               Decimal? @db.Decimal(5, 2)
   cbd               Decimal? @db.Decimal(5, 2)
-  strain            String? @db.VarChar(100)
+  strain            String?  @db.VarChar(100)
   createdAt         DateTime @default(now()) @map("created_at")
   updatedAt         DateTime @updatedAt @map("updated_at")
   createdBy         String?  @map("created_by")
   updatedBy         String?  @map("updated_by")
 
-  portal              Portal          @relation(fields: [portalId], references: [id], onDelete: Cascade)
-  category            ProductCategory @relation(fields: [categoryId], references: [id])
-  measurementUnit     MeasurementUnit @relation(fields: [measurementUnitId], references: [id])
-  images              ProductImage[]
-  orderItems          OrderItem[]
-  createdByEmployee   Employee?       @relation("ProductCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
-  updatedByEmployee   Employee?       @relation("ProductUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
+  portal            Portal          @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  entityRecord      EntityRecord    @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
+  category          ProductCategory @relation(fields: [categoryId], references: [id])
+  measurementUnit   MeasurementUnit @relation(fields: [measurementUnitId], references: [id])
+  images            ProductImage[]
+  orderItems        OrderItem[]
+  reviews           ProductReview[]
+  createdByEmployee Employee?       @relation("ProductCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  updatedByEmployee Employee?       @relation("ProductUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
 
   @@unique([portalId, sku])
   @@index([portalId])
@@ -975,39 +1099,44 @@ model ProductImage {
   @@map("product_images")
 }
 
+// ========================
+// Orders & finance
+// ========================
+
 model Order {
-  id                     String   @id @default(uuid())
-  customerEntityRecordId String   @map("customer_entity_record_id")
-  employeeId             String?  @map("employee_id")
-  orderNumber            String   @unique @map("order_number") @db.VarChar(50)
-  stageId                String?  @map("stage_id")
-  status                 String   @default("pending") @db.VarChar(50)
-  paymentStatus          String   @default("pending") @map("payment_status") @db.VarChar(50)
-  subtotal               Decimal  @db.Decimal(10, 2)
-  discount               Decimal  @default(0) @db.Decimal(10, 2)
-  total                  Decimal  @db.Decimal(10, 2)
-  orderedAt              DateTime @default(now()) @map("ordered_at")
-  confirmedAt            DateTime? @map("confirmed_at")
-  preparedAt             DateTime? @map("prepared_at")
-  readyAt                DateTime? @map("ready_at")
-  completedAt            DateTime? @map("completed_at")
-  cancelledAt            DateTime? @map("cancelled_at")
-  notes                  String?  @db.Text
-  adminNotes             String?  @map("admin_notes") @db.Text
-  createdAt              DateTime @default(now()) @map("created_at")
-  updatedAt              DateTime @updatedAt @map("updated_at")
+  id             String    @id @default(uuid())
+  portalId       String    @map("portal_id")
+  entityRecordId String    @unique @map("entity_record_id")
+  memberId       String    @map("member_id")
+  employeeId     String?   @map("employee_id")
+  orderNumber    String    @map("order_number") @db.VarChar(50)
+  paymentStatus  String    @default("pending") @map("payment_status") @db.VarChar(50)
+  subtotal       Decimal   @db.Decimal(10, 2)
+  discount       Decimal   @default(0) @db.Decimal(10, 2)
+  total          Decimal   @db.Decimal(10, 2)
+  orderedAt      DateTime  @default(now()) @map("ordered_at")
+  confirmedAt    DateTime? @map("confirmed_at")
+  preparedAt     DateTime? @map("prepared_at")
+  readyAt        DateTime? @map("ready_at")
+  completedAt    DateTime? @map("completed_at")
+  cancelledAt    DateTime? @map("cancelled_at")
+  notes          String?   @db.Text
+  adminNotes     String?   @map("admin_notes") @db.Text
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
-  customerEntity EntityRecord @relation("OrderCustomer", fields: [customerEntityRecordId], references: [id], onDelete: Cascade)
-  employee       Employee?    @relation("OrderEmployee", fields: [employeeId], references: [id], onDelete: SetNull)
-  stage          Stage?       @relation(fields: [stageId], references: [id], onDelete: SetNull)
-  items          OrderItem[]
-  transactions   FinancialTransaction[]
+  portal       Portal       @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  entityRecord EntityRecord @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
+  member       Member       @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  employee     Employee?    @relation("OrderEmployee", fields: [employeeId], references: [id], onDelete: SetNull)
+  items        OrderItem[]
+  transactions FinancialTransaction[]
 
-  @@index([customerEntityRecordId])
+  @@unique([portalId, orderNumber])
+  @@index([portalId])
+  @@index([memberId])
   @@index([employeeId])
   @@index([orderNumber])
-  @@index([status])
-  @@index([stageId])
   @@index([paymentStatus])
   @@index([orderedAt])
   @@map("orders")
@@ -1034,6 +1163,7 @@ model OrderItem {
 
 model FinancialTransaction {
   id              String   @id @default(uuid())
+  portalId        String   @map("portal_id")
   orderId         String?  @map("order_id")
   entityRecordId  String?  @map("entity_record_id")
   type            String   @db.VarChar(50)
@@ -1047,10 +1177,12 @@ model FinancialTransaction {
   description     String?  @db.Text
   notes           String?  @db.Text
 
-  order             Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  portal            Portal        @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  order             Order?        @relation(fields: [orderId], references: [id], onDelete: SetNull)
   entityRecord      EntityRecord? @relation(fields: [entityRecordId], references: [id], onDelete: SetNull)
-  createdByEmployee Employee? @relation("TransactionCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  createdByEmployee Employee?     @relation("TransactionCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
 
+  @@index([portalId])
   @@index([orderId])
   @@index([entityRecordId])
   @@index([type])

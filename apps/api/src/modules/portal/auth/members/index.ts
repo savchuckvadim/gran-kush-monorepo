@@ -1,13 +1,14 @@
 // Guards
 export { MemberJwtAuthGuard } from "./infrastructure/guards/member-jwt-auth.guard";
 export { MemberJwtMobileAuthGuard } from "./infrastructure/guards/member-jwt-mobile-auth.guard";
-export { MemberLocalAuthGuard } from "./infrastructure/guards/member-local-auth.guard";
 
 // Decorators
 export { CurrentMember } from "./api/decorators/current-member.decorator";
 export {
     RequireMemberJwt,
     RequireMemberJwtMobile,
+    RequireUserJwt,
+    RequireUserJwtMobile,
 } from "./api/decorators/require-member-jwt.decorator";
 
 // Services
@@ -22,7 +23,6 @@ export { MemberLoginDto } from "./api/dto/member-login.dto";
 export { MemberLogoutResponseDto } from "./api/dto/member-logout-response.dto";
 export { MemberMeResponseDto } from "./api/dto/member-me-response.dto";
 export { MemberRefreshTokenResponseDto } from "./api/dto/member-refresh-token-response.dto";
-export { RegisterQueryDto } from "./api/dto/register-member.dto";
 export { RegisterMemberResponseDto } from "./api/dto/register-member-response.dto";
 export { DynamicMemberRegistrationDto } from "@modules/portal/crm/members/api/dto/dynamic-member.dto";
 

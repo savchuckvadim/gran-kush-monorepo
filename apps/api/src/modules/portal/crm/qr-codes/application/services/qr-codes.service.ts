@@ -52,7 +52,7 @@ export class QrCodesService {
      */
     async generateOrRegenerate(memberId: string): Promise<QrCode> {
         // Проверяем участника
-        const member = await this.membersService.findById(memberId);
+        const member = await this.membersService.findByIdUnscoped(memberId);
         if (!member) {
             throw new NotFoundException(`Участник с ID "${memberId}" не найден`);
         }

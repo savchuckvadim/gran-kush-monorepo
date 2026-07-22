@@ -43,16 +43,34 @@ export class FieldValuesService {
     ): Promise<void> {
         const db = tx ?? this.prisma;
         const entityRecordId = await this.resolveMemberEntityRecordId(memberId, db);
+        await this.upsertRecordFieldValues(
+            portalId,
+            ENTITY_DEFINITION_CODES.MEMBER,
+            entityRecordId,
+            values,
+            db
+        );
+    }
 
-        const memberDef = await db.entityDefinition.findUniqueOrThrow({
+    /** Универсальный upsert значений для любой EntityRecord по коду сущности. */
+    async upsertRecordFieldValues(
+        portalId: string,
+        entityCode: string,
+        entityRecordId: string,
+        values: Record<string, unknown>,
+        tx?: Tx
+    ): Promise<void> {
+        const db = tx ?? this.prisma;
+
+        const entityDef = await db.entityDefinition.findUniqueOrThrow({
             where: {
-                portalId_code: { portalId, code: ENTITY_DEFINITION_CODES.MEMBER },
+                portalId_code: { portalId, code: entityCode },
             },
         });
 
         const defs = await db.fieldDefinition.findMany({
             where: {
-                entityDefinitionId: memberDef.id,
+                entityDefinitionId: entityDef.id,
                 fieldKey: { in: Object.keys(values) },
             },
         });
@@ -104,6 +122,10 @@ export class FieldValuesService {
 
     async getMemberFieldRows(memberId: string) {
         const entityRecordId = await this.resolveMemberEntityRecordId(memberId, this.prisma);
+        return this.getRecordFieldRows(entityRecordId);
+    }
+
+    async getRecordFieldRows(entityRecordId: string) {
         return this.prisma.fieldValue.findMany({
             where: { entityRecordId },
             include: { fieldDefinition: true },
@@ -119,7 +141,20 @@ export class FieldValuesService {
             value: unknown;
         }[]
     > {
-        const rows = await this.getMemberFieldRows(memberId);
+        const entityRecordId = await this.resolveMemberEntityRecordId(memberId, this.prisma);
+        return this.getRecordFieldsPayload(entityRecordId);
+    }
+
+    /** Универсальное чтение значений записи (сгруппировано по полям, multi → массив). */
+    async getRecordFieldsPayload(entityRecordId: string): Promise<
+        {
+            fieldKey: string;
+            type: PortalFieldType;
+            label: string | null;
+            value: unknown;
+        }[]
+    > {
+        const rows = await this.getRecordFieldRows(entityRecordId);
         const byDef = new Map<
             string,
             { def: (typeof rows)[0]["fieldDefinition"]; values: unknown[] }

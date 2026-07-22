@@ -8,8 +8,9 @@ import {
     MEMBER_FILES_QUEUE_NAME,
 } from "@modules/portal/crm/members/events/member-files-events.constants";
 
+/** Файлы сохраняются на уровень аккаунта (User), а не портального member. */
 export interface QueueMemberFilesPayload {
-    memberId: string;
+    userId: string;
     documentType?: string;
     documentFirst?: string;
     documentSecond?: string;

@@ -12,7 +12,7 @@ export class ApiErrorResponseDto {
     // })
     // result: null;
 
-    @ApiProperty({
+    @ApiProperty({ type: String,
         example: "Validation failed",
         description: "Error message",
     })

@@ -29,9 +29,6 @@ export class TransactionOrderDto {
 
     @ApiProperty({ example: "ORD-20260316-0001", type: String })
     orderNumber: string;
-
-    @ApiProperty({ example: "completed", type: String })
-    status: string;
 }
 
 export class TransactionMemberDto {
@@ -52,11 +49,8 @@ export class TransactionEmployeeDto {
     @ApiProperty({ example: "550e8400-e29b-41d4-a716-446655440000", type: String })
     id: string;
 
-    @ApiProperty({ example: "Admin", type: String })
-    name: string;
-
-    @ApiPropertyOptional({ example: "User", type: String, nullable: true })
-    surname?: string | null;
+    @ApiProperty({ example: "manager", type: String })
+    role: string;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

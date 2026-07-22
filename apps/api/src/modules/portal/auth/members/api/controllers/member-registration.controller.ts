@@ -1,8 +1,10 @@
-import { Body, Controller, Get, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Post, Req } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { FormPurpose } from "@prisma/client";
+import type { Request } from "express";
 
+import { CurrentAuthUser } from "@common/decorators/auth/current-auth-user.decorator";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { Public } from "@common/decorators/auth/public.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
@@ -10,20 +12,18 @@ import { ApiSuccessResponse } from "@common/decorators/response/api-success-resp
 import { AllowUnconfirmed } from "@modules/portal/auth/members/api/decorators/allow-unconfirmed.decorator";
 import { CheckUserExistsDto } from "@modules/portal/auth/members/api/dto/check-user-exists.dto";
 import { CheckUserExistsResponseDto } from "@modules/portal/auth/members/api/dto/check-user-exists-response.dto";
-import { RegisterQueryDto } from "@modules/portal/auth/members/api/dto/register-member.dto";
 import { RegisterMemberResponseDto } from "@modules/portal/auth/members/api/dto/register-member-response.dto";
 import { MemberRegistrationService } from "@modules/portal/auth/members/application/services/member-registration.service";
+import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 import { FormSchemaService } from "@modules/portal/crm/entity-fields/application/services/form-schema.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 import { DynamicMemberRegistrationDto } from "@modules/portal/crm/members/api/dto/dynamic-member.dto";
 import { UploadMemberFilesDto } from "@modules/portal/crm/members/api/dto/upload-member-files.dto";
 import { UploadMemberFilesResponseDto } from "@modules/portal/crm/members/api/dto/upload-member-files-response.dto";
 import { MemberFilesService } from "@modules/portal/crm/members/application/services/member-files.service";
-import { Member } from "@modules/portal/crm/members/domain/entity/member.entity";
 
 import { MemberRegistrationUseCase } from "../../application/use-cases/member-registration.service";
-import { CurrentMember } from "../decorators/current-member.decorator";
-import { RequireMemberJwt } from "../decorators/require-member-jwt.decorator";
+import { RequireUserJwt } from "../decorators/require-member-jwt.decorator";
 import {
     MemberConfirmEmailDto,
     MemberConfirmEmailResponseDto,
@@ -63,7 +63,10 @@ export class MemberRegistrationController {
 
     @Post("register")
     @Public()
-    @ApiOperation({ summary: "Register new Member (Site)" })
+    @ApiOperation({
+        summary:
+            "Register global member account. If portal context (X-Portal-*) is present — also joins that club.",
+    })
     @ApiSuccessResponse(RegisterMemberResponseDto, {
         status: 201,
         description: "Member registered successfully",
@@ -71,28 +74,27 @@ export class MemberRegistrationController {
     @ApiErrorResponse([400, 409])
     async register(
         @Body() dto: DynamicMemberRegistrationDto,
-        @Query() query: RegisterQueryDto,
-        @PortalId() portalId: string
+        @Req() request: Request
     ): Promise<RegisterMemberResponseDto> {
-        const shouldForce = query.force === "true";
-        return this.memberRegistrationUseCase.execute(dto, shouldForce, portalId);
+        const portalId = request.portalContext?.portalId;
+        return this.memberRegistrationUseCase.execute(dto, portalId);
     }
 
     @Post("files")
     @AllowUnconfirmed()
-    @RequireMemberJwt()
-    @ApiOperation({ summary: "Queue member documents/signature upload (Site)" })
+    @RequireUserJwt()
+    @ApiOperation({ summary: "Queue account documents/signature upload (Site)" })
     @ApiSuccessResponse(UploadMemberFilesResponseDto, {
         status: 201,
-        description: "Member files were queued for asynchronous processing",
+        description: "Files were queued for asynchronous processing",
     })
     @ApiErrorResponse([400, 401])
     async uploadFiles(
-        @CurrentMember() member: Member,
+        @CurrentAuthUser() user: AuthenticatedUser,
         @Body() dto: UploadMemberFilesDto
     ): Promise<UploadMemberFilesResponseDto> {
         return this.memberFilesService.queueUpload({
-            memberId: member.id,
+            userId: user.userId,
             documentType: dto.documentType,
             documentFirst: dto.documentFirst,
             documentSecond: dto.documentSecond,

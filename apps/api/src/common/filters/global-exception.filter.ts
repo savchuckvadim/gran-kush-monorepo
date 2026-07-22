@@ -73,7 +73,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
         const message = `⚠️ Ошибка: ${error.name}\n\n📄 Файл: ${file}\n🔢 Строка: ${String(line)}\n🔧 Функция: ${func}\n\n💥 Код: ${code}\n\n📬 Сообщение: ${error.message}\n\n📍 URL: ${request.method} ${request.url}\n🧭 User-Agent: ${userAgent}\n🌍 IP: ${String(ip)}\n🔗 Referer: ${referer}
         `;
-        console.log(message);
+        this.logger.error(message);
         const responseBody: ApiResponse = {
             message: error.message,
             errors: [],

@@ -1,7 +1,8 @@
 import { Prisma } from "@prisma/client";
 
 /**
- * Стандартный include: заказ, позиции, стадия, запись клиента (EntityRecord) и связанный Member.
+ * Стандартный include: заказ, позиции, EntityRecord со стадией (источник правды статуса),
+ * member-мост с профильными полями, employee с профильными полями.
  */
 export const ORDER_INCLUDE = {
     items: {
@@ -20,22 +21,26 @@ export const ORDER_INCLUDE = {
         },
         orderBy: { createdAt: "asc" as const },
     },
-    stage: {
-        select: { id: true, name: true, color: true, semantic: true },
-    },
-    customerEntity: {
+    entityRecord: {
         select: {
             id: true,
-            member: {
-                select: {
-                    id: true,
-                    membershipNumber: true,
-                },
+            stage: {
+                select: { id: true, name: true, color: true, semantic: true },
             },
-            fieldValues: {
+        },
+    },
+    member: {
+        select: {
+            id: true,
+            membershipNumber: true,
+            profile: {
                 select: {
-                    valueJson: true,
-                    fieldDefinition: { select: { fieldKey: true } },
+                    fieldValues: {
+                        select: {
+                            valueJson: true,
+                            fieldDefinition: { select: { fieldKey: true } },
+                        },
+                    },
                 },
             },
         },
@@ -43,8 +48,17 @@ export const ORDER_INCLUDE = {
     employee: {
         select: {
             id: true,
-            name: true,
-            surname: true,
+            role: true,
+            profile: {
+                select: {
+                    fieldValues: {
+                        select: {
+                            valueJson: true,
+                            fieldDefinition: { select: { fieldKey: true } },
+                        },
+                    },
+                },
+            },
         },
     },
 } satisfies Prisma.OrderInclude;
