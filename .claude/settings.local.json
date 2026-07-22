@@ -8,7 +8,9 @@
       "Bash(xargs grep -l \"register\\\\|create.*portal\")",
       "Bash(grep -A5 'prisma.$transaction' 'c:\\\\Projects\\\\Sites\\\\new-gran-kush\\\\gran-kush\\\\apps\\\\api\\\\src\\\\modules\\\\portal\\\\crm\\\\portals\\\\application\\\\services\\\\portal-registration.service.ts')",
       "Bash(pnpm --filter api exec tsc --noEmit)",
-      "Bash(npx prisma *)"
+      "Bash(npx prisma *)",
+      "PowerShell(pnpm --filter api exec tsc --noEmit -p tsconfig.json; \"typecheck exit: $LASTEXITCODE\")",
+      "PowerShell(git fetch origin)"
     ]
   }
 }
