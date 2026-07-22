@@ -6,7 +6,8 @@
             "@/*": ["./*"],
             "@/shared/*": ["modules/shared/*"],
             "@workspace/ui": ["../../packages/ui/src/index.ts"],
-            "@workspace/ui/*": ["../../packages/ui/src/*"]
+            "@workspace/ui/*": ["../../packages/ui/src/*"],
+            "@workspace/dynamic-forms": ["../../packages/dynamic-forms/src/index.ts"]
         },
         "plugins": [
             {

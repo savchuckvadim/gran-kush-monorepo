@@ -1,0 +1,28 @@
+{
+    "name": "@workspace/dynamic-forms",
+    "version": "0.0.0",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "lint": "eslint . --max-warnings 0",
+        "lint:fix": "eslint . --fix"
+    },
+    "dependencies": {
+        "@workspace/ui": "workspace:*",
+        "react": "^19.2.4",
+        "react-dom": "^19.2.4"
+    },
+    "devDependencies": {
+        "@types/react": "^19.2.10",
+        "@types/react-dom": "^19.2.3",
+        "@workspace/eslint-config": "workspace:*",
+        "@workspace/prettier-config": "workspace:*",
+        "@workspace/typescript-config": "workspace:*",
+        "eslint": "^9.39.2",
+        "prettier": "^3.8.1",
+        "typescript": "^5.9.3"
+    },
+    "exports": {
+        ".": "./src/index.ts"
+    }
+}
