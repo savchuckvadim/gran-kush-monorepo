@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -11,7 +11,7 @@ import {
     validateDynamicValues,
     type FormSchemaField,
 } from "@workspace/dynamic-forms";
-import { Button, Card } from "@workspace/ui";
+import { Button } from "@workspace/ui";
 
 import {
     useEntityFormSchema,
@@ -27,24 +27,10 @@ import {
 } from "@/modules/entities/entity-records";
 import { getApiErrorMessage } from "@/modules/shared";
 
+import { RecordsKanban } from "./records-kanban";
+import { RecordsTable } from "./records-table";
+
 type ViewMode = "table" | "kanban";
-
-function renderValue(value: unknown): string {
-    if (value == null) return "—";
-    if (Array.isArray(value)) return value.map((item) => String(item)).join(", ");
-    if (typeof value === "object") return JSON.stringify(value);
-    if (typeof value === "boolean") return value ? "да" : "нет";
-    return String(value);
-}
-
-function recordTitle(record: EntityRecord): string {
-    const preferred = record.fields.find((field) =>
-        ["title", "name", "first_name"].includes(field.fieldKey)
-    );
-    const value = preferred?.value as unknown;
-    if (value != null && value !== "") return renderValue(value);
-    return record.id.slice(0, 8);
-}
 
 // ─── Record form modal ───────────────────────────────────────────────────────
 
@@ -231,144 +217,20 @@ export function EntityRecordsPage({ code }: { code: string }) {
                     <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
             ) : view === "table" ? (
-                <Card className="p-0">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b bg-muted/40 text-left text-xs text-muted-foreground">
-                                    <th className="px-3 py-2">Запись</th>
-                                    <th className="px-3 py-2">Стадия</th>
-                                    <th className="px-3 py-2">Поля</th>
-                                    <th className="px-3 py-2" />
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {records.map((record) => (
-                                    <tr key={record.id} className="border-b align-top last:border-b-0">
-                                        <td className="px-3 py-2 font-medium">
-                                            {recordTitle(record)}
-                                        </td>
-                                        <td className="px-3 py-2">
-                                            {stages.length > 0 ? (
-                                                <select
-                                                    className="h-8 rounded border border-input bg-background px-1.5 text-xs"
-                                                    value={record.stage?.id ?? ""}
-                                                    onChange={(e) =>
-                                                        handleStageChange(record, e.target.value)
-                                                    }
-                                                >
-                                                    <option value="">—</option>
-                                                    {stages.map((stage) => (
-                                                        <option key={stage.id} value={stage.id}>
-                                                            {stage.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            ) : (
-                                                <span className="text-xs text-muted-foreground">
-                                                    {record.stage?.name ?? "—"}
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-3 py-2 text-xs text-muted-foreground">
-                                            {record.fields.slice(0, 4).map((field) => (
-                                                <span key={field.fieldKey} className="mr-3">
-                                                    <span className="font-mono">
-                                                        {field.fieldKey}
-                                                    </span>
-                                                    : {renderValue(field.value as unknown)}
-                                                </span>
-                                            ))}
-                                        </td>
-                                        <td className="px-3 py-2">
-                                            <div className="flex gap-1">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="h-7 text-xs"
-                                                    onClick={() => openEdit(record)}
-                                                >
-                                                    Открыть
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-7 w-7 text-destructive"
-                                                    onClick={() => handleDelete(record)}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {records.length === 0 ? (
-                                    <tr>
-                                        <td
-                                            colSpan={4}
-                                            className="px-3 py-8 text-center text-sm text-muted-foreground"
-                                        >
-                                            Записей нет
-                                        </td>
-                                    </tr>
-                                ) : null}
-                            </tbody>
-                        </table>
-                    </div>
-                </Card>
+                <RecordsTable
+                    records={records}
+                    stages={stages}
+                    onEdit={openEdit}
+                    onDelete={handleDelete}
+                    onStageChange={handleStageChange}
+                />
             ) : (
-                <div className="flex gap-3 overflow-x-auto pb-2">
-                    {[{ id: "", name: "Без стадии" }, ...stages].map((stage) => {
-                        const columnRecords = records.filter((record) =>
-                            stage.id ? record.stage?.id === stage.id : !record.stage
-                        );
-                        return (
-                            <div
-                                key={stage.id || "none"}
-                                className="w-64 shrink-0 rounded-lg border bg-muted/20 p-2"
-                            >
-                                <p className="mb-2 px-1 text-sm font-medium">
-                                    {stage.name}{" "}
-                                    <span className="text-xs text-muted-foreground">
-                                        ({columnRecords.length})
-                                    </span>
-                                </p>
-                                <div className="space-y-2">
-                                    {columnRecords.map((record) => (
-                                        <div
-                                            key={record.id}
-                                            className="rounded-md border bg-background p-2 text-sm"
-                                        >
-                                            <button
-                                                type="button"
-                                                className="block text-left font-medium hover:underline"
-                                                onClick={() => openEdit(record)}
-                                            >
-                                                {recordTitle(record)}
-                                            </button>
-                                            {stages.length > 0 ? (
-                                                <select
-                                                    className="mt-2 h-7 w-full rounded border border-input bg-background px-1 text-xs"
-                                                    value={record.stage?.id ?? ""}
-                                                    onChange={(e) =>
-                                                        handleStageChange(record, e.target.value)
-                                                    }
-                                                >
-                                                    <option value="">— без стадии —</option>
-                                                    {stages.map((s) => (
-                                                        <option key={s.id} value={s.id}>
-                                                            {s.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            ) : null}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
+                <RecordsKanban
+                    records={records}
+                    stages={stages}
+                    onEdit={openEdit}
+                    onStageChange={handleStageChange}
+                />
             )}
 
             {showForm ? (

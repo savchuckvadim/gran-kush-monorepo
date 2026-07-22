@@ -1,3 +1,4 @@
+import { assertOpenApiOk } from "@workspace/api-client/core";
 import type {
     SchemaCreateRegistrationLinkDto,
     SchemaRegistrationLinkDto,
@@ -8,16 +9,9 @@ import { $api } from "@/modules/shared";
 
 export type RegistrationLink = SchemaRegistrationLinkDto;
 
-async function unwrap<T>(response: { data?: unknown; response: Response }, label: string): Promise<T> {
-    if (!response.response.ok) {
-        throw new Error(`${label}: ${response.response.status}`);
-    }
-    return response.data as T;
-}
-
 export async function listRegistrationLinks(): Promise<RegistrationLink[]> {
     const response = await $api.GET("/crm/settings/registration-links");
-    const data = await unwrap<{ links: RegistrationLink[] }>(response, "listRegistrationLinks");
+    const data = await assertOpenApiOk<{ links: RegistrationLink[] }>(response);
     return data.links;
 }
 
@@ -25,7 +19,7 @@ export async function createRegistrationLink(
     body: SchemaCreateRegistrationLinkDto
 ): Promise<RegistrationLink> {
     const response = await $api.POST("/crm/settings/registration-links", { body });
-    return unwrap<RegistrationLink>(response, "createRegistrationLink");
+    return assertOpenApiOk<RegistrationLink>(response);
 }
 
 export async function updateRegistrationLink(
@@ -36,5 +30,5 @@ export async function updateRegistrationLink(
         params: { path: { id } },
         body,
     });
-    return unwrap<RegistrationLink>(response, "updateRegistrationLink");
+    return assertOpenApiOk<RegistrationLink>(response);
 }

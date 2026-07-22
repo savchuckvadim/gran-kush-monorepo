@@ -1,3 +1,4 @@
+import { assertOpenApiOk } from "@workspace/api-client/core";
 import type {
     SchemaAcceptInvitationDto,
     SchemaCreateInvitationDto,
@@ -10,36 +11,29 @@ import { $api } from "@/modules/shared";
 export type Invitation = SchemaInvitationDto;
 export type PublicInvitationInfo = SchemaPublicInvitationInfoDto;
 
-async function unwrap<T>(response: { data?: unknown; response: Response }, label: string): Promise<T> {
-    if (!response.response.ok) {
-        throw new Error(`${label}: ${response.response.status}`);
-    }
-    return response.data as T;
-}
-
 export async function listInvitations(): Promise<Invitation[]> {
     const response = await $api.GET("/crm/settings/invitations");
-    const data = await unwrap<{ invitations: Invitation[] }>(response, "listInvitations");
+    const data = await assertOpenApiOk<{ invitations: Invitation[] }>(response);
     return data.invitations;
 }
 
 export async function createInvitation(body: SchemaCreateInvitationDto): Promise<Invitation> {
     const response = await $api.POST("/crm/settings/invitations", { body });
-    return unwrap<Invitation>(response, "createInvitation");
+    return assertOpenApiOk<Invitation>(response);
 }
 
 export async function revokeInvitation(id: string): Promise<void> {
     const response = await $api.DELETE("/crm/settings/invitations/{id}", {
         params: { path: { id } },
     });
-    await unwrap<unknown>(response, "revokeInvitation");
+    await assertOpenApiOk(response);
 }
 
 export async function getPublicInvitation(token: string): Promise<PublicInvitationInfo> {
     const response = await $api.GET("/public/invitations/{token}", {
         params: { path: { token } },
     });
-    return unwrap<PublicInvitationInfo>(response, "getPublicInvitation");
+    return assertOpenApiOk<PublicInvitationInfo>(response);
 }
 
 export async function acceptInvitation(
@@ -50,5 +44,5 @@ export async function acceptInvitation(
         params: { path: { token } },
         body,
     });
-    await unwrap<unknown>(response, "acceptInvitation");
+    await assertOpenApiOk(response);
 }

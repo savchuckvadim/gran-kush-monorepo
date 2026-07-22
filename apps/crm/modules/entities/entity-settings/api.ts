@@ -1,3 +1,4 @@
+import { assertOpenApiOk } from "@workspace/api-client/core";
 import type {
     SchemaCreateEntityDefinitionBodyDto,
     SchemaCreatePortalMemberFieldDto,
@@ -31,18 +32,11 @@ export type FormPurpose =
     | "crm_detail"
     | "member_cabinet";
 
-async function unwrap<T>(response: { data?: unknown; response: Response }, label: string): Promise<T> {
-    if (!response.response.ok) {
-        throw new Error(`${label}: ${response.response.status}`);
-    }
-    return response.data as T;
-}
-
 export async function listEntityFields(code: string): Promise<EntityFieldDefinition[]> {
     const response = await $api.GET("/crm/settings/entities/{code}/fields", {
         params: { path: { code } },
     });
-    return unwrap<EntityFieldDefinition[]>(response, "listEntityFields");
+    return assertOpenApiOk<EntityFieldDefinition[]>(response);
 }
 
 export async function createEntityField(
@@ -53,7 +47,7 @@ export async function createEntityField(
         params: { path: { code } },
         body,
     });
-    return unwrap<EntityFieldDefinition>(response, "createEntityField");
+    return assertOpenApiOk<EntityFieldDefinition>(response);
 }
 
 export async function updateEntityField(
@@ -65,14 +59,14 @@ export async function updateEntityField(
         params: { path: { code, fieldKey } },
         body,
     });
-    return unwrap<EntityFieldDefinition>(response, "updateEntityField");
+    return assertOpenApiOk<EntityFieldDefinition>(response);
 }
 
 export async function deleteEntityField(code: string, fieldKey: string): Promise<void> {
     const response = await $api.DELETE("/crm/settings/entities/{code}/fields/{fieldKey}", {
         params: { path: { code, fieldKey } },
     });
-    await unwrap<unknown>(response, "deleteEntityField");
+    await assertOpenApiOk(response);
 }
 
 export async function addEntityFieldOption(
@@ -84,7 +78,7 @@ export async function addEntityFieldOption(
         params: { path: { code, fieldKey } },
         body,
     });
-    await unwrap<unknown>(response, "addEntityFieldOption");
+    await assertOpenApiOk(response);
 }
 
 export async function updateEntityForm(
@@ -96,7 +90,7 @@ export async function updateEntityForm(
         params: { path: { code, purpose } },
         body,
     });
-    await unwrap<unknown>(response, "updateEntityForm");
+    await assertOpenApiOk(response);
 }
 
 export async function getEntityFormSchema(
@@ -106,31 +100,31 @@ export async function getEntityFormSchema(
     const response = await $api.GET("/crm/settings/entities/{code}/form-schema/{purpose}", {
         params: { path: { code, purpose } },
     });
-    return unwrap<SchemaMemberFormSchemaResponseDto>(response, "getEntityFormSchema");
+    return assertOpenApiOk<SchemaMemberFormSchemaResponseDto>(response);
 }
 
 export async function getEntityFilterFields(code: string): Promise<EntityFormSchemaField[]> {
     const response = await $api.GET("/crm/settings/entities/{code}/filter-fields", {
         params: { path: { code } },
     });
-    return unwrap<EntityFormSchemaField[]>(response, "getEntityFilterFields");
+    return assertOpenApiOk<EntityFormSchemaField[]>(response);
 }
 
 export async function getEntityStageCategories(code: string): Promise<EntityStageCategory[]> {
     const response = await $api.GET("/crm/settings/entities/{code}/stage-categories", {
         params: { path: { code } },
     });
-    return unwrap<EntityStageCategory[]>(response, "getEntityStageCategories");
+    return assertOpenApiOk<EntityStageCategory[]>(response);
 }
 
 export async function listEntityDefinitions(): Promise<EntityDefinitionSummary[]> {
     const response = await $api.GET("/crm/entities");
-    return unwrap<EntityDefinitionSummary[]>(response, "listEntityDefinitions");
+    return assertOpenApiOk<EntityDefinitionSummary[]>(response);
 }
 
 export async function createEntityDefinition(
     body: SchemaCreateEntityDefinitionBodyDto
 ): Promise<EntityDefinitionSummary> {
     const response = await $api.POST("/crm/entities", { body });
-    return unwrap<EntityDefinitionSummary>(response, "createEntityDefinition");
+    return assertOpenApiOk<EntityDefinitionSummary>(response);
 }

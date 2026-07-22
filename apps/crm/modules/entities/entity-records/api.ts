@@ -1,3 +1,4 @@
+import { assertOpenApiOk } from "@workspace/api-client/core";
 import type {
     SchemaCreateEntityRecordDto,
     SchemaEntityRecordDto,
@@ -16,13 +17,6 @@ export interface EntityRecordListParams {
     statusItemId?: string;
 }
 
-async function unwrap<T>(response: { data?: unknown; response: Response }, label: string): Promise<T> {
-    if (!response.response.ok) {
-        throw new Error(`${label}: ${response.response.status}`);
-    }
-    return response.data as T;
-}
-
 export async function listEntityRecords(
     code: string,
     params?: EntityRecordListParams
@@ -30,14 +24,14 @@ export async function listEntityRecords(
     const response = await $api.GET("/crm/entities/{code}/records", {
         params: { path: { code }, query: params ?? {} },
     });
-    return unwrap<SchemaEntityRecordListResponseDto>(response, "listEntityRecords");
+    return assertOpenApiOk<SchemaEntityRecordListResponseDto>(response);
 }
 
 export async function getEntityRecord(code: string, id: string): Promise<EntityRecord> {
     const response = await $api.GET("/crm/entities/{code}/records/{id}", {
         params: { path: { code, id } },
     });
-    return unwrap<EntityRecord>(response, "getEntityRecord");
+    return assertOpenApiOk<EntityRecord>(response);
 }
 
 export async function createEntityRecord(
@@ -48,7 +42,7 @@ export async function createEntityRecord(
         params: { path: { code } },
         body,
     });
-    return unwrap<EntityRecord>(response, "createEntityRecord");
+    return assertOpenApiOk<EntityRecord>(response);
 }
 
 export async function updateEntityRecord(
@@ -60,14 +54,14 @@ export async function updateEntityRecord(
         params: { path: { code, id } },
         body,
     });
-    return unwrap<EntityRecord>(response, "updateEntityRecord");
+    return assertOpenApiOk<EntityRecord>(response);
 }
 
 export async function deleteEntityRecord(code: string, id: string): Promise<void> {
     const response = await $api.DELETE("/crm/entities/{code}/records/{id}", {
         params: { path: { code, id } },
     });
-    await unwrap<unknown>(response, "deleteEntityRecord");
+    await assertOpenApiOk(response);
 }
 
 export async function setEntityRecordStage(
@@ -79,5 +73,5 @@ export async function setEntityRecordStage(
         params: { path: { code, id } },
         body: { stageId },
     });
-    return unwrap<EntityRecord>(response, "setEntityRecordStage");
+    return assertOpenApiOk<EntityRecord>(response);
 }

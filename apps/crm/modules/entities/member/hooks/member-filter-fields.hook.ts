@@ -5,7 +5,8 @@ import { useQuery, UseQueryResult } from "@tanstack/react-query";
 
 import { SchemaMemberFormFieldSchemaItemDto } from "@workspace/api-client/core";
 
-import { $api, notifyApiError } from "@/modules/shared";
+import { getEntityFilterFields } from "@/modules/entities/entity-settings";
+import { notifyApiError } from "@/modules/shared";
 
 export const memberFilterFieldsKeys = {
     all: ["crm-member-filter-fields"] as const,
@@ -17,12 +18,8 @@ export function useMemberFilterFields(
 ): UseQueryResult<SchemaMemberFormFieldSchemaItemDto[], Error> {
     const query = useQuery({
         queryKey: memberFilterFieldsKeys.list(),
-        queryFn: () =>
-            $api.GET("/crm/settings/entities/{code}/filter-fields", {
-                params: { path: { code: "member" } },
-            }),
+        queryFn: () => getEntityFilterFields("member"),
         enabled: isEnabled,
-        select: (response) => response.data as SchemaMemberFormFieldSchemaItemDto[],
     });
     useEffect(() => {
         if (query.isError) {

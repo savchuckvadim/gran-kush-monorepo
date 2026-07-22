@@ -2,7 +2,7 @@
 
 import NextLink from "next/link";
 
-import { Boxes, Link2, Settings2, UserPlus } from "lucide-react";
+import { Link2, Settings2, UserPlus } from "lucide-react";
 
 import { Card } from "@workspace/ui";
 
@@ -15,12 +15,6 @@ const LINKS = [
         title: "Поля, формы и стадии",
         description: "Конструктор сущностей: клиенты, заказы, смарт-процессы.",
         icon: Settings2,
-    },
-    {
-        href: `${ROUTES.CRM_ENTITIES}/member`,
-        title: "Записи смарт-процессов",
-        description: "Универсальные списки и канбан по стадиям.",
-        icon: Boxes,
     },
     {
         href: ROUTES.CRM_SETTINGS_INVITATIONS,
