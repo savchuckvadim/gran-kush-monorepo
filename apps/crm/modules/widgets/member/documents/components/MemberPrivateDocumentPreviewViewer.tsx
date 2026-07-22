@@ -75,7 +75,6 @@ export function MemberPrivateDocumentPreviewViewer({
     }
     if (!previewUrl) return null;
 
-    console.log("previewUrl", previewUrl);
     return (
         <img
             src={previewUrl}

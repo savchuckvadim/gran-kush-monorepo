@@ -41,7 +41,6 @@ export function MemberDocumentEditModal({
     initialDocumentType = "passport",
     currentPreviewUrl,
 }: MemberDocumentEditModalProps) {
-    console.log("MemberDocumentEditModal documentId", documentId);
     const t = useTranslations("crm.members");
     const tEditor = useTranslations("crm.members.editor");
     const router = useRouter();

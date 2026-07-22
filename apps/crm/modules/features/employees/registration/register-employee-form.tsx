@@ -14,11 +14,10 @@ import { $api } from "@/modules/shared";
 
 const schema = z.object({
     email: z.string().email("Invalid email"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    name: z.string().min(2, "Name is required"),
-    surname: z.string().optional(),
-    phone: z.string().optional(),
     role: z.enum(["employee", "manager", "admin"]).default("employee"),
+    first_name: z.string().min(2, "Name is required"),
+    last_name: z.string().optional(),
+    phone: z.string().optional(),
     position: z.string().optional(),
     department: z.string().optional(),
 });
@@ -45,8 +44,9 @@ export function RegisterEmployeeForm() {
                 throw new Error("Portal is required");
             }
 
+            const { email, role, ...fields } = data;
             const response = await $api.POST("/crm/auth/employee/register", {
-                body: data,
+                body: { email, role, fields },
                 headers: { "x-portal-slug": portalSlug },
             });
 
@@ -54,7 +54,7 @@ export function RegisterEmployeeForm() {
                 throw new Error(`Employee registration failed: ${response.response.status}`);
             }
 
-            return data.email;
+            return email;
         },
         onSuccess: (email) => {
             setCreatedEmail(email);
@@ -71,7 +71,8 @@ export function RegisterEmployeeForm() {
             )}
             {createdEmail && (
                 <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-700">
-                    Employee created: {createdEmail}
+                    Employee created: {createdEmail}. They will set a password when claiming the
+                    account with this email.
                 </div>
             )}
 
@@ -83,22 +84,15 @@ export function RegisterEmployeeForm() {
                     error={errors.email?.message}
                 />
                 <FieldInput
-                    label="Password"
-                    type="password"
-                    required
-                    {...register("password")}
-                    error={errors.password?.message}
-                />
-                <FieldInput
                     label="Name"
                     required
-                    {...register("name")}
-                    error={errors.name?.message}
+                    {...register("first_name")}
+                    error={errors.first_name?.message}
                 />
                 <FieldInput
                     label="Surname"
-                    {...register("surname")}
-                    error={errors.surname?.message}
+                    {...register("last_name")}
+                    error={errors.last_name?.message}
                 />
                 <FieldInput label="Phone" {...register("phone")} error={errors.phone?.message} />
                 <FieldInput

@@ -383,11 +383,11 @@
         "sections": {
             "employees": {
                 "title": "Empleados",
-                "description": "Sección placeholder para lista de empleados, invitaciones y control de roles admin."
+                "description": "Empleados del portal: lista, roles, invitaciones y desactivación."
             },
             "settings": {
                 "title": "Configuración",
-                "description": "Sección placeholder para ajustes de CRM y configuración del sistema.",
+                "description": "Ajustes de CRM: entidades y campos, invitaciones, enlaces de registro.",
                 "categories": {
                     "title": "Categorías de productos",
                     "description": "Crear y organizar categorías para el catálogo de productos.",
@@ -422,7 +422,7 @@
             },
             "profile": {
                 "title": "Perfil del empleado",
-                "description": "Sección placeholder para la cuenta y ajustes del empleado actual."
+                "description": "Cuenta y ajustes del empleado actual."
             }
         }
     }

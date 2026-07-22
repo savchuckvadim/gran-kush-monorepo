@@ -51,33 +51,10 @@ export async function getCrmMemberById(memberId: string): Promise<CrmMemberDetai
     return response.data as CrmMemberDetails;
 }
 
-// export async function fetchCrmMemberStatusItems(): Promise<
-//     SchemaMemberLifecycleStatusItemDto[]
-// > {
-//     const response = await $api.GET("/crm/settings/entities/member/status-items");
-//     const result = response.data
-//     if (!result) {
-//         throw new Error("Failed to fetch member status items");
-//     }
-//     return result;
-// }
-
-// export async function fetchCrmMemberFilterFields(): Promise<MemberFormSchemaField[]> {
-//     const response = await $api.GET("/crm/settings/entities/member/filter-fields");
-//     if (!response.response.ok) {
-//         throw new Error(`Failed to load filter fields: ${response.response.status}`);
-//     }
-//     return (response.data ?? []) as MemberFormSchemaField[];
-// }
-
 export async function updateCrmMember(
     memberId: string,
     payload: SchemaCrmMemberFieldsPatchDto
 ): Promise<CrmMemberDetails> {
-    // return crmRequest<CrmMemberDetails>(`/crm/members/${memberId}`, {
-    //     method: "PATCH",
-    //     body: JSON.stringify(payload),
-    // });
     const member = $api.PATCH("/crm/members/{id}", {
         params: { path: { id: memberId } },
         body: payload,

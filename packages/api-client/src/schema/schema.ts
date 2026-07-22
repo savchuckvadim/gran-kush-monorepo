@@ -2625,7 +2625,7 @@ export interface components {
             readOnly: boolean;
             /** @example true */
             isMultiple: boolean;
-            sectionCode?: Record<string, never> | null;
+            sectionCode?: string | null;
             /** @example 1 */
             sortOrder: number;
             validationJson?: {
@@ -2730,7 +2730,7 @@ export interface components {
         PortalFieldOptionInputDto: {
             valueKey: string;
             label: string;
-            color?: Record<string, never>;
+            color?: string | null;
             /** @default 0 */
             sortOrder: number;
         };
@@ -2740,7 +2740,7 @@ export interface components {
             /** @enum {string} */
             type: "string" | "text" | "int" | "decimal" | "boolean" | "date" | "datetime" | "single_select" | "multi_select" | "email" | "phone" | "url" | "file" | "signature" | "document" | "relation";
             label: string;
-            helpText?: Record<string, never>;
+            helpText?: string | null;
             isMultiple?: boolean;
             showInFilters?: boolean;
             /** @default 900 */
@@ -2751,8 +2751,8 @@ export interface components {
             options?: components["schemas"]["PortalFieldOptionInputDto"][];
         };
         UpdatePortalMemberFieldDto: {
-            label?: Record<string, never>;
-            helpText?: Record<string, never>;
+            label?: string | null;
+            helpText?: string | null;
             isActive?: boolean;
             showInFilters?: boolean;
             isMultiple?: boolean;
@@ -2773,7 +2773,7 @@ export interface components {
             visible: boolean;
             /** @default false */
             readOnly: boolean;
-            sectionCode?: Record<string, never>;
+            sectionCode?: string | null;
         };
         UpdateMemberFormLayoutDto: {
             items: components["schemas"]["FormLayoutItemInputDto"][];

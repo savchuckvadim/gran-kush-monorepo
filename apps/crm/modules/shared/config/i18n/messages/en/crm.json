@@ -383,11 +383,11 @@
         "sections": {
             "employees": {
                 "title": "Employees",
-                "description": "Placeholder section for employee list, invitation flow, and admin role controls."
+                "description": "Portal employees: list, roles, invitations and deactivation."
             },
             "settings": {
                 "title": "Settings",
-                "description": "Placeholder section for CRM settings and system configuration.",
+                "description": "CRM settings: entities and fields, invitations, registration links.",
                 "categories": {
                     "title": "Product categories",
                     "description": "Create and organize categories used in the product catalog.",
@@ -422,7 +422,7 @@
             },
             "profile": {
                 "title": "Employee Profile",
-                "description": "Placeholder section for the current employee account and settings."
+                "description": "Current employee account and settings."
             }
         }
     }
