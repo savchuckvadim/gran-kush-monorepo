@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import {
     CategoryManagementWidget,
     MeasurementUnitManagementWidget,
+    SettingsNavLinks,
 } from "@/modules/widgets/settings";
 
 export default async function CrmSettingsPage() {
@@ -13,6 +14,8 @@ export default async function CrmSettingsPage() {
                 <h1 className="text-2xl font-semibold">{t("title")}</h1>
                 <p className="mt-2 text-sm text-muted-foreground">{t("description")}</p>
             </div>
+
+            <SettingsNavLinks />
 
             <CategoryManagementWidget />
             <MeasurementUnitManagementWidget />

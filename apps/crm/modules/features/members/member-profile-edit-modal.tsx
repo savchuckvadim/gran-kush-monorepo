@@ -22,14 +22,15 @@ export function MemberProfileEditModal({ member }: MemberProfileEditModalProps) 
     const [isOpen, setIsOpen] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const initialStatuses = useMemo(
-        () => ({
-            isMedical: member.mjStatuses.some((status) => status.code === "medical"),
-            isMj: member.mjStatuses.some((status) => status.code === "mj"),
-            isRecreation: member.mjStatuses.some((status) => status.code === "recreation"),
-        }),
-        [member.mjStatuses]
-    );
+    const initialStatuses = useMemo(() => {
+        const readBool = (fieldKey: string) =>
+            (member.fields.find((field) => field.fieldKey === fieldKey)?.value as unknown) === true;
+        return {
+            isMedical: readBool("is_medical"),
+            isMj: readBool("is_mj"),
+            isRecreation: readBool("is_recreation"),
+        };
+    }, [member.fields]);
 
     const [profileForm, setProfileForm] = useState({
         firstName: member.name,

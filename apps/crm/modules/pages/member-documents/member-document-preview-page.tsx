@@ -44,22 +44,19 @@ export function MemberDocumentPreviewPage({
     }
 
     const isSignature = documentType === "signature";
-    const identityDocument =
-        member.identityDocuments.find((doc) => doc.id === documentType) ?? null;
+    const identityDocument: IdentityDocument | null =
+        member.documents.find((doc) => doc.id === documentType) ?? null;
     if (!isSignature && !identityDocument) notFound();
-    if (isSignature && !member.signature) notFound();
+    if (isSignature && !member.hasSignature) notFound();
 
-    const identityDoc = identityDocument as IdentityDocument | null;
-
-    const isIdentityDocSide = (side: string): side is "first" | "second" =>
-        side === "first" || side === "second";
+    const identityDoc = identityDocument;
 
     const identityDocumentForActions =
-        identityDoc && isIdentityDocSide(identityDoc.side)
+        identityDoc != null
             ? {
                   id: identityDoc.id,
                   type: identityDoc.type,
-                  side: identityDoc.side,
+                  side: identityDoc.side === "back" ? ("second" as const) : ("first" as const),
               }
             : undefined;
 

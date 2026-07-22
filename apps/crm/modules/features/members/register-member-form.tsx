@@ -1,17 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 
+import {
+    DynamicFormFields,
+    toSubmitPayload,
+    validateDynamicValues,
+    type FormSchemaField,
+} from "@workspace/dynamic-forms";
 import { Button, FieldInput } from "@workspace/ui";
 
 import type { MemberFormSchemaField } from "@/modules/entities/member";
 import { usePortal } from "@/modules/processes";
 import { API_BASE_URL } from "@/modules/shared";
-
-import { DynamicMemberFormFields } from "./dynamic-member-form-fields";
 
 type RegistrationSchemaResponse = {
     purpose: string;
@@ -44,6 +48,7 @@ export function RegisterMemberForm() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [fieldValues, setFieldValues] = useState<Record<string, unknown>>({});
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
     const [credentialErrors, setCredentialErrors] = useState<{
         email?: string;
         password?: string;
@@ -70,10 +75,7 @@ export function RegisterMemberForm() {
         });
     }, [fields]);
 
-    const requiredFieldKeys = useMemo(
-        () => new Set(fields.filter((f) => f.required && f.visible && !f.readOnly).map((f) => f.fieldKey)),
-        [fields]
-    );
+    const schemaFields = fields as FormSchemaField[];
 
     const mutation = useMutation({
         mutationFn: async () => {
@@ -92,15 +94,10 @@ export function RegisterMemberForm() {
             }
             setCredentialErrors({});
 
-            const missing: string[] = [];
-            for (const key of requiredFieldKeys) {
-                const val = fieldValues[key];
-                if (val === undefined || val === null || val === "") {
-                    missing.push(key);
-                }
-            }
-            if (missing.length) {
-                throw new Error(`Missing required fields: ${missing.join(", ")}`);
+            const validationErrors = validateDynamicValues(schemaFields, fieldValues);
+            setFieldErrors(validationErrors);
+            if (Object.keys(validationErrors).length > 0) {
+                throw new Error("Проверьте заполнение полей формы");
             }
 
             const response = await fetch(`${API_BASE_URL}/lk/auth/member/register`, {
@@ -112,7 +109,7 @@ export function RegisterMemberForm() {
                 body: JSON.stringify({
                     email: credParsed.data.email,
                     password: credParsed.data.password,
-                    fields: fieldValues,
+                    fields: toSubmitPayload(fieldValues),
                 }),
             });
 
@@ -184,9 +181,10 @@ export function RegisterMemberForm() {
                 />
             </div>
 
-            <DynamicMemberFormFields
-                fields={fields}
+            <DynamicFormFields
+                fields={schemaFields}
                 values={fieldValues}
+                errors={fieldErrors}
                 disabled={mutation.isPending}
                 onChange={(key, value) =>
                     setFieldValues((prev) => ({

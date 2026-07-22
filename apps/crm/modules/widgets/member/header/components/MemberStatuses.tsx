@@ -8,14 +8,15 @@ export interface IMemberStatusesProps {
 }
 export function MemberStatuses({ member }: IMemberStatusesProps) {
     const t = useTranslations("crm.members");
+    const booleanBadges = member.fields.filter((field) => (field.value as unknown) === true);
     return (
         <div className="mt-2 flex flex-wrap gap-2">
-            {member.mjStatuses.map((status) => (
+            {booleanBadges.map((field) => (
                 <span
-                    key={status.id}
+                    key={field.fieldKey}
                     className="rounded-md border bg-muted px-2 py-1 text-xs text-muted-foreground"
                 >
-                    {status.name}
+                    {field.label ?? field.fieldKey}
                 </span>
             ))}
             <span

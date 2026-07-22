@@ -1,23 +1,13 @@
-import {
-    SchemaCrmMemberFullDto,
-    SchemaCrmMemberIdentityDocumentDto,
-    SchemaCrmMemberSignatureDto,
-} from "@workspace/api-client/core";
+import { SchemaCrmMemberAccountDocumentDto, SchemaCrmMemberFullDto } from "@workspace/api-client/core";
 
 import type { CrmMemberDetails } from "@/modules/entities/member";
 import { $api } from "@/modules/shared";
 
-export interface IdentityDocument extends SchemaCrmMemberIdentityDocumentDto {
-    id: string;
-    type: string;
-    side: string;
-    storagePath: string;
-    createdAt: string;
-}
+/** Документ аккаунта (паспорт/ID) — совпадает с OpenAPI `CrmMemberAccountDocumentDto`. */
+export type IdentityDocument = SchemaCrmMemberAccountDocumentDto;
 
-export interface Signature extends SchemaCrmMemberSignatureDto {
+export interface Signature {
     id: string;
-    storagePath: string;
     createdAt: string;
 }
 
@@ -25,7 +15,7 @@ export async function getIdentityDocumentPreview(
     memberId: string,
     documentId: string
 ): Promise<Blob> {
-    const response = await $api.GET("/crm/members/{id}/identity-documents/{documentId}/preview", {
+    const response = await $api.GET("/crm/members/{id}/documents/{documentId}/preview", {
         params: {
             path: {
                 id: memberId,
@@ -62,7 +52,7 @@ export async function getSignaturePreview(memberId: string): Promise<Blob> {
 // Legacy functions for backward compatibility (return URL strings)
 export function getIdentityDocumentPreviewUrl(memberId: string, documentId: string): string {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    return `${API_BASE_URL}/crm/members/${memberId}/identity-documents/${documentId}/preview`;
+    return `${API_BASE_URL}/crm/members/${memberId}/documents/${documentId}/preview`;
 }
 
 export function getSignaturePreviewUrl(memberId: string): string {

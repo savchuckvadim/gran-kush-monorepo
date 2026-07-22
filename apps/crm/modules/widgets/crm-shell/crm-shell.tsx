@@ -11,6 +11,7 @@ import { cn } from "@workspace/ui/lib/utils";
 
 import { LangSwitcher } from "@/modules/features";
 import { CrmSidebar, useAuth } from "@/modules/processes";
+import { PortalSwitcher } from "@/modules/widgets/portal-switcher";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 import { useSidebar } from "@/modules/shared/ui/Sidebar";
@@ -65,6 +66,7 @@ export function CrmShell({ children }: CrmShellProps) {
                         <div
                             className={cn("items-center gap-4 md:flex", isCrm ? "flex" : "hidden")}
                         >
+                            <PortalSwitcher />
                             <LangSwitcher />
                             <ThemeToggle />
                             <Button
@@ -77,7 +79,7 @@ export function CrmShell({ children }: CrmShellProps) {
                                 <Link href={localizedLink(ROUTES.CRM_PROFILE)}>
                                     <div className="flex items-center gap-2">
                                         <Rabbit className="size-4" />
-                                        <span>{currentUser ? currentUser.name : t("profile")}</span>
+                                        <span>{currentUser ? currentUser.email : t("profile")}</span>
                                     </div>
                                 </Link>
                             </Button>

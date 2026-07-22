@@ -39,16 +39,16 @@ export function MemberDocuments({ member }: IMemberDocumentsProps) {
                     </NextLink>
                 </Button>
             </div>
-            {member.identityDocuments.length > 0 && (
+            {(member.documents.length > 0 || member.hasSignature) && (
                 <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {member.identityDocuments.map((doc) => (
+                    {member.documents.map((doc) => (
                         <MemberDocumentCard
                             key={doc.id}
                             memberId={member.id}
                             document={doc}
                         />
                     ))}
-                    {member.signature && (
+                    {member.hasSignature && (
                         <MemberSignatureCard
                             memberId={member.id}
                             signatureTitle={signatureTitle}

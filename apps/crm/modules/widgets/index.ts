@@ -1,5 +1,6 @@
 export * from "./attendance/scanner";
 export * from "./crm-shell/crm-shell";
+export * from "./portal-switcher";
 export * from "./orders/order-detail";
 export * from "./products/product-detail";
 export * from "./scan-redirect/scan-redirect-client";

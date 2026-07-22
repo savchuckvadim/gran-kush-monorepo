@@ -31,6 +31,12 @@ function RoleBadge({ role }: { role: string }) {
     );
 }
 
+function fieldValue(employee: SchemaEmployeeListItemDto, key: string): string {
+    const field = employee.fields.find((item) => item.fieldKey === key);
+    const value = field?.value as unknown;
+    return value == null || value === "" ? "" : String(value);
+}
+
 // ─── Single row ───────────────────────────────────────────────────────────────
 
 function EmployeeRow({
@@ -45,12 +51,16 @@ function EmployeeRow({
     const updateMutation = useUpdateEmployee();
     const deactivateMutation = useDeactivateEmployee();
 
-    const isSelf = employee.id === currentUserId;
+    const firstName = fieldValue(employee, "first_name");
+    const lastName = fieldValue(employee, "last_name");
+    const displayName = `${firstName} ${lastName}`.trim() || employee.email;
+
+    const isSelf = employee.userId === currentUserId;
     const isOwner = employee.role === "portal_owner";
     const canModify = isAdmin && !isSelf && !isOwner;
 
     function handleDeactivate() {
-        if (!confirm(`Деактивировать сотрудника ${employee.name}?`)) return;
+        if (!confirm(`Деактивировать сотрудника ${displayName}?`)) return;
         deactivateMutation.mutate(employee.id, {
             onSuccess: () => toast.success("Сотрудник деактивирован"),
             onError: (e) => toast.error(e.message),
@@ -73,7 +83,7 @@ function EmployeeRow({
     return (
         <tr className="border-b text-sm last:border-b-0">
             <td className="px-3 py-2 font-medium">
-                {employee.name} {employee.surname ?? ""}
+                {displayName}
                 {isSelf && (
                     <span className="ml-2 text-xs text-muted-foreground">(вы)</span>
                 )}
@@ -95,10 +105,10 @@ function EmployeeRow({
                 )}
             </td>
             <td className="px-3 py-2 text-xs text-muted-foreground">
-                {employee.position ?? "—"}
+                {fieldValue(employee, "position") || "—"}
             </td>
             <td className="px-3 py-2 text-xs text-muted-foreground">
-                {employee.department ?? "—"}
+                {fieldValue(employee, "department") || "—"}
             </td>
             <td className="px-3 py-2">
                 {employee.isActive ? (
@@ -139,7 +149,11 @@ function EmployeesTable() {
     const { data, isLoading, error } = useEmployees({ page, limit: 20 });
     const { currentUser } = useAuth();
 
-    const isAdmin = currentUser?.role === "admin" || currentUser?.role === "portal_owner";
+    const isAdmin = (currentUser?.employments ?? []).some(
+        (employment) =>
+            employment.isActive &&
+            (employment.role === "admin" || employment.role === "portal_owner")
+    );
     const employees = data?.items ?? [];
     const totalPages = data?.totalPages ?? 1;
 

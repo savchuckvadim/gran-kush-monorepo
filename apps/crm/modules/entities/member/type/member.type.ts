@@ -1,16 +1,14 @@
-import { SchemaCrmMemberDto, SchemaCrmMemberFullDto } from "@workspace/api-client/core";
+import {
+    SchemaCrmMemberAccountDocumentDto,
+    SchemaCrmMemberDto,
+    SchemaCrmMemberFullDto,
+} from "@workspace/api-client/core";
 
 export type CrmMemberListItem = SchemaCrmMemberDto;
-export interface IdentityDocument {
-    id: string;
-    type: string;
-    side: string | null;
-    storagePath: string;
-    createdAt: string;
-}
+/** Документ аккаунта (паспорт/ID) — совпадает с OpenAPI `CrmMemberAccountDocumentDto`. */
+export type IdentityDocument = SchemaCrmMemberAccountDocumentDto;
 export interface IMemberSignature {
     id: string;
-    storagePath: string;
     createdAt: string;
 }
 /** Детальная карточка member — совпадает с OpenAPI `CrmMemberFullDto`. */

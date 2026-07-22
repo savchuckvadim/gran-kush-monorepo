@@ -34,6 +34,14 @@ export const ROUTES = {
     CRM_EMPLOYEES: "/crm/employees",
     CRM_PROFILE: "/crm/profile",
     CRM_SETTINGS: "/crm/settings",
+    /** Конструктор сущностей (поля/формы/стадии) */
+    CRM_SETTINGS_ENTITIES: "/crm/settings/entities",
+    /** Инвайты сотрудников */
+    CRM_SETTINGS_INVITATIONS: "/crm/settings/invitations",
+    /** Ссылки-формы регистрации */
+    CRM_SETTINGS_REGISTRATION_LINKS: "/crm/settings/registration-links",
+    /** Записи смарт-процессов: `${ROUTES.CRM_ENTITIES}/${code}` */
+    CRM_ENTITIES: "/crm/entities",
     LOGIN: "/auth/login",
     REGISTER: "/auth/register",
 } as const;
