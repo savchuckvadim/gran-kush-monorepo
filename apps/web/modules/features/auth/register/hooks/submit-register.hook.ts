@@ -2,7 +2,7 @@
 import { useMutation } from "@tanstack/react-query";
 
 import {
-    SchemaRegisterMemberDto,
+    SchemaDynamicMemberRegistrationDto,
     SchemaRegisterMemberResponseDto,
     SchemaUploadMemberFilesDto,
     SchemaUploadMemberFilesResponseDto,
@@ -37,21 +37,26 @@ function toBase64(file: File): Promise<string> {
     });
 }
 
-async function mapToRegisterMemberDto(
-    data: RegisterFormSubmitData
-): Promise<SchemaRegisterMemberDto> {
+/**
+ * Глобальная регистрация аккаунта: { email, password, fields }.
+ * fields валидируются схемой public_registration портала (заголовок X-Portal-Slug);
+ * документы/подпись уходят отдельным запросом в аккаунт (переиспользуются между клубами).
+ */
+function mapToRegisterMemberDto(data: RegisterFormSubmitData): SchemaDynamicMemberRegistrationDto {
     return {
         email: data.email,
         password: data.password,
-        name: data.name,
-        surname: data.surname,
-        phone: data.phone,
-        birthday: data.birthday,
-        documentType: data.documentType,
-        documentNumber: data.documentNumber,
-        isMedical: data.isMedical,
-        isMj: data.isMj,
-        isRecreation: data.isRecreation,
+        fields: {
+            first_name: data.name,
+            last_name: data.surname,
+            phone: data.phone,
+            birthday: data.birthday,
+            is_medical: data.isMedical,
+            is_mj: data.isMj,
+            is_recreation: data.isRecreation,
+            identity_document: { fromAccount: true },
+            signature: { fromAccount: true },
+        },
     };
 }
 
@@ -73,13 +78,8 @@ export const useSubmitRegister = () => {
         RegisterFormSubmitData
     >({
         mutationFn: async (data) => {
-            const registerPayload = await mapToRegisterMemberDto(data);
+            const registerPayload = mapToRegisterMemberDto(data);
             const response = await $api.POST("/lk/auth/member/register", {
-                params: {
-                    query: {
-                        force: "false",
-                    },
-                },
                 body: registerPayload,
             });
             return response.data as SchemaRegisterMemberResponseDto;

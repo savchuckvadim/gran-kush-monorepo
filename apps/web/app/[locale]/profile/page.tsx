@@ -41,32 +41,26 @@ export default function PersonalCabinetPage() {
                                         <div className="space-y-4">
                                             <div>
                                                 <label className="text-sm font-medium text-muted-foreground">
-                                                    {t("name")}
-                                                </label>
-                                                <p className="text-sm">{member.name}</p>
-                                            </div>
-                                            <div>
-                                                <label className="text-sm font-medium text-muted-foreground">
                                                     {t("email")}
                                                 </label>
                                                 <p className="text-sm">{member.email}</p>
                                             </div>
-                                            {member.phone && (
-                                                <div>
-                                                    <label className="text-sm font-medium text-muted-foreground">
-                                                        {t("phone")}
-                                                    </label>
-                                                    <p className="text-sm">{member.phone}</p>
-                                                </div>
-                                            )}
                                             <div>
                                                 <label className="text-sm font-medium text-muted-foreground">
                                                     {t("memberStatus")}
                                                 </label>
                                                 <p className="text-sm">
-                                                    {member.isActive
+                                                    {member.memberships.some((m) => m.isActive)
                                                         ? t("activeMember")
                                                         : t("inactiveMember")}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <label className="text-sm font-medium text-muted-foreground">
+                                                    Клубы
+                                                </label>
+                                                <p className="text-sm">
+                                                    {member.memberships.length}
                                                 </p>
                                             </div>
                                         </div>

@@ -54,19 +54,25 @@ export async function loginMember(data: LoginRequest) {
 }
 
 /**
- * Register new member
+ * Register new member (глобальный аккаунт + анкета портала из контекста)
  */
 export async function registerMember(
-    data: RegisterRequest,
-    force: boolean = false
+    data: RegisterRequest
 ): Promise<SchemaRegisterMemberResponseDto> {
     const response = await $api.POST("/lk/auth/member/register", {
-        params: {
-            query: {
-                force: force ? "true" : "false",
+        body: {
+            email: data.email,
+            password: data.password,
+            fields: {
+                first_name: data.name,
+                ...(data.surname ? { last_name: data.surname } : {}),
+                ...(data.phone ? { phone: data.phone } : {}),
+                ...(data.birthday ? { birthday: data.birthday } : {}),
+                ...(data.isMedical !== undefined ? { is_medical: data.isMedical } : {}),
+                ...(data.isMj !== undefined ? { is_mj: data.isMj } : {}),
+                ...(data.isRecreation !== undefined ? { is_recreation: data.isRecreation } : {}),
             },
         },
-        body: data,
     });
 
     if (!response.response.ok) {
