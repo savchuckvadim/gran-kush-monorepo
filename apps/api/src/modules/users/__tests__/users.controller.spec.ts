@@ -1,11 +1,18 @@
 import { ConflictException, NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 
+import { PortalCrmSubscriptionGuard } from "@common/guards/portal-crm-subscription.guard";
+import { MembershipGuard } from "@common/portal";
 import { UsersController } from "@users/api/controllers/users.controller";
 import { CreateUserDto } from "@users/api/dto/create-user.dto";
 import { UpdateUserDto } from "@users/api/dto/update-user.dto";
 import { UserResponseDto } from "@users/api/dto/user-response.dto";
 import { UsersService } from "@users/application/services/users.service";
+
+import { AdminGuard } from "@modules/portal/auth/employees/infrastructure/guards/admin.guard";
+import { EmployeeJwtAuthGuard } from "@modules/portal/auth/employees/infrastructure/guards/employee-jwt-auth.guard";
+
+const allowGuard = { canActivate: () => true };
 
 describe("UsersController", () => {
     let controller: UsersController;
@@ -34,7 +41,16 @@ describe("UsersController", () => {
                     useValue: mockUsersService,
                 },
             ],
-        }).compile();
+        })
+            .overrideGuard(EmployeeJwtAuthGuard)
+            .useValue(allowGuard)
+            .overrideGuard(MembershipGuard)
+            .useValue(allowGuard)
+            .overrideGuard(PortalCrmSubscriptionGuard)
+            .useValue(allowGuard)
+            .overrideGuard(AdminGuard)
+            .useValue(allowGuard)
+            .compile();
 
         controller = module.get<UsersController>(UsersController);
 

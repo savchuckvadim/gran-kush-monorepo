@@ -157,6 +157,7 @@ describe("UsersService", () => {
         };
 
         it("should update user successfully", async () => {
+            (bcrypt.hash as jest.Mock).mockResolvedValue("hashedNewPassword");
             mockUserRepository.findById.mockResolvedValue(mockUser);
             mockUserRepository.update.mockResolvedValue(updatedUser);
 
