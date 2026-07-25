@@ -33,7 +33,7 @@ export class LkQrCodesController {
     @ApiSuccessResponse(QrCodeWithPayloadDto)
     @ApiErrorResponse([401, 403, 404])
     async getMyQrCode(@CurrentMember() member: Member): Promise<QrCodeWithPayloadDto> {
-        const qr = await this.qrCodesService.findByMemberId(member.id);
+        const qr = await this.qrCodesService.findByMemberId(member.id, member.portalId);
         if (!qr) {
             throw new NotFoundException(
                 "QR-код не найден. Обратитесь к администратору для генерации."
@@ -53,7 +53,7 @@ export class LkQrCodesController {
     @ApiSuccessResponse(QrCodeWithPayloadDto)
     @ApiErrorResponse([400, 401, 403])
     async regenerateMyQrCode(@CurrentMember() member: Member): Promise<QrCodeWithPayloadDto> {
-        const qr = await this.qrCodesService.generateOrRegenerate(member.id);
+        const qr = await this.qrCodesService.generateOrRegenerate(member.id, member.portalId);
         return mapQrCodeToPayloadDto(qr);
     }
 }

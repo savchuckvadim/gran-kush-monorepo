@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, NotFoundException, Param, Post } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
+import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
@@ -35,8 +36,11 @@ export class CrmQrCodesController {
     })
     @ApiSuccessResponse(QrCodeScanResultDto)
     @ApiErrorResponse([400, 401, 403])
-    async scanQrCode(@Body() dto: ScanQrCodeDto): Promise<QrCodeScanResultDto> {
-        return this.qrCodesService.validateScannedCode(dto.encryptedCode);
+    async scanQrCode(
+        @Body() dto: ScanQrCodeDto,
+        @PortalId() portalId: string
+    ): Promise<QrCodeScanResultDto> {
+        return this.qrCodesService.validateScannedCode(dto.encryptedCode, portalId);
     }
 
     // ─── Получить QR-код участника ───────────────────────────────────────────
@@ -45,8 +49,11 @@ export class CrmQrCodesController {
     @ApiOperation({ summary: "Получить QR-код участника" })
     @ApiSuccessResponse(QrCodeDto)
     @ApiErrorResponse([401, 403, 404])
-    async getByMemberId(@Param("memberId") memberId: string): Promise<QrCodeDto> {
-        const qr = await this.qrCodesService.findByMemberId(memberId);
+    async getByMemberId(
+        @Param("memberId") memberId: string,
+        @PortalId() portalId: string
+    ): Promise<QrCodeDto> {
+        const qr = await this.qrCodesService.findByMemberId(memberId, portalId);
         if (!qr) {
             throw new NotFoundException("QR-код для этого участника не найден");
         }
@@ -64,8 +71,11 @@ export class CrmQrCodesController {
     })
     @ApiSuccessResponse(QrCodeDto, { status: 201 })
     @ApiErrorResponse([400, 401, 403, 404])
-    async generateQrCode(@Body() dto: RegenerateQrCodeDto): Promise<QrCodeDto> {
-        const qr = await this.qrCodesService.generateOrRegenerate(dto.memberId);
+    async generateQrCode(
+        @Body() dto: RegenerateQrCodeDto,
+        @PortalId() portalId: string
+    ): Promise<QrCodeDto> {
+        const qr = await this.qrCodesService.generateOrRegenerate(dto.memberId, portalId);
         return mapQrCodeToDto(qr);
     }
 
@@ -77,8 +87,11 @@ export class CrmQrCodesController {
         description: "Удаляет QR-код участника. После этого он не сможет входить по QR.",
     })
     @ApiErrorResponse([401, 403, 404])
-    async revokeQrCode(@Param("memberId") memberId: string): Promise<{ message: string }> {
-        await this.qrCodesService.revokeByMemberId(memberId);
+    async revokeQrCode(
+        @Param("memberId") memberId: string,
+        @PortalId() portalId: string
+    ): Promise<{ message: string }> {
+        await this.qrCodesService.revokeByMemberId(memberId, portalId);
         return { message: "QR-код успешно отозван" };
     }
 }

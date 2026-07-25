@@ -115,6 +115,7 @@ export class QrCodePrismaRepository extends QrCodeRepository {
                 const { firstName, lastName } = getMemberDisplayNameParts(fieldMap);
                 memberPayload = {
                     id: rawMember.id,
+                    portalId: rawMember.portalId,
                     name: firstName,
                     surname: lastName,
                     membershipNumber: rawMember.membershipNumber,
@@ -123,6 +124,7 @@ export class QrCodePrismaRepository extends QrCodeRepository {
             } else {
                 memberPayload = {
                     id: rawMember.id,
+                    portalId: rawMember.portalId,
                     name: "",
                     surname: "",
                     membershipNumber: rawMember.membershipNumber,

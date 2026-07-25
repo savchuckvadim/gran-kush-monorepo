@@ -30,8 +30,12 @@ export class QrCodesService {
     // Queries
     // ═══════════════════════════════════════════════════════════════════════════
 
-    /** Получить QR-код участника */
-    async findByMemberId(memberId: string): Promise<QrCode | null> {
+    /** Получить QR-код участника (в пределах портала) */
+    async findByMemberId(memberId: string, portalId: string): Promise<QrCode | null> {
+        const member = await this.membersService.findByIdForPortal(memberId, portalId);
+        if (!member) {
+            return null;
+        }
         return this.qrCodeRepository.findByMemberId(memberId);
     }
 
@@ -50,9 +54,9 @@ export class QrCodesService {
      * - Шифрует payload (memberId, qrCodeId, issuedAt, expiresAt) с помощью AES-256-GCM
      * - Если у участника уже есть QR-код — обновляет его
      */
-    async generateOrRegenerate(memberId: string): Promise<QrCode> {
-        // Проверяем участника
-        const member = await this.membersService.findByIdUnscoped(memberId);
+    async generateOrRegenerate(memberId: string, portalId: string): Promise<QrCode> {
+        // Проверяем участника в пределах портала
+        const member = await this.membersService.findByIdForPortal(memberId, portalId);
         if (!member) {
             throw new NotFoundException(`Участник с ID "${memberId}" не найден`);
         }
@@ -134,7 +138,10 @@ export class QrCodesService {
      *
      * @returns Объект с результатом сканирования
      */
-    async validateScannedCode(encryptedCode: string): Promise<{
+    async validateScannedCode(
+        encryptedCode: string,
+        portalId: string
+    ): Promise<{
         valid: boolean;
         error?: string;
         memberId?: string;
@@ -188,6 +195,14 @@ export class QrCodesService {
             };
         }
 
+        // 5.1. Участник должен принадлежать порталу сканирующего сотрудника
+        if (!qrCode.member || qrCode.member.portalId !== portalId) {
+            return {
+                valid: false,
+                error: "QR-код не принадлежит этому клубу",
+            };
+        }
+
         // 6. Проверка срока действия (из БД)
         if (qrCode.isExpired()) {
             return {
@@ -221,8 +236,12 @@ export class QrCodesService {
     // Delete / Revoke
     // ═══════════════════════════════════════════════════════════════════════════
 
-    /** Удалить (отозвать) QR-код участника */
-    async revokeByMemberId(memberId: string): Promise<void> {
+    /** Удалить (отозвать) QR-код участника (в пределах портала) */
+    async revokeByMemberId(memberId: string, portalId: string): Promise<void> {
+        const member = await this.membersService.findByIdForPortal(memberId, portalId);
+        if (!member) {
+            throw new NotFoundException(`QR-код для участника "${memberId}" не найден`);
+        }
         const existing = await this.qrCodeRepository.findByMemberId(memberId);
         if (!existing) {
             throw new NotFoundException(`QR-код для участника "${memberId}" не найден`);

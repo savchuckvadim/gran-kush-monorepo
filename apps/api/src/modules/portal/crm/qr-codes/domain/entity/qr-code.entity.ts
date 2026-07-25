@@ -22,6 +22,7 @@ export class QrCode {
     // Relations (опционально)
     member?: {
         id: string;
+        portalId: string;
         name: string;
         surname?: string | null;
         membershipNumber?: string | null;

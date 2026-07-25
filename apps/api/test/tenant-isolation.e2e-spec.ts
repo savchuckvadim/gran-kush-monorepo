@@ -4,8 +4,8 @@ import { Test, TestingModule } from "@nestjs/testing";
 import cookieParser from "cookie-parser";
 import request from "supertest";
 
-import { PrismaService } from "../src/common/prisma/prisma.service";
 import { AppModule } from "../src/app.module";
+import { PrismaService } from "../src/common/prisma/prisma.service";
 
 jest.setTimeout(120_000);
 
@@ -38,13 +38,15 @@ describe("Cross-portal isolation (e2e)", () => {
     let billingPlanId: string;
 
     const registerPortal = async (slug: string, email: string): Promise<PortalContext> => {
-        const res = await request(app.getHttpServer()).post("/platform/portals/register").send({
-            name: slug,
-            displayName: `Isolation Test ${slug}`,
-            email,
-            password: PASSWORD,
-            ownerName: "Owner",
-        });
+        const res = await request(app.getHttpServer())
+            .post("/platform/portals/register")
+            .send({
+                name: slug,
+                displayName: `Isolation Test ${slug}`,
+                email,
+                password: PASSWORD,
+                ownerName: "Owner",
+            });
         expect(res.status).toBe(201);
         return {
             id: res.body.portal.id as string,
@@ -117,7 +119,7 @@ describe("Cross-portal isolation (e2e)", () => {
         // Portal delete каскадно удаляет entity records / members / subscriptions;
         // users (и через них employees/tokens) удаляем по суффиксу вручную
         await prisma.portal.deleteMany({
-            where: { id: { in: [portalA?.id, portalB?.id].filter(Boolean) as string[] } },
+            where: { id: { in: [portalA?.id, portalB?.id].filter(Boolean) } },
         });
         await prisma.user.deleteMany({
             where: { email: { endsWith: `${suffix}@test.local` } },
@@ -242,6 +244,98 @@ describe("Cross-portal isolation (e2e)", () => {
             .set("X-Portal-Slug", portalA.slug);
         expect(res.status).toBe(200);
         expect(res.body.data?.id ?? res.body.id).toBe(memberA.id);
+    });
+
+    describe("QR codes isolation", () => {
+        let encryptedCodeB: string;
+
+        beforeAll(async () => {
+            // Сотрудник портала B генерирует QR своему участнику
+            const res = await request(app.getHttpServer())
+                .post("/crm/qr-codes/generate")
+                .set("Cookie", portalB.cookies)
+                .set("X-Portal-Slug", portalB.slug)
+                .send({ memberId: memberBId });
+            expect(res.status).toBe(201);
+
+            const memberB = await prisma.member.findUniqueOrThrow({
+                where: { id: memberBId },
+                select: { entityRecordId: true },
+            });
+            const qr = await prisma.qrCode.findUniqueOrThrow({
+                where: { entityRecordId: memberB.entityRecordId },
+                select: { encryptedCode: true },
+            });
+            encryptedCodeB = qr.encryptedCode;
+        });
+
+        it("returns 404 for portal B member QR code requested by employee A", async () => {
+            const res = await request(app.getHttpServer())
+                .get(`/crm/qr-codes/member/${memberBId}`)
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug);
+            expect(res.status).toBe(404);
+        });
+
+        it("rejects QR generation for portal B member by employee A", async () => {
+            const res = await request(app.getHttpServer())
+                .post("/crm/qr-codes/generate")
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug)
+                .send({ memberId: memberBId });
+            expect(res.status).toBe(404);
+        });
+
+        it("rejects QR revocation for portal B member by employee A", async () => {
+            const res = await request(app.getHttpServer())
+                .delete(`/crm/qr-codes/member/${memberBId}`)
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug);
+            expect(res.status).toBe(404);
+        });
+
+        it("invalidates portal B member QR scanned in portal A", async () => {
+            const res = await request(app.getHttpServer())
+                .post("/crm/qr-codes/scan")
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug)
+                .send({ encryptedCode: encryptedCodeB });
+            expect(res.status).toBe(201);
+            const result = res.body.data ?? res.body;
+            expect(result.valid).toBe(false);
+        });
+
+        it("validates portal B member QR scanned in own portal", async () => {
+            const res = await request(app.getHttpServer())
+                .post("/crm/qr-codes/scan")
+                .set("Cookie", portalB.cookies)
+                .set("X-Portal-Slug", portalB.slug)
+                .send({ encryptedCode: encryptedCodeB });
+            expect(res.status).toBe(201);
+            const result = res.body.data ?? res.body;
+            expect(result.valid).toBe(true);
+            expect(result.memberId).toBe(memberBId);
+        });
+    });
+
+    describe("member files isolation", () => {
+        it("returns 404 for portal B member document preview requested by employee A", async () => {
+            const res = await request(app.getHttpServer())
+                .get(
+                    `/crm/members/${memberBId}/documents/00000000-0000-4000-8000-000000000000/preview`
+                )
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug);
+            expect(res.status).toBe(404);
+        });
+
+        it("returns 404 for portal B member signature preview requested by employee A", async () => {
+            const res = await request(app.getHttpServer())
+                .get(`/crm/members/${memberBId}/signature/preview`)
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug);
+            expect(res.status).toBe(404);
+        });
     });
 
     describe("subscription gate", () => {

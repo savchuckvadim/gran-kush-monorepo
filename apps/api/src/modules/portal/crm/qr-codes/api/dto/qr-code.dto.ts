@@ -10,6 +10,9 @@ export class QrCodeMemberDto {
     @ApiProperty({ example: "550e8400-e29b-41d4-a716-446655440000", type: String })
     id: string;
 
+    @ApiProperty({ example: "550e8400-e29b-41d4-a716-446655440000", type: String })
+    portalId: string;
+
     @ApiProperty({ example: "John", type: String })
     name: string;
 

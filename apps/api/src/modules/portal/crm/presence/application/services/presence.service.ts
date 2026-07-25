@@ -82,7 +82,7 @@ export class PresenceService {
         session: PresenceSession;
     }> {
         // 1. Валидируем QR-код
-        const scanResult = await this.qrCodesService.validateScannedCode(encryptedCode);
+        const scanResult = await this.qrCodesService.validateScannedCode(encryptedCode, portalId);
 
         if (!scanResult.valid) {
             throw new BadRequestException(scanResult.error ?? "Невалидный QR-код");
@@ -91,10 +91,7 @@ export class PresenceService {
         const memberId = scanResult.memberId!;
 
         // 2. Проверяем, есть ли активная сессия (участник должен принадлежать порталу)
-        const activeSession = await this.sessionRepository.findActiveByMemberId(
-            memberId,
-            portalId
-        );
+        const activeSession = await this.sessionRepository.findActiveByMemberId(memberId, portalId);
 
         if (activeSession) {
             // Выход
@@ -173,10 +170,7 @@ export class PresenceService {
         employeeId: string,
         portalId: string
     ): Promise<PresenceSession> {
-        const activeSession = await this.sessionRepository.findActiveByMemberId(
-            memberId,
-            portalId
-        );
+        const activeSession = await this.sessionRepository.findActiveByMemberId(memberId, portalId);
 
         if (!activeSession) {
             throw new BadRequestException(
@@ -247,7 +241,7 @@ export class PresenceService {
         proposedAction: "entry" | "exit";
     }> {
         // 1. Валидируем QR
-        const scanResult = await this.qrCodesService.validateScannedCode(encryptedCode);
+        const scanResult = await this.qrCodesService.validateScannedCode(encryptedCode, portalId);
 
         if (!scanResult.valid) {
             return {

@@ -17,7 +17,6 @@ export abstract class MemberRepository {
     ): Promise<MemberWithRelations[]>;
     abstract findByIdForPortal(id: string, portalId: string): Promise<MemberWithRelations | null>;
     /** Без tenant-скоупа — только для внутренних сервисов (QR и т.п.) */
-    abstract findByIdUnscoped(id: string): Promise<MemberWithRelations | null>;
     abstract findByUserAndPortal(
         userId: string,
         portalId: string

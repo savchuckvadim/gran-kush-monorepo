@@ -49,7 +49,11 @@ export class MemberPrismaRepository implements MemberRepository {
             profileFilter.statusItemId = filters.statusItemId;
         }
 
-        if (filters?.filterFieldKey && filters.filterValue !== undefined && filters.filterValue !== "") {
+        if (
+            filters?.filterFieldKey &&
+            filters.filterValue !== undefined &&
+            filters.filterValue !== ""
+        ) {
             const memberDef = await this.prisma.entityDefinition.findUnique({
                 where: {
                     portalId_code: {
@@ -100,13 +104,6 @@ export class MemberPrismaRepository implements MemberRepository {
     async findByIdForPortal(id: string, portalId: string): Promise<MemberWithRelations | null> {
         return this.prisma.member.findFirst({
             where: { id, portalId },
-            include: memberWithRelationsInclude,
-        });
-    }
-
-    async findByIdUnscoped(id: string): Promise<MemberWithRelations | null> {
-        return this.prisma.member.findUnique({
-            where: { id },
             include: memberWithRelationsInclude,
         });
     }

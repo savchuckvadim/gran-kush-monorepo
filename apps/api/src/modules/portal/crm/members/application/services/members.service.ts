@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 
 import { MemberJoinSource, UserDocument, UserSignature } from "@prisma/client";
+import { UserDocumentSide } from "@prisma/client";
 import { MulterFile } from "@storage/domain/interfaces/storage-file.interface";
 import { AccountProvisioningService } from "@users/application/services/account-provisioning.service";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
@@ -28,14 +29,12 @@ import {
     CrmMemberStatusDto,
 } from "@modules/portal/crm/members/api/dto/crm-member.dto";
 import { CrmMemberFilesRequestDto } from "@modules/portal/crm/members/api/dto/crm-member-documents.dto";
-import { MemberWithRelations } from "@modules/portal/crm/members/domain/entity/member.entity";
 import { JoinPortalService } from "@modules/portal/crm/members/application/services/join-portal.service";
+import { MemberWithRelations } from "@modules/portal/crm/members/domain/entity/member.entity";
 import {
     MemberListFilters,
     MemberRepository,
 } from "@modules/portal/crm/members/domain/repositories/member-repository.interface";
-
-import { UserDocumentSide } from "@prisma/client";
 
 @Injectable()
 export class MembersService {
@@ -209,10 +208,6 @@ export class MembersService {
     }
 
     /** Без tenant-скоупа — только для внутренних сервисов (QR и т.п.) */
-    async findByIdUnscoped(id: string) {
-        return this.memberRepository.findByIdUnscoped(id);
-    }
-
     async findAllByPortal(
         portalId: string,
         limit?: number,

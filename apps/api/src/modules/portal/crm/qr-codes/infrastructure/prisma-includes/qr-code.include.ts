@@ -9,6 +9,7 @@ export const QR_CODE_INCLUDE = {
             member: {
                 select: {
                     id: true,
+                    portalId: true,
                     membershipNumber: true,
                     isActive: true,
                 },
