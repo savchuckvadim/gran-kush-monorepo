@@ -5,7 +5,6 @@ import { Prisma } from "@prisma/client";
 type Decimal = Prisma.Decimal;
 
 import { PrismaService } from "@common/prisma/prisma.service";
-import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 import { MeasurementUnit } from "@modules/portal/crm/catalog/domain/entity/measurement-unit.entity";
 import { Product } from "@modules/portal/crm/catalog/domain/entity/product.entity";
 import { ProductCategory } from "@modules/portal/crm/catalog/domain/entity/product-category.entity";
@@ -18,6 +17,7 @@ import {
     PRODUCT_INCLUDE,
     type ProductWithRelationsRow,
 } from "@modules/portal/crm/catalog/infrastructure/prisma-includes/product.include";
+import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 
 @Injectable()
 export class ProductPrismaRepository implements ProductRepository {

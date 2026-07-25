@@ -1,5 +1,4 @@
 import { UserAccountStatus } from "@prisma/client";
-
 import { User, UserWithMemberships } from "@users/domain/entity/user.entity";
 
 export abstract class UserRepository {

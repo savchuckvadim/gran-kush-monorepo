@@ -3,13 +3,13 @@ import { ConflictException, Injectable } from "@nestjs/common";
 import { EmployeeRole, Prisma } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
-import { FieldValuesService } from "@modules/portal/crm/entity-fields/application/services/field-values.service";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import {
     EmployeeFilters,
     EmployeeRepository,
     EmployeeWithProfile,
 } from "@modules/portal/crm/employees/domain/repositories/employee-repository.interface";
+import { FieldValuesService } from "@modules/portal/crm/entity-fields/application/services/field-values.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 
 const employeeWithProfileInclude = {
@@ -202,5 +202,4 @@ export class EmployeePrismaRepository implements EmployeeRepository {
         });
         return mapRow(row);
     }
-
 }

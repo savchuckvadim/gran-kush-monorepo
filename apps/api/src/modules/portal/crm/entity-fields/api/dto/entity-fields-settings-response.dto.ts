@@ -136,7 +136,12 @@ export class MemberFieldDefinitionResponseDto {
     @ApiPropertyOptional({ nullable: true, example: "Name", type: String, required: false })
     label: string | null;
 
-    @ApiPropertyOptional({ type: Object, nullable: true, additionalProperties: true, example: { en: "Name" } })
+    @ApiPropertyOptional({
+        type: Object,
+        nullable: true,
+        additionalProperties: true,
+        example: { en: "Name" },
+    })
     labelI18n: Prisma.JsonValue | null;
 
     @ApiPropertyOptional({ nullable: true, example: "Name", type: String, required: false })
@@ -251,7 +256,7 @@ export class OrderStageCategoryResponseDto {
     @ApiProperty({ example: "name", type: String })
     code: string;
 
-    @ApiProperty({ example: "Name", type: String})
+    @ApiProperty({ example: "Name", type: String })
     name: string;
 
     @ApiProperty({ example: true, type: Boolean })

@@ -10,7 +10,10 @@ import { EmployeeRegistrationService } from "@modules/portal/auth/employees/appl
 export class EmployeeRegistrationUseCase {
     constructor(private readonly employeeRegistrationService: EmployeeRegistrationService) {}
 
-    async execute(dto: RegisterEmployeeDto, portalId: string): Promise<RegisterEmployeeResponseDto> {
+    async execute(
+        dto: RegisterEmployeeDto,
+        portalId: string
+    ): Promise<RegisterEmployeeResponseDto> {
         return this.employeeRegistrationService.createEmployee(dto, portalId);
     }
 }

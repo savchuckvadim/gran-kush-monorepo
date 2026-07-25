@@ -9,9 +9,7 @@ import { EmployeeJwtMobileAuthGuard } from "../../infrastructure/guards/employee
 
 /** CRM веб: JWT из HttpOnly cookie + employment в портале запроса (req.user = Employee). */
 export const RequireEmployeeJwt = () =>
-    applyDecorators(
-        UseGuards(EmployeeJwtAuthGuard, MembershipGuard, PortalCrmSubscriptionGuard)
-    );
+    applyDecorators(UseGuards(EmployeeJwtAuthGuard, MembershipGuard, PortalCrmSubscriptionGuard));
 
 /** Нативный CRM: JWT из Authorization Bearer + employment в портале запроса. */
 export const RequireEmployeeJwtMobile = () =>

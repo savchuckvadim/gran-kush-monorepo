@@ -7,8 +7,8 @@ import { Queue } from "bullmq";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
-import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 import { PortalEntityMetadataService } from "@modules/portal/crm/entity-fields/application/services/portal-entity-metadata.service";
+import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 import { RegisterPortalDto } from "@modules/portal/crm/portals/api/dto/register-portal.dto";
 import {
     PORTAL_EVENTS_JOB_NAMES,

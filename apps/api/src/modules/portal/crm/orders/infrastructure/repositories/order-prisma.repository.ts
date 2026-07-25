@@ -115,7 +115,8 @@ export class OrderPrismaRepository extends OrderRepository {
             });
 
             const stageId =
-                data.stageId ?? (await this.resolveDefaultStageId(tx, member.portalId, orderDef.id));
+                data.stageId ??
+                (await this.resolveDefaultStageId(tx, member.portalId, orderDef.id));
 
             const record = await tx.entityRecord.create({
                 data: {

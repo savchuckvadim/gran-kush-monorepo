@@ -14,7 +14,8 @@ export class SendEmailRequestDto {
     @IsEmail()
     email: string;
 
-    @ApiProperty({ type: String,
+    @ApiProperty({
+        type: String,
         description: "Subject",
         example: "Welcome to the realm of NestJS",
     })

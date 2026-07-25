@@ -16,11 +16,7 @@ const MIME_TO_EXTENSION: Record<string, string> = {
 export class AccountFilesService {
     constructor(private readonly storageService: StorageService) {}
 
-    async savePrivateDataUrl(
-        dataUrl: string,
-        userId: string,
-        filePrefix: string
-    ): Promise<string> {
+    async savePrivateDataUrl(dataUrl: string, userId: string, filePrefix: string): Promise<string> {
         const parsed = this.parseDataUrl(dataUrl);
         const extension = MIME_TO_EXTENSION[parsed.mimeType] ?? "bin";
 

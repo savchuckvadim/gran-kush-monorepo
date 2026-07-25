@@ -12,9 +12,8 @@ import {
 } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
-import type { Request, Response } from "express";
-
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
+import type { Request, Response } from "express";
 
 import { AUTH_GLOBAL_SCOPE, resolveDeviceIdFromHeaders } from "@common/auth";
 import { AuthCookieService } from "@common/cookie/services/auth-cookie.service";
@@ -29,11 +28,11 @@ import { MemberMeResponseDto } from "@modules/portal/auth/members/api/dto/member
 import { MemberRefreshTokenResponseDto } from "@modules/portal/auth/members/api/dto/member-refresh-token-response.dto";
 import { MemberWebLoginResponseDto } from "@modules/portal/auth/members/api/dto/member-web-login-response.dto";
 import { MemberAuthService } from "@modules/portal/auth/members/application/services/member-auth.service";
-import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 import { PasswordResetResponseDto } from "@modules/portal/auth/shared/api/dto/password-reset-response.dto";
 import { RequestPasswordResetDto } from "@modules/portal/auth/shared/api/dto/request-password-reset.dto";
 import { ResetPasswordDto } from "@modules/portal/auth/shared/api/dto/reset-password.dto";
 import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
+import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 
 @ApiTags("Member Authentication (Site Web)")
 @Controller("lk/auth")

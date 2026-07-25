@@ -12,9 +12,9 @@ import { randomBytes, randomUUID } from "crypto";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
 import { EmployeesService } from "@modules/portal/crm/employees/application/services/employees.service";
+import { PORTAL_SUMMARY_SELECT } from "@modules/portal/crm/portals/infrastructure/prisma-includes/portal-summary.select";
 
 import { AcceptInvitationResponseDto, CreateInvitationDto } from "../../api/dto/invitation.dto";
-import { PORTAL_SUMMARY_SELECT } from "@modules/portal/crm/portals/infrastructure/prisma-includes/portal-summary.select";
 
 const INVITATION_TTL_DAYS = 7;
 

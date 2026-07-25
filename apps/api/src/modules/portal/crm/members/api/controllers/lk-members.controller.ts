@@ -21,10 +21,7 @@ export class LkMembersController {
     })
     @ApiErrorResponse([401, 404])
     async getMe(@CurrentMember() member: Member): Promise<CrmMemberFullDto> {
-        const fullMember = await this.membersService.findByIdForPortal(
-            member.id,
-            member.portalId
-        );
+        const fullMember = await this.membersService.findByIdForPortal(member.id, member.portalId);
 
         if (!fullMember) {
             throw new NotFoundException("Member not found");

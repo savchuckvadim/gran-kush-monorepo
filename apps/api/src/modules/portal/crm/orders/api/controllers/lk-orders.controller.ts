@@ -55,7 +55,7 @@ export class LkOrdersController {
         @Body() dto: CreateOrderDto,
         @CurrentMember() member: Member
     ): Promise<OrderDetailDto> {
-        const order = await this.ordersService.createOrder(member.id, dto, member.portalId!);
+        const order = await this.ordersService.createOrder(member.id, dto, member.portalId);
         return mapOrderToDetailDto(order);
     }
 
@@ -134,7 +134,7 @@ export class LkOrdersController {
         const order = await this.ordersService.cancelOrderByMember(
             id,
             member.id,
-            member.portalId!,
+            member.portalId,
             dto.reason
         );
         return mapOrderToDetailDto(order);

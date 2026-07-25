@@ -41,9 +41,7 @@ export class AccountProvisioningService {
         password: string | undefined,
         options: { emailVerified: boolean }
     ): Promise<{ user: User; created: boolean; claimed: boolean }> {
-        const verifiedFlags = options.emailVerified
-            ? { isActive: true, emailConfirmed: true }
-            : {};
+        const verifiedFlags = options.emailVerified ? { isActive: true, emailConfirmed: true } : {};
 
         const existing = await this.userRepository.findByEmail(email);
         if (!existing) {

@@ -9,9 +9,9 @@ import { ApiSuccessResponse } from "@common/decorators/response/api-success-resp
 import { PrismaService } from "@common/prisma/prisma.service";
 import { RequireUserJwt } from "@modules/portal/auth/members/api/decorators/require-member-jwt.decorator";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
+import { PORTAL_SUMMARY_SELECT } from "@modules/portal/crm/portals/infrastructure/prisma-includes/portal-summary.select";
 
 import { MySpendingResponseDto, SpendingByPortalDto } from "../dto/public-portals.dto";
-import { PORTAL_SUMMARY_SELECT } from "@modules/portal/crm/portals/infrastructure/prisma-includes/portal-summary.select";
 
 /** Кросс-клубные траты member: агрегация заказов по всем его membership-мостам. */
 @ApiTags("LK Spending")

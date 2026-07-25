@@ -82,7 +82,9 @@ export class DynamicPayloadValidatorService {
             },
         });
         if (!entityDef) {
-            throw new BadRequestException(`Entity "${entityCode}" is not configured for this portal`);
+            throw new BadRequestException(
+                `Entity "${entityCode}" is not configured for this portal`
+            );
         }
 
         const defs = await this.prisma.fieldDefinition.findMany({

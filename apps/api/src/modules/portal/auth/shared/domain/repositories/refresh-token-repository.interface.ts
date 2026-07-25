@@ -1,4 +1,4 @@
-import { Prisma, PrincipalType, RefreshToken } from "@prisma/client";
+import { PrincipalType, Prisma, RefreshToken } from "@prisma/client";
 
 export type RefreshTokenWithUser = Prisma.RefreshTokenGetPayload<{
     include: { user: true };

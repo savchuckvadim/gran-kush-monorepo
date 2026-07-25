@@ -1,4 +1,4 @@
-import { Prisma, PortalFieldType, PortalTypeEnum, StageSemantic } from "@prisma/client";
+import { PortalFieldType, PortalTypeEnum, Prisma, StageSemantic } from "@prisma/client";
 
 type Db = Prisma.TransactionClient;
 

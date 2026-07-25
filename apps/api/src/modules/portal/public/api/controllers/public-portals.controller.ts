@@ -88,9 +88,10 @@ export class PublicPortalsController {
             country: portal.country,
             latitude: portal.latitude === null ? null : Number(portal.latitude),
             longitude: portal.longitude === null ? null : Number(portal.longitude),
-            averageRating: rating?._avg.score !== null && rating?._avg.score !== undefined
-                ? Math.round(rating._avg.score * 10) / 10
-                : null,
+            averageRating:
+                rating?._avg.score !== null && rating?._avg.score !== undefined
+                    ? Math.round(rating._avg.score * 10) / 10
+                    : null,
             reviewsCount: rating?._count._all ?? 0,
         };
     }

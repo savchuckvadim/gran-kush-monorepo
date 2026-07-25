@@ -7,8 +7,8 @@ import { AuthJwtPayload } from "@modules/portal/auth/domain/interfaces/jwt-paylo
 import { MemberAuthResponseDto } from "@modules/portal/auth/members/api/dto/member-auth-response.dto";
 import { MemberLoginDto } from "@modules/portal/auth/members/api/dto/member-login.dto";
 import { MemberRefreshTokenResponseDto } from "@modules/portal/auth/members/api/dto/member-refresh-token-response.dto";
-import { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 import { TokenIssuerService } from "@modules/portal/auth/shared/application/services/token-issuer.service";
+import { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 
 /**
  * Глобальная аутентификация member-аккаунта (ЛК).

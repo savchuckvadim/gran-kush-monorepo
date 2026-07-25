@@ -35,7 +35,8 @@ export class RegisterPortalResponseDto {
     @ApiProperty({ type: () => PortalOwnerInfoDto })
     owner: PortalOwnerInfoDto;
 
-    @ApiProperty({ type: String,
+    @ApiProperty({
+        type: String,
         example: "550e8400-e29b-41d4-a716-446655440000",
         description: "Передавайте в X-Device-Id; токены выставлены в HttpOnly cookies",
     })

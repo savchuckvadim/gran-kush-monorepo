@@ -7,8 +7,8 @@ import { AuthJwtPayload } from "@modules/portal/auth/domain/interfaces/jwt-paylo
 import { EmployeeAuthResponseDto } from "@modules/portal/auth/employees/api/dto/employee-auth-response.dto";
 import { EmployeeLoginDto } from "@modules/portal/auth/employees/api/dto/employee-login.dto";
 import { EmployeeRefreshTokenResponseDto } from "@modules/portal/auth/employees/api/dto/employee-refresh-token-response.dto";
-import { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 import { TokenIssuerService } from "@modules/portal/auth/shared/application/services/token-issuer.service";
+import { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 
 /**
  * Глобальная аутентификация employee-аккаунта (CRM).

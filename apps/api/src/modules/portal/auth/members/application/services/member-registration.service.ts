@@ -47,7 +47,10 @@ export class MemberRegistrationService {
         let claimed = false;
 
         if (existing) {
-            if (existing.passwordHash !== null || existing.status !== UserAccountStatus.pending_claim) {
+            if (
+                existing.passwordHash !== null ||
+                existing.status !== UserAccountStatus.pending_claim
+            ) {
                 throw new ConflictException("User with this email already exists");
             }
             // Клейм аккаунта, созданного клубом

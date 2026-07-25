@@ -18,7 +18,6 @@ import { PrismaService } from "@common/prisma/prisma.service";
 import { FormSchemaService } from "@modules/portal/crm/entity-fields/application/services/form-schema.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 import { JoinPortalService } from "@modules/portal/crm/members/application/services/join-portal.service";
-
 import { PORTAL_SUMMARY_SELECT } from "@modules/portal/crm/portals/infrastructure/prisma-includes/portal-summary.select";
 
 import {

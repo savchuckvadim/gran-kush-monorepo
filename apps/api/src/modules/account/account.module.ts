@@ -26,6 +26,11 @@ import { UserSignaturePrismaRepository } from "@modules/account/infrastructure/r
             useClass: UserSignaturePrismaRepository,
         },
     ],
-    exports: [AccountDocumentsService, AccountFilesService, UserDocumentRepository, UserSignatureRepository],
+    exports: [
+        AccountDocumentsService,
+        AccountFilesService,
+        UserDocumentRepository,
+        UserSignatureRepository,
+    ],
 })
 export class AccountModule {}

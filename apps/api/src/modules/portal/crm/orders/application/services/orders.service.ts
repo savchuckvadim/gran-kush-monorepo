@@ -300,7 +300,10 @@ export class OrdersService {
     /**
      * Проверить товары, доступность и рассчитать цены.
      */
-    private async resolveOrderItems(items: CreateOrderItemDto[], portalId: string): Promise<
+    private async resolveOrderItems(
+        items: CreateOrderItemDto[],
+        portalId: string
+    ): Promise<
         Array<{
             productId: string;
             quantity: number;

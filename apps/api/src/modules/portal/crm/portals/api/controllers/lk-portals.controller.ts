@@ -13,11 +13,7 @@ import { JoinPortalService } from "@modules/portal/crm/members/application/servi
 import { PortalResolutionService } from "@modules/portal/crm/portals/application/services/portal-resolution.service";
 import { PORTAL_SUMMARY_SELECT } from "@modules/portal/crm/portals/infrastructure/prisma-includes/portal-summary.select";
 
-import {
-    JoinPortalDto,
-    JoinPortalResponseDto,
-    MyClubsResponseDto,
-} from "../dto/lk-portals.dto";
+import { JoinPortalDto, JoinPortalResponseDto, MyClubsResponseDto } from "../dto/lk-portals.dto";
 
 @ApiTags("LK Portals (my clubs)")
 @Controller("lk/portals")

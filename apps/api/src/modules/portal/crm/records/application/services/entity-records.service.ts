@@ -90,7 +90,10 @@ export class EntityRecordsService {
 
         if (filters.fields && Object.keys(filters.fields).length > 0) {
             const fieldDefs = await this.prisma.fieldDefinition.findMany({
-                where: { entityDefinitionId: def.id, fieldKey: { in: Object.keys(filters.fields) } },
+                where: {
+                    entityDefinitionId: def.id,
+                    fieldKey: { in: Object.keys(filters.fields) },
+                },
                 select: { id: true, fieldKey: true },
             });
             const defIdByKey = new Map(fieldDefs.map((d) => [d.fieldKey, d.id]));

@@ -9,9 +9,7 @@ import { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user"
  */
 export const CurrentAuthUser = createParamDecorator(
     (_data: unknown, ctx: ExecutionContext): AuthenticatedUser => {
-        const request = ctx
-            .switchToHttp()
-            .getRequest<{ user?: unknown; authUser?: unknown }>();
+        const request = ctx.switchToHttp().getRequest<{ user?: unknown; authUser?: unknown }>();
         const authUser = request.authUser ?? request.user;
         return authUser as AuthenticatedUser;
     }

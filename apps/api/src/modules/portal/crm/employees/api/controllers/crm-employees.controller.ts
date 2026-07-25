@@ -21,10 +21,10 @@ import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
-import type { PortalPrincipal } from "@common/portal";
 import { PaginationDto } from "@common/paginate/dto/pagination.dto";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
+import type { PortalPrincipal } from "@common/portal";
 import { Admin, RequireEmployeeJwt } from "@modules/portal/auth/employees";
 import { AdminGuard } from "@modules/portal/auth/employees/infrastructure/guards/admin.guard";
 import {
