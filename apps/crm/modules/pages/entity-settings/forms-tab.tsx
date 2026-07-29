@@ -2,12 +2,13 @@
 
 import { useMemo, useState } from "react";
 
-import { ArrowDown, ArrowUp, Loader2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@workspace/ui";
 
 import {
+    useEntityFields,
     useEntityFormSchema,
     useUpdateEntityForm,
     type FormPurpose,
@@ -33,8 +34,10 @@ interface LayoutRow {
 export function FormsTab({ code }: { code: string }) {
     const [purpose, setPurpose] = useState<FormPurpose>("crm_create");
     const { data, isLoading, isFetching } = useEntityFormSchema(code, purpose);
+    const { data: allFields = [] } = useEntityFields(code);
     const updateForm = useUpdateEntityForm(code);
     const [rows, setRows] = useState<LayoutRow[] | null>(null);
+    const [fieldToAdd, setFieldToAdd] = useState("");
 
     const serverRows = useMemo<LayoutRow[]>(
         () =>
@@ -67,6 +70,31 @@ export function FormsTab({ code }: { code: string }) {
         next[index] = swapWith;
         next[target] = current;
         setRows(next);
+    }
+
+    const availableFields = allFields.filter(
+        (field) => !effectiveRows.some((row) => row.fieldKey === field.fieldKey)
+    );
+
+    function addField() {
+        const field = allFields.find((f) => f.fieldKey === fieldToAdd);
+        if (!field) return;
+        setRows([
+            ...effectiveRows,
+            {
+                fieldKey: field.fieldKey,
+                label: field.label ?? field.fieldKey,
+                required: false,
+                visible: true,
+                readOnly: false,
+                sortOrder: effectiveRows.length,
+            },
+        ]);
+        setFieldToAdd("");
+    }
+
+    function removeRow(index: number) {
+        setRows(effectiveRows.filter((_, i) => i !== index));
     }
 
     async function handleSave() {
@@ -171,13 +199,49 @@ export function FormsTab({ code }: { code: string }) {
                                 />
                                 только чтение
                             </label>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 text-muted-foreground"
+                                title="Убрать из формы"
+                                onClick={() => removeRow(index)}
+                            >
+                                <X className="h-3 w-3" />
+                            </Button>
                         </div>
                     ))}
 
                     {effectiveRows.length === 0 ? (
                         <p className="py-6 text-center text-sm text-muted-foreground">
-                            Нет полей для этой формы
+                            {data === null
+                                ? "Форма для этого назначения ещё не создана — добавьте поля и сохраните."
+                                : "Нет полей для этой формы"}
                         </p>
+                    ) : null}
+
+                    {availableFields.length > 0 ? (
+                        <div className="flex items-center gap-2">
+                            <select
+                                className="rounded-md border bg-background px-2 py-1.5 text-sm"
+                                value={fieldToAdd}
+                                onChange={(e) => setFieldToAdd(e.target.value)}
+                            >
+                                <option value="">Добавить поле…</option>
+                                {availableFields.map((field) => (
+                                    <option key={field.fieldKey} value={field.fieldKey}>
+                                        {field.label ?? field.fieldKey}
+                                    </option>
+                                ))}
+                            </select>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={addField}
+                                disabled={!fieldToAdd}
+                            >
+                                Добавить
+                            </Button>
+                        </div>
                     ) : null}
 
                     <Button

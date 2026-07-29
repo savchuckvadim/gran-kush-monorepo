@@ -28,6 +28,16 @@ import {
     OrderStageCategoryResponseDto,
 } from "@modules/portal/crm/entity-fields/api/dto/entity-fields-settings-response.dto";
 import {
+    CreateStageCategoryDto,
+    CreateStatusSetDto,
+    DeleteResultDto,
+    StatusItemInputDto,
+    StatusItemResponseDto,
+    StatusSetResponseDto,
+    UpdateStageCategoryDto,
+    UpdateStatusItemDto,
+} from "@modules/portal/crm/entity-fields/api/dto/entity-stages-statuses.dto";
+import {
     CreatePortalMemberFieldDto,
     PortalFieldOptionInputDto,
     UpdateMemberFormLayoutDto,
@@ -37,6 +47,7 @@ import { FormLayoutSettingsService } from "@modules/portal/crm/entity-fields/app
 import { FormSchemaService } from "@modules/portal/crm/entity-fields/application/services/form-schema.service";
 import { OrderStagesService } from "@modules/portal/crm/entity-fields/application/services/order-stages.service";
 import { PortalFieldSettingsService } from "@modules/portal/crm/entity-fields/application/services/portal-field-settings.service";
+import { StatusSetsService } from "@modules/portal/crm/entity-fields/application/services/status-sets.service";
 
 /** Конструктор полей/форм/стадий: универсальные маршруты по коду сущности (member/order/product/смарт-процессы). */
 @ApiTags("CRM Entity fields (settings)")
@@ -47,7 +58,8 @@ export class CrmEntityFieldsSettingsController {
         private readonly formSchema: FormSchemaService,
         private readonly portalFields: PortalFieldSettingsService,
         private readonly formLayout: FormLayoutSettingsService,
-        private readonly stages: OrderStagesService
+        private readonly stages: OrderStagesService,
+        private readonly statusSets: StatusSetsService
     ) {}
 
     private parsePurpose(purposeParam: string): FormPurpose {
@@ -187,5 +199,124 @@ export class CrmEntityFieldsSettingsController {
         @Param("code") code: string
     ): Promise<OrderStageCategoryResponseDto[]> {
         return this.stages.listStageCategories(portalId, code);
+    }
+
+    @Post(":code/stage-categories")
+    @UseGuards(AdminGuard)
+    @Admin()
+    @ApiOperation({ summary: "Create a funnel with stages (Admin)" })
+    @ApiSuccessResponse(OrderStageCategoryResponseDto)
+    @ApiErrorResponse([400, 401, 403, 404])
+    async createStageCategory(
+        @PortalId() portalId: string,
+        @Param("code") code: string,
+        @Body() dto: CreateStageCategoryDto
+    ): Promise<OrderStageCategoryResponseDto> {
+        return this.stages.createStageCategory(portalId, code, dto);
+    }
+
+    @Patch(":code/stage-categories/:categoryId")
+    @UseGuards(AdminGuard)
+    @Admin()
+    @ApiOperation({
+        summary:
+            "Update funnel name/stages (Admin). Stages without id are created, missing ones deleted",
+    })
+    @ApiSuccessResponse(OrderStageCategoryResponseDto)
+    @ApiErrorResponse([400, 401, 403, 404])
+    async updateStageCategory(
+        @PortalId() portalId: string,
+        @Param("code") code: string,
+        @Param("categoryId") categoryId: string,
+        @Body() dto: UpdateStageCategoryDto
+    ): Promise<OrderStageCategoryResponseDto> {
+        return this.stages.updateStageCategory(portalId, code, categoryId, dto);
+    }
+
+    @Delete(":code/stage-categories/:categoryId")
+    @UseGuards(AdminGuard)
+    @Admin()
+    @ApiOperation({ summary: "Delete a non-system, non-default funnel (Admin)" })
+    @ApiSuccessResponse(DeleteResultDto)
+    @ApiErrorResponse([400, 401, 403, 404])
+    async deleteStageCategory(
+        @PortalId() portalId: string,
+        @Param("code") code: string,
+        @Param("categoryId") categoryId: string
+    ): Promise<DeleteResultDto> {
+        await this.stages.deleteStageCategory(portalId, code, categoryId);
+        return { ok: true };
+    }
+
+    @Get(":code/status-sets")
+    @ApiOperation({ summary: "Entity status sets with items" })
+    @ApiSuccessResponse(StatusSetResponseDto, { isArray: true })
+    @ApiErrorResponse([401, 403, 404])
+    async listStatusSets(
+        @PortalId() portalId: string,
+        @Param("code") code: string
+    ): Promise<StatusSetResponseDto[]> {
+        return this.statusSets.listStatusSets(portalId, code);
+    }
+
+    @Post(":code/status-sets")
+    @UseGuards(AdminGuard)
+    @Admin()
+    @ApiOperation({ summary: "Create a status set with items (Admin)" })
+    @ApiSuccessResponse(StatusSetResponseDto)
+    @ApiErrorResponse([400, 401, 403, 404])
+    async createStatusSet(
+        @PortalId() portalId: string,
+        @Param("code") code: string,
+        @Body() dto: CreateStatusSetDto
+    ): Promise<StatusSetResponseDto> {
+        return this.statusSets.createStatusSet(portalId, code, dto);
+    }
+
+    @Post(":code/status-sets/:setId/items")
+    @UseGuards(AdminGuard)
+    @Admin()
+    @ApiOperation({ summary: "Add a status item to a set (Admin)" })
+    @ApiSuccessResponse(StatusItemResponseDto)
+    @ApiErrorResponse([400, 401, 403, 404])
+    async addStatusItem(
+        @PortalId() portalId: string,
+        @Param("code") code: string,
+        @Param("setId") setId: string,
+        @Body() dto: StatusItemInputDto
+    ): Promise<StatusItemResponseDto> {
+        return this.statusSets.addStatusItem(portalId, code, setId, dto);
+    }
+
+    @Patch(":code/status-sets/:setId/items/:itemId")
+    @UseGuards(AdminGuard)
+    @Admin()
+    @ApiOperation({ summary: "Update a status item (Admin)" })
+    @ApiSuccessResponse(StatusItemResponseDto)
+    @ApiErrorResponse([400, 401, 403, 404])
+    async updateStatusItem(
+        @PortalId() portalId: string,
+        @Param("code") code: string,
+        @Param("setId") setId: string,
+        @Param("itemId") itemId: string,
+        @Body() dto: UpdateStatusItemDto
+    ): Promise<StatusItemResponseDto> {
+        return this.statusSets.updateStatusItem(portalId, code, setId, itemId, dto);
+    }
+
+    @Delete(":code/status-sets/:setId/items/:itemId")
+    @UseGuards(AdminGuard)
+    @Admin()
+    @ApiOperation({ summary: "Delete an unused non-system status item (Admin)" })
+    @ApiSuccessResponse(DeleteResultDto)
+    @ApiErrorResponse([400, 401, 403, 404])
+    async deleteStatusItem(
+        @PortalId() portalId: string,
+        @Param("code") code: string,
+        @Param("setId") setId: string,
+        @Param("itemId") itemId: string
+    ): Promise<DeleteResultDto> {
+        await this.statusSets.deleteStatusItem(portalId, code, setId, itemId);
+        return { ok: true };
     }
 }

@@ -822,11 +822,83 @@ export interface paths {
         /** Entity funnel categories and stages */
         get: operations["CrmEntityFieldsSettings_stageCategories"];
         put?: never;
-        post?: never;
+        /** Create a funnel with stages (Admin) */
+        post: operations["CrmEntityFieldsSettings_createStageCategory"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/crm/settings/entities/{code}/stage-categories/{categoryId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a non-system, non-default funnel (Admin) */
+        delete: operations["CrmEntityFieldsSettings_deleteStageCategory"];
+        options?: never;
+        head?: never;
+        /** Update funnel name/stages (Admin). Stages without id are created, missing ones deleted */
+        patch: operations["CrmEntityFieldsSettings_updateStageCategory"];
+        trace?: never;
+    };
+    "/crm/settings/entities/{code}/status-sets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Entity status sets with items */
+        get: operations["CrmEntityFieldsSettings_listStatusSets"];
+        put?: never;
+        /** Create a status set with items (Admin) */
+        post: operations["CrmEntityFieldsSettings_createStatusSet"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/settings/entities/{code}/status-sets/{setId}/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a status item to a set (Admin) */
+        post: operations["CrmEntityFieldsSettings_addStatusItem"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/settings/entities/{code}/status-sets/{setId}/items/{itemId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete an unused non-system status item (Admin) */
+        delete: operations["CrmEntityFieldsSettings_deleteStatusItem"];
+        options?: never;
+        head?: never;
+        /** Update a status item (Admin) */
+        patch: operations["CrmEntityFieldsSettings_updateStatusItem"];
         trace?: never;
     };
     "/crm/entities": {
@@ -839,7 +911,7 @@ export interface paths {
         /** Список определений сущностей портала */
         get: operations["CrmEntityDefinitions_list"];
         put?: never;
-        /** Создать кастомное определение сущности (не системное) */
+        /** Создать кастомную сущность (с дефолтными формами, полем title и воронкой) */
         post: operations["CrmEntityDefinitions_create"];
         delete?: never;
         options?: never;
@@ -2880,6 +2952,74 @@ export interface components {
             updatedAt: string;
             stages: components["schemas"]["OrderStageResponseDto"][];
         };
+        StageInputDto: {
+            /**
+             * Format: uuid
+             * @description Существующая стадия
+             */
+            id?: string;
+            /** @example In progress */
+            name: string;
+            sortOrder: number;
+            /** @example #f59e0b */
+            color?: string | null;
+            /** @enum {string} */
+            semantic: "NEW" | "IN_PROGRESS" | "SUCCESS" | "FAILURE";
+            isTerminalSuccess?: boolean;
+            isTerminalFailure?: boolean;
+        };
+        CreateStageCategoryDto: {
+            /** @example sales */
+            code: string;
+            /** @example Продажи */
+            name: string;
+            stages: components["schemas"]["StageInputDto"][];
+        };
+        UpdateStageCategoryDto: {
+            name?: string;
+            stages?: components["schemas"]["StageInputDto"][];
+        };
+        DeleteResultDto: {
+            ok: boolean;
+        };
+        StatusItemResponseDto: {
+            id: string;
+            statusSetId: string;
+            key: string;
+            label: string;
+            color: string | null;
+            sortOrder: number;
+            isActive: boolean;
+            isSystem: boolean;
+            semantic: string | null;
+        };
+        StatusSetResponseDto: {
+            id: string;
+            code: string;
+            isSystem: boolean;
+            isImmutable: boolean;
+            items: components["schemas"]["StatusItemResponseDto"][];
+        };
+        StatusItemInputDto: {
+            /** @example vip */
+            key: string;
+            /** @example VIP */
+            label: string;
+            /** @example #22c55e */
+            color?: string | null;
+            sortOrder?: number;
+        };
+        CreateStatusSetDto: {
+            /** @example custom */
+            code: string;
+            items: components["schemas"]["StatusItemInputDto"][];
+        };
+        UpdateStatusItemDto: {
+            label?: string;
+            color?: string | null;
+            sortOrder?: number;
+            isActive?: boolean;
+        };
         EntityDefinitionSummaryDto: {
             id: string;
             /** @example vendor */
@@ -4455,6 +4595,15 @@ export type SchemaUpdateMemberFormLayoutDto = components['schemas']['UpdateMembe
 export type SchemaMemberFormLayoutReplaceResponseDto = components['schemas']['MemberFormLayoutReplaceResponseDto'];
 export type SchemaOrderStageResponseDto = components['schemas']['OrderStageResponseDto'];
 export type SchemaOrderStageCategoryResponseDto = components['schemas']['OrderStageCategoryResponseDto'];
+export type SchemaStageInputDto = components['schemas']['StageInputDto'];
+export type SchemaCreateStageCategoryDto = components['schemas']['CreateStageCategoryDto'];
+export type SchemaUpdateStageCategoryDto = components['schemas']['UpdateStageCategoryDto'];
+export type SchemaDeleteResultDto = components['schemas']['DeleteResultDto'];
+export type SchemaStatusItemResponseDto = components['schemas']['StatusItemResponseDto'];
+export type SchemaStatusSetResponseDto = components['schemas']['StatusSetResponseDto'];
+export type SchemaStatusItemInputDto = components['schemas']['StatusItemInputDto'];
+export type SchemaCreateStatusSetDto = components['schemas']['CreateStatusSetDto'];
+export type SchemaUpdateStatusItemDto = components['schemas']['UpdateStatusItemDto'];
 export type SchemaEntityDefinitionSummaryDto = components['schemas']['EntityDefinitionSummaryDto'];
 export type SchemaCreateEntityDefinitionBodyDto = components['schemas']['CreateEntityDefinitionBodyDto'];
 export type SchemaCrmCreateMemberDto = components['schemas']['CrmCreateMemberDto'];
@@ -6752,6 +6901,488 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEntityFieldsSettings_createStageCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateStageCategoryDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderStageCategoryResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEntityFieldsSettings_deleteStageCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                categoryId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeleteResultDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEntityFieldsSettings_updateStageCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                categoryId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateStageCategoryDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderStageCategoryResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEntityFieldsSettings_listStatusSets: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatusSetResponseDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEntityFieldsSettings_createStatusSet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateStatusSetDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatusSetResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEntityFieldsSettings_addStatusItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                setId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StatusItemInputDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatusItemResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEntityFieldsSettings_deleteStatusItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                setId: string;
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeleteResultDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEntityFieldsSettings_updateStatusItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                setId: string;
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateStatusItemDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatusItemResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

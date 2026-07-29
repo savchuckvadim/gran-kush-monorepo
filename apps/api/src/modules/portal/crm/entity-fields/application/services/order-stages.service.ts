@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 
 import { Prisma } from "@prisma/client";
 
@@ -86,6 +86,107 @@ export class OrderStagesService {
                 stages: { orderBy: { sortOrder: "asc" } },
             },
         });
+    }
+
+    /** Обновить воронку: имя + upsert стадий (стадии без id создаются, отсутствующие удаляются). */
+    async updateStageCategory(
+        portalId: string,
+        entityCode: string,
+        categoryId: string,
+        input: {
+            name?: string;
+            stages?: {
+                id?: string;
+                name: string;
+                sortOrder: number;
+                color?: string | null;
+                semantic: "NEW" | "IN_PROGRESS" | "SUCCESS" | "FAILURE";
+                isTerminalSuccess?: boolean;
+                isTerminalFailure?: boolean;
+            }[];
+        }
+    ): Promise<OrderStageCategoryWithStages> {
+        const category = await this.findCategoryInPortal(portalId, entityCode, categoryId);
+
+        return this.prisma.$transaction(async (tx) => {
+            if (input.name !== undefined) {
+                await tx.stageCategory.update({
+                    where: { id: category.id },
+                    data: { name: input.name },
+                });
+            }
+
+            if (input.stages !== undefined) {
+                const keptIds = input.stages
+                    .map((s) => s.id)
+                    .filter((id): id is string => Boolean(id));
+
+                // Записи на удаляемых стадиях теряют stageId (SetNull)
+                await tx.stage.deleteMany({
+                    where: { stageCategoryId: category.id, id: { notIn: keptIds } },
+                });
+
+                for (const stage of input.stages) {
+                    const data = {
+                        name: stage.name,
+                        sortOrder: stage.sortOrder,
+                        color: stage.color ?? null,
+                        semantic: stage.semantic,
+                        isTerminalSuccess: stage.isTerminalSuccess ?? false,
+                        isTerminalFailure: stage.isTerminalFailure ?? false,
+                    };
+                    if (stage.id) {
+                        await tx.stage.update({
+                            where: { id: stage.id },
+                            data,
+                        });
+                    } else {
+                        await tx.stage.create({
+                            data: { ...data, stageCategoryId: category.id },
+                        });
+                    }
+                }
+            }
+
+            return tx.stageCategory.findUniqueOrThrow({
+                where: { id: category.id },
+                include: { stages: { orderBy: { sortOrder: "asc" } } },
+            });
+        });
+    }
+
+    /** Удалить не-системную и не-дефолтную воронку. */
+    async deleteStageCategory(
+        portalId: string,
+        entityCode: string,
+        categoryId: string
+    ): Promise<void> {
+        const category = await this.findCategoryInPortal(portalId, entityCode, categoryId);
+        if (category.isSystem) {
+            throw new BadRequestException("System funnel cannot be deleted");
+        }
+        if (category.isDefault) {
+            throw new BadRequestException("Default funnel cannot be deleted");
+        }
+        await this.prisma.stageCategory.delete({ where: { id: categoryId } });
+    }
+
+    private async findCategoryInPortal(portalId: string, entityCode: string, categoryId: string) {
+        const entityDef = await this.prisma.entityDefinition.findUnique({
+            where: { portalId_code: { portalId, code: entityCode } },
+            select: { id: true },
+        });
+        if (!entityDef) {
+            throw new NotFoundException(`Entity "${entityCode}" not found`);
+        }
+        const category = await this.prisma.stageCategory.findFirst({
+            where: { id: categoryId, portalId, entityDefinitionId: entityDef.id },
+            select: { id: true, isSystem: true, isDefault: true },
+        });
+        if (!category) {
+            throw new NotFoundException("Funnel not found");
+        }
+        return category;
     }
 
     /** Создать воронку со стадиями для сущности (конструктор). */

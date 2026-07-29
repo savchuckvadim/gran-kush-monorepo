@@ -5,11 +5,13 @@ import { useState } from "react";
 import { FieldsTab } from "./fields-tab";
 import { FormsTab } from "./forms-tab";
 import { StagesTab } from "./stages-tab";
+import { StatusesTab } from "./statuses-tab";
 
 const TABS = [
     { id: "fields", label: "Поля" },
     { id: "forms", label: "Формы" },
     { id: "stages", label: "Стадии" },
+    { id: "statuses", label: "Статусы" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -46,6 +48,7 @@ export function EntitySettingsPage({ code }: { code: string }) {
             {tab === "fields" ? <FieldsTab code={code} /> : null}
             {tab === "forms" ? <FormsTab code={code} /> : null}
             {tab === "stages" ? <StagesTab code={code} /> : null}
+            {tab === "statuses" ? <StatusesTab code={code} /> : null}
         </div>
     );
 }

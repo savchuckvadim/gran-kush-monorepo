@@ -6,8 +6,11 @@ import { IsString, Matches, MaxLength, MinLength } from "class-validator";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
-import { PrismaService } from "@common/prisma/prisma.service";
 import { Admin, AdminGuard, RequireEmployeeJwt } from "@modules/portal/auth/employees";
+import {
+    EntityDefinitionsService,
+    EntityDefinitionSummary,
+} from "@modules/portal/crm/entity-fields/application/services/entity-definitions.service";
 
 export class EntityDefinitionSummaryDto {
     @ApiProperty({ type: String })
@@ -50,50 +53,34 @@ export class CreateEntityDefinitionBodyDto {
 @Controller("crm/entities")
 @RequireEmployeeJwt()
 export class CrmEntityDefinitionsController {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(private readonly entityDefinitions: EntityDefinitionsService) {}
 
     @Get()
     @ApiOperation({ summary: "Список определений сущностей портала" })
     @ApiSuccessResponse(EntityDefinitionSummaryDto, { isArray: true })
     @ApiErrorResponse([401, 403])
     async list(@PortalId() portalId: string): Promise<EntityDefinitionSummaryDto[]> {
-        const defs = await this.prisma.entityDefinition.findMany({
-            where: { portalId },
-            orderBy: { code: "asc" },
-        });
+        const defs = await this.entityDefinitions.list(portalId);
         return defs.map((d) => this.toSummary(d));
     }
 
     @Post()
     @UseGuards(AdminGuard)
     @Admin()
-    @ApiOperation({ summary: "Создать кастомное определение сущности (не системное)" })
+    @ApiOperation({
+        summary: "Создать кастомную сущность (с дефолтными формами, полем title и воронкой)",
+    })
     @ApiSuccessResponse(EntityDefinitionSummaryDto)
     @ApiErrorResponse([401, 403, 409])
     async create(
         @PortalId() portalId: string,
         @Body() body: CreateEntityDefinitionBodyDto
     ): Promise<EntityDefinitionSummaryDto> {
-        const created = await this.prisma.entityDefinition.create({
-            data: {
-                portalId,
-                code: body.code.trim(),
-                name: body.name.trim(),
-                isSystem: false,
-                isActive: true,
-            },
-        });
+        const created = await this.entityDefinitions.create(portalId, body);
         return this.toSummary(created);
     }
 
-    private toSummary(def: {
-        id: string;
-        code: string;
-        name: string;
-        isSystem: boolean;
-        isActive: boolean;
-        createdAt: Date;
-    }): EntityDefinitionSummaryDto {
+    private toSummary(def: EntityDefinitionSummary): EntityDefinitionSummaryDto {
         return {
             id: def.id,
             code: def.code,
