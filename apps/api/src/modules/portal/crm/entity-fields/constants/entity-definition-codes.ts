@@ -8,5 +8,3 @@ export const ENTITY_DEFINITION_CODES = {
 
 export type EntityDefinitionCode =
     (typeof ENTITY_DEFINITION_CODES)[keyof typeof ENTITY_DEFINITION_CODES];
-
-export const SYSTEM_ENTITY_CODES: readonly string[] = Object.values(ENTITY_DEFINITION_CODES);

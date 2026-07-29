@@ -7,7 +7,7 @@ import { Queue } from "bullmq";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
-import { PortalEntityMetadataService } from "@modules/portal/crm/entity-fields/application/services/portal-entity-metadata.service";
+import { ProvisionPortalFromTemplatesService } from "@modules/portal/crm/entity-fields/application/services/provision-portal-from-templates.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 import { RegisterPortalDto } from "@modules/portal/crm/portals/api/dto/register-portal.dto";
 import {
@@ -40,7 +40,7 @@ type RegisterPortalResult = {
 export class PortalRegistrationService {
     constructor(
         private readonly prisma: PrismaService,
-        private readonly portalEntityMetadata: PortalEntityMetadataService,
+        private readonly provisionFromTemplates: ProvisionPortalFromTemplatesService,
         private readonly employeeAuthService: EmployeeAuthService,
         @InjectQueue(PORTAL_EVENTS_QUEUE_NAME) private readonly portalEventsQueue: Queue
     ) {}
@@ -75,7 +75,7 @@ export class PortalRegistrationService {
                 },
             });
 
-            await this.portalEntityMetadata.seedForPortal(portal.id, tx);
+            await this.provisionFromTemplates.provisionPortal(portal.id, portal.type, tx);
 
             const user = await tx.user.create({
                 data: {

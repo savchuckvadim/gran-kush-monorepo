@@ -33,7 +33,6 @@ pnpm docker:dev:down
 - Data persists in the `postgres_data` / `redis_data` volumes.
 
 > Note: if another project already holds port `6379`, either stop it or set `REDIS_PORT`.
-> The older `apps/api/docker-compose-dev.yml` still works and is left in place.
 
 ## Prod — full stack
 

@@ -155,7 +155,6 @@ model Portal {
   products            Product[]
   orders              Order[]
   financialTransactions FinancialTransaction[]
-  storageFiles        StorageFile[]
   registrationLinks   RegistrationLink[]
   employeeInvitations EmployeeInvitation[]
   portalReviews       PortalReview[]
@@ -190,7 +189,6 @@ model User {
   employees      Employee[]
   platformAdmin  PlatformAdmin?
   refreshTokens  RefreshToken[]
-  storageFiles   StorageFile[]
   documents      UserDocument[]
   signature      UserSignature?
   portalReviews  PortalReview[]
@@ -928,32 +926,6 @@ model ProductReview {
 // ========================
 // Storage / QR / presence
 // ========================
-
-model StorageFile {
-  id           String   @id @default(uuid())
-  userId       String   @map("user_id")
-  portalId     String?  @map("portal_id")
-  originalName String   @map("original_name") @db.VarChar(255)
-  fileName     String   @map("file_name") @db.VarChar(255)
-  mimeType     String   @map("mime_type") @db.VarChar(100)
-  size         Int
-  storageType  String   @map("storage_type") @db.VarChar(20)
-  category     String   @db.VarChar(50)
-  path         String   @db.VarChar(500)
-  url          String   @db.VarChar(500)
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  portal Portal? @relation(fields: [portalId], references: [id], onDelete: SetNull)
-
-  @@index([userId])
-  @@index([portalId])
-  @@index([category])
-  @@index([storageType])
-  @@index([createdAt])
-  @@map("storage_files")
-}
 
 model QrCode {
   id             String   @id @default(uuid())
