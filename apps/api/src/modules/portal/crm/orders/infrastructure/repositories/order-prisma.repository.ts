@@ -53,6 +53,14 @@ export class OrderPrismaRepository extends OrderRepository {
         return row ? this.mapToEntity(row) : null;
     }
 
+    async findByIdForPortal(id: string, portalId: string): Promise<Order | null> {
+        const row = await this.prisma.order.findFirst({
+            where: { id, portalId },
+            include: ORDER_INCLUDE,
+        });
+        return row ? this.mapToEntity(row) : null;
+    }
+
     // ─── Поиск по номеру заказа ──────────────────────────────────────────────
 
     async findByOrderNumber(orderNumber: string): Promise<Order | null> {

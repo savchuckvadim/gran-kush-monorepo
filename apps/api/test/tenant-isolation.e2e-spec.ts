@@ -36,6 +36,7 @@ describe("Cross-portal isolation (e2e)", () => {
     let memberUserId: string;
     let sessionBId: string;
     let billingPlanId: string;
+    let measurementUnitId: string;
 
     const registerPortal = async (slug: string, email: string): Promise<PortalContext> => {
         const res = await request(app.getHttpServer())
@@ -126,6 +127,10 @@ describe("Cross-portal isolation (e2e)", () => {
         });
         if (billingPlanId) {
             await prisma.billingPlan.deleteMany({ where: { id: billingPlanId } });
+        }
+        // Юнит глобальный (не каскадится с порталом) — удаляем после порталов
+        if (measurementUnitId) {
+            await prisma.measurementUnit.deleteMany({ where: { id: measurementUnitId } });
         }
         await app.close();
     });
@@ -335,6 +340,212 @@ describe("Cross-portal isolation (e2e)", () => {
                 .set("Cookie", portalA.cookies)
                 .set("X-Portal-Slug", portalA.slug);
             expect(res.status).toBe(404);
+        });
+    });
+
+    describe("orders isolation", () => {
+        let orderBId: string;
+
+        beforeAll(async () => {
+            const orderDef = await prisma.entityDefinition.findFirst({
+                where: { portalId: portalB.id, code: "order" },
+                select: { id: true },
+            });
+            if (!orderDef) {
+                throw new Error("Portal B has no provisioned 'order' entity definition");
+            }
+
+            const record = await prisma.entityRecord.create({
+                data: { portalId: portalB.id, entityDefinitionId: orderDef.id },
+            });
+
+            const order = await prisma.order.create({
+                data: {
+                    portalId: portalB.id,
+                    entityRecordId: record.id,
+                    memberId: memberBId,
+                    orderNumber: `ISO-${suffix}`,
+                    subtotal: 10,
+                    total: 10,
+                },
+            });
+            orderBId = order.id;
+        });
+
+        it("does not list portal B orders for employee A", async () => {
+            const res = await request(app.getHttpServer())
+                .get("/crm/orders")
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug);
+            expect(res.status).toBe(200);
+            expect(JSON.stringify(res.body)).not.toContain(orderBId);
+        });
+
+        it("returns 404 for portal B order by id", async () => {
+            const res = await request(app.getHttpServer())
+                .get(`/crm/orders/${orderBId}`)
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug);
+            expect(res.status).toBe(404);
+        });
+
+        it("rejects status update of portal B order by employee A", async () => {
+            const res = await request(app.getHttpServer())
+                .patch(`/crm/orders/${orderBId}/status`)
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug)
+                .send({ status: "confirmed" });
+            expect(res.status).toBe(404);
+        });
+
+        it("rejects payment status update of portal B order by employee A", async () => {
+            const res = await request(app.getHttpServer())
+                .patch(`/crm/orders/${orderBId}/payment`)
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug)
+                .send({ paymentStatus: "paid" });
+            expect(res.status).toBe(404);
+        });
+
+        it("returns portal B order to its own employee", async () => {
+            const res = await request(app.getHttpServer())
+                .get(`/crm/orders/${orderBId}`)
+                .set("Cookie", portalB.cookies)
+                .set("X-Portal-Slug", portalB.slug);
+            expect(res.status).toBe(200);
+        });
+    });
+
+    describe("catalog isolation", () => {
+        let productBId: string;
+        let categoryBId: string;
+
+        beforeAll(async () => {
+            const productDef = await prisma.entityDefinition.findFirst({
+                where: { portalId: portalB.id, code: "product" },
+                select: { id: true },
+            });
+            if (!productDef) {
+                throw new Error("Portal B has no provisioned 'product' entity definition");
+            }
+
+            const record = await prisma.entityRecord.create({
+                data: { portalId: portalB.id, entityDefinitionId: productDef.id },
+            });
+
+            const unit = await prisma.measurementUnit.create({
+                data: { code: `iso-unit-${suffix}`, name: "Isolation Unit", isCustom: true },
+            });
+            measurementUnitId = unit.id;
+
+            const category = await prisma.productCategory.create({
+                data: {
+                    portalId: portalB.id,
+                    code: `iso-cat-${suffix}`,
+                    name: "Isolation Category",
+                },
+            });
+            categoryBId = category.id;
+
+            const product = await prisma.product.create({
+                data: {
+                    portalId: portalB.id,
+                    entityRecordId: record.id,
+                    categoryId: category.id,
+                    measurementUnitId: unit.id,
+                    name: `Isolation Product ${suffix}`,
+                    price: 10,
+                    initialQuantity: 100,
+                    currentQuantity: 100,
+                },
+            });
+            productBId = product.id;
+        });
+
+        it("does not list portal B products for employee A", async () => {
+            const res = await request(app.getHttpServer())
+                .get("/crm/catalog/products")
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug);
+            expect(res.status).toBe(200);
+            expect(JSON.stringify(res.body)).not.toContain(productBId);
+        });
+
+        it("returns 404 for portal B product by id", async () => {
+            const res = await request(app.getHttpServer())
+                .get(`/crm/catalog/products/${productBId}`)
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug);
+            expect(res.status).toBe(404);
+        });
+
+        it("rejects update of portal B product by admin A", async () => {
+            const res = await request(app.getHttpServer())
+                .patch(`/crm/catalog/products/${productBId}`)
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug)
+                .send({ name: "Hijacked" });
+            expect(res.status).toBe(404);
+        });
+
+        it("does not list portal B categories for employee A", async () => {
+            const res = await request(app.getHttpServer())
+                .get("/crm/catalog/categories")
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug);
+            expect(res.status).toBe(200);
+            expect(JSON.stringify(res.body)).not.toContain(categoryBId);
+        });
+
+        it("returns portal B product to its own employee", async () => {
+            const res = await request(app.getHttpServer())
+                .get(`/crm/catalog/products/${productBId}`)
+                .set("Cookie", portalB.cookies)
+                .set("X-Portal-Slug", portalB.slug);
+            expect(res.status).toBe(200);
+        });
+    });
+
+    describe("entity field definitions isolation", () => {
+        const fieldKey = `iso_field_${suffix}`;
+
+        beforeAll(async () => {
+            const res = await request(app.getHttpServer())
+                .post("/crm/settings/entities/member/fields")
+                .set("Cookie", portalB.cookies)
+                .set("X-Portal-Slug", portalB.slug)
+                .send({ fieldKey, type: "string", label: "Isolation Field" });
+            expect([200, 201]).toContain(res.status);
+        });
+
+        it("does not expose portal B custom field in portal A definitions", async () => {
+            const res = await request(app.getHttpServer())
+                .get("/crm/settings/entities/member/fields")
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug);
+            expect(res.status).toBe(200);
+            expect(JSON.stringify(res.body)).not.toContain(fieldKey);
+        });
+
+        it("does not expose portal B custom field in portal A form schema", async () => {
+            const res = await request(app.getHttpServer())
+                .get("/crm/settings/entities/member/form-schema/crm_create")
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug);
+            if (res.status === 200) {
+                expect(JSON.stringify(res.body)).not.toContain(fieldKey);
+            } else {
+                expect(res.status).toBe(404);
+            }
+        });
+
+        it("exposes portal B custom field in its own portal", async () => {
+            const res = await request(app.getHttpServer())
+                .get("/crm/settings/entities/member/fields")
+                .set("Cookie", portalB.cookies)
+                .set("X-Portal-Slug", portalB.slug);
+            expect(res.status).toBe(200);
+            expect(JSON.stringify(res.body)).toContain(fieldKey);
         });
     });
 

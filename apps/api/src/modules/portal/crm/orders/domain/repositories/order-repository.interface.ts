@@ -65,6 +65,9 @@ export abstract class OrderRepository {
     /** Найти заказ по ID (с позициями и связями) */
     abstract findById(id: string): Promise<Order | null>;
 
+    /** Найти заказ по ID в пределах портала (tenant-scoped) */
+    abstract findByIdForPortal(id: string, portalId: string): Promise<Order | null>;
+
     /** Найти заказ по номеру */
     abstract findByOrderNumber(orderNumber: string): Promise<Order | null>;
 

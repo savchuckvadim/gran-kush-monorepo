@@ -73,17 +73,8 @@ export class CrmOrdersController {
     @ApiSuccessResponse(OrderDetailDto)
     @ApiErrorResponse([401, 403, 404])
     async getOrder(@Param("id") id: string, @PortalId() portalId: string): Promise<OrderDetailDto> {
-        const order = await this.ordersService.findById(id);
+        const order = await this.ordersService.findByIdForPortal(id, portalId);
         if (!order) {
-            throw new NotFoundException("Заказ не найден");
-        }
-        // Verify the order's member belongs to the current portal
-        const portalOrders = await this.ordersService.findAll(
-            { portalId, memberId: order.memberId },
-            1,
-            0
-        );
-        if (portalOrders.length === 0) {
             throw new NotFoundException("Заказ не найден");
         }
         return mapOrderToDetailDto(order);
@@ -120,12 +111,14 @@ export class CrmOrdersController {
     async updatePaymentStatus(
         @Param("id") id: string,
         @Body() dto: UpdatePaymentStatusDto,
-        @CurrentEmployee() employee: Employee
+        @CurrentEmployee() employee: Employee,
+        @PortalId() portalId: string
     ): Promise<OrderDetailDto> {
         const order = await this.ordersService.updatePaymentStatus(
             id,
             dto.paymentStatus,
-            employee.id
+            employee.id,
+            portalId
         );
         return mapOrderToDetailDto(order);
     }

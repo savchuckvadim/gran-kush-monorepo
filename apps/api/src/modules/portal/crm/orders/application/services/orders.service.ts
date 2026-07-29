@@ -63,6 +63,20 @@ export class OrdersService {
         return order;
     }
 
+    /** Найти заказ по ID в пределах портала */
+    async findByIdForPortal(id: string, portalId: string): Promise<Order | null> {
+        return this.orderRepository.findByIdForPortal(id, portalId);
+    }
+
+    /** Найти заказ по ID в пределах портала или кинуть 404 */
+    async findByIdForPortalOrFail(id: string, portalId: string): Promise<Order> {
+        const order = await this.orderRepository.findByIdForPortal(id, portalId);
+        if (!order) {
+            throw new NotFoundException(`Заказ с ID "${id}" не найден`);
+        }
+        return order;
+    }
+
     /** Найти заказ по номеру */
     async findByOrderNumber(orderNumber: string): Promise<Order | null> {
         return this.orderRepository.findByOrderNumber(orderNumber);
@@ -158,7 +172,7 @@ export class OrdersService {
         portalId: string,
         adminNotes?: string
     ): Promise<Order> {
-        const order = await this.findByIdOrFail(orderId);
+        const order = await this.findByIdForPortalOrFail(orderId, portalId);
 
         // Проверка допустимости перехода
         this.validateStatusTransition(order.status, newStatus);
@@ -215,9 +229,10 @@ export class OrdersService {
     async updatePaymentStatus(
         orderId: string,
         newPaymentStatus: PaymentStatus,
-        employeeId: string
+        employeeId: string,
+        portalId: string
     ): Promise<Order> {
-        const order = await this.findByIdOrFail(orderId);
+        const order = await this.findByIdForPortalOrFail(orderId, portalId);
 
         // Нельзя менять оплату у отменённого заказа
         if (order.status === OrderStatus.CANCELLED) {
