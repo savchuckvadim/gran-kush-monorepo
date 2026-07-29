@@ -1,0 +1,21 @@
+# Keep the build context small & secrets out of image layers.
+**/node_modules
+**/.next
+**/dist
+**/build
+**/out
+**/.turbo
+**/coverage
+.git
+.gitignore
+.vscode
+.idea
+.cowork-tmp
+documentation
+**/*.log
+
+# Env files — never bake secrets into images.
+# NEXT_PUBLIC_* reach the build via --build-arg instead.
+**/.env
+**/.env.*
+!**/.env.example

@@ -10,7 +10,11 @@
     "format": "prettier --write \"apps/**/*.{ts,tsx,js,jsx,json,css,md}\" \"packages/**/*.{ts,tsx,js,jsx,json,css,md}\" --ignore-path .prettierignore",
     "format:check": "prettier --check \"apps/**/*.{ts,tsx,js,jsx,json,css,md}\" \"packages/**/*.{ts,tsx,js,jsx,json,css,md}\" --ignore-path .prettierignore",
     "format:api": "turbo format --filter=api",
-    "format:web": "turbo format --filter=web"
+    "format:web": "turbo format --filter=web",
+    "docker:dev": "docker compose -f infra/compose/docker-compose.dev.yml up -d",
+    "docker:dev:down": "docker compose -f infra/compose/docker-compose.dev.yml down",
+    "docker:prod": "docker compose --env-file infra/compose/.env -f infra/compose/docker-compose.prod.yml up -d --build",
+    "docker:prod:down": "docker compose --env-file infra/compose/.env -f infra/compose/docker-compose.prod.yml down"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",

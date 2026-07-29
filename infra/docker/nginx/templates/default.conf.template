@@ -1,0 +1,73 @@
+# Rendered by the nginx image from env vars (envsubst).
+# Only *_HOST vars are substituted (see NGINX_ENVSUBST_FILTER in compose),
+# so nginx runtime vars like $host / $scheme stay intact.
+
+# ── API — api.el-gran-kush.ru ──
+server {
+    listen 80;
+    server_name ${API_HOST};
+
+    client_max_body_size 25m;
+
+    location / {
+        proxy_pass http://api:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade           $http_upgrade;
+        proxy_set_header Connection        "upgrade";
+    }
+}
+
+# ── CRM — crm.el-gran-kush.ru ──
+server {
+    listen 80;
+    server_name ${CRM_HOST};
+
+    location / {
+        proxy_pass http://crm:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade           $http_upgrade;
+        proxy_set_header Connection        "upgrade";
+    }
+}
+
+# ── Member portal / LK — el-gran-kush.ru ──
+server {
+    listen 80;
+    server_name ${WEB_HOST} www.${WEB_HOST};
+
+    location / {
+        proxy_pass http://web:5001;
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade           $http_upgrade;
+        proxy_set_header Connection        "upgrade";
+    }
+}
+
+# ── Platform admin — admin.el-gran-kush.ru ──
+server {
+    listen 80;
+    server_name ${ADMIN_HOST};
+
+    location / {
+        proxy_pass http://admin:5002;
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade           $http_upgrade;
+        proxy_set_header Connection        "upgrade";
+    }
+}

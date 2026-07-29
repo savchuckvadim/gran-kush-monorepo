@@ -41,3 +41,8 @@ npm-debug.log*
 
 # Cowork temp
 .cowork-tmp/
+
+# Docker compose secrets (keep the *.example files tracked)
+infra/compose/.env
+infra/compose/env/*.env
+!infra/compose/env/*.env.example

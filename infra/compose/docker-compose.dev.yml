@@ -1,0 +1,49 @@
+# Dev infrastructure — databases only (Postgres + Redis).
+# Apps run on the host via `pnpm dev`; this just brings up the data stores.
+#
+#   docker compose -f infra/compose/docker-compose.dev.yml up -d
+#   docker compose -f infra/compose/docker-compose.dev.yml down
+#
+# Values default to what apps/api/.env expects; override via a shell env
+# or `--env-file apps/api/.env`.
+
+name: gran-kush-dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: gran-kush-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-kush}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kush}
+      POSTGRES_DB: ${POSTGRES_DB:-bro-crm}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kush} -d ${POSTGRES_DB:-bro-crm}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: gran-kush-redis-dev
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:

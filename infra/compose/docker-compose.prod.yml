@@ -1,0 +1,153 @@
+# Full production stack: Postgres + Redis + API + 3 Next.js apps + nginx.
+#
+#   cp infra/compose/.env.example        infra/compose/.env
+#   cp infra/compose/env/api.env.example infra/compose/env/api.env
+#   # ...fill in secrets...
+#   docker compose --env-file infra/compose/.env \
+#     -f infra/compose/docker-compose.prod.yml up -d --build
+#
+# nginx routes by Host header:
+#   API_HOST   -> api:3000
+#   CRM_HOST   -> crm:5000
+#   WEB_HOST   -> web:5001   (member portal / LK)
+#   ADMIN_HOST -> admin:5002
+# TLS is intentionally left out — terminate it upstream or add certs + a 443
+# server block (see infra/README.md).
+
+name: gran-kush
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: gran-kush-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # Not published to the host by default — reachable only inside the network.
+    # Uncomment to connect from outside (e.g. a migration from your laptop):
+    # ports:
+    #   - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: gran-kush-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ../..
+      dockerfile: infra/docker/api.Dockerfile
+    image: gran-kush/api:latest
+    container_name: gran-kush-api
+    restart: unless-stopped
+    env_file:
+      - ./env/api.env
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
+      REDIS_URL: redis://redis:6379
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
+      RUN_SEED: ${RUN_SEED:-false}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  crm:
+    build:
+      context: ../..
+      dockerfile: infra/docker/next.Dockerfile
+      args:
+        APP: crm
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    image: gran-kush/crm:latest
+    container_name: gran-kush-crm
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      HOSTNAME: 0.0.0.0
+    depends_on:
+      - api
+
+  web:
+    build:
+      context: ../..
+      dockerfile: infra/docker/next.Dockerfile
+      args:
+        APP: web
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_CRM_URL: ${NEXT_PUBLIC_CRM_URL}
+    image: gran-kush/web:latest
+    container_name: gran-kush-web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 5001
+      HOSTNAME: 0.0.0.0
+    depends_on:
+      - api
+
+  admin:
+    build:
+      context: ../..
+      dockerfile: infra/docker/next.Dockerfile
+      args:
+        APP: admin
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    image: gran-kush/admin:latest
+    container_name: gran-kush-admin
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 5002
+      HOSTNAME: 0.0.0.0
+    depends_on:
+      - api
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: gran-kush-nginx
+    restart: unless-stopped
+    environment:
+      API_HOST: ${API_HOST}
+      CRM_HOST: ${CRM_HOST}
+      WEB_HOST: ${WEB_HOST}
+      ADMIN_HOST: ${ADMIN_HOST}
+      # Substitute only *_HOST vars; leave nginx's own $vars untouched.
+      NGINX_ENVSUBST_FILTER: "^(API|CRM|WEB|ADMIN)_HOST$$"
+    ports:
+      - "80:80"
+      # - "443:443"   # enable once you mount certs + add a 443 server block
+    volumes:
+      - ../docker/nginx/templates:/etc/nginx/templates:ro
+      # - ../docker/nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - api
+      - crm
+      - web
+      - admin
+
+volumes:
+  postgres_data:
+  redis_data:
