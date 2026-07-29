@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 import { UserDocumentSide } from "@prisma/client";
-import { IsBoolean, IsObject, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsObject, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class CrmMemberStatusDto {
     @ApiProperty({ type: String })
@@ -84,6 +84,13 @@ export class CrmMemberFullDto extends CrmMemberDto {
     membershipNumber: string | null;
     @ApiProperty({ example: "Notes", type: String, nullable: true })
     notes: string | null;
+}
+
+/** PATCH /crm/members/:id/status — смена lifecycle-статуса. */
+export class CrmMemberStatusPatchDto {
+    @ApiProperty({ type: String, format: "uuid" })
+    @IsUUID()
+    statusItemId: string;
 }
 
 /** PATCH: только динамические поля и метаданные member. */

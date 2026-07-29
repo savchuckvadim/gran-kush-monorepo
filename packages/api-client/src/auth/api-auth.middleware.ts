@@ -2,6 +2,7 @@ import { Middleware } from "openapi-fetch";
 
 import type { ApiAuthStrategy } from "../client/client";
 
+import { parseApiErrorFromResponse } from "../errors/api-error";
 import { ApiRefreshHelper } from "./api-auth.refresh-helper";
 import { ApiTokensStorage } from "./api-auth.storage";
 import { ApiAuthType } from "./api-auth.type";
@@ -62,17 +63,8 @@ export const getAuthMiddleware = (
                 return response;
             }
             if (!response.ok && response.status !== 401) {
-                let errorMessage = `Request failed: ${response.url} ${response.status} ${response.statusText}`;
-                try {
-                    const body = (await response.json()) as Record<string, unknown>;
-                    if (body && typeof body.message === "string") {
-                        errorMessage = body.message;
-                    }
-                } catch {
-                    // ignore parse errors
-                }
-
-                throw new Error(errorMessage);
+                // ApiClientError сохраняет status/body — консюмеры различают 402/403/404
+                throw await parseApiErrorFromResponse(response);
             }
 
             try {

@@ -34,7 +34,12 @@ import {
 } from "@modules/portal/crm/members/api/dto/dynamic-member.dto";
 import { MembersService } from "@modules/portal/crm/members/application/services/members.service";
 
-import { CrmMemberDto, CrmMemberFieldsPatchDto, CrmMemberFullDto } from "../dto/crm-member.dto";
+import {
+    CrmMemberDto,
+    CrmMemberFieldsPatchDto,
+    CrmMemberFullDto,
+    CrmMemberStatusPatchDto,
+} from "../dto/crm-member.dto";
 import { CrmMemberFilesRequestDto } from "../dto/crm-member-documents.dto";
 
 @ApiTags("CRM Members Management")
@@ -140,6 +145,30 @@ export class CrmMembersController {
         @PortalId() portalId: string
     ): Promise<CrmMemberFullDto> {
         const updated = await this.membersService.updateCrmMember(id, portalId, dto);
+        if (!updated) {
+            throw new NotFoundException("Member not found");
+        }
+        return this.membersService.toCrmMemberFullDto(updated);
+    }
+
+    @Patch(":id/status")
+    @UseGuards(AdminGuard)
+    @Admin()
+    @ApiOperation({ summary: "Change member lifecycle status (Admin only)" })
+    @ApiSuccessResponse(CrmMemberFullDto, {
+        description: "Member details with updated status",
+    })
+    @ApiErrorResponse([400, 401, 403, 404])
+    async updateStatus(
+        @Param("id") id: string,
+        @Body() dto: CrmMemberStatusPatchDto,
+        @PortalId() portalId: string
+    ): Promise<CrmMemberFullDto> {
+        const updated = await this.membersService.updateMemberStatus(
+            id,
+            portalId,
+            dto.statusItemId
+        );
         if (!updated) {
             throw new NotFoundException("Member not found");
         }

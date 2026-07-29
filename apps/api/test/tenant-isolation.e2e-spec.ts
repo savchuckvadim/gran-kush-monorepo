@@ -549,6 +549,112 @@ describe("Cross-portal isolation (e2e)", () => {
         });
     });
 
+    describe("portal info", () => {
+        it("returns own portal info with subscription status", async () => {
+            const res = await request(app.getHttpServer())
+                .get("/crm/portal/info")
+                .set("Cookie", portalB.cookies)
+                .set("X-Portal-Slug", portalB.slug);
+            expect(res.status).toBe(200);
+            const info = res.body.data ?? res.body;
+            expect(info.portalId).toBe(portalB.id);
+            expect(info.name).toBe(portalB.slug);
+            expect(info.status).toBe("active");
+        });
+
+        it("rejects portal info of portal B for employee A", async () => {
+            const res = await request(app.getHttpServer())
+                .get("/crm/portal/info")
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalB.slug);
+            expect(res.status).toBe(403);
+        });
+    });
+
+    describe("member status change", () => {
+        let memberAId: string;
+        let statusItemAId: string;
+        let statusItemBId: string;
+
+        beforeAll(async () => {
+            // Участник портала A
+            const memberDefinitionA = await prisma.entityDefinition.findFirstOrThrow({
+                where: { portalId: portalA.id, code: "member" },
+                select: { id: true },
+            });
+            const recordA = await prisma.entityRecord.create({
+                data: { portalId: portalA.id, entityDefinitionId: memberDefinitionA.id },
+            });
+            const userA = await prisma.user.create({
+                data: {
+                    email: `member-a-status-${suffix}@test.local`,
+                    passwordHash: "not-a-real-hash",
+                    isActive: true,
+                    emailConfirmed: true,
+                },
+            });
+            const memberA = await prisma.member.create({
+                data: {
+                    userId: userA.id,
+                    portalId: portalA.id,
+                    entityRecordId: recordA.id,
+                    isActive: true,
+                },
+            });
+            memberAId = memberA.id;
+
+            const statusItemA = await prisma.statusItem.findFirstOrThrow({
+                where: { statusSet: { portalId: portalA.id, code: "member_lifecycle" } },
+                select: { id: true },
+            });
+            statusItemAId = statusItemA.id;
+
+            const statusItemB = await prisma.statusItem.findFirstOrThrow({
+                where: { statusSet: { portalId: portalB.id, code: "member_lifecycle" } },
+                select: { id: true },
+            });
+            statusItemBId = statusItemB.id;
+        });
+
+        it("changes member status within own portal", async () => {
+            const res = await request(app.getHttpServer())
+                .patch(`/crm/members/${memberAId}/status`)
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug)
+                .send({ statusItemId: statusItemAId });
+            expect(res.status).toBe(200);
+            const member = res.body.data ?? res.body;
+            expect(member.statusItem?.id).toBe(statusItemAId);
+        });
+
+        it("rejects status change of portal B member by employee A", async () => {
+            const res = await request(app.getHttpServer())
+                .patch(`/crm/members/${memberBId}/status`)
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug)
+                .send({ statusItemId: statusItemAId });
+            expect(res.status).toBe(404);
+        });
+
+        it("rejects portal B status item for portal A member", async () => {
+            const res = await request(app.getHttpServer())
+                .patch(`/crm/members/${memberAId}/status`)
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug)
+                .send({ statusItemId: statusItemBId });
+            expect(res.status).toBe(400);
+        });
+
+        it("rejects portal B status item in generic member PATCH", async () => {
+            const res = await request(app.getHttpServer())
+                .patch(`/crm/members/${memberAId}`)
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug)
+                .send({ statusItemId: statusItemBId });
+            expect(res.status).toBe(400);
+        });
+    });
+
     describe("subscription gate", () => {
         beforeAll(async () => {
             const plan = await prisma.billingPlan.create({

@@ -50,20 +50,17 @@
 
 ## Открытые задачи
 
-### TASK-015: Portal info в CRM Shell — `[~]`
+### TASK-015: Portal info в CRM Shell — `[x]` (2026-07-29)
 
-Portal switcher в CRM есть, но выделенного `GET /crm/portal/info` (displayName, type, subscription status) не найдено.
+- [x] `GET /crm/portal/info` — `{ portalId, name, displayName, type, status, subscription { status, planName, graceEndsAt } }` (`CrmPortalInfoController`, без subscription gate — блок-страница читает статус и при 402)
+- [x] Banner в CRM shell при `past_due` + hard-block вместо контента при `canceled`/`expired`/истёкшем grace (`SubscriptionGate` widget)
+- [x] api-client middleware теперь кидает `ApiClientError` со status/body вместо plain `Error`
 
-- [ ] `GET /crm/portal/info` — `{ portalId, name, displayName, type, status, subscription { status, planName } }`
-- [ ] Banner в CRM shell при `past_due` (backend-заголовок уже есть), hard-block страница при 402
+### TASK-016: Member status update из CRM — `[x]` (2026-07-29)
 
-### TASK-016: Member status update из CRM — `[ ]`
-
-Отдельного endpoint смены статуса не найдено (сейчас — только через общий PATCH).
-
-- [ ] `GET /crm/members/statuses` — статусы портала (StatusSet + StatusItem)
-- [ ] `PATCH /crm/members/:id/status` — `{ statusItemId }`, guard Admin
-- [ ] Frontend: dropdown смены статуса + цвет + confirm
+- [x] Список статусов — существующий `GET /crm/settings/entities/member/status-items` (дублирующий `GET /crm/members/statuses` не заводили)
+- [x] `PATCH /crm/members/:id/status` — `{ statusItemId }`, guard Admin, статус валидируется на принадлежность member_lifecycle-набору портала (та же проверка добавлена в общий PATCH — раньше можно было подставить statusItemId чужого портала)
+- [x] Frontend: dropdown смены статуса в шапке участника + цвет + confirm-диалог
 
 ### TASK-021: Убрать/задействовать модель `StorageFile` — `[ ]`
 

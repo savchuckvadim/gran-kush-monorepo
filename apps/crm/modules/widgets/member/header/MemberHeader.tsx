@@ -9,6 +9,7 @@ import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
 import { MemberStatuses } from "./components/MemberStatuses";
+import { MemberStatusSelect } from "./components/MemberStatusSelect";
 
 export interface IMemberHeaderProps {
     member: CrmMemberDetails;
@@ -24,9 +25,12 @@ export function MemberHeader({ member }: IMemberHeaderProps) {
                     {member.name} {member.surname ?? ""}
                 </h1>
                 <MemberStatuses member={member} />
-                <p className="text-sm text-muted-foreground">
-                    {member.email} · {t("statusLabel")}: {member.status}
-                </p>
+                <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+                    <span>
+                        {member.email} · {t("statusLabel")}:
+                    </span>
+                    <MemberStatusSelect member={member} />
+                </div>
             </div>
             <Button variant="outline" asChild>
                 <Link href={membersPath}>{t("backToClients")}</Link>

@@ -61,3 +61,14 @@ export async function updateCrmMember(
     });
     return (await member).data as CrmMemberDetails;
 }
+
+export async function updateCrmMemberStatus(
+    memberId: string,
+    statusItemId: string
+): Promise<CrmMemberDetails> {
+    const member = await $api.PATCH("/crm/members/{id}/status", {
+        params: { path: { id: memberId } },
+        body: { statusItemId },
+    });
+    return member.data as CrmMemberDetails;
+}

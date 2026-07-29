@@ -7,6 +7,7 @@ import { SharedAuthModule } from "@modules/portal/auth/shared/shared-auth.module
 import { EntityFieldsModule } from "@modules/portal/crm/entity-fields/entity-fields.module";
 import { MembersModule } from "@modules/portal/crm/members/members.module";
 import { CrmMyPortalsController } from "@modules/portal/crm/portals/api/controllers/crm-my-portals.controller";
+import { CrmPortalInfoController } from "@modules/portal/crm/portals/api/controllers/crm-portal-info.controller";
 import { LkPortalsController } from "@modules/portal/crm/portals/api/controllers/lk-portals.controller";
 import { PortalRegistrationController } from "@modules/portal/crm/portals/api/controllers/portal-registration.controller";
 import { PortalResolveController } from "@modules/portal/crm/portals/api/controllers/portal-resolve.controller";
@@ -30,6 +31,7 @@ import { PortalEventsProcessor } from "@modules/portal/crm/portals/infrastructur
         PortalResolveController,
         LkPortalsController,
         CrmMyPortalsController,
+        CrmPortalInfoController,
     ],
     providers: [PortalRegistrationService, PortalEventsProcessor],
     exports: [PortalRegistrationService],

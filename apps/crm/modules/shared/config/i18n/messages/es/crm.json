@@ -15,9 +15,26 @@
                 "settings": "Configuración"
             }
         },
+        "subscription": {
+            "pastDueTitle": "Suscripción vencida",
+            "pastDueDescription": "El pago de la suscripción está vencido. Renuévala para mantener el acceso al CRM.",
+            "pastDueUntil": "El pago de la suscripción está vencido. El acceso se mantiene hasta {date} — renuévala.",
+            "blockedTitle": "Suscripción inactiva",
+            "blockedDescription": "El acceso al CRM de «{portal}» está suspendido: la suscripción expiró o fue cancelada. Renuévala para continuar.",
+            "plan": "Plan"
+        },
         "members": {
             "title": "Miembros",
             "subtitle": "Miembros del club creados (vista temporal sin autenticación)",
+            "statusSelect": {
+                "placeholder": "Estado",
+                "confirmTitle": "¿Cambiar el estado del miembro?",
+                "confirmDescription": "Al miembro {name} se le asignará el estado «{status}».",
+                "confirm": "Cambiar",
+                "cancel": "Cancelar",
+                "saving": "Guardando…",
+                "errorTitle": "No se pudo cambiar el estado"
+            },
             "total": "{count} en total",
             "columns": {
                 "name": "Nombre",

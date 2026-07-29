@@ -12,6 +12,7 @@ export {
     RequireEmployeeAdmin,
     RequireEmployeeJwt,
     RequireEmployeeJwtMobile,
+    RequireEmployeeJwtWithoutSubscriptionGate,
 } from "./api/decorators/require-employee-jwt.decorator";
 
 // Services

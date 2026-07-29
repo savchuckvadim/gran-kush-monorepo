@@ -12,6 +12,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { LangSwitcher } from "@/modules/features";
 import { CrmSidebar, useAuth } from "@/modules/processes";
 import { PortalSwitcher } from "@/modules/widgets/portal-switcher";
+import { SubscriptionGate } from "@/modules/widgets/subscription-gate";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 import { useSidebar } from "@/modules/shared/ui/Sidebar";
@@ -89,7 +90,7 @@ export function CrmShell({ children }: CrmShellProps) {
 
                 <main className="min-w-full  mx-auto flex flex-1 flex-col p-3 pt-4 bg-card-background rounded-tl-xl">
                     <div className="container mx-auto flex flex-1 flex-col p-3 pt-0">
-                    {children}
+                        <SubscriptionGate>{children}</SubscriptionGate>
                     </div>
                 </main>
             </div>

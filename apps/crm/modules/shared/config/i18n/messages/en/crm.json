@@ -15,9 +15,26 @@
                 "settings": "Settings"
             }
         },
+        "subscription": {
+            "pastDueTitle": "Subscription past due",
+            "pastDueDescription": "Your subscription payment is overdue. Renew to keep access to the CRM.",
+            "pastDueUntil": "Your subscription payment is overdue. Access remains until {date} — please renew.",
+            "blockedTitle": "Subscription inactive",
+            "blockedDescription": "Access to the CRM of \"{portal}\" is suspended: the subscription has expired or was canceled. Renew it to continue.",
+            "plan": "Plan"
+        },
         "members": {
             "title": "Members",
             "subtitle": "Created club members (temporary no-auth preview)",
+            "statusSelect": {
+                "placeholder": "Status",
+                "confirmTitle": "Change member status?",
+                "confirmDescription": "Member {name} will be set to \"{status}\".",
+                "confirm": "Change",
+                "cancel": "Cancel",
+                "saving": "Saving…",
+                "errorTitle": "Failed to change status"
+            },
             "total": "{count} total",
             "columns": {
                 "name": "Name",

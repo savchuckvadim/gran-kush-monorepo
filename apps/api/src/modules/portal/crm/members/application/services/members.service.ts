@@ -236,6 +236,7 @@ export class MembersService {
         }
 
         if (dto.statusItemId !== undefined) {
+            await this.assertMemberStatusItemInPortal(portalId, dto.statusItemId);
             await this.prisma.entityRecord.update({
                 where: { id: member.entityRecordId },
                 data: { statusItemId: dto.statusItemId },
@@ -257,6 +258,41 @@ export class MembersService {
         if (Object.keys(updatePayload).length > 0) {
             await this.memberRepository.update(memberId, updatePayload);
         }
+
+        return this.memberRepository.findByIdForPortal(memberId, portalId);
+    }
+
+    /** Статус должен принадлежать набору member_lifecycle этого портала. */
+    private async assertMemberStatusItemInPortal(
+        portalId: string,
+        statusItemId: string
+    ): Promise<void> {
+        const item = await this.prisma.statusItem.findFirst({
+            where: {
+                id: statusItemId,
+                isActive: true,
+                statusSet: { portalId, code: "member_lifecycle" },
+            },
+            select: { id: true },
+        });
+        if (!item) {
+            throw new BadRequestException("Unknown member status for this portal");
+        }
+    }
+
+    /** CRM: смена lifecycle-статуса участника. */
+    async updateMemberStatus(memberId: string, portalId: string, statusItemId: string) {
+        const member = await this.memberRepository.findByIdForPortal(memberId, portalId);
+        if (!member) {
+            throw new NotFoundException("Member not found");
+        }
+
+        await this.assertMemberStatusItemInPortal(portalId, statusItemId);
+
+        await this.prisma.entityRecord.update({
+            where: { id: member.entityRecordId },
+            data: { statusItemId },
+        });
 
         return this.memberRepository.findByIdForPortal(memberId, portalId);
     }

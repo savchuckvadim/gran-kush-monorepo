@@ -11,6 +11,10 @@ import { EmployeeJwtMobileAuthGuard } from "../../infrastructure/guards/employee
 export const RequireEmployeeJwt = () =>
     applyDecorators(UseGuards(EmployeeJwtAuthGuard, MembershipGuard, PortalCrmSubscriptionGuard));
 
+/** CRM веб без subscription gate: для endpoints, которые должны отвечать и при 402 (напр. /crm/portal/info). */
+export const RequireEmployeeJwtWithoutSubscriptionGate = () =>
+    applyDecorators(UseGuards(EmployeeJwtAuthGuard, MembershipGuard));
+
 /** Нативный CRM: JWT из Authorization Bearer + employment в портале запроса. */
 export const RequireEmployeeJwtMobile = () =>
     applyDecorators(

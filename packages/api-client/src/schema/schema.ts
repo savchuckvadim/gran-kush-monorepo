@@ -900,6 +900,23 @@ export interface paths {
         patch: operations["CrmMembers_update"];
         trace?: never;
     };
+    "/crm/members/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change member lifecycle status (Admin only) */
+        patch: operations["CrmMembers_updateStatus"];
+        trace?: never;
+    };
     "/crm/members/{id}/files": {
         parameters: {
             query?: never;
@@ -1045,6 +1062,26 @@ export interface paths {
         };
         /** Порталы, где текущий аккаунт — сотрудник (для переключателя) */
         get: operations["CrmMyPortals_myPortals"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/portal/info": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Инфо текущего портала со статусом подписки
+         * @description Доступен без subscription gate: banner и блок-страница CRM читают статус даже при истёкшей подписке.
+         */
+        get: operations["CrmPortalInfo_getPortalInfo"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2971,6 +3008,10 @@ export interface components {
             membershipNumber?: string | null;
             isActive?: boolean;
         };
+        CrmMemberStatusPatchDto: {
+            /** Format: uuid */
+            statusItemId: string;
+        };
         StreamableFile: Record<string, never>;
         RegisterPortalDto: {
             /**
@@ -2993,14 +3034,16 @@ export interface components {
             ownerSurname?: string;
         };
         PortalInfoDto: {
-            /** @example f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f */
-            id: string;
-            /** @example green-club */
+            /** Format: uuid */
+            portalId: string;
+            /** @description Portal slug */
             name: string;
-            /** @example Green Club */
             displayName: string;
-            /** @example active */
-            status: string;
+            /** @enum {string} */
+            type: "CLUB" | "TATTOO_STUDIO" | "BEAUTY_STUDIO";
+            /** @enum {string} */
+            status: "active" | "suspended" | "archived";
+            subscription: components["schemas"]["PortalSubscriptionInfoDto"] | null;
         };
         PortalOwnerInfoDto: {
             /** @example 123e4567-e89b-12d3-a456-426614174000 */
@@ -3060,6 +3103,17 @@ export interface components {
         };
         MyPortalsResponseDto: {
             portals: components["schemas"]["MyPortalDto"][];
+        };
+        PortalSubscriptionInfoDto: {
+            /**
+             * @example active
+             * @enum {string}
+             */
+            status: "active" | "trialing" | "past_due" | "canceled" | "expired";
+            /** @example Start */
+            planName: string | null;
+            /** Format: date-time */
+            graceEndsAt: string | null;
         };
         ProductCategoryDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
@@ -3392,6 +3446,8 @@ export interface components {
         QrCodeMemberDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
             id: string;
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            portalId: string;
             /** @example John */
             name: string;
             /** @example Doe */
@@ -4409,6 +4465,7 @@ export type SchemaCrmMemberDynamicFieldDto = components['schemas']['CrmMemberDyn
 export type SchemaCrmMemberAccountDocumentDto = components['schemas']['CrmMemberAccountDocumentDto'];
 export type SchemaCrmMemberFullDto = components['schemas']['CrmMemberFullDto'];
 export type SchemaCrmMemberFieldsPatchDto = components['schemas']['CrmMemberFieldsPatchDto'];
+export type SchemaCrmMemberStatusPatchDto = components['schemas']['CrmMemberStatusPatchDto'];
 export type SchemaStreamableFile = components['schemas']['StreamableFile'];
 export type SchemaRegisterPortalDto = components['schemas']['RegisterPortalDto'];
 export type SchemaPortalInfoDto = components['schemas']['PortalInfoDto'];
@@ -4421,6 +4478,7 @@ export type SchemaJoinPortalDto = components['schemas']['JoinPortalDto'];
 export type SchemaJoinPortalResponseDto = components['schemas']['JoinPortalResponseDto'];
 export type SchemaMyPortalDto = components['schemas']['MyPortalDto'];
 export type SchemaMyPortalsResponseDto = components['schemas']['MyPortalsResponseDto'];
+export type SchemaPortalSubscriptionInfoDto = components['schemas']['PortalSubscriptionInfoDto'];
 export type SchemaProductCategoryDto = components['schemas']['ProductCategoryDto'];
 export type SchemaMeasurementUnitDto = components['schemas']['MeasurementUnitDto'];
 export type SchemaProductListDto = components['schemas']['ProductListDto'];
@@ -7055,6 +7113,68 @@ export interface operations {
             };
         };
     };
+    CrmMembers_updateStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CrmMemberStatusPatchDto"];
+            };
+        };
+        responses: {
+            /** @description Member details with updated status */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CrmMemberFullDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
     CrmMembers_updateFiles: {
         parameters: {
             query?: never;
@@ -7438,6 +7558,62 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmPortalInfo_getPortalInfo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalInfoDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
