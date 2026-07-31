@@ -2,9 +2,11 @@
 export { AdminGuard } from "./infrastructure/guards/admin.guard";
 export { EmployeeJwtAuthGuard } from "./infrastructure/guards/employee-jwt-auth.guard";
 export { EmployeeJwtMobileAuthGuard } from "./infrastructure/guards/employee-jwt-mobile-auth.guard";
+export { EmployeeRolesGuard } from "./infrastructure/guards/employee-roles.guard";
 
 // Re-export Admin decorator for convenience
 export { Admin } from "@common/decorators/auth/admin.decorator";
+export { EmployeeRoles, MANAGER_ROLES } from "@common/decorators/auth/employee-roles.decorator";
 
 // Decorators
 export { CurrentEmployee } from "./api/decorators/current-employee.decorator";

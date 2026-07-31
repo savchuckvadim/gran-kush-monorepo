@@ -10,6 +10,10 @@ import { ApiErrorResponse } from "@common/decorators/response/api-error-response
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import type { PortalPrincipal } from "@common/portal";
 import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
+import {
+    RequireAdmin,
+    RequireManager,
+} from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
 
 import { EntityRecordsService } from "../../application/services/entity-records.service";
 import {
@@ -71,7 +75,8 @@ export class CrmEntityRecordsController {
     }
 
     @Post()
-    @ApiOperation({ summary: "Создать запись (валидация по форме crm_create)" })
+    @RequireManager()
+    @ApiOperation({ summary: "Создать запись (валидация по форме crm_create). Роль: manager+" })
     @ApiSuccessResponse(EntityRecordDto, { status: 201 })
     @ApiErrorResponse([400, 401, 403, 404])
     async create(
@@ -96,7 +101,8 @@ export class CrmEntityRecordsController {
     }
 
     @Patch(":id")
-    @ApiOperation({ summary: "Обновить поля/активность записи" })
+    @RequireManager()
+    @ApiOperation({ summary: "Обновить поля/активность записи. Роль: manager+" })
     @ApiSuccessResponse(EntityRecordDto)
     @ApiErrorResponse([400, 401, 403, 404])
     async update(
@@ -109,7 +115,8 @@ export class CrmEntityRecordsController {
     }
 
     @Delete(":id")
-    @ApiOperation({ summary: "Удалить запись" })
+    @RequireAdmin()
+    @ApiOperation({ summary: "Удалить запись. Роль: admin/portal_owner" })
     @ApiSuccessResponse(DeleteRecordResponseDto)
     @ApiErrorResponse([401, 403, 404])
     async remove(
@@ -122,7 +129,8 @@ export class CrmEntityRecordsController {
     }
 
     @Patch(":id/stage")
-    @ApiOperation({ summary: "Сменить стадию записи (kanban)" })
+    @RequireManager()
+    @ApiOperation({ summary: "Сменить стадию записи (kanban). Роль: manager+" })
     @ApiSuccessResponse(EntityRecordDto)
     @ApiErrorResponse([400, 401, 403, 404])
     async setStage(
@@ -135,7 +143,8 @@ export class CrmEntityRecordsController {
     }
 
     @Patch(":id/status")
-    @ApiOperation({ summary: "Сменить статус записи" })
+    @RequireManager()
+    @ApiOperation({ summary: "Сменить статус записи. Роль: manager+" })
     @ApiSuccessResponse(EntityRecordDto)
     @ApiErrorResponse([400, 401, 403, 404])
     async setStatus(
