@@ -21,7 +21,7 @@ import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.in
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
 import { CurrentEmployee } from "@modules/portal/auth/employees/api/decorators/current-employee.decorator";
-import { AdminGuard } from "@modules/portal/auth/employees/infrastructure/guards/admin.guard";
+import { RequireAdmin } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
 import {
     CreateMeasurementUnitDto,
     MeasurementUnitDto,
@@ -114,7 +114,7 @@ export class CrmCatalogController {
     }
 
     @Post("products")
-    @UseGuards(AdminGuard)
+    @RequireAdmin()
     @ApiOperation({ summary: "Создать товар (Admin)" })
     @ApiSuccessResponse(ProductDetailDto, { status: 201 })
     @ApiErrorResponse([400, 401, 403, 404, 409])
@@ -128,7 +128,7 @@ export class CrmCatalogController {
     }
 
     @Patch("products/:id")
-    @UseGuards(AdminGuard)
+    @RequireAdmin()
     @ApiOperation({ summary: "Обновить товар (Admin)" })
     @ApiSuccessResponse(ProductDetailDto)
     @ApiErrorResponse([400, 401, 403, 404, 409])
@@ -143,7 +143,7 @@ export class CrmCatalogController {
     }
 
     @Delete("products/:id")
-    @UseGuards(AdminGuard)
+    @RequireAdmin()
     @ApiOperation({ summary: "Удалить товар (Admin)" })
     @ApiErrorResponse([401, 403, 404])
     async deleteProduct(
@@ -175,7 +175,7 @@ export class CrmCatalogController {
     }
 
     @Post("categories")
-    @UseGuards(AdminGuard)
+    @RequireAdmin()
     @ApiOperation({ summary: "Создать категорию (Admin)" })
     @ApiSuccessResponse(ProductCategoryDto, { status: 201 })
     @ApiErrorResponse([400, 401, 403, 404, 409])
@@ -188,7 +188,7 @@ export class CrmCatalogController {
     }
 
     @Patch("categories/:id")
-    @UseGuards(AdminGuard)
+    @RequireAdmin()
     @ApiOperation({ summary: "Обновить категорию (Admin)" })
     @ApiSuccessResponse(ProductCategoryDto)
     @ApiErrorResponse([400, 401, 403, 404, 409])
@@ -202,7 +202,7 @@ export class CrmCatalogController {
     }
 
     @Delete("categories/:id")
-    @UseGuards(AdminGuard)
+    @RequireAdmin()
     @ApiOperation({ summary: "Удалить категорию (Admin)" })
     @ApiErrorResponse([401, 403, 404])
     async deleteCategory(
@@ -225,7 +225,7 @@ export class CrmCatalogController {
     }
 
     @Post("measurement-units")
-    @UseGuards(AdminGuard)
+    @RequireAdmin()
     @ApiOperation({ summary: "Создать единицу измерения (Admin)" })
     @ApiSuccessResponse(MeasurementUnitDto, { status: 201 })
     @ApiErrorResponse([400, 401, 403, 409])
@@ -237,7 +237,7 @@ export class CrmCatalogController {
     }
 
     @Patch("measurement-units/:id")
-    @UseGuards(AdminGuard)
+    @RequireAdmin()
     @ApiOperation({ summary: "Обновить единицу измерения (Admin)" })
     @ApiSuccessResponse(MeasurementUnitDto)
     @ApiErrorResponse([400, 401, 403, 404, 409])
@@ -250,7 +250,7 @@ export class CrmCatalogController {
     }
 
     @Delete("measurement-units/:id")
-    @UseGuards(AdminGuard)
+    @RequireAdmin()
     @ApiOperation({ summary: "Удалить единицу измерения (Admin)" })
     @ApiErrorResponse([401, 403, 404])
     async deleteMeasurementUnit(@Param("id") id: string): Promise<{ message: string }> {

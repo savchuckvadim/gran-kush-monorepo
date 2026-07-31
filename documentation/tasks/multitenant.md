@@ -79,14 +79,23 @@ orders, catalog (product + category), entity field definitions.
 - [x] Entity records (смарт-процессы): записи портала A невидимы/неизменяемы из портала B
       (`entity-records-rbac.e2e-spec.ts`)
 
-### TASK-023: RBAC внутри портала — `[~]`
+### TASK-023: RBAC внутри портала — `[x]` (2026-07-31)
 
-Изоляция между порталами закрыта, но роли внутри портала проверяются не везде.
+Изоляция между порталами закрыта, роли внутри портала — тоже.
 
 - [x] Записи смарт-процессов: Post/Patch → manager+, Delete → admin/portal_owner
-      (`EmployeeRolesGuard` + `RequireManager()` / `RequireAdmin()`, 2026-07-31)
-- [ ] Аудит остальных CRM-контроллеров на голый `@RequireEmployeeJwt()` без роли
-      (orders, catalog, presence — write-операции доступны роли `employee`)
+      (`EmployeeRolesGuard` + `RequireManager()` / `RequireAdmin()`)
+- [x] **Каталог и финансы: гвард был навешен, но не работал.** `@UseGuards(AdminGuard)`
+      стоял без `@Admin()`, а `AdminGuard` при отсутствии метаданных возвращал `true` —
+      9 write-эндпоинтов каталога (товары/категории/единицы) и ручные финансовые
+      транзакции были открыты любому сотруднику, при том что Swagger писал «(Admin)».
+- [x] `AdminGuard` переведён в fail-closed: навешен → роль проверяется всегда
+- [x] Заказы: `PATCH :id/status` и `PATCH :id/payment` → manager+ (были доступны всем)
+- [x] E2E: `crm-rbac.e2e-spec.ts` — 14 кейсов по каталогу, финансам и заказам
+
+Осознанно оставлено роли `employee` (это работа сотрудника на стойке):
+presence (check-in/out, скан QR), выдача/отзыв QR участнику, создание участника
+(`POST /crm/members`) — при том что его редактирование admin-only.
 
 ---
 

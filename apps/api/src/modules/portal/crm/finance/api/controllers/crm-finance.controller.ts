@@ -18,7 +18,7 @@ import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.in
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
 import { CurrentEmployee } from "@modules/portal/auth/employees/api/decorators/current-employee.decorator";
-import { AdminGuard } from "@modules/portal/auth/employees/infrastructure/guards/admin.guard";
+import { RequireAdmin } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import {
     CreateFinancialTransactionDto,
@@ -91,7 +91,7 @@ export class CrmFinanceController {
     }
 
     @Post("transactions")
-    @UseGuards(AdminGuard)
+    @RequireAdmin()
     @ApiOperation({
         summary: "Создать ручную транзакцию (Admin)",
         description:

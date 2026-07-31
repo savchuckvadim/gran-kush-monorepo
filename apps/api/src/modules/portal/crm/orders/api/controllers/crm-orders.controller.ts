@@ -10,6 +10,7 @@ import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.in
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
 import { CurrentEmployee } from "@modules/portal/auth/employees/api/decorators/current-employee.decorator";
+import { RequireManager } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import {
     OrderDetailDto,
@@ -83,7 +84,8 @@ export class CrmOrdersController {
     // ─── Обновить статус заказа ──────────────────────────────────────────────
 
     @Patch(":id/status")
-    @ApiOperation({ summary: "Обновить статус заказа" })
+    @RequireManager()
+    @ApiOperation({ summary: "Обновить статус заказа. Роль: manager+" })
     @ApiSuccessResponse(OrderDetailDto)
     @ApiErrorResponse([400, 401, 403, 404])
     async updateStatus(
@@ -105,7 +107,8 @@ export class CrmOrdersController {
     // ─── Обновить статус оплаты ──────────────────────────────────────────────
 
     @Patch(":id/payment")
-    @ApiOperation({ summary: "Обновить статус оплаты" })
+    @RequireManager()
+    @ApiOperation({ summary: "Обновить статус оплаты. Роль: manager+" })
     @ApiSuccessResponse(OrderDetailDto)
     @ApiErrorResponse([400, 401, 403, 404])
     async updatePaymentStatus(

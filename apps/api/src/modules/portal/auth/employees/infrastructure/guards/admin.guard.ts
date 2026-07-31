@@ -1,10 +1,8 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common";
-import { Reflector } from "@nestjs/core";
 
 import { EmployeeRole } from "@prisma/client";
 import { Request } from "express";
 
-import { ADMIN_KEY } from "@common/decorators/auth/admin.decorator";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 
 type RequestWithEmployeeUser = Request & { user?: Employee };
@@ -14,21 +12,15 @@ const ADMIN_ROLES: readonly EmployeeRole[] = [EmployeeRole.admin, EmployeeRole.p
 /**
  * Требует роль admin/portal_owner у Employee-моста текущего портала.
  * Должен идти после MembershipGuard (req.user = Employee bridge).
+ *
+ * Fail-closed: если гвард навешен, роль проверяется всегда. Раньше при отсутствии
+ * метаданных @Admin() гвард молча пропускал всех — из-за чего write-эндпоинты
+ * каталога и финансов были открыты любому сотруднику. Предпочитай @RequireAdmin(),
+ * который навешивает гвард и метаданные вместе.
  */
 @Injectable()
 export class AdminGuard implements CanActivate {
-    constructor(private reflector: Reflector) {}
-
     canActivate(context: ExecutionContext): boolean {
-        const isAdminRequired = this.reflector.getAllAndOverride<boolean>(ADMIN_KEY, [
-            context.getHandler(),
-            context.getClass(),
-        ]);
-
-        if (!isAdminRequired) {
-            return true;
-        }
-
         const request = context.switchToHttp().getRequest<RequestWithEmployeeUser>();
         const employee = request.user;
 
