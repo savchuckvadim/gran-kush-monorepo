@@ -1,8 +1,9 @@
 # Multitenant: план задач
 
-Дата анализа: 2026-07-25 (первичный аудит: 2026-05-19)
+Дата анализа: 2026-07-31 (первичный аудит: 2026-05-19)
 Ветка: `tenant-crm`
-Статус: ~90% готовности к production multitenant. P0 закрыт полностью, P1 закрыт, из P2/P3 остались точечные задачи.
+Статус: multitenant-изоляция закрыта полностью (P0–P3 + e2e). Открыт хвост TASK-023 — RBAC ролей
+внутри портала (изоляция между порталами его не покрывает).
 
 ---
 
@@ -62,18 +63,30 @@
 - [x] `PATCH /crm/members/:id/status` — `{ statusItemId }`, guard Admin, статус валидируется на принадлежность member_lifecycle-набору портала (та же проверка добавлена в общий PATCH — раньше можно было подставить statusItemId чужого портала)
 - [x] Frontend: dropdown смены статуса в шапке участника + цвет + confirm-диалог
 
-### TASK-021: Убрать/задействовать модель `StorageFile` — `[ ]`
+### TASK-021: Убрать/задействовать модель `StorageFile` — `[x]` (2026-07-30)
 
-- [ ] Решить: удалить модель из schema или начать вести учёт загрузок (портал+аккаунт) в ней
-- [ ] Если ведём учёт — писать записи из `AccountFilesService` / member-files queue
+- [x] Модель удалена из schema вместе со связями Portal/User (`4ca6e2a`); учёт файлов
+      остаётся в `UserDocument` / `UserSignature`
 
-### TASK-022: Расширение e2e изоляции — `[~]`
+### TASK-022: Расширение e2e изоляции — `[x]` (2026-07-31)
 
-Покрыто: members, presence, QR, файлы (preview), subscription gate.
+Покрыто в `tenant-isolation.e2e-spec.ts`: members, presence, QR, файлы (preview), subscription gate,
+orders, catalog (product + category), entity field definitions.
 
-- [ ] Orders: заказ портала A невиден в портале B
-- [ ] Catalog: product портала A невиден в портале B
-- [ ] Entity-fields settings: field definitions не пересекаются между порталами
+- [x] Orders: заказ портала A невиден в портале B
+- [x] Catalog: product портала A невиден в портале B
+- [x] Entity-fields settings: field definitions не пересекаются между порталами
+- [x] Entity records (смарт-процессы): записи портала A невидимы/неизменяемы из портала B
+      (`entity-records-rbac.e2e-spec.ts`)
+
+### TASK-023: RBAC внутри портала — `[~]`
+
+Изоляция между порталами закрыта, но роли внутри портала проверяются не везде.
+
+- [x] Записи смарт-процессов: Post/Patch → manager+, Delete → admin/portal_owner
+      (`EmployeeRolesGuard` + `RequireManager()` / `RequireAdmin()`, 2026-07-31)
+- [ ] Аудит остальных CRM-контроллеров на голый `@RequireEmployeeJwt()` без роли
+      (orders, catalog, presence — write-операции доступны роли `employee`)
 
 ---
 
