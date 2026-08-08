@@ -13,8 +13,11 @@ const intlMiddleware = createIntlMiddleware({
     localeDetection: false,
 });
 
+const CRM_ACCESS_COOKIE = "crm_access_token";
+const CRM_REFRESH_COOKIE = "crm_refresh_token";
+
 /**
- * Next.js 16: proxy для обработки locale в URL
+ * Next.js 16: proxy (бывший middleware) — locale в URL + защита CRM-маршрутов
  */
 export default function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
@@ -28,10 +31,33 @@ export default function proxy(request: NextRequest) {
     ) {
         return NextResponse.next();
     }
-    // Handle internationalization first
-    const response = intlMiddleware(request);
 
-    return response;
+    // segments: [locale, portal?, section?, ...]
+    const segments = pathname.split("/").filter(Boolean);
+    const locale = segments[0];
+    const second = segments[1]; // portal slug or "auth"
+    const third = segments[2]; // "crm", "auth", "scan", "member", ...
+
+    // Access-cookie живёт 15 минут; живой refresh-cookie означает,
+    // что клиент восстановит сессию через /crm/auth/refresh
+    const hasAuthCookie =
+        request.cookies.has(CRM_ACCESS_COOKIE) || request.cookies.has(CRM_REFRESH_COOKIE);
+
+    // [locale]/[portal]/crm/* and [locale]/[portal]/scan — protected
+    if (second && second !== "auth" && (third === "crm" || third === "scan" || third === "member")) {
+        if (!hasAuthCookie) {
+            const loginUrl = new URL(`/${locale}/${second}/auth/login`, request.url);
+            loginUrl.searchParams.set("from", pathname);
+            return NextResponse.redirect(loginUrl);
+        }
+    }
+
+    // [locale]/[portal]/auth/* — redirect to CRM if already authenticated
+    if (second && second !== "auth" && third === "auth" && hasAuthCookie) {
+        return NextResponse.redirect(new URL(`/${locale}/${second}/crm`, request.url));
+    }
+
+    return intlMiddleware(request);
 }
 
 export const config = {
