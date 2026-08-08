@@ -1,8 +1,8 @@
 import { Middleware } from "openapi-fetch";
 
 import type { ApiAuthStrategy } from "../client/client";
-
 import { parseApiErrorFromResponse } from "../errors/api-error";
+
 import { ApiRefreshHelper } from "./api-auth.refresh-helper";
 import { ApiTokensStorage } from "./api-auth.storage";
 import { ApiAuthType } from "./api-auth.type";

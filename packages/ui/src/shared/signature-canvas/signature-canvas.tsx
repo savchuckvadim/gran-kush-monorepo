@@ -14,11 +14,10 @@ function ThemedSignaturePreview({ src, className }: { src: string; className?: s
     const { resolvedTheme } = useTheme();
     const isDark = resolvedTheme === "dark";
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [processedSrc, setProcessedSrc] = useState<string | null>(null);
+    const [processed, setProcessed] = useState<{ src: string; dataUrl: string } | null>(null);
 
     useEffect(() => {
         if (!isDark || !canvasRef.current) {
-            setProcessedSrc(null);
             return;
         }
 
@@ -53,13 +52,15 @@ function ThemedSignaturePreview({ src, className }: { src: string; className?: s
             }
 
             ctx.putImageData(imageData, 0, 0);
-            setProcessedSrc(canvas.toDataURL("image/png"));
+            setProcessed({ src, dataUrl: canvas.toDataURL("image/png") });
         };
         img.onerror = () => {
-            setProcessedSrc(null);
+            setProcessed(null);
         };
         img.src = src;
     }, [src, isDark]);
+
+    const processedSrc = isDark && processed?.src === src ? processed.dataUrl : null;
 
     if (!isDark) {
         return <img src={src} alt="signature" className={className} />;
@@ -96,6 +97,8 @@ export function SignatureCanvasField({
 }: SignatureCanvasProps) {
     const canvasRef = useRef<SignatureCanvas>(null);
     const [isEmpty, setIsEmpty] = useState(true);
+    // Track if canvas has content but hasn't been saved yet
+    const [hasUnsavedContent, setHasUnsavedContent] = useState(false);
     const { resolvedTheme } = useTheme();
     const effectivePenColor = penColor ?? (resolvedTheme === "dark" ? "#f8fafc" : "#111827");
 
@@ -171,9 +174,6 @@ export function SignatureCanvasField({
             onChange?.(dataURL);
         }
     };
-
-    // Track if canvas has content but hasn't been saved yet
-    const [hasUnsavedContent, setHasUnsavedContent] = useState(false);
 
     const handleEnd = () => {
         // Just mark that there's content, don't save automatically
