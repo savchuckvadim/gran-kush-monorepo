@@ -1,0 +1,105 @@
+name: CI
+
+on:
+  push:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Lint, typecheck, unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck api
+        run: pnpm --filter api typecheck
+
+      - name: Typecheck crm
+        run: pnpm --filter crm typecheck
+
+      - name: Typecheck web
+        run: pnpm --filter web typecheck
+
+      - name: Unit tests (api)
+        run: pnpm --filter api test
+
+  e2e:
+    name: API e2e (Postgres + Redis)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: kush
+          POSTGRES_PASSWORD: kush
+          POSTGRES_DB: gran_kush_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kush -d gran_kush_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://kush:kush@localhost:5432/gran_kush_test?schema=public
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: ci-access-secret
+      JWT_REFRESH_SECRET: ci-refresh-secret
+      JWT_ACCESS_TOKEN_EXPIRES_IN: 15m
+      JWT_REFRESH_TOKEN_EXPIRES_IN: 7d
+      COOKIE_SECRET: ci-cookie-secret
+      ENCRYPTION_MASTER_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      AUTH_COOKIE_SECURE: "false"
+      MAIL_HOST: localhost
+      MAIL_PORT: "1025"
+      MAIL_LOGIN: ci
+      MAIL_PASSWORD: ci
+      CORS_ORIGIN: http://localhost:5000
+      CRM_FRONTEND_URL: http://localhost:5000
+      MEMBER_FRONTEND_URL: http://localhost:5001
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply migrations
+        run: pnpm --filter api prisma:migrate:deploy
+
+      - name: E2E tests (api)
+        run: pnpm --filter api test:e2e -- --runInBand
