@@ -8,8 +8,10 @@
 > **Что уже есть в репозитории** (не нужно писать заново): `infra/compose/docker-compose.prod.yml`
 > — полный стек (postgres, redis, api, crm, web, admin, nginx с host-based routing),
 > `infra/docker/api.Dockerfile` + `next.Dockerfile`, entrypoint с `prisma migrate deploy`.
-> Из инфраструктуры **не хватает**: выбранного сервера, TLS, GitHub Actions (`.github/workflows/` пуст),
+> Из инфраструктуры **не хватает**: выбранного сервера, TLS, deploy-workflow,
 > registry для образов и бэкапов БД.
+> **Есть (2026-08-08):** `.github/workflows/ci.yml` — lint/typecheck/unit + e2e
+> с Postgres/Redis services на каждый push; первая половина шага 5 закрыта.
 
 ---
 
@@ -161,7 +163,10 @@ Managed-сервисы (Cloud SQL) добавят ещё столько же. С
 
 Два workflow.
 
-**`.github/workflows/ci.yml`** — на каждый PR и push:
+**`.github/workflows/ci.yml`** — ✅ сделан (2026-08-08, push в любую ветку + workflow_dispatch).
+Нюансы, которые пришлось решить: pnpm 10 пробрасывает `--` в jest буквально → скрипт
+`test:e2e:ci`; e2e требуют `MEMBER_AUTH_COOKIE_DOMAIN`/`CRM_AUTH_COOKIE_DOMAIN`;
+jest не выходит из-за Redis-хэндлов → `--forceExit`. Состав:
 - `pnpm install --frozen-lockfile`
 - `pnpm lint`
 - `pnpm --filter api typecheck && pnpm --filter crm typecheck && pnpm --filter web typecheck`
