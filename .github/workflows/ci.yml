@@ -78,6 +78,8 @@ jobs:
       COOKIE_SECRET: ci-cookie-secret
       ENCRYPTION_MASTER_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
       AUTH_COOKIE_SECURE: "false"
+      MEMBER_AUTH_COOKIE_DOMAIN: localhost
+      CRM_AUTH_COOKIE_DOMAIN: localhost
       MAIL_HOST: localhost
       MAIL_PORT: "1025"
       MAIL_LOGIN: ci
@@ -102,4 +104,4 @@ jobs:
         run: pnpm --filter api prisma:migrate:deploy
 
       - name: E2E tests (api)
-        run: pnpm --filter api test:e2e -- --runInBand
+        run: pnpm --filter api test:e2e:ci
