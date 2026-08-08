@@ -27,6 +27,11 @@ Unified documentation for the platform split into three product areas:
 - [HTTP API Contract](./backend/HTTP_API_CONTRACT.md) — errors, CORS, portal headers (`X-Portal-*`), web cookies vs mobile Bearer
 - Covers module architecture, API boundaries, migrations, bootstrap admin seed, and runtime setup
 
+### 4) Brand & Positioning
+
+- [Philosophy](./philosophy/README.md)
+- Brand concept, manifesto, tone of voice, naming shortlist and domain plan
+
 ## Cross-Cutting Technical Docs
 
 - [Authentication System](./AUTHENTICATION.md) - dual auth model (`/lk/auth/*`, `/crm/auth/*`); **for cookie/mobile and tenant headers prefer [HTTP API Contract](./backend/HTTP_API_CONTRACT.md)**
