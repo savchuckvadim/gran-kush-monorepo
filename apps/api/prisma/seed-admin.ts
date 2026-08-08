@@ -32,26 +32,31 @@ function parseBooleanFlag(value: string | undefined, fallback: boolean): boolean
 
 async function seedPlatformBootstrapAdmin(): Promise<void> {
     const isEnabled = parseBooleanFlag(
-        process.env.PLATFORM_BOOTSTRAP_ENABLED ?? process.env.BOOTSTRAP_ADMIN_ENABLED,
+        process.env.PLATFORM_BOOTSTRAP_ENABLED ??
+            process.env.PLATFORM_BOOTSTRAP_ADMIN_ENABLED ??
+            process.env.BOOTSTRAP_ADMIN_ENABLED,
         false
     );
     if (!isEnabled) {
         console.log(
-            "[seed-admin] Skip: PLATFORM_BOOTSTRAP_ENABLED / BOOTSTRAP_ADMIN_ENABLED is false"
+            "[seed-admin] Skip: PLATFORM_BOOTSTRAP_ADMIN_ENABLED / BOOTSTRAP_ADMIN_ENABLED is false"
         );
         return;
     }
 
     const adminEmailRaw =
-        process.env.PLATFORM_BOOTSTRAP_EMAIL?.trim() || process.env.BOOTSTRAP_ADMIN_EMAIL?.trim();
+        process.env.PLATFORM_BOOTSTRAP_EMAIL?.trim() ||
+        process.env.PLATFORM_BOOTSTRAP_ADMIN_EMAIL?.trim() ||
+        process.env.BOOTSTRAP_ADMIN_EMAIL?.trim();
     const adminPasswordRaw =
         process.env.PLATFORM_BOOTSTRAP_PASSWORD?.trim() ||
+        process.env.PLATFORM_BOOTSTRAP_ADMIN_PASSWORD?.trim() ||
         process.env.BOOTSTRAP_ADMIN_PASSWORD?.trim();
     if (!adminEmailRaw) {
-        throw new Error("Set PLATFORM_BOOTSTRAP_EMAIL or BOOTSTRAP_ADMIN_EMAIL");
+        throw new Error("Set PLATFORM_BOOTSTRAP_ADMIN_EMAIL or BOOTSTRAP_ADMIN_EMAIL");
     }
     if (!adminPasswordRaw) {
-        throw new Error("Set PLATFORM_BOOTSTRAP_PASSWORD or BOOTSTRAP_ADMIN_PASSWORD");
+        throw new Error("Set PLATFORM_BOOTSTRAP_ADMIN_PASSWORD or BOOTSTRAP_ADMIN_PASSWORD");
     }
     const adminEmail = adminEmailRaw;
     const adminPassword = adminPasswordRaw;

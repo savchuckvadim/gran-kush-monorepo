@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-class PortalInfoDto {
+class RegisteredPortalDto {
     @ApiProperty({ example: "f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f", type: String })
     id: string;
 
@@ -29,8 +29,8 @@ class PortalOwnerInfoDto {
 }
 
 export class RegisterPortalResponseDto {
-    @ApiProperty({ type: () => PortalInfoDto })
-    portal: PortalInfoDto;
+    @ApiProperty({ type: () => RegisteredPortalDto })
+    portal: RegisteredPortalDto;
 
     @ApiProperty({ type: () => PortalOwnerInfoDto })
     owner: PortalOwnerInfoDto;

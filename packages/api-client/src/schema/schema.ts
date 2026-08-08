@@ -1672,7 +1672,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Обновить статус заказа */
+        /** Обновить статус заказа. Роль: manager+ */
         patch: operations["CrmOrders_updateStatus"];
         trace?: never;
     };
@@ -1689,7 +1689,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Обновить статус оплаты */
+        /** Обновить статус оплаты. Роль: manager+ */
         patch: operations["CrmOrders_updatePaymentStatus"];
         trace?: never;
     };
@@ -2003,7 +2003,7 @@ export interface paths {
         /** Список записей сущности (пагинация, фильтры по FieldValue) */
         get: operations["CrmEntityRecords_list"];
         put?: never;
-        /** Создать запись (валидация по форме crm_create) */
+        /** Создать запись (валидация по форме crm_create). Роль: manager+ */
         post: operations["CrmEntityRecords_create"];
         delete?: never;
         options?: never;
@@ -2022,11 +2022,11 @@ export interface paths {
         get: operations["CrmEntityRecords_byId"];
         put?: never;
         post?: never;
-        /** Удалить запись */
+        /** Удалить запись. Роль: admin/portal_owner */
         delete: operations["CrmEntityRecords_remove"];
         options?: never;
         head?: never;
-        /** Обновить поля/активность записи */
+        /** Обновить поля/активность записи. Роль: manager+ */
         patch: operations["CrmEntityRecords_update"];
         trace?: never;
     };
@@ -2043,7 +2043,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Сменить стадию записи (kanban) */
+        /** Сменить стадию записи (kanban). Роль: manager+ */
         patch: operations["CrmEntityRecords_setStage"];
         trace?: never;
     };
@@ -2060,7 +2060,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Сменить статус записи */
+        /** Сменить статус записи. Роль: manager+ */
         patch: operations["CrmEntityRecords_setStatus"];
         trace?: never;
     };
@@ -3173,17 +3173,15 @@ export interface components {
             /** @example Surname */
             ownerSurname?: string;
         };
-        PortalInfoDto: {
-            /** Format: uuid */
-            portalId: string;
-            /** @description Portal slug */
+        RegisteredPortalDto: {
+            /** @example f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f */
+            id: string;
+            /** @example green-club */
             name: string;
+            /** @example Green Club */
             displayName: string;
-            /** @enum {string} */
-            type: "CLUB" | "TATTOO_STUDIO" | "BEAUTY_STUDIO";
-            /** @enum {string} */
-            status: "active" | "suspended" | "archived";
-            subscription: components["schemas"]["PortalSubscriptionInfoDto"] | null;
+            /** @example active */
+            status: string;
         };
         PortalOwnerInfoDto: {
             /** @example 123e4567-e89b-12d3-a456-426614174000 */
@@ -3196,7 +3194,7 @@ export interface components {
             role: string;
         };
         RegisterPortalResponseDto: {
-            portal: components["schemas"]["PortalInfoDto"];
+            portal: components["schemas"]["RegisteredPortalDto"];
             owner: components["schemas"]["PortalOwnerInfoDto"];
             /**
              * @description Передавайте в X-Device-Id; токены выставлены в HttpOnly cookies
@@ -3254,6 +3252,18 @@ export interface components {
             planName: string | null;
             /** Format: date-time */
             graceEndsAt: string | null;
+        };
+        PortalInfoDto: {
+            /** Format: uuid */
+            portalId: string;
+            /** @description Portal slug */
+            name: string;
+            displayName: string;
+            /** @enum {string} */
+            type: "CLUB" | "TATTOO_STUDIO" | "BEAUTY_STUDIO";
+            /** @enum {string} */
+            status: "active" | "suspended" | "archived";
+            subscription: components["schemas"]["PortalSubscriptionInfoDto"] | null;
         };
         ProductCategoryDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
@@ -4617,7 +4627,7 @@ export type SchemaCrmMemberFieldsPatchDto = components['schemas']['CrmMemberFiel
 export type SchemaCrmMemberStatusPatchDto = components['schemas']['CrmMemberStatusPatchDto'];
 export type SchemaStreamableFile = components['schemas']['StreamableFile'];
 export type SchemaRegisterPortalDto = components['schemas']['RegisterPortalDto'];
-export type SchemaPortalInfoDto = components['schemas']['PortalInfoDto'];
+export type SchemaRegisteredPortalDto = components['schemas']['RegisteredPortalDto'];
 export type SchemaPortalOwnerInfoDto = components['schemas']['PortalOwnerInfoDto'];
 export type SchemaRegisterPortalResponseDto = components['schemas']['RegisterPortalResponseDto'];
 export type SchemaPortalResolveResponseDto = components['schemas']['PortalResolveResponseDto'];
@@ -4628,6 +4638,7 @@ export type SchemaJoinPortalResponseDto = components['schemas']['JoinPortalRespo
 export type SchemaMyPortalDto = components['schemas']['MyPortalDto'];
 export type SchemaMyPortalsResponseDto = components['schemas']['MyPortalsResponseDto'];
 export type SchemaPortalSubscriptionInfoDto = components['schemas']['PortalSubscriptionInfoDto'];
+export type SchemaPortalInfoDto = components['schemas']['PortalInfoDto'];
 export type SchemaProductCategoryDto = components['schemas']['ProductCategoryDto'];
 export type SchemaMeasurementUnitDto = components['schemas']['MeasurementUnitDto'];
 export type SchemaProductListDto = components['schemas']['ProductListDto'];
