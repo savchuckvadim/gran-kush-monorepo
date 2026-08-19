@@ -24,16 +24,16 @@ name: gran-kush
 services:
   api:
     build: !reset null
-    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush}/api:${TAG:-latest}
+    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/api:${TAG:-latest}
 
   crm:
     build: !reset null
-    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush}/crm:${TAG:-latest}
+    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/crm:${TAG:-latest}
 
   web:
     build: !reset null
-    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush}/web:${TAG:-latest}
+    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/web:${TAG:-latest}
 
   admin:
     build: !reset null
-    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush}/admin:${TAG:-latest}
+    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/admin:${TAG:-latest}

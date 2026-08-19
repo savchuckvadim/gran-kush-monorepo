@@ -157,7 +157,7 @@ Managed-сервисы (Cloud SQL) добавят ещё столько же. С
 Собирать на сервере нельзя (см. §1), значит нужен registry. **GitHub Container Registry (ghcr.io)** —
 бесплатен для приватных образов в разумных объёмах и не требует заводить ещё один аккаунт.
 
-1. ✅ В GH Actions пушим `ghcr.io/savchuckvadim/gran-kush/{api,crm,web,admin}:sha-<commit>` и `:latest`
+1. ✅ В GH Actions пушим `ghcr.io/savchuckvadim/gran-kush-monorepo/{api,crm,web,admin}:sha-<commit>` и `:latest`
    (`deploy.yml`, права — встроенный `GITHUB_TOKEN` с `packages: write`, отдельный PAT не нужен).
 2. На сервере — `docker login ghcr.io` с PAT (scope `read:packages`), сохранённый в `~/.docker/config.json`.
 3. ✅ `infra/compose/docker-compose.deploy.yml` — override: `build: !reset null` +
