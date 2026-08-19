@@ -1,0 +1,39 @@
+# Deploy override: run the stack from prebuilt ghcr.io images instead of
+# building on the server (the server is too small for three `next build`s —
+# see documentation/tasks/deployment.md §1).
+#
+#   export TAG=sha-<commit>            # or latest
+#   docker compose --env-file infra/compose/.env \
+#     -f infra/compose/docker-compose.prod.yml \
+#     -f infra/compose/docker-compose.deploy.yml \
+#     pull
+#   docker compose --env-file infra/compose/.env \
+#     -f infra/compose/docker-compose.prod.yml \
+#     -f infra/compose/docker-compose.deploy.yml \
+#     up -d --remove-orphans
+#
+# `build: !reset null` removes the build config from the merged model, so
+# compose never falls back to building on the server. Requires Docker
+# Compose >= 2.24. The server must be logged in to the registry once:
+#   docker login ghcr.io   # PAT with read:packages
+#
+# Images are pushed by .github/workflows/deploy.yml.
+
+name: gran-kush
+
+services:
+  api:
+    build: !reset null
+    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush}/api:${TAG:-latest}
+
+  crm:
+    build: !reset null
+    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush}/crm:${TAG:-latest}
+
+  web:
+    build: !reset null
+    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush}/web:${TAG:-latest}
+
+  admin:
+    build: !reset null
+    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush}/admin:${TAG:-latest}
