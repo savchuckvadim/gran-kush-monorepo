@@ -46,3 +46,6 @@ npm-debug.log*
 infra/compose/.env
 infra/compose/env/*.env
 !infra/compose/env/*.env.example
+
+
+documentation/philosophy/

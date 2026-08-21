@@ -99,6 +99,7 @@ export class PortalContextMiddleware implements NestMiddleware {
     private portalContextOptional(path: string): boolean {
         const optionalPrefixes = [
             "/crm/my-portals",
+            "/crm/portals/resolve",
             "/crm/auth/login",
             "/crm/auth/refresh",
             "/crm/auth/logout",
