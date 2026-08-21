@@ -68,6 +68,17 @@ Frontend apps must use **`fetch(..., { credentials: "include" })`** when calling
 
 Constants: `apps/api/src/common/portal/portal-http.constants.ts`.
 
+`PortalContextMiddleware` (`apps/api/src/modules/portal/crm/portals/infrastructure/middleware/portal-context.middleware.ts`)
+requires portal headers on every `/crm/*`, `/lk/*`, `/users/*`, `/public/*` route and answers
+**400** (`Missing portal: send x-portal-id or x-portal-slug`) when they are absent.
+
+Routes listed in its `optionalPrefixes` work without the headers — auth, account, cross-portal
+screens, and `/crm/portals/resolve` (used by CRM SSR to resolve the portal from the URL slug).
+
+> **Rule:** an endpoint that is public / used during SSR *before* the portal is known must be added
+> to `optionalPrefixes`. Otherwise it is unreachable by design: it needs the portal context in order
+> to tell the caller what the portal is.
+
 After JWT validation, **`PortalTenantMatchGuard`** ensures the authenticated user’s `portalId` matches the request’s portal context when that context is present. Mismatch → **403** (`ForbiddenException`).
 
 ---

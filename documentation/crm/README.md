@@ -86,6 +86,7 @@ The API resolves **portal** via **`X-Portal-Id`** / **`X-Portal-Slug`** (forward
 ### API client (`@workspace/api-client`)
 
 - **`configureApiClient(baseUrl, ApiAuthType.CRM, { authStrategy: "cookie" })`** — all requests use `fetch` with **`credentials: "include"`** so HttpOnly auth cookies are sent.
+- **Portal header** — the client is configured with `getPortalSlug` (`apps/crm/modules/shared/api/api.ts`) and the middleware puts the slug into **`X-Portal-Slug`** on every request. In the browser the slug is read straight from the URL (`getRouteContext`), not from React state: `[locale]/layout` and `[portal]/layout` both render a `PortalProvider`, and since effects run bottom-up the outer one used to overwrite the slug with `null`, so the header silently disappeared and every call answered **400 `Missing portal`**.
 - **`getAuthMiddleware`** — handles **401 → refresh → retry**; does not replace domain-level error UX (toasts/forms); use helpers below for user-visible messages.
 - **Errors** — `assertOpenApiOk(result)` throws **`ApiClientError`** with a message derived from the JSON body (`errors` preferred over `message`). **`getApiErrorMessage(error)`** unwraps for UI.
 - **CRM UI helpers** — `notifyApiError` (`apps/crm/modules/shared/lib/notify-api-error.ts`) shows a **Sonner** toast; forms can also show **`getApiErrorMessage(mutation.error)`** inline (better for mobile if toasts are disabled later).

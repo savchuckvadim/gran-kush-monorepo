@@ -29,11 +29,11 @@ Unified documentation for the platform split into three product areas:
 
 ### 4) Brand & Positioning
 
-- [Philosophy](./philosophy/README.md)
-- Brand concept, manifesto, tone of voice, naming shortlist and domain plan
+- Philosophy — brand concept, manifesto, tone of voice, naming shortlist and domain plan; kept **locally only**, the folder is git-ignored
 
 ## Cross-Cutting Technical Docs
 
+- [Work log](./HISTORY.md) — dated notes on non-obvious bugs and the decisions behind their fixes
 - [Authentication System](./AUTHENTICATION.md) - dual auth model (`/lk/auth/*`, `/crm/auth/*`); **for cookie/mobile and tenant headers prefer [HTTP API Contract](./backend/HTTP_API_CONTRACT.md)**
 - [Storage Module](./STORAGE.md) - private/public file storage and member documents
 

@@ -33,6 +33,11 @@ pnpm docker:dev:down
 - Data persists in the `postgres_data` / `redis_data` volumes.
 
 > Note: if another project already holds port `6379`, either stop it or set `REDIS_PORT`.
+>
+> Careful: the plain `docker compose -f ... up -d` form above ignores `apps/api/.env`, so a custom
+> `REDIS_PORT` there is **not** applied and the container ends up on a different port than `REDIS_URL`
+> expects — the API then fails with `ECONNREFUSED` against a perfectly healthy container.
+> Prefer `pnpm docker:dev`, which always passes `--env-file apps/api/.env`.
 
 ## Prod — full stack
 
