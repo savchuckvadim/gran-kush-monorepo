@@ -8,6 +8,8 @@ The backend API is built with **NestJS 11**, following Domain-Driven Design (DDD
 
 **Entity-first CRM, платформа, биллинг:** [ENTITY_PLATFORM_ARCHITECTURE.md](./ENTITY_PLATFORM_ARCHITECTURE.md)
 
+**Идемпотентность, реплики, оплата, изоляция порталов:** [IDEMPOTENCY_AND_SCALING.md](./IDEMPOTENCY_AND_SCALING.md)
+
 ## Architecture
 
 ### Design Patterns

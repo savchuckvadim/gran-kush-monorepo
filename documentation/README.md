@@ -33,6 +33,7 @@ Unified documentation for the platform split into three product areas:
 
 ## Cross-Cutting Technical Docs
 
+- [Идемпотентность и масштабирование](./backend/IDEMPOTENCY_AND_SCALING.md) — реплики, оплата, изоляция порталов, куки и домены; план: [scaling-roadmap](./tasks/scaling-roadmap.md)
 - [Развёртывание и эксплуатация](./DEPLOYMENT.md) — инструкция для DevOps: инфраструктура, env, CI/CD, домены и куки, реплики
 - [Work log](./HISTORY.md) — dated notes on non-obvious bugs and the decisions behind their fixes
 - [Authentication System](./AUTHENTICATION.md) - dual auth model (`/lk/auth/*`, `/crm/auth/*`); **for cookie/mobile and tenant headers prefer [HTTP API Contract](./backend/HTTP_API_CONTRACT.md)**
