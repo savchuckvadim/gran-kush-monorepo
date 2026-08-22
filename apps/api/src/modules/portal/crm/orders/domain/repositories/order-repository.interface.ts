@@ -68,9 +68,6 @@ export abstract class OrderRepository {
     /** Найти заказ по ID в пределах портала (tenant-scoped) */
     abstract findByIdForPortal(id: string, portalId: string): Promise<Order | null>;
 
-    /** Найти заказ по номеру */
-    abstract findByOrderNumber(orderNumber: string): Promise<Order | null>;
-
     /** Найти все заказы с фильтрами, пагинацией и сортировкой */
     abstract findAll(
         filters?: OrderFilters,
@@ -89,6 +86,9 @@ export abstract class OrderRepository {
     /** Обновить заказ (без позиций) */
     abstract update(id: string, data: UpdateOrderInput): Promise<Order>;
 
-    /** Получить последний номер заказа за сегодня (для генерации следующего) */
-    abstract getLastOrderNumberForDate(date: Date): Promise<string | null>;
+    /**
+     * Наибольший номер заказа с данным префиксом в пределах портала.
+     * Префикс несёт дату, поэтому дневная нумерация не зависит от таймзоны сервера.
+     */
+    abstract getLastOrderNumberWithPrefix(portalId: string, prefix: string): Promise<string | null>;
 }

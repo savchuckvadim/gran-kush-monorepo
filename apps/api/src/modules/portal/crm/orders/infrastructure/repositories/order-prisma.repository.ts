@@ -61,16 +61,6 @@ export class OrderPrismaRepository extends OrderRepository {
         return row ? this.mapToEntity(row) : null;
     }
 
-    // ─── Поиск по номеру заказа ──────────────────────────────────────────────
-
-    async findByOrderNumber(orderNumber: string): Promise<Order | null> {
-        const row = await this.prisma.order.findFirst({
-            where: { orderNumber },
-            include: ORDER_INCLUDE,
-        });
-        return row ? this.mapToEntity(row) : null;
-    }
-
     // ─── Список с фильтрами и пагинацией ────────────────────────────────────
 
     async findAll(
@@ -206,22 +196,11 @@ export class OrderPrismaRepository extends OrderRepository {
         return this.mapToEntity(row);
     }
 
-    // ─── Последний номер заказа за дату ──────────────────────────────────────
+    // ─── Последний номер заказа по префиксу (в пределах портала) ─────────────
 
-    async getLastOrderNumberForDate(date: Date): Promise<string | null> {
-        const startOfDay = new Date(date);
-        startOfDay.setHours(0, 0, 0, 0);
-
-        const endOfDay = new Date(date);
-        endOfDay.setHours(23, 59, 59, 999);
-
+    async getLastOrderNumberWithPrefix(portalId: string, prefix: string): Promise<string | null> {
         const lastOrder = await this.prisma.order.findFirst({
-            where: {
-                orderedAt: {
-                    gte: startOfDay,
-                    lte: endOfDay,
-                },
-            },
+            where: { portalId, orderNumber: { startsWith: prefix } },
             orderBy: { orderNumber: "desc" },
             select: { orderNumber: true },
         });

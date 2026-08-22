@@ -23,6 +23,24 @@ import {
     UpdateOrderInput,
 } from "@modules/portal/crm/orders/domain/repositories/order-repository.interface";
 
+/** Сколько раз подбирать свободный номер заказа, прежде чем сдаться */
+const ORDER_NUMBER_MAX_ATTEMPTS = 5;
+
+/** `ORD-20260316-` — дата всегда в UTC, чтобы нумерация не зависела от таймзоны сервера */
+const buildOrderNumberPrefix = (date: Date): string =>
+    `ORD-${date.toISOString().slice(0, 10).replace(/-/g, "")}-`;
+
+/** Конфликт по уникальному индексу `(portal_id, order_number)` */
+const isOrderNumberConflict = (error: unknown): boolean => {
+    if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
+        return false;
+    }
+
+    const target = error.meta?.target;
+    const fields = Array.isArray(target) ? target : [target];
+    return fields.some((field) => String(field).includes("order_number"));
+};
+
 @Injectable()
 export class OrdersService {
     private readonly logger = new Logger(OrdersService.name);
@@ -77,11 +95,6 @@ export class OrdersService {
         return order;
     }
 
-    /** Найти заказ по номеру */
-    async findByOrderNumber(orderNumber: string): Promise<Order | null> {
-        return this.orderRepository.findByOrderNumber(orderNumber);
-    }
-
     /** Все заказы с фильтрами */
     async findAll(
         filters?: OrderFilters,
@@ -119,15 +132,11 @@ export class OrdersService {
         const discount = 0; // Скидки пока не реализованы
         const total = subtotal - discount;
 
-        // 3. Сгенерировать номер заказа
-        const orderNumber = await this.generateOrderNumber();
-
-        // 4. Создать заказ в БД
+        // 3. Создать заказ в БД с номером, уникальным в пределах портала
         const stageId = await this.resolveStageIdForMemberOrder(memberId, OrderStatus.PENDING);
 
-        const orderInput: CreateOrderInput = {
+        const order = await this.createWithGeneratedOrderNumber(portalId, {
             memberId,
-            orderNumber,
             status: OrderStatus.PENDING,
             paymentStatus: PaymentStatus.PENDING,
             subtotal,
@@ -136,11 +145,9 @@ export class OrdersService {
             notes: dto.notes,
             items: resolvedItems,
             stageId,
-        };
+        });
 
-        const order = await this.orderRepository.create(orderInput);
-
-        // 5. Списать количество товаров со склада
+        // 4. Списать количество товаров со склада
         for (const item of resolvedItems) {
             await this.productsService.adjustQuantity(
                 item.productId,
@@ -150,7 +157,7 @@ export class OrdersService {
         }
 
         this.logger.log(
-            `✅ Заказ ${orderNumber} создан для члена ${memberId}, ` +
+            `✅ Заказ ${order.orderNumber} создан для члена ${memberId}, ` +
                 `позиций: ${resolvedItems.length}, сумма: ${total}`
         );
 
@@ -393,26 +400,56 @@ export class OrdersService {
     }
 
     /**
-     * Генерация номера заказа: ORD-YYYYMMDD-NNNN
+     * Создать заказ, подобрав номер, свободный в пределах портала.
+     *
+     * Номер вычисляется из максимального существующего, поэтому два параллельных заказа
+     * могут получить одинаковый. Гонку ловит уникальный индекс `(portal_id, order_number)`:
+     * при конфликте транзакция откатывается целиком и номер подбирается заново.
      */
-    private async generateOrderNumber(): Promise<string> {
-        const now = new Date();
-        const dateStr = now.toISOString().slice(0, 10).replace(/-/g, ""); // 20260316
+    private async createWithGeneratedOrderNumber(
+        portalId: string,
+        input: Omit<CreateOrderInput, "orderNumber">
+    ): Promise<Order> {
+        for (let attempt = 1; attempt <= ORDER_NUMBER_MAX_ATTEMPTS; attempt++) {
+            const orderNumber = await this.generateOrderNumber(portalId);
+            try {
+                return await this.orderRepository.create({ ...input, orderNumber });
+            } catch (error) {
+                if (attempt === ORDER_NUMBER_MAX_ATTEMPTS || !isOrderNumberConflict(error)) {
+                    throw error;
+                }
+                this.logger.warn(
+                    `Номер заказа ${orderNumber} занят (попытка ${attempt}), подбираю следующий`
+                );
+            }
+        }
 
-        const lastNumber = await this.orderRepository.getLastOrderNumberForDate(now);
+        // Недостижимо: цикл либо возвращает заказ, либо пробрасывает ошибку на последней попытке
+        throw new Error("Не удалось подобрать номер заказа");
+    }
+
+    /**
+     * Генерация номера заказа: ORD-YYYYMMDD-NNNN.
+     * Нумерация ведётся отдельно в каждом портале — номера одного клуба не выдают объём другого.
+     */
+    private async generateOrderNumber(portalId: string): Promise<string> {
+        const prefix = buildOrderNumberPrefix(new Date()); // ORD-20260316-
+
+        const lastNumber = await this.orderRepository.getLastOrderNumberWithPrefix(
+            portalId,
+            prefix
+        );
 
         let sequence = 1;
         if (lastNumber) {
             // ORD-20260316-0042 → 42
-            const parts = lastNumber.split("-");
-            const lastSeq = parseInt(parts[parts.length - 1], 10);
+            const lastSeq = parseInt(lastNumber.slice(prefix.length), 10);
             if (!isNaN(lastSeq)) {
                 sequence = lastSeq + 1;
             }
         }
 
-        const seqStr = sequence.toString().padStart(4, "0");
-        return `ORD-${dateStr}-${seqStr}`;
+        return `${prefix}${sequence.toString().padStart(4, "0")}`;
     }
 
     /**
