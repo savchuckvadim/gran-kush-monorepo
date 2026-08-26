@@ -114,14 +114,18 @@ jobs:
           git checkout main
           git pull --ff-only
           export TAG=sha-${{ github.sha }}
-          docker compose --env-file infra/compose/.env \
-            -f infra/compose/docker-compose.prod.yml \
-            -f infra/compose/docker-compose.deploy.yml \
-            pull
-          docker compose --env-file infra/compose/.env \
-            -f infra/compose/docker-compose.prod.yml \
-            -f infra/compose/docker-compose.deploy.yml \
-            up -d --remove-orphans
+          # The TLS overlay is opt-in by the presence of the certificate: drop
+          # one into infra/docker/nginx/certs/ and every later deploy keeps :443.
+          # Without this check a deploy would silently recreate nginx on :80 only.
+          FILES="-f infra/compose/docker-compose.prod.yml -f infra/compose/docker-compose.deploy.yml"
+          if [ -f infra/docker/nginx/certs/origin.pem ]; then
+            FILES="$FILES -f infra/compose/docker-compose.tls.yml"
+            echo "TLS overlay enabled"
+          else
+            echo "No certificate found — serving plain HTTP on :80"
+          fi
+          docker compose --env-file infra/compose/.env $FILES pull
+          docker compose --env-file infra/compose/.env $FILES up -d --remove-orphans
           docker image prune -f
           EOF
 

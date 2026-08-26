@@ -6,7 +6,9 @@ Docker setup for Gran Kush.
 infra/
 ├── compose/
 │   ├── docker-compose.dev.yml     # dev: Postgres + Redis only
-│   ├── docker-compose.prod.yml    # prod: full stack + nginx
+│   ├── docker-compose.prod.yml    # prod: full stack + nginx (:80)
+│   ├── docker-compose.deploy.yml  # overlay: pull images from ghcr.io
+│   ├── docker-compose.tls.yml     # overlay: publish :443 + mount certs
 │   ├── .env.example               # compose vars (copy → .env)
 │   └── env/
 │       └── api.env.example         # API runtime secrets (copy → api.env)
@@ -14,8 +16,12 @@ infra/
     ├── api.Dockerfile              # NestJS API
     ├── api-entrypoint.sh           # migrate (+optional seed) → start
     ├── next.Dockerfile             # generic Next.js app (crm/web/admin)
-    └── nginx/templates/
-        └── default.conf.template   # host-based routing
+    └── nginx/
+        ├── templates/
+        │   └── default.conf.template  # host-based routing, :80
+        ├── tls/
+        │   └── tls.conf.template      # same hosts on :443 (overlay only)
+        └── certs/                     # gitignored: origin.pem / origin.key
 ```
 
 ## Dev — databases only
@@ -91,11 +97,23 @@ docker compose -f infra/compose/docker-compose.prod.yml \
 
 ### TLS
 
-The nginx config serves plain HTTP on `:80`. For HTTPS, terminate TLS upstream
-(cloud LB / Cloudflare), or mount certs and add a `443` server block:
-uncomment the `443` port and `certs` volume in `docker-compose.prod.yml`, drop
-your certs into `infra/docker/nginx/certs/`, and add `listen 443 ssl;` +
-`ssl_certificate*` directives to the template.
+The base stack serves plain HTTP on `:80`. HTTPS is an opt-in overlay, because
+nginx refuses to boot when `ssl_certificate` points at a file that is not there:
+
+```bash
+# drop a cert covering the apex + wildcard into infra/docker/nginx/certs/
+#   origin.pem / origin.key   (e.g. a Cloudflare Origin CA certificate)
+docker compose --env-file infra/compose/.env \
+  -f infra/compose/docker-compose.prod.yml \
+  -f infra/compose/docker-compose.tls.yml up -d
+```
+
+The overlay publishes `:443` and mounts `infra/docker/nginx/tls/tls.conf.template`.
+The `certs/` directory is gitignored. CD enables the overlay automatically when
+`origin.pem` exists on the server.
+
+Full walkthrough (Hetzner + Cloudflare, server to autodeploy):
+[documentation/VPS_SETUP.md](../documentation/VPS_SETUP.md).
 
 ## Notes
 

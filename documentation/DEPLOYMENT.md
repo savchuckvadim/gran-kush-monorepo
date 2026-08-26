@@ -4,6 +4,10 @@
 и что учесть при масштабировании. Всё описанное живёт в [`infra/`](../infra) и
 [`.github/workflows/`](../.github/workflows).
 
+> Разворачиваете с нуля на новом сервере? Идите по пошаговому рунбуку
+> **[VPS_SETUP.md](./VPS_SETUP.md)** (Hetzner + Cloudflare, от заказа VPS до автодеплоя).
+> Этот документ — справочник, а не последовательность действий.
+
 Смежные документы: [журнал работ](./HISTORY.md), [контракт HTTP API](./backend/HTTP_API_CONTRACT.md),
 [план деплоя](./tasks/deployment.md), [README инфраструктуры](../infra/README.md).
 
@@ -16,12 +20,14 @@
 | [`infra/compose/docker-compose.dev.yml`](../infra/compose/docker-compose.dev.yml) | dev: только Postgres + Redis, приложения запускаются на хосте |
 | [`infra/compose/docker-compose.prod.yml`](../infra/compose/docker-compose.prod.yml) | прод: полный стек — postgres, redis, api, crm, web, admin, nginx |
 | [`infra/compose/docker-compose.deploy.yml`](../infra/compose/docker-compose.deploy.yml) | оверлей: брать готовые образы из ghcr.io вместо сборки на сервере |
+| [`infra/compose/docker-compose.tls.yml`](../infra/compose/docker-compose.tls.yml) | оверлей: публикует `:443` и монтирует сертификат в nginx |
 | [`infra/compose/.env.example`](../infra/compose/.env.example) | переменные самого compose (домены, пароль БД, публичные URL) |
 | [`infra/compose/env/api.env.example`](../infra/compose/env/api.env.example) | рантайм-секреты контейнера API |
 | [`infra/docker/api.Dockerfile`](../infra/docker/api.Dockerfile) | образ NestJS API |
 | [`infra/docker/next.Dockerfile`](../infra/docker/next.Dockerfile) | общий образ для трёх Next-приложений (аргумент `APP`) |
 | [`infra/docker/api-entrypoint.sh`](../infra/docker/api-entrypoint.sh) | миграции (+опционально сид) → старт API |
-| [`infra/docker/nginx/templates/default.conf.template`](../infra/docker/nginx/templates/default.conf.template) | маршрутизация по `Host` |
+| [`infra/docker/nginx/templates/default.conf.template`](../infra/docker/nginx/templates/default.conf.template) | маршрутизация по `Host`, HTTP `:80` |
+| [`infra/docker/nginx/tls/tls.conf.template`](../infra/docker/nginx/tls/tls.conf.template) | те же хосты на `:443`, подключается оверлеем |
 | [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) | lint, typecheck, unit, e2e на каждый push |
 | [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) | сборка образов → ghcr.io → SSH-деплой → smoke-проверка |
 
@@ -188,9 +194,18 @@ docker compose --env-file infra/compose/.env \
 nginx разбирает запросы по заголовку `Host` и проксирует в нужный контейнер; шаблон подставляет
 `*_HOST` через `envsubst` с фильтром, чтобы не затронуть собственные переменные nginx.
 
-TLS в конфиге намеренно нет: терминируйте выше (облачный балансировщик, Cloudflare) либо
-смонтируйте сертификаты и добавьте `443`-блок — в прод-compose для этого заготовлены
-закомментированные `ports` и `volumes`.
+TLS вынесен в отдельный оверлей [`docker-compose.tls.yml`](../infra/compose/docker-compose.tls.yml):
+он публикует `:443`, монтирует каталог `infra/docker/nginx/certs/` и добавляет второй шаблон
+с `443`-блоками. Разделение нужно потому, что nginx не стартует, если `ssl_certificate`
+указывает на отсутствующий файл — базовый compose должен подниматься на голой машине без сертификатов.
+
+Рабочая схема прода — Cloudflare Origin CA на `домен` + `*.домен` (15 лет, без ACME) при режиме
+**Full (strict)**; wildcard заранее закрывает поддомены клубов, то есть ветку «поддомены одного
+домена» из TASK-112 [scaling-roadmap](./tasks/scaling-roadmap.md). Пошагово — в
+[VPS_SETUP.md §4](./VPS_SETUP.md).
+
+CD подключает оверлей автоматически, если на сервере лежит `infra/docker/nginx/certs/origin.pem`;
+иначе деплоит по `:80`. Без этой проверки каждый деплой пересоздавал бы nginx без `443`.
 
 ---
 

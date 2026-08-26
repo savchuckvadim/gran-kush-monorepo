@@ -142,12 +142,12 @@ services:
       ADMIN_HOST: ${ADMIN_HOST}
       # Substitute only *_HOST vars; leave nginx's own $vars untouched.
       NGINX_ENVSUBST_FILTER: "^(API|CRM|WEB|ADMIN)_HOST$$"
+    # HTTPS lives in the docker-compose.tls.yml overlay: it adds :443, mounts
+    # the certificate and the extra template. See documentation/VPS_SETUP.md.
     ports:
       - "80:80"
-      # - "443:443"   # enable once you mount certs + add a 443 server block
     volumes:
       - ../docker/nginx/templates:/etc/nginx/templates:ro
-      # - ../docker/nginx/certs:/etc/nginx/certs:ro
     depends_on:
       - api
       - crm

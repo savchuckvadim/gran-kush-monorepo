@@ -49,3 +49,7 @@ infra/compose/env/*.env
 
 
 documentation/philosophy/
+
+# TLS certificates for the nginx container — never commit these
+infra/docker/nginx/certs/*
+!infra/docker/nginx/certs/.gitkeep

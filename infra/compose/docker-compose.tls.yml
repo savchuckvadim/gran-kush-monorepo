@@ -1,0 +1,24 @@
+# TLS overlay: publishes :443 and mounts the certificate into nginx.
+#
+#   docker compose --env-file infra/compose/.env \
+#     -f infra/compose/docker-compose.prod.yml \
+#     -f infra/compose/docker-compose.deploy.yml \
+#     -f infra/compose/docker-compose.tls.yml up -d
+#
+# Put the certificate and key here before the first start — nginx will not boot
+# if ssl_certificate points at a missing file:
+#   infra/docker/nginx/certs/origin.pem
+#   infra/docker/nginx/certs/origin.key
+#
+# The directory is gitignored: certificates never belong in the repository.
+# See documentation/VPS_SETUP.md §4 for how to issue a Cloudflare Origin CA cert.
+
+services:
+  nginx:
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../docker/nginx/templates:/etc/nginx/templates:ro
+      - ../docker/nginx/tls/tls.conf.template:/etc/nginx/templates/tls.conf.template:ro
+      - ../docker/nginx/certs:/etc/nginx/certs:ro
