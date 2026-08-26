@@ -954,6 +954,17 @@ model PresenceSession {
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
 
+  /// Держит entityRecordId, пока сессия открыта, и NULL после закрытия.
+  /// Уникальность + «NULL не конфликтует с NULL» в Postgres дают ровно одну
+  /// открытую сессию на участника, при любом числе закрытых.
+  /// Инвариант: activeEntityRecordId IS NOT NULL <=> exitedAt IS NULL.
+  /// Прямое выражение этого правила — частичный уникальный индекс
+  /// (WHERE exited_at IS NULL), но Prisma не умеет его в схеме, а добавленный
+  /// сырым SQL он сносится при следующем `migrate dev` (prisma/prisma#29220,
+  /// открыт, воспроизводится на 7.4.x). Колонка — эквивалент по гарантии,
+  /// который переживает генерацию миграций.
+  activeEntityRecordId String? @unique @map("active_entity_record_id")
+
   entityRecord EntityRecord @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
   employee     Employee?    @relation("PresenceEmployee", fields: [employeeId], references: [id], onDelete: SetNull)
 

@@ -136,42 +136,83 @@ export class RegistrationLinksService {
     ): Promise<RegisterViaLinkResponseDto> {
         const link = await this.getActiveByToken(token);
 
-        const { user, created, claimed } = await this.accountProvisioning.ensureUserWithPassword(
-            dto.email,
-            dto.password,
-            { emailVerified: false }
-        );
-        const accountCreated = created || claimed;
+        // Слот занимается ДО регистрации, одним атомарным UPDATE. Раньше лимит
+        // проверялся чтением в getActiveByToken, а инкремент шёл в самом конце:
+        // два параллельных запроса по ссылке с maxUses=1 оба проходили проверку
+        // и оба заводили участника.
+        await this.consumeUse(link.id);
 
-        const existing = await this.prisma.member.findUnique({
-            where: { userId_portalId: { userId: user.id, portalId: link.portalId } },
-            select: { id: true },
-        });
-        if (existing) {
-            throw new ConflictException("User is already a member of this portal");
+        try {
+            const { user, created, claimed } =
+                await this.accountProvisioning.ensureUserWithPassword(dto.email, dto.password, {
+                    emailVerified: false,
+                });
+            const accountCreated = created || claimed;
+
+            const existing = await this.prisma.member.findUnique({
+                where: { userId_portalId: { userId: user.id, portalId: link.portalId } },
+                select: { id: true },
+            });
+            if (existing) {
+                throw new ConflictException("User is already a member of this portal");
+            }
+
+            const member = await this.joinPortalService.joinPortal({
+                userId: user.id,
+                portalId: link.portalId,
+                fields: dto.fields ?? {},
+                joinSource:
+                    link.kind === RegistrationLinkKind.kiosk
+                        ? MemberJoinSource.kiosk
+                        : MemberJoinSource.registration_link,
+                registrationLinkId: link.id,
+            });
+
+            return {
+                userId: user.id,
+                memberId: member.id,
+                portalSlug: link.portal.name,
+                accountCreated,
+            };
+        } catch (error) {
+            await this.releaseUse(link.id);
+            throw error;
         }
+    }
 
-        const member = await this.joinPortalService.joinPortal({
-            userId: user.id,
-            portalId: link.portalId,
-            fields: dto.fields ?? {},
-            joinSource:
-                link.kind === RegistrationLinkKind.kiosk
-                    ? MemberJoinSource.kiosk
-                    : MemberJoinSource.registration_link,
-            registrationLinkId: link.id,
-        });
+    /**
+     * Атомарно занять одно использование ссылки.
+     *
+     * Условия лимита, активности и срока проверяются внутри самого UPDATE,
+     * а `max_uses` сравнивается с колонкой, а не с прочитанным ранее значением,
+     * поэтому изменение лимита в параллель не создаёт окна для перерасхода.
+     */
+    private async consumeUse(linkId: string): Promise<void> {
+        const updated = await this.prisma.$executeRaw`
+            UPDATE "registration_links"
+            SET "uses_count" = "uses_count" + 1
+            WHERE "id" = ${linkId}
+              AND "is_active" = true
+              AND ("expires_at" IS NULL OR "expires_at" > NOW())
+              AND ("max_uses" IS NULL OR "uses_count" < "max_uses")
+        `;
 
-        await this.prisma.registrationLink.update({
-            where: { id: link.id },
-            data: { usesCount: { increment: 1 } },
-        });
+        if (updated === 0) {
+            throw new NotFoundException("Registration link usage limit reached");
+        }
+    }
 
-        return {
-            userId: user.id,
-            memberId: member.id,
-            portalSlug: link.portal.name,
-            accountCreated,
-        };
+    /** Вернуть слот, если регистрация не доехала до конца. */
+    private async releaseUse(linkId: string): Promise<void> {
+        try {
+            await this.prisma.$executeRaw`
+                UPDATE "registration_links"
+                SET "uses_count" = "uses_count" - 1
+                WHERE "id" = ${linkId} AND "uses_count" > 0
+            `;
+        } catch {
+            // Не маскируем исходную ошибку регистрации: в худшем случае слот
+            // останется занятым, что безопаснее перерасхода лимита.
+        }
     }
 }

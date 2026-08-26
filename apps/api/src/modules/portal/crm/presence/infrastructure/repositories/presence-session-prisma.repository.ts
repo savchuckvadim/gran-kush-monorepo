@@ -86,15 +86,35 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
         portalId?: string;
     }): Promise<PresenceSession> {
         const entityRecordId = await this.entityRecordIdForMember(data.memberId, data.portalId);
-        const row = await this.prisma.presenceSession.create({
-            data: {
-                entityRecordId,
-                employeeId: data.employeeId,
-                entryMethod: data.entryMethod,
-            },
-            include: SESSION_INCLUDE,
-        });
-        return this.mapToEntity(row);
+
+        try {
+            const row = await this.prisma.presenceSession.create({
+                data: {
+                    entityRecordId,
+                    activeEntityRecordId: entityRecordId,
+                    employeeId: data.employeeId,
+                    entryMethod: data.entryMethod,
+                },
+                include: SESSION_INCLUDE,
+            });
+            return this.mapToEntity(row);
+        } catch (error) {
+            if (!this.isOpenSessionConflict(error)) {
+                throw error;
+            }
+
+            // Параллельный скан успел открыть сессию между нашей проверкой и INSERT.
+            // Возвращаем её вместо второй записи: участник внутри в любом случае.
+            const existing = await this.prisma.presenceSession.findFirst({
+                where: { activeEntityRecordId: entityRecordId },
+                include: SESSION_INCLUDE,
+            });
+            if (!existing) {
+                // Сессию закрыли между конфликтом и выборкой — повторить безопасно.
+                throw error;
+            }
+            return this.mapToEntity(existing);
+        }
     }
 
     async closeSession(
@@ -104,6 +124,8 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
         const updateData: Prisma.PresenceSessionUpdateInput = {
             exitedAt: new Date(),
             exitMethod: data.exitMethod,
+            // Снимаем маркер — иначе участник не сможет войти снова.
+            activeEntityRecordId: null,
         };
         if (data.employeeId) {
             updateData.employee = { connect: { id: data.employeeId } };
@@ -117,6 +139,20 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
         return this.mapToEntity(row);
     }
 
+    /** Нарушение уникальности маркера открытой сессии. */
+    private isOpenSessionConflict(error: unknown): boolean {
+        if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
+            return false;
+        }
+        const target = error.meta?.target;
+        const fields: string[] = Array.isArray(target)
+            ? target.filter((f): f is string => typeof f === "string")
+            : typeof target === "string"
+              ? [target]
+              : [];
+        return fields.some((f) => f.includes("active_entity_record_id"));
+    }
+
     async findAllActive(): Promise<PresenceSession[]> {
         const rows = await this.prisma.presenceSession.findMany({
             where: { exitedAt: null },
@@ -128,10 +164,13 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
 
     async closeMany(ids: string[], exitMethod: string): Promise<number> {
         const result = await this.prisma.presenceSession.updateMany({
-            where: { id: { in: ids } },
+            // exitedAt: null — чтобы повторный прогон крона не переписывал время
+            // выхода у уже закрытых сессий.
+            where: { id: { in: ids }, exitedAt: null },
             data: {
                 exitedAt: new Date(),
                 exitMethod,
+                activeEntityRecordId: null,
             },
         });
         return result.count;

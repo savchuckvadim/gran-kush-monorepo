@@ -49,7 +49,12 @@ export abstract class PresenceSessionRepository {
     /** Подсчёт сессий */
     abstract count(filters?: PresenceFilters): Promise<number>;
 
-    /** Создать запись о входе (при указании portalId — участник должен принадлежать порталу) */
+    /**
+     * Создать запись о входе (при указании portalId — участник должен принадлежать порталу).
+     *
+     * Идемпотентен: если параллельный запрос уже открыл сессию этому участнику,
+     * возвращается она, а не создаётся вторая. Гарантия — на уровне БД.
+     */
     abstract createEntry(data: {
         memberId: string;
         employeeId?: string;
