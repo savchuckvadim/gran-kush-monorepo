@@ -157,7 +157,7 @@ docker compose -f infra/compose/docker-compose.prod.yml exec api pnpm prisma:see
 | `NEXT_PUBLIC_API_URL` | вшивается в бандлы фронтов |
 | `NEXT_PUBLIC_CRM_URL` | то же |
 | `NEXT_PUBLIC_MAIN_SITE_URL` | то же |
-| `SMOKE_CHECK_URL` | например `https://api.домен/docs-json`; пустое значение — шаг пропускается |
+| `SMOKE_CHECK_URL` | например `https://api.домен/health`; пустое значение — шаг пропускается |
 
 ### Требования к серверу
 
@@ -264,10 +264,11 @@ TLS в конфиге намеренно нет: терминируйте выш
 [IDEMPOTENCY_AND_SCALING.md](./backend/IDEMPOTENCY_AND_SCALING.md) и
 [scaling-roadmap.md](./tasks/scaling-roadmap.md):
 
-1. **Health-эндпоинта нет.** Балансировщику и smoke-проверке сейчас предлагается `/docs-json` — это
-   тяжёлый ответ и публичная выдача схемы API. Нужен лёгкий `/health` и отдельный readiness
-   с проверкой БД и Redis.
-2. **Swagger открыт в проде** — `/docs` и `/docs-json` доступны всем, стоит закрыть или ограничить по сети.
+1. ~~**Health-эндпоинта нет.**~~ Закрыто: `GET /health` (liveness, без БД) и `GET /ready`
+   (Postgres + Redis, таймаут 2 с, при отказе — 503 с деталями). `SMOKE_CHECK_URL` направлять
+   на `/health`.
+2. ~~**Swagger открыт в проде**~~ Закрыто: при `NODE_ENV=production` Swagger не поднимается;
+   `SWAGGER_ENABLED=true` включает его явно (например, на staging).
 3. **Крон не защищён от многократного запуска** — см. §8.
 4. **Миграции привязаны к старту контейнера** — см. §8.
 5. **Метрик и трейсинга нет** — ни Prometheus-эндпоинта, ни OpenTelemetry.

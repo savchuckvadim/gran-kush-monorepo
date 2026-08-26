@@ -10,7 +10,7 @@
 # Repository variables (build/smoke):
 #   NEXT_PUBLIC_API_URL, NEXT_PUBLIC_CRM_URL, NEXT_PUBLIC_MAIN_SITE_URL —
 #     inlined into the Next.js bundles at BUILD time (changing them = rebuild)
-#   SMOKE_CHECK_URL — e.g. https://api.<domain>/docs-json; smoke step skipped if empty
+#   SMOKE_CHECK_URL — e.g. https://api.<domain>/health; smoke step skipped if empty
 
 name: Deploy
 

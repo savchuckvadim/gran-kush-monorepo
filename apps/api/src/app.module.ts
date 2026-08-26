@@ -11,6 +11,7 @@ import { AccountModule } from "./modules/account/account.module";
 import { CrmModule } from "./modules/crm/crm.module";
 import { CronModule } from "./modules/cron/cron.module";
 import { EncryptionModule } from "./modules/encryption/encryption.module";
+import { HealthModule } from "./modules/health/health.module";
 import { MailModule } from "./modules/mail/mail.module";
 import { PlatformModule } from "./modules/platform/platform.module";
 import { AuthModule } from "./modules/portal/auth/auth.module";
@@ -35,6 +36,7 @@ import { StorageModule } from "./modules/storage/storage.module";
         PlatformModule,
         CronModule,
         StorageModule,
+        HealthModule,
     ],
     controllers: [AppController],
     providers: [AppService],

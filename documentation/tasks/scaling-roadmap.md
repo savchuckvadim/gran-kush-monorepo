@@ -64,12 +64,18 @@
 - [ ] отдельный шаг деплоя вместо `RUN_MIGRATIONS=true` на каждой реплике
 - [ ] `RUN_MIGRATIONS=false` для реплик, документировать в `infra/README.md`
 
-### TASK-107: health и readiness `[ ]`
+### TASK-107: health и readiness `[x]` (2026-08-26)
 
-- [ ] лёгкий `GET /health` без обращения к БД — для балансировщика
-- [ ] `GET /ready` с проверкой Postgres и Redis — для деплоя и smoke-проверки
-- [ ] заменить `SMOKE_CHECK_URL` с `/docs-json` на `/health`
-- [ ] закрыть `/docs` и `/docs-json` в проде
+- [x] `GET /health` — только `{ status: "ok" }`, без обращения к БД и Redis. Лежит в корне,
+      под `PortalContextMiddleware` не попадает (`requiresPortalContext` пропускает всё вне
+      `/crm/`, `/lk/`, `/users/`, `/public/`) — заголовки `X-Portal-*` не нужны
+- [x] `GET /ready` — параллельные `SELECT 1` (Prisma) и `PING` (Redis) с таймаутом 2 с на каждую
+      проверку; при отказе любой из них — `503` с телом `{ checks: { database, redis } }`.
+      Таймаут нужен, потому что `ioredis` с `retryStrategy` при мёртвом Redis висит, а не падает
+- [x] `SMOKE_CHECK_URL` переведён на `/health` (`deploy.yml`, `DEPLOYMENT.md`)
+- [x] Swagger не поднимается при `NODE_ENV=production`; `SWAGGER_ENABLED=true` включает явно
+- [x] healthcheck сервиса `api` в `docker-compose.prod.yml` — по `/health`
+- [x] unit-тесты: `apps/api/src/modules/health/__tests__/health.service.spec.ts`
 
 ---
 
@@ -151,8 +157,8 @@
 
 ## Порядок выполнения
 
-1. **Сейчас, дёшево:** TASK-107 (health) — нужен и балансировщику, и деплою; TASK-109,
-   TASK-110 — реальные дефекты, каждая правка изолирована. TASK-108 закрыта 2026-08-22.
+1. **Сейчас, дёшево:** TASK-109, TASK-110 — реальные дефекты, каждая правка изолирована.
+   TASK-108 закрыта 2026-08-22, TASK-107 (health) — 2026-08-26.
 2. **Перед оплатой:** TASK-101 → TASK-102 → TASK-103 → TASK-104 строго в этом порядке,
    каждая следующая опирается на предыдущую.
 3. **Перед горизонтальным масштабированием:** TASK-105, TASK-106, TASK-111.

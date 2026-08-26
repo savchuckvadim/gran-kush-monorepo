@@ -26,14 +26,21 @@ async function bootstrap() {
     // Настройка CORS
     setCorsConfig(configService, app);
 
-    // Настройка Swagger
-    getSwaggerConfig(app);
+    // Swagger закрыт в проде; SWAGGER_ENABLED=true — явное включение (например, на staging)
+    const swaggerEnabled =
+        configService.get<string>("SWAGGER_ENABLED") === "true" ||
+        configService.get<string>("NODE_ENV") !== "production";
+    if (swaggerEnabled) {
+        getSwaggerConfig(app);
+    }
 
     const port = process.env.PORT ?? 3000;
     await app.listen(port);
     console.log(`🚀 Application is running on: http://localhost:${port}`);
-    console.log(`📚 Swagger documentation: http://localhost:${port}/docs`);
-    console.log(`📋 OpenAPI JSON: http://localhost:${port}/docs-json`);
+    if (swaggerEnabled) {
+        console.log(`📚 Swagger documentation: http://localhost:${port}/docs`);
+        console.log(`📋 OpenAPI JSON: http://localhost:${port}/docs-json`);
+    }
 }
 
 void bootstrap().catch((error: unknown) => {
