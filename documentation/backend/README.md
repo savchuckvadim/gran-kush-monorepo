@@ -253,6 +253,34 @@ Email verification & password reset are handled in the **Auth module**:
   - Telegram notification for verification emails
   - follow-up `portal-events` job for portal-registration email
 
+### 7. Billing Module
+
+**Purpose**: idempotency core for payments — provider event journal and payment records.
+
+**Status**: infrastructure only. No webhook route and no provider adapter yet — those land with
+the chosen provider. Until then `PaymentEventsService.ingest` rejects every request: there is
+nothing to verify the signature with (fail-closed by design).
+
+**Key pieces** (`apps/api/src/modules/billing`):
+- `PaymentsService.recordProviderPayment` — idempotent by `(provider, externalId)`. Inserts via
+  `createMany({ skipDuplicates: true })` so a repeated webhook returns the stored payment instead
+  of creating a second one or blowing up with `500`.
+- `PaymentEventsService.ingest` — single entry point for a webhook. Order of steps is the
+  requirement itself: verify signature → journal the raw payload → detect duplicate by
+  `(provider, eventId)` → run the handler and stamp `processedAt` in one transaction.
+- `PaymentWebhookVerifier` (port) — a provider adapter that verifies the signature **and** parses
+  the body. Registered under the `PAYMENT_WEBHOOK_VERIFIERS` token.
+
+**Why `ON CONFLICT DO NOTHING` and not `create` + catch `P2002`**: the write happens inside the
+event-processing transaction, and in Postgres any error aborts the whole transaction — the next
+query would fail with «current transaction is aborted».
+
+**Duplicate vs retry**: a conflict on `(provider, eventId)` is only a duplicate when
+`processedAt` is set. An event journalled but not processed (handler failed, process died) is a
+retry and gets processed. Treating every conflict as a duplicate would silently lose events.
+
+See [tasks/scaling-roadmap.md](../tasks/scaling-roadmap.md) — TASK-101, TASK-102.
+
 ## Common Modules
 
 ### Prisma Module

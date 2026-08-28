@@ -113,4 +113,4 @@ presence (check-in/out, скан QR), выдача/отзыв QR участни�
 - [x] Нет localStorage для хранения auth токенов
 - [x] `apps/web` — member registration через dynamic schema (`@workspace/dynamic-forms`)
 - [x] Subscription gate блокирует просроченные порталы (402 + grace)
-- [ ] Frontend-обработка 402 (banner / expired page) — см. TASK-015
+- [x] Frontend-обработка 402 (banner / expired page) — `SubscriptionGate` в CRM shell, см. TASK-015

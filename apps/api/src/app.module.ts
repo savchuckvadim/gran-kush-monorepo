@@ -8,6 +8,7 @@ import { QueueModule } from "./common/queue/queue.module";
 import { TelegramModule } from "./common/telegram/telegram.module";
 import { CoreModule } from "./core/core.module";
 import { AccountModule } from "./modules/account/account.module";
+import { BillingModule } from "./modules/billing/billing.module";
 import { CrmModule } from "./modules/crm/crm.module";
 import { CronModule } from "./modules/cron/cron.module";
 import { EncryptionModule } from "./modules/encryption/encryption.module";
@@ -35,6 +36,7 @@ import { StorageModule } from "./modules/storage/storage.module";
         CrmModule,
         PlatformModule,
         CronModule,
+        BillingModule,
         StorageModule,
         HealthModule,
     ],
