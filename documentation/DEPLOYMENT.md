@@ -127,7 +127,7 @@ docker compose -f infra/compose/docker-compose.prod.yml exec api pnpm prisma:see
 
 Триггер: любой push и ручной запуск. Две джобы:
 
-- **checks** — `pnpm lint`, typecheck api/crm/web, unit-тесты API;
+- **checks** — `pnpm lint`, typecheck api/crm/web/admin, unit-тесты API;
 - **e2e** — поднимает сервисные контейнеры Postgres и Redis, прогоняет `prisma migrate deploy`
   и e2e-набор API. Секреты для тестов заданы прямо в workflow фиктивными значениями.
 
@@ -145,6 +145,49 @@ docker compose -f infra/compose/docker-compose.prod.yml exec api pnpm prisma:see
    затем чистит старые образы. В конце — smoke-проверка курлом по `SMOKE_CHECK_URL`.
 
 Пока сервера нет, деплой-джоба пропускается сама, а образы всё равно собираются и лежат в реестре.
+
+### Токены и доступы — что откуда берётся
+
+Кредов ровно три вида, и создавать руками надо только один.
+
+| Что | Где берётся | Куда кладётся |
+|-----|-------------|---------------|
+| `GITHUB_TOKEN` | **Нигде.** Actions выдаёт автоматически на каждый запуск | Уже используется в `deploy.yml` для пуша в ghcr.io. Работает за счёт `permissions: packages: write` на build-джобе — настраивать нечего |
+| **PAT с `read:packages`** | Создаётся руками на github.com, см. ниже | **На сервере**, разово: `docker login ghcr.io`. Без него сервер не вытянет приватные образы |
+| SSH-пара для деплоя | Генерируется локально `ssh-keygen` | Публичная половина — в `authorized_keys` на сервере, приватная — в секрет `SSH_PRIVATE_KEY` |
+
+#### Где именно создаётся PAT
+
+Это **личные** настройки аккаунта, а не настройки репозитория — в репозитории такого пункта нет,
+на этом чаще всего и застревают:
+
+```
+github.com → аватар справа вверху → Settings
+  → Developer settings          (самый низ левого меню)
+  → Personal access tokens
+  → Tokens (classic) → Generate new token (classic)
+  → scope: read:packages        (одна галочка, больше ничего не нужно)
+```
+
+Берите именно **classic**, а не fine-grained: у fine-grained поддержка Container registry
+неполная, и `docker login` может не пройти. Токен показывается один раз — сразу на сервер:
+
+```bash
+echo <PAT> | docker login ghcr.io -u <github-username> --password-stdin
+```
+
+Если образы публичные, PAT не нужен вовсе — `docker pull` пройдёт анонимно.
+
+#### SSH-пара
+
+Отдельная пара, не ваш личный ключ:
+
+```bash
+ssh-keygen -t ed25519 -f deploy_key -N ""
+```
+
+Публичную часть (`deploy_key.pub`) дописать в `/home/deploy/.ssh/authorized_keys` на сервере,
+приватную (`deploy_key`) целиком, вместе со строками `BEGIN`/`END`, положить в секрет.
 
 ### Что настроить в репозитории
 
