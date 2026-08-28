@@ -38,6 +38,11 @@ jobs:
       - name: Typecheck web
         run: pnpm --filter web typecheck
 
+      # admin собирается в deploy.yml, но здесь не проверялся —
+      # из-за чего сломанные импорты дошли до сборки образа.
+      - name: Typecheck admin
+        run: pnpm --filter "./apps/admin" typecheck
+
       - name: Unit tests (api)
         run: pnpm --filter api test
 
