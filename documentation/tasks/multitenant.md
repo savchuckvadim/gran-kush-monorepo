@@ -110,6 +110,10 @@ presence (check-in/out, скан QR), выдача/отзыв QR участни�
 - [x] `GET/PATCH /crm/employees` работает с portalId scope
 - [x] Все CRM endpoints проверяют принадлежность ресурса порталу (members, presence, QR, orders, catalog)
 - [x] E2E тест cross-portal isolation проходит
+- [x] Финансы скоупятся по порталу (TASK-103a, 2026-08-28). До этого весь модуль
+      `/crm/finance/*` был вне изоляции — см. [scaling-roadmap](./scaling-roadmap.md).
+      Утверждение «multitenant-изоляция закрыта полностью» было верно для проверенных
+      модулей и неверно для непроверенных: финансы в e2e-набор не входили
 - [x] Нет localStorage для хранения auth токенов
 - [x] `apps/web` — member registration через dynamic schema (`@workspace/dynamic-forms`)
 - [x] Subscription gate блокирует просроченные порталы (402 + grace)

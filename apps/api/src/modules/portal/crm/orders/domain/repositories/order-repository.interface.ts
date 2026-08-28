@@ -87,6 +87,19 @@ export abstract class OrderRepository {
     abstract update(id: string, data: UpdateOrderInput): Promise<Order>;
 
     /**
+     * Перевести статус оплаты только если он всё ещё равен `from` (compare-and-set).
+     * Возвращает `false`, если строку успел изменить кто-то другой — это ожидаемый
+     * исход параллельного запроса, а не ошибка.
+     */
+    abstract compareAndSetPaymentStatus(input: {
+        orderId: string;
+        portalId: string;
+        from: string;
+        to: string;
+        employeeId?: string;
+    }): Promise<boolean>;
+
+    /**
      * Наибольший номер заказа с данным префиксом в пределах портала.
      * Префикс несёт дату, поэтому дневная нумерация не зависит от таймзоны сервера.
      */

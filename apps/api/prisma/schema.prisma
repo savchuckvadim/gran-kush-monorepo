@@ -1188,11 +1188,20 @@ model FinancialTransaction {
   description     String?  @db.Text
   notes           String?  @db.Text
 
+  /// Источник проводки — ключ идемпотентности. Например ("order_payment", orderId)
+  /// или ("provider_refund", refundId провайдера). У ручных проводок источника нет.
+  sourceType String? @map("source_type") @db.VarChar(50)
+  sourceId   String? @map("source_id") @db.VarChar(255)
+
   portal            Portal        @relation(fields: [portalId], references: [id], onDelete: Cascade)
   order             Order?        @relation(fields: [orderId], references: [id], onDelete: SetNull)
   entityRecord      EntityRecord? @relation(fields: [entityRecordId], references: [id], onDelete: SetNull)
   createdByEmployee Employee?     @relation("TransactionCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
 
+  // Деньги append-only: двойное списание ловится этим индексом, а не сверкой
+  // арифметики постфактум. Оба поля nullable, NULL в Postgres различны —
+  // ручные проводки индекс не ограничивает.
+  @@unique([sourceType, sourceId])
   @@index([portalId])
   @@index([orderId])
   @@index([entityRecordId])

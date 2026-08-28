@@ -10,6 +10,7 @@ import {
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
+import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
@@ -57,7 +58,8 @@ export class CrmFinanceController {
     @ApiErrorResponse([401, 403])
     async listTransactions(
         @Query() pagination: PaginationDto,
-        @Query() filters: TransactionFilterDto
+        @Query() filters: TransactionFilterDto,
+        @PortalId() portalId: string
     ): Promise<PaginatedResult<FinancialTransactionListDto>> {
         const page = pagination.page ?? 1;
         const limit = pagination.limit ?? 10;
@@ -65,13 +67,14 @@ export class CrmFinanceController {
 
         const [txns, total] = await Promise.all([
             this.financeService.findAll(
+                portalId,
                 filters,
                 limit,
                 skip,
                 pagination.sortBy,
                 pagination.sortOrder
             ),
-            this.financeService.count(filters),
+            this.financeService.count(portalId, filters),
         ]);
 
         const items = txns.map(mapTransactionToListDto);
@@ -82,8 +85,11 @@ export class CrmFinanceController {
     @ApiOperation({ summary: "Детали транзакции" })
     @ApiSuccessResponse(FinancialTransactionDetailDto)
     @ApiErrorResponse([401, 403, 404])
-    async getTransaction(@Param("id") id: string): Promise<FinancialTransactionDetailDto> {
-        const txn = await this.financeService.findById(id);
+    async getTransaction(
+        @Param("id") id: string,
+        @PortalId() portalId: string
+    ): Promise<FinancialTransactionDetailDto> {
+        const txn = await this.financeService.findById(id, portalId);
         if (!txn) {
             throw new NotFoundException("Транзакция не найдена");
         }
@@ -102,9 +108,10 @@ export class CrmFinanceController {
     @ApiErrorResponse([400, 401, 403])
     async createTransaction(
         @Body() dto: CreateFinancialTransactionDto,
-        @CurrentEmployee() employee: Employee
+        @CurrentEmployee() employee: Employee,
+        @PortalId() portalId: string
     ): Promise<FinancialTransactionDetailDto> {
-        const txn = await this.financeService.createManualTransaction(dto, employee.id);
+        const txn = await this.financeService.createManualTransaction(dto, employee.id, portalId);
         return mapTransactionToDetailDto(txn);
     }
 
@@ -119,12 +126,15 @@ export class CrmFinanceController {
     })
     @ApiSuccessResponse(TransactionSummaryDto)
     @ApiErrorResponse([401, 403])
-    async getSummary(@Query() period: ReportPeriodDto): Promise<TransactionSummaryDto> {
+    async getSummary(
+        @Query() period: ReportPeriodDto,
+        @PortalId() portalId: string
+    ): Promise<TransactionSummaryDto> {
         const startDate = new Date(period.startDate);
         const endDate = new Date(period.endDate);
         endDate.setHours(23, 59, 59, 999); // До конца дня
 
-        return this.financeService.getSummary(startDate, endDate);
+        return this.financeService.getSummary(portalId, startDate, endDate);
     }
 
     @Get("reports/by-type")
@@ -134,12 +144,15 @@ export class CrmFinanceController {
     })
     @ApiSuccessResponse(TransactionGroupedByTypeDto, { isArray: true })
     @ApiErrorResponse([401, 403])
-    async getByType(@Query() period: ReportPeriodDto): Promise<TransactionGroupedByTypeDto[]> {
+    async getByType(
+        @Query() period: ReportPeriodDto,
+        @PortalId() portalId: string
+    ): Promise<TransactionGroupedByTypeDto[]> {
         const startDate = new Date(period.startDate);
         const endDate = new Date(period.endDate);
         endDate.setHours(23, 59, 59, 999);
 
-        return this.financeService.getGroupedByType(startDate, endDate);
+        return this.financeService.getGroupedByType(portalId, startDate, endDate);
     }
 
     @Get("reports/by-date")
@@ -150,11 +163,14 @@ export class CrmFinanceController {
     })
     @ApiSuccessResponse(TransactionGroupedByDateDto, { isArray: true })
     @ApiErrorResponse([401, 403])
-    async getByDate(@Query() period: ReportPeriodDto): Promise<TransactionGroupedByDateDto[]> {
+    async getByDate(
+        @Query() period: ReportPeriodDto,
+        @PortalId() portalId: string
+    ): Promise<TransactionGroupedByDateDto[]> {
         const startDate = new Date(period.startDate);
         const endDate = new Date(period.endDate);
         endDate.setHours(23, 59, 59, 999);
 
-        return this.financeService.getGroupedByDate(startDate, endDate);
+        return this.financeService.getGroupedByDate(portalId, startDate, endDate);
     }
 }

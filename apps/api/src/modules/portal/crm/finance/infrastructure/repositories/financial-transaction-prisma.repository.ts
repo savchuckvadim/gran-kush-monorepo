@@ -12,6 +12,7 @@ import {
 } from "@modules/portal/crm/entity-fields/lib/member-field-values";
 import { FinancialTransaction } from "@modules/portal/crm/finance/domain/entity/financial-transaction.entity";
 import {
+    CreateSourcedTransactionInput,
     CreateTransactionInput,
     FinancialTransactionRepository,
     TransactionFilters,
@@ -25,6 +26,9 @@ type FinancialTransactionRow = Prisma.FinancialTransactionGetPayload<{
     include: typeof TRANSACTION_INCLUDE;
 }>;
 
+/** Заведомо несуществующий entityRecordId — даёт пустую выборку вместо «без фильтра». */
+const NO_SUCH_ENTITY_RECORD = "__no_such_entity_record__";
+
 @Injectable()
 export class FinancialTransactionPrismaRepository extends FinancialTransactionRepository {
     constructor(private readonly prisma: PrismaService) {
@@ -33,9 +37,9 @@ export class FinancialTransactionPrismaRepository extends FinancialTransactionRe
 
     // ─── Поиск по ID ─────────────────────────────────────────────────────────
 
-    async findById(id: string): Promise<FinancialTransaction | null> {
-        const row = await this.prisma.financialTransaction.findUnique({
-            where: { id },
+    async findByIdForPortal(id: string, portalId: string): Promise<FinancialTransaction | null> {
+        const row = await this.prisma.financialTransaction.findFirst({
+            where: { id, portalId },
             include: TRANSACTION_INCLUDE,
         });
         return row ? this.mapToEntity(row) : null;
@@ -44,13 +48,14 @@ export class FinancialTransactionPrismaRepository extends FinancialTransactionRe
     // ─── Список с фильтрами ─────────────────────────────────────────────────
 
     async findAll(
+        portalId: string,
         filters?: TransactionFilters,
         limit?: number,
         skip?: number,
         sortBy?: string,
         sortOrder?: "asc" | "desc"
     ): Promise<FinancialTransaction[]> {
-        const where = this.buildWhere(filters);
+        const where = this.buildWhere(portalId, filters);
         const orderBy = this.buildOrderBy(sortBy, sortOrder);
 
         const rows = await this.prisma.financialTransaction.findMany({
@@ -66,77 +71,83 @@ export class FinancialTransactionPrismaRepository extends FinancialTransactionRe
 
     // ─── Подсчет ─────────────────────────────────────────────────────────────
 
-    async count(filters?: TransactionFilters): Promise<number> {
-        const where = this.buildWhere(filters);
+    async count(portalId: string, filters?: TransactionFilters): Promise<number> {
+        const where = this.buildWhere(portalId, filters);
         return this.prisma.financialTransaction.count({ where });
     }
 
     // ─── Создание ────────────────────────────────────────────────────────────
 
     async create(data: CreateTransactionInput): Promise<FinancialTransaction> {
-        let entityRecordId: string | null = null;
-        let portalId: string | null = null;
-        if (data.memberId) {
-            const m = await this.prisma.member.findUnique({
-                where: { id: data.memberId },
-                select: { entityRecordId: true, portalId: true },
-            });
-            entityRecordId = m?.entityRecordId ?? null;
-            portalId = m?.portalId ?? null;
-        }
-        if (!portalId && data.orderId) {
-            const o = await this.prisma.order.findUnique({
-                where: { id: data.orderId },
-                select: { portalId: true },
-            });
-            portalId = o?.portalId ?? null;
-        }
-        if (!portalId) {
-            throw new Error("Cannot resolve portal for financial transaction");
-        }
+        const entityRecordId = await this.resolveEntityRecordId(data);
 
         const row = await this.prisma.financialTransaction.create({
-            data: {
-                portalId,
-                orderId: data.orderId,
-                entityRecordId,
-                type: data.type,
-                direction: data.direction,
-                amount: new Prisma.Decimal(data.amount),
-                currency: data.currency ?? "EUR",
-                paymentMethod: data.paymentMethod,
-                transactionDate: data.transactionDate ?? new Date(),
-                createdBy: data.createdBy,
-                description: data.description,
-                notes: data.notes,
-            },
+            data: this.buildCreateData(data, entityRecordId),
             include: TRANSACTION_INCLUDE,
         });
 
         return this.mapToEntity(row);
     }
 
+    /**
+     * Идемпотентная вставка по источнику. `createMany({ skipDuplicates })` — это
+     * `ON CONFLICT DO NOTHING`: повтор не порождает исключения и не переводит
+     * внешнюю транзакцию в aborted, в отличие от `create` с перехватом `P2002`.
+     */
+    async createFromSource(data: CreateSourcedTransactionInput): Promise<FinancialTransaction> {
+        const entityRecordId = await this.resolveEntityRecordId(data);
+
+        await this.prisma.financialTransaction.createMany({
+            data: [
+                {
+                    ...this.buildCreateData(data, entityRecordId),
+                    sourceType: data.source.type,
+                    sourceId: data.source.id,
+                },
+            ],
+            skipDuplicates: true,
+        });
+
+        const row = await this.prisma.financialTransaction.findFirst({
+            where: {
+                sourceType: data.source.type,
+                sourceId: data.source.id,
+                portalId: data.portalId,
+            },
+            include: TRANSACTION_INCLUDE,
+        });
+        if (!row) {
+            // Проводка с этим источником есть, но в другом портале. Молчать нельзя:
+            // это либо коллизия идентификаторов, либо попытка подмены источника.
+            throw new Error(
+                `Transaction source ${data.source.type}:${data.source.id} belongs to another portal`
+            );
+        }
+        return this.mapToEntity(row);
+    }
+
     // ─── Суммарная статистика ────────────────────────────────────────────────
 
     async getSummary(
+        portalId: string,
         startDate?: Date,
         endDate?: Date,
         memberId?: string
     ): Promise<TransactionSummary> {
-        const where: Prisma.FinancialTransactionWhereInput = {};
+        const where: Prisma.FinancialTransactionWhereInput = { portalId };
         if (startDate || endDate) {
             where.transactionDate = {};
             if (startDate) where.transactionDate.gte = startDate;
             if (endDate) where.transactionDate.lte = endDate;
         }
         if (memberId) {
-            const m = await this.prisma.member.findUnique({
-                where: { id: memberId },
+            const m = await this.prisma.member.findFirst({
+                where: { id: memberId, portalId },
                 select: { entityRecordId: true },
             });
-            if (m?.entityRecordId) {
-                where.entityRecordId = m.entityRecordId;
-            }
+            // Участника нет в этом портале — сводка обязана быть пустой. Раньше
+            // фильтр по участнику просто не применялся, и в ответ уходил итог по всему порталу.
+            where.entityRecordId = m?.entityRecordId ?? NO_SUCH_ENTITY_RECORD;
         }
 
         const [incomeAgg, expenseAgg, countResult] = await Promise.all([
@@ -164,8 +175,12 @@ export class FinancialTransactionPrismaRepository extends FinancialTransactionRe
 
     // ─── Группировка по типу ─────────────────────────────────────────────────
 
-    async getGroupedByType(startDate?: Date, endDate?: Date): Promise<TransactionGroupedByType[]> {
-        const where: Prisma.FinancialTransactionWhereInput = {};
+    async getGroupedByType(
+        portalId: string,
+        startDate?: Date,
+        endDate?: Date
+    ): Promise<TransactionGroupedByType[]> {
+        const where: Prisma.FinancialTransactionWhereInput = { portalId };
         if (startDate || endDate) {
             where.transactionDate = {};
             if (startDate) where.transactionDate.gte = startDate;
@@ -189,7 +204,11 @@ export class FinancialTransactionPrismaRepository extends FinancialTransactionRe
 
     // ─── Группировка по дате ─────────────────────────────────────────────────
 
-    async getGroupedByDate(startDate: Date, endDate: Date): Promise<TransactionGroupedByDate[]> {
+    async getGroupedByDate(
+        portalId: string,
+        startDate: Date,
+        endDate: Date
+    ): Promise<TransactionGroupedByDate[]> {
         // Используем raw-запрос для группировки по дням
         const rows = await this.prisma.$queryRaw<
             Array<{
@@ -205,7 +224,8 @@ export class FinancialTransactionPrismaRepository extends FinancialTransactionRe
                 COALESCE(SUM(amount), 0) AS total,
                 COUNT(*)::bigint AS cnt
             FROM financial_transactions
-            WHERE transaction_date >= ${startDate}
+            WHERE portal_id = ${portalId}
+              AND transaction_date >= ${startDate}
               AND transaction_date <= ${endDate}
             GROUP BY DATE(transaction_date), direction
             ORDER BY "date" ASC
@@ -248,10 +268,64 @@ export class FinancialTransactionPrismaRepository extends FinancialTransactionRe
     // Private helpers
     // ═══════════════════════════════════════════════════════════════════════════
 
-    private buildWhere(filters?: TransactionFilters): Prisma.FinancialTransactionWhereInput {
-        if (!filters) return {};
+    /**
+     * Участник и заказ обязаны принадлежать порталу вызывающего. Раньше портал
+     * выводился ИЗ них — то есть сотрудник клуба A, подставив чужой memberId,
+     * заводил проводку в клубе B.
+     */
+    private async resolveEntityRecordId(data: CreateTransactionInput): Promise<string | null> {
+        if (data.orderId) {
+            const order = await this.prisma.order.findFirst({
+                where: { id: data.orderId, portalId: data.portalId },
+                select: { id: true },
+            });
+            if (!order) {
+                throw new Error(`Order ${data.orderId} does not belong to portal ${data.portalId}`);
+            }
+        }
 
-        const where: Prisma.FinancialTransactionWhereInput = {};
+        if (!data.memberId) {
+            return null;
+        }
+
+        const member = await this.prisma.member.findFirst({
+            where: { id: data.memberId, portalId: data.portalId },
+            select: { entityRecordId: true },
+        });
+        if (!member) {
+            throw new Error(`Member ${data.memberId} does not belong to portal ${data.portalId}`);
+        }
+        return member.entityRecordId;
+    }
+
+    private buildCreateData(
+        data: CreateTransactionInput,
+        entityRecordId: string | null
+    ): Prisma.FinancialTransactionCreateManyInput {
+        return {
+            portalId: data.portalId,
+            orderId: data.orderId,
+            entityRecordId,
+            type: data.type,
+            direction: data.direction,
+            amount: new Prisma.Decimal(data.amount),
+            currency: data.currency ?? "EUR",
+            paymentMethod: data.paymentMethod,
+            transactionDate: data.transactionDate ?? new Date(),
+            createdBy: data.createdBy,
+            description: data.description,
+            notes: data.notes,
+        };
+    }
+
+    private buildWhere(
+        portalId: string,
+        filters?: TransactionFilters
+    ): Prisma.FinancialTransactionWhereInput {
+        // Портал добавляется всегда, включая вызов без фильтров: раньше
+        // `if (!filters) return {}` отдавал проводки всех клубов разом.
+        const where: Prisma.FinancialTransactionWhereInput = { portalId };
+        if (!filters) return where;
 
         if (filters.orderId) where.orderId = filters.orderId;
         if (filters.memberId) {

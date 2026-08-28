@@ -416,6 +416,79 @@ describe("Cross-portal isolation (e2e)", () => {
         });
     });
 
+    describe("finance isolation", () => {
+        let txnBId: string;
+
+        beforeAll(async () => {
+            const txn = await prisma.financialTransaction.create({
+                data: {
+                    portalId: portalB.id,
+                    type: "adjustment",
+                    direction: "income",
+                    amount: 777.77,
+                    currency: "EUR",
+                    description: `ISO-FIN-${suffix}`,
+                },
+            });
+            txnBId = txn.id;
+        });
+
+        it("does not list portal B transactions for employee A", async () => {
+            const res = await request(app.getHttpServer())
+                .get("/crm/finance/transactions")
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug);
+            expect(res.status).toBe(200);
+            expect(JSON.stringify(res.body)).not.toContain(txnBId);
+        });
+
+        it("returns 404 for portal B transaction by id", async () => {
+            const res = await request(app.getHttpServer())
+                .get(`/crm/finance/transactions/${txnBId}`)
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug);
+            expect(res.status).toBe(404);
+        });
+
+        it("does not count portal B money into portal A summary", async () => {
+            const res = await request(app.getHttpServer())
+                .get("/crm/finance/reports/summary")
+                .query({ startDate: "2000-01-01", endDate: "2100-01-01" })
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug);
+            expect(res.status).toBe(200);
+            expect(Number(res.body.totalIncome)).toBe(0);
+        });
+
+        it("does not leak portal B money into portal A by-type report", async () => {
+            const res = await request(app.getHttpServer())
+                .get("/crm/finance/reports/by-type")
+                .query({ startDate: "2000-01-01", endDate: "2100-01-01" })
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug);
+            expect(res.status).toBe(200);
+            expect(JSON.stringify(res.body)).not.toContain("777.77");
+        });
+
+        it("does not leak portal B money into portal A by-date report", async () => {
+            const res = await request(app.getHttpServer())
+                .get("/crm/finance/reports/by-date")
+                .query({ startDate: "2000-01-01", endDate: "2100-01-01" })
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug);
+            expect(res.status).toBe(200);
+            expect(JSON.stringify(res.body)).not.toContain("777.77");
+        });
+
+        it("returns portal B transaction to its own employee", async () => {
+            const res = await request(app.getHttpServer())
+                .get(`/crm/finance/transactions/${txnBId}`)
+                .set("Cookie", portalB.cookies)
+                .set("X-Portal-Slug", portalB.slug);
+            expect(res.status).toBe(200);
+        });
+    });
+
     describe("catalog isolation", () => {
         let productBId: string;
         let categoryBId: string;

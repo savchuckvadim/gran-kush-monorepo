@@ -1,5 +1,6 @@
 import {
     BadRequestException,
+    ConflictException,
     ForbiddenException,
     Injectable,
     Logger,
@@ -25,6 +26,16 @@ import {
 
 /** Сколько раз подбирать свободный номер заказа, прежде чем сдаться */
 const ORDER_NUMBER_MAX_ATTEMPTS = 5;
+
+/**
+ * Машина состояний оплаты — только вперёд. Нужна не ради строгости, а потому что
+ * поздно доставленный вебхук с `pending` иначе откатит уже наступившее `paid`.
+ */
+const PAYMENT_STATUS_TRANSITIONS: Record<PaymentStatus, PaymentStatus[]> = {
+    [PaymentStatus.PENDING]: [PaymentStatus.PAID],
+    [PaymentStatus.PAID]: [PaymentStatus.REFUNDED],
+    [PaymentStatus.REFUNDED]: [],
+};
 
 /** `ORD-20260316-` — дата всегда в UTC, чтобы нумерация не зависела от таймзоны сервера */
 const buildOrderNumberPrefix = (date: Date): string =>
@@ -232,6 +243,11 @@ export class OrdersService {
 
     /**
      * Обновить статус оплаты (сотрудник CRM).
+     *
+     * Статус двигается только вперёд по машине состояний и переводится
+     * compare-and-set'ом. Прежний порядок — прочитать, проверить, записать —
+     * позволял двум параллельным запросам одновременно пройти проверку и обоим
+     * записать: повторное «оплачено» по одному заказу, а с ним и вторая проводка.
      */
     async updatePaymentStatus(
         orderId: string,
@@ -241,29 +257,41 @@ export class OrdersService {
     ): Promise<Order> {
         const order = await this.findByIdForPortalOrFail(orderId, portalId);
 
-        // Нельзя менять оплату у отменённого заказа
+        // Нельзя менять оплату у отменённого заказа. Статус заказа живёт на
+        // EntityRecord, в один UPDATE с оплатой его не свести — проверка остаётся чтением.
         if (order.status === OrderStatus.CANCELLED) {
             throw new BadRequestException("Нельзя изменить оплату отменённого заказа");
         }
 
-        // Нельзя возвратить, если не было оплаты
-        if (
-            newPaymentStatus === PaymentStatus.REFUNDED &&
-            order.paymentStatus !== PaymentStatus.PAID
-        ) {
-            throw new BadRequestException("Возврат возможен только для оплаченных заказов");
+        const current = order.paymentStatus;
+        if (current === newPaymentStatus) {
+            // Повтор того же перехода — не ошибка: запрос уже применён.
+            return order;
+        }
+        if (!PAYMENT_STATUS_TRANSITIONS[current]?.includes(newPaymentStatus)) {
+            throw new BadRequestException(
+                `Недопустимый переход оплаты: "${current}" → "${newPaymentStatus}"`
+            );
         }
 
-        const updated = await this.orderRepository.update(orderId, {
-            paymentStatus: newPaymentStatus,
+        const won = await this.orderRepository.compareAndSetPaymentStatus({
+            orderId,
+            portalId,
+            from: current,
+            to: newPaymentStatus,
             employeeId,
-        } as UpdateOrderInput);
+        });
+        if (!won) {
+            // Ноль обновлённых строк — статус увели из-под нас. Отдаём 409, чтобы
+            // клиент перечитал заказ, а не считал, что его переход применился.
+            throw new ConflictException(
+                "Статус оплаты изменён параллельным запросом — обновите заказ"
+            );
+        }
 
-        this.logger.log(
-            `💳 Заказ ${order.orderNumber}: оплата ${order.paymentStatus} → ${newPaymentStatus}`
-        );
+        this.logger.log(`💳 Заказ ${order.orderNumber}: оплата ${current} → ${newPaymentStatus}`);
 
-        return updated;
+        return this.findByIdForPortalOrFail(orderId, portalId);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════

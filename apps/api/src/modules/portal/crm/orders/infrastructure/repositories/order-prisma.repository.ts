@@ -152,6 +152,34 @@ export class OrderPrismaRepository extends OrderRepository {
         return this.mapToEntity(row);
     }
 
+    // ─── Перевод статуса оплаты (compare-and-set) ────────────────────────────
+
+    /**
+     * Одним `UPDATE ... WHERE payment_status = from` вместо «прочитать, проверить,
+     * записать». Прежний порядок — классический TOCTOU: два параллельных
+     * подтверждения оплаты оба читали `pending`, оба проходили проверку и оба писали.
+     */
+    async compareAndSetPaymentStatus(input: {
+        orderId: string;
+        portalId: string;
+        from: string;
+        to: string;
+        employeeId?: string;
+    }): Promise<boolean> {
+        const result = await this.prisma.order.updateMany({
+            where: {
+                id: input.orderId,
+                portalId: input.portalId,
+                paymentStatus: input.from,
+            },
+            data: {
+                paymentStatus: input.to,
+                ...(input.employeeId ? { employeeId: input.employeeId } : {}),
+            },
+        });
+        return result.count === 1;
+    }
+
     // ─── Обновление заказа ───────────────────────────────────────────────────
 
     async update(id: string, data: UpdateOrderInput): Promise<Order> {
