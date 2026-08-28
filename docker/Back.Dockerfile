@@ -47,4 +47,4 @@ RUN pnpm --filter api build
 EXPOSE 4200
 
 # ENTRYPOINT ["/entrypoint.sh"]
-CMD ["node", "apps/api/dist/src/main.js"]
+CMD ["node", "apps/api/dist/main.js"]
