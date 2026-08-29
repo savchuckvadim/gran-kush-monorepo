@@ -145,6 +145,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Liveness: процесс жив, без обращения к БД */
+        get: operations["Health_getHealth"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ready": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Readiness: Postgres и Redis доступны */
+        get: operations["Health_getReadiness"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/": {
         parameters: {
             query?: never;
@@ -2269,6 +2303,27 @@ export interface components {
         PlatformLoginDto: {
             email: string;
             password: string;
+        };
+        HealthResponseDto: {
+            /** @example ok */
+            status: string;
+        };
+        ReadinessChecksDto: {
+            /**
+             * @example up
+             * @enum {string}
+             */
+            database: "up" | "down";
+            /**
+             * @example up
+             * @enum {string}
+             */
+            redis: "up" | "down";
+        };
+        ReadinessResponseDto: {
+            /** @example ready */
+            status: string;
+            checks: components["schemas"]["ReadinessChecksDto"];
         };
         EmployeeLoginDto: {
             /** @example employee@example.com */
@@ -4550,6 +4605,9 @@ export type SchemaDeleteAccountDocumentResponseDto = components['schemas']['Dele
 export type SchemaAccountSignatureDto = components['schemas']['AccountSignatureDto'];
 export type SchemaUploadAccountSignatureDto = components['schemas']['UploadAccountSignatureDto'];
 export type SchemaPlatformLoginDto = components['schemas']['PlatformLoginDto'];
+export type SchemaHealthResponseDto = components['schemas']['HealthResponseDto'];
+export type SchemaReadinessChecksDto = components['schemas']['ReadinessChecksDto'];
+export type SchemaReadinessResponseDto = components['schemas']['ReadinessResponseDto'];
 export type SchemaEmployeeLoginDto = components['schemas']['EmployeeLoginDto'];
 export type SchemaEmployeePortalRoleDto = components['schemas']['EmployeePortalRoleDto'];
 export type SchemaEmployeeInfoDto = components['schemas']['EmployeeInfoDto'];
@@ -5017,6 +5075,51 @@ export interface operations {
         requestBody?: never;
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Health_getHealth: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HealthResponseDto"];
+                };
+            };
+        };
+    };
+    Health_getReadiness: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadinessResponseDto"];
+                };
+            };
+            /** @description Одна из зависимостей недоступна */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -10182,7 +10285,10 @@ export interface operations {
     LkOrders_createOrder: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Ключ идемпотентности. Повтор с тем же ключом и тем же телом возвращает сохранённый ответ вместо повторного выполнения. Тот же ключ с другим телом → 422, ключ ещё в работе → 409. */
+                "idempotency-key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -10230,6 +10336,24 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -10405,7 +10529,10 @@ export interface operations {
     CrmFinance_createTransaction: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Ключ идемпотентности. Повтор с тем же ключом и тем же телом возвращает сохранённый ответ вместо повторного выполнения. Тот же ключ с другим телом → 422, ключ ещё в работе → 409. */
+                "idempotency-key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -10444,6 +10571,24 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
