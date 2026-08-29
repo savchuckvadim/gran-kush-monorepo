@@ -1,8 +1,11 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { APP_GUARD } from "@nestjs/core";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
+import { getThrottlerConfig } from "./common/config/throttler/throttler.config";
 import { IdempotencyModule } from "./common/idempotency";
 import { PrismaModule } from "./common/prisma/prisma.module";
 import { QueueModule } from "./common/queue/queue.module";
@@ -26,6 +29,7 @@ import { StorageModule } from "./modules/storage/storage.module";
             envFilePath: [".env"],
             expandVariables: true,
         }),
+        ThrottlerModule.forRoot(getThrottlerConfig()),
         CoreModule,
         PrismaModule,
         IdempotencyModule,
@@ -43,6 +47,10 @@ import { StorageModule } from "./modules/storage/storage.module";
         HealthModule,
     ],
     controllers: [AppController],
-    providers: [AppService],
+    providers: [
+        AppService,
+        // Глобально: лимит применяется ко всему, точечные наборы вешаются @Throttle.
+        { provide: APP_GUARD, useClass: ThrottlerGuard },
+    ],
 })
 export class AppModule {}

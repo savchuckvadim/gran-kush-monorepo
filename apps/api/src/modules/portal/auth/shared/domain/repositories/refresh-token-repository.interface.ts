@@ -29,6 +29,13 @@ export abstract class RefreshTokenRepository {
         deviceId: string
     ): Promise<void>;
 
+    /**
+     * Снять все активные refresh глобального аккаунта — во всех порталах и на всех
+     * устройствах. Нужно при смене пароля: иначе угнанная сессия живёт ещё 7 дней
+     * после того, как владелец сбросил пароль.
+     */
+    abstract revokeAllForUser(userId: string): Promise<number>;
+
     abstract revokeAllActiveForPlatformAdminDevice(
         platformAdminId: string,
         deviceId: string

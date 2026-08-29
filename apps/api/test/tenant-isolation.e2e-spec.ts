@@ -128,10 +128,6 @@ describe("Cross-portal isolation (e2e)", () => {
         if (billingPlanId) {
             await prisma.billingPlan.deleteMany({ where: { id: billingPlanId } });
         }
-        // Юнит глобальный (не каскадится с порталом) — удаляем после порталов
-        if (measurementUnitId) {
-            await prisma.measurementUnit.deleteMany({ where: { id: measurementUnitId } });
-        }
         await app.close();
     });
 
@@ -507,7 +503,12 @@ describe("Cross-portal isolation (e2e)", () => {
             });
 
             const unit = await prisma.measurementUnit.create({
-                data: { code: `iso-unit-${suffix}`, name: "Isolation Unit", isCustom: true },
+                data: {
+                    portalId: portalB.id,
+                    code: `iso-unit-${suffix}`,
+                    name: "Isolation Unit",
+                    isCustom: true,
+                },
             });
             measurementUnitId = unit.id;
 
@@ -576,6 +577,72 @@ describe("Cross-portal isolation (e2e)", () => {
                 .set("Cookie", portalB.cookies)
                 .set("X-Portal-Slug", portalB.slug);
             expect(res.status).toBe(200);
+        });
+
+        // Справочник единиц был общим на всю платформу: админ клуба A правил и удалял
+        // единицы, на которые ссылаются товары клуба B, а занятый им код не давал
+        // клубу B завести свой.
+        it("does not list portal B measurement units for employee A", async () => {
+            const res = await request(app.getHttpServer())
+                .get("/crm/catalog/measurement-units")
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug);
+            expect(res.status).toBe(200);
+            expect(JSON.stringify(res.body)).not.toContain(measurementUnitId);
+        });
+
+        it("rejects update of portal B measurement unit by admin A", async () => {
+            const res = await request(app.getHttpServer())
+                .patch(`/crm/catalog/measurement-units/${measurementUnitId}`)
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug)
+                .send({ name: "Hijacked" });
+            expect(res.status).toBe(404);
+
+            const unit = await prisma.measurementUnit.findUnique({
+                where: { id: measurementUnitId },
+                select: { name: true },
+            });
+            expect(unit?.name).not.toBe("Hijacked");
+        });
+
+        it("rejects delete of portal B measurement unit by admin A", async () => {
+            const res = await request(app.getHttpServer())
+                .delete(`/crm/catalog/measurement-units/${measurementUnitId}`)
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug);
+            expect(res.status).toBe(404);
+            expect(await prisma.measurementUnit.count({ where: { id: measurementUnitId } })).toBe(
+                1
+            );
+        });
+
+        it("allows both portals to use the same unit code", async () => {
+            const code = `shared-code-${suffix}`;
+            for (const portal of [portalA, portalB]) {
+                const res = await request(app.getHttpServer())
+                    .post("/crm/catalog/measurement-units")
+                    .set("Cookie", portal.cookies)
+                    .set("X-Portal-Slug", portal.slug)
+                    .send({ code, name: "Грамм" });
+                expect(res.status).toBe(201);
+            }
+            expect(await prisma.measurementUnit.count({ where: { code } })).toBe(2);
+        });
+
+        it("does not let a product reference another portal's measurement unit", async () => {
+            const res = await request(app.getHttpServer())
+                .post("/crm/catalog/products")
+                .set("Cookie", portalA.cookies)
+                .set("X-Portal-Slug", portalA.slug)
+                .send({
+                    name: `Cross unit ${suffix}`,
+                    categoryId: categoryBId,
+                    measurementUnitId,
+                    price: 1,
+                    initialQuantity: 1,
+                });
+            expect(res.status).toBe(404);
         });
     });
 

@@ -1,8 +1,10 @@
 import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Throttle } from "@nestjs/throttler";
 
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 
+import { PUBLIC_TOKEN_THROTTLE } from "@common/config/throttler/throttler.config";
 import { Public } from "@common/decorators/auth/public.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
@@ -24,6 +26,7 @@ export class PublicInvitationsController {
     ) {}
 
     @Get(":token")
+    @Throttle(PUBLIC_TOKEN_THROTTLE)
     @ApiOperation({ summary: "Информация о приглашении по токену" })
     @ApiSuccessResponse(PublicInvitationInfoDto)
     @ApiErrorResponse([404])
@@ -40,6 +43,7 @@ export class PublicInvitationsController {
     }
 
     @Post(":token/accept")
+    @Throttle(PUBLIC_TOKEN_THROTTLE)
     @ApiOperation({
         summary:
             "Принять приглашение: создаёт/клеймит аккаунт (password обязателен для новых) и Employee",

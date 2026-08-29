@@ -214,13 +214,16 @@ export class CrmCatalogController {
     }
 
     // ─── Measurement Units ───────────────────────────────────────────────────
+    // Справочник портальный: раньше таблица была общей, и админ клуба A правил или
+    // удалял единицу, на которую ссылаются товары клуба B, а занятый им код не давал
+    // клубу B завести свой.
 
     @Get("measurement-units")
     @ApiOperation({ summary: "Список единиц измерения" })
     @ApiSuccessResponse(MeasurementUnitDto, { isArray: true })
     @ApiErrorResponse([401, 403])
-    async listMeasurementUnits(): Promise<MeasurementUnitDto[]> {
-        const units = await this.unitsService.findAll();
+    async listMeasurementUnits(@PortalId() portalId: string): Promise<MeasurementUnitDto[]> {
+        const units = await this.unitsService.findAll(portalId);
         return units.map(mapMeasurementUnitToDto);
     }
 
@@ -230,9 +233,10 @@ export class CrmCatalogController {
     @ApiSuccessResponse(MeasurementUnitDto, { status: 201 })
     @ApiErrorResponse([400, 401, 403, 409])
     async createMeasurementUnit(
-        @Body() dto: CreateMeasurementUnitDto
+        @Body() dto: CreateMeasurementUnitDto,
+        @PortalId() portalId: string
     ): Promise<MeasurementUnitDto> {
-        const unit = await this.unitsService.create(dto);
+        const unit = await this.unitsService.create(portalId, dto);
         return mapMeasurementUnitToDto(unit);
     }
 
@@ -243,9 +247,10 @@ export class CrmCatalogController {
     @ApiErrorResponse([400, 401, 403, 404, 409])
     async updateMeasurementUnit(
         @Param("id") id: string,
-        @Body() dto: UpdateMeasurementUnitDto
+        @Body() dto: UpdateMeasurementUnitDto,
+        @PortalId() portalId: string
     ): Promise<MeasurementUnitDto> {
-        const unit = await this.unitsService.update(id, dto);
+        const unit = await this.unitsService.update(portalId, id, dto);
         return mapMeasurementUnitToDto(unit);
     }
 
@@ -253,8 +258,11 @@ export class CrmCatalogController {
     @RequireAdmin()
     @ApiOperation({ summary: "Удалить единицу измерения (Admin)" })
     @ApiErrorResponse([401, 403, 404])
-    async deleteMeasurementUnit(@Param("id") id: string): Promise<{ message: string }> {
-        await this.unitsService.delete(id);
+    async deleteMeasurementUnit(
+        @Param("id") id: string,
+        @PortalId() portalId: string
+    ): Promise<{ message: string }> {
+        await this.unitsService.delete(portalId, id);
         return { message: "Measurement unit deleted successfully" };
     }
 }

@@ -74,7 +74,7 @@ export class ProductsService {
             throw new NotFoundException(`Category with id "${dto.categoryId}" not found`);
         }
 
-        const unit = await this.unitRepository.findById(dto.measurementUnitId);
+        const unit = await this.unitRepository.findById(portalId, dto.measurementUnitId);
         if (!unit) {
             throw new NotFoundException(
                 `Measurement unit with id "${dto.measurementUnitId}" not found`
@@ -143,7 +143,7 @@ export class ProductsService {
         }
 
         if (dto.measurementUnitId) {
-            const unit = await this.unitRepository.findById(dto.measurementUnitId);
+            const unit = await this.unitRepository.findById(portalId, dto.measurementUnitId);
             if (!unit) {
                 throw new NotFoundException(
                     `Measurement unit with id "${dto.measurementUnitId}" not found`

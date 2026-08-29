@@ -7,33 +7,37 @@ import { MeasurementUnitRepository } from "@modules/portal/crm/catalog/domain/re
 export class MeasurementUnitsService {
     constructor(private readonly repository: MeasurementUnitRepository) {}
 
-    async findById(id: string): Promise<MeasurementUnit | null> {
-        return this.repository.findById(id);
+    async findById(portalId: string, id: string): Promise<MeasurementUnit | null> {
+        return this.repository.findById(portalId, id);
     }
 
-    async findByCode(code: string): Promise<MeasurementUnit | null> {
-        return this.repository.findByCode(code);
+    async findByCode(portalId: string, code: string): Promise<MeasurementUnit | null> {
+        return this.repository.findByCode(portalId, code);
     }
 
-    async findAll(onlyActive?: boolean): Promise<MeasurementUnit[]> {
-        return this.repository.findAll(onlyActive);
+    async findAll(portalId: string, onlyActive?: boolean): Promise<MeasurementUnit[]> {
+        return this.repository.findAll(portalId, onlyActive);
     }
 
-    async create(data: {
-        code: string;
-        name: string;
-        description?: string;
-        isCustom?: boolean;
-    }): Promise<MeasurementUnit> {
-        // Проверка уникальности code
-        const existing = await this.repository.findByCode(data.code);
+    async create(
+        portalId: string,
+        data: {
+            code: string;
+            name: string;
+            description?: string;
+            isCustom?: boolean;
+        }
+    ): Promise<MeasurementUnit> {
+        // Код уникален внутри портала: занятый соседним клубом код больше не мешает.
+        const existing = await this.repository.findByCode(portalId, data.code);
         if (existing) {
             throw new ConflictException(`Measurement unit with code "${data.code}" already exists`);
         }
-        return this.repository.create(data);
+        return this.repository.create(portalId, data);
     }
 
     async update(
+        portalId: string,
         id: string,
         data: Partial<{
             code: string;
@@ -43,14 +47,13 @@ export class MeasurementUnitsService {
             isActive: boolean;
         }>
     ): Promise<MeasurementUnit> {
-        const unit = await this.repository.findById(id);
+        const unit = await this.repository.findById(portalId, id);
         if (!unit) {
             throw new NotFoundException("Measurement unit not found");
         }
 
-        // Проверка уникальности code при обновлении
         if (data.code && data.code !== unit.code) {
-            const existing = await this.repository.findByCode(data.code);
+            const existing = await this.repository.findByCode(portalId, data.code);
             if (existing) {
                 throw new ConflictException(
                     `Measurement unit with code "${data.code}" already exists`
@@ -58,14 +61,17 @@ export class MeasurementUnitsService {
             }
         }
 
-        return this.repository.update(id, data);
-    }
-
-    async delete(id: string): Promise<void> {
-        const unit = await this.repository.findById(id);
-        if (!unit) {
+        const updated = await this.repository.update(portalId, id, data);
+        if (!updated) {
             throw new NotFoundException("Measurement unit not found");
         }
-        return this.repository.delete(id);
+        return updated;
+    }
+
+    async delete(portalId: string, id: string): Promise<void> {
+        const deleted = await this.repository.delete(portalId, id);
+        if (!deleted) {
+            throw new NotFoundException("Measurement unit not found");
+        }
     }
 }

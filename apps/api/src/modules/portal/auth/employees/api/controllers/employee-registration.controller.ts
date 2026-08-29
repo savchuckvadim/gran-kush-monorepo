@@ -1,6 +1,8 @@
 import { Body, Controller, Post } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Throttle } from "@nestjs/throttler";
 
+import { SIGNUP_THROTTLE } from "@common/config/throttler/throttler.config";
 import { Admin } from "@common/decorators/auth/admin.decorator";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
@@ -20,6 +22,7 @@ export class EmployeeRegistrationController {
     constructor(private readonly employeeRegistrationUseCase: EmployeeRegistrationUseCase) {}
 
     @Post("register")
+    @Throttle(SIGNUP_THROTTLE)
     @Admin()
     @ApiOperation({ summary: "Register new Employee (Admin only, account claimed later)" })
     @ApiSuccessResponse(RegisterEmployeeResponseDto, {

@@ -1,9 +1,11 @@
 import { Body, Controller, Get, Post, Req } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Throttle } from "@nestjs/throttler";
 
 import { FormPurpose } from "@prisma/client";
 import type { Request } from "express";
 
+import { EMAIL_THROTTLE, SIGNUP_THROTTLE } from "@common/config/throttler/throttler.config";
 import { CurrentAuthUser } from "@common/decorators/auth/current-auth-user.decorator";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { Public } from "@common/decorators/auth/public.decorator";
@@ -62,6 +64,7 @@ export class MemberRegistrationController {
     }
 
     @Post("register")
+    @Throttle(SIGNUP_THROTTLE)
     @Public()
     @ApiOperation({
         summary:
@@ -103,6 +106,7 @@ export class MemberRegistrationController {
     }
 
     @Post("confirm-email")
+    @Throttle(EMAIL_THROTTLE)
     @Public()
     @ApiOperation({ summary: "Confirm email" })
     @ApiSuccessResponse(MemberConfirmEmailResponseDto, {

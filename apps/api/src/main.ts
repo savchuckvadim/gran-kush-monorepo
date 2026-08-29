@@ -1,6 +1,7 @@
 import { ValidationPipe } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
+import type { NestExpressApplication } from "@nestjs/platform-express";
 
 import cookieParser from "cookie-parser";
 
@@ -10,7 +11,15 @@ import { AppModule } from "./app.module";
 import { getSwaggerConfig } from "./common/config/swagger/swagger.config";
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+    // Сколько прокси перед приложением. За nginx из infra/ это 1: он добавляет свой
+    // хоп в X-Forwarded-For, и Express берёт реальный IP клиента, а не адрес контейнера.
+    // Без этого rate limiting считает всех клиентов одним IP и рубит их общим лимитом,
+    // а значение больше фактического числа хопов позволяет клиенту подделать свой IP
+    // заголовком X-Forwarded-For и лимит обойти.
+    const trustProxyHops = Number(process.env.TRUST_PROXY_HOPS ?? 1);
+    app.set("trust proxy", Number.isFinite(trustProxyHops) ? trustProxyHops : 1);
 
     // Глобальная валидация и трансформация типов
     app.useGlobalPipes(

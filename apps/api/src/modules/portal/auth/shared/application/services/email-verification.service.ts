@@ -4,11 +4,14 @@ import { MailService } from "@mail/application/services/mail.service";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import { randomBytes } from "crypto";
 
+import { RefreshTokenRepository } from "@modules/portal/auth/shared/domain/repositories/refresh-token-repository.interface";
+
 @Injectable()
 export class EmailVerificationService {
     constructor(
         private readonly userRepository: UserRepository,
-        private readonly mailService: MailService
+        private readonly mailService: MailService,
+        private readonly refreshTokenRepository: RefreshTokenRepository
     ) {}
 
     /**
@@ -151,6 +154,11 @@ export class EmailVerificationService {
             resetPasswordToken: null,
             resetPasswordExpiresAt: null,
         });
+
+        // Сброс пароля обязан выкидывать все остальные сессии: если аккаунт угнали,
+        // смена пароля без этого ничего не даёт — refresh-токен злоумышленника живёт
+        // ещё 7 дней и молча выписывает новые access-токены.
+        await this.refreshTokenRepository.revokeAllForUser(user.id);
 
         return {
             success: true,

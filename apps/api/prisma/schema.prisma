@@ -152,6 +152,7 @@ model Portal {
   subscription        PortalSubscription?
   payments            Payment[]
   productCategories   ProductCategory[]
+  measurementUnits    MeasurementUnit[]
   products            Product[]
   orders              Order[]
   financialTransactions FinancialTransaction[]
@@ -1047,7 +1048,8 @@ model PresenceSession {
 
 model MeasurementUnit {
   id          String   @id @default(uuid())
-  code        String   @unique @db.VarChar(50)
+  portalId    String   @map("portal_id")
+  code        String   @db.VarChar(50)
   name        String   @db.VarChar(255)
   description String?  @db.Text
   isCustom    Boolean  @default(false) @map("is_custom")
@@ -1055,8 +1057,13 @@ model MeasurementUnit {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
+  portal   Portal    @relation(fields: [portalId], references: [id], onDelete: Cascade)
   products Product[]
 
+  // Раньше code был уникален глобально: клуб A занимал код, и клуб B не мог завести свой.
+  // Плюс запись была открыта админу любого портала — он правил чужой справочник.
+  @@unique([portalId, code])
+  @@index([portalId])
   @@index([code])
   @@index([isActive])
   @@map("measurement_units")

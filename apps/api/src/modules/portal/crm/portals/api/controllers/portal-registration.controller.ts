@@ -1,9 +1,11 @@
 import { Body, Controller, Headers, Post, Res } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Throttle } from "@nestjs/throttler";
 
 import type { Response } from "express";
 
 import { AUTH_GLOBAL_SCOPE, resolveDeviceIdFromHeaders } from "@common/auth";
+import { SIGNUP_THROTTLE } from "@common/config/throttler/throttler.config";
 import { AuthCookieService } from "@common/cookie/services/auth-cookie.service";
 import { Public } from "@common/decorators/auth/public.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
@@ -21,6 +23,7 @@ export class PortalRegistrationController {
     ) {}
 
     @Post("register")
+    @Throttle(SIGNUP_THROTTLE)
     @Public()
     @ApiOperation({ summary: "Register new portal and root owner employee" })
     @ApiSuccessResponse(RegisterPortalResponseDto, {

@@ -8,7 +8,6 @@ import { getMailerConfig } from "@common/config/mail/mailer.config";
 import { TelegramModule } from "@common/telegram/telegram.module";
 import { PORTAL_EVENTS_QUEUE_NAME } from "@modules/portal/crm/portals/events/portal-events.constants";
 
-import { MailController } from "./api/controllers/mail.controller";
 import { MailService } from "./application/services/mail.service";
 import { MAIL_QUEUE_NAME } from "./events/mail-events.constants";
 import { MailProcessor } from "./infrastructure/processors/mail.processor";
@@ -33,6 +32,5 @@ import { MailProcessor } from "./infrastructure/processors/mail.processor";
     ],
     providers: [MailService, MailProcessor],
     exports: [MailService],
-    controllers: [MailController],
 })
 export class MailModule {}

@@ -84,6 +84,34 @@ After JWT validation, **`PortalTenantMatchGuard`** ensures the authenticated use
 
 ---
 
+## Rate limiting
+
+Глобальный `ThrottlerGuard` (`APP_GUARD`), наборы лимитов —
+`apps/api/src/common/config/throttler/throttler.config.ts`. Лимит считается **на IP**,
+превышение → **429**. Все значения переопределяются переменными окружения.
+
+| Набор | По умолчанию | Где применяется | Env |
+|---|---|---|---|
+| `default` | 300 / мин | всё остальное | `THROTTLE_DEFAULT_LIMIT` |
+| `auth` | 20 / мин | логины, refresh, верификация email, подтверждение сброса | `THROTTLE_AUTH_LIMIT` |
+| `email` | 5 / мин | всё, что отправляет письмо | `THROTTLE_EMAIL_LIMIT` |
+| `public-token` | 30 / мин | `/public/invitations/*`, `/public/reg-links/*` | `THROTTLE_PUBLIC_TOKEN_LIMIT` |
+| `signup` | 10 / мин | регистрация участника, сотрудника, портала | `THROTTLE_SIGNUP_LIMIT` |
+
+### `trust proxy` — обязателен за nginx
+
+`main.ts` выставляет `trust proxy` из **`TRUST_PROXY_HOPS`** (по умолчанию `1`) — это число
+прокси перед приложением, а не `true`.
+
+- Без него `req.ip` — адрес контейнера nginx, и лимит считается на всех клиентов сразу:
+  один активный пользователь выбивает 429 всему клубу.
+- Значение **больше** фактического числа хопов позволяет клиенту подделать свой IP заголовком
+  `X-Forwarded-For` и лимит обойти. Поэтому число, а не `true`.
+- nginx из `infra/docker/nginx/templates` добавляет ровно один хоп → `1`. Если приложение
+  смотрит в интернет напрямую, ставьте `0`.
+
+---
+
 ## Idempotency-Key
 
 Повтор одного и того же POST не должен создавать вторую сущность. Клиент присылает
@@ -165,6 +193,12 @@ Passport uses **separate strategies** for bearer vs cookie (see `apps/api/src/co
 | `CRM_FRONTEND_URL` | CRM cookie domain base |
 | `MEMBER_FRONTEND_URL` | LK cookie domain base |
 | `JWT_*` | Token signing and TTL |
+| `TRUST_PROXY_HOPS` | Число прокси перед API (за nginx из `infra/` — `1`, напрямую — `0`) |
+| `THROTTLE_DEFAULT_LIMIT` | Общий лимит запросов на IP в минуту (300) |
+| `THROTTLE_AUTH_LIMIT` | Лимит на логины и refresh (20) |
+| `THROTTLE_EMAIL_LIMIT` | Лимит на маршруты, отправляющие письма (5) |
+| `THROTTLE_PUBLIC_TOKEN_LIMIT` | Лимит на публичные токен-маршруты (30) |
+| `THROTTLE_SIGNUP_LIMIT` | Лимит на регистрации (10) |
 
 ---
 

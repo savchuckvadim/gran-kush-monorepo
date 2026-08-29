@@ -56,6 +56,16 @@ export class RefreshTokenPrismaRepository implements RefreshTokenRepository {
         });
     }
 
+    async revokeAllForUser(userId: string): Promise<number> {
+        // Без фильтра по principalType: member- и employee-мосты делят один
+        // глобальный аккаунт, и пароль у них общий.
+        const { count } = await this.prisma.refreshToken.updateMany({
+            where: { userId, revoked: false },
+            data: { revoked: true },
+        });
+        return count;
+    }
+
     async revokeAllActiveForPlatformAdminDevice(
         platformAdminId: string,
         deviceId: string

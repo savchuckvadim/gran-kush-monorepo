@@ -118,7 +118,12 @@ describe("CRM role-based access (e2e)", () => {
 
         // Каталог: юнит + категория + товар (сидим напрямую, чтобы тесты не зависели от прав на создание)
         const unit = await prisma.measurementUnit.create({
-            data: { code: `rbac-unit-${suffix}`, name: "RBAC Unit", isCustom: true },
+            data: {
+                portalId: portalId,
+                code: `rbac-unit-${suffix}`,
+                name: "RBAC Unit",
+                isCustom: true,
+            },
         });
         unitId = unit.id;
 
@@ -244,6 +249,20 @@ describe("CRM role-based access (e2e)", () => {
                 .post("/crm/catalog/measurement-units")
                 .send({ code: `hack-unit-${suffix}`, name: "Левый юнит" });
             expect(res.status).toBe(403);
+        });
+
+        it("allows measurement unit creation by portal owner", async () => {
+            const res = await as(ownerCookies)
+                .post("/crm/catalog/measurement-units")
+                .send({ code: `own-unit-${suffix}`, name: "Своя единица" });
+            expect(res.status).toBe(201);
+
+            // Единица заводится в своём портале, а не в общей таблице.
+            const created = await prisma.measurementUnit.findFirst({
+                where: { code: `own-unit-${suffix}` },
+                select: { portalId: true },
+            });
+            expect(created?.portalId).toBe(portalId);
         });
 
         it("rejects product update by manager role (admin only)", async () => {

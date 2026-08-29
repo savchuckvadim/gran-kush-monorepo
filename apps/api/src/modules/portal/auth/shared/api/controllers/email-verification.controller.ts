@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Throttle } from "@nestjs/throttler";
 
+import { AUTH_THROTTLE, EMAIL_THROTTLE } from "@common/config/throttler/throttler.config";
 import { Public } from "@common/decorators/auth/public.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
@@ -18,6 +20,7 @@ export class EmailVerificationController {
     constructor(private readonly emailVerificationService: EmailVerificationService) {}
 
     @Get("verify/:token")
+    @Throttle(AUTH_THROTTLE)
     @ApiOperation({ summary: "Verify email by token (GET redirect from email link)" })
     @ApiSuccessResponse(VerifyEmailResponseDto, {
         description: "Email verified successfully",
@@ -28,6 +31,7 @@ export class EmailVerificationController {
     }
 
     @Post("verify")
+    @Throttle(AUTH_THROTTLE)
     @ApiOperation({ summary: "Verify email by token (POST)" })
     @ApiSuccessResponse(VerifyEmailResponseDto, {
         description: "Email verified successfully",
@@ -38,6 +42,7 @@ export class EmailVerificationController {
     }
 
     @Post("password/reset/request")
+    @Throttle(EMAIL_THROTTLE)
     @ApiOperation({ summary: "Request password reset (send email with reset link)" })
     @ApiSuccessResponse(PasswordResetResponseDto, {
         description: "Password reset email sent (if email exists)",
@@ -50,6 +55,7 @@ export class EmailVerificationController {
     }
 
     @Post("password/reset")
+    @Throttle(AUTH_THROTTLE)
     @ApiOperation({ summary: "Reset password using token from email" })
     @ApiSuccessResponse(PasswordResetResponseDto, {
         description: "Password reset successfully",

@@ -4,23 +4,6 @@
  */
 
 export interface paths {
-    "/mail/send": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Send email */
-        post: operations["Mail_sendMail"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/lk/account/documents": {
         parameters: {
             query?: never;
@@ -2206,33 +2189,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        SendEmailRequestDto: {
-            /**
-             * @description Email
-             * @example test@example.com
-             */
-            email: string;
-            /**
-             * @description Subject
-             * @example Welcome to the realm of NestJS
-             */
-            subject: string;
-            /**
-             * @description Template
-             * @example text
-             */
-            body: string;
-            /**
-             * @description Name
-             * @example John
-             */
-            name: string;
-            /**
-             * @description Surname
-             * @example Doe
-             */
-            surname: string;
-        };
         AccountDocumentDto: {
             id: string;
             /** @example passport */
@@ -4596,7 +4552,6 @@ export interface components {
     headers: never;
     pathItems: never;
 }
-export type SchemaSendEmailRequestDto = components['schemas']['SendEmailRequestDto'];
 export type SchemaAccountDocumentDto = components['schemas']['AccountDocumentDto'];
 export type SchemaAccountDocumentsResponseDto = components['schemas']['AccountDocumentsResponseDto'];
 export type SchemaApiErrorResponseDto = components['schemas']['ApiErrorResponseDto'];
@@ -4784,30 +4739,6 @@ export type SchemaPortalSettingsDto = components['schemas']['PortalSettingsDto']
 export type SchemaUpdatePortalSettingsDto = components['schemas']['UpdatePortalSettingsDto'];
 export type $defs = Record<string, never>;
 export interface operations {
-    Mail_sendMail: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SendEmailRequestDto"];
-            };
-        };
-        responses: {
-            /** @description Email sent */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": boolean;
-                };
-            };
-        };
-    };
     Account_listDocuments: {
         parameters: {
             query?: never;

@@ -10,11 +10,13 @@ import {
     Res,
 } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Throttle } from "@nestjs/throttler";
 
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import type { Request, Response } from "express";
 
 import { AUTH_GLOBAL_SCOPE, resolveDeviceIdFromHeaders } from "@common/auth";
+import { AUTH_THROTTLE } from "@common/config/throttler/throttler.config";
 import { AuthCookieService } from "@common/cookie/services/auth-cookie.service";
 import { CurrentAuthUser } from "@common/decorators/auth/current-auth-user.decorator";
 import { Public } from "@common/decorators/auth/public.decorator";
@@ -39,6 +41,7 @@ export class EmployeeAuthController {
     ) {}
 
     @Post("login")
+    @Throttle(AUTH_THROTTLE)
     @Public()
     @ApiOperation({ summary: "Login employee (CRM web, HttpOnly cookies, global account)" })
     @ApiSuccessResponse(EmployeeWebLoginResponseDto, {
@@ -64,6 +67,7 @@ export class EmployeeAuthController {
     }
 
     @Post("refresh")
+    @Throttle(AUTH_THROTTLE)
     @Public()
     @ApiOperation({ summary: "Refresh tokens (cookie refresh only, empty body)" })
     @ApiSuccessResponse(EmployeeRefreshTokenResponseDto, {

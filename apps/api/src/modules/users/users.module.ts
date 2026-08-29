@@ -9,7 +9,6 @@ import { PrismaModule } from "@common/prisma/prisma.module";
 
 @Module({
     imports: [PrismaModule],
-    // controllers: [UsersController],
     providers: [
         UsersService,
         AccountProvisioningService,

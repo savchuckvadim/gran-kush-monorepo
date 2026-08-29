@@ -8,39 +8,47 @@ import { MeasurementUnitRepository } from "@modules/portal/crm/catalog/domain/re
 export class MeasurementUnitPrismaRepository implements MeasurementUnitRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    async findById(id: string): Promise<MeasurementUnit | null> {
-        const unit = await this.prisma.measurementUnit.findUnique({ where: { id } });
+    async findById(portalId: string, id: string): Promise<MeasurementUnit | null> {
+        // findFirst, а не findUnique по id: портал должен попасть в условие, иначе
+        // подстановка чужого id вернула бы единицу соседнего клуба.
+        const unit = await this.prisma.measurementUnit.findFirst({ where: { id, portalId } });
         return unit ? this.mapToEntity(unit) : null;
     }
 
-    async findByCode(code: string): Promise<MeasurementUnit | null> {
-        const unit = await this.prisma.measurementUnit.findUnique({ where: { code } });
+    async findByCode(portalId: string, code: string): Promise<MeasurementUnit | null> {
+        const unit = await this.prisma.measurementUnit.findUnique({
+            where: { portalId_code: { portalId, code } },
+        });
         return unit ? this.mapToEntity(unit) : null;
     }
 
-    async findAll(onlyActive?: boolean): Promise<MeasurementUnit[]> {
+    async findAll(portalId: string, onlyActive?: boolean): Promise<MeasurementUnit[]> {
         const units = await this.prisma.measurementUnit.findMany({
-            where: onlyActive ? { isActive: true } : undefined,
+            where: onlyActive ? { portalId, isActive: true } : { portalId },
             orderBy: { name: "asc" },
         });
         return units.map((u) => this.mapToEntity(u));
     }
 
-    async count(): Promise<number> {
-        return this.prisma.measurementUnit.count();
+    async count(portalId: string): Promise<number> {
+        return this.prisma.measurementUnit.count({ where: { portalId } });
     }
 
-    async create(data: {
-        code: string;
-        name: string;
-        description?: string;
-        isCustom?: boolean;
-    }): Promise<MeasurementUnit> {
-        const unit = await this.prisma.measurementUnit.create({ data });
+    async create(
+        portalId: string,
+        data: {
+            code: string;
+            name: string;
+            description?: string;
+            isCustom?: boolean;
+        }
+    ): Promise<MeasurementUnit> {
+        const unit = await this.prisma.measurementUnit.create({ data: { ...data, portalId } });
         return this.mapToEntity(unit);
     }
 
     async update(
+        portalId: string,
         id: string,
         data: Partial<{
             code: string;
@@ -49,13 +57,23 @@ export class MeasurementUnitPrismaRepository implements MeasurementUnitRepositor
             isCustom: boolean;
             isActive: boolean;
         }>
-    ): Promise<MeasurementUnit> {
-        const unit = await this.prisma.measurementUnit.update({ where: { id }, data });
-        return this.mapToEntity(unit);
+    ): Promise<MeasurementUnit | null> {
+        // updateMany с портулом в условии: update по одному id правил бы чужую строку.
+        const { count } = await this.prisma.measurementUnit.updateMany({
+            where: { id, portalId },
+            data,
+        });
+        if (count === 0) {
+            return null;
+        }
+        return this.findById(portalId, id);
     }
 
-    async delete(id: string): Promise<void> {
-        await this.prisma.measurementUnit.delete({ where: { id } });
+    async delete(portalId: string, id: string): Promise<boolean> {
+        const { count } = await this.prisma.measurementUnit.deleteMany({
+            where: { id, portalId },
+        });
+        return count > 0;
     }
 
     private mapToEntity(raw: {
