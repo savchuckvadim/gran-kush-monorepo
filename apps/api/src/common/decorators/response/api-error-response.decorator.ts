@@ -6,6 +6,7 @@ import {
     ApiInternalServerErrorResponse,
     ApiNotFoundResponse,
     ApiUnauthorizedResponse,
+    ApiUnprocessableEntityResponse,
 } from "@nestjs/swagger";
 
 import { ApiErrorResponseDto } from "@common/dto/api-error-response.dto";
@@ -25,6 +26,7 @@ const ERROR_DESCRIPTIONS: Record<number, string> = {
     [HttpStatus.FORBIDDEN]: "Forbidden",
     [HttpStatus.NOT_FOUND]: "Not Found",
     [HttpStatus.CONFLICT]: "Conflict",
+    [HttpStatus.UNPROCESSABLE_ENTITY]: "Unprocessable Entity",
     [HttpStatus.INTERNAL_SERVER_ERROR]: "Internal Server Error",
 };
 
@@ -37,6 +39,7 @@ const ERROR_DECORATORS: Record<number, SwaggerErrorDecoratorFactory> = {
     [HttpStatus.FORBIDDEN]: (opts) => ApiForbiddenResponse(opts),
     [HttpStatus.NOT_FOUND]: (opts) => ApiNotFoundResponse(opts),
     [HttpStatus.CONFLICT]: (opts) => ApiConflictResponse(opts),
+    [HttpStatus.UNPROCESSABLE_ENTITY]: (opts) => ApiUnprocessableEntityResponse(opts),
     [HttpStatus.INTERNAL_SERVER_ERROR]: (opts) => ApiInternalServerErrorResponse(opts),
 };
 

@@ -426,6 +426,44 @@ model PaymentEvent {
   @@map("payment_events")
 }
 
+enum IdempotencyStatus {
+  in_progress
+  completed
+}
+
+/// Ключи идемпотентности для POST-запросов, которые нельзя выполнить дважды.
+/// Клиент присылает `Idempotency-Key`, сервер занимает ключ до выполнения и
+/// сохраняет ответ после — повтор возвращает сохранённое, а не выполняет заново.
+model IdempotencyKey {
+  id String @id @default(uuid())
+
+  /// Логический маршрут: "lk.orders.create". Ключи разных операций не пересекаются.
+  scope String @db.VarChar(100)
+  /// Принципал: "<portalId>:<principalType>:<membershipId>". Клиентский ключ уникален
+  /// только внутри своего владельца — иначе совпадение ключей у двух клубов отдало бы
+  /// одному чужой ответ.
+  ownerKey String @map("owner_key") @db.VarChar(200)
+  /// Значение заголовка `Idempotency-Key` как прислал клиент.
+  key String @db.VarChar(255)
+  /// sha256 канонизированного тела: тот же ключ с другим телом — ошибка клиента, а не повтор.
+  requestHash String @map("request_hash") @db.Char(64)
+
+  status     IdempotencyStatus @default(in_progress)
+  /// HTTP-статус сохранённого ответа; воспроизводится при повторе.
+  statusCode Int?              @map("status_code")
+  /// Тело успешного ответа. Ошибки не сохраняются — строка снимается, чтобы ретрай сработал.
+  response   Json?
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  completedAt DateTime? @map("completed_at")
+  /// Горизонт хранения. Протухшая строка не блокирует переиспользование ключа.
+  expiresAt   DateTime  @map("expires_at")
+
+  @@unique([scope, ownerKey, key])
+  @@index([expiresAt])
+  @@map("idempotency_keys")
+}
+
 // ========================
 // Global templates (platform → portal provisioning)
 // ========================

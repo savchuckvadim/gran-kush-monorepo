@@ -13,6 +13,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { IdempotencyScope, Idempotent } from "@common/idempotency";
 import { PaginationDto } from "@common/paginate/dto/pagination.dto";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
@@ -43,6 +44,7 @@ export class LkOrdersController {
     // ─── Создать заказ ───────────────────────────────────────────────────────
 
     @Post()
+    @Idempotent(IdempotencyScope.LK_ORDER_CREATE)
     @ApiOperation({
         summary: "Создать заказ",
         description:

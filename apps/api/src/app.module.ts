@@ -3,6 +3,7 @@ import { ConfigModule } from "@nestjs/config";
 
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
+import { IdempotencyModule } from "./common/idempotency";
 import { PrismaModule } from "./common/prisma/prisma.module";
 import { QueueModule } from "./common/queue/queue.module";
 import { TelegramModule } from "./common/telegram/telegram.module";
@@ -27,6 +28,7 @@ import { StorageModule } from "./modules/storage/storage.module";
         }),
         CoreModule,
         PrismaModule,
+        IdempotencyModule,
         QueueModule,
         TelegramModule,
         MailModule,

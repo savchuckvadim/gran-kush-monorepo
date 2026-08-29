@@ -18,6 +18,7 @@ const getCorsConfig = (configService: ConfigService) => {
             "X-Portal-Id",
             "X-Portal-Slug",
             "X-Device-Id",
+            "Idempotency-Key",
         ],
         exposedHeaders: ["X-Subscription-Warning"],
     };

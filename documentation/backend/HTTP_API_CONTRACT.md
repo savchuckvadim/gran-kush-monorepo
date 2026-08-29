@@ -51,6 +51,7 @@ Configured in `apps/api/src/common/config/cors/cors.config.ts`.
   - `Content-Type`, `Authorization`
   - `X-Portal-Id`, `X-Portal-Slug` — portal resolution / tenant context
   - `X-Device-Id` — device binding for auth flows
+  - `Idempotency-Key` — ключ идемпотентности мутаций (см. ниже)
 
 Frontend apps must use **`fetch(..., { credentials: "include" })`** when calling the API with cookies (see CRM `configureApiClient` with `authStrategy: "cookie"`).
 
@@ -80,6 +81,42 @@ screens, and `/crm/portals/resolve` (used by CRM SSR to resolve the portal from 
 > to tell the caller what the portal is.
 
 After JWT validation, **`PortalTenantMatchGuard`** ensures the authenticated user’s `portalId` matches the request’s portal context when that context is present. Mismatch → **403** (`ForbiddenException`).
+
+---
+
+## Idempotency-Key
+
+Повтор одного и того же POST не должен создавать вторую сущность. Клиент присылает
+`Idempotency-Key`, сервер занимает ключ до выполнения и сохраняет ответ после — повтор
+возвращает сохранённое вместо второго выполнения.
+
+**Заголовок опционален.** Без него маршрут работает как раньше; `@workspace/api-client`
+проставляет ключ на все `POST`/`PUT`/`PATCH` автоматически.
+
+Защищённые маршруты помечены декоратором `@Idempotent(scope)`
+(`apps/api/src/common/idempotency`) и видны в Swagger по заголовку `idempotency-key`:
+
+| Маршрут | Scope |
+|---|---|
+| `POST /lk/orders` | `lk.orders.create` |
+| `POST /crm/finance/transactions` | `crm.finance.transactions.create` |
+
+| Ситуация | Ответ |
+|---|---|
+| Ключ прислан впервые | запрос выполняется, ответ сохраняется |
+| Повтор с тем же телом | сохранённый ответ, эффекты не применяются повторно |
+| Тот же ключ с другим телом | **422** — ошибка клиента, а не повтор |
+| Ключ занят незавершённым запросом | **409** — перечитать результат, а не создавать второй |
+| Запрос завершился ошибкой | ключ снимается: осмысленный ретрай пройдёт |
+| Ключ длиннее 255 символов | **400** |
+
+**Ключ уникален в пределах владельца**, а не глобально: адрес строки —
+`(scope, "<portalId>:<principalType>:<membershipId>", key)`. Совпадение клиентских ключей
+у двух клубов не отдаёт одному ответ другого. Маршрут без аутентификации помечать
+`@Idempotent` нельзя — владельца ключа нет, и интерцептор отвечает 500 fail-closed.
+
+Ключи живут 24 часа; протухшие снимает `IdempotencyCronService`. Ошибки не кэшируются
+намеренно — иначе первый же сетевой сбой навсегда занял бы ключ.
 
 ---
 
