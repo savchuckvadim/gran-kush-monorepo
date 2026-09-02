@@ -11,7 +11,11 @@ import { AppModule } from "./app.module";
 import { getSwaggerConfig } from "./common/config/swagger/swagger.config";
 
 async function bootstrap() {
-    const app = await NestFactory.create<NestExpressApplication>(AppModule);
+    // Парсеры тела регистрирует AppModule с разными потолками для маршрутов загрузки
+    // файлов и всего остального — см. common/config/body-parser
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+        bodyParser: false,
+    });
 
     // Сколько прокси перед приложением. За nginx из infra/ это 1: он добавляет свой
     // хоп в X-Forwarded-For, и Express берёт реальный IP клиента, а не адрес контейнера.

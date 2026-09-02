@@ -4,9 +4,8 @@ import { Injectable, Logger } from "@nestjs/common";
 import { UserDocumentSide } from "@prisma/client";
 import { Job } from "bullmq";
 
+import { decodeDataUrl } from "@common/upload";
 import { AccountFilesService } from "@modules/account/application/services/account-files.service";
-import { UserDocumentRepository } from "@modules/account/domain/repositories/user-document-repository.interface";
-import { UserSignatureRepository } from "@modules/account/domain/repositories/user-signature-repository.interface";
 import { QueueMemberFilesPayload } from "@modules/portal/crm/members/application/services/member-files.service";
 import {
     MEMBER_FILES_QUEUE_NAME,
@@ -18,11 +17,7 @@ import {
 export class MemberFilesProcessor extends WorkerHost {
     private readonly logger = new Logger(MemberFilesProcessor.name);
 
-    constructor(
-        private readonly accountFiles: AccountFilesService,
-        private readonly userDocumentRepository: UserDocumentRepository,
-        private readonly userSignatureRepository: UserSignatureRepository
-    ) {
+    constructor(private readonly accountFiles: AccountFilesService) {
         super();
     }
 
@@ -34,40 +29,25 @@ export class MemberFilesProcessor extends WorkerHost {
         }
 
         if (documentType && documentFirst) {
-            const storagePath = await this.accountFiles.savePrivateDataUrl(
-                documentFirst,
-                userId,
-                `document-${documentType}-front`
-            );
-            await this.userDocumentRepository.upsertByUserTypeSide({
+            await this.accountFiles.replaceDocument({
                 userId,
                 type: documentType,
                 side: UserDocumentSide.front,
-                storagePath,
+                file: decodeDataUrl(documentFirst),
             });
         }
 
         if (documentType && documentSecond) {
-            const storagePath = await this.accountFiles.savePrivateDataUrl(
-                documentSecond,
-                userId,
-                `document-${documentType}-back`
-            );
-            await this.userDocumentRepository.upsertByUserTypeSide({
+            await this.accountFiles.replaceDocument({
                 userId,
                 type: documentType,
                 side: UserDocumentSide.back,
-                storagePath,
+                file: decodeDataUrl(documentSecond),
             });
         }
 
         if (signature) {
-            const storagePath = await this.accountFiles.savePrivateDataUrl(
-                signature,
-                userId,
-                "signature"
-            );
-            await this.userSignatureRepository.upsertByUser({ userId, storagePath });
+            await this.accountFiles.replaceSignature({ userId, file: decodeDataUrl(signature) });
         }
     }
 

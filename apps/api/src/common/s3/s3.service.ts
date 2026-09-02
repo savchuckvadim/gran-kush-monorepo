@@ -8,7 +8,6 @@ import {
     type PutObjectCommandInput,
     S3Client,
 } from "@aws-sdk/client-s3";
-import { randomUUID } from "crypto";
 
 @Global()
 @Injectable()
@@ -118,32 +117,6 @@ export class S3Service {
 
         const command = new PutObjectCommand(input);
         await this.s3!.send(command);
-    }
-
-    /**
-     * Загружает файл в S3
-     * @param file - файл (buffer + имя + mimetype)
-     * @param folder - папка для организации файлов (например, 'avatars', 'hero', 'posts')
-     * @returns URL загруженного файла
-     */
-    async uploadFile(
-        file: { buffer: Buffer; originalname: string; mimetype: string },
-        folder?: string
-    ): Promise<{ url: string }> {
-        this.validateS3Config();
-        // Генерируем уникальное имя файла
-        const fileExtension = file.originalname.split(".").pop();
-        const fileName = `${randomUUID()}.${fileExtension}`;
-        const key = folder ? `${folder}/${fileName}` : fileName;
-
-        await this.uploadBuffer({
-            key,
-            buffer: file.buffer,
-            contentType: file.mimetype,
-            isPublic: true,
-        });
-
-        return { url: this.getPublicUrl(key) };
     }
 
     /**

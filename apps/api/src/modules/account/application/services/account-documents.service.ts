@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/commo
 
 import { UserDocument, UserDocumentSide, UserSignature } from "@prisma/client";
 
+import { decodeDataUrl } from "@common/upload";
 import { AccountFilesService } from "@modules/account/application/services/account-files.service";
 import { UserDocumentRepository } from "@modules/account/domain/repositories/user-document-repository.interface";
 import { UserSignatureRepository } from "@modules/account/domain/repositories/user-signature-repository.interface";
@@ -23,17 +24,11 @@ export class AccountDocumentsService {
         userId: string,
         data: { type: string; side?: UserDocumentSide; number?: string; file: string }
     ): Promise<UserDocument> {
-        const side = data.side ?? UserDocumentSide.single;
-        const storagePath = await this.accountFiles.savePrivateDataUrl(
-            data.file,
-            userId,
-            `document-${data.type}-${side}`
-        );
-        return this.userDocumentRepository.upsertByUserTypeSide({
+        return this.accountFiles.replaceDocument({
             userId,
             type: data.type,
-            side,
-            storagePath,
+            side: data.side ?? UserDocumentSide.single,
+            file: decodeDataUrl(data.file),
             number: data.number ?? null,
         });
     }
@@ -46,7 +41,7 @@ export class AccountDocumentsService {
         if (doc.userId !== userId) {
             throw new ForbiddenException("Document belongs to another account");
         }
-        await this.userDocumentRepository.deleteById(documentId);
+        await this.accountFiles.removeDocument(doc);
     }
 
     async getSignature(userId: string): Promise<UserSignature | null> {
@@ -54,8 +49,7 @@ export class AccountDocumentsService {
     }
 
     async putSignature(userId: string, file: string): Promise<UserSignature> {
-        const storagePath = await this.accountFiles.savePrivateDataUrl(file, userId, "signature");
-        return this.userSignatureRepository.upsertByUser({ userId, storagePath });
+        return this.accountFiles.replaceSignature({ userId, file: decodeDataUrl(file) });
     }
 
     async hasSignature(userId: string): Promise<boolean> {

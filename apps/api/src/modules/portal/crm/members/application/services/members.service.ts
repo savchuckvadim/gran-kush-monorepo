@@ -7,7 +7,6 @@ import { AccountProvisioningService } from "@users/application/services/account-
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 
 import { PrismaService } from "@common/prisma/prisma.service";
-import { AccountDocumentsService } from "@modules/account/application/services/account-documents.service";
 import { AccountFilesService } from "@modules/account/application/services/account-files.service";
 import { UserDocumentRepository } from "@modules/account/domain/repositories/user-document-repository.interface";
 import { UserSignatureRepository } from "@modules/account/domain/repositories/user-signature-repository.interface";
@@ -44,7 +43,6 @@ export class MembersService {
         private readonly accountProvisioning: AccountProvisioningService,
         private readonly userDocumentRepository: UserDocumentRepository,
         private readonly userSignatureRepository: UserSignatureRepository,
-        private readonly accountDocuments: AccountDocumentsService,
         private readonly accountFiles: AccountFilesService,
         private readonly joinPortalService: JoinPortalService,
         private readonly prisma: PrismaService,
@@ -326,42 +324,27 @@ export class MembersService {
         }
 
         if (documentFirst) {
-            const storagePath = await this.accountFiles.savePrivateBuffer(
-                { buffer: documentFirst.buffer, mimetype: documentFirst.mimetype },
-                member.userId,
-                `document-${documentType}-front`
-            );
-            await this.userDocumentRepository.upsertByUserTypeSide({
+            await this.accountFiles.replaceDocument({
                 userId: member.userId,
                 type: documentType,
                 side: UserDocumentSide.front,
-                storagePath,
+                file: documentFirst.buffer,
             });
         }
 
         if (documentSecond) {
-            const storagePath = await this.accountFiles.savePrivateBuffer(
-                { buffer: documentSecond.buffer, mimetype: documentSecond.mimetype },
-                member.userId,
-                `document-${documentType}-back`
-            );
-            await this.userDocumentRepository.upsertByUserTypeSide({
+            await this.accountFiles.replaceDocument({
                 userId: member.userId,
                 type: documentType,
                 side: UserDocumentSide.back,
-                storagePath,
+                file: documentSecond.buffer,
             });
         }
 
         if (signature) {
-            const storagePath = await this.accountFiles.savePrivateBuffer(
-                { buffer: signature.buffer, mimetype: signature.mimetype },
-                member.userId,
-                "signature"
-            );
-            await this.userSignatureRepository.upsertByUser({
+            await this.accountFiles.replaceSignature({
                 userId: member.userId,
-                storagePath,
+                file: signature.buffer,
             });
         }
 

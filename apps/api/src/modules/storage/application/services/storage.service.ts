@@ -1,8 +1,8 @@
 import { BadGatewayException, Injectable, NotFoundException } from "@nestjs/common";
 
 import { StorageType } from "@storage/domain/enums/storage-type.enum";
+import { randomUUID } from "crypto";
 import * as path from "path";
-import { v4 as uuidv4 } from "uuid";
 
 import { S3Service } from "@common/s3";
 
@@ -39,7 +39,7 @@ export class StorageService {
 
         // Генерируем уникальное имя файла
         const fileExtension = path.extname(file.originalname);
-        const fileName = `${uuidv4()}${fileExtension}`;
+        const fileName = `${randomUUID()}${fileExtension}`;
 
         // Ключ S3 совпадает с относительным путём, который вы храните в БД:
         // public/<folder>/<file> или private/<folder>/<file>

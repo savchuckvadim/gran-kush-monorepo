@@ -1,10 +1,11 @@
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_GUARD } from "@nestjs/core";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
+import { configureBodyParsers } from "./common/config/body-parser/body-parser.config";
 import { getThrottlerConfig } from "./common/config/throttler/throttler.config";
 import { IdempotencyModule } from "./common/idempotency";
 import { PrismaModule } from "./common/prisma/prisma.module";
@@ -53,4 +54,8 @@ import { StorageModule } from "./modules/storage/storage.module";
         { provide: APP_GUARD, useClass: ThrottlerGuard },
     ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+    configure(consumer: MiddlewareConsumer): void {
+        configureBodyParsers(consumer);
+    }
+}

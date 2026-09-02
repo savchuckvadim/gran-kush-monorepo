@@ -1,6 +1,8 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
 
-import { IsOptional, IsString, ValidateIf } from "class-validator";
+import { IsOptional, IsString, Matches, MaxLength, ValidateIf } from "class-validator";
+
+const DATA_URL_PREFIX = /^data:[\w.+-]+\/[\w.+-]+;base64,/u;
 
 export class UploadMemberFilesDto {
     @ApiPropertyOptional({
@@ -10,6 +12,7 @@ export class UploadMemberFilesDto {
     })
     @ValidateIf((dto: UploadMemberFilesDto) => Boolean(dto.documentFirst || dto.documentSecond))
     @IsString()
+    @MaxLength(50)
     documentType?: string;
 
     @ApiPropertyOptional({
@@ -19,6 +22,7 @@ export class UploadMemberFilesDto {
     })
     @IsOptional()
     @IsString()
+    @Matches(DATA_URL_PREFIX, { message: "documentFirst must be a base64 data URL" })
     documentFirst?: string;
 
     @ApiPropertyOptional({
@@ -28,6 +32,7 @@ export class UploadMemberFilesDto {
     })
     @IsOptional()
     @IsString()
+    @Matches(DATA_URL_PREFIX, { message: "documentSecond must be a base64 data URL" })
     documentSecond?: string;
 
     @ApiPropertyOptional({
@@ -37,5 +42,6 @@ export class UploadMemberFilesDto {
     })
     @IsOptional()
     @IsString()
+    @Matches(DATA_URL_PREFIX, { message: "signature must be a base64 data URL" })
     signature?: string;
 }

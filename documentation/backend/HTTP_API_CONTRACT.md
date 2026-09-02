@@ -97,6 +97,7 @@ After JWT validation, **`PortalTenantMatchGuard`** ensures the authenticated use
 | `email` | 5 / мин | всё, что отправляет письмо | `THROTTLE_EMAIL_LIMIT` |
 | `public-token` | 30 / мин | `/public/invitations/*`, `/public/reg-links/*` | `THROTTLE_PUBLIC_TOKEN_LIMIT` |
 | `signup` | 10 / мин | регистрация участника, сотрудника, портала | `THROTTLE_SIGNUP_LIMIT` |
+| `upload` | 20 / мин | загрузка документов и подписи (LK и CRM) | `THROTTLE_UPLOAD_LIMIT` |
 
 ### `trust proxy` — обязателен за nginx
 
@@ -109,6 +110,42 @@ After JWT validation, **`PortalTenantMatchGuard`** ensures the authenticated use
   `X-Forwarded-For` и лимит обойти. Поэтому число, а не `true`.
 - nginx из `infra/docker/nginx/templates` добавляет ровно один хоп → `1`. Если приложение
   смотрит в интернет напрямую, ставьте `0`.
+
+---
+
+## Загрузка файлов
+
+Файлы аккаунта (удостоверение личности, подпись) принимаются тремя маршрутами и всегда
+проходят через `AccountFilesService` (`apps/api/src/modules/account`):
+
+| Маршрут | Формат | Кто |
+|---|---|---|
+| `POST /lk/account/documents`, `PUT /lk/account/signature` | base64 data URL в JSON | участник |
+| `POST /lk/auth/member/files` | base64 data URL в JSON → очередь `member-files` | участник при регистрации |
+| `PATCH /crm/members/:id/files` | multipart | admin клуба |
+
+**Тип — по содержимому.** Заявленный клиентом MIME (префикс data URL, `Content-Type` части
+multipart) не имеет значения: тип определяется по сигнатуре байтов (`common/upload`).
+Документ — JPEG, PNG, WebP или PDF; подпись — только изображение. Иное → **400**
+`… file type is not supported`.
+
+**Лимиты** (`common/upload/upload.config.ts`, переопределяются окружением):
+
+| Что | По умолчанию | Env |
+|---|---|---|
+| Документ | 8 МБ | `UPLOAD_MAX_DOCUMENT_MB` |
+| Подпись | 2 МБ | `UPLOAD_MAX_SIGNATURE_MB` |
+| Документов на аккаунт (пар тип × сторона) | 10 | `UPLOAD_MAX_DOCUMENTS_PER_ACCOUNT` |
+| JSON-тело на маршрутах загрузки | 25 МБ (считается от лимитов выше) | — |
+| JSON-тело везде остальное | 1 МБ | `JSON_BODY_LIMIT` |
+
+Превышение лимита файла → **400** с причиной; превышение потолка тела → **413** от парсера
+(до контроллера). `client_max_body_size` в nginx (`infra/`) должен быть не меньше потолка
+маршрутов загрузки — сейчас оба 25 МБ.
+
+Замена документа или подписи удаляет прежний объект из бакета; `DELETE /lk/account/documents/:id`
+удаляет и строку, и объект. Превью в CRM отдаются с `Cache-Control: private, no-store` и
+`X-Content-Type-Options: nosniff`.
 
 ---
 
@@ -199,6 +236,11 @@ Passport uses **separate strategies** for bearer vs cookie (see `apps/api/src/co
 | `THROTTLE_EMAIL_LIMIT` | Лимит на маршруты, отправляющие письма (5) |
 | `THROTTLE_PUBLIC_TOKEN_LIMIT` | Лимит на публичные токен-маршруты (30) |
 | `THROTTLE_SIGNUP_LIMIT` | Лимит на регистрации (10) |
+| `THROTTLE_UPLOAD_LIMIT` | Лимит на загрузку файлов (20) |
+| `UPLOAD_MAX_DOCUMENT_MB` | Потолок файла документа в МБ (8) |
+| `UPLOAD_MAX_SIGNATURE_MB` | Потолок файла подписи в МБ (2) |
+| `UPLOAD_MAX_DOCUMENTS_PER_ACCOUNT` | Сколько документов может держать один аккаунт (10) |
+| `JSON_BODY_LIMIT` | Потолок JSON-тела вне маршрутов загрузки (`1mb`) |
 
 ---
 

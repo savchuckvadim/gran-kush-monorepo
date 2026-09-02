@@ -8,6 +8,7 @@ import {
     Patch,
     Post,
     Query,
+    Res,
     StreamableFile,
     UploadedFiles,
     UseGuards,
@@ -15,16 +16,20 @@ import {
 } from "@nestjs/common";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { Throttle } from "@nestjs/throttler";
 
 import { FormPurpose } from "@prisma/client";
 import { StorageService } from "@storage/application/services/storage.service";
 import { MulterFile } from "@storage/domain/interfaces/storage-file.interface";
+import type { Response } from "express";
 
+import { UPLOAD_THROTTLE } from "@common/config/throttler/throttler.config";
 import { CurrentPrincipal } from "@common/decorators/auth/current-principal.decorator";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import type { PortalPrincipal } from "@common/portal";
+import { mimeForStoragePath, UPLOAD_LIMITS } from "@common/upload";
 import { Admin, AdminGuard, RequireEmployeeJwt } from "@modules/portal/auth/employees";
 import { FormSchemaService } from "@modules/portal/crm/entity-fields/application/services/form-schema.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
@@ -178,6 +183,7 @@ export class CrmMembersController {
     @Patch(":id/files")
     @UseGuards(AdminGuard)
     @Admin()
+    @Throttle(UPLOAD_THROTTLE)
     @ApiOperation({ summary: "Re-upload member files from CRM (saved to member account)" })
     @ApiConsumes("multipart/form-data")
     @ApiBody({
@@ -192,16 +198,23 @@ export class CrmMembersController {
         },
     })
     @UseInterceptors(
-        FileFieldsInterceptor([
-            { name: "documentFirst", maxCount: 1 },
-            { name: "documentSecond", maxCount: 1 },
-            { name: "signature", maxCount: 1 },
-        ])
+        FileFieldsInterceptor(
+            [
+                { name: "documentFirst", maxCount: 1 },
+                { name: "documentSecond", maxCount: 1 },
+                { name: "signature", maxCount: 1 },
+            ],
+            {
+                // Файлы читаются в память целиком: без потолка один запрос съедал бы её всю.
+                // Тип и меньший лимит подписи проверяет AccountFilesService по содержимому
+                limits: { fileSize: UPLOAD_LIMITS.documentBytes, files: 3, fields: 4 },
+            }
+        )
     )
     @ApiSuccessResponse(CrmMemberFullDto, {
         description: "Member details",
     })
-    @ApiErrorResponse([401, 403, 400])
+    @ApiErrorResponse([401, 403, 400, 413])
     async updateFiles(
         @Param("id") id: string,
         @Body()
@@ -226,7 +239,8 @@ export class CrmMembersController {
     async documentPreview(
         @Param("id") memberId: string,
         @Param("documentId") documentId: string,
-        @PortalId() portalId: string
+        @PortalId() portalId: string,
+        @Res({ passthrough: true }) res: Response
     ): Promise<StreamableFile> {
         const document = await this.membersService.getMemberAccountDocument(
             memberId,
@@ -234,10 +248,7 @@ export class CrmMembersController {
             documentId
         );
 
-        const fileBuffer = await this.storageService.getFile(document.storagePath);
-        return new StreamableFile(fileBuffer, {
-            type: this.resolveMimeType(document.storagePath),
-        });
+        return this.privateFile(res, document.storagePath);
     }
 
     @Get(":id/signature/preview")
@@ -248,24 +259,30 @@ export class CrmMembersController {
     @ApiErrorResponse([401, 403, 404])
     async signaturePreview(
         @Param("id") memberId: string,
-        @PortalId() portalId: string
+        @PortalId() portalId: string,
+        @Res({ passthrough: true }) res: Response
     ): Promise<StreamableFile> {
         const signature = await this.membersService.getMemberAccountSignature(memberId, portalId);
 
-        const fileBuffer = await this.storageService.getFile(signature.storagePath);
-        return new StreamableFile(fileBuffer, {
-            type: this.resolveMimeType(signature.storagePath),
-        });
+        return this.privateFile(res, signature.storagePath);
     }
 
-    private resolveMimeType(storagePath: string): string {
-        const normalizedPath = storagePath.toLowerCase();
-        if (normalizedPath.endsWith(".png")) return "image/png";
-        if (normalizedPath.endsWith(".jpg") || normalizedPath.endsWith(".jpeg"))
-            return "image/jpeg";
-        if (normalizedPath.endsWith(".webp")) return "image/webp";
-        if (normalizedPath.endsWith(".gif")) return "image/gif";
-        if (normalizedPath.endsWith(".pdf")) return "application/pdf";
-        return "application/octet-stream";
+    /**
+     * Удостоверение личности: не кэшировать и не давать браузеру угадывать тип.
+     * Расширение в хранилище выставлено по сигнатуре при загрузке; неизвестное
+     * отдаётся вложением как бинарник.
+     */
+    private async privateFile(res: Response, storagePath: string): Promise<StreamableFile> {
+        const fileBuffer = await this.storageService.getFile(storagePath);
+        const type = mimeForStoragePath(storagePath);
+        const filename = storagePath.split("/").pop() ?? "file";
+
+        res.setHeader("Cache-Control", "private, no-store");
+        res.setHeader("X-Content-Type-Options", "nosniff");
+
+        return new StreamableFile(fileBuffer, {
+            type,
+            disposition: `${type === "application/octet-stream" ? "attachment" : "inline"}; filename="${filename}"`,
+        });
     }
 }

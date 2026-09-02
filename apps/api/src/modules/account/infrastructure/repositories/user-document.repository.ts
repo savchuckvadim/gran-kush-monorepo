@@ -16,8 +16,22 @@ export class UserDocumentPrismaRepository implements UserDocumentRepository {
         });
     }
 
+    async countByUser(userId: string): Promise<number> {
+        return this.prisma.userDocument.count({ where: { userId } });
+    }
+
     async findById(id: string): Promise<UserDocument | null> {
         return this.prisma.userDocument.findUnique({ where: { id } });
+    }
+
+    async findByUserTypeSide(
+        userId: string,
+        type: string,
+        side: UserDocumentSide
+    ): Promise<UserDocument | null> {
+        return this.prisma.userDocument.findUnique({
+            where: { userId_type_side: { userId, type, side } },
+        });
     }
 
     async upsertByUserTypeSide(data: {

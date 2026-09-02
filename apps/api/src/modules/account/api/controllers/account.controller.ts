@@ -1,8 +1,10 @@
 import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Throttle } from "@nestjs/throttler";
 
 import { UserDocument, UserSignature } from "@prisma/client";
 
+import { UPLOAD_THROTTLE } from "@common/config/throttler/throttler.config";
 import { CurrentAuthUser } from "@common/decorators/auth/current-auth-user.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
@@ -43,6 +45,7 @@ export class AccountController {
 
     @Post("documents")
     @RequireUserJwt()
+    @Throttle(UPLOAD_THROTTLE)
     @ApiOperation({ summary: "Upload/replace account document (base64 data URL)" })
     @ApiSuccessResponse(AccountDocumentDto)
     @ApiErrorResponse([400, 401])
@@ -82,6 +85,7 @@ export class AccountController {
 
     @Put("signature")
     @RequireUserJwt()
+    @Throttle(UPLOAD_THROTTLE)
     @ApiOperation({ summary: "Upload/replace account signature (base64 data URL)" })
     @ApiSuccessResponse(AccountSignatureDto)
     @ApiErrorResponse([400, 401])

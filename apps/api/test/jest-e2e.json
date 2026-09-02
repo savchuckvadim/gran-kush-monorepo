@@ -7,7 +7,6 @@
         "^.+\\.(t|j)sx?$": "ts-jest"
     },
     "moduleNameMapper": {
-        "^uuid$": "<rootDir>/mocks/uuid.ts",
         "^@portals$": "<rootDir>/../src/modules/portal/crm/portals",
         "^@portals/(.*)$": "<rootDir>/../src/modules/portal/crm/portals/$1",
         "^@modules$": "<rootDir>/../src/modules",

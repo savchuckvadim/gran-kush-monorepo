@@ -10,6 +10,7 @@ export const THROTTLE_NAMES = {
     EMAIL: "email",
     PUBLIC_TOKEN: "public-token",
     SIGNUP: "signup",
+    UPLOAD: "upload",
 } as const;
 
 const seconds = (n: number) => n * 1000;
@@ -69,5 +70,13 @@ export const SIGNUP_THROTTLE = {
     [THROTTLE_NAMES.DEFAULT]: {
         ttl: seconds(60),
         limit: envLimit("THROTTLE_SIGNUP_LIMIT", 10),
+    },
+};
+
+/** Загрузка файлов: каждый запрос — мегабайты в памяти и объект в S3. */
+export const UPLOAD_THROTTLE = {
+    [THROTTLE_NAMES.DEFAULT]: {
+        ttl: seconds(60),
+        limit: envLimit("THROTTLE_UPLOAD_LIMIT", 20),
     },
 };

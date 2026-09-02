@@ -5,7 +5,11 @@ import { Throttle } from "@nestjs/throttler";
 import { FormPurpose } from "@prisma/client";
 import type { Request } from "express";
 
-import { EMAIL_THROTTLE, SIGNUP_THROTTLE } from "@common/config/throttler/throttler.config";
+import {
+    EMAIL_THROTTLE,
+    SIGNUP_THROTTLE,
+    UPLOAD_THROTTLE,
+} from "@common/config/throttler/throttler.config";
 import { CurrentAuthUser } from "@common/decorators/auth/current-auth-user.decorator";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { Public } from "@common/decorators/auth/public.decorator";
@@ -86,6 +90,7 @@ export class MemberRegistrationController {
     @Post("files")
     @AllowUnconfirmed()
     @RequireUserJwt()
+    @Throttle(UPLOAD_THROTTLE)
     @ApiOperation({ summary: "Queue account documents/signature upload (Site)" })
     @ApiSuccessResponse(UploadMemberFilesResponseDto, {
         status: 201,
