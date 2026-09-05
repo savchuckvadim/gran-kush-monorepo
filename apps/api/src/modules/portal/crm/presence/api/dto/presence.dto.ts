@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional, IntersectionType } from "@nestjs/swagger";
 
 import { Type } from "class-transformer";
 import {
@@ -11,6 +11,7 @@ import {
     MaxLength,
 } from "class-validator";
 
+import { PaginationDto } from "@common/paginate/dto/pagination.dto";
 import {
     EntryMethod,
     ExitMethod,
@@ -189,6 +190,9 @@ export class PresenceFilterDto {
     @Type(() => Date)
     endDate?: Date;
 }
+
+/** Один `@Query()` DTO на хендлер: два DTO на одном query несовместимы с forbidNonWhitelisted */
+export class PresenceListQueryDto extends IntersectionType(PaginationDto, PresenceFilterDto) {}
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Stats

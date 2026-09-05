@@ -12,28 +12,28 @@ Single reference for **multi-tenant portals**, **auth transport** (cookies vs be
 
 ## Error responses
 
-All non-validation failures go through the global filter and return a JSON body compatible with:
+`GlobalExceptionFilter` is registered as `APP_FILTER` in `AppModule`. Every failure — HTTP exceptions, `ValidationPipe`, body-parser errors, unexpected throws — returns:
 
 ```ts
-interface ApiResponse {
+interface ApiErrorBody {
     message: string;
-    errors?: string[];
+    errors: string[]; // always present, empty when there are no details
 }
 ```
 
-- **`message`**: human-readable summary (or the thrown exception message).
-- **`errors`**: optional list of extra strings (e.g. validation lines).
+- **`message`**: human-readable summary (the thrown exception message, or the Nest default such as `Forbidden`).
+- **`errors`**: constraint messages for validation failures, otherwise `[]`.
+- Nest's own `statusCode` / `error` fields are **not** emitted. Extra fields of an object exception payload are kept (e.g. `checks` on `GET /health/ready` → 503).
 
-**Validation (`class-validator` / `BadRequestException`)** is handled separately and returns **HTTP 400** with:
+| Case | Status | Body |
+|---|---|---|
+| DTO validation (`class-validator`) | 400 | `{ "message": "Validation failed", "errors": ["email must be an email", "..."] }` |
+| Unknown field in body or query (`forbidNonWhitelisted`) | 400 | `{ "message": "Validation failed", "errors": ["property extra should not exist"] }` |
+| Body above the route limit (body-parser) | 413 | `{ "message": "request entity too large", "errors": [] }` |
+| Malformed JSON (body-parser) | 400 | `{ "message": "<parser text>", "errors": [] }` |
+| Unexpected exception | 500 | `{ "message": "Internal server error", "errors": [] }` — exception text never reaches the client, the stack goes to the log |
 
-```json
-{
-    "message": "Validation failed",
-    "errors": ["email must be an email", "..."]
-}
-```
-
-The `errors` field may be a **string array** (each item is one constraint message).
+**Validation is strict**: `ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true })` is registered as `APP_PIPE` (`apps/api/src/common/config/validation/validation.config.ts`). Fields missing from the DTO are rejected, not stripped — this applies to query strings too, so list endpoints take **one** `@Query()` DTO (`IntersectionType(PaginationDto, XxxFilterDto)`); two DTOs on the same handler would reject each other's fields.
 
 **Client parsing** (CRM / shared packages): prefer `formatApiErrorMessage` / `assertOpenApiOk` from `@workspace/api-client/core` — they prefer **`errors`** when non-empty, otherwise **`message`**.
 

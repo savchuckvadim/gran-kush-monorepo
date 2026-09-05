@@ -99,6 +99,16 @@ Binary file upload and business registration must be separated:
 
 This prevents DB length errors and keeps data model clean.
 
+## Request DTO Validation
+
+The global `ValidationPipe` runs with `whitelist` + `forbidNonWhitelisted` (`common/config/validation`, registered as `APP_PIPE`). Consequences:
+
+1. Every `@Body()` / `@Query()` parameter is a class with `class-validator` decorators; a field without a decorator is rejected as unknown (400 `property x should not exist`).
+2. **One `@Query()` DTO per handler.** Each `@Query()` DTO is validated against the whole query string, so two DTOs on one handler reject each other's fields. Merge pagination and filters: `class OrderListQueryDto extends IntersectionType(PaginationDto, OrderFilterDto) {}` and destructure in the controller.
+3. Free-form maps (dynamic entity fields) are `Record<string, unknown>` with `@IsObject()`; the pipe does not descend into them.
+4. Booleans from the query string need `@Transform` (`"true"` / `"false"`), not `@Type(() => Boolean)` — `Boolean("false")` is `true`.
+5. Tests must not add their own `useGlobalPipes`: the pipe comes with `AppModule`.
+
 ## Type Safety Checklist for New Methods
 
 Before merging a repository/service change:

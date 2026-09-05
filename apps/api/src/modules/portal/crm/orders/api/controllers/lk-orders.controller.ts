@@ -14,7 +14,6 @@ import { ApiErrorResponse } from "@common/decorators/response/api-error-response
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { IdempotencyScope, Idempotent } from "@common/idempotency";
-import { PaginationDto } from "@common/paginate/dto/pagination.dto";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import { RequireMemberJwt } from "@modules/portal/auth/members";
@@ -24,8 +23,8 @@ import {
     CancelOrderDto,
     CreateOrderDto,
     OrderDetailDto,
-    OrderFilterDto,
     OrderListDto,
+    OrderListQueryDto,
 } from "@modules/portal/crm/orders/api/dto/order.dto";
 import { mapOrderToDetailDto, mapOrderToListDto } from "@modules/portal/crm/orders/api/mappers";
 import { OrdersService } from "@modules/portal/crm/orders/application/services/orders.service";
@@ -73,25 +72,17 @@ export class LkOrdersController {
     })
     @ApiErrorResponse([401, 403])
     async listMyOrders(
-        @Query() pagination: PaginationDto,
-        @Query() filters: OrderFilterDto,
+        @Query() query: OrderListQueryDto,
         @CurrentMember() member: Member
     ): Promise<PaginatedResult<OrderListDto>> {
-        const page = pagination.page ?? 1;
-        const limit = pagination.limit ?? 10;
+        const { page = 1, limit = 10, sortBy, sortOrder, ...filters } = query;
         const skip = PaginationUtil.getSkip(page, limit);
 
         // Принудительно фильтруем по текущему члену
         const memberFilters = { ...filters, memberId: member.id };
 
         const [orders, total] = await Promise.all([
-            this.ordersService.findAll(
-                memberFilters,
-                limit,
-                skip,
-                pagination.sortBy,
-                pagination.sortOrder
-            ),
+            this.ordersService.findAll(memberFilters, limit, skip, sortBy, sortOrder),
             this.ordersService.count(memberFilters),
         ]);
 

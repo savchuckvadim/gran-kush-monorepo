@@ -1,4 +1,4 @@
-import { INestApplication, ValidationPipe } from "@nestjs/common";
+import { INestApplication } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 
 import cookieParser from "cookie-parser";
@@ -48,7 +48,6 @@ describe("Uploads (e2e)", () => {
 
         // Как в main.ts: парсеры тела с разными потолками регистрирует AppModule
         app = moduleFixture.createNestApplication({ bodyParser: false });
-        app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
         app.use(cookieParser());
         await app.init();
 

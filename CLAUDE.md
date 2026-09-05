@@ -193,7 +193,7 @@ Never use `Promise<any>` in repository contracts.
 
 ### Error Response Format
 
-All exceptions go through `GlobalExceptionFilter`:
+All exceptions go through `GlobalExceptionFilter` (`APP_FILTER` in `AppModule`):
 
 ```json
 {
@@ -202,17 +202,17 @@ All exceptions go through `GlobalExceptionFilter`:
 }
 ```
 
-Validation (400): `message: "Validation failed"`, `errors` is string[].
+`errors` is always an array (empty when there are no details). Validation (400): `message: "Validation failed"`, `errors` lists constraint messages. 5xx never expose exception text: `message: "Internal server error"`, details go to the log.
 Client: use `assertOpenApiOk(result)` / `getApiErrorMessage(error)` from `@workspace/api-client`.
 
 ### Global ValidationPipe
 
-Configured in `main.ts`:
+Registered as `APP_PIPE` in `AppModule` (`common/config/validation/validation.config.ts`), so e2e tests run the same pipe — do not add `useGlobalPipes` in tests:
 ```ts
 new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true })
 ```
 
-Unknown fields are rejected outright. Every endpoint that accepts input has a typed DTO class.
+Unknown fields are rejected outright (400, `property x should not exist`) — in bodies and in query strings. Every endpoint that accepts input has a typed DTO class. **One `@Query()` DTO per handler**: pagination + filters are merged via `IntersectionType(PaginationDto, XxxFilterDto)`; two DTOs on the same query reject each other's fields.
 
 ### CORS
 

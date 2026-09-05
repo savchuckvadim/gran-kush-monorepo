@@ -438,7 +438,7 @@ The system implements two separate authentication **domains**:
 
 ### Error response format (HTTP errors)
 
-Unhandled HTTP exceptions are normalized by **`GlobalExceptionFilter`** to JSON:
+Every failure is normalized by **`GlobalExceptionFilter`** (`APP_FILTER` in `AppModule`) to JSON:
 
 ```json
 {
@@ -447,7 +447,7 @@ Unhandled HTTP exceptions are normalized by **`GlobalExceptionFilter`** to JSON:
 }
 ```
 
-**Validation** (`400`) uses `message: "Validation failed"` and `errors` as a **string array** of constraint messages. Clients should prefer displaying **`errors`** when non-empty, otherwise **`message`**. See [HTTP_API_CONTRACT.md](./HTTP_API_CONTRACT.md).
+**Validation** (`400`) uses `message: "Validation failed"` and `errors` as a **string array** of constraint messages; unknown fields are rejected the same way (`property x should not exist`). `errors` is always present. Unexpected exceptions return `500` with `message: "Internal server error"` — details stay in the log. Clients should prefer displaying **`errors`** when non-empty, otherwise **`message`**. See [HTTP_API_CONTRACT.md](./HTTP_API_CONTRACT.md).
 
 Success payloads are **per controller/DTO** (not a global `{ success, data }` envelope unless a specific endpoint defines that shape).
 

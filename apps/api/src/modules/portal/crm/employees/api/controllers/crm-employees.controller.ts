@@ -14,14 +14,13 @@ import {
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 
-import { EmployeeRole, FormPurpose } from "@prisma/client";
+import { FormPurpose } from "@prisma/client";
 
 import { CurrentPrincipal } from "@common/decorators/auth/current-principal.decorator";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
-import { PaginationDto } from "@common/paginate/dto/pagination.dto";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import type { PortalPrincipal } from "@common/portal";
@@ -31,6 +30,7 @@ import {
     CreateEmployeeDto,
     CreateEmployeeResponseDto,
 } from "@modules/portal/crm/employees/api/dto/create-employee.dto";
+import { EmployeeListQueryDto } from "@modules/portal/crm/employees/api/dto/employee-list-query.dto";
 import { EmployeeListItemDto } from "@modules/portal/crm/employees/api/dto/employee-list.dto";
 import { UpdateEmployeeDto } from "@modules/portal/crm/employees/api/dto/update-employee.dto";
 import { mapEmployeeToListDto } from "@modules/portal/crm/employees/api/mappers";
@@ -52,27 +52,14 @@ export class CrmEmployeesController {
     @ApiOperation({ summary: "Список сотрудников портала (с пагинацией и фильтрами)" })
     @ApiPaginatedResponse(EmployeeListItemDto, { description: "Paginated list of employees" })
     @ApiErrorResponse([401, 403])
-    @ApiQuery({ name: "role", required: false, enum: EmployeeRole })
-    @ApiQuery({ name: "isActive", required: false, type: Boolean })
     async listEmployees(
-        @Query() pagination: PaginationDto,
-        @Query("role") role: string | undefined,
-        @Query("isActive") isActiveRaw: string | undefined,
+        @Query() query: EmployeeListQueryDto,
         @PortalId() portalId: string
     ): Promise<PaginatedResult<EmployeeListItemDto>> {
-        const page = pagination.page ?? 1;
-        const limit = pagination.limit ?? 20;
+        const { page = 1, limit = 20, role, isActive } = query;
         const skip = PaginationUtil.getSkip(page, limit);
 
-        const isActive =
-            isActiveRaw === "true" ? true : isActiveRaw === "false" ? false : undefined;
-
-        const parsedRole =
-            role && Object.values(EmployeeRole).includes(role as EmployeeRole)
-                ? (role as EmployeeRole)
-                : undefined;
-
-        const filters = { role: parsedRole, isActive };
+        const filters = { role, isActive };
 
         const [employees, total] = await Promise.all([
             this.employeesService.findAllByPortal(portalId, filters, limit, skip),

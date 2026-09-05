@@ -1,12 +1,14 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { APP_GUARD } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD, APP_PIPE } from "@nestjs/core";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { configureBodyParsers } from "./common/config/body-parser/body-parser.config";
 import { getThrottlerConfig } from "./common/config/throttler/throttler.config";
+import { createValidationPipe } from "./common/config/validation/validation.config";
+import { GlobalExceptionFilter } from "./common/filters/global-exception.filter";
 import { IdempotencyModule } from "./common/idempotency";
 import { PrismaModule } from "./common/prisma/prisma.module";
 import { QueueModule } from "./common/queue/queue.module";
@@ -52,6 +54,9 @@ import { StorageModule } from "./modules/storage/storage.module";
         AppService,
         // Глобально: лимит применяется ко всему, точечные наборы вешаются @Throttle.
         { provide: APP_GUARD, useClass: ThrottlerGuard },
+        // Пайп и фильтр здесь, а не в main.ts: e2e поднимают AppModule и получают тот же контракт
+        { provide: APP_PIPE, useFactory: createValidationPipe },
+        { provide: APP_FILTER, useClass: GlobalExceptionFilter },
     ],
 })
 export class AppModule implements NestModule {

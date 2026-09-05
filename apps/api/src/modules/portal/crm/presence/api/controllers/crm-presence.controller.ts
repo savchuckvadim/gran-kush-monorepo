@@ -5,7 +5,6 @@ import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
-import { PaginationDto } from "@common/paginate/dto/pagination.dto";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
@@ -15,7 +14,7 @@ import {
     CheckInResultDto,
     ManualCheckInDto,
     ManualCheckOutDto,
-    PresenceFilterDto,
+    PresenceListQueryDto,
     PresenceSessionDto,
     PresenceStatsDto,
     PresenceStatsQueryDto,
@@ -127,24 +126,16 @@ export class CrmPresenceController {
     })
     @ApiErrorResponse([401, 403])
     async listSessions(
-        @Query() pagination: PaginationDto,
-        @Query() filters: PresenceFilterDto,
+        @Query() query: PresenceListQueryDto,
         @PortalId() portalId: string
     ): Promise<PaginatedResult<PresenceSessionDto>> {
-        const page = pagination.page ?? 1;
-        const limit = pagination.limit ?? 10;
+        const { page = 1, limit = 10, sortBy, sortOrder, ...filters } = query;
         const skip = PaginationUtil.getSkip(page, limit);
 
         const scopedFilters = { ...filters, portalId };
 
         const [sessions, total] = await Promise.all([
-            this.presenceService.findAll(
-                scopedFilters,
-                limit,
-                skip,
-                pagination.sortBy,
-                pagination.sortOrder
-            ),
+            this.presenceService.findAll(scopedFilters, limit, skip, sortBy, sortOrder),
             this.presenceService.count(scopedFilters),
         ]);
 

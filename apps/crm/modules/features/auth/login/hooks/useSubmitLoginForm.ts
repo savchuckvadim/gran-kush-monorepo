@@ -22,11 +22,12 @@ export function useSubmitLoginForm(setError: UseFormSetError<LoginFormData>) {
                 throw new Error("Club is required");
             }
             setCrmPortalSlugForApiClient(effectivePortalSlug);
+            // Портал уезжает заголовком X-Portal-Slug (см. setCrmPortalSlugForApiClient),
+            // в теле его нет: API отвергает поля вне DTO
             const response = await $api.POST("/crm/auth/login", {
                 body: {
                     email: data.email,
                     password: data.password,
-                    domain: effectivePortalSlug,
                 },
             });
             if (!response.response.ok) {
