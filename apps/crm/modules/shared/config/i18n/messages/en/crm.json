@@ -354,6 +354,7 @@
             "subtitle": "Financial reports, transactions and analytics",
             "summary": {
                 "loading": "Loading...",
+                "period": "Current month",
                 "totalIncome": "Total income",
                 "totalExpense": "Total expense",
                 "netBalance": "Net balance"

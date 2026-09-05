@@ -127,9 +127,9 @@ describe("Error contract (e2e)", () => {
     describe("пагинация и фильтры одним query", () => {
         it.each([
             "/crm/orders?page=1&limit=5&status=pending",
-            "/crm/presence/sessions?page=1&limit=5&isActive=true",
+            "/crm/presence/sessions?page=1&limit=5&isActive=false",
             "/crm/finance/transactions?page=1&limit=5&direction=income",
-            "/crm/catalog/products?page=1&limit=5&search=kush",
+            "/crm/catalog/products?page=1&limit=5&search=kush&isActive=false",
             "/crm/employees?page=1&limit=5&role=admin&isActive=true",
         ])("%s → 200", async (path) => {
             const res = await crmGet(path);
@@ -144,10 +144,20 @@ describe("Error contract (e2e)", () => {
             expect(res.body.errors).toContain("property foo should not exist");
         });
 
-        it("невалидное значение фильтра → 400, а не молчаливый пропуск", async () => {
-            const res = await crmGet("/crm/employees?role=janitor");
-            expect(res.status).toBe(400);
-            expect(res.body.message).toBe("Validation failed");
+        it.each(["/crm/employees?role=janitor", "/crm/catalog/products?isActive=maybe"])(
+            "невалидное значение фильтра %s → 400, а не молчаливый пропуск",
+            async (path) => {
+                const res = await crmGet(path);
+                expect(res.status).toBe(400);
+                expect(res.body.message).toBe("Validation failed");
+            }
+        );
+
+        it("isActive=false остаётся false: сотрудник-владелец активен и в выборку не попадает", async () => {
+            const active = await crmGet("/crm/employees?isActive=true");
+            const inactive = await crmGet("/crm/employees?isActive=false");
+            expect(active.body.total).toBeGreaterThan(0);
+            expect(inactive.body.total).toBe(0);
         });
     });
 });

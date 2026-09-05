@@ -225,12 +225,15 @@ Access. Очередь для `/lk/auth/member/files` оставлена как 
   которых нет в `UpdateEmployeeDto`, — приведён к DTO. TypeScript здесь не защищает:
   openapi-fetch типизирует body через mapped type, и лишнее свойство в литерале проходит `tsc`.
 
-**Замечено попутно, не трогал.**
+**Замечено попутно, исправлено вторым коммитом.**
 
 - `ReportPeriodDto` требует непустые даты, а виджеты сводки и отчёта по типам в CRM без фильтра
-  шлют `startDate=&endDate=` — эти два виджета получают 400 уже сейчас.
-- `isActive` в `PresenceFilterDto` и `ProductFilterDto` идёт через `@Type(() => Boolean)`:
-  `isActive=false` превращается в `true`.
+  слали `startDate=&endDate=` — оба виджета получали 400 и молча рендерили пустоту. Теперь
+  без явного периода фронт подставляет текущий месяц и подписывает это в карточках.
+- `isActive` в `PresenceFilterDto` и `ProductFilterDto` шёл через `@Type(() => Boolean)`:
+  `isActive=false` превращался в `true`. Общий `@IsQueryBoolean()`
+  (`common/decorators/dto`) разбирает `"true"`/`"false"`, остальное — 400; e2e проверяет,
+  что `isActive=false` действительно фильтрует.
 
 - [x] `forbidNonWhitelisted: true`, пайп в `AppModule`, e2e-сьюты без своих пайпов
 - [x] списки — один query DTO, `/crm/employees` — типизированные фильтры

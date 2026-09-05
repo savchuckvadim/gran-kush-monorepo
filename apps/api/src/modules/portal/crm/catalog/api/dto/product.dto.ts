@@ -12,6 +12,7 @@ import {
     Min,
 } from "class-validator";
 
+import { IsQueryBoolean } from "@common/decorators/dto/query-boolean.decorator";
 import { PaginationDto } from "@common/paginate/dto/pagination.dto";
 
 import { MeasurementUnitDto } from "./measurement-unit.dto";
@@ -283,14 +284,12 @@ export class ProductFilterDto {
 
     @ApiPropertyOptional({ example: true, type: Boolean })
     @IsOptional()
-    @Type(() => Boolean)
-    @IsBoolean()
+    @IsQueryBoolean()
     isActive?: boolean;
 
     @ApiPropertyOptional({ example: true, type: Boolean })
     @IsOptional()
-    @Type(() => Boolean)
-    @IsBoolean()
+    @IsQueryBoolean()
     isAvailable?: boolean;
 
     @ApiPropertyOptional({

@@ -10,6 +10,7 @@ import { useReportByType } from "@/modules/entities/finance";
 
 export function ReportByTypeCard() {
     const t = useTranslations("crm.finance.reports");
+    const tSummary = useTranslations("crm.finance.summary");
     const { data: items, isLoading } = useReportByType();
 
     if (isLoading) {
@@ -30,6 +31,7 @@ export function ReportByTypeCard() {
             <div className="mb-4 flex items-center gap-2">
                 <PieChart className="h-5 w-5 text-muted-foreground" />
                 <h2 className="text-base font-medium">{t("byTypeTitle")}</h2>
+                <span className="ml-auto text-xs text-muted-foreground">{tSummary("period")}</span>
             </div>
 
             <div className="space-y-3">
