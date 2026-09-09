@@ -145,7 +145,7 @@ services:
     # HTTPS lives in the docker-compose.tls.yml overlay: it adds :443, mounts
     # the certificate and the extra template. See documentation/VPS_SETUP.md.
     ports:
-      - "80:80"
+      - "${NGINX_HTTP_PORT:-80}:80"
     volumes:
       - ../docker/nginx/templates:/etc/nginx/templates:ro
     depends_on:
