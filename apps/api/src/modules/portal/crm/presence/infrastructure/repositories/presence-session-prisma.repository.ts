@@ -153,20 +153,13 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
         return fields.some((f) => f.includes("active_entity_record_id"));
     }
 
-    async findAllActive(): Promise<PresenceSession[]> {
-        const rows = await this.prisma.presenceSession.findMany({
-            where: { exitedAt: null },
-            include: SESSION_INCLUDE,
-            orderBy: { enteredAt: "asc" },
-        });
-        return rows.map((row) => this.mapToEntity(row));
-    }
-
-    async closeMany(ids: string[], exitMethod: string): Promise<number> {
+    async closeAllActive(exitMethod: string): Promise<number> {
         const result = await this.prisma.presenceSession.updateMany({
-            // exitedAt: null — чтобы повторный прогон крона не переписывал время
-            // выхода у уже закрытых сессий.
-            where: { id: { in: ids }, exitedAt: null },
+            // Один UPDATE вместо «прочитать id → закрыть по списку»: между чтением и записью
+            // участник успевает выйти сам, а на второй реплике (TASK-105) крон видит тот же
+            // список. Условие exitedAt: null проверяется самим UPDATE, поэтому параллельный
+            // прогон закроет ноль строк и не перепишет чужое время выхода.
+            where: { exitedAt: null },
             data: {
                 exitedAt: new Date(),
                 exitMethod,

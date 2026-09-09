@@ -71,11 +71,11 @@ export abstract class PresenceSessionRepository {
         }
     ): Promise<PresenceSession>;
 
-    /** Найти все незакрытые сессии (для auto_cron) */
-    abstract findAllActive(): Promise<PresenceSession[]>;
-
-    /** Массовое закрытие сессий (для auto_cron) */
-    abstract closeMany(ids: string[], exitMethod: string): Promise<number>;
+    /**
+     * Закрыть все незакрытые сессии одним запросом (для auto_cron).
+     * Возвращает число реально закрытых строк.
+     */
+    abstract closeAllActive(exitMethod: string): Promise<number>;
 
     /** Текущее количество присутствующих (при указании portalId — только в рамках портала) */
     abstract countCurrentlyPresent(portalId?: string): Promise<number>;

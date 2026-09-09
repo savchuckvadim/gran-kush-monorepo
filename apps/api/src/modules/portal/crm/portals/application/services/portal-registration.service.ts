@@ -162,12 +162,13 @@ export class PortalRegistrationService {
         };
 
         // Portal events are processed asynchronously in PortalEventsProcessor.
+        // jobId фиксирован по порталу: регистрация случается один раз, и повторная
+        // постановка (ретрай запроса, вторая реплика) не должна давать второе уведомление.
         await this.portalEventsQueue.add(
             PORTAL_EVENTS_JOB_NAMES.PORTAL_REGISTRATION_INIT,
             initPayload,
             {
-                removeOnComplete: true,
-                removeOnFail: false,
+                jobId: `${PORTAL_EVENTS_JOB_NAMES.PORTAL_REGISTRATION_INIT}:${created.portal.id}`,
             }
         );
 

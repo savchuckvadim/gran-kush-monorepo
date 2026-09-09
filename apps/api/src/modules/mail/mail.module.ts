@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { MailerModule } from "@nestjs-modules/mailer";
 
 import { getMailerConfig } from "@common/config/mail/mailer.config";
+import { MAIL_JOB_OPTIONS, PORTAL_EVENTS_JOB_OPTIONS } from "@common/queue/job-options";
 import { TelegramModule } from "@common/telegram/telegram.module";
 import { PORTAL_EVENTS_QUEUE_NAME } from "@modules/portal/crm/portals/events/portal-events.constants";
 
@@ -25,9 +26,11 @@ import { MailProcessor } from "./infrastructure/processors/mail.processor";
         // Register mail queue for this module
         BullModule.registerQueue({
             name: MAIL_QUEUE_NAME,
+            defaultJobOptions: MAIL_JOB_OPTIONS,
         }),
         BullModule.registerQueue({
             name: PORTAL_EVENTS_QUEUE_NAME,
+            defaultJobOptions: PORTAL_EVENTS_JOB_OPTIONS,
         }),
     ],
     providers: [MailService, MailProcessor],

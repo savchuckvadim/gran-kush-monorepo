@@ -131,13 +131,19 @@ describe("PresenceSessionPrismaRepository — одна открытая сесс
         const { prisma, repo } = build();
         prisma.presenceSession.updateMany.mockResolvedValue({ count: 2 });
 
-        const count = await repo.closeMany(["s-1", "s-2"], "auto_cron");
+        const count = await repo.closeAllActive("auto_cron");
 
         expect(count).toBe(2);
         expect(prisma.presenceSession.updateMany).toHaveBeenCalledWith(
             expect.objectContaining({
-                where: { id: { in: ["s-1", "s-2"] }, exitedAt: null },
-                data: expect.objectContaining({ activeEntityRecordId: null }),
+                // Отбор идёт самим UPDATE, без предварительного чтения id: иначе между
+                // чтением и записью участник успевает выйти сам, а вторая реплика крона
+                // переписала бы ему время выхода.
+                where: { exitedAt: null },
+                data: expect.objectContaining({
+                    exitMethod: "auto_cron",
+                    activeEntityRecordId: null,
+                }),
             })
         );
     });

@@ -43,11 +43,3 @@ export type SupportedLanguage = "ru" | "es" | "en";
  * Default language
  */
 export const DEFAULT_LANGUAGE: SupportedLanguage = "en";
-
-/**
- * Job options defaults
- */
-export const JOB_OPTIONS = {
-    REMOVE_ON_COMPLETE: true,
-    REMOVE_ON_FAIL: false,
-} as const;

@@ -12,7 +12,6 @@ import {
     DEFAULT_EMAIL_FROM_NAME,
     DEFAULT_LANGUAGE,
     EMAIL_SUBJECTS,
-    JOB_OPTIONS,
     SupportedLanguage,
 } from "../../consts/mail.constants";
 import {
@@ -77,11 +76,9 @@ export class MailService {
                     name: member.name,
                 },
                 emailType: EmailType.VERIFICATION,
-            },
-            {
-                removeOnComplete: JOB_OPTIONS.REMOVE_ON_COMPLETE,
-                removeOnFail: JOB_OPTIONS.REMOVE_ON_FAIL,
             }
+            // Без jobId: письмо запрашивает сам пользователь, и повторная отправка
+            // по кнопке «выслать ещё раз» должна доходить, а не глохнуть в дедупликации.
         );
 
         this.logger.log(`📬 Email verification queued for ${user.email}`);
@@ -117,11 +114,9 @@ export class MailService {
                     name: employee.name,
                 },
                 emailType: EmailType.VERIFICATION,
-            },
-            {
-                removeOnComplete: JOB_OPTIONS.REMOVE_ON_COMPLETE,
-                removeOnFail: JOB_OPTIONS.REMOVE_ON_FAIL,
             }
+            // Без jobId: письмо запрашивает сам пользователь, и повторная отправка
+            // по кнопке «выслать ещё раз» должна доходить, а не глохнуть в дедупликации.
         );
 
         this.logger.log(`📬 Employee email verification queued for ${user.email}`);
@@ -159,11 +154,9 @@ export class MailService {
                     name: user.email,
                 },
                 emailType: EmailType.PASSWORD_RESET,
-            },
-            {
-                removeOnComplete: JOB_OPTIONS.REMOVE_ON_COMPLETE,
-                removeOnFail: JOB_OPTIONS.REMOVE_ON_FAIL,
             }
+            // Без jobId: письмо запрашивает сам пользователь, и повторная отправка
+            // по кнопке «выслать ещё раз» должна доходить, а не глохнуть в дедупликации.
         );
 
         this.logger.log(`📬 Password reset email queued for ${user.email}`);
@@ -206,8 +199,10 @@ export class MailService {
                 emailType: EmailType.PORTAL_REGISTRATION,
             },
             {
-                removeOnComplete: JOB_OPTIONS.REMOVE_ON_COMPLETE,
-                removeOnFail: JOB_OPTIONS.REMOVE_ON_FAIL,
+                // Приветственное письмо у портала одно. Обработчик события портала теперь
+                // повторяется (TASK-111), и без фиксированного jobId каждый повтор слал бы
+                // владельцу ещё одну копию.
+                jobId: `${MAIL_QUEUE_JOB_NAMES.SEND_EMAIL}:portal-registration:${params.portal.id}`,
             }
         );
 

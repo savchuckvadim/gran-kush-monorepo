@@ -46,13 +46,10 @@ export class MemberFilesService {
         if (payload.documentSecond) validateDataUrl(payload.documentSecond, "document");
         if (payload.signature) validateDataUrl(payload.signature, "signature");
 
-        const job = await this.queue.add(MEMBER_FILES_QUEUE_JOB_NAMES.SAVE_MEMBER_FILES, payload, {
-            attempts: 3,
-            backoff: { type: "exponential", delay: 5_000 },
-            removeOnComplete: true,
-            // Тело задачи — файлы в base64: упавшие задачи не должны жить в Redis вечно
-            removeOnFail: { age: 24 * 60 * 60, count: 100 },
-        });
+        // Повторы и срок хранения — в defaultJobOptions очереди (@common/queue/job-options).
+        // Без jobId: участник может осознанно перезалить документы, и вторая загрузка
+        // не должна молча потеряться в дедупликации.
+        const job = await this.queue.add(MEMBER_FILES_QUEUE_JOB_NAMES.SAVE_MEMBER_FILES, payload);
 
         return {
             queued: true,
