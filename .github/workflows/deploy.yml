@@ -1,5 +1,6 @@
-# CD: build the four production images, push them to ghcr.io, then deploy to
+# CD: build the five production images, push them to ghcr.io, then deploy to
 # the server over SSH (documentation/tasks/deployment.md §3, шаги 4–5).
+# PafPaf on Dokploy pulls the same images instead (infra/dokploy/README.md).
 #
 # While the server does not exist yet, the deploy job is skipped automatically:
 # it only runs when the SSH_* secrets are configured. The build half still runs
@@ -45,6 +46,8 @@ jobs:
           - app: web
             dockerfile: infra/docker/next.Dockerfile
           - app: admin
+            dockerfile: infra/docker/next.Dockerfile
+          - app: site
             dockerfile: infra/docker/next.Dockerfile
     steps:
       - uses: actions/checkout@v4

@@ -1,0 +1,217 @@
+# PafPaf on Dokploy: one Compose service in its own Dokploy project on a shared
+# server. Setup, domains and the order of the first deploy: README.md here;
+# variables: .env.example here (real values live only in Dokploy).
+#
+# - No host ports. Traefik (Dokploy → Domains) routes each host name to port
+#   3000 of a pafpaf-* service, so nothing collides with other projects.
+#   infra/compose/ is not used: its nginx wants :80, which Traefik owns here.
+# - Postgres and Redis stay on the project's internal network.
+# - Images come from ghcr.io: .github/workflows/deploy.yml builds them on every
+#   push to main, the server builds nothing. pull_policy: always makes every
+#   Dokploy deploy fetch the current tag.
+# - The pafpaf- prefix matters: dokploy-network is shared by every project on
+#   the server, and a bare "api" or "site" could resolve to another container.
+# - Memory limits and log rotation protect the other projects on the server.
+# - No YAML anchors on purpose: Dokploy rewrites this file to add its domain
+#   labels, and every service must keep both networks however it is parsed.
+
+services:
+  pafpaf-postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in Dokploy → Environment}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in Dokploy → Environment}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in Dokploy → Environment}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  pafpaf-redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  # api.${DOMAIN}
+  pafpaf-api:
+    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/api:${TAG:-latest}
+    restart: unless-stopped
+    pull_policy: always
+    networks: [default, dokploy-network]
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pafpaf-postgres:5432/${POSTGRES_DB}?schema=public
+      REDIS_URL: redis://pafpaf-redis:6379
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
+      RUN_SEED: ${RUN_SEED:-false}
+      # Cloudflare and Traefik in front: two proxies, so req.ip is the visitor, not Cloudflare.
+      TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-2}
+      APP_NAME: PafPaf API
+      APP_DESCRIPTION: PafPaf API
+      CORS_ORIGIN: https://crm.${DOMAIN:?set DOMAIN in Dokploy → Environment},https://club.${DOMAIN},https://admin.${DOMAIN}
+      CRM_FRONTEND_URL: https://crm.${DOMAIN}
+      MEMBER_FRONTEND_URL: https://club.${DOMAIN}
+      CRM_AUTH_COOKIE_DOMAIN: .${DOMAIN}
+      MEMBER_AUTH_COOKIE_DOMAIN: .${DOMAIN}
+      MEMBER_ACCESS_COOKIE_NAME: member_access_token
+      MEMBER_REFRESH_COOKIE_NAME: member_refresh_token
+      CRM_ACCESS_COOKIE_NAME: crm_access_token
+      CRM_REFRESH_COOKIE_NAME: crm_refresh_token
+      AUTH_COOKIE_SECURE: "true"
+      COOKIE_SECRET: ${COOKIE_SECRET:?set COOKIE_SECRET in Dokploy → Environment}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in Dokploy → Environment}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?set JWT_REFRESH_SECRET in Dokploy → Environment}
+      JWT_ACCESS_TOKEN_EXPIRES_IN: ${JWT_ACCESS_TOKEN_EXPIRES_IN:-1d}
+      JWT_REFRESH_TOKEN_EXPIRES_IN: ${JWT_REFRESH_TOKEN_EXPIRES_IN:-7d}
+      PLATFORM_JWT_SECRET: ${PLATFORM_JWT_SECRET:?set PLATFORM_JWT_SECRET in Dokploy → Environment}
+      ENCRYPTION_MASTER_KEY: ${ENCRYPTION_MASTER_KEY:?set ENCRYPTION_MASTER_KEY in Dokploy → Environment}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_LOGIN: ${MAIL_LOGIN:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME:-PafPaf}
+      TG_BOT_API_KEY: ${TG_BOT_API_KEY:-}
+      TG_BOT_CHAT_ID: ${TG_BOT_CHAT_ID:-}
+      PLATFORM_BOOTSTRAP_ADMIN_EMAIL: ${PLATFORM_BOOTSTRAP_ADMIN_EMAIL:-}
+      PLATFORM_BOOTSTRAP_ADMIN_PASSWORD: ${PLATFORM_BOOTSTRAP_ADMIN_PASSWORD:-}
+      PLATFORM_BOOTSTRAP_ADMIN_NAME: ${PLATFORM_BOOTSTRAP_ADMIN_NAME:-ADMIN}
+      PLATFORM_BOOTSTRAP_ADMIN_ENABLED: "true"
+      PLATFORM_BOOTSTRAP_NEED_ADMIN_SEED: "true"
+      AWS_REGION: ${AWS_REGION:-eu-north-1}
+      AWS_BUCKET_NAME: ${AWS_BUCKET_NAME:-}
+      AWS_ACCESS_KEY: ${AWS_ACCESS_KEY:-}
+      AWS_SECRET_KEY: ${AWS_SECRET_KEY:-}
+    depends_on:
+      pafpaf-postgres:
+        condition: service_healthy
+      pafpaf-redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+
+  # crm.${DOMAIN}
+  pafpaf-crm:
+    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/crm:${TAG:-latest}
+    restart: unless-stopped
+    pull_policy: always
+    networks: [default, dokploy-network]
+    environment:
+      HOSTNAME: 0.0.0.0
+    depends_on: [pafpaf-api]
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # club.${DOMAIN}: member cabinet and club pages
+  pafpaf-web:
+    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/web:${TAG:-latest}
+    restart: unless-stopped
+    pull_policy: always
+    networks: [default, dokploy-network]
+    environment:
+      HOSTNAME: 0.0.0.0
+    depends_on: [pafpaf-api]
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # admin.${DOMAIN}: platform admin
+  pafpaf-admin:
+    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/admin:${TAG:-latest}
+    restart: unless-stopped
+    pull_policy: always
+    networks: [default, dokploy-network]
+    environment:
+      HOSTNAME: 0.0.0.0
+    depends_on: [pafpaf-api]
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # ${DOMAIN}: product site, Payload admin at /admin
+  pafpaf-site:
+    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/site:${TAG:-latest}
+    restart: unless-stopped
+    pull_policy: always
+    networks: [default, dokploy-network]
+    environment:
+      HOSTNAME: 0.0.0.0
+      # Payload creates this database on first start and applies its migrations.
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pafpaf-postgres:5432/site
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET:?set PAYLOAD_SECRET in Dokploy → Environment}
+      PAYLOAD_ADMIN_EMAIL: ${PAYLOAD_ADMIN_EMAIL:-}
+      PAYLOAD_ADMIN_PASSWORD: ${PAYLOAD_ADMIN_PASSWORD:-}
+      PAYLOAD_SEED_IF_EMPTY: ${PAYLOAD_SEED_IF_EMPTY:-false}
+      BILLING_API_URL: http://pafpaf-api:3000
+    volumes:
+      - site_media:/app/apps/site/media
+    depends_on:
+      pafpaf-postgres:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+
+networks:
+  dokploy-network:
+    external: true
+
+volumes:
+  postgres_data:
+  redis_data:
+  site_media:

@@ -1,12 +1,12 @@
 # syntax=docker/dockerfile:1
 
 # ─────────────────────────────────────────────────────────────
-# Generic Next.js 16 app image (crm / web / admin).
+# Generic Next.js 16 app image (crm / web / admin / site).
 # Uses Next standalone output; build context = monorepo root.
 #   docker build -f infra/docker/next.Dockerfile \
 #     --build-arg APP=crm --build-arg NEXT_PUBLIC_API_URL=https://api.example \
 #     -t gran-kush/crm .
-# APP is the directory name under apps/ (crm | web | admin).
+# APP is the directory name under apps/ (crm | web | admin | site).
 # ─────────────────────────────────────────────────────────────
 
 FROM node:20-slim AS base
@@ -30,6 +30,8 @@ COPY . .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile
 RUN pnpm --filter "./apps/${APP}" build
+# The standalone bundle never includes public/, and only some apps have one.
+RUN mkdir -p apps/${APP}/public
 
 # ── Runner ──
 FROM base AS runner
@@ -44,6 +46,10 @@ RUN addgroup --system --gid 1001 nodejs \
 # so the server entry lives at apps/<APP>/server.js.
 COPY --from=builder --chown=nextjs:nodejs /app/apps/${APP}/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/${APP}/.next/static ./apps/${APP}/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/${APP}/public ./apps/${APP}/public
+# Mount point for uploads (Payload media on the site): a fresh volume copies this
+# folder's owner, so the non-root user can write to it.
+RUN mkdir -p apps/${APP}/media && chown nextjs:nodejs apps/${APP}/media
 USER nextjs
 EXPOSE 3000
 CMD ["sh", "-c", "node apps/$APP/server.js"]

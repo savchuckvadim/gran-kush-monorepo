@@ -7,12 +7,13 @@ import { theme } from "@site/theme";
 import type { ReactNode } from "react";
 
 import { isLocale } from "@/modules/shared/config/locales";
+import { SERVER_URL } from "@/modules/shared/config/site";
 
 // Content comes from the CMS on every request until revalidation hooks land; the Docker build has no database.
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SERVER_URL ?? "http://localhost:5002"),
+    metadataBase: new URL(SERVER_URL),
 };
 
 export default async function LocaleLayout({

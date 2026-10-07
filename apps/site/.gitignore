@@ -1,0 +1,2 @@
+# Payload uploads in dev; production keeps them in a volume (infra/dokploy).
+/media/

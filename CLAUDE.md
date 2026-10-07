@@ -51,6 +51,7 @@ pnpm --filter web typecheck
 pnpm --filter site dev          # Next.js + Payload, port 5002 (documentation/site/PRODUCT_SITES.md)
 pnpm --filter site seed         # PafPaf content in es/ru/en
 pnpm --filter site generate     # payload-types.ts + admin import map
+pnpm --filter site migrate:create <name>   # after changing collections/blocks; production applies it on start
 ```
 
 ### Database (from apps/api)

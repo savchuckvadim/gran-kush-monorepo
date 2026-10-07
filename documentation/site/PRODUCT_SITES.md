@@ -50,13 +50,15 @@ pnpm --filter site dev                         # http://localhost:5002/es
 ```
 
 - **Админка** — http://localhost:5002/admin. При первом входе Payload попросит создать пользователя.
-- **Схема базы в dev** синхронизируется сама (`PAYLOAD_DB_PUSH=true`). В продакшене будут миграции.
+- **Схема базы.** В dev синхронизируется сама (`PAYLOAD_DB_PUSH=true`). В продакшене при старте сайта применяются миграции из `apps/site/migrations`.
 - **Настоящие цены:**
   - нужен запущенный API (`pnpm --filter api dev`), эндпоинт `GET /platform/billing/plans`;
   - в `billing_plans` должны быть строки с кодами выше, см. «Тарифы в API».
 
   Без этого сайт показывает запасные цены из CMS.
-- **После изменения коллекций или блоков:** `pnpm --filter site generate` — это типы `payload-types.ts` и карта импорта админки.
+- **После изменения коллекций или блоков:**
+  - `pnpm --filter site generate` — типы `payload-types.ts` и карта импорта админки;
+  - `pnpm --filter site migrate:create <имя>` — миграция для продакшена, коммитится вместе с изменением.
 
 ## Блоки PafPaf
 
@@ -75,6 +77,18 @@ pnpm --filter site dev                         # http://localhost:5002/es
 1. Описать конфиг в `payload/blocks.ts` и добавить его в `PAGE_BLOCKS`.
 2. Сделать компонент в `modules/sites/pafpaf/blocks/` и подключить его в `render-blocks.tsx`.
 3. Запустить `pnpm --filter site generate`.
+
+## Продакшен
+
+Деплой идёт через Dokploy на общем сервере. Схема и порядок первого запуска описаны в `infra/dokploy/README.md`.
+
+- **Образ.** `site` собирает `deploy.yml` вместе с остальными образами, общим `infra/docker/next.Dockerfile`.
+- **Первый старт на пустой базе.** Сайт всё делает сам (`payload/seed/bootstrap.ts`):
+  - создаёт базу `site` и применяет миграции;
+  - заводит админа CMS из `PAYLOAD_ADMIN_EMAIL` и `PAYLOAD_ADMIN_PASSWORD`, так что открытая форма «создать первого пользователя» на публичном домене не появляется;
+  - заливает стартовый контент при `PAYLOAD_SEED_IF_EMPTY=true`.
+- **Загрузки Payload** лежат в `apps/site/media`. В dev папка в git-ignore, в проде это том.
+- **Адрес сайта** для canonical и OpenGraph задаёт `NEXT_PUBLIC_SERVER_URL`. Без него берётся прод-домен сайта из `modules/shared/config/site.ts`.
 
 ## Тарифы в API
 
@@ -101,9 +115,10 @@ ON CONFLICT ("code") DO NOTHING;
 
 ## Дальше
 
-- Nagual: перенести кодекс из прототипа в блоки (`modules/sites/nagual`).
+- Nagual — отдельный проект. Вариант `nagual` здесь пока заглушка и в деплой не входит.
 - Блоки из других вариантов PafPaf: параллакс со звёздами, карточки с перетекающими рамками, карточки с дымом, «космический» hero.
-- Отдельный сервер под PafPaf, продакшен-сборка и CI.
-  - Сайт не входит в `deploy.yml`, деплой CRM его не выкатывает.
-  - Но образы CRM (`infra/docker/*.Dockerfile`) ставят зависимости всего монорепо (`COPY . .` и `pnpm install`), так что теперь в них попадают и Payload, и sharp. Образ API копирует `/app` целиком. При настройке CI стоит перейти на `turbo prune`.
+- Продакшен:
+  - бэкапы базы и медиа;
+  - автодеплой после сборки образов (сейчас деплой запускается кнопкой в Dokploy);
+  - `turbo prune` в образах. Сейчас каждый образ ставит зависимости всего монорепо (`COPY . .` и `pnpm install`), так что Payload и sharp попадают и в образы CRM, а образ API копирует `/app` целиком.
 - Data-миграция с тарифами в API, см. «Тарифы в API».

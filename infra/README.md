@@ -12,10 +12,13 @@ infra/
 │   ├── .env.example               # compose vars (copy → .env)
 │   └── env/
 │       └── api.env.example         # API runtime secrets (copy → api.env)
+├── dokploy/                        # PafPaf on Dokploy (shared server, Traefik): see dokploy/README.md
+│   ├── docker-compose.yml          # whole stack, no host ports, images from ghcr.io
+│   └── .env.example                # paste into Dokploy → Environment
 └── docker/
     ├── api.Dockerfile              # NestJS API
     ├── api-entrypoint.sh           # migrate (+optional seed) → start
-    ├── next.Dockerfile             # generic Next.js app (crm/web/admin)
+    ├── next.Dockerfile             # generic Next.js app (crm/web/admin/site)
     └── nginx/
         ├── templates/
         │   └── default.conf.template  # host-based routing, :80

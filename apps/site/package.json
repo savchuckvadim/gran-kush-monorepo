@@ -13,6 +13,8 @@
         "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
         "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
         "generate": "pnpm generate:types && pnpm generate:importmap",
+        "migrate:create": "cross-env NODE_OPTIONS=--no-deprecation payload migrate:create",
+        "migrate": "cross-env NODE_OPTIONS=--no-deprecation payload migrate",
         "db:ensure": "node scripts/ensure-db.mjs",
         "seed": "cross-env NODE_OPTIONS=--no-deprecation payload run payload/seed/run.ts"
     },

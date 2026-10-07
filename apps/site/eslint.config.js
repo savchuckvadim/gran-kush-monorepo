@@ -8,6 +8,7 @@ export default [
             ".next/**",
             "out/**",
             "payload-types.ts",
+            "migrations/**",
             "app/(payload)/**",
             "modules/shared/vendor/**",
             "scripts/**",

@@ -1,3 +1,4 @@
+import path from "path";
 import type { CollectionConfig } from "payload";
 
 import { anyone, authenticated } from "./access";
@@ -20,7 +21,12 @@ export const Users: CollectionConfig = {
 export const Media: CollectionConfig = {
     slug: "media",
     access: { read: anyone, create: authenticated, update: authenticated, delete: authenticated },
-    upload: { mimeTypes: ["image/*", "video/mp4", "video/webm"] },
+    upload: {
+        // cwd is apps/site both in dev and in the standalone server (it chdirs to its own folder),
+        // so production uploads land in /app/apps/site/media, the volume in infra/dokploy.
+        staticDir: path.resolve(process.cwd(), "media"),
+        mimeTypes: ["image/*", "video/mp4", "video/webm"],
+    },
     fields: [{ name: "alt", type: "text", localized: true }],
 };
 

@@ -11,6 +11,9 @@
                 "DATABASE_URL",
                 "PAYLOAD_SECRET",
                 "PAYLOAD_DB_PUSH",
+                "PAYLOAD_ADMIN_EMAIL",
+                "PAYLOAD_ADMIN_PASSWORD",
+                "PAYLOAD_SEED_IF_EMPTY",
                 "BILLING_API_URL"
             ]
         }
