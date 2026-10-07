@@ -13,6 +13,7 @@ export function MemberStatuses({ member }: IMemberStatusesProps) {
         <div className="mt-2 flex flex-wrap gap-2">
             {booleanBadges.map((field) => (
                 <span
+                    data-slot="badge"
                     key={field.fieldKey}
                     className="rounded-md border bg-muted px-2 py-1 text-xs text-muted-foreground"
                 >
@@ -20,6 +21,7 @@ export function MemberStatuses({ member }: IMemberStatusesProps) {
                 </span>
             ))}
             <span
+                data-slot="badge"
                 className={`rounded-md px-2 py-1 text-xs ${
                     member.isActive
                         ? "border border-green-500/30 bg-green-500/10 text-green-700"

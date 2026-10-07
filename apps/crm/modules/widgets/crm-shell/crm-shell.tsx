@@ -9,13 +9,14 @@ import { Menu, Rabbit, X } from "lucide-react";
 import { Button, ThemeToggle } from "@workspace/ui";
 import { cn } from "@workspace/ui/lib/utils";
 
-import { LangSwitcher } from "@/modules/features";
+import { LangSwitcher, SkinPickerDialog } from "@/modules/features";
 import { CrmSidebar, useAuth } from "@/modules/processes";
 import { PortalSwitcher } from "@/modules/widgets/portal-switcher";
 import { SubscriptionGate } from "@/modules/widgets/subscription-gate";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 import { useSidebar } from "@/modules/shared/ui/Sidebar";
+import { SkinBackdrop } from "@/modules/shared/ui/SkinBackdrop";
 
 interface CrmShellProps {
     children: React.ReactNode;
@@ -23,6 +24,7 @@ interface CrmShellProps {
 
 export function CrmShell({ children }: CrmShellProps) {
     const t = useTranslations("crm.shell");
+    const tAppearance = useTranslations("crm.appearance");
     const localizedLink = useLocalizedLink();
     const pathname = usePathname();
     const { isOpen: isSidebarOpen, toggle: toggleSidebar } = useSidebar();
@@ -30,9 +32,11 @@ export function CrmShell({ children }: CrmShellProps) {
     const { currentUser } = useAuth();
     return (
         <div className="flex min-h-screen min-w-full flex-row">
+            <SkinBackdrop />
             <CrmSidebar />
             <div className="flex flex-1 flex-col w-full justify-center">
                 <header
+                    data-slot="app-header"
                     className={cn(
                         "  sticky top-0 flex w-full justify-center  bg-background/80 backdrop-blur-sm ",
                         isCrm ? "" : "z-50"
@@ -69,7 +73,8 @@ export function CrmShell({ children }: CrmShellProps) {
                         >
                             <PortalSwitcher />
                             <LangSwitcher />
-                            <ThemeToggle />
+                            <SkinPickerDialog />
+                            <ThemeToggle forcedHint={tAppearance("mode.single")} />
                             <Button
                                 variant="outline"
                                 size="sm"

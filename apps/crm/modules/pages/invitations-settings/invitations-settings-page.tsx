@@ -138,6 +138,7 @@ export function InvitationsSettingsPage() {
                                         <td className="px-3 py-2">{invitation.role}</td>
                                         <td className="px-3 py-2">
                                             <span
+                                                data-slot="badge"
                                                 className={`rounded-full px-2 py-0.5 text-xs ${
                                                     STATUS_STYLES[invitation.status] ??
                                                     "bg-muted text-muted-foreground"

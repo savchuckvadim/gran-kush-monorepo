@@ -75,6 +75,15 @@
     --sidebar-ring: oklch(0.405 0.101 131.063);
 }
 
+@import "./skins.css";
+
+/* Apps that put next/font variables on <html> (--font-geist, ...) let skins remap these;
+   apps that still set --font-sans on <body> keep overriding them there */
+@theme {
+    --font-sans: var(--font-geist, ui-sans-serif), ui-sans-serif, system-ui, sans-serif;
+    --font-mono: var(--font-geist-mono, ui-monospace), ui-monospace, monospace;
+}
+
 @theme inline {
     --color-background: var(--background);
     --color-foreground: var(--foreground);

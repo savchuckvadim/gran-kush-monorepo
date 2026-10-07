@@ -38,6 +38,7 @@ The API resolves **portal** via **`X-Portal-Id`** / **`X-Portal-Slug`** (forward
   - document list page
   - single document preview page
 - Member profile editing and re-upload flow for documents/signature
+- Authored themes (skins): Settings → Appearance and a picker in the header, see [THEMES.md](./THEMES.md)
 
 ### In Progress / Planned
 
@@ -107,6 +108,7 @@ OpenAPI-generated types in **`packages/api-client`** are the source of truth for
 - [Employee Authentication Detailed Task](./EMPLOYEE_AUTH_DETAILED_TASK.md)
 - [Strict FSD Refactor Plan](./FSD_STRICT_REFACTOR_PLAN.md)
 - [Multi-tenant micro-SaaS plan](./MULTI_TENANT_MICROSAAS_PLAN.md) — в т.ч. §8 Dynamic Fields (база для Epic B)
+- [Themes](./THEMES.md) — авторские темы CRM: как устроены, как добавить тему, что во второй фазе
 
 ## Related documentation
 
