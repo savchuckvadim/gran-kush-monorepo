@@ -1,0 +1,75 @@
+{
+    "nav": {
+        "home": "Home",
+        "features": "Features",
+        "privacy": "Privacy",
+        "pricing": "Pricing",
+        "crm": "Sign in",
+        "member": "I'm a member"
+    },
+    "a11y": {
+        "language": "Language",
+        "mode": "Day or night",
+        "billing": "Billing",
+        "roles": "Role",
+        "main": "Main"
+    },
+    "hero": {
+        "hint": "Touch the smoke"
+    },
+    "live": {
+        "inside": "Inside now",
+        "pickups": "Pick-ups today",
+        "cash": "Cash today"
+    },
+    "phone": {
+        "member": "Member No. 0147",
+        "fee": "Fee paid",
+        "sponsor": "Sponsor No. 0098",
+        "limit": "41 / 60 g",
+        "ok": "Entry recorded"
+    },
+    "flask": {
+        "today": "Today's pick-up",
+        "of": "of {limit} g this month",
+        "ok": "It fits: {n} g left this month.",
+        "over": "Over by {n} g: the CRM won't record it."
+    },
+    "units": {
+        "g": "g"
+    },
+    "roles": {
+        "disp": "Dispensing",
+        "manager": "Manager",
+        "admin": "Admin"
+    },
+    "record": {
+        "since": "Member since 2024",
+        "number": "Member No.",
+        "limit": "Monthly limit",
+        "fee": "Fee",
+        "feeValue": "Paid",
+        "sponsor": "Sponsor",
+        "phone": "Phone",
+        "id": "DNI / NIE",
+        "files": "Documents",
+        "filesValue": "3 files"
+    },
+    "pricing": {
+        "monthly": "Monthly",
+        "yearly": "Yearly · −20%",
+        "perMonth": "/mo",
+        "vat": "VAT not included · {value} with VAT",
+        "members": "How many members does your club have?",
+        "reco": "For {n} members we recommend <b>{plan}</b>.",
+        "badge": "For your club",
+        "choose": "Choose {plan}"
+    },
+    "footer": {
+        "rights": "© {year} PafPaf · paf-paf.app"
+    },
+    "notFound": {
+        "title": "This page has gone up in smoke.",
+        "back": "Back to home"
+    }
+}
