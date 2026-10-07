@@ -52,8 +52,8 @@ pnpm --filter site dev                         # http://localhost:5002/es
 - **Админка** — http://localhost:5002/admin. При первом входе Payload попросит создать пользователя.
 - **Схема базы в dev** синхронизируется сама (`PAYLOAD_DB_PUSH=true`). В продакшене будут миграции.
 - **Настоящие цены:**
-  - нужен запущенный API (`pnpm --filter api dev`) с эндпоинтом из ветки `feat/public-plans`;
-  - в `billing_plans` должны быть строки с кодами выше.
+  - нужен запущенный API (`pnpm --filter api dev`), эндпоинт `GET /platform/billing/plans`;
+  - в `billing_plans` должны быть строки с кодами выше, см. «Тарифы в API».
 
   Без этого сайт показывает запасные цены из CMS.
 - **После изменения коллекций или блоков:** `pnpm --filter site generate` — это типы `payload-types.ts` и карта импорта админки.
@@ -76,9 +76,34 @@ pnpm --filter site dev                         # http://localhost:5002/es
 2. Сделать компонент в `modules/sites/pafpaf/blocks/` и подключить его в `render-blocks.tsx`.
 3. Запустить `pnpm --filter site generate`.
 
+## Тарифы в API
+
+Сейчас в `billing_plans` есть только `trial`, поэтому сайт показывает запасные цены.
+
+Тарифы попадут в прод data-миграцией Prisma, а не через `seed-admin.ts`: контейнеры по умолчанию запускают `migrate deploy`, а сид — только по opt-in (`RUN_SEED=true` или `BOOTSTRAP_ADMIN_ENABLED=true`).
+
+Набросок (Postgres 16, `gen_random_uuid()` есть):
+
+```sql
+INSERT INTO "billing_plans" ("id","code","name","price_amount","currency","interval","features_json","updated_at") VALUES
+  (gen_random_uuid()::text,'calada-month','Calada',25.00,'EUR','month','{...}',CURRENT_TIMESTAMP),
+  (gen_random_uuid()::text,'calada-year','Calada',240.00,'EUR','year','{...}',CURRENT_TIMESTAMP),
+  (gen_random_uuid()::text,'club-month','Club',49.00,'EUR','month','{...}',CURRENT_TIMESTAMP),
+  (gen_random_uuid()::text,'club-year','Club',468.00,'EUR','year','{...}',CURRENT_TIMESTAMP),
+  (gen_random_uuid()::text,'cadena-month','Cadena',99.00,'EUR','month','{...}',CURRENT_TIMESTAMP),
+  (gen_random_uuid()::text,'cadena-year','Cadena',948.00,'EUR','year','{...}',CURRENT_TIMESTAMP)
+ON CONFLICT ("code") DO NOTHING;
+```
+
+- У `id` и `updated_at` в базе нет дефолта, их нужно указывать явно.
+- Флаги `features_json` для каждого тарифа решает продукт.
+- Сайт запрашивает цены на сервере и кэширует их на 5 минут (`revalidate: 300`), потому что у API общий лимит 300 запросов в минуту на IP. Если цены понадобятся в браузере, origin сайта нужно добавить в `CORS_ORIGIN`.
+
 ## Дальше
 
 - Nagual: перенести кодекс из прототипа в блоки (`modules/sites/nagual`).
 - Блоки из других вариантов PafPaf: параллакс со звёздами, карточки с перетекающими рамками, карточки с дымом, «космический» hero.
 - Отдельный сервер под PafPaf, продакшен-сборка и CI.
-- Data-миграция в API с тарифами Calada/Club/Cadena (набросок — в описании ветки `feat/public-plans`).
+  - Сайт не входит в `deploy.yml`, деплой CRM его не выкатывает.
+  - Но образы CRM (`infra/docker/*.Dockerfile`) ставят зависимости всего монорепо (`COPY . .` и `pnpm install`), так что теперь в них попадают и Payload, и sharp. Образ API копирует `/app` целиком. При настройке CI стоит перейти на `turbo prune`.
+- Data-миграция с тарифами в API, см. «Тарифы в API».
