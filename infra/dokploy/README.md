@@ -14,7 +14,7 @@
 |---|---|---|
 | `paf-paf.app` | `pafpaf-site` | сайт и админка контента на `/admin` |
 | `crm.paf-paf.app` | `pafpaf-crm` | CRM клуба |
-| `club.paf-paf.app` | `pafpaf-web` | кабинет участника и страницы клубов |
+| `club.paf-paf.app` | `pafpaf-web` | кабинет участника и страницы клубов; по умолчанию выключен, включается `COMPOSE_PROFILES=club` |
 | `api.paf-paf.app` | `pafpaf-api` | API |
 | `admin.paf-paf.app` | `pafpaf-admin` | админка платформы |
 
@@ -37,22 +37,21 @@
   - `NEXT_PUBLIC_API_URL` = `https://api.paf-paf.app`;
   - `NEXT_PUBLIC_CRM_URL` = `https://crm.paf-paf.app`.
 
-  Эти адреса вшиваются в образы при сборке. После их смены запустите сборку заново: Actions → Deploy → Run workflow.
-- Токен для скачивания образов: настройки профиля → Developer settings → Personal access tokens (classic), право `read:packages`.
+  Эти адреса вшиваются в образы при сборке. Если они не заданы, в CRM попадает `http://localhost:3000`, и CRM не достучится до API. После их смены запустите сборку заново: Actions → Deploy → Run workflow.
+- Токен для образов не нужен, пока репозиторий публичный: образы в ghcr тоже публичные.
 
 ### Dokploy
 
-1. Settings → Registry → добавить `ghcr.io` с логином GitHub и токеном из шага выше. Если деплой потом не сможет скачать образ, один раз выполните `docker login ghcr.io` в терминале сервера (Dokploy → Terminal).
-2. Projects → Create Project → `pafpaf`.
-3. Create Service → **Compose**, тип Docker Compose:
-   - провайдер GitHub, репозиторий `savchuckvadim/gran-kush-monorepo`, ветка `main`;
+1. Projects → Create Project → `pafpaf`.
+2. Create Service → **Compose**, тип Docker Compose:
+   - провайдер Git, URL `https://github.com/savchuckvadim/gran-kush-monorepo.git`, ветка `main`. Репозиторий публичный, поэтому ключ не нужен;
    - Compose Path: `./infra/dokploy/docker-compose.yml`;
    - **Autodeploy выключить**. Иначе Dokploy начнёт деплой сразу после push, пока GitHub ещё собирает новые образы.
-4. Environment: вставить `infra/dokploy/.env.example` и заполнить.
+3. Environment: вставить `infra/dokploy/.env.example` и заполнить.
    - Секреты генерируются командой `openssl rand -hex 32`.
    - Обязательные переменные помечены `(required)`. Пока хоть одна пустая, деплой останавливается с понятной ошибкой.
-5. Domains: заполнить по таблице выше (домен, сервис, порт 3000, HTTPS, сертификат Let's Encrypt).
-6. Deploy.
+4. Domains: заполнить по таблице выше (домен, сервис, порт 3000, HTTPS, сертификат Let's Encrypt).
+5. Deploy.
 
 ## Первый деплой
 

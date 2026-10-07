@@ -12,6 +12,8 @@
 # - The pafpaf- prefix matters: dokploy-network is shared by every project on
 #   the server, and a bare "api" or "site" could resolve to another container.
 # - Memory limits and log rotation protect the other projects on the server.
+# - The server is small: the member cabinet (club.) starts only with
+#   COMPOSE_PROFILES=club, once clubs bring their members in.
 # - No YAML anchors on purpose: Dokploy rewrites this file to add its domain
 #   labels, and every service must keep both networks however it is parsed.
 
@@ -148,6 +150,7 @@ services:
   # club.${DOMAIN}: member cabinet and club pages
   pafpaf-web:
     image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/web:${TAG:-latest}
+    profiles: [club]
     restart: unless-stopped
     pull_policy: always
     networks: [default, dokploy-network]
