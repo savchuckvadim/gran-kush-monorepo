@@ -255,13 +255,17 @@ Email verification & password reset are handled in the **Auth module**:
 
 ### 7. Billing Module
 
-**Purpose**: idempotency core for payments — provider event journal and payment records.
+**Purpose**: public plan catalog and the idempotency core for payments — provider event journal
+and payment records.
 
-**Status**: infrastructure only. No webhook route and no provider adapter yet — those land with
-the chosen provider. Until then `PaymentEventsService.ingest` rejects every request: there is
-nothing to verify the signature with (fail-closed by design).
+**Status**: payments are infrastructure only. No webhook route and no provider adapter yet — those
+land with the chosen provider. Until then `PaymentEventsService.ingest` rejects every request:
+there is nothing to verify the signature with (fail-closed by design).
 
 **Key pieces** (`apps/api/src/modules/billing`):
+- `GET /platform/billing/plans` — `PlatformBillingPlansController` → `BillingPlansService` →
+  `BillingPlanRepository.findActivePlansForCatalog`. Public catalog of active plans for the product
+  site; contract in [HTTP_API_CONTRACT.md](./HTTP_API_CONTRACT.md#platform-onboarding).
 - `PaymentsService.recordProviderPayment` — idempotent by `(provider, externalId)`. Inserts via
   `createMany({ skipDuplicates: true })` so a repeated webhook returns the stored payment instead
   of creating a second one or blowing up with `500`.

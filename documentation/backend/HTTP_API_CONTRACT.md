@@ -218,6 +218,31 @@ Passport uses **separate strategies** for bearer vs cookie (see `apps/api/src/co
 ## Platform (onboarding)
 
 - **`POST /platform/portals/register`** — public registration of a new portal (and root owner employee). Used from CRM “create portal” flow before tenant-scoped CRM routes.
+- **`GET /platform/billing/plans`** — публичный каталог тарифов для сайта продукта. Без авторизации
+  и без заголовков портала: `/platform/*` не проходит через `PortalContextMiddleware`, поэтому
+  `X-Portal-*` не требуются и не резолвятся. Ответ — активные `BillingPlan` по возрастанию цены,
+  при равной цене — по `code`:
+
+  ```json
+  {
+      "plans": [
+          {
+              "code": "trial",
+              "name": "Trial",
+              "priceAmount": "0.00",
+              "currency": "EUR",
+              "interval": "month",
+              "features": { "crm": true, "sites": true, "messenger": false }
+          }
+      ]
+  }
+  ```
+
+  `priceAmount` — цена за один `interval` строкой ровно с двумя знаками после точки, а не number:
+  `Decimal(12,2)` не проходит через float. `features` — флаги возможностей из `featuresJson`,
+  значения не-boolean отбрасываются. Успешный ответ идёт с `Cache-Control: public, max-age=300`,
+  ошибка — без него. Лимит — общий `default` (300/мин на IP): сайт с серверным рендерингом ходит
+  с одного IP, поэтому ответ стоит кэшировать и на его стороне.
 
 ---
 
