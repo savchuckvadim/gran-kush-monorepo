@@ -1,0 +1,268 @@
+<title>PafPaf en órbita</title>
+<meta name="description" content="PafPaf: la CRM para asociaciones cannábicas y clubes sociales. Socios con aval y firma digital, entrada por QR, límites, stock y caja." />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" />
+<link rel="stylesheet" href="pafpaf.css" />
+
+<script>window.PP_PAGE = { id: "home", title: "meta.home" };</script>
+<canvas class="cosmos" id="cosmos" aria-hidden="true"></canvas>
+<header class="gnav" data-gnav></header>
+<nav class="lnav" data-lnav aria-label="PafPaf"></nav>
+
+<main>
+    <!-- hero: the planet rises, the panel lands on its horizon -->
+    <section class="hero s-dark" id="top" data-scrolly>
+        <div class="sticky">
+            <div class="aurora" aria-hidden="true"></div>
+            <div class="planet" aria-hidden="true"></div>
+            <div class="hero__text">
+                <video class="hero__smoke" data-src="assets/hero-smoke.mp4" poster="assets/hero-smoke.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+                <span class="eyebrow eyebrow--aurora">PafPaf</span>
+                <h1 class="h-hero smoke-text hero-now" data-i18n-html="hero.h1">Tu club,<br />en órbita.</h1>
+                <p class="lede center fade-late" data-i18n="hero.lede">La CRM para asociaciones cannábicas y clubes sociales. Socios, entrada, stock y caja. En calma.</p>
+                <div class="ctas fade-late">
+                    <a class="pill" href="precios.html" data-i18n="cta.try">Probar gratis</a>
+                    <a class="more" href="#entrada" data-i18n="cta.how">Ver cómo funciona</a>
+                </div>
+            </div>
+            <div class="hero__ui">
+                <div class="win">
+                    <div class="win__bar"><i></i><i></i><i></i><span>crm.paf-paf.app</span></div>
+                    <div class="win__body">
+                        <aside class="win__side">
+                            <b>Nube Norte</b>
+                            <span class="on" data-i18n="win.nav1">Panel</span>
+                            <span data-i18n="win.nav2">Socios</span>
+                            <span data-i18n="win.nav3">Entrada</span>
+                            <span data-i18n="win.nav4">Stock</span>
+                            <span data-i18n="win.nav5">Caja</span>
+                        </aside>
+                        <div class="win__main">
+                            <div class="win__kpis">
+                                <div class="win__kpi"><small data-i18n="win.k1">Dentro ahora</small><b>23</b></div>
+                                <div class="win__kpi"><small data-i18n="win.k2">Retiradas hoy</small><b>64</b></div>
+                                <div class="win__kpi"><small data-i18n="win.k3">Caja de hoy</small><b data-count="1284" data-post=" €">1.284 €</b></div>
+                            </div>
+                            <div class="win__chart">
+                                <svg viewBox="0 0 400 86" preserveAspectRatio="none" aria-hidden="true">
+                                    <defs>
+                                        <linearGradient id="winArea" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0" stop-color="#7b61ff" stop-opacity=".42" />
+                                            <stop offset="1" stop-color="#7b61ff" stop-opacity="0" />
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M0 72 C30 70 55 62 90 60 S150 44 182 46 S240 32 272 28 S330 16 362 18 S392 9 400 8 V86 H0 Z" fill="url(#winArea)" />
+                                    <path d="M0 72 C30 70 55 62 90 60 S150 44 182 46 S240 32 272 28 S330 16 362 18 S392 9 400 8" fill="none" stroke="url(#auroraGrad)" stroke-width="2" />
+                                </svg>
+                            </div>
+                            <ul class="feed">
+                                <li><span class="av">LM</span><span>Lucía Martín <em>· <span data-i18n="win.f1">Entrada</span></em></span><span class="ok">18:42</span></li>
+                                <li><span class="av">DS</span><span>Dmitri Sokolov <em>· <span data-i18n="win.f2">Retirada · 2 g</span></em></span><em>18:30</em></li>
+                                <li><span class="av">OK</span><span>Olena Kovalenko <em>· <span data-i18n="win.f3">Cuota anual</span></em></span><em>18:05</em></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="hero__caption h3" data-i18n-html="hero.cap">Todo el club. <b>Una sola pantalla.</b></p>
+        </div>
+    </section>
+
+    <!-- highlights -->
+    <section class="s-alt pad" data-rail>
+        <div class="wrap-l hl__head">
+            <h2 class="h1 reveal" data-i18n="hl.h2">Lo esencial.</h2>
+            <a class="more" href="funciones.html" data-i18n="cta.features">Todas las funciones</a>
+        </div>
+        <div class="rail" tabindex="0" aria-label="Lo esencial">
+            <article class="hl-card hl-card--dark">
+                <video class="hl-smoke" data-src="assets/hero-smoke.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+                <div class="hl-card__txt"><h3 data-i18n="hl.1.t">Entrada por QR.</h3><p data-i18n="hl.1.p">Un segundo en la puerta.</p></div>
+                <div class="hl-card__vis"><div class="qr qr-glow" data-seed="147"></div></div>
+            </article>
+            <article class="hl-card hl-card--dark">
+                <div class="hl-card__txt"><h3 data-i18n="hl.2.t">Límite mensual.</h3><p data-i18n="hl.2.p">La CRM lo controla sola.</p></div>
+                <div class="hl-card__vis">
+                    <div class="ring-wrap">
+                        <svg class="ring" viewBox="0 0 200 200" data-val="41" data-max="60" aria-hidden="true"><circle class="track" cx="100" cy="100" r="82" /><circle class="val" cx="100" cy="100" r="82" /></svg>
+                        <div class="ring-label"><b>41</b><small data-i18n="ring.of">de 60 g</small></div>
+                    </div>
+                </div>
+            </article>
+            <article class="hl-card">
+                <div class="hl-card__txt"><h3 data-i18n="hl.3.t">Stock al gramo.</h3><p data-i18n="hl.3.p">Cada retirada descuenta.</p></div>
+                <div class="hl-card__vis">
+                    <div class="bars">
+                        <div><span>Amnesia Haze <b>340 <span data-i18n="unit.g">g</span></b></span><i style="--w: 68%"></i></div>
+                        <div><span>Critical <b>510 <span data-i18n="unit.g">g</span></b></span><i style="--w: 85%"></i></div>
+                        <div class="low"><span>Lemon Haze <b>60 <span data-i18n="unit.g">g</span></b></span><i style="--w: 15%"></i></div>
+                        <div><span>CBD Harlequin <b>200 <span data-i18n="unit.g">g</span></b></span><i style="--w: 66%"></i></div>
+                    </div>
+                </div>
+            </article>
+            <article class="hl-card">
+                <div class="hl-card__txt"><h3 data-i18n="hl.4.t">Caja que cuadra.</h3><p data-i18n="hl.4.p">Cada euro, con su recibo.</p></div>
+                <div class="hl-card__vis">
+                    <div class="receipt">
+                        <b data-i18n="rcpt.t">Turno de tarde</b>
+                        <p><span data-i18n="rcpt.1">Retiradas</span><span>964,50 €</span></p>
+                        <p><span data-i18n="rcpt.2">Cuotas</span><span>360,00 €</span></p>
+                        <p><span data-i18n="rcpt.3">Gastos</span><span>−40,00 €</span></p>
+                        <p><span data-i18n="rcpt.4">Total</span><span>1.284,50 €</span></p>
+                    </div>
+                </div>
+            </article>
+            <article class="hl-card hl-card--dark">
+                <video class="hl-smoke hl-smoke--low" data-src="assets/hero-smoke.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+                <div class="hl-card__txt"><h3 data-i18n="hl.5.t">El club en el móvil.</h3><p data-i18n="hl.5.p">Para cada socio. Sin instalar nada.</p></div>
+                <div class="hl-card__vis">
+                    <div class="mini-phone">
+                        <small>Nube Norte</small>
+                        <div class="qr" data-seed="173"></div>
+                        <b>Iryna Shevchenko</b>
+                        <small>Nº 0173</small>
+                    </div>
+                </div>
+            </article>
+        </div>
+        <div class="rail-nav"><button type="button" data-prev aria-label="Anterior"></button><button type="button" data-next aria-label="Siguiente"></button></div>
+    </section>
+
+    <!-- the door: pinned phone, three steps -->
+    <section class="door s-dark" id="entrada" data-scrolly data-steps="3" data-step="0">
+        <div class="sticky">
+            <div class="door__grid">
+                <div class="door__copy">
+                    <span class="eyebrow" data-i18n="door.eyebrow">Entrada</span>
+                    <h2 class="h1" data-i18n-html="door.h2">Un segundo<br />en la puerta.</h2>
+                    <ol class="door__steps">
+                        <li data-n="1" data-i18n="door.s1">El socio enseña su QR.</li>
+                        <li data-n="2" data-i18n="door.s2">La CRM comprueba cuota, aval y límite.</li>
+                        <li data-n="3" data-i18n="door.s3">Y pasa. Sin colas ni carpetas.</li>
+                    </ol>
+                    <p class="door__now" aria-live="polite"></p>
+                </div>
+                <div class="door__phone">
+                    <div class="phone">
+                        <div class="phone__screen">
+                            <div class="scr scr--0"><small data-i18n="ph.qr">Socia Nº 0147</small><div class="qr" data-seed="147"></div><b>Lucía Martín</b></div>
+                            <div class="scr scr--1">
+                                <div class="member">
+                                    <span class="av">LM</span>
+                                    <b>Lucía Martín</b>
+                                    <div class="chips"><span class="g" data-i18n="ph.fee">Cuota al día</span><span data-i18n="ph.aval">Aval Nº 0098</span><span data-i18n="ph.lim">41 / 60 g</span></div>
+                                </div>
+                            </div>
+                            <div class="scr scr--2">
+                                <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></div>
+                                <b data-i18n="ph.ok">Entrada registrada</b>
+                                <small>18:42</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- members -->
+    <section class="s-light pad">
+        <div class="wrap center">
+            <span class="eyebrow reveal" data-i18n="card.eyebrow">Socios</span>
+            <h2 class="h1 reveal d1" data-i18n-html="card.h2">Alta en tres minutos.<br />Con aval y firma.</h2>
+            <p class="lede center reveal d2" style="margin-top: 22px" data-i18n="card.p">DNI o NIE, foto, firma en la pantalla y el aval de otro socio. La ficha queda completa y cifrada.</p>
+            <div class="card-stage reveal d2">
+                <div class="mcard">
+                    <div class="mcard__top">
+                        <span class="mcard__club">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <defs><linearGradient id="mcardLogo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7b61ff" /><stop offset=".55" stop-color="#ff5fa2" /><stop offset="1" stop-color="#ffb340" /></linearGradient></defs>
+                                <circle cx="9" cy="13.5" r="6.4" fill="url(#mcardLogo)" /><circle cx="16.6" cy="8" r="4.3" fill="url(#mcardLogo)" opacity=".82" />
+                            </svg>
+                            Nube Norte
+                        </span>
+                        <span class="mcard__no">Nº 0147</span>
+                    </div>
+                    <div></div>
+                    <div class="mcard__bottom">
+                        <div class="mcard__name">Lucía Martín<small data-i18n="card.member">Socia desde 2024</small></div>
+                        <div class="qr" data-seed="147"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="facts">
+                <div class="reveal"><b data-count="3">3</b><span data-i18n="fact.1">minutos por alta</span></div>
+                <div class="reveal d1"><b>0</b><span data-i18n="fact.2">papeles</span></div>
+                <div class="reveal d2"><b data-count="100" data-post=" %">100 %</b><span data-i18n="fact.3">datos cifrados</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- cash -->
+    <section class="s-alt pad">
+        <div class="wrap center">
+            <span class="eyebrow" data-i18n="cash.eyebrow">Caja</span>
+            <h2 class="h1 reveal" data-i18n="cash.h2">La caja cuadra sola.</h2>
+            <p class="lede center reveal d1" style="margin-top: 22px" data-i18n="cash.p">Retiradas, cuotas y gastos del turno, al céntimo. Se cierra en un toque.</p>
+            <div class="cash__num" data-count="1284.5" data-dec="2" data-post=" €">1.284,50 €</div>
+            <p class="cash__label" data-i18n="cash.label">Caja del turno de tarde</p>
+        </div>
+    </section>
+
+    <!-- privacy -->
+    <section class="s-dark pad clip">
+        <div class="moon moon--ring" data-speed="0.16" style="--d: 150px; top: 10%; left: 5%"></div>
+        <div class="moon" data-speed="-0.1" style="--d: 64px; top: 64%; right: 9%"></div>
+        <div class="wrap center">
+            <span class="eyebrow" data-i18n="priv.eyebrow">Privacidad</span>
+            <h2 class="h1 smoke-text" data-i18n-html="priv.h2">Lo que pasa en el club,<br />se queda en el club.</h2>
+            <p class="lede center reveal" style="margin-top: 22px" data-i18n="priv.p">Datos sensibles cifrados, accesos por rol y registro de cada visita. Servidores en la UE.</p>
+            <div class="ctas"><a class="more" href="privacidad.html" data-i18n="cta.privacy">Más sobre privacidad</a></div>
+            <div class="orbit reveal">
+                <svg class="rings" viewBox="0 0 100 100" aria-hidden="true"><ellipse cx="50" cy="50" rx="49" ry="49" /><ellipse cx="50" cy="50" rx="36" ry="36" /><ellipse cx="50" cy="50" rx="24" ry="24" /></svg>
+                <div class="sat" style="--t: 48s"><i style="--y: 1%; --c: #7b61ff"></i></div>
+                <div class="sat" style="--t: 32s; animation-direction: reverse"><i style="--y: 14%; --c: #ff5fa2; --s: 8px"></i></div>
+                <div class="sat" style="--t: 22s"><i style="--y: 26%; --c: #ffb340; --s: 7px"></i></div>
+                <div class="orbit__core">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="16" r="1" /><rect x="3" y="10" width="18" height="12" rx="2" /><path d="M7 10V7a5 5 0 0 1 10 0v3" /></svg>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- pricing teaser -->
+    <section class="s-light pad">
+        <div class="wrap center">
+            <span class="eyebrow" data-i18n="tiers.eyebrow">Precios</span>
+            <h2 class="h1 reveal" data-i18n="tiers.h2">Desde 20 € al mes.</h2>
+            <p class="lede center reveal d1" style="margin-top: 22px" data-i18n="tiers.p">Sin permanencia. Con el IVA a la vista. Migración gratis desde el plan Club.</p>
+            <div class="tiers">
+                <div class="tier reveal"><h3>Calada</h3><p data-i18n="tier.1">Hasta 300 socios</p><b data-i18n="tier.1.p">Desde 20 €/mes</b></div>
+                <div class="tier reveal d1"><h3>Club</h3><p data-i18n="tier.2">Hasta 1.500 socios</p><b data-i18n="tier.2.p">Desde 39 €/mes</b></div>
+                <div class="tier reveal d2"><h3>Cadena</h3><p data-i18n="tier.3">Varios clubes</p><b data-i18n="tier.3.p">Desde 79 €/mes</b></div>
+            </div>
+            <div class="ctas"><a class="pill" href="precios.html" data-i18n="cta.prices">Ver precios</a></div>
+        </div>
+    </section>
+
+    <!-- origin and final call, second horizon -->
+    <section class="s-dark horizon clip">
+        <div class="aurora aurora--low" aria-hidden="true"></div>
+        <div class="planet" aria-hidden="true"></div>
+        <div class="wrap center horizon__inner">
+            <span class="eyebrow" data-i18n="origin.eyebrow">Torrevieja</span>
+            <h2 class="h1 smoke-text" data-i18n-html="origin.h2">Nacimos dentro de un club,<br />no en una oficina.</h2>
+            <p class="lede center reveal" style="margin-top: 22px" data-i18n="origin.p">Cada función salió de un problema real en la barra.</p>
+            <div class="gap"></div>
+            <h2 class="h2 reveal" data-i18n-html="final.h2">Tu club, en órbita<br />esta misma semana.</h2>
+            <p class="lede center reveal d1" style="margin-top: 14px" data-i18n="final.p">Prueba gratis. Sin tarjeta.</p>
+            <div class="ctas"><a class="pill" href="precios.html" data-i18n="cta.try">Probar gratis</a><a class="more" href="funciones.html" data-i18n="cta.features">Todas las funciones</a></div>
+        </div>
+    </section>
+</main>
+
+<footer class="foot" data-foot></footer>
+<script src="i18n.js"></script>
+<script src="pafpaf.js"></script>

@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Funciones — PafPaf</title>
+<meta name="description" content="Funciones de PafPaf: socios con aval y firma, entrada por QR, límite mensual, stock al gramo, caja, zona del socio, roles y varios clubes." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" />
+<link rel="stylesheet" href="pafpaf.css" />
+</head>
+<body>
+<script>window.PP_PAGE = { id: "funciones", title: "meta.funciones" };</script>
+<canvas class="cosmos" id="cosmos" aria-hidden="true"></canvas>
+<header class="gnav" data-gnav></header>
+<nav class="lnav" data-lnav aria-label="PafPaf"></nav>
+
+<main>
+    <section class="s-light f-hero">
+        <div class="wrap center">
+            <span class="eyebrow" data-i18n="f.eyebrow">Funciones</span>
+            <h1 class="h1 reveal" data-i18n-html="f.h1">Todo lo que tu club necesita.<br />Nada que no.</h1>
+            <p class="lede center reveal d1" style="margin-top: 22px" data-i18n="f.lede">Ocho piezas que encajan. Cada una nació en la barra de un club.</p>
+            <nav class="jump reveal d2" aria-label="Funciones">
+                <a href="#socios" data-i18n="f.j1">Socios</a>
+                <a href="#entrada" data-i18n="f.j2">Entrada</a>
+                <a href="#limites" data-i18n="f.j3">Límites</a>
+                <a href="#stock" data-i18n="f.j4">Stock</a>
+                <a href="#caja" data-i18n="f.j5">Caja</a>
+                <a href="#socio" data-i18n="f.j6">Zona del socio</a>
+                <a href="#equipo" data-i18n="f.j7">Equipo</a>
+                <a href="#clubes" data-i18n="f.j8">Varios clubes</a>
+            </nav>
+        </div>
+    </section>
+
+    <section class="fsec s-alt" id="socios">
+        <div class="wrap-l fsec__grid">
+            <div class="reveal">
+                <span class="eyebrow" data-i18n="f.j1">Socios</span>
+                <h2 class="h2" data-i18n-html="f1.h2">Alta con aval<br />y firma.</h2>
+                <p class="lede" data-i18n="f1.p">Documento, foto y firma en la pantalla. Un socio avala al nuevo y la ficha queda completa.</p>
+                <ul class="ticks">
+                    <li data-i18n="f1.t1">DNI, NIE o pasaporte</li>
+                    <li data-i18n="f1.t2">Firma digital en la pantalla</li>
+                    <li data-i18n="f1.t3">Aval de otro socio</li>
+                    <li data-i18n="f1.t4">Cuotas y renovaciones</li>
+                </ul>
+            </div>
+            <div class="fsec__vis reveal d1">
+                <div class="list-mock">
+                    <header><span data-i18n="lm.title">Socios</span><span data-i18n="lm.new">Nuevo</span></header>
+                    <ul>
+                        <li><span class="av">LM</span><div><b>Lucía Martín</b><small>Nº 0147</small></div><span class="st st--ok" data-i18n="lm.ok">Activo</span></li>
+                        <li><span class="av">AV</span><div><b>Andrei Volkov</b><small>Nº 0151</small></div><span class="st st--bad" data-i18n="lm.due">Cuota vencida</span></li>
+                        <li><span class="av">OK</span><div><b>Olena Kovalenko</b><small>Nº 0153</small></div><span class="st st--ok" data-i18n="lm.ok">Activo</span></li>
+                        <li><span class="av">JO</span><div><b>Javier Ortega</b><small>Nº 0158</small></div><span class="st st--warn" data-i18n="lm.rev">En revisión</span></li>
+                        <li><span class="av">IS</span><div><b>Iryna Shevchenko</b><small>Nº 0173</small></div><span class="st st--ok" data-i18n="lm.ok">Activo</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="fsec s-dark clip" id="entrada">
+        <div class="moon moon--ring" data-speed="0.14" style="--d: 120px; top: 12%; right: 7%"></div>
+        <div class="wrap-l fsec__grid">
+            <div class="reveal">
+                <span class="eyebrow" data-i18n="f.j2">Entrada</span>
+                <h2 class="h2 smoke-text" data-i18n-html="f2.h2">QR en la puerta.</h2>
+                <p class="lede" data-i18n="f2.p">Cada socio lleva su QR en el móvil. Ves quién está dentro y el día se cierra solo.</p>
+            </div>
+            <div class="fsec__vis reveal d1" data-step="0">
+                <div class="door__phone">
+                    <div class="phone">
+                        <div class="phone__screen">
+                            <div class="scr scr--0"><small data-i18n="ph.qr">Socia Nº 0147</small><div class="qr" data-seed="147"></div><b>Lucía Martín</b></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="fsec s-dark fsec--flip clip" id="limites">
+        <div class="moon" data-speed="-0.12" style="--d: 70px; bottom: 14%; left: 6%"></div>
+        <div class="wrap-l fsec__grid">
+            <div class="reveal">
+                <span class="eyebrow" data-i18n="f.j3">Límites</span>
+                <h2 class="h2 smoke-text" data-i18n-html="f3.h2">El límite mensual,<br />bajo control.</h2>
+                <p class="lede" data-i18n="f3.p">Cada retirada suma al mes del socio. Si se pasa, la CRM avisa antes de registrar.</p>
+            </div>
+            <div class="fsec__vis">
+                <div class="ring-wrap ring-wrap--big">
+                    <svg class="ring" viewBox="0 0 200 200" data-val="41" data-max="60" aria-hidden="true"><circle class="track" cx="100" cy="100" r="82" /><circle class="val" cx="100" cy="100" r="82" /></svg>
+                    <div class="ring-label"><b>41</b><small data-i18n="ring.of">de 60 g</small></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="fsec s-light" id="stock">
+        <div class="wrap-l fsec__grid">
+            <div class="reveal">
+                <span class="eyebrow" data-i18n="f.j4">Stock</span>
+                <h2 class="h2" data-i18n-html="f4.h2">Al gramo.</h2>
+                <p class="lede" data-i18n="f4.p">Catálogo, existencias y movimientos. Cada retirada descuenta del stock y el stock bajo avisa.</p>
+            </div>
+            <div class="fsec__vis reveal d1">
+                <div class="bars bars--card">
+                    <div><span>Amnesia Haze <b>340 <span data-i18n="unit.g">g</span></b></span><i style="--w: 68%"></i></div>
+                    <div><span>Gorilla Glue <b>120 <span data-i18n="unit.g">g</span></b></span><i style="--w: 30%"></i></div>
+                    <div><span>Critical <b>510 <span data-i18n="unit.g">g</span></b></span><i style="--w: 85%"></i></div>
+                    <div class="low"><span>Lemon Haze <b>60 <span data-i18n="unit.g">g</span></b></span><i style="--w: 15%"></i></div>
+                    <div><span>CBD Harlequin <b>200 <span data-i18n="unit.g">g</span></b></span><i style="--w: 66%"></i></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="fsec s-alt fsec--flip" id="caja">
+        <div class="wrap-l fsec__grid">
+            <div class="reveal">
+                <span class="eyebrow" data-i18n="f.j5">Caja</span>
+                <h2 class="h2" data-i18n-html="f5.h2">Cada euro,<br />con su recibo.</h2>
+                <p class="lede" data-i18n="f5.p">Caja diaria, cuotas e informes. El turno se cierra en un toque y cuadra.</p>
+            </div>
+            <div class="fsec__vis reveal d1">
+                <div class="receipt receipt--big">
+                    <b data-i18n="rcpt.t">Turno de tarde</b>
+                    <p><span data-i18n="rcpt.1">Retiradas</span><span>964,50 €</span></p>
+                    <p><span data-i18n="rcpt.2">Cuotas</span><span>360,00 €</span></p>
+                    <p><span data-i18n="rcpt.3">Gastos</span><span>−40,00 €</span></p>
+                    <p><span data-i18n="rcpt.4">Total</span><span>1.284,50 €</span></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="fsec s-dark clip" id="socio">
+        <div class="moon moon--ring" data-speed="0.2" style="--d: 100px; top: 8%; left: 44%"></div>
+        <div class="wrap-l fsec__grid">
+            <div class="reveal">
+                <span class="eyebrow" data-i18n="f.j6">Zona del socio</span>
+                <h2 class="h2 smoke-text" data-i18n-html="f6.h2">El club<br />en el bolsillo.</h2>
+                <p class="lede" data-i18n="f6.p">Perfil, documentos, QR e historial en el móvil del socio. Sin instalar nada.</p>
+            </div>
+            <div class="fsec__vis reveal d1">
+                <div class="door__phone">
+                    <div class="phone">
+                        <div class="phone__screen zs">
+                            <small data-i18n="zs.hello">Hola, Lucía</small>
+                            <div class="zs__card"><span>Nube Norte</span><div class="qr" data-seed="147"></div><small data-i18n="zs.qr">Tu QR de entrada</small></div>
+                            <div class="zs__row"><span data-i18n="zs.month">Este mes</span><b>41 / 60 g</b></div>
+                            <div class="zs__row"><span data-i18n="zs.docs">Documentos</span><b>3</b></div>
+                            <div class="zs__row"><span data-i18n="zs.hist">Historial</span><b>›</b></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="fsec s-light fsec--flip" id="equipo">
+        <div class="wrap-l fsec__grid">
+            <div class="reveal">
+                <span class="eyebrow" data-i18n="f.j7">Equipo</span>
+                <h2 class="h2" data-i18n-html="f7.h2">Cada uno<br />ve lo suyo.</h2>
+                <p class="lede" data-i18n="f7.p">Administración, encargados y dispensación, con permisos distintos. Cada acción queda firmada con nombre y hora.</p>
+            </div>
+            <div class="fsec__vis reveal d1">
+                <div class="roles">
+                    <div class="role"><div><b data-i18n="role.1">Administración</b><small data-i18n="role.1s">Todo, incluida la facturación</small></div><i><span class="on"></span><span class="on"></span><span class="on"></span></i></div>
+                    <div class="role"><div><b data-i18n="role.2">Encargado</b><small data-i18n="role.2s">Socios, caja e informes</small></div><i><span class="on"></span><span class="on"></span><span></span></i></div>
+                    <div class="role"><div><b data-i18n="role.3">Dispensación</b><small data-i18n="role.3s">Entrada y retiradas</small></div><i><span class="on"></span><span></span><span></span></i></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="fsec s-dark clip" id="clubes">
+        <div class="wrap-l fsec__grid">
+            <div class="reveal">
+                <span class="eyebrow" data-i18n="f.j8">Varios clubes</span>
+                <h2 class="h2 smoke-text" data-i18n-html="f8.h2">Varios clubes.<br />Una órbita.</h2>
+                <p class="lede" data-i18n="f8.p">¿Abres otro local? Lo gestionas desde la misma cuenta, con su equipo y sus socios.</p>
+            </div>
+            <div class="fsec__vis">
+                <div class="orbit orbit--clubs">
+                    <svg class="rings" viewBox="0 0 100 100" aria-hidden="true"><ellipse cx="50" cy="50" rx="44" ry="44" /><ellipse cx="50" cy="50" rx="30" ry="30" /></svg>
+                    <div class="sat" style="--t: 60s"><b style="--y: 6%; --c: #7b61ff; --s: 34px"></b></div>
+                    <div class="sat" style="--t: 60s; animation-delay: -30s"><b style="--y: 6%; --c: #ff5fa2; --s: 26px"></b></div>
+                    <div class="sat" style="--t: 38s; animation-direction: reverse"><b style="--y: 20%; --c: #ffb340; --s: 22px"></b></div>
+                    <div class="orbit__core orbit__core--logo">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="9" cy="13.5" r="6.4" fill="url(#auroraGrad)" /><circle cx="16.6" cy="8" r="4.3" fill="url(#auroraGrad)" opacity=".82" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="s-light pad" id="idiomas">
+        <div class="wrap center">
+            <span class="eyebrow" data-i18n="f9.eyebrow">Idiomas</span>
+            <div class="langs reveal"><span>Español.</span><span>Русский.</span><span>English.</span></div>
+            <p class="lede center reveal d1" style="margin-top: 30px" data-i18n="f9.p">El panel y la zona del socio hablan tres idiomas. Como tus socios.</p>
+        </div>
+    </section>
+
+    <section class="s-dark horizon clip">
+        <div class="aurora aurora--low" aria-hidden="true"></div>
+        <div class="planet" aria-hidden="true"></div>
+        <div class="wrap center horizon__inner">
+            <h2 class="h1 smoke-text" data-i18n-html="final.h2">Tu club, en órbita<br />esta misma semana.</h2>
+            <p class="lede center reveal" style="margin-top: 18px" data-i18n="final.p">Prueba gratis. Sin tarjeta.</p>
+            <div class="ctas"><a class="pill" href="precios.html" data-i18n="cta.try">Probar gratis</a><a class="more" href="precios.html" data-i18n="cta.prices">Ver precios</a></div>
+        </div>
+    </section>
+</main>
+
+<footer class="foot" data-foot></footer>
+<script src="i18n.js"></script>
+<script src="pafpaf.js"></script>
+</body>
+</html>

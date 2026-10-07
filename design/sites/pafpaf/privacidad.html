@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Privacidad — PafPaf</title>
+<meta name="description" content="Privacidad en PafPaf: datos cifrados, accesos por rol, registro de cada acceso, servidores en la UE y exportación cuando quieras." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" />
+<link rel="stylesheet" href="pafpaf.css" />
+</head>
+<body>
+<script>window.PP_PAGE = { id: "privacidad", title: "meta.privacidad" };</script>
+<canvas class="cosmos" id="cosmos" aria-hidden="true"></canvas>
+<header class="gnav" data-gnav></header>
+<nav class="lnav" data-lnav aria-label="PafPaf"></nav>
+
+<main>
+    <section class="s-dark clip pv-hero">
+        <div class="moon moon--ring" data-speed="0.18" style="--d: 160px; top: 14%; left: 4%"></div>
+        <div class="moon" data-speed="-0.14" style="--d: 70px; top: 58%; right: 8%"></div>
+        <div class="wrap center">
+            <span class="eyebrow eyebrow--aurora" data-i18n="pv.eyebrow">Privacidad</span>
+            <h1 class="h-hero smoke-text hero-now" data-i18n-html="pv.h1">Privacidad.<br />De serie.</h1>
+            <p class="lede center fade-late" style="margin-top: 24px" data-i18n="pv.lede">Tus socios confían en tu club. Tu club puede confiar en PafPaf.</p>
+            <div class="orbit orbit--big">
+                <svg class="rings" viewBox="0 0 100 100" aria-hidden="true"><ellipse cx="50" cy="50" rx="49" ry="49" /><ellipse cx="50" cy="50" rx="38" ry="38" /><ellipse cx="50" cy="50" rx="27" ry="27" /></svg>
+                <div class="sat" style="--t: 70s"><i style="--y: 1%; --c: #7b61ff; --s: 11px"></i></div>
+                <div class="sat" style="--t: 70s; animation-delay: -35s"><i style="--y: 1%; --c: #9a8cff; --s: 6px"></i></div>
+                <div class="sat" style="--t: 44s; animation-direction: reverse"><i style="--y: 12%; --c: #ff5fa2; --s: 9px"></i></div>
+                <div class="sat" style="--t: 28s"><i style="--y: 23%; --c: #ffb340; --s: 7px"></i></div>
+                <div class="orbit__core">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="16" r="1" /><rect x="3" y="10" width="18" height="12" rx="2" /><path d="M7 10V7a5 5 0 0 1 10 0v3" /></svg>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="s-dark" style="padding-bottom: 140px">
+        <div class="wrap-l">
+            <div class="pcards">
+                <article class="pcard reveal">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="16" r="1" /><rect x="3" y="10" width="18" height="12" rx="2" /><path d="M7 10V7a5 5 0 0 1 10 0v3" /></svg>
+                    <h3 data-i18n="pc.1.t">Cifrado</h3>
+                    <p data-i18n="pc.1.p">Documentos, firmas y datos sensibles van cifrados en la base de datos.</p>
+                </article>
+                <article class="pcard reveal d1">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><path d="M16 3.128a4 4 0 0 1 0 7.744" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><circle cx="9" cy="7" r="4" /></svg>
+                    <h3 data-i18n="pc.2.t">Roles</h3>
+                    <p data-i18n="pc.2.p">Cada persona del equipo ve solo lo que necesita para su turno.</p>
+                </article>
+                <article class="pcard reveal d2">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 12h-5" /><path d="M15 8h-5" /><path d="M19 17V5a2 2 0 0 0-2-2H4" /><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3" /></svg>
+                    <h3 data-i18n="pc.3.t">Registro</h3>
+                    <p data-i18n="pc.3.p">Cada acceso y cada cambio quedan registrados con nombre y hora.</p>
+                </article>
+                <article class="pcard reveal">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /><path d="m9 12 2 2 4-4" /></svg>
+                    <h3 data-i18n="pc.4.t">RGPD</h3>
+                    <p data-i18n="pc.4.p">Servidores en la UE y contrato de encargo de tratamiento para tu asociación.</p>
+                </article>
+                <article class="pcard reveal d1">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M3 12a9 3 0 0 0 5 2.69" /><path d="M21 9.3V5" /><path d="M3 5v14a9 3 0 0 0 6.47 2.88" /><path d="M12 12v4h4" /><path d="M13 20a5 5 0 0 0 9-3 4.5 4.5 0 0 0-4.5-4.5c-1.33 0-2.54.54-3.41 1.41L12 16" /></svg>
+                    <h3 data-i18n="pc.5.t">Copias</h3>
+                    <p data-i18n="pc.5.p">Copias de seguridad diarias y una página pública con el estado del servicio.</p>
+                </article>
+                <article class="pcard reveal d2">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>
+                    <h3 data-i18n="pc.6.t">Tus datos</h3>
+                    <p data-i18n="pc.6.p">Exporta socios, visitas y caja cuando quieras. Sin permanencia.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="s-dark horizon clip">
+        <div class="aurora aurora--low" aria-hidden="true"></div>
+        <div class="planet" aria-hidden="true"></div>
+        <div class="wrap center horizon__inner">
+            <h2 class="h1 smoke-text" data-i18n-html="pv.close">Sin publicidad. Sin venta de datos.<br />Nunca.</h2>
+            <div class="ctas"><a class="pill" href="precios.html" data-i18n="cta.try">Probar gratis</a><a class="more" href="funciones.html" data-i18n="cta.features">Todas las funciones</a></div>
+        </div>
+    </section>
+</main>
+
+<footer class="foot" data-foot></footer>
+<script src="i18n.js"></script>
+<script src="pafpaf.js"></script>
+</body>
+</html>

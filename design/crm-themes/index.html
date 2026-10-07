@@ -1,0 +1,362 @@
+<title>Temas de la CRM</title>
+<meta name="description" content="Prototipo: temas de autor para la CRM de clubes, con modo claro u oscuro, tema del club y ahorro de energía." />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&family=Onest:wght@400..800&family=Cormorant+Garamond:wght@500..700&family=Geologica:wght@300..700&family=Comfortaa:wght@500..700&family=Nunito:wght@400..800&family=Exo+2:wght@400..800&family=JetBrains+Mono:wght@400..600&family=IBM+Plex+Sans:wght@400..700&family=IBM+Plex+Mono:wght@400..600&family=Commissioner:wght@200..700&family=Unbounded:wght@400..800&family=Fira+Sans+Extra+Condensed:wght@500..800&family=Dela+Gothic+One&family=Rubik+Spray+Paint&family=Rubik+Mono+One&family=Pirata+One&family=Ruslan+Display&family=Lora:wght@500..700&family=Manrope:wght@400..800&display=swap"
+/>
+<link rel="stylesheet" href="crm.css" />
+<link rel="stylesheet" href="themes.css" />
+<script>
+    (function () {
+        var MODES = { clasico: "ld", pafpaf: "ld", nagual: "dl", unicornio: "l", galaxia: "dl", asceta: "d", cristal: "ld", vapor: "l", brasa: "d", trap: "d", noventa: "l", grind: "d", mediterraneo: "ld" };
+        var d = document.documentElement, club = "clasico", mine = null, pref = "light", eco = "0";
+        try {
+            club = localStorage.getItem("crm.clubTheme") || club;
+            mine = localStorage.getItem("crm.myTheme");
+            pref = localStorage.getItem("crm.mode") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+            eco = localStorage.getItem("crm.eco") || eco;
+        } catch (e) {}
+        var t = mine && MODES[mine] ? mine : MODES[club] ? club : "clasico";
+        var modes = MODES[t], m = modes.indexOf(pref.charAt(0)) >= 0 ? pref.charAt(0) : modes.charAt(0);
+        d.setAttribute("data-skin", t);
+        d.classList.toggle("dark", m === "d");
+        d.classList.toggle("eco", eco === "1" || t === "asceta");
+    })();
+</script>
+
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
+    <filter id="rough">
+        <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="3" result="n" />
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+</svg>
+
+<div class="fx" aria-hidden="true">
+    <canvas class="fx-stars" id="stars"></canvas>
+    <div class="fx-photo" id="photo"></div>
+    <div class="fx-blobs"><i></i><i></i><i></i></div>
+    <div class="fx-embers" id="embers"></div>
+    <svg class="fx-geo" viewBox="-100 -100 200 200" fill="none" stroke="currentColor" stroke-width="0.45">
+        <circle r="97" />
+        <circle r="72" />
+        <circle r="48" />
+        <g class="gold">
+            <path d="M0 -97 L84 48.5 L-84 48.5 Z" />
+            <path d="M0 97 L-84 -48.5 L84 -48.5 Z" />
+        </g>
+        <circle r="24" />
+        <circle cx="24" cy="0" r="24" />
+        <circle cx="12" cy="20.8" r="24" />
+        <circle cx="-12" cy="20.8" r="24" />
+        <circle cx="-24" cy="0" r="24" />
+        <circle cx="-12" cy="-20.8" r="24" />
+        <circle cx="12" cy="-20.8" r="24" />
+        <g class="gold"><circle r="4" /></g>
+    </svg>
+</div>
+
+<div class="shell">
+    <aside class="side" id="side">
+        <div class="side__head"><svg class="i" data-i="cannabis"></svg><span>Nube Norte</span></div>
+        <nav class="side__nav" aria-label="CRM">
+            <button type="button" class="nav-i is-active" data-view="socios"><svg class="i" data-i="cat"></svg><span data-t="nav.socios">Socios</span></button>
+            <button type="button" class="nav-i" data-view="productos"><svg class="i" data-i="hop"></svg><span data-t="nav.productos">Productos</span></button>
+            <button type="button" class="nav-i" data-view="pedidos"><svg class="i" data-i="gem"></svg><span data-t="nav.pedidos">Pedidos</span></button>
+            <button type="button" class="nav-i" data-view="asistencia"><svg class="i" data-i="gamepad-2"></svg><span data-t="nav.asistencia">Asistencia</span></button>
+            <button type="button" class="nav-i" data-view="finanzas"><svg class="i" data-i="piggy-bank"></svg><span data-t="nav.finanzas">Finanzas</span></button>
+            <button type="button" class="nav-i" data-view="empleados"><svg class="i" data-i="rabbit"></svg><span data-t="nav.empleados">Empleados</span></button>
+            <button type="button" class="nav-i" data-view="apariencia"><svg class="i" data-i="palette"></svg><span data-t="nav.apariencia">Apariencia</span><span class="nav-i__new" data-t="nav.new">nuevo</span></button>
+        </nav>
+        <div class="side__foot">
+            <button type="button" class="btn btn--outline"><svg class="i" data-i="log-out"></svg><span data-t="nav.logout">Salir</span></button>
+        </div>
+    </aside>
+
+    <div class="main">
+        <header class="top">
+            <div class="top__l">
+                <button type="button" class="btn btn--ghost btn--icon burger" id="burger" aria-label="Menú" aria-expanded="false"><svg class="i" data-i="menu"></svg></button>
+                <div class="portal"><span class="portal__dot"></span><b class="portal__name">Club Nube Norte</b><svg class="i" data-i="chevron-down"></svg></div>
+            </div>
+            <div class="top__r">
+                <button type="button" class="btn btn--outline" id="openThemes"><svg class="i" data-i="palette"></svg><span class="hide-sm" data-t="top.theme">Tema</span></button>
+                <button type="button" class="btn btn--ghost btn--icon" id="modeBtn" aria-label="Claro u oscuro"><svg class="i" data-i="sun" id="iconSun"></svg><svg class="i" data-i="moon" id="iconMoon"></svg></button>
+                <div class="seg hide-sm" role="group" aria-label="Idioma">
+                    <button type="button" data-lang="es" aria-pressed="true">ES</button>
+                    <button type="button" data-lang="ru" aria-pressed="false">RU</button>
+                </div>
+                <button type="button" class="btn btn--outline hide-sm" data-t="top.profile">Mi perfil</button>
+            </div>
+        </header>
+
+        <main class="page">
+            <!-- members: the CRM home -->
+            <section class="view" data-view="socios">
+                <div class="ph">
+                    <div>
+                        <h1 data-t="socios.title" data-tag="nube norte">Socios</h1>
+                        <p data-t="socios.sub">412 activos · 9 en revisión</p>
+                    </div>
+                    <div class="ph__actions">
+                        <label class="search"><svg class="i" data-i="search"></svg><input class="input" type="search" data-tp="socios.search" placeholder="Buscar por nombre, Nº o documento" /></label>
+                        <button type="button" class="btn btn--primary"><svg class="i" data-i="plus"></svg><span data-t="socios.new">Nuevo socio</span></button>
+                    </div>
+                </div>
+
+                <div class="kpis">
+                    <div class="card kpi">
+                        <div class="kpi__label"><span class="live"></span><span data-t="kpi.inside">Dentro ahora</span></div>
+                        <div class="kpi__value" id="kpiInside">23</div>
+                        <div class="kpi__sub" data-t="kpi.inside.sub">pico de hoy: 31</div>
+                    </div>
+                    <div class="card kpi">
+                        <div class="kpi__label" data-t="kpi.active">Socios activos</div>
+                        <div class="kpi__value">412</div>
+                        <div class="kpi__sub" data-th="kpi.active.sub"><b>+12</b> este mes</div>
+                    </div>
+                    <div class="card kpi">
+                        <div class="kpi__label" data-t="kpi.review">En revisión</div>
+                        <div class="kpi__value">9</div>
+                        <div class="kpi__sub" data-t="kpi.review.sub">esperan aval</div>
+                    </div>
+                    <div class="card kpi">
+                        <div class="kpi__label" data-t="kpi.debt">Cuotas vencidas</div>
+                        <div class="kpi__value">6</div>
+                        <div class="kpi__sub" data-t="kpi.debt.sub">180 € por cobrar</div>
+                    </div>
+                </div>
+
+                <div class="grid-main">
+                    <div class="card">
+                        <div class="tools">
+                            <div class="chips" role="group">
+                                <button type="button" class="chip is-on" data-t="chip.all">Todos</button>
+                                <button type="button" class="chip" data-t="chip.active">Activos</button>
+                                <button type="button" class="chip" data-t="chip.review">En revisión</button>
+                                <button type="button" class="chip" data-t="chip.debt">Cuota vencida</button>
+                            </div>
+                            <span class="muted mono" style="font-size: 0.78rem">8 / 427</span>
+                        </div>
+                        <div class="tbl-wrap">
+                            <table class="tbl">
+                                <thead>
+                                    <tr>
+                                        <th data-t="th.member">Socio</th>
+                                        <th data-t="th.status">Estado</th>
+                                        <th data-t="th.fee">Cuota</th>
+                                        <th data-t="th.visit">Última visita</th>
+                                        <th data-t="th.limit">Límite del mes</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="members"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card scan">
+                        <div class="card__head">
+                            <h2 data-t="scan.title">Entrada</h2>
+                            <span class="muted mono" style="font-size: 0.75rem" id="scanClock">18:43</span>
+                        </div>
+                        <div class="card__body">
+                            <div class="scan__view" aria-hidden="true">
+                                <span class="scan__corner"></span><span class="scan__corner"></span><span class="scan__corner"></span><span class="scan__corner"></span>
+                                <span class="scan__line"></span>
+                                <svg class="i" data-i="scan-line"></svg>
+                            </div>
+                            <button type="button" class="btn btn--primary btn--lg btn--flow" id="scanBtn" style="width: 100%"><svg class="i" data-i="scan-line"></svg><span data-t="scan.btn">Escanear QR</span></button>
+                            <p class="muted" style="margin: 12px 0 0; font-size: 0.82rem" data-t="scan.hint">El socio enseña su QR desde el móvil.</p>
+                            <div id="scanResult" style="margin-top: 12px"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="view" data-view="productos" hidden>
+                <div class="ph">
+                    <div>
+                        <h1 data-t="productos.title" data-tag="stock">Productos</h1>
+                        <p data-t="productos.sub">Stock al gramo y precio para socios.</p>
+                    </div>
+                    <div class="ph__actions"><button type="button" class="btn btn--primary"><svg class="i" data-i="plus"></svg><span data-t="productos.new">Nuevo producto</span></button></div>
+                </div>
+                <div class="prods" id="prods"></div>
+            </section>
+
+            <section class="view" data-view="pedidos" hidden>
+                <div class="ph">
+                    <div>
+                        <h1 data-t="pedidos.title" data-tag="hoy">Pedidos</h1>
+                        <p data-t="pedidos.sub">Retiradas de hoy</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="tbl-wrap">
+                        <table class="tbl">
+                            <thead>
+                                <tr>
+                                    <th data-t="th.order">Pedido</th>
+                                    <th data-t="th.member">Socio</th>
+                                    <th data-t="th.items">Producto</th>
+                                    <th class="right" data-t="th.grams">Gramos</th>
+                                    <th class="right" data-t="th.total">Total</th>
+                                    <th data-t="th.status">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="view" data-view="asistencia" hidden>
+                <div class="ph">
+                    <div>
+                        <h1 data-t="asistencia.title" data-tag="live">Asistencia</h1>
+                        <p data-t="asistencia.sub">Hoy, en directo</p>
+                    </div>
+                </div>
+                <div class="kpis">
+                    <div class="card kpi">
+                        <div class="kpi__label"><span class="live"></span><span data-t="kpi.inside">Dentro ahora</span></div>
+                        <div class="kpi__value" id="kpiInside2">23</div>
+                    </div>
+                    <div class="card kpi">
+                        <div class="kpi__label" data-t="kpi.entries">Entradas hoy</div>
+                        <div class="kpi__value" id="kpiEntries">87</div>
+                    </div>
+                    <div class="card kpi">
+                        <div class="kpi__label" data-t="kpi.peak">Hora pico</div>
+                        <div class="kpi__value">20:00</div>
+                    </div>
+                    <div class="card kpi">
+                        <div class="kpi__label" data-t="kpi.avg">Estancia media</div>
+                        <div class="kpi__value">1 h 40</div>
+                    </div>
+                </div>
+                <div class="split">
+                    <div class="card">
+                        <div class="card__head"><h2 data-t="chart.title">Entradas por hora</h2></div>
+                        <div class="card__body"><div class="chart" id="chart"></div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card__head"><h2 data-t="log.title">Registro</h2></div>
+                        <div class="card__body"><ul class="log" id="log"></ul></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="view" data-view="finanzas" hidden>
+                <div class="ph">
+                    <div>
+                        <h1 data-t="finanzas.title" data-tag="cash">Finanzas</h1>
+                        <p data-t="finanzas.sub">Caja del turno de tarde</p>
+                    </div>
+                    <div class="ph__actions"><button type="button" class="btn btn--primary" id="closeCash"><svg class="i" data-i="piggy-bank"></svg><span data-t="fin.close">Cerrar caja</span></button></div>
+                </div>
+                <div class="kpis">
+                    <div class="card kpi">
+                        <div class="kpi__label" data-t="kpi.cash">Caja de hoy</div>
+                        <div class="kpi__value" data-money="1284.5">1.284,50 €</div>
+                    </div>
+                    <div class="card kpi">
+                        <div class="kpi__label" data-t="kpi.fees">Cuotas del mes</div>
+                        <div class="kpi__value" data-money="2940">2.940,00 €</div>
+                    </div>
+                    <div class="card kpi">
+                        <div class="kpi__label" data-t="kpi.pending">Pendiente</div>
+                        <div class="kpi__value" data-money="180">180,00 €</div>
+                    </div>
+                    <div class="card kpi">
+                        <div class="kpi__label" data-t="kpi.tickets">Tickets</div>
+                        <div class="kpi__value">64</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card__head"><h2 data-t="mov.title">Movimientos</h2></div>
+                    <div class="tbl-wrap" style="margin-top: 10px">
+                        <table class="tbl">
+                            <thead>
+                                <tr>
+                                    <th data-t="th.time">Hora</th>
+                                    <th data-t="th.concept">Concepto</th>
+                                    <th data-t="th.member">Socio</th>
+                                    <th class="right" data-t="th.amount">Importe</th>
+                                </tr>
+                            </thead>
+                            <tbody id="moves"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="view" data-view="empleados" hidden>
+                <div class="ph">
+                    <div>
+                        <h1 data-t="empleados.title" data-tag="crew">Equipo</h1>
+                        <p data-t="empleados.sub">Roles y accesos</p>
+                    </div>
+                </div>
+                <div class="staff" id="staff"></div>
+            </section>
+
+            <section class="view" data-view="apariencia" hidden>
+                <div class="ph">
+                    <div>
+                        <h1 data-t="ap.title" data-tag="style">Apariencia</h1>
+                        <p data-t="ap.sub">Temas de autor para la CRM, el portal del socio y el formulario de alta.</p>
+                    </div>
+                </div>
+                <div class="appear">
+                    <div class="gallery" data-gallery></div>
+                    <div style="display: grid; gap: 18px">
+                        <div class="card">
+                            <div class="card__body opts" data-opts></div>
+                        </div>
+                        <div class="card">
+                            <div class="card__head"><h2 data-t="form.title">Formulario de alta</h2></div>
+                            <div class="card__body" style="display: grid; gap: 14px">
+                                <p class="muted" style="margin: 0; font-size: 0.85rem" data-t="form.hint">El encargado elige el tema del formulario que rellenan los nuevos socios.</p>
+                                <select class="input" id="formTheme" aria-label="Tema del formulario"></select>
+                                <div class="phone">
+                                    <div class="form" id="formPreview">
+                                        <div class="form__club"><svg class="i" data-i="cannabis"></svg>Nube Norte</div>
+                                        <h3 data-t="form.h">Hazte socio</h3>
+                                        <p data-t="form.p">Club Nube Norte · Torrevieja. Necesitas el aval de un socio.</p>
+                                        <label><span data-t="form.name">Nombre y apellidos</span><span class="finput">Lucía Martín</span></label>
+                                        <label><span data-t="form.doc">DNI / NIE / pasaporte</span><span class="finput">Y1234567X</span></label>
+                                        <label><span data-t="form.birth">Fecha de nacimiento</span><span class="finput">14/03/1994</span></label>
+                                        <label><span data-t="form.sponsor">Nº de socio avalista</span><span class="finput">0098</span></label>
+                                        <label class="form__check"><i></i><span data-t="form.ok">Acepto las normas del club y la política de privacidad.</span></label>
+                                        <span class="fbtn" data-t="form.btn">Solicitar alta</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Temas" aria-hidden="true">
+    <div class="drawer__head">
+        <h2 data-t="gal.title">Temas</h2>
+        <button type="button" class="btn btn--ghost btn--icon" id="closeThemes" aria-label="Cerrar"><svg class="i" data-i="x"></svg></button>
+    </div>
+    <div class="drawer__body">
+        <div class="opts" data-opts></div>
+        <div class="gallery" data-gallery></div>
+    </div>
+</aside>
+
+<div class="toast" id="toast" role="status" aria-live="polite"><svg class="i" data-i="check"></svg><span></span></div>
+<div class="dim" id="dim" hidden><span data-t="dim.wake">Toca para despertar</span></div>
+
+<script src="icons.js"></script>
+<script src="app.js"></script>

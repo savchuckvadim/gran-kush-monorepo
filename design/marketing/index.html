@@ -1,0 +1,579 @@
+<title>PafPaf</title>
+<meta name="description" content="PafPaf: el CRM para asociaciones cannábicas y clubes sociales. Socios con aval y firma digital, entrada por QR, pedidos, stock y caja." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@200..700&family=Onest:wght@400..800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Dela+Gothic+One&family=Forum&family=Pirata+One&family=Rubik+Bubbles&family=Rubik+Mono+One&family=Ruslan+Display&family=VT323&family=Fira+Sans+Extra+Condensed:ital,wght@0,700;0,800;0,900;1,800&family=Geologica:wght@300..700&family=JetBrains+Mono:wght@400;500;600;700&family=Rubik+Spray+Paint&family=Unbounded:wght@300..800&display=swap" />
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="directions-extra.css" />
+<link rel="stylesheet" href="sites.css" />
+<script>
+    (function () {
+        try {
+            var d = localStorage.getItem("pafpaf.dir");
+            if (["pafpaf", "nagual", "brasa", "trap", "vapor", "cristal", "boombap", "grind"].indexOf(d) >= 0) document.documentElement.setAttribute("data-dir", d);
+            var l = localStorage.getItem("pafpaf.lang");
+            if (l === "ru") document.documentElement.setAttribute("lang", "ru");
+        } catch (e) {}
+        if (!document.documentElement.getAttribute("data-dir")) document.documentElement.setAttribute("data-dir", "pafpaf");
+        if (!document.documentElement.getAttribute("data-mode")) {
+            var m = null;
+            try { m = localStorage.getItem("pafpaf.mode"); } catch (e) {}
+            document.documentElement.setAttribute("data-mode", m === "dark" ? "dark" : "light");
+        }
+    })();
+</script>
+
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
+    <defs>
+        <filter id="goo">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b" />
+            <feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -10" />
+        </filter>
+        <filter id="liquid" x="0" y="0" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.006 0.018" numOctaves="2" seed="11" result="n" />
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="42" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+        <filter id="prism" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="1" seed="4" result="n" />
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="18" xChannelSelector="R" yChannelSelector="G" result="d" />
+            <feColorMatrix in="d" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r" />
+            <feOffset in="r" dx="-7" result="r2" />
+            <feColorMatrix in="d" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g" />
+            <feColorMatrix in="d" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b" />
+            <feOffset in="b" dx="7" result="b2" />
+            <feBlend in="r2" in2="g" mode="screen" result="rg" />
+            <feBlend in="rg" in2="b2" mode="screen" />
+        </filter>
+        <filter id="rough" x="-2%" y="-2%" width="104%" height="104%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="3" result="t" />
+            <feDisplacementMap in="SourceGraphic" in2="t" scale="3.5" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+    </defs>
+</svg>
+
+<div class="grain" aria-hidden="true"></div>
+
+<header class="hdr glass glass--liquid" id="hdr">
+    <a class="logo" href="#top" aria-label="PafPaf, inicio">
+        <span class="logo__puff" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="brand-name">Paf<b>·</b>Paf</span>
+    </a>
+    <nav class="gnav" aria-label="Principal" id="gnav">
+        <span class="gnav__fx" aria-hidden="true"><span class="gnav__pill" id="gpill"></span></span>
+        <ul>
+            <li class="is-active"><a href="#demo" data-i18n="nav.demo">Demo</a></li>
+            <li><a href="#funciones" data-i18n="nav.features">Funciones</a></li>
+            <li><a href="#precios" data-i18n="nav.pricing">Precios</a></li>
+            <li><a href="#blog" data-i18n="nav.blog">Guías</a></li>
+            <li><a href="#faq" data-i18n="nav.faq">FAQ</a></li>
+        </ul>
+    </nav>
+    <div class="hdr__actions">
+        <a class="btn btn--ghost btn--sm hide-md" href="#socio" data-i18n="cta.member" title="Zona del socio: tu QR, perfil e historial">Soy socio</a>
+        <a class="btn btn--sm hide-md" href="#crm" data-i18n="cta.crm" title="Panel del club para el equipo">Entrar al CRM</a>
+        <button class="btn btn--ghost cart-btn" type="button" id="cartOpen" aria-label="Carrito">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h12l-1.2 11.1a2 2 0 0 1-2 1.9H9.2a2 2 0 0 1-2-1.9L6 7Z" /><path d="M9 7a3 3 0 0 1 6 0" /></svg>
+            <span class="cart-btn__count" id="cartCount" hidden>0</span>
+        </button>
+        <button class="btn btn--ghost burger" type="button" id="burger" aria-expanded="false" aria-controls="mnav" aria-label="Menú">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 8h16M4 16h16" /></svg>
+        </button>
+    </div>
+</header>
+
+<nav class="mnav glass" id="mnav" hidden aria-label="Menú móvil">
+    <a href="#demo" data-i18n="nav.demo">Demo</a>
+    <a href="#funciones" data-i18n="nav.features">Funciones</a>
+    <a href="#precios" data-i18n="nav.pricing">Precios</a>
+    <a href="#blog" data-i18n="nav.blog">Guías</a>
+    <a href="#faq" data-i18n="nav.faq">FAQ</a>
+    <div class="mnav__actions">
+        <a class="btn btn--ghost" href="#socio" data-i18n="cta.member">Soy socio</a>
+        <a class="btn" href="#crm" data-i18n="cta.crm">Entrar al CRM</a>
+    </div>
+</nav>
+
+<main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+        <video class="hero__video" id="heroVideo" autoplay muted loop playsinline preload="metadata" poster="assets/hero-smoke.jpg" aria-hidden="true"></video>
+        <canvas class="hero__fluid" id="fluid" aria-hidden="true"></canvas>
+        <div class="hero__tint" aria-hidden="true"></div>
+        <span class="hero__tag" data-only="trap" aria-hidden="true">paf paf</span>
+        <div class="lens" id="lens" data-only="cristal" aria-hidden="true"></div>
+        <div class="spores" id="spores" data-only="nagual" aria-hidden="true"></div>
+        <svg class="geo" data-only="nagual" viewBox="-100 -100 200 200" aria-hidden="true">
+            <g stroke="#34e39a">
+                <circle r="96" /><circle r="78" stroke="#e7c76a" /><circle r="30" />
+                <circle cx="30" r="30" /><circle cx="-30" r="30" />
+                <circle cx="15" cy="25.98" r="30" /><circle cx="-15" cy="25.98" r="30" />
+                <circle cx="15" cy="-25.98" r="30" /><circle cx="-15" cy="-25.98" r="30" />
+                <polygon points="0,-78 67.55,39 -67.55,39" stroke="#e7c76a" />
+                <polygon points="0,78 67.55,-39 -67.55,-39" stroke="#e7c76a" />
+                <path d="M-96 0H96M0 -96V96" stroke-dasharray="2 4" />
+            </g>
+        </svg>
+        <div class="osd" data-only="boombap" aria-hidden="true">
+            <span class="tl"><i>▶</i> PLAY</span><span class="tr">SP</span><span class="br" id="osdTime">00:00:00</span>
+        </div>
+        <div class="hero__stack" aria-hidden="true">
+            <div class="mini flow">
+                <span class="mini__label"><span class="pulse"></span><span data-i18n="app.inside">Dentro ahora</span></span>
+                <b class="mini__big" id="miniInside">23</b>
+                <svg class="spark" viewBox="0 0 120 40" preserveAspectRatio="none"><path d="M0 34 L15 31 L30 33 L45 25 L60 27 L75 18 L90 21 L105 9 L120 12" fill="none" stroke="var(--accent)" stroke-width="2" /></svg>
+            </div>
+            <div class="mini mini--toast"><span class="mini__ok">✓</span><div><b data-i18n="mini.done">Retirada registrada</b><small>Nº 0147 · 2 g · 18:42</small></div></div>
+            <div class="mini mini--member"><div class="mini__qr"><div class="qr" id="qrMini"></div></div><div><b>Lucía Martín</b><small data-i18n="phone.meta">Socia nº 0147 · cuota al día</small></div></div>
+        </div>
+
+        <div class="wrap hero__inner">
+            <p class="eyebrow">
+                <span class="chip glass"><span class="pulse" style="display: inline-block; vertical-align: middle; margin-right: 8px"></span><span data-i18n="hero.eyebrow">CRM para asociaciones cannábicas y clubes sociales</span></span>
+                <span data-i18n="hero.origin">Hecho en Torrevieja</span>
+            </p>
+
+            <h1 class="display" id="hero-title">
+                <span data-only="brasa pafpaf"><span class="ln" data-i18n-html="hero.h1.brasa">Todo el <em>humo.</em></span><span class="ln" data-i18n-html="hero.h1.brasa2">Cero papeleo.</span></span>
+                <span data-only="trap"><span class="ln" data-i18n-html="hero.h1.trap">Menos Excel.</span><span class="ln" data-i18n-html="hero.h1.trap2">Más <em>paf paf.</em></span></span>
+                <span data-only="vapor"><span class="ln" data-i18n-html="hero.h1.vapor">Gestión limpia</span><span class="ln" data-i18n-html="hero.h1.vapor2">para clubes <em>con humo.</em></span></span>
+                <span data-only="cristal"><span class="ln" data-i18n-html="hero.h1.cristal">Transparente.</span><span class="ln" data-i18n-html="hero.h1.cristal2">Como <em>debe ser.</em></span></span>
+                <span data-only="nagual"><span class="ln" data-i18n-html="hero.h1.nagual">Sana el <em>caos</em></span><span class="ln" data-i18n-html="hero.h1.nagual2">de tu club.</span></span>
+                <span data-only="boombap"><span class="ln" data-i18n-html="hero.h1.boombap">Old school club.</span><span class="ln" data-i18n-html="hero.h1.boombap2"><em>New school</em> CRM.</span></span>
+                <span data-only="grind"><span class="ln" data-i18n-html="hero.h1.grind">Muerte</span><span class="ln" data-i18n-html="hero.h1.grind2">al <em>papeleo.</em></span></span>
+            </h1>
+
+            <div class="hero__foot">
+                <div style="display: grid; gap: 22px; max-width: 760px">
+                    <p class="hero__lead" data-i18n="hero.lead">Socios con aval y firma digital, entrada por QR, pedidos, stock y caja en un solo panel. Y cada socio, con su zona en el móvil.</p>
+                    <div class="hero__cta">
+                        <a class="btn btn--flow" href="#precios" data-i18n="cta.trial">Probar gratis</a>
+                        <a class="btn btn--ghost" href="#demo"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor" /></svg><span data-i18n="cta.demo">Probar la demo aquí</span></a>
+                    </div>
+                    <ul class="trust-row">
+                        <li data-i18n="trust.gdpr">RGPD y LOPDGDD</li>
+                        <li data-i18n="trust.enc">Datos sensibles cifrados</li>
+                        <li data-i18n="trust.nolock">Sin permanencia</li>
+                        <li>ES · RU · EN</li>
+                    </ul>
+                </div>
+                <span class="scroll-hint" aria-hidden="true">scroll ↓</span>
+            </div>
+        </div>
+    </section>
+
+    <div class="marquee" aria-hidden="true">
+        <div class="marquee__track" id="marquee">
+            <span data-i18n-html="marquee">Socios <i>✦</i> Avales <i>✦</i> Firma digital <i>✦</i> Check-in QR <i>✦</i> Pedidos <i>✦</i> Stock <i>✦</i> Caja <i>✦</i> Informes <i>✦</i> Zona del socio <i>✦</i></span>
+            <span data-i18n-html="marquee">Socios <i>✦</i> Avales <i>✦</i> Firma digital <i>✦</i> Check-in QR <i>✦</i> Pedidos <i>✦</i> Stock <i>✦</i> Caja <i>✦</i> Informes <i>✦</i> Zona del socio <i>✦</i></span>
+        </div>
+    </div>
+
+    <section class="sec" id="demo" aria-labelledby="demo-title">
+        <div class="haze" aria-hidden="true"><i></i><i></i></div>
+        <div class="wrap">
+            <div class="sec__head">
+                <span class="kicker" data-i18n="demo.kicker">Demo en vivo · sin registro</span>
+                <h2 class="display" id="demo-title" data-i18n="demo.title">Un turno en la barra. En 10 segundos.</h2>
+                <p data-i18n="demo.lead">Escanea el QR del socio: el sistema comprueba aval, cuota y límite del mes, y la retirada queda registrada con su stock. Pruébalo con datos de ejemplo.</p>
+            </div>
+
+            <div class="demo glass flow">
+                <div class="scanner" id="scanner">
+                    <div class="scanner__frame">
+                        <div class="qr" id="qrDemo" aria-hidden="true"></div>
+                    </div>
+                    <p class="scanner__caption" id="scanCaption" data-i18n="demo.caption">QR del socio nº 0147</p>
+                </div>
+
+                <div class="flow" aria-live="polite">
+                    <ol class="flow__steps" id="flowSteps">
+                        <li class="is-on" data-i18n="demo.s1">Escanear</li>
+                        <li data-i18n="demo.s2">Ficha</li>
+                        <li data-i18n="demo.s3">Retirada</li>
+                        <li data-i18n="demo.s4">Recibo</li>
+                    </ol>
+
+                    <div id="stage0">
+                        <p style="margin: 0; color: var(--fg-2)" data-i18n="demo.idle">El socio enseña su QR desde el móvil. Tú solo pulsas escanear.</p>
+                    </div>
+
+                    <div id="stage1" hidden>
+                        <div class="member">
+                            <span class="avatar" aria-hidden="true">LM</span>
+                            <div>
+                                <h3>Lucía Martín · <span style="font-family: var(--f-mono); font-size: 0.9rem">Nº 0147</span></h3>
+                                <ul class="checks">
+                                    <li data-i18n="demo.c1">✓ Aval: socio nº 0032</li>
+                                    <li data-i18n="demo.c2">✓ Cuota al día hasta 31/10</li>
+                                    <li data-i18n="demo.c3">✓ Mayor de 21</li>
+                                    <li data-i18n="demo.c4">✓ Dentro desde 18:31</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="picker" style="margin-top: 14px">
+                            <span class="example-note" data-i18n="demo.pick">Variedad</span>
+                            <div class="picker__row" id="products">
+                                <button class="chip-btn" type="button" aria-pressed="true" data-p="Niebla Norte" data-price="9">Niebla Norte · 9 €/g</button>
+                                <button class="chip-btn" type="button" aria-pressed="false" data-p="Brasa 22" data-price="10">Brasa 22 · 10 €/g</button>
+                                <button class="chip-btn" type="button" aria-pressed="false" data-p="Luna Haze" data-price="11">Luna Haze · 11 €/g</button>
+                            </div>
+                            <span class="example-note" data-i18n="demo.qty">Cantidad</span>
+                            <div class="picker__row" id="qty">
+                                <button class="chip-btn" type="button" aria-pressed="false" data-g="1">1 g</button>
+                                <button class="chip-btn" type="button" aria-pressed="true" data-g="2">2 g</button>
+                                <button class="chip-btn" type="button" aria-pressed="false" data-g="5">5 g</button>
+                                <button class="chip-btn" type="button" aria-pressed="false" data-g="20">20 g</button>
+                            </div>
+                            <div class="limit" id="limit">
+                                <div class="limit__bar"><span class="limit__used" id="limUsed"></span><span class="limit__add" id="limAdd"></span></div>
+                                <div class="limit__meta"><span id="limText"></span><span id="limLeft"></span></div>
+                                <p class="limit__warn" id="limWarn" hidden data-i18n="demo.over">Supera el límite mensual del socio. El sistema no deja registrarlo.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="stage3" hidden>
+                        <div class="receipt" id="receipt"></div>
+                    </div>
+
+                    <div class="flow__actions">
+                        <button class="btn" type="button" id="demoNext" data-i18n="demo.scan">Escanear QR</button>
+                        <button class="btn btn--ghost" type="button" id="demoReset" hidden data-i18n="demo.reset">Otra vez</button>
+                    </div>
+                    <span class="example-note" data-i18n="demo.note">Datos de ejemplo. En tu club, los límites y precios los defines tú.</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="sec" id="funciones" aria-labelledby="feat-title">
+        <div class="wrap">
+            <div class="sec__head">
+                <span class="kicker" data-i18n="feat.kicker">Funciones</span>
+                <h2 class="display" id="feat-title" data-i18n="feat.title">Todo lo que pasa en el club, en un panel.</h2>
+            </div>
+            <div class="bento" id="bento">
+                <article class="card glass card--wide card--tall">
+                    <video class="card__smoke" data-smoke muted loop playsinline preload="none" aria-hidden="true"></video>
+                    <span class="sticker" data-i18n="feat.sticker">Sin fotocopias</span>
+                    <span class="card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2" /><circle cx="9" cy="11" r="2.4" /><path d="M14 10h4M14 14h4M6 16c.6-1.4 1.8-2 3-2s2.4.6 3 2" /></svg></span>
+                    <h3 data-i18n="f1.t">Alta de socio en 3 minutos</h3>
+                    <p data-i18n="f1.d">DNI o NIE, foto, firma en la pantalla y aval de otro socio. La ficha queda completa y cifrada, sin carpetas.</p>
+                    <span class="card__big">3:00</span>
+                </article>
+                <article class="card glass card--wide">
+                    <span class="card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3" /></svg></span>
+                    <h3 data-i18n="f2.t">Entrada por QR</h3>
+                    <p data-i18n="f2.d">Cada socio lleva su QR en el móvil. Ves quién está dentro ahora mismo y el día se cierra solo.</p>
+                </article>
+                <article class="card glass">
+                    <span class="card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7l8-4 8 4-8 4-8-4Z" /><path d="M4 7v10l8 4 8-4V7M12 11v10" /></svg></span>
+                    <h3 data-i18n="f3.t">Pedidos y stock</h3>
+                    <p data-i18n="f3.d">Catálogo, retiradas por socio y existencias al gramo.</p>
+                </article>
+                <article class="card glass">
+                    <span class="card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="2" /><path d="M3 10h18M7 15h4" /></svg></span>
+                    <h3 data-i18n="f4.t">Caja sin descuadres</h3>
+                    <p data-i18n="f4.d">Movimientos, caja diaria e informes. Cada euro con su recibo.</p>
+                </article>
+                <article class="card glass">
+                    <span class="card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2" /><path d="M11 18h2" /></svg></span>
+                    <h3 data-i18n="f5.t">Zona del socio</h3>
+                    <p data-i18n="f5.d">Perfil, documentos, QR e historial en su móvil. Sin instalar nada.</p>
+                </article>
+                <article class="card glass">
+                    <span class="card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3" /><path d="M3 20c.8-3.4 3.2-5 6-5s5.2 1.6 6 5" /><circle cx="17" cy="9" r="2.4" /><path d="M16 15c2.6 0 4.4 1.4 5 4" /></svg></span>
+                    <h3 data-i18n="f6.t">Equipo con roles</h3>
+                    <p data-i18n="f6.d">Empleado, encargado y admin: cada uno ve lo suyo.</p>
+                </article>
+                <article class="card glass card--wide">
+                    <span class="card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21V9l6-4 6 4v12M15 21V12l6 3v6M7 13h4M7 17h4" /></svg></span>
+                    <h3 data-i18n="f7.t">Varios clubes, una cuenta</h3>
+                    <p data-i18n="f7.d">¿Abres otro local? Lo gestionas desde el mismo panel, con su equipo y sus socios.</p>
+                </article>
+                <article class="card glass card--wide card--full">
+                    <video class="card__smoke" data-smoke muted loop playsinline preload="none" aria-hidden="true"></video>
+                    <span class="card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="10" width="14" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg></span>
+                    <h3 data-i18n="f8.t">Privacidad de serie</h3>
+                    <p data-i18n="f8.d">Datos sensibles cifrados, accesos por rol y registro de cada visita. Tus datos se exportan cuando quieras.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="sec" aria-labelledby="show-title">
+        <div class="haze" aria-hidden="true"><i></i><i></i></div>
+        <div class="wrap">
+            <div class="sec__head">
+                <span class="kicker" data-i18n="show.kicker">El panel</span>
+                <h2 class="display" id="show-title" data-i18n="show.title">Así se ve tu club por dentro.</h2>
+            </div>
+            <div class="show">
+                <div class="win glass flow">
+                    <div class="win__bar" aria-hidden="true"><i></i><i></i><i></i><span><span class="brand-domain">crm.paf-paf.app</span> / club-nube-norte / socios</span></div>
+                    <div class="app">
+                        <nav class="app__side" aria-label="CRM (ejemplo)">
+                            <a class="is-on" href="#funciones" data-i18n="app.members">Socios</a>
+                            <a href="#funciones" data-i18n="app.checkin">Check-in</a>
+                            <a href="#funciones" data-i18n="app.orders">Pedidos</a>
+                            <a href="#funciones" data-i18n="app.stock">Stock</a>
+                            <a href="#funciones" data-i18n="app.cash">Caja</a>
+                            <a href="#funciones" data-i18n="app.team">Equipo</a>
+                        </nav>
+                        <div class="app__main">
+                            <div class="app__top">
+                                <div>
+                                    <h3 data-i18n="app.title">Socios</h3>
+                                    <small data-i18n="app.sub">412 activos · 9 en revisión</small>
+                                </div>
+                                <button class="btn btn--sm" type="button" data-i18n="app.new">+ Nuevo socio</button>
+                            </div>
+                            <div class="tbl-wrap">
+                                <table class="tbl">
+                                    <thead>
+                                        <tr><th>Nº</th><th data-i18n="app.th.name">Socio</th><th data-i18n="app.th.status">Estado</th><th data-i18n="app.th.aval">Aval</th><th data-i18n="app.th.visit">Última visita</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td>0147</td><td>Lucía Martín</td><td><span class="pill pill--ok" data-i18n="st.ok">Activa</span></td><td>0032</td><td data-i18n="app.now">Dentro ahora</td></tr>
+                                        <tr><td>0151</td><td>Andrei Volkov</td><td><span class="pill pill--ok" data-i18n="st.ok2">Activo</span></td><td>0147</td><td>hoy 17:05</td></tr>
+                                        <tr><td>0158</td><td>Marta Ríos</td><td><span class="pill pill--warn" data-i18n="st.fee">Cuota pendiente</span></td><td>0009</td><td>02/10</td></tr>
+                                        <tr><td>0160</td><td>Olena Kovalenko</td><td><span class="pill pill--rev" data-i18n="st.rev">En revisión</span></td><td>0151</td><td>—</td></tr>
+                                        <tr><td>0163</td><td>Diego Navarro</td><td><span class="pill pill--ok" data-i18n="st.ok2">Activo</span></td><td>0032</td><td>ayer 22:40</td></tr>
+                                        <tr><td>0166</td><td>Sam Whitaker</td><td><span class="pill pill--ok" data-i18n="st.ok2">Activo</span></td><td>0158</td><td>hoy 12:18</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <aside class="app__aside">
+                            <div class="stat"><span data-i18n="app.inside">Dentro ahora</span><b id="insideNow">23</b>
+                                <svg class="spark" viewBox="0 0 120 54" preserveAspectRatio="none" aria-hidden="true">
+                                    <path d="M0 48 L15 44 L30 46 L45 36 L60 38 L75 26 L90 30 L105 14 L120 18 L120 54 L0 54Z" fill="var(--accent)" opacity="0.18" />
+                                    <path d="M0 48 L15 44 L30 46 L45 36 L60 38 L75 26 L90 30 L105 14 L120 18" fill="none" stroke="var(--accent)" stroke-width="2" />
+                                    <circle cx="120" cy="18" r="3" fill="var(--accent)" />
+                                </svg>
+                            </div>
+                            <div class="stat"><span data-i18n="app.today">Retiradas hoy</span><b>87</b></div>
+                            <div class="stat"><span data-i18n="app.cashnow">Caja del día</span><b>1.312 €</b></div>
+                        </aside>
+                    </div>
+                </div>
+                <div class="phone glass" aria-label="Zona del socio (ejemplo)">
+                    <div class="phone__screen">
+                        <span class="phone__club">Club Nube Norte</span>
+                        <div class="phone__qr"><div class="qr" id="qrPhone" aria-hidden="true"></div></div>
+                        <p class="phone__name">Lucía Martín</p>
+                        <p class="phone__meta" data-i18n="phone.meta">Socia nº 0147 · cuota al día</p>
+                    </div>
+                </div>
+            </div>
+            <p class="example-note" style="margin-top: 90px" data-i18n="show.note">Pantallas con datos de ejemplo.</p>
+        </div>
+    </section>
+
+    <section class="sec" aria-labelledby="origin-title">
+        <div class="wrap origin">
+            <div style="display: grid; gap: 20px">
+                <span class="kicker" data-i18n="origin.kicker">De dónde salimos</span>
+                <h2 class="manifesto" id="origin-title" data-i18n-html="origin.title">Nacimos dentro de un club en Torrevieja, <span class="dim">no en una oficina.</span></h2>
+                <p style="margin: 0; max-width: 56ch; color: var(--fg-2)" data-i18n="origin.text">Cada función salió de un problema real en la barra: colas en la puerta, carpetas de fichas, cuadrar la caja de madrugada. Por eso el panel habla español, ruso e inglés: como los socios.</p>
+            </div>
+            <ul class="origin__facts">
+                <li><b>3</b><span data-i18n="origin.f1">idiomas en el panel y en la zona del socio</span></li>
+                <li><b>1</b><span data-i18n="origin.f2">panel para la puerta, la barra y la caja</span></li>
+                <li><b>0</b><span data-i18n="origin.f3">papeles que guardar en un cajón</span></li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="sec" aria-labelledby="steps-title">
+        <div class="wrap">
+            <div class="sec__head">
+                <span class="kicker" data-i18n="steps.kicker">Cómo empezar</span>
+                <h2 class="display" id="steps-title" data-i18n="steps.title">Tu club en la nube esta semana.</h2>
+            </div>
+            <ol class="steps">
+                <li class="glass"><h3 data-i18n="s1.t">Crea tu club</h3><p data-i18n="s1.d">Nombre, ciudad y email. En dos minutos tienes tu panel.</p></li>
+                <li class="glass"><h3 data-i18n="s2.t">Trae a tus socios</h3><p data-i18n="s2.d">Importa tu Excel o déjanos la migración desde tu programa actual.</p></li>
+                <li class="glass"><h3 data-i18n="s3.t">Abre la puerta</h3><p data-i18n="s3.d">Envía los QR al móvil de cada socio o imprímelos en tarjetas. Listo.</p></li>
+            </ol>
+        </div>
+    </section>
+
+    <section class="sec" id="precios" aria-labelledby="price-title">
+        <div class="haze" aria-hidden="true"><i></i><i></i></div>
+        <div class="wrap">
+            <div class="sec__head">
+                <span class="kicker" data-i18n="price.kicker">Precios</span>
+                <h2 class="display" id="price-title" data-i18n="price.title">Precios claros. IVA a la vista.</h2>
+                <p data-i18n="price.lead">Sin permanencia, sin coste de alta y con migración incluida desde el plan Club.</p>
+            </div>
+
+            <div class="price-tools glass">
+                <div class="calc">
+                    <label for="members"><span data-i18n="price.q">¿Cuántos socios tiene tu club?</span><output id="membersOut" for="members">400</output></label>
+                    <input id="members" type="range" min="50" max="3000" step="50" value="400" />
+                    <p class="calc__hint" id="calcHint"></p>
+                </div>
+                <div class="billing" role="group" aria-label="Facturación">
+                    <button type="button" aria-pressed="true" data-bill="month" data-i18n="price.month">Mensual</button>
+                    <button type="button" aria-pressed="false" data-bill="year"><span data-i18n="price.year">Anual</span><small>−20%</small></button>
+                </div>
+            </div>
+
+            <div class="plans" id="plans"></div>
+            <p class="price-note" data-i18n="price.note">Precios sin IVA (21 % en España). Precios de ejemplo del prototipo: los fijamos al cerrar el modelo.</p>
+        </div>
+    </section>
+
+    <section class="sec" aria-labelledby="trust-title">
+        <div class="wrap">
+            <div class="sec__head">
+                <span class="kicker" data-i18n="trust.kicker">Seguridad</span>
+                <h2 class="display" id="trust-title" data-i18n="trust.title">Estética de calle. Backend de banco.</h2>
+            </div>
+            <div class="trust">
+                <div><b data-i18n="t1.t">RGPD y LOPDGDD</b><span data-i18n="t1.d">Contrato de encargado del tratamiento y registro de accesos.</span></div>
+                <div><b data-i18n="t2.t">Cifrado</b><span data-i18n="t2.d">Documentos y datos sensibles de los socios, cifrados en la base de datos.</span></div>
+                <div><b data-i18n="t3.t">Roles y registro</b><span data-i18n="t3.d">Cada acción del equipo queda firmada con su usuario y su hora.</span></div>
+                <div><b data-i18n="t4.t">Tus datos, tuyos</b><span data-i18n="t4.d">Exporta socios, visitas y caja cuando quieras. Sin permanencia.</span></div>
+                <div><b data-i18n="t5.t">Soporte humano</b><span data-i18n="t5.d">En español, ruso e inglés, por chat y WhatsApp.</span></div>
+                <div><b data-i18n="t6.t">Copias diarias</b><span data-i18n="t6.d">Copias de seguridad automáticas y página pública de estado del servicio.</span></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="sec" id="blog" aria-labelledby="blog-title">
+        <div class="wrap">
+            <div class="sec__head">
+                <span class="kicker" data-i18n="blog.kicker">Guías para clubes</span>
+                <h2 class="display" id="blog-title" data-i18n="blog.title">Lo que nadie te explica al abrir un club.</h2>
+            </div>
+            <div class="posts">
+                <a class="post glass" href="#blog">
+                    <div class="post__img" style="background-image: url(assets/hero-smoke.jpg)" aria-hidden="true"></div>
+                    <div class="post__body"><span class="post__meta" data-i18n="b1.m">Guía · 7 min</span><h3 data-i18n="b1.t">Libro de socios digital: qué datos guardar y durante cuánto tiempo</h3></div>
+                </a>
+                <a class="post glass" href="#blog">
+                    <div class="post__img" style="background-image: url(assets/smoke-portrait.jpg)" aria-hidden="true"></div>
+                    <div class="post__body"><span class="post__meta" data-i18n="b2.m">Guía · 5 min</span><h3 data-i18n="b2.t">Avales y admisión de nuevos socios: cómo hacerlo bien</h3></div>
+                </a>
+                <a class="post glass" href="#blog">
+                    <div class="post__img" style="background-image: url(assets/hero-smoke.jpg); background-position: 80% 50%" aria-hidden="true"></div>
+                    <div class="post__body"><span class="post__meta" data-i18n="b3.m">Caso práctico · 6 min</span><h3 data-i18n="b3.t">Del Excel al QR: migrar un club en un fin de semana</h3></div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="sec" id="faq" aria-labelledby="faq-title">
+        <div class="wrap">
+            <div class="sec__head">
+                <span class="kicker">FAQ</span>
+                <h2 class="display" id="faq-title" data-i18n="faq.title">Preguntas de dueños de club.</h2>
+            </div>
+            <div class="faq">
+                <details class="glass" open><summary data-i18n="q1">¿Puedo probarlo gratis?</summary><p data-i18n="a1">Sí. Creas tu club, importas socios y lo usas sin tarjeta durante el periodo de prueba. Si no te convence, exportas tus datos y listo.</p></details>
+                <details class="glass"><summary data-i18n="q2">¿Mis socios tienen que instalar una app?</summary><p data-i18n="a2">No. La zona del socio funciona en el navegador del móvil: ahí tienen su QR, su perfil y sus documentos.</p></details>
+                <details class="glass"><summary data-i18n="q3">Uso otro programa o un Excel. ¿Pierdo mis datos?</summary><p data-i18n="a3">No. Importas el Excel tú mismo o hacemos la migración por ti; en el plan Club está incluida.</p></details>
+                <details class="glass"><summary data-i18n="q4">¿Quién ve los datos de mis socios?</summary><p data-i18n="a4">Solo tu equipo, cada uno según su rol. Los documentos y datos sensibles van cifrados y cada acceso queda registrado.</p></details>
+                <details class="glass"><summary data-i18n="q5">¿En qué idiomas funciona?</summary><p data-i18n="a5">Español, ruso e inglés en el panel y en la zona del socio. Catalán y alemán, en camino.</p></details>
+            </div>
+        </div>
+    </section>
+
+    <section class="sec" aria-labelledby="final-title">
+        <div class="wrap">
+            <div class="final glass flow">
+                <div class="haze" aria-hidden="true"><i></i><i></i></div>
+                <h2 class="display final__word brand-word" id="final-title">Paf paf.</h2>
+                <p data-i18n="final.text">Tu club en la nube hoy. Tus socios, con su QR mañana.</p>
+                <div class="hero__cta" style="justify-content: center">
+                    <a class="btn btn--flow" href="#precios" data-i18n="cta.trial">Probar gratis</a>
+                    <a class="btn btn--ghost" href="#demo" data-i18n="cta.demo">Probar la demo aquí</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="foot">
+    <div class="wrap">
+        <div class="foot__grid">
+            <div style="display: grid; gap: 14px; align-content: start">
+                <a class="logo" href="#top"><span class="logo__puff" aria-hidden="true"><i></i><i></i><i></i></span><span class="brand-name">Paf<b>·</b>Paf</span></a>
+                <p style="margin: 0; max-width: 34ch" data-i18n="foot.about">CRM para asociaciones cannábicas y clubes sociales. Hecho en Torrevieja.</p>
+            </div>
+            <div><h4 data-i18n="foot.product">Producto</h4><ul><li><a href="#funciones" data-i18n="nav.features">Funciones</a></li><li><a href="#precios" data-i18n="nav.pricing">Precios</a></li><li><a href="#demo" data-i18n="nav.demo">Demo</a></li><li><a href="#orders" id="ordersLink" data-i18n="foot.orders">Mis pedidos</a></li></ul></div>
+            <div><h4 data-i18n="foot.res">Recursos</h4><ul><li><a href="#blog" data-i18n="nav.blog">Guías</a></li><li><a href="#faq">FAQ</a></li><li><a href="#top" data-i18n="foot.status">Estado del servicio</a></li></ul></div>
+            <div><h4 data-i18n="foot.access">Acceso</h4><ul><li><a href="#crm" data-i18n="cta.crm">Entrar al CRM</a></li><li><a href="#socio" data-i18n="cta.member">Soy socio</a></li><li><a href="#top" data-i18n="foot.legal">Aviso legal y privacidad</a></li></ul></div>
+        </div>
+        <div class="foot__base"><span>© 2026 <span class="brand-upper">PafPaf</span></span><span data-i18n="foot.proto">Prototipo de diseño · datos de ejemplo</span></div>
+    </div>
+</footer>
+
+<div class="dock glass" role="group" aria-label="Prototipo: sitio, modo, tema e idioma">
+    <span class="dock__label" data-i18n="dock.site">Sitio</span>
+    <button type="button" data-dir-btn="pafpaf" aria-pressed="true">PafPaf</button>
+    <button type="button" data-dir-btn="nagual" aria-pressed="false">Nagual</button>
+    <button type="button" data-mode-btn="light" aria-pressed="true" aria-label="Claro" title="Claro">☀</button>
+    <button type="button" data-mode-btn="dark" aria-pressed="false" aria-label="Oscuro" title="Oscuro">☾</button>
+    <span class="dock__sep" aria-hidden="true"></span>
+    <span class="dock__label" data-i18n="dock.themes">Temas</span>
+    <button type="button" data-dir-btn="brasa" aria-pressed="false">Brasa</button>
+    <button type="button" data-dir-btn="trap" aria-pressed="false">Trap</button>
+    <button type="button" data-dir-btn="vapor" aria-pressed="false">Vapor</button>
+    <button type="button" data-dir-btn="cristal" aria-pressed="false">Cristal</button>
+    <button type="button" data-dir-btn="boombap" aria-pressed="false">90s</button>
+    <button type="button" data-dir-btn="grind" aria-pressed="false">Grind</button>
+    <span class="dock__sep" aria-hidden="true"></span>
+    <button type="button" data-lang-btn="es" aria-pressed="true">ES</button>
+    <button type="button" data-lang-btn="ru" aria-pressed="false">RU</button>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+
+<aside class="drawer" id="cart" hidden aria-labelledby="cart-title" role="dialog" aria-modal="true">
+    <div class="drawer__head"><h2 id="cart-title" data-i18n="cart.title">Carrito</h2><button class="x-btn" type="button" data-close aria-label="Cerrar">×</button></div>
+    <div class="drawer__body" id="cartBody"></div>
+    <div class="drawer__foot" id="cartFoot"></div>
+</aside>
+
+<aside class="drawer" id="orders" hidden aria-labelledby="orders-title" role="dialog" aria-modal="true">
+    <div class="drawer__head"><h2 id="orders-title" data-i18n="orders.title">Mis pedidos</h2><button class="x-btn" type="button" data-close aria-label="Cerrar">×</button></div>
+    <div class="drawer__body" id="ordersBody"></div>
+    <div class="drawer__foot"><span class="example-note" data-i18n="orders.note">En el producto real, las facturas llegan también por email.</span></div>
+</aside>
+
+<div class="modal" id="checkout" hidden role="dialog" aria-modal="true" aria-labelledby="co-title">
+    <div class="modal__card">
+        <ol class="stepper" id="coStepper"><li class="is-on"></li><li></li><li></li></ol>
+        <form class="form" id="coForm1" novalidate>
+            <h3 id="co-title" data-i18n="co.t1">Tu club</h3>
+            <div class="field"><label for="coClub" data-i18n="co.club">Nombre de la asociación</label><input id="coClub" autocomplete="organization" placeholder="Asociación Nube Norte" /><span class="err"></span></div>
+            <div class="field-row">
+                <div class="field"><label for="coCif">CIF</label><input id="coCif" placeholder="G12345678" /><span class="err"></span></div>
+                <div class="field"><label for="coCity" data-i18n="co.city">Ciudad</label><input id="coCity" autocomplete="address-level2" placeholder="Alicante" /><span class="err"></span></div>
+            </div>
+            <div class="field"><label for="coEmail">Email</label><input id="coEmail" type="email" autocomplete="email" placeholder="junta@nubenorte.es" /><span class="err"></span></div>
+            <div class="flow__actions"><button class="btn" type="submit" data-i18n="co.next">Continuar al pago</button><button class="btn btn--ghost" type="button" data-close data-i18n="co.cancel">Cancelar</button></div>
+        </form>
+        <form class="form" id="coForm2" novalidate hidden>
+            <h3 data-i18n="co.t2">Pago</h3>
+            <div class="field"><label for="coCard" data-i18n="co.card">Tarjeta</label><input id="coCard" inputmode="numeric" autocomplete="cc-number" placeholder="4242 4242 4242 4242" /><span class="err"></span></div>
+            <div class="field-row">
+                <div class="field"><label for="coExp" data-i18n="co.exp">Caducidad</label><input id="coExp" inputmode="numeric" autocomplete="cc-exp" placeholder="12/28" /><span class="err"></span></div>
+                <div class="field"><label for="coCvc">CVC</label><input id="coCvc" inputmode="numeric" autocomplete="cc-csc" placeholder="123" /><span class="err"></span></div>
+            </div>
+            <p class="secure" data-i18n="co.secure">Pago seguro con Stripe. En el prototipo no se cobra nada.</p>
+            <div class="flow__actions"><button class="btn" type="submit" id="coPay">Pagar</button><button class="btn btn--ghost" type="button" id="coBack" data-i18n="co.back">Atrás</button></div>
+        </form>
+        <div class="success" id="coDone" hidden>
+            <span class="success__mark">Paf!</span>
+            <h3 class="display" style="font-size: 1.8rem; margin: 0" data-i18n="co.t3">Tu club está listo.</h3>
+            <p style="margin: 0; color: var(--fg-2)" id="coDoneText"></p>
+            <div class="flow__actions" style="justify-content: center"><a class="btn" href="#crm" data-close data-i18n="cta.crm">Entrar al CRM</a><button class="btn btn--ghost" type="button" id="coOrders" data-i18n="foot.orders">Mis pedidos</button></div>
+        </div>
+    </div>
+</div>
+
+<script src="fluid.js"></script>
+<script src="app.js"></script>

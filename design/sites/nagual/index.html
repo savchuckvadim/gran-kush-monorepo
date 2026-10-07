@@ -1,0 +1,464 @@
+<title data-i18n="meta.home.title">Nagual · Códice</title>
+<meta name="description" content="Nagual, el CRM que nació dentro de un club en Torrevieja: socios con aval y firma en pantalla, entrada por QR, límites mensuales, stock al gramo, caja diaria y zona del socio en el móvil."  data-i18n-attr="content:meta.home.desc"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&amp;family=Forum&amp;family=Geologica:wght@300..600&amp;display=swap" />
+<link rel="stylesheet" href="nagual.css" />
+<meta name="theme-color" content="#070d0a" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-50 -50 100 100'%3E%3Crect x='-50' y='-50' width='100' height='100' rx='22' fill='%23070d0a'/%3E%3Ccircle r='38' fill='none' stroke='%23e7c76a' stroke-width='4'/%3E%3Cpath d='M-13 19V-19L13 19V-19' fill='none' stroke='%2334e39a' stroke-width='7' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E" />
+<script>(function(){var r=document.documentElement,m=null,l=null;try{m=localStorage.getItem("nagual.mode");l=localStorage.getItem("nagual.lang")}catch(e){}if(!r.getAttribute("data-mode"))r.setAttribute("data-mode",m==="light"?"light":"dark");if(!r.getAttribute("data-lang"))r.setAttribute("data-lang",l==="ru"?"ru":"es");r.setAttribute("lang",r.getAttribute("data-lang"));r.className+=" js";setTimeout(function(){r.className+=" i18n-ready"},1800)})();</script>
+<a class="skip" href="#main" data-i18n="ui.skip">Saltar al contenido</a>
+<div class="grain" aria-hidden="true"></div>
+<header class="rail" aria-label="Navegación de Nagual" data-i18n-attr="aria-label:ui.rail">
+<a class="rail__sigil" href="index.html" aria-label="Nagual, inicio" data-i18n-attr="aria-label:ui.home"><svg class="sigil" viewBox="-50 -50 100 100" aria-hidden="true" focusable="false"><circle class="s-g" r="42"/><circle class="s-j" r="35" stroke-dasharray="1.6 3.6"/><path class="s-g" d="M0 -42L0 -49M29.7 -29.7L34.6 -34.6M42 0L49 0M29.7 29.7L34.6 34.6M0 42L0 49M-29.7 29.7L-34.6 34.6M-42 0L-49 0M-29.7 -29.7L-34.6 -34.6"/><path class="s-n" d="M-13 19V-19L13 19V-19"/><circle class="s-e" cy="-27" r="3"/></svg></a>
+<span class="rail__word" aria-hidden="true">NAGUAL</span>
+<nav class="rail__nav" aria-label="Capítulos de esta página" data-i18n-attr="aria-label:ui.chapters"><ol class="rail__list"><li><a class="rail__link" href="#capitulo-1"><span class="rail__num">I</span><span class="rail__name" data-i18n="home.c1.name">El caos</span></a></li><li><a class="rail__link" href="#capitulo-2"><span class="rail__num">II</span><span class="rail__name" data-i18n="home.c2.name">El camino</span></a></li><li><a class="rail__link" href="#capitulo-3"><span class="rail__num">III</span><span class="rail__name" data-i18n="home.c3.name">Los arcanos</span></a></li><li><a class="rail__link" href="#capitulo-4"><span class="rail__num">IV</span><span class="rail__name" data-i18n="home.c4.name">El círculo</span></a></li><li><a class="rail__link" href="#capitulo-5"><span class="rail__num">V</span><span class="rail__name" data-i18n="home.c5.name">La ofrenda</span></a></li><li><a class="rail__link" href="#capitulo-6"><span class="rail__num">VI</span><span class="rail__name" data-i18n="home.c6.name">El juramento</span></a></li><li><a class="rail__link" href="#capitulo-7"><span class="rail__num">VII</span><span class="rail__name" data-i18n="home.c7.name">El origen</span></a></li></ol><span class="rail__orbit" aria-hidden="true"><i></i></span></nav>
+<div class="rail__tools"><div class="langs langs--stack" role="group" aria-label="Idioma" data-i18n-attr="aria-label:ui.lang"><button type="button" data-lang-btn="es" aria-pressed="true" lang="es" aria-label="Español">ES</button><button type="button" data-lang-btn="ru" aria-pressed="false" lang="ru" aria-label="Русский">RU</button></div><button type="button" class="mode-btn " data-mode-btn aria-pressed="false" aria-label="Modo claro" title="Modo claro" data-i18n-attr="aria-label:ui.light;title:ui.light"><svg class="ico ico--mode" viewBox="-12 -12 24 24" aria-hidden="true" focusable="false"><circle r="8.5"/><path class="fill" d="M0 -8.5A8.5 8.5 0 0 1 0 8.5Z"/></svg></button><button type="button" class="index-btn" data-wheel-open aria-haspopup="dialog" aria-controls="wheel"><svg class="ico ico--star" viewBox="-12 -12 24 24" aria-hidden="true" focusable="false"><path d="M0 -10.5L1.6 -3.9L7.4 -7.4L3.9 -1.6L10.5 0L3.9 1.6L7.4 7.4L1.6 3.9L0 10.5L-1.6 3.9L-7.4 7.4L-3.9 1.6L-10.5 0L-3.9 -1.6L-7.4 -7.4L-1.6 -3.9Z"/><circle r="2.2"/></svg><span data-i18n="ui.index">Índice</span></button></div>
+</header>
+<button type="button" class="astro" data-wheel-open aria-haspopup="dialog" aria-controls="wheel" aria-label="Abrir el índice" data-i18n-attr="aria-label:ui.openIndex"><svg class="astro__ring" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><circle class="astro__track" cx="32" cy="32" r="29"/><circle class="astro__prog" cx="32" cy="32" r="29"/></svg><span class="astro__num" aria-hidden="true">✦</span></button>
+
+<main id="main" class="page page--home">
+    <section class="portal" aria-labelledby="portal-title">
+        <div class="topline">
+<a class="brandline" href="index.html" aria-label="Nagual, inicio" data-i18n-attr="aria-label:ui.home"><svg class="sigil" viewBox="-50 -50 100 100" aria-hidden="true" focusable="false"><circle class="s-g" r="42"/><circle class="s-j" r="35" stroke-dasharray="1.6 3.6"/><path class="s-g" d="M0 -42L0 -49M29.7 -29.7L34.6 -34.6M42 0L49 0M29.7 29.7L34.6 34.6M0 42L0 49M-29.7 29.7L-34.6 34.6M-42 0L-49 0M-29.7 -29.7L-34.6 -34.6"/><path class="s-n" d="M-13 19V-19L13 19V-19"/><circle class="s-e" cy="-27" r="3"/></svg><span>NAGUAL</span></a>
+<div class="topline__enter"><a href="https://crm.nagual.club/" data-proto="crm" data-i18n="cta.crm">Entrar al CRM</a><a href="https://crm.nagual.club/socio" data-proto="socio" data-i18n="cta.member">Soy socio</a></div>
+<div class="langs langs--top" role="group" aria-label="Idioma" data-i18n-attr="aria-label:ui.lang"><button type="button" data-lang-btn="es" aria-pressed="true" lang="es" aria-label="Español">ES</button><button type="button" data-lang-btn="ru" aria-pressed="false" lang="ru" aria-label="Русский">RU</button></div>
+</div>
+        <div class="portal__orb" aria-hidden="true">
+            <div class="portal__glow"></div>
+            <div class="spores spores--orb" data-spores="26"></div>
+            <svg class="geo geo--portal" viewBox="-100 -100 200 200" data-draw="load" aria-hidden="true" focusable="false">
+<defs><path id="portal-ring" d="M0 -79a79 79 0 1 1 0 158a79 79 0 1 1 0 -158"/><radialGradient id="portal-core"><stop offset="0" class="stop-a"/><stop offset="1" class="stop-b"/></radialGradient></defs>
+<circle class="geo__core" r="58" fill="url(#portal-core)"/>
+<circle class="d g" r="98" style="--k:0"/>
+<circle class="d g2" r="93.5" style="--k:0.04"/>
+<path class="geo__ticks" d="M0 -93.5L0 -86.5M4.9 -93.4L4.7 -90.4M9.8 -93L9.5 -90M14.6 -92.3L14.2 -89.4M19.4 -91.5L18.8 -88.5M24.2 -90.3L23.4 -87.4M28.9 -88.9L28 -86.1M33.5 -87.3L32.4 -84.5M38 -85.4L36.8 -82.7M42.4 -83.3L41.1 -80.6M46.8 -81L43.3 -74.9M50.9 -78.4L49.3 -75.9M55 -75.6L53.2 -73.2M58.8 -72.7L57 -70.3M62.6 -69.5L60.6 -67.3M66.1 -66.1L64 -64M69.5 -62.6L67.3 -60.6M72.7 -58.8L70.3 -57M75.6 -55L73.2 -53.2M78.4 -50.9L75.9 -49.3M81 -46.7L74.9 -43.2M83.3 -42.4L80.6 -41.1M85.4 -38L82.7 -36.8M87.3 -33.5L84.5 -32.4M88.9 -28.9L86.1 -28M90.3 -24.2L87.4 -23.4M91.5 -19.4L88.5 -18.8M92.3 -14.6L89.4 -14.2M93 -9.8L90 -9.5M93.4 -4.9L90.4 -4.7M93.5 0L86.5 0M93.4 4.9L90.4 4.7M93 9.8L90 9.5M92.3 14.6L89.4 14.2M91.5 19.4L88.5 18.8M90.3 24.2L87.4 23.4M88.9 28.9L86.1 28M87.3 33.5L84.5 32.4M85.4 38L82.7 36.8M83.3 42.4L80.6 41.1M81 46.7L74.9 43.2M78.4 50.9L75.9 49.3M75.6 55L73.2 53.2M72.7 58.8L70.3 57M69.5 62.6L67.3 60.6M66.1 66.1L64 64M62.6 69.5L60.6 67.3M58.8 72.7L57 70.3M55 75.6L53.2 73.2M50.9 78.4L49.3 75.9M46.8 81L43.3 74.9M42.4 83.3L41.1 80.6M38 85.4L36.8 82.7M33.5 87.3L32.4 84.5M28.9 88.9L28 86.1M24.2 90.3L23.4 87.4M19.4 91.5L18.8 88.5M14.6 92.3L14.2 89.4M9.8 93L9.5 90M4.9 93.4L4.7 90.4M0 93.5L0 86.5M-4.9 93.4L-4.7 90.4M-9.8 93L-9.5 90M-14.6 92.3L-14.2 89.4M-19.4 91.5L-18.8 88.5M-24.2 90.3L-23.4 87.4M-28.9 88.9L-28 86.1M-33.5 87.3L-32.4 84.5M-38 85.4L-36.8 82.7M-42.4 83.3L-41.1 80.6M-46.7 81L-43.2 74.9M-50.9 78.4L-49.3 75.9M-55 75.6L-53.2 73.2M-58.8 72.7L-57 70.3M-62.6 69.5L-60.6 67.3M-66.1 66.1L-64 64M-69.5 62.6L-67.3 60.6M-72.7 58.8L-70.3 57M-75.6 55L-73.2 53.2M-78.4 50.9L-75.9 49.3M-81 46.7L-74.9 43.2M-83.3 42.4L-80.6 41.1M-85.4 38L-82.7 36.8M-87.3 33.5L-84.5 32.4M-88.9 28.9L-86.1 28M-90.3 24.2L-87.4 23.4M-91.5 19.4L-88.5 18.8M-92.3 14.6L-89.4 14.2M-93 9.8L-90 9.5M-93.4 4.9L-90.4 4.7M-93.5 0L-86.5 0M-93.4 -4.9L-90.4 -4.7M-93 -9.8L-90 -9.5M-92.3 -14.6L-89.4 -14.2M-91.5 -19.4L-88.5 -18.8M-90.3 -24.2L-87.4 -23.4M-88.9 -28.9L-86.1 -28M-87.3 -33.5L-84.5 -32.4M-85.4 -38L-82.7 -36.8M-83.3 -42.4L-80.6 -41.1M-81 -46.8L-74.9 -43.3M-78.4 -50.9L-75.9 -49.3M-75.6 -55L-73.2 -53.2M-72.7 -58.8L-70.3 -57M-69.5 -62.6L-67.3 -60.6M-66.1 -66.1L-64 -64M-62.6 -69.5L-60.6 -67.3M-58.8 -72.7L-57 -70.3M-55 -75.6L-53.2 -73.2M-50.9 -78.4L-49.3 -75.9M-46.8 -81L-43.3 -74.9M-42.4 -83.3L-41.1 -80.6M-38 -85.4L-36.8 -82.7M-33.5 -87.3L-32.4 -84.5M-28.9 -88.9L-28 -86.1M-24.2 -90.3L-23.4 -87.4M-19.4 -91.5L-18.8 -88.5M-14.6 -92.3L-14.2 -89.4M-9.8 -93L-9.5 -90M-4.9 -93.4L-4.7 -90.4"/>
+<g class="geo__spin"><text class="geo__text"><textPath href="#portal-ring" textLength="492" lengthAdjust="spacingAndGlyphs" data-i18n="home.p.ring">SOCIOS ✦ AVALES ✦ FIRMA ✦ PUERTA ✦ LÍMITES ✦ STOCK ✦ CAJA ✦ ROLES ✦ SELLO ✦ </textPath></text></g>
+<circle class="d j" r="73" style="--k:0.1"/>
+<path class="d g2" d="M0 -73L36.5 63.2L-63.2 -36.5L73 0L-63.2 36.5L36.5 -63.2L0 73L-36.5 -63.2L63.2 36.5L-73 0L63.2 -36.5L-36.5 63.2L0 -73Z" style="--k:0.3"/>
+<circle class="d g" r="56" stroke-dasharray="0" style="--k:0.22"/>
+<circle class="d j" r="48" style="--k:0.16"/>
+<circle class="d j" cx="0" cy="0" r="16" style="--k:0.200"/><circle class="d j" cx="0" cy="-16" r="16" style="--k:0.218"/><circle class="d j" cx="13.9" cy="-8" r="16" style="--k:0.236"/><circle class="d j" cx="13.9" cy="8" r="16" style="--k:0.254"/><circle class="d j" cx="0" cy="16" r="16" style="--k:0.272"/><circle class="d j" cx="-13.9" cy="8" r="16" style="--k:0.290"/><circle class="d j" cx="-13.9" cy="-8" r="16" style="--k:0.308"/><circle class="d j" cx="0" cy="-32" r="16" style="--k:0.326"/><circle class="d j" cx="27.7" cy="-16" r="16" style="--k:0.344"/><circle class="d j" cx="27.7" cy="16" r="16" style="--k:0.362"/><circle class="d j" cx="0" cy="32" r="16" style="--k:0.380"/><circle class="d j" cx="-27.7" cy="16" r="16" style="--k:0.398"/><circle class="d j" cx="-27.7" cy="-16" r="16" style="--k:0.416"/><circle class="d j" cx="13.9" cy="-24" r="16" style="--k:0.434"/><circle class="d j" cx="27.7" cy="0" r="16" style="--k:0.452"/><circle class="d j" cx="13.9" cy="24" r="16" style="--k:0.470"/><circle class="d j" cx="-13.9" cy="24" r="16" style="--k:0.488"/><circle class="d j" cx="-27.7" cy="0" r="16" style="--k:0.506"/><circle class="d j" cx="-13.9" cy="-24" r="16" style="--k:0.524"/>
+<path class="geo__nodes" d="M-1.3 -73a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0M35.2 -63.2a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0M61.9 -36.5a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0M71.7 0a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0M61.9 36.5a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0M35.2 63.2a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0M-1.3 73a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0M-37.8 63.2a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0M-64.5 36.5a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0M-74.3 0a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0M-64.5 -36.5a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0M-37.8 -63.2a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0"/>
+<circle class="geo__eye" r="3.2"/>
+</svg>
+        </div>
+        <div class="folio portal__body">
+            <p class="eyebrow portal__eyebrow" data-i18n="home.p.eyebrow">CRM para asociaciones cannábicas y clubes sociales</p>
+            <h1 class="portal__title" id="portal-title" data-i18n-html="home.p.h1"><span class="ln">Sana el <em>caos</em></span> <span class="ln">de tu club.</span></h1>
+            <p class="portal__lead" data-i18n="home.p.lead">Socios con aval y firma en pantalla, entrada por QR, límites del mes, stock al gramo y caja diaria. Un solo libro para todo el club, y cada socio con su zona en el móvil.</p>
+            <div class="portal__act">
+                <a class="seal" href="ofrendas.html#altar" aria-label="Probar gratis" data-i18n-attr="aria-label:cta.trial"><svg class="seal__ring" viewBox="0 0 160 160" aria-hidden="true" focusable="false"><defs><path id="seal-a" d="M80 80m-61 0a61 61 0 1 1 122 0a61 61 0 1 1 -122 0"/></defs><circle class="seal__edge" cx="80" cy="80" r="77"/><circle class="seal__edge seal__edge--in" cx="80" cy="80" r="47"/><text class="seal__text"><textPath href="#seal-a" textLength="380" lengthAdjust="spacing" data-i18n="cta.ring">PROBAR GRATIS ✦ SIN PERMANENCIA ✦ </textPath></text></svg><span class="seal__core" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></a>
+                <a class="arrow-link arrow-link--down" href="#capitulo-1"><span data-i18n="home.p.more">Cómo funciona · 7 capítulos</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v15M6 13l6 6 6-6"/></svg></a>
+            </div>
+            <p class="portal__note marg" data-i18n-html="home.p.note"><i>Nagual</i>, del náhuatl <i>nahualli</i>: el espíritu guardián que acompaña a cada uno.</p>
+        </div>
+        <ul class="portal__foot">
+            <li data-i18n="home.p.f1">Hecho en Torrevieja</li>
+            <li data-i18n="home.p.f2">RGPD y LOPDGDD</li>
+            <li data-i18n="home.p.f3">Panel en ES · RU · EN</li>
+        </ul>
+    </section>
+
+    <section class="cap cap--caos" id="capitulo-1" data-cap aria-labelledby="c1-title">
+        <div class="smoke" data-smoke aria-hidden="true">
+            <video class="smoke__video" muted loop playsinline preload="none" poster="assets/hero-smoke.jpg" data-wide="assets/hero-smoke.mp4" data-tall="assets/smoke-portrait.mp4" data-tall-poster="assets/smoke-portrait.jpg"></video>
+            <canvas class="smoke__fluid"></canvas>
+            <div class="smoke__veil"></div>
+        </div>
+        <div class="folio">
+            <header class="cap__head">
+                <span class="cap__num" aria-hidden="true">I</span>
+                <p class="runhead"><span data-i18n="ui.chapter">Capítulo</span><span class="runhead__n">I</span><span class="runhead__dot" aria-hidden="true"></span><span data-i18n="home.c1.name">El caos</span></p>
+                <h2 class="cap__title" id="c1-title" data-i18n="home.c1.title">Papel, Excel y una cola en la puerta.</h2>
+            </header>
+            <div class="caos__text">
+                <p class="dropcap rv" data-i18n="home.c1.p">Así empieza casi todo club. Una libreta de avales que nadie encuentra, un Excel con tres versiones, la cola del viernes en la puerta y el límite de cada socio contado de memoria. Nadie lo eligió: simplemente creció así.</p>
+                <ul class="litany">
+                    <li class="rv" data-i18n="home.c1.l1">La ficha en papel, con la firma borrosa y el aval en otra carpeta.</li>
+                    <li class="rv" data-i18n="home.c1.l2">El Excel de socios que solo entiende quien lo hizo.</li>
+                    <li class="rv" data-i18n="home.c1.l3">La cola en la puerta mientras alguien busca un nombre en la lista.</li>
+                    <li class="rv" data-i18n="home.c1.l4">El límite del mes, contado de memoria.</li>
+                    <li class="rv" data-i18n="home.c1.l5">La caja que no cuadra a las tres de la mañana.</li>
+                </ul>
+            </div>
+            <div class="caos__scraps" aria-hidden="true">
+                <div class="scrap scrap--sheet">
+                    <p class="sheet__file" data-i18n="home.c1.s.file">socios_FINAL_v3.xlsx</p>
+                    <div class="sheet">
+                        <span class="sheet__h" data-i18n="home.c1.s.h1">Socio</span><span class="sheet__h" data-i18n="home.c1.s.h2">Aval</span><span class="sheet__h" data-i18n="home.c1.s.h3">g/mes</span>
+                        <span>0147</span><span data-i18n="home.c1.s.q">¿0032?</span><span>58</span>
+                        <span>0212</span><span class="err" data-i18n="home.c1.s.ref">#¡REF!</span><span>61</span>
+                        <span>0098</span><span>—</span><span class="err">#####</span>
+                        <span>0153</span><span>0147</span><span>…</span>
+                    </div>
+                </div>
+                <div class="scrap scrap--note">
+                    <p class="note__t" data-i18n="home.c1.n.t">Avales · octubre</p>
+                    <p><s data-i18n="home.c1.n.l1">Marta avala a Joan</s></p>
+                    <p data-i18n="home.c1.n.l2">nº 0032 firmó… ¿cuándo?</p>
+                    <p data-i18n="home.c1.n.l3">buscar la carpeta azul</p>
+                </div>
+                <div class="scrap scrap--ticket"><b>14</b><span data-i18n="home.c1.t">en la puerta</span></div>
+                <div class="scrap scrap--receipt"><span class="receipt__t" data-i18n="home.c1.r.t">Caja · viernes</span><b>−35,00 €</b><span class="err" data-i18n="home.c1.r.q">no cuadra</span></div>
+            </div>
+            <p class="marg caos__marg" data-i18n="home.c1.marg">Mueve el humo con el cursor o con el dedo: así se siente un viernes sin sistema.</p>
+        </div>
+    </section>
+
+    <section class="cap cap--camino" id="capitulo-2" data-cap aria-labelledby="c2-title">
+        <div class="folio">
+            <header class="cap__head cap__head--split">
+                <span class="cap__num" aria-hidden="true">II</span>
+                <p class="runhead"><span data-i18n="ui.chapter">Capítulo</span><span class="runhead__n">II</span><span class="runhead__dot" aria-hidden="true"></span><span data-i18n="home.c2.name">El camino</span></p>
+                <h2 class="cap__title" id="c2-title" data-i18n="home.c2.title">Un turno entero, de la puerta a la caja.</h2>
+                <p class="cap__lead" data-i18n="home.c2.lead">Nagual sigue el mismo recorrido que tu equipo. Cada paso deja rastro, y el siguiente ya sabe lo que pasó en el anterior.</p>
+            </header>
+            <div class="camino" data-camino>
+                <svg class="camino__line camino__line--ghost" viewBox="0 0 1000 120" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0 60C40 60 60 36 100 36C160 36 240 84 300 84C360 84 440 36 500 36C560 36 640 84 700 84C760 84 840 36 900 36C940 36 960 60 1000 60"/></svg><svg class="camino__line camino__line--ink" viewBox="0 0 1000 120" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0 60C40 60 60 36 100 36C160 36 240 84 300 84C360 84 440 36 500 36C560 36 640 84 700 84C760 84 840 36 900 36C940 36 960 60 1000 60"/></svg>
+                <span class="camino__spore" aria-hidden="true"></span>
+                <ol class="camino__list">
+                    <li class="estacion" style="--y: 36px"><span class="estacion__dot" aria-hidden="true"></span><p class="estacion__n" aria-hidden="true">i</p><h3 class="estacion__t" data-i18n="home.c2.s1.t">La puerta</h3><p class="estacion__d" data-i18n="home.c2.s1.d">El socio enseña su QR desde el móvil. Entra quien tiene la cuota al día.</p><p class="frag" data-i18n-html="home.c2.s1.f">QR nº 0147 · cuota al día <b>✓</b></p></li>
+                    <li class="estacion" style="--y: 84px"><span class="estacion__dot" aria-hidden="true"></span><p class="estacion__n" aria-hidden="true">ii</p><h3 class="estacion__t" data-i18n="home.c2.s2.t">La ficha</h3><p class="estacion__d" data-i18n="home.c2.s2.d">Aval, firma y cuota en una sola pantalla. Nada de carpetas.</p><p class="frag" data-i18n="home.c2.s2.f">Aval: nº 0032 · firmada el 12.03.2026</p></li>
+                    <li class="estacion" style="--y: 36px"><span class="estacion__dot" aria-hidden="true"></span><p class="estacion__n" aria-hidden="true">iii</p><h3 class="estacion__t" data-i18n="home.c2.s3.t">La retirada</h3><p class="estacion__d" data-i18n="home.c2.s3.d">Antes de registrarla, la CRM comprueba el límite del mes.</p><p class="frag" data-i18n-html="home.c2.s3.f">22 + 2 de 60 g <b>✓</b></p></li>
+                    <li class="estacion" style="--y: 84px"><span class="estacion__dot" aria-hidden="true"></span><p class="estacion__n" aria-hidden="true">iv</p><h3 class="estacion__t" data-i18n="home.c2.s4.t">El stock</h3><p class="estacion__d" data-i18n="home.c2.s4.d">Cada gramo sale del inventario en el mismo momento.</p><p class="frag" data-i18n="home.c2.s4.f">Lote 14: 482 g → 480 g</p></li>
+                    <li class="estacion" style="--y: 36px"><span class="estacion__dot" aria-hidden="true"></span><p class="estacion__n" aria-hidden="true">v</p><h3 class="estacion__t" data-i18n="home.c2.s5.t">La caja</h3><p class="estacion__d" data-i18n="home.c2.s5.d">La aportación entra en la caja del día con su movimiento.</p><p class="frag" data-i18n="home.c2.s5.f">Caja de hoy: +14,00 €</p></li>
+                </ol>
+            </div>
+            <p class="marg camino__marg" data-i18n="home.c2.marg">Datos de ejemplo. Los límites y las aportaciones los fija tu club.</p>
+        </div>
+    </section>
+
+    <section class="cap cap--arcanos" id="capitulo-3" data-cap aria-labelledby="c3-title">
+        <div class="spores spores--deck" data-spores="14" aria-hidden="true"></div>
+        <div class="folio">
+            <header class="cap__head cap__head--right">
+                <span class="cap__num" aria-hidden="true">III</span>
+                <p class="runhead"><span data-i18n="ui.chapter">Capítulo</span><span class="runhead__n">III</span><span class="runhead__dot" aria-hidden="true"></span><span data-i18n="home.c3.name">Los arcanos</span></p>
+                <h2 class="cap__title" id="c3-title" data-i18n="home.c3.title">Ocho arcanos para gobernar el club.</h2>
+                <p class="cap__lead" data-i18n="home.c3.lead">Cada herramienta de Nagual es una carta. Gírala para ver qué guarda.</p>
+            </header>
+            <div class="baraja">
+                <article class="arcano" style="--tilt:-2.2deg">
+<div class="arcano__inner">
+<div class="arcano__face arcano__front">
+<span class="arcano__num">I</span>
+<svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path d="M28 92V58a22 22 0 0 1 44 0v34"/><path class="g" d="M23 92V57a27 27 0 0 1 54 0v35" stroke-dasharray="1 3.2"/><path d="M18 92h64"/><path d="M38 58h8v8h-8zM54 58h8v8h-8zM38 74h8v8h-8z"/><path class="f" d="M40.5 60.5h3v3h-3zM56.5 60.5h3v3h-3zM40.5 76.5h3v3h-3zM50 58h2v2h-2zM50 62h2v4h-2zM50 70h2v2h-2zM54 70h2v2h-2zM58 70h4v2h-4zM54 74h2v4h-2zM58 76h4v2h-4zM50 78h2v4h-2zM58 80h2v2h-2z"/><path class="g" d="M35 21q15-13 30 0q-15 13-30 0z"/><circle class="g" cx="50" cy="21" r="4.2"/><circle class="f fg" cx="50" cy="21" r="1.7"/><path class="g" d="M50 3v5M38.5 6l2.6 4.2M61.5 6l-2.6 4.2M30 12.5l3.8 2.6M70 12.5l-3.8 2.6"/></svg>
+<h3 class="arcano__name" id="an-h-1" data-i18n="arc.1.name">El Guardián</h3>
+<p class="arcano__key" data-i18n="arc.1.key">Entrada por QR</p>
+</div>
+<div class="arcano__face arcano__back">
+<span class="arcano__num arcano__num--back">I</span>
+<p class="arcano__bname" aria-hidden="true" data-i18n="arc.1.name">El Guardián</p>
+<p class="arcano__text" data-i18n="arc.1.back">El socio enseña su QR desde el móvil y la puerta sabe quién es, si su cuota está al día y cuánta gente hay dentro.</p>
+<svg class="emblem emblem--tiny" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path d="M28 92V58a22 22 0 0 1 44 0v34"/><path class="g" d="M23 92V57a27 27 0 0 1 54 0v35" stroke-dasharray="1 3.2"/><path d="M18 92h64"/><path d="M38 58h8v8h-8zM54 58h8v8h-8zM38 74h8v8h-8z"/><path class="f" d="M40.5 60.5h3v3h-3zM56.5 60.5h3v3h-3zM40.5 76.5h3v3h-3zM50 58h2v2h-2zM50 62h2v4h-2zM50 70h2v2h-2zM54 70h2v2h-2zM58 70h4v2h-4zM54 74h2v4h-2zM58 76h4v2h-4zM50 78h2v4h-2zM58 80h2v2h-2z"/><path class="g" d="M35 21q15-13 30 0q-15 13-30 0z"/><circle class="g" cx="50" cy="21" r="4.2"/><circle class="f fg" cx="50" cy="21" r="1.7"/><path class="g" d="M50 3v5M38.5 6l2.6 4.2M61.5 6l-2.6 4.2M30 12.5l3.8 2.6M70 12.5l-3.8 2.6"/></svg>
+</div>
+</div>
+<button type="button" class="arcano__turn" aria-pressed="false" aria-labelledby="turn-lbl an-h-1"></button>
+</article>
+                <article class="arcano" style="--tilt:1.6deg">
+<div class="arcano__inner">
+<div class="arcano__face arcano__front">
+<span class="arcano__num">II</span>
+<svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path d="M12 37v39q20-6 38 2q18-8 38-2V37"/><path d="M50 34q-16-8-34-2v40q18-6 34 2q16-8 34-2V32q-18-6-34 2z"/><path d="M50 34v40"/><path class="m" d="M22 42q11-4 22 1M22 49q11-4 22 1M22 56q11-4 22 1M22 63q11-4 22 1M56 43q11-5 22-1M56 50q11-5 22-1"/><path class="g" d="M56 61c3-7 5 3 8-2s4 3 7-1 4 3 8-1"/><path class="m" d="M56 65h23"/><path class="g" d="M70 74v14l-4-3.2-4 3.2V75"/><ellipse cx="43" cy="17" rx="8.5" ry="4.8" transform="rotate(-18 43 17)"/><ellipse class="g" cx="57" cy="17" rx="8.5" ry="4.8" transform="rotate(-18 57 17)"/></svg>
+<h3 class="arcano__name" id="an-h-2" data-i18n="arc.2.name">El Libro</h3>
+<p class="arcano__key" data-i18n="arc.2.key">Socios y avales</p>
+</div>
+<div class="arcano__face arcano__back">
+<span class="arcano__num arcano__num--back">II</span>
+<p class="arcano__bname" aria-hidden="true" data-i18n="arc.2.name">El Libro</p>
+<p class="arcano__text" data-i18n="arc.2.back">Alta con documento, foto y firma digital en pantalla. Cada socio entra con el aval de otro, y queda escrito.</p>
+<svg class="emblem emblem--tiny" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path d="M12 37v39q20-6 38 2q18-8 38-2V37"/><path d="M50 34q-16-8-34-2v40q18-6 34 2q16-8 34-2V32q-18-6-34 2z"/><path d="M50 34v40"/><path class="m" d="M22 42q11-4 22 1M22 49q11-4 22 1M22 56q11-4 22 1M22 63q11-4 22 1M56 43q11-5 22-1M56 50q11-5 22-1"/><path class="g" d="M56 61c3-7 5 3 8-2s4 3 7-1 4 3 8-1"/><path class="m" d="M56 65h23"/><path class="g" d="M70 74v14l-4-3.2-4 3.2V75"/><ellipse cx="43" cy="17" rx="8.5" ry="4.8" transform="rotate(-18 43 17)"/><ellipse class="g" cx="57" cy="17" rx="8.5" ry="4.8" transform="rotate(-18 57 17)"/></svg>
+</div>
+</div>
+<button type="button" class="arcano__turn" aria-pressed="false" aria-labelledby="turn-lbl an-h-2"></button>
+</article>
+                <article class="arcano" style="--tilt:-1deg">
+<div class="arcano__inner">
+<div class="arcano__face arcano__front">
+<span class="arcano__num">III</span>
+<svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle class="g" cx="50" cy="11" r="3.4"/><path d="M50 15v70M38 89h24M42 85h16"/><path d="M15 31 85 25"/><circle cx="50" cy="28" r="2.2"/><path d="M15 31 7 58M15 31l8 27M85 25l-8 26M85 25l8 26"/><path d="M5 58q10 9 20 0zM75 51q10 9 20 0z"/><path class="g" d="M10 55.5h10M11 53h8M12.5 50.5h5"/><path class="g" d="M81 50v-9h8v9M83 44h4M83 47h3"/></svg>
+<h3 class="arcano__name" id="an-h-3" data-i18n="arc.3.name">La Balanza</h3>
+<p class="arcano__key" data-i18n="arc.3.key">Caja diaria</p>
+</div>
+<div class="arcano__face arcano__back">
+<span class="arcano__num arcano__num--back">III</span>
+<p class="arcano__bname" aria-hidden="true" data-i18n="arc.3.name">La Balanza</p>
+<p class="arcano__text" data-i18n="arc.3.back">Movimientos, aportaciones y cierre del día. Cada euro con su recibo y su responsable.</p>
+<svg class="emblem emblem--tiny" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle class="g" cx="50" cy="11" r="3.4"/><path d="M50 15v70M38 89h24M42 85h16"/><path d="M15 31 85 25"/><circle cx="50" cy="28" r="2.2"/><path d="M15 31 7 58M15 31l8 27M85 25l-8 26M85 25l8 26"/><path d="M5 58q10 9 20 0zM75 51q10 9 20 0z"/><path class="g" d="M10 55.5h10M11 53h8M12.5 50.5h5"/><path class="g" d="M81 50v-9h8v9M83 44h4M83 47h3"/></svg>
+</div>
+</div>
+<button type="button" class="arcano__turn" aria-pressed="false" aria-labelledby="turn-lbl an-h-3"></button>
+</article>
+                <article class="arcano" style="--tilt:2.4deg">
+<div class="arcano__inner">
+<div class="arcano__face arcano__front">
+<span class="arcano__num">IV</span>
+<svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path d="M32 40h32v5q8 4 8 14v26q0 5-5 5H29q-5 0-5-5V59q0-10 8-14z"/><path d="M35 40v-6h26v6M41 34v-6h14v6"/><circle class="g" cx="48" cy="24.5" r="3.5"/><path class="g" d="M31 60h34v16H31z"/><path class="m" d="M36 72h24M38 68v4M43 69v3M48 66.5v5.5M53 69v3M58 68v4"/><path d="M86 90q-2-18 4-36"/><path class="g" d="M85.5 79q-7-3-9-10q7 1 9 10zM87 69q7-3 8-10q-7 2-8 10zM88.5 61q-5-3-6-9q5 2 6 9z"/></svg>
+<h3 class="arcano__name" id="an-h-4" data-i18n="arc.4.name">El Herbolario</h3>
+<p class="arcano__key" data-i18n="arc.4.key">Stock al gramo</p>
+</div>
+<div class="arcano__face arcano__back">
+<span class="arcano__num arcano__num--back">IV</span>
+<p class="arcano__bname" aria-hidden="true" data-i18n="arc.4.name">El Herbolario</p>
+<p class="arcano__text" data-i18n="arc.4.back">Pedidos e inventario al gramo. Cada retirada descuenta del stock en el mismo instante.</p>
+<svg class="emblem emblem--tiny" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path d="M32 40h32v5q8 4 8 14v26q0 5-5 5H29q-5 0-5-5V59q0-10 8-14z"/><path d="M35 40v-6h26v6M41 34v-6h14v6"/><circle class="g" cx="48" cy="24.5" r="3.5"/><path class="g" d="M31 60h34v16H31z"/><path class="m" d="M36 72h24M38 68v4M43 69v3M48 66.5v5.5M53 69v3M58 68v4"/><path d="M86 90q-2-18 4-36"/><path class="g" d="M85.5 79q-7-3-9-10q7 1 9 10zM87 69q7-3 8-10q-7 2-8 10zM88.5 61q-5-3-6-9q5 2 6 9z"/></svg>
+</div>
+</div>
+<button type="button" class="arcano__turn" aria-pressed="false" aria-labelledby="turn-lbl an-h-4"></button>
+</article>
+                <article class="arcano" style="--tilt:1.2deg">
+<div class="arcano__inner">
+<div class="arcano__face arcano__front">
+<span class="arcano__num">V</span>
+<svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle class="m" cx="50" cy="50" r="40" stroke-dasharray="1 3.2"/><path d="M60 28A24 24 0 1 0 60 72A26 26 0 0 1 60 28Z"/><path class="g" d="M73 34l1.6 4.4 4.4 1.6-4.4 1.6L73 46l-1.6-4.4L67 40l4.4-1.6z"/><circle class="f fg" cx="50" cy="10" r="3"/><circle class="f fg" cx="78.3" cy="21.7" r="3"/><circle class="f fg" cx="90" cy="50" r="3"/><circle class="dotbg" cx="78.3" cy="78.3" r="2.8"/><circle class="dotbg" cx="50" cy="90" r="2.8"/><circle class="dotbg" cx="21.7" cy="78.3" r="2.8"/><circle class="dotbg" cx="10" cy="50" r="2.8"/><circle class="dotbg" cx="21.7" cy="21.7" r="2.8"/></svg>
+<h3 class="arcano__name" id="an-h-5" data-i18n="arc.5.name">La Luna</h3>
+<p class="arcano__key" data-i18n="arc.5.key">Límite mensual</p>
+</div>
+<div class="arcano__face arcano__back">
+<span class="arcano__num arcano__num--back">V</span>
+<p class="arcano__bname" aria-hidden="true" data-i18n="arc.5.name">La Luna</p>
+<p class="arcano__text" data-i18n="arc.5.back">Fija el límite de cada socio, por ejemplo 60 g al mes. La CRM lo comprueba al registrar cada retirada.</p>
+<svg class="emblem emblem--tiny" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle class="m" cx="50" cy="50" r="40" stroke-dasharray="1 3.2"/><path d="M60 28A24 24 0 1 0 60 72A26 26 0 0 1 60 28Z"/><path class="g" d="M73 34l1.6 4.4 4.4 1.6-4.4 1.6L73 46l-1.6-4.4L67 40l4.4-1.6z"/><circle class="f fg" cx="50" cy="10" r="3"/><circle class="f fg" cx="78.3" cy="21.7" r="3"/><circle class="f fg" cx="90" cy="50" r="3"/><circle class="dotbg" cx="78.3" cy="78.3" r="2.8"/><circle class="dotbg" cx="50" cy="90" r="2.8"/><circle class="dotbg" cx="21.7" cy="78.3" r="2.8"/><circle class="dotbg" cx="10" cy="50" r="2.8"/><circle class="dotbg" cx="21.7" cy="21.7" r="2.8"/></svg>
+</div>
+</div>
+<button type="button" class="arcano__turn" aria-pressed="false" aria-labelledby="turn-lbl an-h-5"></button>
+</article>
+                <article class="arcano" style="--tilt:-1.8deg">
+<div class="arcano__inner">
+<div class="arcano__face arcano__front">
+<span class="arcano__num">VI</span>
+<svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle cx="50" cy="50" r="36"/><path class="m" d="M50 14L75.5 75.5L14 50L75.5 24.5L50 86L24.5 24.5L86 50L24.5 75.5L50 14"/><circle class="dotbg g" cx="50" cy="14" r="4.4"/><circle class="dotbg " cx="75.5" cy="24.5" r="4.4"/><circle class="dotbg " cx="86" cy="50" r="4.4"/><circle class="dotbg g" cx="75.5" cy="75.5" r="4.4"/><circle class="dotbg " cx="50" cy="86" r="4.4"/><circle class="dotbg " cx="24.5" cy="75.5" r="4.4"/><circle class="dotbg g" cx="14" cy="50" r="4.4"/><circle class="dotbg " cx="24.5" cy="24.5" r="4.4"/><rect class="dotbg" x="42.5" y="37" width="15" height="26" rx="3"/><path class="f" d="M46 41.5h3v3h-3zM51 41.5h3v3h-3zM46 46.5h3v3h-3zM51.5 47h2v2h-2zM51.5 50.5h2v2h-2zM46.5 51h2v2h-2z"/><path d="M48 59h4"/></svg>
+<h3 class="arcano__name" id="an-h-6" data-i18n="arc.6.name">El Círculo</h3>
+<p class="arcano__key" data-i18n="arc.6.key">Zona del socio</p>
+</div>
+<div class="arcano__face arcano__back">
+<span class="arcano__num arcano__num--back">VI</span>
+<p class="arcano__bname" aria-hidden="true" data-i18n="arc.6.name">El Círculo</p>
+<p class="arcano__text" data-i18n="arc.6.back">Cada socio tiene su zona en el móvil, sin instalar nada: su QR, su límite del mes y su historial.</p>
+<svg class="emblem emblem--tiny" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle cx="50" cy="50" r="36"/><path class="m" d="M50 14L75.5 75.5L14 50L75.5 24.5L50 86L24.5 24.5L86 50L24.5 75.5L50 14"/><circle class="dotbg g" cx="50" cy="14" r="4.4"/><circle class="dotbg " cx="75.5" cy="24.5" r="4.4"/><circle class="dotbg " cx="86" cy="50" r="4.4"/><circle class="dotbg g" cx="75.5" cy="75.5" r="4.4"/><circle class="dotbg " cx="50" cy="86" r="4.4"/><circle class="dotbg " cx="24.5" cy="75.5" r="4.4"/><circle class="dotbg g" cx="14" cy="50" r="4.4"/><circle class="dotbg " cx="24.5" cy="24.5" r="4.4"/><rect class="dotbg" x="42.5" y="37" width="15" height="26" rx="3"/><path class="f" d="M46 41.5h3v3h-3zM51 41.5h3v3h-3zM46 46.5h3v3h-3zM51.5 47h2v2h-2zM51.5 50.5h2v2h-2zM46.5 51h2v2h-2z"/><path d="M48 59h4"/></svg>
+</div>
+</div>
+<button type="button" class="arcano__turn" aria-pressed="false" aria-labelledby="turn-lbl an-h-6"></button>
+</article>
+                <article class="arcano" style="--tilt:2deg">
+<div class="arcano__inner">
+<div class="arcano__face arcano__front">
+<span class="arcano__num">VII</span>
+<svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle cx="50" cy="15.5" r="8.5"/><circle cx="42.6" cy="28.3" r="8.5"/><circle cx="57.4" cy="28.3" r="8.5"/><circle class="g" cx="50" cy="24" r="2.6"/><path d="M50 37v52"/><path class="g" d="M44.5 41h11M45.5 45h9"/><path d="M50 70h11v5h-5v4h5v5H50"/><circle class="g" cx="50" cy="91" r="1.8"/></svg>
+<h3 class="arcano__name" id="an-h-7" data-i18n="arc.7.name">La Llave</h3>
+<p class="arcano__key" data-i18n="arc.7.key">Roles y clubes</p>
+</div>
+<div class="arcano__face arcano__back">
+<span class="arcano__num arcano__num--back">VII</span>
+<p class="arcano__bname" aria-hidden="true" data-i18n="arc.7.name">La Llave</p>
+<p class="arcano__text" data-i18n="arc.7.back">Admin, encargado y dispensador: cada uno ve y hace solo lo suyo. Y varios clubes caben en una cuenta.</p>
+<svg class="emblem emblem--tiny" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle cx="50" cy="15.5" r="8.5"/><circle cx="42.6" cy="28.3" r="8.5"/><circle cx="57.4" cy="28.3" r="8.5"/><circle class="g" cx="50" cy="24" r="2.6"/><path d="M50 37v52"/><path class="g" d="M44.5 41h11M45.5 45h9"/><path d="M50 70h11v5h-5v4h5v5H50"/><circle class="g" cx="50" cy="91" r="1.8"/></svg>
+</div>
+</div>
+<button type="button" class="arcano__turn" aria-pressed="false" aria-labelledby="turn-lbl an-h-7"></button>
+</article>
+                <article class="arcano" style="--tilt:-1.4deg">
+<div class="arcano__inner">
+<div class="arcano__face arcano__front">
+<span class="arcano__num">VIII</span>
+<svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path class="g" d="M40 70 35 94l6-4 3 6 4-21M60 70l5 24-6-4-3 6-4-21"/><path class="dotbg" d="M83.2 44L82.6 45.3L81.2 46.5L79.6 47.5L78.6 48.5L78.4 49.7L79.2 51L80.3 52.6L81.2 54.1L81.1 55.5L80.1 56.5L78.3 57.1L76.5 57.5L75.2 58.1L74.8 59.2L75.1 60.8L75.6 62.6L75.8 64.4L75.2 65.5L73.8 66L71.9 65.9L70.1 65.7L68.7 65.9L68 66.9L67.8 68.5L67.7 70.5L67.2 72.1L66.2 72.9L64.7 72.8L62.9 72L61.3 71.2L60 71L59 71.8L58.3 73.3L57.5 75.1L56.4 76.4L55.2 76.7L53.8 75.9L52.4 74.6L51.2 73.3L50 72.8L48.8 73.3L47.6 74.6L46.2 75.9L44.8 76.7L43.6 76.4L42.5 75.1L41.7 73.3L41 71.8L40 71L38.7 71.2L37.1 72L35.3 72.8L33.8 72.9L32.8 72.1L32.3 70.5L32.2 68.5L32 66.9L31.3 65.9L29.9 65.7L28.1 65.9L26.2 66L24.8 65.5L24.2 64.4L24.4 62.6L24.9 60.8L25.2 59.2L24.8 58.1L23.5 57.5L21.7 57.1L19.9 56.5L18.9 55.5L18.8 54.1L19.7 52.6L20.8 51L21.6 49.7L21.4 48.5L20.4 47.5L18.8 46.5L17.4 45.3L16.8 44L17.4 42.7L18.8 41.5L20.4 40.5L21.4 39.5L21.6 38.3L20.8 37L19.7 35.4L18.8 33.9L18.9 32.5L19.9 31.5L21.7 30.9L23.5 30.5L24.8 29.9L25.2 28.8L24.9 27.2L24.4 25.4L24.2 23.6L24.8 22.5L26.2 22L28.1 22.1L29.9 22.3L31.3 22.1L32 21.1L32.2 19.5L32.3 17.5L32.8 15.9L33.8 15.1L35.3 15.2L37.1 16L38.7 16.8L40 17L41 16.2L41.7 14.7L42.5 12.9L43.6 11.6L44.8 11.3L46.2 12.1L47.6 13.4L48.8 14.7L50 15.2L51.2 14.7L52.4 13.4L53.8 12.1L55.2 11.3L56.4 11.6L57.5 12.9L58.3 14.7L59 16.2L60 17L61.3 16.8L62.9 16L64.7 15.2L66.2 15.1L67.2 15.9L67.7 17.5L67.8 19.5L68 21.1L68.7 22.1L70.1 22.3L71.9 22.1L73.8 22L75.2 22.5L75.8 23.6L75.6 25.4L75.1 27.2L74.8 28.8L75.2 29.9L76.5 30.5L78.3 30.9L80.1 31.5L81.1 32.5L81.2 33.9L80.3 35.4L79.2 37L78.4 38.3L78.6 39.5L79.6 40.5L81.2 41.5L82.6 42.7L83.2 44Z"/><circle class="g" cx="50" cy="44" r="23"/><circle cx="50" cy="40" r="5"/><path d="M47.6 44.4 45.8 54h8.4l-1.8-9.6"/></svg>
+<h3 class="arcano__name" id="an-h-8" data-i18n="arc.8.name">El Sello</h3>
+<p class="arcano__key" data-i18n="arc.8.key">Privacidad</p>
+</div>
+<div class="arcano__face arcano__back">
+<span class="arcano__num arcano__num--back">VIII</span>
+<p class="arcano__bname" aria-hidden="true" data-i18n="arc.8.name">El Sello</p>
+<p class="arcano__text" data-i18n="arc.8.back">RGPD y LOPDGDD. Datos sensibles cifrados y un registro de cada acceso: quién vio qué, y cuándo.</p>
+<svg class="emblem emblem--tiny" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path class="g" d="M40 70 35 94l6-4 3 6 4-21M60 70l5 24-6-4-3 6-4-21"/><path class="dotbg" d="M83.2 44L82.6 45.3L81.2 46.5L79.6 47.5L78.6 48.5L78.4 49.7L79.2 51L80.3 52.6L81.2 54.1L81.1 55.5L80.1 56.5L78.3 57.1L76.5 57.5L75.2 58.1L74.8 59.2L75.1 60.8L75.6 62.6L75.8 64.4L75.2 65.5L73.8 66L71.9 65.9L70.1 65.7L68.7 65.9L68 66.9L67.8 68.5L67.7 70.5L67.2 72.1L66.2 72.9L64.7 72.8L62.9 72L61.3 71.2L60 71L59 71.8L58.3 73.3L57.5 75.1L56.4 76.4L55.2 76.7L53.8 75.9L52.4 74.6L51.2 73.3L50 72.8L48.8 73.3L47.6 74.6L46.2 75.9L44.8 76.7L43.6 76.4L42.5 75.1L41.7 73.3L41 71.8L40 71L38.7 71.2L37.1 72L35.3 72.8L33.8 72.9L32.8 72.1L32.3 70.5L32.2 68.5L32 66.9L31.3 65.9L29.9 65.7L28.1 65.9L26.2 66L24.8 65.5L24.2 64.4L24.4 62.6L24.9 60.8L25.2 59.2L24.8 58.1L23.5 57.5L21.7 57.1L19.9 56.5L18.9 55.5L18.8 54.1L19.7 52.6L20.8 51L21.6 49.7L21.4 48.5L20.4 47.5L18.8 46.5L17.4 45.3L16.8 44L17.4 42.7L18.8 41.5L20.4 40.5L21.4 39.5L21.6 38.3L20.8 37L19.7 35.4L18.8 33.9L18.9 32.5L19.9 31.5L21.7 30.9L23.5 30.5L24.8 29.9L25.2 28.8L24.9 27.2L24.4 25.4L24.2 23.6L24.8 22.5L26.2 22L28.1 22.1L29.9 22.3L31.3 22.1L32 21.1L32.2 19.5L32.3 17.5L32.8 15.9L33.8 15.1L35.3 15.2L37.1 16L38.7 16.8L40 17L41 16.2L41.7 14.7L42.5 12.9L43.6 11.6L44.8 11.3L46.2 12.1L47.6 13.4L48.8 14.7L50 15.2L51.2 14.7L52.4 13.4L53.8 12.1L55.2 11.3L56.4 11.6L57.5 12.9L58.3 14.7L59 16.2L60 17L61.3 16.8L62.9 16L64.7 15.2L66.2 15.1L67.2 15.9L67.7 17.5L67.8 19.5L68 21.1L68.7 22.1L70.1 22.3L71.9 22.1L73.8 22L75.2 22.5L75.8 23.6L75.6 25.4L75.1 27.2L74.8 28.8L75.2 29.9L76.5 30.5L78.3 30.9L80.1 31.5L81.1 32.5L81.2 33.9L80.3 35.4L79.2 37L78.4 38.3L78.6 39.5L79.6 40.5L81.2 41.5L82.6 42.7L83.2 44Z"/><circle class="g" cx="50" cy="44" r="23"/><circle cx="50" cy="40" r="5"/><path d="M47.6 44.4 45.8 54h8.4l-1.8-9.6"/></svg>
+</div>
+</div>
+<button type="button" class="arcano__turn" aria-pressed="false" aria-labelledby="turn-lbl an-h-8"></button>
+</article>
+            </div>
+            <div class="baraja__foot">
+                <p class="marg" data-i18n="home.c3.hint">Pasa el cursor o toca una carta para girarla.</p>
+                <a class="arrow-link" href="arcanos.html"><span data-i18n="home.c3.more">Los ocho arcanos en detalle</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12h15M13 6l6 6-6 6"/></svg></a>
+            </div>
+        </div>
+    </section>
+
+    <section class="cap cap--circulo" id="capitulo-4" data-cap aria-labelledby="c4-title">
+        <div class="folio">
+            <header class="cap__head">
+                <span class="cap__num" aria-hidden="true">IV</span>
+                <p class="runhead"><span data-i18n="ui.chapter">Capítulo</span><span class="runhead__n">IV</span><span class="runhead__dot" aria-hidden="true"></span><span data-i18n="home.c4.name">El círculo</span></p>
+                <h2 class="cap__title" id="c4-title" data-i18n="home.c4.title">El círculo crece de socio en socio.</h2>
+            </header>
+            <figure class="circulo__fig">
+                <svg class="circulo__svg" viewBox="-110 -110 220 220" data-draw="scroll" aria-hidden="true" focusable="false"><circle class="ring ring--out" r="104" stroke-dasharray="1 4"/><circle class="ring" r="78"/><circle class="ring ring--in" r="22"/><path class="d ln" d="M0 -78Q12.1 -15.7 75.3 -20.2" style="--k:0.050"/><path class="d ln" d="M0 -78Q8.8 -3.7 55.2 55.2" style="--k:0.078"/><path class="d ln" d="M0 -78Q-12.1 -9.2 -75.3 20.2" style="--k:0.106"/><path class="d ln" d="M75.3 -20.2Q18.3 -14 39 -67.5" style="--k:0.134"/><path class="d ln" d="M75.3 -20.2Q8.8 8.8 -20.2 75.3" style="--k:0.162"/><path class="d hi" d="M55.2 55.2Q0 0 -55.2 -55.2" style="--k:0.190"/><path class="d ln" d="M55.2 55.2Q0 17.6 -55.2 55.2" style="--k:0.218"/><path class="d ln" d="M-75.3 20.2Q-8.8 15.3 20.2 75.3" style="--k:0.246"/><path class="d ln" d="M-75.3 20.2Q0 6.5 75.3 20.2" style="--k:0.274"/><path class="d ln" d="M-20.2 75.3Q-15.3 8.8 -75.3 -20.2" style="--k:0.302"/><path class="d ln" d="M39 -67.5Q3 -22.9 -20.2 -75.3" style="--k:0.330"/><path class="d ln" d="M-55.2 -55.2Q2 -15.1 67.5 -39" style="--k:0.358"/><path class="d ln" d="M-55.2 55.2Q-5.6 -3.2 20.2 -75.3" style="--k:0.386"/><path class="d ln" d="M20.2 75.3Q-7.6 5.8 -67.5 -39" style="--k:0.414"/><path class="d ln" d="M75.3 20.2Q5.8 14 -39 67.5" style="--k:0.442"/><path class="d ln" d="M-75.3 -20.2Q-5.8 7.6 39 67.5" style="--k:0.470"/><path class="d ln" d="M67.5 -39Q0 0 -67.5 39" style="--k:0.498"/><path class="d ln" d="M20.2 -75.3Q-9.2 -12.1 -78 0" style="--k:0.526"/><path class="d ln" d="M-67.5 -39Q1.7 -6.2 78 0" style="--k:0.554"/><path class="d ln" d="M-39 67.5Q2.6 2 55.2 -55.2" style="--k:0.582"/><path class="d ln" d="M39 67.5Q0 0 -39 -67.5" style="--k:0.610"/><path class="d ln" d="M-67.5 39Q-10.8 18.7 0 78" style="--k:0.638"/><path class="d ln" d="M-78 0Q-1.7 6.2 67.5 39" style="--k:0.666"/><circle class="node node--root" cx="0" cy="-78" r="4"/><circle class="node" cx="20.2" cy="-75.3" r="2.8"/><circle class="node" cx="39" cy="-67.5" r="2.8"/><circle class="node" cx="55.2" cy="-55.2" r="2.8"/><circle class="node" cx="67.5" cy="-39" r="2.8"/><circle class="node" cx="75.3" cy="-20.2" r="2.8"/><circle class="node" cx="78" cy="0" r="2.8"/><circle class="node" cx="75.3" cy="20.2" r="2.8"/><circle class="node" cx="67.5" cy="39" r="2.8"/><circle class="node node--hi" cx="55.2" cy="55.2" r="4"/><circle class="node" cx="39" cy="67.5" r="2.8"/><circle class="node" cx="20.2" cy="75.3" r="2.8"/><circle class="node" cx="0" cy="78" r="2.8"/><circle class="node" cx="-20.2" cy="75.3" r="2.8"/><circle class="node" cx="-39" cy="67.5" r="2.8"/><circle class="node" cx="-55.2" cy="55.2" r="2.8"/><circle class="node" cx="-67.5" cy="39" r="2.8"/><circle class="node" cx="-75.3" cy="20.2" r="2.8"/><circle class="node" cx="-78" cy="0" r="2.8"/><circle class="node" cx="-75.3" cy="-20.2" r="2.8"/><circle class="node" cx="-67.5" cy="-39" r="2.8"/><circle class="node node--hi" cx="-55.2" cy="-55.2" r="4"/><circle class="node" cx="-39" cy="-67.5" r="2.8"/><circle class="node" cx="-20.2" cy="-75.3" r="2.8"/><circle class="core" r="13"/><path class="core__n" d="M-5 7V-7L5 7V-7"/><text class="lbl" x="65.6" y="66.6" text-anchor="start">0032</text><text class="lbl" x="-65.6" y="-60.6" text-anchor="end">0147</text><text class="lbl" x="0" y="-87" text-anchor="middle">0001</text></svg>
+                <figcaption class="marg" data-i18n="home.c4.cap">Cada línea es un aval. En dorado, el nº 0032 avaló al nº 0147.</figcaption>
+            </figure>
+            <div class="circulo__phone">
+                <div class="phone" role="img" aria-label="Ejemplo de la zona del socio en el móvil" data-i18n-attr="aria-label:home.c4.ph.aria">
+                    <div class="phone__screen">
+                        <p class="phone__top"><span data-i18n="home.c4.ph.zone">Zona del socio</span><svg class="sigil sigil--tiny" viewBox="-50 -50 100 100" aria-hidden="true" focusable="false"><circle class="s-g" r="42"/><circle class="s-j" r="35" stroke-dasharray="1.6 3.6"/><path class="s-g" d="M0 -42L0 -49M29.7 -29.7L34.6 -34.6M42 0L49 0M29.7 29.7L34.6 34.6M0 42L0 49M-29.7 29.7L-34.6 34.6M-42 0L-49 0M-29.7 -29.7L-34.6 -34.6"/><path class="s-n" d="M-13 19V-19L13 19V-19"/><circle class="s-e" cy="-27" r="3"/></svg></p>
+                        <p class="phone__name" data-i18n="home.c4.ph.name">Socia nº 0147</p>
+                        <div class="phone__qr"><svg class="qr" viewBox="0 0 29 29" shape-rendering="crispEdges" aria-hidden="true" focusable="false"><rect class="qr__bg" width="29" height="29" rx="1.5"/><path class="qr__m" d="M2 2h7v1h-7zM10 2h1v1h-1zM13 2h2v1h-2zM17 2h2v1h-2zM20 2h7v1h-7zM2 3h1v1h-1zM8 3h1v1h-1zM10 3h1v1h-1zM12 3h2v1h-2zM16 3h2v1h-2zM20 3h1v1h-1zM26 3h1v1h-1zM2 4h1v1h-1zM4 4h3v1h-3zM8 4h1v1h-1zM10 4h4v1h-4zM16 4h3v1h-3zM20 4h1v1h-1zM22 4h3v1h-3zM26 4h1v1h-1zM2 5h1v1h-1zM4 5h3v1h-3zM8 5h1v1h-1zM10 5h1v1h-1zM17 5h2v1h-2zM20 5h1v1h-1zM22 5h3v1h-3zM26 5h1v1h-1zM2 6h1v1h-1zM4 6h3v1h-3zM8 6h1v1h-1zM11 6h3v1h-3zM20 6h1v1h-1zM22 6h3v1h-3zM26 6h1v1h-1zM2 7h1v1h-1zM8 7h1v1h-1zM10 7h2v1h-2zM13 7h1v1h-1zM15 7h1v1h-1zM17 7h2v1h-2zM20 7h1v1h-1zM26 7h1v1h-1zM2 8h7v1h-7zM10 8h1v1h-1zM12 8h1v1h-1zM14 8h1v1h-1zM16 8h1v1h-1zM18 8h1v1h-1zM20 8h7v1h-7zM11 9h3v1h-3zM15 9h2v1h-2zM18 9h1v1h-1zM2 10h4v1h-4zM8 10h1v1h-1zM12 10h7v1h-7zM21 10h1v1h-1zM24 10h1v1h-1zM3 11h1v1h-1zM6 11h2v1h-2zM10 11h2v1h-2zM13 11h2v1h-2zM19 11h2v1h-2zM22 11h1v1h-1zM26 11h1v1h-1zM3 12h3v1h-3zM8 12h3v1h-3zM13 12h1v1h-1zM17 12h7v1h-7zM25 12h2v1h-2zM3 13h1v1h-1zM6 13h1v1h-1zM10 13h2v1h-2zM14 13h3v1h-3zM19 13h1v1h-1zM23 13h1v1h-1zM26 13h1v1h-1zM6 14h1v1h-1zM8 14h1v1h-1zM10 14h2v1h-2zM14 14h1v1h-1zM17 14h2v1h-2zM20 14h1v1h-1zM24 14h3v1h-3zM3 15h1v1h-1zM5 15h3v1h-3zM13 15h1v1h-1zM15 15h2v1h-2zM18 15h1v1h-1zM20 15h2v1h-2zM25 15h2v1h-2zM2 16h2v1h-2zM5 16h1v1h-1zM7 16h2v1h-2zM11 16h2v1h-2zM15 16h2v1h-2zM19 16h1v1h-1zM26 16h1v1h-1zM2 17h1v1h-1zM4 17h1v1h-1zM6 17h1v1h-1zM9 17h1v1h-1zM13 17h1v1h-1zM20 17h1v1h-1zM22 17h3v1h-3zM4 18h1v1h-1zM6 18h3v1h-3zM11 18h2v1h-2zM15 18h1v1h-1zM17 18h6v1h-6zM24 18h1v1h-1zM26 18h1v1h-1zM11 19h3v1h-3zM15 19h4v1h-4zM22 19h1v1h-1zM24 19h3v1h-3zM2 20h7v1h-7zM11 20h1v1h-1zM18 20h1v1h-1zM20 20h1v1h-1zM22 20h2v1h-2zM25 20h1v1h-1zM2 21h1v1h-1zM8 21h1v1h-1zM10 21h1v1h-1zM12 21h3v1h-3zM16 21h3v1h-3zM22 21h3v1h-3zM26 21h1v1h-1zM2 22h1v1h-1zM4 22h3v1h-3zM8 22h1v1h-1zM10 22h1v1h-1zM16 22h11v1h-11zM2 23h1v1h-1zM4 23h3v1h-3zM8 23h1v1h-1zM11 23h1v1h-1zM14 23h1v1h-1zM17 23h3v1h-3zM21 23h2v1h-2zM25 23h2v1h-2zM2 24h1v1h-1zM4 24h3v1h-3zM8 24h1v1h-1zM11 24h6v1h-6zM18 24h4v1h-4zM23 24h1v1h-1zM25 24h2v1h-2zM2 25h1v1h-1zM8 25h1v1h-1zM10 25h1v1h-1zM14 25h1v1h-1zM19 25h3v1h-3zM23 25h1v1h-1zM25 25h2v1h-2zM2 26h7v1h-7zM10 26h3v1h-3zM19 26h5v1h-5zM25 26h2v1h-2z"/></svg></div>
+                        <p class="phone__hint" data-i18n="home.c4.ph.hint">Enseña este QR en la puerta</p>
+                        <div class="phone__moon"><svg class="moon moon--sm" viewBox="-40 -40 80 80" aria-hidden="true" focusable="false"><defs><radialGradient id="moon-ph" cx="0.62" cy="0.38" r="0.8"><stop offset="0" class="moon__s1"/><stop offset="1" class="moon__s2"/></radialGradient></defs><circle class="moon__dark" r="34"/><path class="moon__lit" d="M0 -34A34 34 0 0 1 0 34A9.04 34 0 0 0 0 -34Z" fill="url(#moon-ph)"/><circle class="moon__rim" r="34"/></svg><p><b data-i18n="home.c4.ph.lim">22 de 60 g este mes</b><small data-i18n="home.c4.ph.left">Quedan 38 g · se renueva el 1 de noviembre</small></p></div>
+                        <p class="phone__h" data-i18n="home.c4.ph.hist">Este mes</p>
+                        <ul class="phone__hist">
+                            <li><span>06.10</span><span>5 <span data-i18n="u.g">g</span></span></li>
+                            <li><span>04.10</span><span>7 <span data-i18n="u.g">g</span></span></li>
+                            <li><span>02.10</span><span>10 <span data-i18n="u.g">g</span></span></li>
+                        </ul>
+                        <p class="phone__fee" data-i18n="home.c4.ph.fee">Cuota al día hasta el 31.12</p>
+                        <div class="phone__tabs" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 18h2v2h-2z"/></svg><svg viewBox="0 0 24 24"><path d="M15 4a8 8 0 1 0 0 16a6.5 6.5 0 0 1 0-16z"/></svg><svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h9"/></svg></div>
+                    </div>
+                </div>
+            </div>
+            <div class="circulo__text">
+                <p class="dropcap rv" data-i18n="home.c4.p1">En un club social, cada socio nuevo entra con el aval de otro. Nagual dibuja ese círculo: quién avaló a quién, cuándo firmó cada uno y si su cuota está al día.</p>
+                <p class="rv" data-i18n="home.c4.p2">Y cada socio lleva el club en el móvil. Abre un enlace y ahí están su QR, su límite del mes y su historial, sin instalar nada.</p>
+                <div class="firma rv">
+                    <p class="firma__label" data-i18n="home.c4.sign">Firma del socio</p>
+                    <svg class="firma__svg" viewBox="0 0 240 70" data-draw="scroll" aria-hidden="true" focusable="false"><path class="firma__base" d="M6 58H234"/><path class="d firma__ink" style="--k:0" d="M14 46C22 18 34 10 36 26S30 58 44 40 56 6 66 22 60 52 72 44 86 20 92 30 96 50 108 40 118 22 126 30 128 46 140 40C152 34 160 26 172 30S196 42 214 26C220 21 226 20 230 24"/><path class="firma__x" d="M8 52l8 8M16 52l-8 8"/></svg>
+                    <p class="firma__cap" data-i18n="home.c4.signcap">La firma se hace en la pantalla y se guarda con la ficha.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cap cap--ofrenda" id="capitulo-5" data-cap aria-labelledby="c5-title">
+        <div class="folio">
+            <header class="cap__head">
+                <span class="cap__num" aria-hidden="true">V</span>
+                <p class="runhead"><span data-i18n="ui.chapter">Capítulo</span><span class="runhead__n">V</span><span class="runhead__dot" aria-hidden="true"></span><span data-i18n="home.c5.name">La ofrenda</span></p>
+                <h2 class="cap__title" id="c5-title" data-i18n="home.c5.title">Tres ofrendas. Elige la de tu club.</h2>
+                <p class="cap__lead" data-i18n="home.c5.lead">Pagas por lo que tu club necesita hoy y cambias cuando crezca. Sin permanencia.</p>
+            </header>
+            <ul class="ledger">
+                <li class="ledger__row rv">
+                    <span class="ledger__glyph"><svg class="glyph" viewBox="-24 -24 48 48" aria-hidden="true" focusable="false"><circle r="17"/><circle class="g" r="2.4"/></svg></span>
+                    <p class="ledger__name"><b>Calada</b><i data-i18n="home.c5.calada">para el club que empieza · hasta 300 socios</i></p>
+                    <span class="ledger__dots" aria-hidden="true"></span>
+                    <p class="ledger__price"><b>25 €</b><span data-i18n="u.month">/mes</span><small data-i18n="home.c5.y20">20 € con pago anual</small></p>
+                </li>
+                <li class="ledger__row rv">
+                    <span class="ledger__glyph"><svg class="glyph" viewBox="-24 -24 48 48" aria-hidden="true" focusable="false"><circle cx="-7" r="14"/><circle cx="7" r="14"/><circle class="g" r="2.4"/></svg></span>
+                    <p class="ledger__name"><b>Club</b><i data-i18n="home.c5.club">un club en marcha · migración gratis</i></p>
+                    <span class="ledger__dots" aria-hidden="true"></span>
+                    <p class="ledger__price"><b>49 €</b><span data-i18n="u.month">/mes</span><small data-i18n="home.c5.y39">39 € con pago anual</small></p>
+                </li>
+                <li class="ledger__row rv">
+                    <span class="ledger__glyph"><svg class="glyph" viewBox="-24 -24 48 48" aria-hidden="true" focusable="false"><circle r="8.5"/><circle cx="0" cy="-8.5" r="8.5"/><circle cx="7.4" cy="-4.2" r="8.5"/><circle cx="7.4" cy="4.2" r="8.5"/><circle cx="0" cy="8.5" r="8.5"/><circle cx="-7.4" cy="4.2" r="8.5"/><circle cx="-7.4" cy="-4.3" r="8.5"/><circle class="g" r="17"/></svg></span>
+                    <p class="ledger__name"><b>Cadena</b><i data-i18n="home.c5.cadena">varios clubes en una cuenta</i></p>
+                    <span class="ledger__dots" aria-hidden="true"></span>
+                    <p class="ledger__price"><b>99 €</b><span data-i18n="u.month">/mes</span><small data-i18n="home.c5.y79">79 € con pago anual</small></p>
+                </li>
+            </ul>
+            <div class="ledger__foot">
+                <p class="marg" data-i18n="home.c5.note">Precios de ejemplo · IVA 21 % aparte</p>
+                <a class="arrow-link" href="ofrendas.html#altar"><span data-i18n="home.c5.more">Elegir por número de socios</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12h15M13 6l6 6-6 6"/></svg></a>
+            </div>
+        </div>
+    </section>
+
+    <section class="cap cap--juramento" id="capitulo-6" data-cap aria-labelledby="c6-title">
+        <div class="folio">
+            <header class="cap__head">
+                <span class="cap__num" aria-hidden="true">VI</span>
+                <p class="runhead"><span data-i18n="ui.chapter">Capítulo</span><span class="runhead__n">VI</span><span class="runhead__dot" aria-hidden="true"></span><span data-i18n="home.c6.name">El juramento</span></p>
+                <h2 class="cap__title" id="c6-title" data-i18n="home.c6.title">Lo que sabemos de tus socios, lo guardamos como un secreto.</h2>
+            </header>
+            <div class="juramento__seal" data-stamp aria-hidden="true"><svg class="wax" viewBox="-62 -62 124 124" aria-hidden="true" focusable="false"><defs><radialGradient id="wax-g" cx="0.38" cy="0.32" r="0.85"><stop offset="0" class="wax__s1"/><stop offset="0.55" class="wax__s2"/><stop offset="1" class="wax__s3"/></radialGradient><path id="wax-ring" d="M0 -33a33 33 0 1 1 0 66a33 33 0 1 1 0 -66"/></defs><path class="wax__drop" d="M54.6 0L54.2 1.7L52.7 3.3L51 4.8L49.8 6.3L49.6 7.9L50.5 9.6L51.8 11.6L53 13.6L53.1 15.4L52.1 16.9L50 18L47.7 18.9L45.8 19.8L44.8 21.1L44.9 22.9L45.5 25L45.9 27.1L45.6 28.9L44.3 30.1L42.1 30.6L39.7 30.8L37.7 31.2L36.5 32.2L36.2 34L36.4 36.4L36.4 38.8L35.9 40.7L34.5 41.7L32.5 41.9L30.2 41.6L28.2 41.5L26.8 42.2L25.9 43.8L25.3 46.1L24.7 48.4L23.6 50.1L21.9 50.6L19.8 50L17.6 48.9L15.6 47.9L13.9 47.7L12.5 48.7L11.3 50.4L10 52.3L8.5 53.4L6.8 53.5L5 52.4L3.2 50.7L1.5 49.2L0 48.6L-1.5 49.2L-3.2 50.7L-5 52.4L-6.8 53.5L-8.5 53.4L-10 52.3L-11.3 50.4L-12.5 48.7L-13.9 47.7L-15.6 47.9L-17.6 48.9L-19.8 50L-21.9 50.6L-23.6 50.1L-24.7 48.4L-25.3 46.1L-25.9 43.8L-26.8 42.2L-28.2 41.5L-30.2 41.6L-32.5 41.9L-34.5 41.7L-35.9 40.7L-36.4 38.8L-36.4 36.4L-36.2 34L-36.5 32.2L-37.7 31.2L-39.7 30.8L-42.1 30.6L-44.3 30.1L-45.6 28.9L-45.9 27.1L-45.5 25L-44.9 22.9L-44.8 21.1L-45.8 19.8L-47.7 18.9L-50 18L-52.1 16.9L-53.1 15.4L-53 13.6L-51.8 11.6L-50.5 9.6L-49.6 7.9L-49.8 6.3L-51 4.8L-52.7 3.3L-54.2 1.7L-54.6 0L-53.8 -1.7L-52 -3.3L-50 -4.7L-48.6 -6.1L-48.2 -7.6L-48.9 -9.3L-50.3 -11.2L-51.4 -13.2L-51.7 -15L-50.8 -16.5L-49 -17.7L-47 -18.6L-45.4 -19.6L-44.7 -21L-45.1 -23L-46 -25.3L-46.7 -27.6L-46.6 -29.6L-45.4 -30.8L-43.3 -31.5L-41 -31.8L-38.9 -32.2L-37.7 -33.2L-37.2 -34.9L-37.2 -37.2L-37 -39.4L-36.3 -41.1L-34.7 -41.9L-32.4 -41.8L-29.9 -41.2L-27.8 -40.9L-26.2 -41.3L-25.2 -42.7L-24.6 -44.8L-23.9 -47L-22.9 -48.6L-21.3 -49.2L-19.3 -48.7L-17.2 -47.8L-15.3 -47L-13.7 -47.1L-12.4 -48.4L-11.3 -50.5L-10 -52.6L-8.6 -54.2L-6.9 -54.5L-5.1 -53.6L-3.3 -52.1L-1.6 -50.8L0 -50.2L1.6 -50.8L3.3 -52.1L5.1 -53.6L6.9 -54.5L8.6 -54.2L10 -52.6L11.3 -50.5L12.4 -48.4L13.7 -47.1L15.3 -47L17.2 -47.8L19.3 -48.7L21.3 -49.2L22.9 -48.6L23.9 -47L24.6 -44.8L25.2 -42.7L26.2 -41.3L27.8 -40.9L29.9 -41.2L32.4 -41.8L34.7 -41.9L36.3 -41.1L37 -39.4L37.2 -37.2L37.2 -34.9L37.7 -33.2L38.9 -32.2L41 -31.8L43.3 -31.5L45.4 -30.8L46.6 -29.6L46.7 -27.6L46 -25.3L45.1 -23L44.7 -21L45.4 -19.6L47 -18.6L49 -17.7L50.8 -16.5L51.7 -15L51.4 -13.2L50.3 -11.2L48.9 -9.3L48.2 -7.6L48.6 -6.1L50 -4.7L52 -3.3L53.8 -1.7L54.6 0Z" fill="url(#wax-g)"/><circle class="wax__line" r="41"/><circle class="wax__line wax__line--thin" r="26"/><text class="wax__text"><textPath href="#wax-ring" textLength="203" lengthAdjust="spacingAndGlyphs" data-i18n="home.c6.sealring">RGPD · LOPDGDD · CIFRADO · REGISTRO · </textPath></text><path class="wax__n" d="M-8 11V-11L8 11V-11"/><circle class="wax__eye" cy="-17" r="2"/></svg></div>
+            <ol class="votos">
+                <li class="rv"><span class="votos__n" aria-hidden="true">I</span><h3 data-i18n="home.c6.v1.t">Cumplimos el RGPD y la LOPDGDD.</h3><p data-i18n="home.c6.v1.d">Los datos de un club social son sensibles. Los tratamos así desde el primer día.</p></li>
+                <li class="rv"><span class="votos__n" aria-hidden="true">II</span><h3 data-i18n="home.c6.v2.t">Ciframos lo sensible.</h3><p data-i18n="home.c6.v2.d">Documentos y datos sensibles de cada socio se guardan cifrados.</p></li>
+                <li class="rv"><span class="votos__n" aria-hidden="true">III</span><h3 data-i18n="home.c6.v3.t">Anotamos cada acceso.</h3><p data-i18n="home.c6.v3.d">Un registro de accesos dice quién abrió qué ficha y cuándo.</p></li>
+                <li class="rv"><span class="votos__n" aria-hidden="true">IV</span><h3 data-i18n="home.c6.v4.t">Cada rol ve solo lo suyo.</h3><p data-i18n="home.c6.v4.d">Admin, encargado y dispensador tienen permisos distintos. Nadie ve más de lo que necesita.</p></li>
+            </ol>
+            <aside class="registro" aria-labelledby="reg-title">
+                <p class="registro__t" id="reg-title" data-i18n="home.c6.log.t">Registro de accesos · ejemplo</p>
+                <ol class="registro__list">
+                    <li><time>18:42</time><span data-i18n="home.c6.log.1">dispensador · abrió la ficha nº 0147</span></li>
+                    <li><time>18:40</time><span data-i18n="home.c6.log.2">encargado · cerró la caja del turno</span></li>
+                    <li><time>18:31</time><span data-i18n="home.c6.log.3">puerta · QR nº 0147 · entrada</span></li>
+                    <li><time>17:05</time><span data-i18n="home.c6.log.4">admin · cambió el límite de un socio</span></li>
+                </ol>
+            </aside>
+        </div>
+    </section>
+
+    <section class="cap cap--origen" id="capitulo-7" data-cap aria-labelledby="c7-title">
+        <div class="folio">
+            <header class="cap__head">
+                <span class="cap__num" aria-hidden="true">VII</span>
+                <p class="runhead"><span data-i18n="ui.chapter">Capítulo</span><span class="runhead__n">VII</span><span class="runhead__dot" aria-hidden="true"></span><span data-i18n="home.c7.name">El origen</span></p>
+                <h2 class="cap__title" id="c7-title" data-i18n="home.c7.title">No nació en una oficina. Nació detrás de una barra, en Torrevieja.</h2>
+            </header>
+            <figure class="mapa">
+                <svg class="mapa__svg" viewBox="70 30 460 660" data-draw="scroll" aria-hidden="true" focusable="false">
+<path class="mapa__hatch" d="M465.1 46H520M462.1 54H480M458.6 62H520M453 70H520M448.8 78H480M440.3 86H520M427 94H520M400.3 102H480M384.4 110H520M378 118H520M375.5 126H480M372.9 134H520M370.1 142H520M367.9 150H480M366.1 158H520M363.8 166H520M360.8 174H480M357 182H520M355.8 190H520M353.9 198H480M352.6 206H520M354.2 214H520M357 222H480M357.5 230H520M358 238H520M345 246H480M330.6 254H520M316.2 262H520M304.4 270H480M295.3 278H520M288.1 286H520M282.9 294H480M278.9 302H520M274.6 310H520M270.3 318H480M265.8 326H520M260.6 334H520M255 342H480M248.9 350H520M244.4 358H520M241.5 366H480M239.8 374H520M238.8 382H520M237.8 390H480M236.8 398H520M236.2 406H520M235.5 414H480M234.6 422H520M233.2 430H520M232.9 438H480M232.5 446H520M230.9 454H520M228.7 462H480M226.3 470H520M223.3 478H520M218.5 486H480M212.9 494H520M207 502H520M202 510H480M198.6 518H520M196.8 526H520M195 534H480M190.6 542H520M186.1 550H520M179.8 558H480M172.8 566H520M167.3 574H520M163.3 582H480M162.2 590H520M161.4 598H520M160.4 606H480M159.6 614H520M158.2 622H520M156.5 630H480M154.6 638H520M152.3 646H520M150.7 654H480M150.2 662H520M149.7 670H520"/>
+<path class="d mapa__depth" style="--k:0.25" d="M474 40C473 43.5 470.8 54.1 468.2 61.2C465.7 68.3 463.6 77.1 458.6 82.6C453.7 88.2 445.3 91.9 438.6 94.6C432 97.3 425.3 96.9 418.6 99.1C411.9 101.3 402.8 104.4 398.3 107.7C393.9 111 394.3 113.6 392.1 118.9C389.9 124.3 388.4 132.5 385.2 139.8C382 147.1 376.3 155.8 372.8 162.9C369.2 170.1 365.6 175.8 363.9 182.6C362.1 189.3 361.2 196.5 362.4 203.3C363.7 210 370.1 217.2 371.3 223C372.6 228.8 372.2 233.9 370 237.9C367.9 241.9 363.4 243.9 358.5 246.9C353.5 249.9 346.2 252.7 340.2 255.8C334.1 258.9 327.8 261.4 322.2 265.5C316.5 269.7 311.2 275.7 306.2 280.7C301.2 285.6 296.7 289.9 292.2 295.4C287.7 300.8 283.6 307 279.4 313.5C275.2 320 270.4 328 267 334.3C263.6 340.6 261.1 344.9 259 351.2C256.9 357.6 255.6 365 254.3 372.3C253 379.6 252.2 387.3 251.3 395.1C250.4 403 250.2 411.5 248.9 419.3C247.6 427.1 245.8 434.7 243.7 441.9C241.6 449 238.6 455.5 236.1 462C233.6 468.4 231.5 474.2 228.8 480.6C226.1 487 222.6 494.5 219.9 500.4C217.1 506.2 214.4 510 212.3 515.7C210.3 521.5 209.9 528.9 207.5 535C205.1 541 202.1 546.6 198 552C194 557.4 187.3 562.1 183.2 567.3C179 572.6 175.4 577.4 172.9 583.5C170.4 589.7 169.3 597.1 168.1 604.4C166.9 611.6 166.8 619.1 165.9 626.8C165.1 634.6 163.8 642 163.1 650.9C162.4 659.7 162.2 675.1 162 680"/>
+<path class="d mapa__depth mapa__depth--far" style="--k:0.35" d="M500 40C499 43.5 496.8 54.1 494.2 61.2C491.7 68.3 489.6 77.1 484.6 82.6C479.7 88.2 471.3 91.9 464.6 94.6C458 97.3 451.3 96.9 444.6 99.1C437.9 101.3 428.8 104.4 424.3 107.7C419.9 111 420.3 113.6 418.1 118.9C415.9 124.3 414.4 132.5 411.2 139.8C408 147.1 402.3 155.8 398.8 162.9C395.2 170.1 391.6 175.8 389.9 182.6C388.1 189.3 387.2 196.5 388.4 203.3C389.7 210 396.1 217.2 397.3 223C398.6 228.8 398.2 233.9 396 237.9C393.9 241.9 389.4 243.9 384.5 246.9C379.5 249.9 372.2 252.7 366.2 255.8C360.1 258.9 353.8 261.4 348.2 265.5C342.5 269.7 337.2 275.7 332.2 280.7C327.2 285.6 322.7 289.9 318.2 295.4C313.7 300.8 309.6 307 305.4 313.5C301.2 320 296.4 328 293 334.3C289.6 340.6 287.1 344.9 285 351.2C282.9 357.6 281.6 365 280.3 372.3C279 379.6 278.2 387.3 277.3 395.1C276.4 403 276.2 411.5 274.9 419.3C273.6 427.1 271.8 434.7 269.7 441.9C267.6 449 264.6 455.5 262.1 462C259.6 468.4 257.5 474.2 254.8 480.6C252.1 487 248.6 494.5 245.9 500.4C243.1 506.2 240.4 510 238.3 515.7C236.3 521.5 235.9 528.9 233.5 535C231.1 541 228.1 546.6 224 552C220 557.4 213.3 562.1 209.2 567.3C205 572.6 201.4 577.4 198.9 583.5C196.4 589.7 195.3 597.1 194.1 604.4C192.9 611.6 192.8 619.1 191.9 626.8C191.1 634.6 189.8 642 189.1 650.9C188.4 659.7 188.2 675.1 188 680"/>
+<path class="d mapa__coast" style="--k:0" d="M452 40C451 43.5 448.8 54.1 446.2 61.2C443.7 68.3 441.6 77.1 436.6 82.6C431.7 88.2 423.3 91.9 416.6 94.6C410 97.3 403.3 96.9 396.6 99.1C389.9 101.3 380.8 104.4 376.3 107.7C371.9 111 372.3 113.6 370.1 118.9C367.9 124.3 366.4 132.5 363.2 139.8C360 147.1 354.3 155.8 350.8 162.9C347.2 170.1 343.6 175.8 341.9 182.6C340.1 189.3 339.2 196.5 340.4 203.3C341.7 210 348.1 217.2 349.3 223C350.6 228.8 350.2 233.9 348 237.9C345.9 241.9 341.4 243.9 336.5 246.9C331.5 249.9 324.2 252.7 318.2 255.8C312.1 258.9 305.8 261.4 300.2 265.5C294.5 269.7 289.2 275.7 284.2 280.7C279.2 285.6 274.7 289.9 270.2 295.4C265.7 300.8 261.6 307 257.4 313.5C253.2 320 248.4 328 245 334.3C241.6 340.6 239.1 344.9 237 351.2C234.9 357.6 233.6 365 232.3 372.3C231 379.6 230.2 387.3 229.3 395.1C228.4 403 228.2 411.5 226.9 419.3C225.6 427.1 223.8 434.7 221.7 441.9C219.6 449 216.6 455.5 214.1 462C211.6 468.4 209.5 474.2 206.8 480.6C204.1 487 200.6 494.5 197.9 500.4C195.1 506.2 192.4 510 190.3 515.7C188.3 521.5 187.9 528.9 185.5 535C183.1 541 180.1 546.6 176 552C172 557.4 165.3 562.1 161.2 567.3C157 572.6 153.4 577.4 150.9 583.5C148.4 589.7 147.3 597.1 146.1 604.4C144.9 611.6 144.8 619.1 143.9 626.8C143.1 634.6 141.8 642 141.1 650.9C140.4 659.7 140.2 675.1 140 680"/>
+<path class="d mapa__river" style="--k:0.3" d="M234 352C222 349 210 345 198 347S174 352 162 344 140 334 126 338 100 342 84 336"/>
+<path class="mapa__lagoon" d="M209.7 409.1C212.6 422.6 208.8 434.8 201.2 436.5C193.6 438.1 185.2 428.4 182.3 414.9C179.4 401.4 183.2 389.2 190.8 387.5C198.4 385.9 206.8 395.6 209.7 409.1Z"/><path class="mapa__lagoon" d="M199.3 456.7C203.8 474.4 197.8 491.1 186 494C174.2 497 161.1 485 156.7 467.3C152.2 449.6 158.2 432.9 170 430C181.8 427 194.9 439 199.3 456.7Z"/><path class="mapa__isle" d="M388.5 280.9C389 282.5 385.7 285.1 381 286.8C376.4 288.5 372.1 288.6 371.5 287.1C371 285.5 374.3 282.9 379 281.2C383.6 279.5 387.9 279.4 388.5 280.9Z"/>
+<path class="mapa__rose" d="M462 552L463.5 570.3L470.5 565.5L465.7 572.5L484 574L465.7 575.5L470.5 582.5L463.5 577.7L462 596L460.5 577.7L453.5 582.5L458.3 575.5L440 574L458.3 572.5L453.5 565.5L460.5 570.3Z"/><circle class="mapa__rose-c" cx="462" cy="574" r="30"/><text class="mapa__n" x="462" y="538" text-anchor="middle">N</text>
+<g class="mapa__pin"><circle cx="214" cy="470" r="11"/><circle class="mapa__pin-dot" cx="214" cy="470" r="3.6"/></g>
+<circle class="mapa__town" cx="370" cy="112" r="3"/><circle class="mapa__town" cx="306" cy="262" r="2.6"/><circle class="mapa__town" cx="236" cy="356" r="2.4"/>
+<text class="mapa__lbl" x="382" y="118" data-i18n="home.c7.m.alicante">Alicante</text>
+<text class="mapa__lbl" x="318" y="270" data-i18n="home.c7.m.santapola">Santa Pola</text>
+<text class="mapa__lbl mapa__lbl--sm" x="392" y="300" data-i18n="home.c7.m.tabarca">Tabarca</text>
+<text class="mapa__lbl mapa__lbl--sm" x="246" y="360" data-i18n="home.c7.m.guardamar">Guardamar</text>
+<text class="mapa__lbl mapa__lbl--big" x="236" y="478" data-i18n="home.c7.m.torrevieja">Torrevieja</text>
+<text class="mapa__lbl mapa__lbl--it" x="150" y="512" text-anchor="middle" data-i18n="home.c7.m.lagoon">Lagunas saladas</text>
+<text class="mapa__lbl mapa__lbl--sea" x="370" y="406" text-anchor="middle" data-i18n="home.c7.m.sea">Mar Mediterráneo</text>
+<text class="mapa__lbl mapa__lbl--coast" x="300" y="200" text-anchor="middle" transform="rotate(-62 300 200)" data-i18n="home.c7.m.coast">Costa Blanca</text>
+</svg>
+                <figcaption class="marg" data-i18n="home.c7.mapcap">Costa Blanca, entre Alicante y Torrevieja. Aquí empezó todo.</figcaption>
+            </figure>
+            <div class="origen__text">
+                <p class="dropcap rv" data-i18n="home.c7.p">Cada arcano salió de un problema real del turno: la cola del viernes, las carpetas de avales, la caja de madrugada. Por eso el panel habla español, ruso e inglés, como los socios de la Costa Blanca.</p>
+            </div>
+        </div>
+        <div class="invocacion">
+            <div class="spores" data-spores="18" aria-hidden="true"></div>
+            <div class="folio">
+                <p class="invocacion__word" data-i18n-html="home.c7.final">Abre el <em>círculo.</em></p>
+                <div class="invocacion__act">
+                    <p class="invocacion__text" data-i18n="home.c7.finaltext">Prueba Nagual con tu equipo. Sin permanencia, y con tus socios migrados gratis desde el plan Club.</p>
+                    <a class="seal" href="ofrendas.html#altar" aria-label="Probar gratis" data-i18n-attr="aria-label:cta.trial"><svg class="seal__ring" viewBox="0 0 160 160" aria-hidden="true" focusable="false"><defs><path id="seal-b" d="M80 80m-61 0a61 61 0 1 1 122 0a61 61 0 1 1 -122 0"/></defs><circle class="seal__edge" cx="80" cy="80" r="77"/><circle class="seal__edge seal__edge--in" cx="80" cy="80" r="47"/><text class="seal__text"><textPath href="#seal-b" textLength="380" lengthAdjust="spacing" data-i18n="cta.ring">PROBAR GRATIS ✦ SIN PERMANENCIA ✦ </textPath></text></svg><span class="seal__core" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="colofon">
+<div class="colofon__inner">
+<div class="colofon__mark"><svg class="sigil sigil--foot" viewBox="-50 -50 100 100" aria-hidden="true" focusable="false"><circle class="s-g" r="42"/><circle class="s-j" r="35" stroke-dasharray="1.6 3.6"/><path class="s-g" d="M0 -42L0 -49M29.7 -29.7L34.6 -34.6M42 0L49 0M29.7 29.7L34.6 34.6M0 42L0 49M-29.7 29.7L-34.6 34.6M-42 0L-49 0M-29.7 -29.7L-34.6 -34.6"/><path class="s-n" d="M-13 19V-19L13 19V-19"/><circle class="s-e" cy="-27" r="3"/></svg><span class="colofon__word">NAGUAL</span></div>
+<p class="colofon__about" data-i18n="foot.about">Nagual es un CRM para asociaciones cannábicas y clubes sociales. Nació dentro de un club en Torrevieja, en la Costa Blanca.</p>
+<div class="colofon__cols">
+<div><p class="colofon__h" data-i18n="foot.pages">Páginas</p><nav class="colofon__nav" aria-label="Páginas" data-i18n-attr="aria-label:ui.pages"><a href="index.html" data-i18n="nav.home">Códice</a><a href="arcanos.html" data-i18n="nav.arc">Arcanos</a><a href="ofrendas.html" data-i18n="nav.of">Ofrendas</a><a href="diario.html" data-i18n="nav.dia">Diario</a></nav></div>
+<div><p class="colofon__h" data-i18n="foot.enter">Entrar</p><div class="colofon__nav"><a href="https://crm.nagual.club/" data-proto="crm" data-i18n="cta.crm">Entrar al CRM</a><a href="https://crm.nagual.club/socio" data-proto="socio" data-i18n="cta.member">Soy socio</a></div></div>
+<div><p class="colofon__h" data-i18n="foot.lang">Idioma y modo</p><div class="colofon__tools"><div class="langs " role="group" aria-label="Idioma" data-i18n-attr="aria-label:ui.lang"><button type="button" data-lang-btn="es" aria-pressed="true" lang="es" aria-label="Español">ES</button><button type="button" data-lang-btn="ru" aria-pressed="false" lang="ru" aria-label="Русский">RU</button></div><button type="button" class="mode-btn mode-btn--wide" data-mode-btn aria-pressed="false" aria-label="Modo claro" title="Modo claro" data-i18n-attr="aria-label:ui.light;title:ui.light"><svg class="ico ico--mode" viewBox="-12 -12 24 24" aria-hidden="true" focusable="false"><circle r="8.5"/><path class="fill" d="M0 -8.5A8.5 8.5 0 0 1 0 8.5Z"/></svg></button></div><p class="colofon__small" data-i18n="foot.speaks">El panel habla español, ruso e inglés.</p></div>
+</div>
+<div class="colofon__rule" aria-hidden="true"><span></span></div>
+<p class="colofon__fine"><span data-i18n="foot.copy">© 2026 Nagual · Torrevieja</span><span data-i18n="foot.fine">Prototipo de diseño · datos y precios de ejemplo</span><span class="colofon__type" data-i18n="foot.type">Compuesto en Cormorant Garamond, Forum y Geologica.</span></p>
+</div>
+</footer>
+<dialog class="wheel" id="wheel" aria-labelledby="wheel-title">
+<div class="wheel__frame">
+<p class="wheel__title" id="wheel-title" data-i18n="ui.index">Índice</p>
+<button type="button" class="wheel__close" data-wheel-close aria-label="Cerrar" data-i18n-attr="aria-label:ui.close"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+<div class="wheel__dial"><svg class="geo geo--wheel" viewBox="-100 -100 200 200" aria-hidden="true" focusable="false"><circle class="g" r="98"/><circle class="g2" r="96"/><path class="geo__ticks" d="M0 -96L0 -89M8.4 -95.6L8.1 -92.1M16.7 -94.5L16.1 -91.1M24.8 -92.7L23.9 -89.3M32.8 -90.2L31.6 -86.9M40.6 -87L39.1 -83.8M48 -83.1L44.5 -77.1M55.1 -78.6L53.1 -75.8M61.7 -73.5L59.5 -70.9M67.9 -67.9L65.4 -65.4M73.5 -61.7L70.9 -59.5M78.6 -55.1L75.8 -53.1M83.1 -48L77.1 -44.5M87 -40.6L83.8 -39.1M90.2 -32.8L86.9 -31.6M92.7 -24.8L89.3 -23.9M94.5 -16.7L91.1 -16.1M95.6 -8.4L92.1 -8.1M96 0L89 0M95.6 8.4L92.1 8.1M94.5 16.7L91.1 16.1M92.7 24.8L89.3 23.9M90.2 32.8L86.9 31.6M87 40.6L83.8 39.1M83.1 48L77.1 44.5M78.6 55.1L75.8 53.1M73.5 61.7L70.9 59.5M67.9 67.9L65.4 65.4M61.7 73.5L59.5 70.9M55.1 78.6L53.1 75.8M48 83.1L44.5 77.1M40.6 87L39.1 83.8M32.8 90.2L31.6 86.9M24.8 92.7L23.9 89.3M16.7 94.5L16.1 91.1M8.4 95.6L8.1 92.1M0 96L0 89M-8.4 95.6L-8.1 92.1M-16.7 94.5L-16.1 91.1M-24.8 92.7L-23.9 89.3M-32.8 90.2L-31.6 86.9M-40.6 87L-39.1 83.8M-48 83.1L-44.5 77.1M-55.1 78.6L-53.1 75.8M-61.7 73.5L-59.5 70.9M-67.9 67.9L-65.4 65.4M-73.5 61.7L-70.9 59.5M-78.6 55.1L-75.8 53.1M-83.1 48L-77.1 44.5M-87 40.6L-83.8 39.1M-90.2 32.8L-86.9 31.6M-92.7 24.8L-89.3 23.9M-94.5 16.7L-91.1 16.1M-95.6 8.4L-92.1 8.1M-96 0L-89 0M-95.6 -8.4L-92.1 -8.1M-94.5 -16.7L-91.1 -16.1M-92.7 -24.8L-89.3 -23.9M-90.2 -32.8L-86.9 -31.6M-87 -40.6L-83.8 -39.1M-83.1 -48L-77.1 -44.5M-78.6 -55.1L-75.8 -53.1M-73.5 -61.7L-70.9 -59.5M-67.9 -67.9L-65.4 -65.4M-61.7 -73.5L-59.5 -70.9M-55.1 -78.6L-53.1 -75.8M-48 -83.1L-44.5 -77.1M-40.6 -87L-39.1 -83.8M-32.8 -90.2L-31.6 -86.9M-24.8 -92.7L-23.9 -89.3M-16.7 -94.5L-16.1 -91.1M-8.4 -95.6L-8.1 -92.1"/><circle class="j" r="80" stroke-dasharray="1 4"/><path class="g2" d="M0 -62L43.8 43.8L-62 0L43.8 -43.8L0 62L-43.8 -43.8L62 0L-43.8 43.8L0 -62Z"/><circle class="j" r="44"/></svg>
+<nav class="wheel__pages" aria-label="Páginas" data-i18n-attr="aria-label:ui.pages"><a class="wheel__page" href="index.html" style="--a:-90deg" aria-current="page"><b data-i18n="nav.home">Códice</b><small data-i18n="nav.home.sub">Inicio</small></a><a class="wheel__page" href="arcanos.html" style="--a:0deg"><b data-i18n="nav.arc">Arcanos</b><small data-i18n="nav.arc.sub">Funciones</small></a><a class="wheel__page" href="ofrendas.html" style="--a:90deg"><b data-i18n="nav.of">Ofrendas</b><small data-i18n="nav.of.sub">Precios y comienzo</small></a><a class="wheel__page" href="diario.html" style="--a:180deg"><b data-i18n="nav.dia">Diario</b><small data-i18n="nav.dia.sub">Guías</small></a></nav>
+<div class="wheel__core"><svg class="sigil sigil--core" viewBox="-50 -50 100 100" aria-hidden="true" focusable="false"><circle class="s-g" r="42"/><circle class="s-j" r="35" stroke-dasharray="1.6 3.6"/><path class="s-g" d="M0 -42L0 -49M29.7 -29.7L34.6 -34.6M42 0L49 0M29.7 29.7L34.6 34.6M0 42L0 49M-29.7 29.7L-34.6 34.6M-42 0L-49 0M-29.7 -29.7L-34.6 -34.6"/><path class="s-n" d="M-13 19V-19L13 19V-19"/><circle class="s-e" cy="-27" r="3"/></svg><a class="btn btn--jade" href="https://crm.nagual.club/" data-proto="crm" data-i18n="cta.crm">Entrar al CRM</a><a class="wheel__member" href="https://crm.nagual.club/socio" data-proto="socio" data-i18n="cta.member">Soy socio</a></div>
+</div>
+<nav class="wheel__chapters" aria-label="Capítulos de esta página" data-i18n-attr="aria-label:ui.chapters"><ol><li><a class="wheel__cap" href="#capitulo-1"><span class="wheel__num">I</span><span data-i18n="home.c1.name">El caos</span></a></li><li><a class="wheel__cap" href="#capitulo-2"><span class="wheel__num">II</span><span data-i18n="home.c2.name">El camino</span></a></li><li><a class="wheel__cap" href="#capitulo-3"><span class="wheel__num">III</span><span data-i18n="home.c3.name">Los arcanos</span></a></li><li><a class="wheel__cap" href="#capitulo-4"><span class="wheel__num">IV</span><span data-i18n="home.c4.name">El círculo</span></a></li><li><a class="wheel__cap" href="#capitulo-5"><span class="wheel__num">V</span><span data-i18n="home.c5.name">La ofrenda</span></a></li><li><a class="wheel__cap" href="#capitulo-6"><span class="wheel__num">VI</span><span data-i18n="home.c6.name">El juramento</span></a></li><li><a class="wheel__cap" href="#capitulo-7"><span class="wheel__num">VII</span><span data-i18n="home.c7.name">El origen</span></a></li></ol></nav>
+<div class="wheel__tools"><div class="langs " role="group" aria-label="Idioma" data-i18n-attr="aria-label:ui.lang"><button type="button" data-lang-btn="es" aria-pressed="true" lang="es" aria-label="Español">ES</button><button type="button" data-lang-btn="ru" aria-pressed="false" lang="ru" aria-label="Русский">RU</button></div><button type="button" class="mode-btn mode-btn--wide" data-mode-btn aria-pressed="false" aria-label="Modo claro" title="Modo claro" data-i18n-attr="aria-label:ui.light;title:ui.light"><svg class="ico ico--mode" viewBox="-12 -12 24 24" aria-hidden="true" focusable="false"><circle r="8.5"/><path class="fill" d="M0 -8.5A8.5 8.5 0 0 1 0 8.5Z"/></svg></button></div>
+</div>
+</dialog>
+<div class="toast" role="status" aria-live="polite" hidden></div>
+<span class="vh" id="turn-lbl" data-i18n="ui.turn">Girar la carta</span>
+<script src="fluid.js"></script>
+<script src="nagual.js"></script>

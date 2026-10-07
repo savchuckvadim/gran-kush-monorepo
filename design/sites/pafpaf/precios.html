@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Precios — PafPaf</title>
+<meta name="description" content="Precios de PafPaf: Calada, Club y Cadena. Sin permanencia, con el IVA a la vista y migración incluida desde el plan Club." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" />
+<link rel="stylesheet" href="pafpaf.css" />
+</head>
+<body>
+<script>window.PP_PAGE = { id: "precios", title: "meta.precios" };</script>
+<canvas class="cosmos" id="cosmos" aria-hidden="true"></canvas>
+<header class="gnav" data-gnav></header>
+<nav class="lnav" data-lnav aria-label="PafPaf"></nav>
+
+<main>
+    <section class="s-light f-hero" data-pricing>
+        <div class="wrap center">
+            <span class="eyebrow" data-i18n="p.eyebrow">Precios</span>
+            <h1 class="h1 reveal" data-i18n-html="p.h1">Claros. Con el IVA<br />a la vista.</h1>
+            <p class="lede center reveal d1" style="margin-top: 22px" data-i18n="p.lede">Sin permanencia y sin coste de alta. Pruébalo gratis antes de pagar.</p>
+            <div style="margin-top: 44px">
+                <div class="seg" role="group" aria-label="Facturación">
+                    <button type="button" data-billing="m" aria-pressed="true" data-i18n="p.m">Mensual</button>
+                    <button type="button" data-billing="y" aria-pressed="false" data-i18n="p.y">Anual · −20 %</button>
+                </div>
+            </div>
+            <div class="calc">
+                <label for="members"><span data-i18n="p.q">¿Cuántos socios tiene tu club?</span><output id="membersOut" for="members">400</output></label>
+                <input type="range" id="members" min="30" max="3000" step="10" value="400" />
+                <p id="recoText" aria-live="polite"></p>
+            </div>
+        </div>
+    </section>
+
+    <section class="s-light" style="padding-bottom: 120px">
+        <div class="wrap-l">
+            <div class="plans">
+                <article class="plan" data-plan="calada">
+                    <span class="plan__badge" data-i18n="p.badge">Recomendado</span>
+                    <h3>Calada</h3>
+                    <p class="plan__for" data-i18n="pl.1.for">Para clubes que empiezan</p>
+                    <div class="plan__price" data-price></div>
+                    <p class="plan__vat" data-vat></p>
+                    <ul>
+                        <li data-i18n="pl.1.f1">Hasta 300 socios</li>
+                        <li data-i18n="pl.1.f2">CRM, zona del socio y entrada QR</li>
+                        <li data-i18n="pl.1.f3">Pedidos y stock</li>
+                        <li data-i18n="pl.1.f4">Soporte por chat</li>
+                    </ul>
+                    <a class="pill pill--ghost" href="#"><span data-i18n="p.choose">Elegir</span>&nbsp;Calada</a>
+                </article>
+                <article class="plan" data-plan="club">
+                    <span class="plan__badge" data-i18n="p.badge">Recomendado</span>
+                    <h3>Club</h3>
+                    <p class="plan__for" data-i18n="pl.2.for">Para el club que va en serio</p>
+                    <div class="plan__price" data-price></div>
+                    <p class="plan__vat" data-vat></p>
+                    <ul>
+                        <li data-i18n="pl.2.f1">Hasta 1.500 socios</li>
+                        <li data-i18n="pl.2.f2">Todo lo de Calada</li>
+                        <li data-i18n="pl.2.f3">Caja e informes</li>
+                        <li data-i18n="pl.2.f4">Roles del equipo</li>
+                        <li data-i18n="pl.2.f5">Migración incluida</li>
+                    </ul>
+                    <a class="pill" href="#"><span data-i18n="p.choose">Elegir</span>&nbsp;Club</a>
+                </article>
+                <article class="plan" data-plan="cadena">
+                    <span class="plan__badge" data-i18n="p.badge">Recomendado</span>
+                    <h3>Cadena</h3>
+                    <p class="plan__for" data-i18n="pl.3.for">Para varios locales</p>
+                    <div class="plan__price" data-price></div>
+                    <p class="plan__vat" data-vat></p>
+                    <ul>
+                        <li data-i18n="pl.3.f1">Socios ilimitados</li>
+                        <li data-i18n="pl.3.f2">Varios clubes en una cuenta</li>
+                        <li data-i18n="pl.3.f3">Dominio y marca propios</li>
+                        <li data-i18n="pl.3.f4">Soporte prioritario por WhatsApp</li>
+                    </ul>
+                    <a class="pill pill--ghost" href="#"><span data-i18n="p.choose">Elegir</span>&nbsp;Cadena</a>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="s-alt pad">
+        <div class="wrap">
+            <h2 class="h2 reveal" data-i18n="ad.h2">Extras.</h2>
+            <div class="addons">
+                <div class="addon"><div><b data-i18n="ad.1">Migración desde Excel u otra CRM</b><small data-i18n="ad.1s">Gratis con Club y Cadena</small></div><span>149 €</span></div>
+                <div class="addon"><div><b data-i18n="ad.2">Puesta en marcha guiada</b><small data-i18n="ad.2s">Una sesión con tu equipo</small></div><span>59 €</span></div>
+                <div class="addon"><div><b data-i18n="ad.3">Tarjetas de socio con QR</b><small data-i18n="ad.3s">50 unidades</small></div><span>39 €</span></div>
+                <div class="addon"><div><b data-i18n="ad.4">Dominio propio</b><small data-i18n="ad.4s">Tu club en tu dirección</small></div><span data-i18n="ad.4p">5 €/mes</span></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="s-light pad">
+        <div class="wrap">
+            <h2 class="h2 reveal" data-i18n="cmp.h2">Compara los planes.</h2>
+            <div class="cmp-wrap">
+                <table class="cmp">
+                    <thead>
+                        <tr><th></th><th>Calada</th><th>Club</th><th>Cadena</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td data-i18n="cmp.r1">Socios</td><td>300</td><td>1.500</td><td data-i18n="cmp.unl">Ilimitados</td></tr>
+                        <tr><td data-i18n="cmp.r2">Entrada por QR</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+                        <tr><td data-i18n="cmp.r3">Zona del socio</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+                        <tr><td data-i18n="cmp.r4">Pedidos y stock</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+                        <tr><td data-i18n="cmp.r5">Caja e informes</td><td class="n">—</td><td class="y">✓</td><td class="y">✓</td></tr>
+                        <tr><td data-i18n="cmp.r6">Roles del equipo</td><td class="n">—</td><td class="y">✓</td><td class="y">✓</td></tr>
+                        <tr><td data-i18n="cmp.r7">Varios clubes</td><td class="n">—</td><td class="n">—</td><td class="y">✓</td></tr>
+                        <tr><td data-i18n="cmp.r8">Dominio propio</td><td class="n">—</td><td class="n">—</td><td class="y">✓</td></tr>
+                        <tr><td data-i18n="cmp.r9">Migración incluida</td><td class="n">—</td><td class="y">✓</td><td class="y">✓</td></tr>
+                        <tr><td data-i18n="cmp.r10">Soporte</td><td data-i18n="cmp.chat">Chat</td><td data-i18n="cmp.chat">Chat</td><td data-i18n="cmp.prio">WhatsApp</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section class="s-alt pad">
+        <div class="wrap">
+            <h2 class="h2 reveal" data-i18n="faq.h2">Preguntas sobre el pago.</h2>
+            <div class="faq">
+                <details><summary data-i18n="faq.q1">¿Hay permanencia?</summary><p data-i18n="faq.a1">No.</p></details>
+                <details><summary data-i18n="faq.q2">¿Cómo se paga?</summary><p data-i18n="faq.a2"></p></details>
+                <details><summary data-i18n="faq.q3">¿Qué pasa con mis datos si me voy?</summary><p data-i18n="faq.a3"></p></details>
+                <details><summary data-i18n="faq.q4">¿Puedo cambiar de plan?</summary><p data-i18n="faq.a4"></p></details>
+            </div>
+        </div>
+    </section>
+
+    <section class="s-dark horizon clip">
+        <div class="aurora aurora--low" aria-hidden="true"></div>
+        <div class="planet" aria-hidden="true"></div>
+        <div class="wrap center horizon__inner">
+            <h2 class="h1 smoke-text" data-i18n-html="final.h2">Tu club, en órbita<br />esta misma semana.</h2>
+            <p class="lede center reveal" style="margin-top: 18px" data-i18n="final.p">Prueba gratis. Sin tarjeta.</p>
+            <div class="ctas"><a class="pill" href="#" data-i18n="cta.try">Probar gratis</a><a class="more" href="funciones.html" data-i18n="cta.features">Todas las funciones</a></div>
+        </div>
+    </section>
+</main>
+
+<footer class="foot" data-foot></footer>
+<script src="i18n.js"></script>
+<script src="pafpaf.js"></script>
+</body>
+</html>

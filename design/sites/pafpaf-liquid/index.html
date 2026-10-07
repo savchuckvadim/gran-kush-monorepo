@@ -1,0 +1,313 @@
+<title>PafPaf líquido</title>
+<meta name="description" content="PafPaf: la CRM para asociaciones cannábicas y clubes sociales. Socios con aval, entrada por QR, límite mensual, stock al gramo y caja. Fluido como el humo." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@300..800&display=swap" />
+<link rel="stylesheet" href="liquid.css" />
+<script>
+    (function () {
+        var m = null;
+        try { m = localStorage.getItem("pafpaf.liquid.mode"); } catch (e) {}
+        if (!document.documentElement.getAttribute("data-mode")) document.documentElement.setAttribute("data-mode", m === "light" ? "light" : "dark");
+    })();
+    window.PL_PAGE = { id: "home", title: "meta.home" };
+</script>
+
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
+    <defs>
+        <filter id="goo">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b" />
+            <feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9" />
+        </filter>
+        <filter id="goo-big" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="20" result="b" />
+            <feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 34 -14" />
+        </filter>
+        <filter id="liquid" x="0" y="0" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.006 0.018" numOctaves="2" seed="11" result="n" />
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="42" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+        <filter id="prism" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="1" seed="4" result="n" />
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="26" xChannelSelector="R" yChannelSelector="G" result="d" />
+            <feColorMatrix in="d" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r" />
+            <feOffset in="r" dx="-6" result="r2" />
+            <feColorMatrix in="d" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g" />
+            <feColorMatrix in="d" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b" />
+            <feOffset in="b" dx="6" result="b2" />
+            <feBlend in="r2" in2="g" mode="screen" result="rg" />
+            <feBlend in="rg" in2="b2" mode="screen" />
+        </filter>
+        <linearGradient id="auroraV" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#8f7bff" />
+            <stop offset=".55" stop-color="#ff6fae" />
+            <stop offset="1" stop-color="#ffbf5a" />
+        </linearGradient>
+        <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#7b61ff" />
+            <stop offset=".55" stop-color="#ff5fa2" />
+            <stop offset="1" stop-color="#ffb340" />
+        </linearGradient>
+    </defs>
+</svg>
+
+<canvas class="smoke" id="smoke" aria-hidden="true"></canvas>
+
+<nav class="nav glass" aria-label="PafPaf">
+    <a class="logo" href="index.html" aria-label="PafPaf">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="13.5" r="6.4" fill="url(#logoGrad)" /><circle cx="16.6" cy="8" r="4.3" fill="url(#logoGrad)" opacity=".82" /></svg>
+        <span>paf paf</span>
+    </a>
+    <div class="nav__links">
+        <div class="nav__goo" aria-hidden="true"><span class="nav__blob"></span><span class="nav__drop"></span></div>
+        <a href="#top" data-page="home" data-i18n="nav.inicio">Inicio</a>
+        <a href="#funciones" data-i18n="nav.funciones">Funciones</a>
+        <a href="#privacidad" data-i18n="nav.privacidad">Privacidad</a>
+        <a href="precios.html" data-page="precios" data-i18n="nav.precios">Precios</a>
+    </div>
+    <div class="nav__side">
+        <button type="button" class="chipbtn" data-lang-toggle aria-label="Idioma / Язык">RU</button>
+        <button type="button" class="lswitch glass" role="switch" aria-checked="false" aria-label="Día o noche / День или ночь">
+            <span class="lswitch__thumb">
+                <svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" /></svg>
+                <svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
+            </span>
+        </button>
+        <a class="lbtn lbtn--sm glass chipbtn--crm" href="#"><span class="lbtn__liq"><svg viewBox="0 0 120 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6 Q 7.5 0 15 6 T 30 6 T 45 6 T 60 6 T 75 6 T 90 6 T 105 6 T 120 6 V12 H0 Z" /></svg></span><span data-i18n="nav.crm">Entrar</span></a>
+    </div>
+</nav>
+
+<div class="topctl glass">
+    <button type="button" class="chipbtn" data-lang-toggle aria-label="Idioma / Язык">RU</button>
+    <button type="button" class="lswitch glass" role="switch" aria-checked="false" aria-label="Día o noche / День или ночь">
+        <span class="lswitch__thumb">
+            <svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" /></svg>
+            <svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
+        </span>
+    </button>
+</div>
+
+<main>
+    <section class="hero" id="top" data-spy>
+        <video class="hero__video" autoplay muted loop playsinline poster="assets/hero-smoke.jpg" src="assets/hero-smoke.mp4" aria-hidden="true"></video>
+        <div class="lens glass" aria-hidden="true"></div>
+        <div class="hero__inner wrap">
+            <span class="eyebrow" data-i18n="hero.eyebrow">PafPaf · CRM para clubes</span>
+            <h1 class="h1 smoke-text now" data-i18n-html="hero.h1">Fluido<br />como el humo.</h1>
+            <p class="lede fade-late" data-i18n="hero.lede">Socios, entrada, stock y caja en una sola pantalla. Sin colas, sin carpetas, sin fricción.</p>
+            <div class="ctas fade-late">
+                <a class="lbtn lbtn--primary glass" href="precios.html"><span class="lbtn__liq"><svg viewBox="0 0 120 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6 Q 7.5 0 15 6 T 30 6 T 45 6 T 60 6 T 75 6 T 90 6 T 105 6 T 120 6 V12 H0 Z" /></svg></span><span data-i18n="cta.try">Probar gratis</span></a>
+                <a class="lbtn glass" href="#entrada"><span class="lbtn__liq"><svg viewBox="0 0 120 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6 Q 7.5 0 15 6 T 30 6 T 45 6 T 60 6 T 75 6 T 90 6 T 105 6 T 120 6 V12 H0 Z" /></svg></span><span data-i18n="cta.flow">Ver cómo fluye</span></a>
+            </div>
+            <div class="livebar glass fade-late">
+                <div><small><i></i><span data-i18n="live.in">Dentro ahora</span></small><b id="liveIn">23</b></div>
+                <div><small data-i18n="live.out">Retiradas hoy</small><b id="liveOut">64</b></div>
+                <div><small data-i18n="live.cash">Caja de hoy</small><b id="liveCash">1.284,50 €</b></div>
+            </div>
+        </div>
+        <p class="hint" aria-hidden="true"><i></i><span data-i18n="hero.hint">Toca el humo</span></p>
+    </section>
+
+    <section class="sec" id="entrada">
+        <div class="wrap split">
+            <div>
+                <span class="eyebrow" data-i18n="door.eyebrow">Entrada</span>
+                <h2 class="h2 smoke-text" data-i18n-html="door.h2">Un QR.<br />Un segundo.</h2>
+                <p class="lede reveal" data-i18n="door.p">El socio enseña su QR y la CRM comprueba cuota, aval y límite antes de que guarde el móvil.</p>
+            </div>
+            <div class="vis" data-cycle data-step="0">
+                <div class="gphone glass">
+                    <span class="gphone__island"></span>
+                    <div class="gphone__screen">
+                        <div class="scr scr--0"><small data-i18n="ph.qr">Socia Nº 0147</small><div class="qr" data-seed="147"></div><b>Lucía Martín</b></div>
+                        <div class="scr scr--1">
+                            <span class="av">LM</span>
+                            <b>Lucía Martín</b>
+                            <div class="chips"><span class="g" data-i18n="ph.fee">Cuota al día</span><span data-i18n="ph.aval">Aval Nº 0098</span><span data-i18n="ph.lim">41 / 60 g</span></div>
+                        </div>
+                        <div class="scr scr--2">
+                            <div class="okdrop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></div>
+                            <b data-i18n="ph.ok">Entrada registrada</b>
+                            <small>18:42</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="sec" id="funciones" data-spy>
+        <div class="wrap center">
+            <span class="eyebrow" data-i18n="es.eyebrow">Funciones</span>
+            <h2 class="h2 smoke-text" data-i18n-html="es.h2">Todo el club,<br />en una pantalla.</h2>
+        </div>
+        <div class="wrap">
+            <div class="ggrid">
+                <div class="ggrid__goo" aria-hidden="true"><span class="ggrid__blob"></span><span class="ggrid__trail"></span></div>
+                <article class="gcard glass reveal">
+                    <span class="gcard__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><path d="M16 3.128a4 4 0 0 1 0 7.744" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><circle cx="9" cy="7" r="4" /></svg></span>
+                    <div><h3 data-i18n="c1.t">Socios con aval</h3><p data-i18n="c1.p">Alta en tres minutos, con firma en la pantalla.</p></div>
+                </article>
+                <article class="gcard glass reveal d1">
+                    <span class="gcard__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2" /><path d="M17 3h2a2 2 0 0 1 2 2v2" /><path d="M21 17v2a2 2 0 0 1-2 2h-2" /><path d="M7 21H5a2 2 0 0 1-2-2v-2" /><path d="M7 12h10" /></svg></span>
+                    <div><h3 data-i18n="c2.t">Entrada por QR</h3><p data-i18n="c2.p">Ves quién está dentro, en directo.</p></div>
+                </article>
+                <article class="gcard glass reveal d2">
+                    <span class="gcard__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 14 4-4" /><path d="M3.34 19a10 10 0 1 1 17.32 0" /></svg></span>
+                    <div><h3 data-i18n="c3.t">Límite mensual</h3><p data-i18n="c3.p">La CRM no deja pasarse.</p></div>
+                </article>
+                <article class="gcard glass reveal">
+                    <span class="gcard__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" /><path d="M12 22V12" /><polyline points="3.29 7 12 12 20.71 7" /><path d="m7.5 4.27 9 5.15" /></svg></span>
+                    <div><h3 data-i18n="c4.t">Stock al gramo</h3><p data-i18n="c4.p">Cada retirada descuenta sola.</p></div>
+                </article>
+                <article class="gcard glass reveal d1">
+                    <span class="gcard__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" /><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" /></svg></span>
+                    <div><h3 data-i18n="c5.t">Caja que cuadra</h3><p data-i18n="c5.p">El turno se cierra en un toque.</p></div>
+                </article>
+                <article class="gcard glass reveal d2">
+                    <span class="gcard__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2" /><path d="M12 18h.01" /></svg></span>
+                    <div><h3 data-i18n="c6.t">Zona del socio</h3><p data-i18n="c6.p">Su QR y su historial, en el móvil.</p></div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="sec" id="limite">
+        <div class="wrap split split--flip">
+            <div>
+                <span class="eyebrow" data-i18n="lim.eyebrow">Límite mensual</span>
+                <h2 class="h2 smoke-text" data-i18n-html="lim.h2">Hasta donde<br />diga el club.</h2>
+                <p class="lede reveal" data-i18n="lim.p">Mueve el control: la CRM suma la retirada al mes del socio y la frena si se pasa del límite.</p>
+                <div class="ctrl glass reveal d1">
+                    <label for="grams"><span data-i18n="lim.today">Retirada de hoy</span><output id="gramsOut" for="grams">2 g</output></label>
+                    <input class="lrange" type="range" id="grams" min="0" max="30" step="1" value="2" />
+                    <p class="verdict" id="verdict" aria-live="polite"></p>
+                </div>
+            </div>
+            <div class="vis">
+                <div class="gauge glass" id="gauge">
+                    <svg viewBox="0 0 200 200" aria-hidden="true">
+                        <defs><clipPath id="jar"><circle cx="100" cy="100" r="96" /></clipPath></defs>
+                        <g clip-path="url(#jar)">
+                            <g class="water" id="water">
+                                <path class="w2" d="M-50 6 Q -37.5 0 -25 6 T 0 6 T 25 6 T 50 6 T 75 6 T 100 6 T 125 6 T 150 6 T 175 6 T 200 6 T 225 6 T 250 6 T 275 6 T 300 6 T 325 6 T 350 6 T 375 6 T 400 6 V 260 H -50 Z" />
+                                <path class="w1" d="M0 6 Q 12.5 0 25 6 T 50 6 T 75 6 T 100 6 T 125 6 T 150 6 T 175 6 T 200 6 T 225 6 T 250 6 T 275 6 T 300 6 T 325 6 T 350 6 T 375 6 T 400 6 V 260 H 0 Z" />
+                            </g>
+                        </g>
+                    </svg>
+                    <div class="gauge__label"><b id="gaugeNum">43</b><small data-i18n="lim.of">de 60 g este mes</small></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="sec" id="clubes">
+        <div class="wrap split">
+            <div>
+                <span class="eyebrow" data-i18n="mc.eyebrow">Varios clubes</span>
+                <h2 class="h2 smoke-text" data-i18n-html="mc.h2">Tres clubes.<br />Una sola cuenta.</h2>
+                <p class="lede reveal" data-i18n="mc.p">Cada local con su equipo y sus socios. Tú lo ves todo desde el mismo sitio.</p>
+            </div>
+            <div class="vis">
+                <div class="meta" id="meta">
+                    <div class="meta__goo" aria-hidden="true">
+                        <span class="meta__ball" style="--c: var(--a1); --s: 160px" data-x="-130" data-y="-110"></span>
+                        <span class="meta__ball" style="--c: var(--a2); --s: 140px" data-x="140" data-y="-60"></span>
+                        <span class="meta__ball" style="--c: var(--a3); --s: 130px" data-x="-10" data-y="140"></span>
+                    </div>
+                    <span class="meta__label glass" data-x="-130" data-y="-110">Nube Norte</span>
+                    <span class="meta__label glass" data-x="140" data-y="-60">Brisa</span>
+                    <span class="meta__label glass" data-x="-10" data-y="140">Cala Mar</span>
+                    <span class="meta__one" aria-hidden="true">PafPaf</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="sec" id="privacidad" data-spy>
+        <div class="wrap split split--flip">
+            <div>
+                <span class="eyebrow" data-i18n="pv.eyebrow">Privacidad</span>
+                <h2 class="h2 smoke-text" data-i18n-html="pv.h2">Cada rol ve<br />solo lo suyo.</h2>
+                <p class="lede reveal" data-i18n="pv.p">Lo demás se queda tras el cristal.</p>
+                <div class="roles glass" data-roles role="group" aria-label="Rol">
+                    <button type="button" data-role="disp" aria-pressed="true" data-i18n="role.disp">Dispensación</button>
+                    <button type="button" data-role="enc" aria-pressed="false" data-i18n="role.enc">Encargado</button>
+                    <button type="button" data-role="admin" aria-pressed="false" data-i18n="role.admin">Administración</button>
+                </div>
+            </div>
+            <div class="vis">
+                <div class="record glass">
+                    <div class="record__top"><span class="av">LM</span><div><b>Lucía Martín</b><small class="small" data-i18n="rec.since">Socia desde 2024</small></div></div>
+                    <dl>
+                        <div><dt data-i18n="rec.no">Nº de socio</dt><dd>0147</dd></div>
+                        <div><dt data-i18n="rec.lim">Límite del mes</dt><dd>41 / 60 <span data-i18n="unit.g">g</span></dd></div>
+                        <div><dt data-i18n="rec.fee">Cuota</dt><dd data-min="enc" data-i18n="rec.feeV">Al día</dd></div>
+                        <div><dt data-i18n="rec.aval">Avalista</dt><dd data-min="enc">Nº 0098</dd></div>
+                        <div><dt data-i18n="rec.tel">Teléfono</dt><dd data-min="enc">+34 612 48 90 17</dd></div>
+                        <div><dt data-i18n="rec.doc">DNI / NIE</dt><dd data-min="admin">Y1234567X</dd></div>
+                        <div><dt data-i18n="rec.files">Documentos</dt><dd data-min="admin" data-i18n="rec.filesV">3 archivos</dd></div>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="sec center" id="precios">
+        <div class="wrap">
+            <span class="eyebrow" data-i18n="pr.eyebrow">Precios</span>
+            <h2 class="h2 smoke-text" data-i18n-html="pr.h2">Precios claros.</h2>
+            <p class="lede reveal" data-i18n="pr.p">Sin permanencia. Con el IVA a la vista.</p>
+            <div style="margin-top: 36px">
+                <div class="lseg glass" role="group" aria-label="Facturación">
+                    <div class="lseg__goo" aria-hidden="true"><span class="lseg__thumb"></span><span class="lseg__drop"></span></div>
+                    <button type="button" data-i18n="seg.m">Mensual</button>
+                    <button type="button" data-i18n="seg.y">Anual · −20 %</button>
+                </div>
+            </div>
+            <div class="plans">
+                <article class="plan glass reveal"><h3>Calada</h3><p class="plan__for" data-i18n="pl.1">Hasta 300 socios</p><div class="plan__price" data-price="calada"></div></article>
+                <article class="plan glass reveal d1"><h3>Club</h3><p class="plan__for" data-i18n="pl.2">Hasta 1.500 socios</p><div class="plan__price" data-price="club"></div></article>
+                <article class="plan glass reveal d2"><h3>Cadena</h3><p class="plan__for" data-i18n="pl.3">Varios clubes</p><div class="plan__price" data-price="cadena"></div></article>
+            </div>
+            <div class="ctas">
+                <a class="lbtn lbtn--primary glass" href="precios.html"><span class="lbtn__liq"><svg viewBox="0 0 120 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6 Q 7.5 0 15 6 T 30 6 T 45 6 T 60 6 T 75 6 T 90 6 T 105 6 T 120 6 V12 H0 Z" /></svg></span><span data-i18n="cta.prices">Ver precios</span></a>
+            </div>
+        </div>
+    </section>
+
+    <section class="final">
+        <div class="wrap">
+            <h2 class="h1 smoke-text final__h" data-i18n-html="fin.h2">Tu club, fluido<br />esta misma semana.</h2>
+            <p class="lede reveal" style="margin-left: auto; margin-right: auto" data-i18n="fin.p">Prueba gratis. Sin tarjeta.</p>
+            <div class="ctas">
+                <a class="lbtn lbtn--primary glass" href="precios.html"><span class="lbtn__liq"><svg viewBox="0 0 120 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6 Q 7.5 0 15 6 T 30 6 T 45 6 T 60 6 T 75 6 T 90 6 T 105 6 T 120 6 V12 H0 Z" /></svg></span><span data-i18n="cta.try">Probar gratis</span></a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="foot glass">
+    <div class="foot__row">
+        <a class="logo" href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="13.5" r="6.4" fill="url(#logoGrad)" /><circle cx="16.6" cy="8" r="4.3" fill="url(#logoGrad)" opacity=".82" /></svg><span>paf paf</span></a>
+        <div class="foot__links">
+            <a href="#funciones" data-i18n="nav.funciones">Funciones</a>
+            <a href="#privacidad" data-i18n="nav.privacidad">Privacidad</a>
+            <a href="precios.html" data-i18n="nav.precios">Precios</a>
+            <a href="#" data-i18n="nav.crm">Entrar</a>
+        </div>
+    </div>
+    <div class="foot__row">
+        <span data-i18n="foot.n1">Precios de ejemplo del prototipo.</span>
+        <span data-i18n="foot.n2">PafPaf es una CRM para asociaciones sin ánimo de lucro.</span>
+    </div>
+    <div class="foot__row">
+        <span>© 2026 PafPaf · paf-paf.app · <span data-i18n="foot.proto">Prototipo de diseño</span></span>
+        <span><button type="button" class="chipbtn" data-lang="es">ES</button><button type="button" class="chipbtn" data-lang="ru">RU</button></span>
+    </div>
+</footer>
+
+<script src="i18n.js"></script>
+<script src="fluid.js"></script>
+<script src="liquid.js"></script>

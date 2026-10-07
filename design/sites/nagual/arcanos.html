@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title data-i18n="meta.arc.title">Los ocho arcanos · Nagual</title>
+<meta name="description" content="Las ocho herramientas de Nagual para clubes sociales: entrada por QR, socios y avales, caja diaria, stock al gramo, límites mensuales, zona del socio, roles y privacidad."  data-i18n-attr="content:meta.arc.desc"/>
+<meta name="theme-color" content="#070d0a" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&amp;family=Forum&amp;family=Geologica:wght@300..600&amp;display=swap" />
+<link rel="stylesheet" href="nagual.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-50 -50 100 100'%3E%3Crect x='-50' y='-50' width='100' height='100' rx='22' fill='%23070d0a'/%3E%3Ccircle r='38' fill='none' stroke='%23e7c76a' stroke-width='4'/%3E%3Cpath d='M-13 19V-19L13 19V-19' fill='none' stroke='%2334e39a' stroke-width='7' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E" />
+<script>(function(){var r=document.documentElement,m=null,l=null;try{m=localStorage.getItem("nagual.mode");l=localStorage.getItem("nagual.lang")}catch(e){}if(!r.getAttribute("data-mode"))r.setAttribute("data-mode",m==="light"?"light":"dark");if(!r.getAttribute("data-lang"))r.setAttribute("data-lang",l==="ru"?"ru":"es");r.setAttribute("lang",r.getAttribute("data-lang"));r.className+=" js";setTimeout(function(){r.className+=" i18n-ready"},1800)})();</script>
+</head>
+<body>
+<a class="skip" href="#main" data-i18n="ui.skip">Saltar al contenido</a>
+<div class="grain" aria-hidden="true"></div>
+<header class="rail" aria-label="Navegación de Nagual" data-i18n-attr="aria-label:ui.rail">
+<a class="rail__sigil" href="index.html" aria-label="Nagual, inicio" data-i18n-attr="aria-label:ui.home"><svg class="sigil" viewBox="-50 -50 100 100" aria-hidden="true" focusable="false"><circle class="s-g" r="42"/><circle class="s-j" r="35" stroke-dasharray="1.6 3.6"/><path class="s-g" d="M0 -42L0 -49M29.7 -29.7L34.6 -34.6M42 0L49 0M29.7 29.7L34.6 34.6M0 42L0 49M-29.7 29.7L-34.6 34.6M-42 0L-49 0M-29.7 -29.7L-34.6 -34.6"/><path class="s-n" d="M-13 19V-19L13 19V-19"/><circle class="s-e" cy="-27" r="3"/></svg></a>
+<span class="rail__word" aria-hidden="true">NAGUAL</span>
+<nav class="rail__nav" aria-label="Capítulos de esta página" data-i18n-attr="aria-label:ui.chapters"><ol class="rail__list"><li><a class="rail__link" href="#el-guardian"><span class="rail__num">I</span><span class="rail__name" data-i18n="arc.1.name">El Guardián</span></a></li><li><a class="rail__link" href="#el-libro"><span class="rail__num">II</span><span class="rail__name" data-i18n="arc.2.name">El Libro</span></a></li><li><a class="rail__link" href="#la-balanza"><span class="rail__num">III</span><span class="rail__name" data-i18n="arc.3.name">La Balanza</span></a></li><li><a class="rail__link" href="#el-herbolario"><span class="rail__num">IV</span><span class="rail__name" data-i18n="arc.4.name">El Herbolario</span></a></li><li><a class="rail__link" href="#la-luna"><span class="rail__num">V</span><span class="rail__name" data-i18n="arc.5.name">La Luna</span></a></li><li><a class="rail__link" href="#el-circulo"><span class="rail__num">VI</span><span class="rail__name" data-i18n="arc.6.name">El Círculo</span></a></li><li><a class="rail__link" href="#la-llave"><span class="rail__num">VII</span><span class="rail__name" data-i18n="arc.7.name">La Llave</span></a></li><li><a class="rail__link" href="#el-sello"><span class="rail__num">VIII</span><span class="rail__name" data-i18n="arc.8.name">El Sello</span></a></li></ol><span class="rail__orbit" aria-hidden="true"><i></i></span></nav>
+<div class="rail__tools"><div class="langs langs--stack" role="group" aria-label="Idioma" data-i18n-attr="aria-label:ui.lang"><button type="button" data-lang-btn="es" aria-pressed="true" lang="es" aria-label="Español">ES</button><button type="button" data-lang-btn="ru" aria-pressed="false" lang="ru" aria-label="Русский">RU</button></div><button type="button" class="mode-btn " data-mode-btn aria-pressed="false" aria-label="Modo claro" title="Modo claro" data-i18n-attr="aria-label:ui.light;title:ui.light"><svg class="ico ico--mode" viewBox="-12 -12 24 24" aria-hidden="true" focusable="false"><circle r="8.5"/><path class="fill" d="M0 -8.5A8.5 8.5 0 0 1 0 8.5Z"/></svg></button><button type="button" class="index-btn" data-wheel-open aria-haspopup="dialog" aria-controls="wheel"><svg class="ico ico--star" viewBox="-12 -12 24 24" aria-hidden="true" focusable="false"><path d="M0 -10.5L1.6 -3.9L7.4 -7.4L3.9 -1.6L10.5 0L3.9 1.6L7.4 7.4L1.6 3.9L0 10.5L-1.6 3.9L-7.4 7.4L-3.9 1.6L-10.5 0L-3.9 -1.6L-7.4 -7.4L-1.6 -3.9Z"/><circle r="2.2"/></svg><span data-i18n="ui.index">Índice</span></button></div>
+</header>
+<button type="button" class="astro" data-wheel-open aria-haspopup="dialog" aria-controls="wheel" aria-label="Abrir el índice" data-i18n-attr="aria-label:ui.openIndex"><svg class="astro__ring" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><circle class="astro__track" cx="32" cy="32" r="29"/><circle class="astro__prog" cx="32" cy="32" r="29"/></svg><span class="astro__num" aria-hidden="true">✦</span></button>
+
+<main id="main" class="page page--arcanos">
+    <section class="opening opening--arcanos" aria-labelledby="arc-title">
+        <div class="topline">
+<a class="brandline" href="index.html" aria-label="Nagual, inicio" data-i18n-attr="aria-label:ui.home"><svg class="sigil" viewBox="-50 -50 100 100" aria-hidden="true" focusable="false"><circle class="s-g" r="42"/><circle class="s-j" r="35" stroke-dasharray="1.6 3.6"/><path class="s-g" d="M0 -42L0 -49M29.7 -29.7L34.6 -34.6M42 0L49 0M29.7 29.7L34.6 34.6M0 42L0 49M-29.7 29.7L-34.6 34.6M-42 0L-49 0M-29.7 -29.7L-34.6 -34.6"/><path class="s-n" d="M-13 19V-19L13 19V-19"/><circle class="s-e" cy="-27" r="3"/></svg><span>NAGUAL</span></a>
+<div class="topline__enter"><a href="https://crm.nagual.club/" data-proto="crm" data-i18n="cta.crm">Entrar al CRM</a><a href="https://crm.nagual.club/socio" data-proto="socio" data-i18n="cta.member">Soy socio</a></div>
+<div class="langs langs--top" role="group" aria-label="Idioma" data-i18n-attr="aria-label:ui.lang"><button type="button" data-lang-btn="es" aria-pressed="true" lang="es" aria-label="Español">ES</button><button type="button" data-lang-btn="ru" aria-pressed="false" lang="ru" aria-label="Русский">RU</button></div>
+</div>
+        <div class="spores" data-spores="16" aria-hidden="true"></div>
+        <div class="folio">
+            <div class="opening__text">
+                <p class="eyebrow" data-i18n="arc.o.eyebrow">Arcanos · lo que hace Nagual</p>
+                <h1 class="opening__title" id="arc-title" data-i18n-html="arc.o.h1">Los ocho <em>arcanos</em></h1>
+                <p class="opening__lead" data-i18n="arc.o.lead">Una baraja para todo lo que pasa en el club: la puerta, el libro, la caja, el inventario, los límites, los socios, las llaves y el sello. Elige una carta.</p>
+                <p class="marg opening__hint" data-i18n="arc.o.hint">Cada carta lleva a su lectura.</p>
+            </div>
+            <nav class="fan" aria-label="Elige un arcano" data-i18n-attr="aria-label:arc.o.fan"><a class="fan__card face" href="#el-guardian" style="--i:0"><span class="fan__num">I</span><svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path d="M28 92V58a22 22 0 0 1 44 0v34"/><path class="g" d="M23 92V57a27 27 0 0 1 54 0v35" stroke-dasharray="1 3.2"/><path d="M18 92h64"/><path d="M38 58h8v8h-8zM54 58h8v8h-8zM38 74h8v8h-8z"/><path class="f" d="M40.5 60.5h3v3h-3zM56.5 60.5h3v3h-3zM40.5 76.5h3v3h-3zM50 58h2v2h-2zM50 62h2v4h-2zM50 70h2v2h-2zM54 70h2v2h-2zM58 70h4v2h-4zM54 74h2v4h-2zM58 76h4v2h-4zM50 78h2v4h-2zM58 80h2v2h-2z"/><path class="g" d="M35 21q15-13 30 0q-15 13-30 0z"/><circle class="g" cx="50" cy="21" r="4.2"/><circle class="f fg" cx="50" cy="21" r="1.7"/><path class="g" d="M50 3v5M38.5 6l2.6 4.2M61.5 6l-2.6 4.2M30 12.5l3.8 2.6M70 12.5l-3.8 2.6"/></svg><span class="fan__name" data-i18n="arc.1.name">El Guardián</span></a><a class="fan__card face" href="#el-libro" style="--i:1"><span class="fan__num">II</span><svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path d="M12 37v39q20-6 38 2q18-8 38-2V37"/><path d="M50 34q-16-8-34-2v40q18-6 34 2q16-8 34-2V32q-18-6-34 2z"/><path d="M50 34v40"/><path class="m" d="M22 42q11-4 22 1M22 49q11-4 22 1M22 56q11-4 22 1M22 63q11-4 22 1M56 43q11-5 22-1M56 50q11-5 22-1"/><path class="g" d="M56 61c3-7 5 3 8-2s4 3 7-1 4 3 8-1"/><path class="m" d="M56 65h23"/><path class="g" d="M70 74v14l-4-3.2-4 3.2V75"/><ellipse cx="43" cy="17" rx="8.5" ry="4.8" transform="rotate(-18 43 17)"/><ellipse class="g" cx="57" cy="17" rx="8.5" ry="4.8" transform="rotate(-18 57 17)"/></svg><span class="fan__name" data-i18n="arc.2.name">El Libro</span></a><a class="fan__card face" href="#la-balanza" style="--i:2"><span class="fan__num">III</span><svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle class="g" cx="50" cy="11" r="3.4"/><path d="M50 15v70M38 89h24M42 85h16"/><path d="M15 31 85 25"/><circle cx="50" cy="28" r="2.2"/><path d="M15 31 7 58M15 31l8 27M85 25l-8 26M85 25l8 26"/><path d="M5 58q10 9 20 0zM75 51q10 9 20 0z"/><path class="g" d="M10 55.5h10M11 53h8M12.5 50.5h5"/><path class="g" d="M81 50v-9h8v9M83 44h4M83 47h3"/></svg><span class="fan__name" data-i18n="arc.3.name">La Balanza</span></a><a class="fan__card face" href="#el-herbolario" style="--i:3"><span class="fan__num">IV</span><svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path d="M32 40h32v5q8 4 8 14v26q0 5-5 5H29q-5 0-5-5V59q0-10 8-14z"/><path d="M35 40v-6h26v6M41 34v-6h14v6"/><circle class="g" cx="48" cy="24.5" r="3.5"/><path class="g" d="M31 60h34v16H31z"/><path class="m" d="M36 72h24M38 68v4M43 69v3M48 66.5v5.5M53 69v3M58 68v4"/><path d="M86 90q-2-18 4-36"/><path class="g" d="M85.5 79q-7-3-9-10q7 1 9 10zM87 69q7-3 8-10q-7 2-8 10zM88.5 61q-5-3-6-9q5 2 6 9z"/></svg><span class="fan__name" data-i18n="arc.4.name">El Herbolario</span></a><a class="fan__card face" href="#la-luna" style="--i:4"><span class="fan__num">V</span><svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle class="m" cx="50" cy="50" r="40" stroke-dasharray="1 3.2"/><path d="M60 28A24 24 0 1 0 60 72A26 26 0 0 1 60 28Z"/><path class="g" d="M73 34l1.6 4.4 4.4 1.6-4.4 1.6L73 46l-1.6-4.4L67 40l4.4-1.6z"/><circle class="f fg" cx="50" cy="10" r="3"/><circle class="f fg" cx="78.3" cy="21.7" r="3"/><circle class="f fg" cx="90" cy="50" r="3"/><circle class="dotbg" cx="78.3" cy="78.3" r="2.8"/><circle class="dotbg" cx="50" cy="90" r="2.8"/><circle class="dotbg" cx="21.7" cy="78.3" r="2.8"/><circle class="dotbg" cx="10" cy="50" r="2.8"/><circle class="dotbg" cx="21.7" cy="21.7" r="2.8"/></svg><span class="fan__name" data-i18n="arc.5.name">La Luna</span></a><a class="fan__card face" href="#el-circulo" style="--i:5"><span class="fan__num">VI</span><svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle cx="50" cy="50" r="36"/><path class="m" d="M50 14L75.5 75.5L14 50L75.5 24.5L50 86L24.5 24.5L86 50L24.5 75.5L50 14"/><circle class="dotbg g" cx="50" cy="14" r="4.4"/><circle class="dotbg " cx="75.5" cy="24.5" r="4.4"/><circle class="dotbg " cx="86" cy="50" r="4.4"/><circle class="dotbg g" cx="75.5" cy="75.5" r="4.4"/><circle class="dotbg " cx="50" cy="86" r="4.4"/><circle class="dotbg " cx="24.5" cy="75.5" r="4.4"/><circle class="dotbg g" cx="14" cy="50" r="4.4"/><circle class="dotbg " cx="24.5" cy="24.5" r="4.4"/><rect class="dotbg" x="42.5" y="37" width="15" height="26" rx="3"/><path class="f" d="M46 41.5h3v3h-3zM51 41.5h3v3h-3zM46 46.5h3v3h-3zM51.5 47h2v2h-2zM51.5 50.5h2v2h-2zM46.5 51h2v2h-2z"/><path d="M48 59h4"/></svg><span class="fan__name" data-i18n="arc.6.name">El Círculo</span></a><a class="fan__card face" href="#la-llave" style="--i:6"><span class="fan__num">VII</span><svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle cx="50" cy="15.5" r="8.5"/><circle cx="42.6" cy="28.3" r="8.5"/><circle cx="57.4" cy="28.3" r="8.5"/><circle class="g" cx="50" cy="24" r="2.6"/><path d="M50 37v52"/><path class="g" d="M44.5 41h11M45.5 45h9"/><path d="M50 70h11v5h-5v4h5v5H50"/><circle class="g" cx="50" cy="91" r="1.8"/></svg><span class="fan__name" data-i18n="arc.7.name">La Llave</span></a><a class="fan__card face" href="#el-sello" style="--i:7"><span class="fan__num">VIII</span><svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path class="g" d="M40 70 35 94l6-4 3 6 4-21M60 70l5 24-6-4-3 6-4-21"/><path class="dotbg" d="M83.2 44L82.6 45.3L81.2 46.5L79.6 47.5L78.6 48.5L78.4 49.7L79.2 51L80.3 52.6L81.2 54.1L81.1 55.5L80.1 56.5L78.3 57.1L76.5 57.5L75.2 58.1L74.8 59.2L75.1 60.8L75.6 62.6L75.8 64.4L75.2 65.5L73.8 66L71.9 65.9L70.1 65.7L68.7 65.9L68 66.9L67.8 68.5L67.7 70.5L67.2 72.1L66.2 72.9L64.7 72.8L62.9 72L61.3 71.2L60 71L59 71.8L58.3 73.3L57.5 75.1L56.4 76.4L55.2 76.7L53.8 75.9L52.4 74.6L51.2 73.3L50 72.8L48.8 73.3L47.6 74.6L46.2 75.9L44.8 76.7L43.6 76.4L42.5 75.1L41.7 73.3L41 71.8L40 71L38.7 71.2L37.1 72L35.3 72.8L33.8 72.9L32.8 72.1L32.3 70.5L32.2 68.5L32 66.9L31.3 65.9L29.9 65.7L28.1 65.9L26.2 66L24.8 65.5L24.2 64.4L24.4 62.6L24.9 60.8L25.2 59.2L24.8 58.1L23.5 57.5L21.7 57.1L19.9 56.5L18.9 55.5L18.8 54.1L19.7 52.6L20.8 51L21.6 49.7L21.4 48.5L20.4 47.5L18.8 46.5L17.4 45.3L16.8 44L17.4 42.7L18.8 41.5L20.4 40.5L21.4 39.5L21.6 38.3L20.8 37L19.7 35.4L18.8 33.9L18.9 32.5L19.9 31.5L21.7 30.9L23.5 30.5L24.8 29.9L25.2 28.8L24.9 27.2L24.4 25.4L24.2 23.6L24.8 22.5L26.2 22L28.1 22.1L29.9 22.3L31.3 22.1L32 21.1L32.2 19.5L32.3 17.5L32.8 15.9L33.8 15.1L35.3 15.2L37.1 16L38.7 16.8L40 17L41 16.2L41.7 14.7L42.5 12.9L43.6 11.6L44.8 11.3L46.2 12.1L47.6 13.4L48.8 14.7L50 15.2L51.2 14.7L52.4 13.4L53.8 12.1L55.2 11.3L56.4 11.6L57.5 12.9L58.3 14.7L59 16.2L60 17L61.3 16.8L62.9 16L64.7 15.2L66.2 15.1L67.2 15.9L67.7 17.5L67.8 19.5L68 21.1L68.7 22.1L70.1 22.3L71.9 22.1L73.8 22L75.2 22.5L75.8 23.6L75.6 25.4L75.1 27.2L74.8 28.8L75.2 29.9L76.5 30.5L78.3 30.9L80.1 31.5L81.1 32.5L81.2 33.9L80.3 35.4L79.2 37L78.4 38.3L78.6 39.5L79.6 40.5L81.2 41.5L82.6 42.7L83.2 44Z"/><circle class="g" cx="50" cy="44" r="23"/><circle cx="50" cy="40" r="5"/><path d="M47.6 44.4 45.8 54h8.4l-1.8-9.6"/></svg><span class="fan__name" data-i18n="arc.8.name">El Sello</span></a></nav>
+        </div>
+    </section>
+
+    <section class="lectura lectura--left" id="el-guardian" data-cap aria-labelledby="l1-title">
+        <div class="folio">
+            <div class="lectura__card"><div class="tarot face" data-tilt aria-hidden="true"><span class="arcano__num">I</span><svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path d="M28 92V58a22 22 0 0 1 44 0v34"/><path class="g" d="M23 92V57a27 27 0 0 1 54 0v35" stroke-dasharray="1 3.2"/><path d="M18 92h64"/><path d="M38 58h8v8h-8zM54 58h8v8h-8zM38 74h8v8h-8z"/><path class="f" d="M40.5 60.5h3v3h-3zM56.5 60.5h3v3h-3zM40.5 76.5h3v3h-3zM50 58h2v2h-2zM50 62h2v4h-2zM50 70h2v2h-2zM54 70h2v2h-2zM58 70h4v2h-4zM54 74h2v4h-2zM58 76h4v2h-4zM50 78h2v4h-2zM58 80h2v2h-2z"/><path class="g" d="M35 21q15-13 30 0q-15 13-30 0z"/><circle class="g" cx="50" cy="21" r="4.2"/><circle class="f fg" cx="50" cy="21" r="1.7"/><path class="g" d="M50 3v5M38.5 6l2.6 4.2M61.5 6l-2.6 4.2M30 12.5l3.8 2.6M70 12.5l-3.8 2.6"/></svg><p class="tarot__name" data-i18n="arc.1.name">El Guardián</p><p class="arcano__key" data-i18n="arc.1.key">Entrada por QR</p></div></div>
+            <div class="lectura__text">
+                <p class="runhead"><span data-i18n="ui.arcanum">Arcano</span><span class="runhead__n">I</span><span class="runhead__dot" aria-hidden="true"></span><span data-i18n="arc.1.key">Entrada por QR</span></p>
+                <h2 class="lectura__title" id="l1-title" data-i18n="arc.1.name">El Guardián</h2>
+                <p class="dropcap" data-i18n="arc.1.long">El Guardián vigila la puerta para que tu equipo no tenga que hacerlo con una lista. El socio abre su zona en el móvil y enseña su QR; el Guardián lo reconoce, mira si la cuota está al día y lo deja pasar. Al mismo tiempo, cuenta cuánta gente hay dentro.</p>
+                <ul class="virtudes">
+                    <li data-i18n="arc.1.v1">QR en el móvil del socio, sin tarjetas ni app</li>
+                    <li data-i18n="arc.1.v2">Comprueba la cuota antes de abrir</li>
+                    <li data-i18n="arc.1.v3">Sabes quién está dentro ahora</li>
+                </ul>
+                <div class="specimen" aria-label="Ejemplo" role="group" data-i18n-attr="aria-label:ui.example">
+                    <p class="specimen__label" data-i18n="ui.example">Ejemplo</p>
+                    <div class="sp-door">
+                        <p class="sp-row"><span class="pulse" aria-hidden="true"></span><b data-i18n="arc.1.f1">Puerta · 18:31</b></p>
+                        <p class="sp-row sp-ok"><span data-i18n="arc.1.f2">nº 0147 · cuota al día</span><b>✓</b></p>
+                        <p class="sp-big"><b>23</b><span data-i18n="arc.1.f3">Dentro ahora</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="lectura lectura--right" id="el-libro" data-cap aria-labelledby="l2-title">
+        <div class="folio">
+            <div class="lectura__card"><div class="tarot face" data-tilt aria-hidden="true"><span class="arcano__num">II</span><svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path d="M12 37v39q20-6 38 2q18-8 38-2V37"/><path d="M50 34q-16-8-34-2v40q18-6 34 2q16-8 34-2V32q-18-6-34 2z"/><path d="M50 34v40"/><path class="m" d="M22 42q11-4 22 1M22 49q11-4 22 1M22 56q11-4 22 1M22 63q11-4 22 1M56 43q11-5 22-1M56 50q11-5 22-1"/><path class="g" d="M56 61c3-7 5 3 8-2s4 3 7-1 4 3 8-1"/><path class="m" d="M56 65h23"/><path class="g" d="M70 74v14l-4-3.2-4 3.2V75"/><ellipse cx="43" cy="17" rx="8.5" ry="4.8" transform="rotate(-18 43 17)"/><ellipse class="g" cx="57" cy="17" rx="8.5" ry="4.8" transform="rotate(-18 57 17)"/></svg><p class="tarot__name" data-i18n="arc.2.name">El Libro</p><p class="arcano__key" data-i18n="arc.2.key">Socios y avales</p></div></div>
+            <div class="lectura__text">
+                <p class="runhead"><span data-i18n="ui.arcanum">Arcano</span><span class="runhead__n">II</span><span class="runhead__dot" aria-hidden="true"></span><span data-i18n="arc.2.key">Socios y avales</span></p>
+                <h2 class="lectura__title" id="l2-title" data-i18n="arc.2.name">El Libro</h2>
+                <p class="dropcap" data-i18n="arc.2.long">El Libro es el registro de socios. Cada alta lleva documento, foto, firma digital en pantalla y el aval de un socio que ya está dentro. Nada se pierde en una carpeta: el Libro recuerda quién avaló a quién y cuándo firmó cada uno.</p>
+                <ul class="virtudes">
+                    <li data-i18n="arc.2.v1">Firma en pantalla, sin papel</li>
+                    <li data-i18n="arc.2.v2">El aval de otro socio, siempre a la vista</li>
+                    <li data-i18n="arc.2.v3">Toda la ficha en una pantalla</li>
+                </ul>
+                <div class="specimen" aria-label="Ejemplo" role="group" data-i18n-attr="aria-label:ui.example">
+                    <p class="specimen__label" data-i18n="ui.example">Ejemplo</p>
+                    <p class="sp-title" data-i18n="arc.2.f1">Ficha · socia nº 0147</p>
+                    <dl class="sp-dl">
+                        <div><dt data-i18n="arc.2.f2">Aval</dt><dd>0032</dd></div>
+                        <div><dt data-i18n="arc.2.f3">Firmada</dt><dd>12.03.2026</dd></div>
+                        <div><dt data-i18n="arc.2.f4">Documento</dt><dd><span data-i18n="arc.2.f5">verificado</span> ✓</dd></div>
+                    </dl>
+                    <svg class="firma__svg" viewBox="0 0 240 70" data-draw="scroll" aria-hidden="true" focusable="false"><path class="firma__base" d="M6 58H234"/><path class="d firma__ink" style="--k:0" d="M14 46C22 18 34 10 36 26S30 58 44 40 56 6 66 22 60 52 72 44 86 20 92 30 96 50 108 40 118 22 126 30 128 46 140 40C152 34 160 26 172 30S196 42 214 26C220 21 226 20 230 24"/><path class="firma__x" d="M8 52l8 8M16 52l-8 8"/></svg>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="lectura lectura--left" id="la-balanza" data-cap aria-labelledby="l3-title">
+        <div class="folio">
+            <div class="lectura__card"><div class="tarot face" data-tilt aria-hidden="true"><span class="arcano__num">III</span><svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle class="g" cx="50" cy="11" r="3.4"/><path d="M50 15v70M38 89h24M42 85h16"/><path d="M15 31 85 25"/><circle cx="50" cy="28" r="2.2"/><path d="M15 31 7 58M15 31l8 27M85 25l-8 26M85 25l8 26"/><path d="M5 58q10 9 20 0zM75 51q10 9 20 0z"/><path class="g" d="M10 55.5h10M11 53h8M12.5 50.5h5"/><path class="g" d="M81 50v-9h8v9M83 44h4M83 47h3"/></svg><p class="tarot__name" data-i18n="arc.3.name">La Balanza</p><p class="arcano__key" data-i18n="arc.3.key">Caja diaria</p></div></div>
+            <div class="lectura__text">
+                <p class="runhead"><span data-i18n="ui.arcanum">Arcano</span><span class="runhead__n">III</span><span class="runhead__dot" aria-hidden="true"></span><span data-i18n="arc.3.key">Caja diaria</span></p>
+                <h2 class="lectura__title" id="l3-title" data-i18n="arc.3.name">La Balanza</h2>
+                <p class="dropcap" data-i18n="arc.3.long">La Balanza pesa el dinero del día. Cada aportación y cada movimiento quedan anotados con su hora y su responsable, y al cerrar el turno la caja cuadra sola. Si algo no cuadra, sabes dónde mirar.</p>
+                <ul class="virtudes">
+                    <li data-i18n="arc.3.v1">Caja diaria y movimientos</li>
+                    <li data-i18n="arc.3.v2">Cada euro con su responsable</li>
+                    <li data-i18n="arc.3.v3">Cierre de turno sin calculadora</li>
+                </ul>
+                <div class="specimen" aria-label="Ejemplo" role="group" data-i18n-attr="aria-label:ui.example">
+                    <p class="specimen__label" data-i18n="ui.example">Ejemplo</p>
+                    <p class="sp-title" data-i18n="arc.3.f1">Caja de hoy</p>
+                    <dl class="sp-dl sp-dl--money">
+                        <div><dt data-i18n="arc.3.f2">Entradas</dt><dd class="sp-plus">+412,00 €</dd></div>
+                        <div><dt data-i18n="arc.3.f3">Salidas</dt><dd class="sp-minus">−35,00 €</dd></div>
+                        <div class="sp-total"><dt data-i18n="arc.3.f4">Saldo</dt><dd>377,00 €</dd></div>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="lectura lectura--right" id="el-herbolario" data-cap aria-labelledby="l4-title">
+        <div class="folio">
+            <div class="lectura__card"><div class="tarot face" data-tilt aria-hidden="true"><span class="arcano__num">IV</span><svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path d="M32 40h32v5q8 4 8 14v26q0 5-5 5H29q-5 0-5-5V59q0-10 8-14z"/><path d="M35 40v-6h26v6M41 34v-6h14v6"/><circle class="g" cx="48" cy="24.5" r="3.5"/><path class="g" d="M31 60h34v16H31z"/><path class="m" d="M36 72h24M38 68v4M43 69v3M48 66.5v5.5M53 69v3M58 68v4"/><path d="M86 90q-2-18 4-36"/><path class="g" d="M85.5 79q-7-3-9-10q7 1 9 10zM87 69q7-3 8-10q-7 2-8 10zM88.5 61q-5-3-6-9q5 2 6 9z"/></svg><p class="tarot__name" data-i18n="arc.4.name">El Herbolario</p><p class="arcano__key" data-i18n="arc.4.key">Stock al gramo</p></div></div>
+            <div class="lectura__text">
+                <p class="runhead"><span data-i18n="ui.arcanum">Arcano</span><span class="runhead__n">IV</span><span class="runhead__dot" aria-hidden="true"></span><span data-i18n="arc.4.key">Stock al gramo</span></p>
+                <h2 class="lectura__title" id="l4-title" data-i18n="arc.4.name">El Herbolario</h2>
+                <p class="dropcap" data-i18n="arc.4.long">El Herbolario lleva el inventario al gramo. Registra los pedidos que entran y descuenta cada retirada en el mismo instante, así que el stock que ves es el que hay. Sin recuentos a ojo al final de la semana.</p>
+                <ul class="virtudes">
+                    <li data-i18n="arc.4.v1">Pedidos y entradas de stock</li>
+                    <li data-i18n="arc.4.v2">Descuento automático en cada retirada</li>
+                    <li data-i18n="arc.4.v3">Inventario al gramo, al momento</li>
+                </ul>
+                <div class="specimen" aria-label="Ejemplo" role="group" data-i18n-attr="aria-label:ui.example">
+                    <p class="specimen__label" data-i18n="ui.example">Ejemplo</p>
+                    <p class="sp-title" data-i18n="arc.4.f1">Stock · lote 14</p>
+                    <p class="sp-stock"><b>482</b><span aria-hidden="true">→</span><b>480</b> <span data-i18n="u.g">g</span></p>
+                    <div class="sp-bar" aria-hidden="true"><i style="width: 80%"></i></div>
+                    <p class="sp-note" data-i18n="arc.4.f2">tras la retirada</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="lectura lectura--left" id="la-luna" data-cap aria-labelledby="l5-title">
+        <div class="folio">
+            <div class="lectura__card"><div class="tarot face" data-tilt aria-hidden="true"><span class="arcano__num">V</span><svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle class="m" cx="50" cy="50" r="40" stroke-dasharray="1 3.2"/><path d="M60 28A24 24 0 1 0 60 72A26 26 0 0 1 60 28Z"/><path class="g" d="M73 34l1.6 4.4 4.4 1.6-4.4 1.6L73 46l-1.6-4.4L67 40l4.4-1.6z"/><circle class="f fg" cx="50" cy="10" r="3"/><circle class="f fg" cx="78.3" cy="21.7" r="3"/><circle class="f fg" cx="90" cy="50" r="3"/><circle class="dotbg" cx="78.3" cy="78.3" r="2.8"/><circle class="dotbg" cx="50" cy="90" r="2.8"/><circle class="dotbg" cx="21.7" cy="78.3" r="2.8"/><circle class="dotbg" cx="10" cy="50" r="2.8"/><circle class="dotbg" cx="21.7" cy="21.7" r="2.8"/></svg><p class="tarot__name" data-i18n="arc.5.name">La Luna</p><p class="arcano__key" data-i18n="arc.5.key">Límite mensual</p></div></div>
+            <div class="lectura__text">
+                <p class="runhead"><span data-i18n="ui.arcanum">Arcano</span><span class="runhead__n">V</span><span class="runhead__dot" aria-hidden="true"></span><span data-i18n="arc.5.key">Límite mensual</span></p>
+                <h2 class="lectura__title" id="l5-title" data-i18n="arc.5.name">La Luna</h2>
+                <p class="dropcap" data-i18n="arc.5.long">La Luna marca el ciclo del mes. Fijas un límite por socio, por ejemplo 60 g al mes, y la CRM lo comprueba cada vez que alguien registra una retirada. Si el socio ya llegó a su límite, la retirada no se registra. El día 1, la Luna vuelve a empezar.</p>
+                <ul class="virtudes">
+                    <li data-i18n="arc.5.v1">Un límite por socio, editable</li>
+                    <li data-i18n="arc.5.v2">Comprobación en cada retirada</li>
+                    <li data-i18n="arc.5.v3">El socio ve lo que le queda</li>
+                </ul>
+                <div class="specimen specimen--moon" aria-label="Ejemplo" role="group" data-i18n-attr="aria-label:ui.example">
+                    <p class="specimen__label" data-i18n="ui.example">Ejemplo</p>
+                    <svg class="moon moon--md" viewBox="-40 -40 80 80" aria-hidden="true" focusable="false"><defs><radialGradient id="moon-arc" cx="0.62" cy="0.38" r="0.8"><stop offset="0" class="moon__s1"/><stop offset="1" class="moon__s2"/></radialGradient></defs><circle class="moon__dark" r="34"/><path class="moon__lit" d="M0 -34A34 34 0 0 1 0 34A9.04 34 0 0 0 0 -34Z" fill="url(#moon-arc)"/><circle class="moon__rim" r="34"/></svg>
+                    <div><p class="sp-title" data-i18n="arc.5.f1">Límite de octubre</p><p class="sp-moontext" data-i18n="arc.5.f2">22 de 60 g · quedan 38 g</p></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="lectura lectura--right" id="el-circulo" data-cap aria-labelledby="l6-title">
+        <div class="folio">
+            <div class="lectura__card"><div class="tarot face" data-tilt aria-hidden="true"><span class="arcano__num">VI</span><svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle cx="50" cy="50" r="36"/><path class="m" d="M50 14L75.5 75.5L14 50L75.5 24.5L50 86L24.5 24.5L86 50L24.5 75.5L50 14"/><circle class="dotbg g" cx="50" cy="14" r="4.4"/><circle class="dotbg " cx="75.5" cy="24.5" r="4.4"/><circle class="dotbg " cx="86" cy="50" r="4.4"/><circle class="dotbg g" cx="75.5" cy="75.5" r="4.4"/><circle class="dotbg " cx="50" cy="86" r="4.4"/><circle class="dotbg " cx="24.5" cy="75.5" r="4.4"/><circle class="dotbg g" cx="14" cy="50" r="4.4"/><circle class="dotbg " cx="24.5" cy="24.5" r="4.4"/><rect class="dotbg" x="42.5" y="37" width="15" height="26" rx="3"/><path class="f" d="M46 41.5h3v3h-3zM51 41.5h3v3h-3zM46 46.5h3v3h-3zM51.5 47h2v2h-2zM51.5 50.5h2v2h-2zM46.5 51h2v2h-2z"/><path d="M48 59h4"/></svg><p class="tarot__name" data-i18n="arc.6.name">El Círculo</p><p class="arcano__key" data-i18n="arc.6.key">Zona del socio</p></div></div>
+            <div class="lectura__text">
+                <p class="runhead"><span data-i18n="ui.arcanum">Arcano</span><span class="runhead__n">VI</span><span class="runhead__dot" aria-hidden="true"></span><span data-i18n="arc.6.key">Zona del socio</span></p>
+                <h2 class="lectura__title" id="l6-title" data-i18n="arc.6.name">El Círculo</h2>
+                <p class="dropcap" data-i18n="arc.6.long">El Círculo es lo que el socio ve en su móvil. Abre un enlace, sin instalar nada, y ahí tiene su QR para la puerta, lo que le queda del mes, su historial y el estado de su cuota. Menos preguntas en la barra.</p>
+                <ul class="virtudes">
+                    <li data-i18n="arc.6.v1">Sin app: se abre en el navegador</li>
+                    <li data-i18n="arc.6.v2">QR, límite e historial</li>
+                    <li data-i18n="arc.6.v3">En español, ruso o inglés</li>
+                </ul>
+                <div class="specimen specimen--qr" aria-label="Ejemplo" role="group" data-i18n-attr="aria-label:ui.example">
+                    <p class="specimen__label" data-i18n="ui.example">Ejemplo</p>
+                    <div class="sp-qr"><svg class="qr" viewBox="0 0 29 29" shape-rendering="crispEdges" aria-hidden="true" focusable="false"><rect class="qr__bg" width="29" height="29" rx="1.5"/><path class="qr__m" d="M2 2h7v1h-7zM10 2h3v1h-3zM14 2h3v1h-3zM20 2h7v1h-7zM2 3h1v1h-1zM8 3h1v1h-1zM12 3h1v1h-1zM15 3h1v1h-1zM17 3h1v1h-1zM20 3h1v1h-1zM26 3h1v1h-1zM2 4h1v1h-1zM4 4h3v1h-3zM8 4h1v1h-1zM10 4h1v1h-1zM12 4h2v1h-2zM15 4h1v1h-1zM18 4h1v1h-1zM20 4h1v1h-1zM22 4h3v1h-3zM26 4h1v1h-1zM2 5h1v1h-1zM4 5h3v1h-3zM8 5h1v1h-1zM10 5h4v1h-4zM16 5h1v1h-1zM18 5h1v1h-1zM20 5h1v1h-1zM22 5h3v1h-3zM26 5h1v1h-1zM2 6h1v1h-1zM4 6h3v1h-3zM8 6h1v1h-1zM10 6h1v1h-1zM17 6h1v1h-1zM20 6h1v1h-1zM22 6h3v1h-3zM26 6h1v1h-1zM2 7h1v1h-1zM8 7h1v1h-1zM13 7h2v1h-2zM18 7h1v1h-1zM20 7h1v1h-1zM26 7h1v1h-1zM2 8h7v1h-7zM10 8h1v1h-1zM12 8h1v1h-1zM14 8h1v1h-1zM16 8h1v1h-1zM18 8h1v1h-1zM20 8h7v1h-7zM10 9h3v1h-3zM18 9h1v1h-1zM2 10h1v1h-1zM4 10h1v1h-1zM6 10h3v1h-3zM10 10h1v1h-1zM14 10h3v1h-3zM21 10h1v1h-1zM23 10h3v1h-3zM2 11h5v1h-5zM14 11h1v1h-1zM18 11h2v1h-2zM21 11h2v1h-2zM24 11h2v1h-2zM3 12h2v1h-2zM6 12h1v1h-1zM8 12h2v1h-2zM12 12h1v1h-1zM15 12h1v1h-1zM17 12h1v1h-1zM20 12h2v1h-2zM23 12h2v1h-2zM6 13h2v1h-2zM15 13h4v1h-4zM21 13h3v1h-3zM4 14h1v1h-1zM7 14h2v1h-2zM11 14h2v1h-2zM15 14h1v1h-1zM20 14h2v1h-2zM25 14h1v1h-1zM2 15h1v1h-1zM9 15h5v1h-5zM15 15h1v1h-1zM18 15h3v1h-3zM22 15h5v1h-5zM4 16h1v1h-1zM8 16h3v1h-3zM12 16h1v1h-1zM15 16h1v1h-1zM20 16h1v1h-1zM22 16h1v1h-1zM26 16h1v1h-1zM6 17h2v1h-2zM9 17h2v1h-2zM13 17h1v1h-1zM16 17h7v1h-7zM2 18h2v1h-2zM5 18h2v1h-2zM8 18h2v1h-2zM11 18h1v1h-1zM18 18h6v1h-6zM26 18h1v1h-1zM16 19h1v1h-1zM18 19h1v1h-1zM22 19h2v1h-2zM25 19h1v1h-1zM2 20h7v1h-7zM11 20h2v1h-2zM16 20h1v1h-1zM18 20h1v1h-1zM20 20h1v1h-1zM22 20h5v1h-5zM2 21h1v1h-1zM8 21h1v1h-1zM13 21h1v1h-1zM18 21h1v1h-1zM22 21h3v1h-3zM26 21h1v1h-1zM2 22h1v1h-1zM4 22h3v1h-3zM8 22h1v1h-1zM10 22h2v1h-2zM13 22h1v1h-1zM15 22h10v1h-10zM2 23h1v1h-1zM4 23h3v1h-3zM8 23h1v1h-1zM10 23h3v1h-3zM14 23h1v1h-1zM17 23h1v1h-1zM20 23h1v1h-1zM22 23h3v1h-3zM26 23h1v1h-1zM2 24h1v1h-1zM4 24h3v1h-3zM8 24h1v1h-1zM12 24h1v1h-1zM15 24h2v1h-2zM18 24h1v1h-1zM21 24h2v1h-2zM25 24h1v1h-1zM2 25h1v1h-1zM8 25h1v1h-1zM10 25h2v1h-2zM13 25h3v1h-3zM17 25h3v1h-3zM22 25h1v1h-1zM2 26h7v1h-7zM10 26h1v1h-1zM13 26h2v1h-2zM16 26h3v1h-3zM20 26h1v1h-1zM25 26h1v1h-1z"/></svg></div>
+                    <div><p class="sp-title" data-i18n="home.c4.ph.name">Socia nº 0147</p><p class="sp-note" data-i18n="home.c4.ph.hint">Enseña este QR en la puerta</p><p class="sp-note sp-ok" data-i18n="home.c4.ph.fee">Cuota al día hasta el 31.12</p></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="lectura lectura--left" id="la-llave" data-cap aria-labelledby="l7-title">
+        <div class="folio">
+            <div class="lectura__card"><div class="tarot face" data-tilt aria-hidden="true"><span class="arcano__num">VII</span><svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle cx="50" cy="15.5" r="8.5"/><circle cx="42.6" cy="28.3" r="8.5"/><circle cx="57.4" cy="28.3" r="8.5"/><circle class="g" cx="50" cy="24" r="2.6"/><path d="M50 37v52"/><path class="g" d="M44.5 41h11M45.5 45h9"/><path d="M50 70h11v5h-5v4h5v5H50"/><circle class="g" cx="50" cy="91" r="1.8"/></svg><p class="tarot__name" data-i18n="arc.7.name">La Llave</p><p class="arcano__key" data-i18n="arc.7.key">Roles y clubes</p></div></div>
+            <div class="lectura__text">
+                <p class="runhead"><span data-i18n="ui.arcanum">Arcano</span><span class="runhead__n">VII</span><span class="runhead__dot" aria-hidden="true"></span><span data-i18n="arc.7.key">Roles y clubes</span></p>
+                <h2 class="lectura__title" id="l7-title" data-i18n="arc.7.name">La Llave</h2>
+                <p class="dropcap" data-i18n="arc.7.long">La Llave reparte los permisos. El admin configura el club, el encargado lleva el turno y la caja, y el dispensador registra las retiradas. Cada uno ve lo suyo. Si abres un segundo club, la misma cuenta guarda los dos, cada uno con su equipo y sus socios.</p>
+                <ul class="virtudes">
+                    <li data-i18n="arc.7.v1">Tres roles: admin, encargado y dispensador</li>
+                    <li data-i18n="arc.7.v2">Varios clubes en una cuenta</li>
+                    <li data-i18n="arc.7.v3">Cada acción, firmada por quien la hizo</li>
+                </ul>
+                <div class="specimen" aria-label="Ejemplo" role="group" data-i18n-attr="aria-label:ui.example">
+                    <p class="specimen__label" data-i18n="ui.example">Ejemplo</p>
+                    <p class="sp-title" data-i18n="arc.7.f1">Equipo · club de Torrevieja</p>
+                    <ul class="sp-team">
+                        <li><span data-i18n="arc.7.n1">Ana</span><i data-i18n="arc.7.r1">admin</i></li>
+                        <li><span data-i18n="arc.7.n2">Pau</span><i data-i18n="arc.7.r2">encargado</i></li>
+                        <li><span data-i18n="arc.7.n3">Iván</span><i data-i18n="arc.7.r3">dispensador</i></li>
+                    </ul>
+                    <p class="sp-note" data-i18n="arc.7.f2">Segundo club · Alicante</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="lectura lectura--right" id="el-sello" data-cap aria-labelledby="l8-title">
+        <div class="folio">
+            <div class="lectura__card"><div class="tarot face" data-tilt aria-hidden="true"><span class="arcano__num">VIII</span><svg class="emblem" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path class="g" d="M40 70 35 94l6-4 3 6 4-21M60 70l5 24-6-4-3 6-4-21"/><path class="dotbg" d="M83.2 44L82.6 45.3L81.2 46.5L79.6 47.5L78.6 48.5L78.4 49.7L79.2 51L80.3 52.6L81.2 54.1L81.1 55.5L80.1 56.5L78.3 57.1L76.5 57.5L75.2 58.1L74.8 59.2L75.1 60.8L75.6 62.6L75.8 64.4L75.2 65.5L73.8 66L71.9 65.9L70.1 65.7L68.7 65.9L68 66.9L67.8 68.5L67.7 70.5L67.2 72.1L66.2 72.9L64.7 72.8L62.9 72L61.3 71.2L60 71L59 71.8L58.3 73.3L57.5 75.1L56.4 76.4L55.2 76.7L53.8 75.9L52.4 74.6L51.2 73.3L50 72.8L48.8 73.3L47.6 74.6L46.2 75.9L44.8 76.7L43.6 76.4L42.5 75.1L41.7 73.3L41 71.8L40 71L38.7 71.2L37.1 72L35.3 72.8L33.8 72.9L32.8 72.1L32.3 70.5L32.2 68.5L32 66.9L31.3 65.9L29.9 65.7L28.1 65.9L26.2 66L24.8 65.5L24.2 64.4L24.4 62.6L24.9 60.8L25.2 59.2L24.8 58.1L23.5 57.5L21.7 57.1L19.9 56.5L18.9 55.5L18.8 54.1L19.7 52.6L20.8 51L21.6 49.7L21.4 48.5L20.4 47.5L18.8 46.5L17.4 45.3L16.8 44L17.4 42.7L18.8 41.5L20.4 40.5L21.4 39.5L21.6 38.3L20.8 37L19.7 35.4L18.8 33.9L18.9 32.5L19.9 31.5L21.7 30.9L23.5 30.5L24.8 29.9L25.2 28.8L24.9 27.2L24.4 25.4L24.2 23.6L24.8 22.5L26.2 22L28.1 22.1L29.9 22.3L31.3 22.1L32 21.1L32.2 19.5L32.3 17.5L32.8 15.9L33.8 15.1L35.3 15.2L37.1 16L38.7 16.8L40 17L41 16.2L41.7 14.7L42.5 12.9L43.6 11.6L44.8 11.3L46.2 12.1L47.6 13.4L48.8 14.7L50 15.2L51.2 14.7L52.4 13.4L53.8 12.1L55.2 11.3L56.4 11.6L57.5 12.9L58.3 14.7L59 16.2L60 17L61.3 16.8L62.9 16L64.7 15.2L66.2 15.1L67.2 15.9L67.7 17.5L67.8 19.5L68 21.1L68.7 22.1L70.1 22.3L71.9 22.1L73.8 22L75.2 22.5L75.8 23.6L75.6 25.4L75.1 27.2L74.8 28.8L75.2 29.9L76.5 30.5L78.3 30.9L80.1 31.5L81.1 32.5L81.2 33.9L80.3 35.4L79.2 37L78.4 38.3L78.6 39.5L79.6 40.5L81.2 41.5L82.6 42.7L83.2 44Z"/><circle class="g" cx="50" cy="44" r="23"/><circle cx="50" cy="40" r="5"/><path d="M47.6 44.4 45.8 54h8.4l-1.8-9.6"/></svg><p class="tarot__name" data-i18n="arc.8.name">El Sello</p><p class="arcano__key" data-i18n="arc.8.key">Privacidad</p></div></div>
+            <div class="lectura__text">
+                <p class="runhead"><span data-i18n="ui.arcanum">Arcano</span><span class="runhead__n">VIII</span><span class="runhead__dot" aria-hidden="true"></span><span data-i18n="arc.8.key">Privacidad</span></p>
+                <h2 class="lectura__title" id="l8-title" data-i18n="arc.8.name">El Sello</h2>
+                <p class="dropcap" data-i18n="arc.8.long">El Sello cierra el libro. Nagual cumple el RGPD y la LOPDGDD, guarda cifrados los datos sensibles y anota en un registro cada acceso: quién abrió qué ficha y cuándo. Lo que pasa en el club se queda en el club.</p>
+                <ul class="virtudes">
+                    <li data-i18n="arc.8.v1">RGPD y LOPDGDD</li>
+                    <li data-i18n="arc.8.v2">Datos sensibles cifrados</li>
+                    <li data-i18n="arc.8.v3">Registro de accesos</li>
+                </ul>
+                <div class="specimen" aria-label="Ejemplo" role="group" data-i18n-attr="aria-label:ui.example">
+                    <p class="specimen__label" data-i18n="home.c6.log.t">Registro de accesos · ejemplo</p>
+                    <ol class="registro__list">
+                        <li><time>18:42</time><span data-i18n="home.c6.log.1">dispensador · abrió la ficha nº 0147</span></li>
+                        <li><time>18:40</time><span data-i18n="home.c6.log.2">encargado · cerró la caja del turno</span></li>
+                        <li><time>17:05</time><span data-i18n="home.c6.log.4">admin · cambió el límite de un socio</span></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cierre">
+        <div class="spores" data-spores="14" aria-hidden="true"></div>
+        <div class="folio">
+            <p class="invocacion__word" data-i18n-html="arc.end.title">Ahora, <em>la ofrenda.</em></p>
+            <div class="invocacion__act">
+                <p class="invocacion__text" data-i18n="arc.end.text">Los ocho arcanos están en todas las ofrendas. Lo que cambia es el tamaño del círculo y cuántos clubes guarda.</p>
+                <a class="arrow-link" href="ofrendas.html"><span data-i18n="arc.end.link">Ver las ofrendas</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12h15M13 6l6 6-6 6"/></svg></a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="colofon">
+<div class="colofon__inner">
+<div class="colofon__mark"><svg class="sigil sigil--foot" viewBox="-50 -50 100 100" aria-hidden="true" focusable="false"><circle class="s-g" r="42"/><circle class="s-j" r="35" stroke-dasharray="1.6 3.6"/><path class="s-g" d="M0 -42L0 -49M29.7 -29.7L34.6 -34.6M42 0L49 0M29.7 29.7L34.6 34.6M0 42L0 49M-29.7 29.7L-34.6 34.6M-42 0L-49 0M-29.7 -29.7L-34.6 -34.6"/><path class="s-n" d="M-13 19V-19L13 19V-19"/><circle class="s-e" cy="-27" r="3"/></svg><span class="colofon__word">NAGUAL</span></div>
+<p class="colofon__about" data-i18n="foot.about">Nagual es un CRM para asociaciones cannábicas y clubes sociales. Nació dentro de un club en Torrevieja, en la Costa Blanca.</p>
+<div class="colofon__cols">
+<div><p class="colofon__h" data-i18n="foot.pages">Páginas</p><nav class="colofon__nav" aria-label="Páginas" data-i18n-attr="aria-label:ui.pages"><a href="index.html" data-i18n="nav.home">Códice</a><a href="arcanos.html" data-i18n="nav.arc">Arcanos</a><a href="ofrendas.html" data-i18n="nav.of">Ofrendas</a><a href="diario.html" data-i18n="nav.dia">Diario</a></nav></div>
+<div><p class="colofon__h" data-i18n="foot.enter">Entrar</p><div class="colofon__nav"><a href="https://crm.nagual.club/" data-proto="crm" data-i18n="cta.crm">Entrar al CRM</a><a href="https://crm.nagual.club/socio" data-proto="socio" data-i18n="cta.member">Soy socio</a></div></div>
+<div><p class="colofon__h" data-i18n="foot.lang">Idioma y modo</p><div class="colofon__tools"><div class="langs " role="group" aria-label="Idioma" data-i18n-attr="aria-label:ui.lang"><button type="button" data-lang-btn="es" aria-pressed="true" lang="es" aria-label="Español">ES</button><button type="button" data-lang-btn="ru" aria-pressed="false" lang="ru" aria-label="Русский">RU</button></div><button type="button" class="mode-btn mode-btn--wide" data-mode-btn aria-pressed="false" aria-label="Modo claro" title="Modo claro" data-i18n-attr="aria-label:ui.light;title:ui.light"><svg class="ico ico--mode" viewBox="-12 -12 24 24" aria-hidden="true" focusable="false"><circle r="8.5"/><path class="fill" d="M0 -8.5A8.5 8.5 0 0 1 0 8.5Z"/></svg></button></div><p class="colofon__small" data-i18n="foot.speaks">El panel habla español, ruso e inglés.</p></div>
+</div>
+<div class="colofon__rule" aria-hidden="true"><span></span></div>
+<p class="colofon__fine"><span data-i18n="foot.copy">© 2026 Nagual · Torrevieja</span><span data-i18n="foot.fine">Prototipo de diseño · datos y precios de ejemplo</span><span class="colofon__type" data-i18n="foot.type">Compuesto en Cormorant Garamond, Forum y Geologica.</span></p>
+</div>
+</footer>
+<dialog class="wheel" id="wheel" aria-labelledby="wheel-title">
+<div class="wheel__frame">
+<p class="wheel__title" id="wheel-title" data-i18n="ui.index">Índice</p>
+<button type="button" class="wheel__close" data-wheel-close aria-label="Cerrar" data-i18n-attr="aria-label:ui.close"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+<div class="wheel__dial"><svg class="geo geo--wheel" viewBox="-100 -100 200 200" aria-hidden="true" focusable="false"><circle class="g" r="98"/><circle class="g2" r="96"/><path class="geo__ticks" d="M0 -96L0 -89M8.4 -95.6L8.1 -92.1M16.7 -94.5L16.1 -91.1M24.8 -92.7L23.9 -89.3M32.8 -90.2L31.6 -86.9M40.6 -87L39.1 -83.8M48 -83.1L44.5 -77.1M55.1 -78.6L53.1 -75.8M61.7 -73.5L59.5 -70.9M67.9 -67.9L65.4 -65.4M73.5 -61.7L70.9 -59.5M78.6 -55.1L75.8 -53.1M83.1 -48L77.1 -44.5M87 -40.6L83.8 -39.1M90.2 -32.8L86.9 -31.6M92.7 -24.8L89.3 -23.9M94.5 -16.7L91.1 -16.1M95.6 -8.4L92.1 -8.1M96 0L89 0M95.6 8.4L92.1 8.1M94.5 16.7L91.1 16.1M92.7 24.8L89.3 23.9M90.2 32.8L86.9 31.6M87 40.6L83.8 39.1M83.1 48L77.1 44.5M78.6 55.1L75.8 53.1M73.5 61.7L70.9 59.5M67.9 67.9L65.4 65.4M61.7 73.5L59.5 70.9M55.1 78.6L53.1 75.8M48 83.1L44.5 77.1M40.6 87L39.1 83.8M32.8 90.2L31.6 86.9M24.8 92.7L23.9 89.3M16.7 94.5L16.1 91.1M8.4 95.6L8.1 92.1M0 96L0 89M-8.4 95.6L-8.1 92.1M-16.7 94.5L-16.1 91.1M-24.8 92.7L-23.9 89.3M-32.8 90.2L-31.6 86.9M-40.6 87L-39.1 83.8M-48 83.1L-44.5 77.1M-55.1 78.6L-53.1 75.8M-61.7 73.5L-59.5 70.9M-67.9 67.9L-65.4 65.4M-73.5 61.7L-70.9 59.5M-78.6 55.1L-75.8 53.1M-83.1 48L-77.1 44.5M-87 40.6L-83.8 39.1M-90.2 32.8L-86.9 31.6M-92.7 24.8L-89.3 23.9M-94.5 16.7L-91.1 16.1M-95.6 8.4L-92.1 8.1M-96 0L-89 0M-95.6 -8.4L-92.1 -8.1M-94.5 -16.7L-91.1 -16.1M-92.7 -24.8L-89.3 -23.9M-90.2 -32.8L-86.9 -31.6M-87 -40.6L-83.8 -39.1M-83.1 -48L-77.1 -44.5M-78.6 -55.1L-75.8 -53.1M-73.5 -61.7L-70.9 -59.5M-67.9 -67.9L-65.4 -65.4M-61.7 -73.5L-59.5 -70.9M-55.1 -78.6L-53.1 -75.8M-48 -83.1L-44.5 -77.1M-40.6 -87L-39.1 -83.8M-32.8 -90.2L-31.6 -86.9M-24.8 -92.7L-23.9 -89.3M-16.7 -94.5L-16.1 -91.1M-8.4 -95.6L-8.1 -92.1"/><circle class="j" r="80" stroke-dasharray="1 4"/><path class="g2" d="M0 -62L43.8 43.8L-62 0L43.8 -43.8L0 62L-43.8 -43.8L62 0L-43.8 43.8L0 -62Z"/><circle class="j" r="44"/></svg>
+<nav class="wheel__pages" aria-label="Páginas" data-i18n-attr="aria-label:ui.pages"><a class="wheel__page" href="index.html" style="--a:-90deg"><b data-i18n="nav.home">Códice</b><small data-i18n="nav.home.sub">Inicio</small></a><a class="wheel__page" href="arcanos.html" style="--a:0deg" aria-current="page"><b data-i18n="nav.arc">Arcanos</b><small data-i18n="nav.arc.sub">Funciones</small></a><a class="wheel__page" href="ofrendas.html" style="--a:90deg"><b data-i18n="nav.of">Ofrendas</b><small data-i18n="nav.of.sub">Precios y comienzo</small></a><a class="wheel__page" href="diario.html" style="--a:180deg"><b data-i18n="nav.dia">Diario</b><small data-i18n="nav.dia.sub">Guías</small></a></nav>
+<div class="wheel__core"><svg class="sigil sigil--core" viewBox="-50 -50 100 100" aria-hidden="true" focusable="false"><circle class="s-g" r="42"/><circle class="s-j" r="35" stroke-dasharray="1.6 3.6"/><path class="s-g" d="M0 -42L0 -49M29.7 -29.7L34.6 -34.6M42 0L49 0M29.7 29.7L34.6 34.6M0 42L0 49M-29.7 29.7L-34.6 34.6M-42 0L-49 0M-29.7 -29.7L-34.6 -34.6"/><path class="s-n" d="M-13 19V-19L13 19V-19"/><circle class="s-e" cy="-27" r="3"/></svg><a class="btn btn--jade" href="https://crm.nagual.club/" data-proto="crm" data-i18n="cta.crm">Entrar al CRM</a><a class="wheel__member" href="https://crm.nagual.club/socio" data-proto="socio" data-i18n="cta.member">Soy socio</a></div>
+</div>
+<nav class="wheel__chapters" aria-label="Capítulos de esta página" data-i18n-attr="aria-label:ui.chapters"><ol><li><a class="wheel__cap" href="#el-guardian"><span class="wheel__num">I</span><span data-i18n="arc.1.name">El Guardián</span></a></li><li><a class="wheel__cap" href="#el-libro"><span class="wheel__num">II</span><span data-i18n="arc.2.name">El Libro</span></a></li><li><a class="wheel__cap" href="#la-balanza"><span class="wheel__num">III</span><span data-i18n="arc.3.name">La Balanza</span></a></li><li><a class="wheel__cap" href="#el-herbolario"><span class="wheel__num">IV</span><span data-i18n="arc.4.name">El Herbolario</span></a></li><li><a class="wheel__cap" href="#la-luna"><span class="wheel__num">V</span><span data-i18n="arc.5.name">La Luna</span></a></li><li><a class="wheel__cap" href="#el-circulo"><span class="wheel__num">VI</span><span data-i18n="arc.6.name">El Círculo</span></a></li><li><a class="wheel__cap" href="#la-llave"><span class="wheel__num">VII</span><span data-i18n="arc.7.name">La Llave</span></a></li><li><a class="wheel__cap" href="#el-sello"><span class="wheel__num">VIII</span><span data-i18n="arc.8.name">El Sello</span></a></li></ol></nav>
+<div class="wheel__tools"><div class="langs " role="group" aria-label="Idioma" data-i18n-attr="aria-label:ui.lang"><button type="button" data-lang-btn="es" aria-pressed="true" lang="es" aria-label="Español">ES</button><button type="button" data-lang-btn="ru" aria-pressed="false" lang="ru" aria-label="Русский">RU</button></div><button type="button" class="mode-btn mode-btn--wide" data-mode-btn aria-pressed="false" aria-label="Modo claro" title="Modo claro" data-i18n-attr="aria-label:ui.light;title:ui.light"><svg class="ico ico--mode" viewBox="-12 -12 24 24" aria-hidden="true" focusable="false"><circle r="8.5"/><path class="fill" d="M0 -8.5A8.5 8.5 0 0 1 0 8.5Z"/></svg></button></div>
+</div>
+</dialog>
+<div class="toast" role="status" aria-live="polite" hidden></div>
+<span class="vh" id="turn-lbl" data-i18n="ui.turn">Girar la carta</span>
+<script src="nagual.js"></script>
+</body>
+</html>

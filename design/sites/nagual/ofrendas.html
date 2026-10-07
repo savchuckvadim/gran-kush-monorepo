@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title data-i18n="meta.of.title">Ofrendas: precios y comienzo · Nagual</title>
+<meta name="description" content="Precios de ejemplo de Nagual: Calada, Club y Cadena. Calcula tu ofrenda por número de socios, mira las cuatro fases de la puesta en marcha y lee las respuestas del oráculo."  data-i18n-attr="content:meta.of.desc"/>
+<meta name="theme-color" content="#070d0a" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&amp;family=Forum&amp;family=Geologica:wght@300..600&amp;display=swap" />
+<link rel="stylesheet" href="nagual.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-50 -50 100 100'%3E%3Crect x='-50' y='-50' width='100' height='100' rx='22' fill='%23070d0a'/%3E%3Ccircle r='38' fill='none' stroke='%23e7c76a' stroke-width='4'/%3E%3Cpath d='M-13 19V-19L13 19V-19' fill='none' stroke='%2334e39a' stroke-width='7' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E" />
+<script>(function(){var r=document.documentElement,m=null,l=null;try{m=localStorage.getItem("nagual.mode");l=localStorage.getItem("nagual.lang")}catch(e){}if(!r.getAttribute("data-mode"))r.setAttribute("data-mode",m==="light"?"light":"dark");if(!r.getAttribute("data-lang"))r.setAttribute("data-lang",l==="ru"?"ru":"es");r.setAttribute("lang",r.getAttribute("data-lang"));r.className+=" js";setTimeout(function(){r.className+=" i18n-ready"},1800)})();</script>
+</head>
+<body>
+<a class="skip" href="#main" data-i18n="ui.skip">Saltar al contenido</a>
+<div class="grain" aria-hidden="true"></div>
+<header class="rail" aria-label="Navegación de Nagual" data-i18n-attr="aria-label:ui.rail">
+<a class="rail__sigil" href="index.html" aria-label="Nagual, inicio" data-i18n-attr="aria-label:ui.home"><svg class="sigil" viewBox="-50 -50 100 100" aria-hidden="true" focusable="false"><circle class="s-g" r="42"/><circle class="s-j" r="35" stroke-dasharray="1.6 3.6"/><path class="s-g" d="M0 -42L0 -49M29.7 -29.7L34.6 -34.6M42 0L49 0M29.7 29.7L34.6 34.6M0 42L0 49M-29.7 29.7L-34.6 34.6M-42 0L-49 0M-29.7 -29.7L-34.6 -34.6"/><path class="s-n" d="M-13 19V-19L13 19V-19"/><circle class="s-e" cy="-27" r="3"/></svg></a>
+<span class="rail__word" aria-hidden="true">NAGUAL</span>
+<nav class="rail__nav" aria-label="Capítulos de esta página" data-i18n-attr="aria-label:ui.chapters"><ol class="rail__list"><li><a class="rail__link" href="#altar"><span class="rail__num">I</span><span class="rail__name" data-i18n="of.c1.name">El altar</span></a></li><li><a class="rail__link" href="#fases"><span class="rail__num">II</span><span class="rail__name" data-i18n="of.c2.name">Las fases</span></a></li><li><a class="rail__link" href="#oraculo"><span class="rail__num">III</span><span class="rail__name" data-i18n="of.c3.name">El oráculo</span></a></li></ol><span class="rail__orbit" aria-hidden="true"><i></i></span></nav>
+<div class="rail__tools"><div class="langs langs--stack" role="group" aria-label="Idioma" data-i18n-attr="aria-label:ui.lang"><button type="button" data-lang-btn="es" aria-pressed="true" lang="es" aria-label="Español">ES</button><button type="button" data-lang-btn="ru" aria-pressed="false" lang="ru" aria-label="Русский">RU</button></div><button type="button" class="mode-btn " data-mode-btn aria-pressed="false" aria-label="Modo claro" title="Modo claro" data-i18n-attr="aria-label:ui.light;title:ui.light"><svg class="ico ico--mode" viewBox="-12 -12 24 24" aria-hidden="true" focusable="false"><circle r="8.5"/><path class="fill" d="M0 -8.5A8.5 8.5 0 0 1 0 8.5Z"/></svg></button><button type="button" class="index-btn" data-wheel-open aria-haspopup="dialog" aria-controls="wheel"><svg class="ico ico--star" viewBox="-12 -12 24 24" aria-hidden="true" focusable="false"><path d="M0 -10.5L1.6 -3.9L7.4 -7.4L3.9 -1.6L10.5 0L3.9 1.6L7.4 7.4L1.6 3.9L0 10.5L-1.6 3.9L-7.4 7.4L-3.9 1.6L-10.5 0L-3.9 -1.6L-7.4 -7.4L-1.6 -3.9Z"/><circle r="2.2"/></svg><span data-i18n="ui.index">Índice</span></button></div>
+</header>
+<button type="button" class="astro" data-wheel-open aria-haspopup="dialog" aria-controls="wheel" aria-label="Abrir el índice" data-i18n-attr="aria-label:ui.openIndex"><svg class="astro__ring" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><circle class="astro__track" cx="32" cy="32" r="29"/><circle class="astro__prog" cx="32" cy="32" r="29"/></svg><span class="astro__num" aria-hidden="true">✦</span></button>
+
+<main id="main" class="page page--ofrendas">
+    <section class="opening opening--ofrendas" aria-labelledby="of-title">
+        <div class="topline">
+<a class="brandline" href="index.html" aria-label="Nagual, inicio" data-i18n-attr="aria-label:ui.home"><svg class="sigil" viewBox="-50 -50 100 100" aria-hidden="true" focusable="false"><circle class="s-g" r="42"/><circle class="s-j" r="35" stroke-dasharray="1.6 3.6"/><path class="s-g" d="M0 -42L0 -49M29.7 -29.7L34.6 -34.6M42 0L49 0M29.7 29.7L34.6 34.6M0 42L0 49M-29.7 29.7L-34.6 34.6M-42 0L-49 0M-29.7 -29.7L-34.6 -34.6"/><path class="s-n" d="M-13 19V-19L13 19V-19"/><circle class="s-e" cy="-27" r="3"/></svg><span>NAGUAL</span></a>
+<div class="topline__enter"><a href="https://crm.nagual.club/" data-proto="crm" data-i18n="cta.crm">Entrar al CRM</a><a href="https://crm.nagual.club/socio" data-proto="socio" data-i18n="cta.member">Soy socio</a></div>
+<div class="langs langs--top" role="group" aria-label="Idioma" data-i18n-attr="aria-label:ui.lang"><button type="button" data-lang-btn="es" aria-pressed="true" lang="es" aria-label="Español">ES</button><button type="button" data-lang-btn="ru" aria-pressed="false" lang="ru" aria-label="Русский">RU</button></div>
+</div>
+        <div class="folio">
+            <div class="opening__text">
+                <p class="eyebrow" data-i18n="of.o.eyebrow">Ofrendas · precios</p>
+                <h1 class="opening__title" id="of-title" data-i18n-html="of.o.h1">Las <em>ofrendas</em></h1>
+                <p class="opening__lead" data-i18n="of.o.lead">Elige lo que tu club necesita hoy y cambia de ofrenda cuando el círculo crezca. Sin permanencia.</p>
+            </div>
+            <div class="opening__art" aria-hidden="true"><svg class="retablo-art" viewBox="0 0 300 270" data-draw="load" aria-hidden="true" focusable="false">
+<path class="d g" style="--k:0" d="M8 252V114A44 44 0 0 1 96 114V252"/>
+<path class="d g" style="--k:0.05" d="M104 252V62A46 46 0 0 1 196 62V252"/>
+<path class="d g" style="--k:0.1" d="M204 252V114A44 44 0 0 1 292 114V252"/>
+<path class="d g2" style="--k:0.2" d="M16 244V116A36 36 0 0 1 88 116V244"/>
+<path class="d g2" style="--k:0.22" d="M112 244V64A38 38 0 0 1 188 64V244"/>
+<path class="d g2" style="--k:0.24" d="M212 244V116A36 36 0 0 1 284 116V244"/>
+<path class="d g" style="--k:0.3" d="M0 252H300M8 262H292"/>
+<circle class="d j" cx="52" cy="158" r="17" style="--k:0.4"/>
+<circle class="d j" cx="143" cy="128" r="14" style="--k:0.42"/><circle class="d j" cx="157" cy="128" r="14" style="--k:0.44"/>
+<circle class="d j" cx="248" cy="158" r="9" style="--k:0.44"/><circle class="d j" cx="248" cy="149" r="9" style="--k:0.45"/><circle class="d j" cx="255.8" cy="153.5" r="9" style="--k:0.48"/><circle class="d j" cx="255.8" cy="162.5" r="9" style="--k:0.51"/><circle class="d j" cx="248" cy="167" r="9" style="--k:0.54"/><circle class="d j" cx="240.2" cy="162.5" r="9" style="--k:0.57"/><circle class="d j" cx="240.2" cy="153.5" r="9" style="--k:0.60"/>
+<path class="geo__nodes" d="M50 158a2 2 0 1 0 4 0a2 2 0 1 0 -4 0M148 128a2 2 0 1 0 4 0a2 2 0 1 0 -4 0M246.4 158a1.6 1.6 0 1 0 3.2 0a1.6 1.6 0 1 0 -3.2 0"/>
+<path class="d g2" style="--k:0.5" d="M150 2v8M146 6h8"/>
+</svg></div>
+            <p class="stamp" data-i18n="of.stamp">Precios de ejemplo</p>
+        </div>
+    </section>
+
+    <section class="cap cap--altar" id="altar" data-cap aria-labelledby="altar-title">
+        <div class="folio">
+            <header class="cap__head">
+                <span class="cap__num" aria-hidden="true">I</span>
+                <p class="runhead"><span data-i18n="ui.chapter">Capítulo</span><span class="runhead__n">I</span><span class="runhead__dot" aria-hidden="true"></span><span data-i18n="of.c1.name">El altar</span></p>
+                <h2 class="cap__title" id="altar-title" data-i18n="of.c1.title">Dinos cuántos sois. El altar elige.</h2>
+            </header>
+            <div class="altar" data-altar>
+                <div class="altar__controls">
+                    <div class="altar__q">
+                        <label for="socios" data-i18n="of.q">¿Cuántos socios tiene tu club?</label>
+                        <output class="altar__num" for="socios">240</output>
+                    </div>
+                    <input class="range" type="range" id="socios" min="10" max="3000" step="10" value="240" aria-describedby="altar-result" />
+                    <div class="range__scale" aria-hidden="true"><span>10</span><span>750</span><span>1500</span><span>2250</span><span>3000</span></div>
+                    <div class="altar__opts">
+                        <div class="seg" role="radiogroup" aria-label="Forma de pago" data-i18n-attr="aria-label:of.period">
+                            <button type="button" role="radio" aria-checked="true" tabindex="0" data-period="m" data-i18n="of.m">Mensual</button>
+                            <button type="button" role="radio" aria-checked="false" tabindex="-1" data-period="y" data-i18n="of.y">Anual · ahorra ~20 %</button>
+                        </div>
+                        <label class="check"><input type="checkbox" id="multi" /><span data-i18n="of.multi">Tengo más de un club</span></label>
+                    </div>
+                </div>
+                <p class="altar__result" id="altar-result" aria-live="polite">Para 240 socios en un club, tu ofrenda es <b>Club</b>: 49 €/mes + IVA (59,29 € con IVA).</p>
+
+                <div class="retablo">
+                    <article class="tabla" data-plan="calada">
+                        <p class="tabla__badge" data-i18n="of.chosen">Para tu club</p>
+                        <svg class="glyph" viewBox="-24 -24 48 48" aria-hidden="true" focusable="false"><circle r="17"/><circle class="g" r="2.4"/></svg>
+                        <h3 class="tabla__name">Calada</h3>
+                        <p class="tabla__for" data-i18n="of.calada.for">Para el club que empieza</p>
+                        <p class="tabla__price"><span class="tabla__amount">25</span><span class="tabla__cur">€</span><span class="tabla__per" data-i18n="u.month">/mes</span></p>
+                        <p class="tabla__vat">30,25 € con IVA</p>
+                        <p class="tabla__bill">al mes, sin permanencia</p>
+                        <ul class="tabla__list">
+                            <li data-i18n="of.calada.i1">Hasta 300 socios</li>
+                            <li data-i18n="of.calada.i2">Un club</li>
+                            <li data-i18n="of.calada.i3">Los ocho arcanos</li>
+                        </ul>
+                        <button type="button" class="btn tabla__btn" data-start="Calada" data-i18n="of.start.calada">Empezar con Calada</button>
+                    </article>
+                    <article class="tabla tabla--centro is-chosen" data-plan="club">
+                        <p class="tabla__badge" data-i18n="of.chosen">Para tu club</p>
+                        <svg class="glyph" viewBox="-24 -24 48 48" aria-hidden="true" focusable="false"><circle cx="-7" r="14"/><circle cx="7" r="14"/><circle class="g" r="2.4"/></svg>
+                        <h3 class="tabla__name">Club</h3>
+                        <p class="tabla__for" data-i18n="of.club.for">Para un club en marcha</p>
+                        <p class="tabla__price"><span class="tabla__amount">49</span><span class="tabla__cur">€</span><span class="tabla__per" data-i18n="u.month">/mes</span></p>
+                        <p class="tabla__vat">59,29 € con IVA</p>
+                        <p class="tabla__bill">al mes, sin permanencia</p>
+                        <ul class="tabla__list">
+                            <li data-i18n="of.club.i1">Hasta 1.500 socios</li>
+                            <li data-i18n="of.club.i2">Un club</li>
+                            <li data-i18n="of.club.i3">Migración gratis desde tu Excel o programa</li>
+                        </ul>
+                        <button type="button" class="btn tabla__btn" data-start="Club" data-i18n="of.start.club">Empezar con Club</button>
+                    </article>
+                    <article class="tabla" data-plan="cadena">
+                        <p class="tabla__badge" data-i18n="of.chosen">Para tu club</p>
+                        <svg class="glyph" viewBox="-24 -24 48 48" aria-hidden="true" focusable="false"><circle r="8.5"/><circle cx="0" cy="-8.5" r="8.5"/><circle cx="7.4" cy="-4.2" r="8.5"/><circle cx="7.4" cy="4.2" r="8.5"/><circle cx="0" cy="8.5" r="8.5"/><circle cx="-7.4" cy="4.2" r="8.5"/><circle cx="-7.4" cy="-4.3" r="8.5"/><circle class="g" r="17"/></svg>
+                        <h3 class="tabla__name">Cadena</h3>
+                        <p class="tabla__for" data-i18n="of.cadena.for">Para varios clubes</p>
+                        <p class="tabla__price"><span class="tabla__amount">99</span><span class="tabla__cur">€</span><span class="tabla__per" data-i18n="u.month">/mes</span></p>
+                        <p class="tabla__vat">119,79 € con IVA</p>
+                        <p class="tabla__bill">al mes, sin permanencia</p>
+                        <ul class="tabla__list">
+                            <li data-i18n="of.cadena.i1">Socios sin límite</li>
+                            <li data-i18n="of.cadena.i2">Varios clubes en una cuenta</li>
+                            <li data-i18n="of.cadena.i3">Migración gratis de todos tus clubes</li>
+                        </ul>
+                        <button type="button" class="btn tabla__btn" data-start="Cadena" data-i18n="of.start.cadena">Empezar con Cadena</button>
+                    </article>
+                </div>
+                <div class="predela">
+                    <p class="predela__t" data-i18n="of.predela">En todas las ofrendas</p>
+                    <ul class="predela__list"><li><svg class="emblem emblem--sm" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path d="M28 92V58a22 22 0 0 1 44 0v34"/><path class="g" d="M23 92V57a27 27 0 0 1 54 0v35" stroke-dasharray="1 3.2"/><path d="M18 92h64"/><path d="M38 58h8v8h-8zM54 58h8v8h-8zM38 74h8v8h-8z"/><path class="f" d="M40.5 60.5h3v3h-3zM56.5 60.5h3v3h-3zM40.5 76.5h3v3h-3zM50 58h2v2h-2zM50 62h2v4h-2zM50 70h2v2h-2zM54 70h2v2h-2zM58 70h4v2h-4zM54 74h2v4h-2zM58 76h4v2h-4zM50 78h2v4h-2zM58 80h2v2h-2z"/><path class="g" d="M35 21q15-13 30 0q-15 13-30 0z"/><circle class="g" cx="50" cy="21" r="4.2"/><circle class="f fg" cx="50" cy="21" r="1.7"/><path class="g" d="M50 3v5M38.5 6l2.6 4.2M61.5 6l-2.6 4.2M30 12.5l3.8 2.6M70 12.5l-3.8 2.6"/></svg><span data-i18n="arc.1.key">Entrada por QR</span></li><li><svg class="emblem emblem--sm" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path d="M12 37v39q20-6 38 2q18-8 38-2V37"/><path d="M50 34q-16-8-34-2v40q18-6 34 2q16-8 34-2V32q-18-6-34 2z"/><path d="M50 34v40"/><path class="m" d="M22 42q11-4 22 1M22 49q11-4 22 1M22 56q11-4 22 1M22 63q11-4 22 1M56 43q11-5 22-1M56 50q11-5 22-1"/><path class="g" d="M56 61c3-7 5 3 8-2s4 3 7-1 4 3 8-1"/><path class="m" d="M56 65h23"/><path class="g" d="M70 74v14l-4-3.2-4 3.2V75"/><ellipse cx="43" cy="17" rx="8.5" ry="4.8" transform="rotate(-18 43 17)"/><ellipse class="g" cx="57" cy="17" rx="8.5" ry="4.8" transform="rotate(-18 57 17)"/></svg><span data-i18n="arc.2.key">Socios y avales</span></li><li><svg class="emblem emblem--sm" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle class="g" cx="50" cy="11" r="3.4"/><path d="M50 15v70M38 89h24M42 85h16"/><path d="M15 31 85 25"/><circle cx="50" cy="28" r="2.2"/><path d="M15 31 7 58M15 31l8 27M85 25l-8 26M85 25l8 26"/><path d="M5 58q10 9 20 0zM75 51q10 9 20 0z"/><path class="g" d="M10 55.5h10M11 53h8M12.5 50.5h5"/><path class="g" d="M81 50v-9h8v9M83 44h4M83 47h3"/></svg><span data-i18n="arc.3.key">Caja diaria</span></li><li><svg class="emblem emblem--sm" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path d="M32 40h32v5q8 4 8 14v26q0 5-5 5H29q-5 0-5-5V59q0-10 8-14z"/><path d="M35 40v-6h26v6M41 34v-6h14v6"/><circle class="g" cx="48" cy="24.5" r="3.5"/><path class="g" d="M31 60h34v16H31z"/><path class="m" d="M36 72h24M38 68v4M43 69v3M48 66.5v5.5M53 69v3M58 68v4"/><path d="M86 90q-2-18 4-36"/><path class="g" d="M85.5 79q-7-3-9-10q7 1 9 10zM87 69q7-3 8-10q-7 2-8 10zM88.5 61q-5-3-6-9q5 2 6 9z"/></svg><span data-i18n="arc.4.key">Stock al gramo</span></li><li><svg class="emblem emblem--sm" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle class="m" cx="50" cy="50" r="40" stroke-dasharray="1 3.2"/><path d="M60 28A24 24 0 1 0 60 72A26 26 0 0 1 60 28Z"/><path class="g" d="M73 34l1.6 4.4 4.4 1.6-4.4 1.6L73 46l-1.6-4.4L67 40l4.4-1.6z"/><circle class="f fg" cx="50" cy="10" r="3"/><circle class="f fg" cx="78.3" cy="21.7" r="3"/><circle class="f fg" cx="90" cy="50" r="3"/><circle class="dotbg" cx="78.3" cy="78.3" r="2.8"/><circle class="dotbg" cx="50" cy="90" r="2.8"/><circle class="dotbg" cx="21.7" cy="78.3" r="2.8"/><circle class="dotbg" cx="10" cy="50" r="2.8"/><circle class="dotbg" cx="21.7" cy="21.7" r="2.8"/></svg><span data-i18n="arc.5.key">Límite mensual</span></li><li><svg class="emblem emblem--sm" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle cx="50" cy="50" r="36"/><path class="m" d="M50 14L75.5 75.5L14 50L75.5 24.5L50 86L24.5 24.5L86 50L24.5 75.5L50 14"/><circle class="dotbg g" cx="50" cy="14" r="4.4"/><circle class="dotbg " cx="75.5" cy="24.5" r="4.4"/><circle class="dotbg " cx="86" cy="50" r="4.4"/><circle class="dotbg g" cx="75.5" cy="75.5" r="4.4"/><circle class="dotbg " cx="50" cy="86" r="4.4"/><circle class="dotbg " cx="24.5" cy="75.5" r="4.4"/><circle class="dotbg g" cx="14" cy="50" r="4.4"/><circle class="dotbg " cx="24.5" cy="24.5" r="4.4"/><rect class="dotbg" x="42.5" y="37" width="15" height="26" rx="3"/><path class="f" d="M46 41.5h3v3h-3zM51 41.5h3v3h-3zM46 46.5h3v3h-3zM51.5 47h2v2h-2zM51.5 50.5h2v2h-2zM46.5 51h2v2h-2z"/><path d="M48 59h4"/></svg><span data-i18n="arc.6.key">Zona del socio</span></li><li><svg class="emblem emblem--sm" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle cx="50" cy="15.5" r="8.5"/><circle cx="42.6" cy="28.3" r="8.5"/><circle cx="57.4" cy="28.3" r="8.5"/><circle class="g" cx="50" cy="24" r="2.6"/><path d="M50 37v52"/><path class="g" d="M44.5 41h11M45.5 45h9"/><path d="M50 70h11v5h-5v4h5v5H50"/><circle class="g" cx="50" cy="91" r="1.8"/></svg><span data-i18n="arc.7.key">Roles y clubes</span></li><li><svg class="emblem emblem--sm" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path class="g" d="M40 70 35 94l6-4 3 6 4-21M60 70l5 24-6-4-3 6-4-21"/><path class="dotbg" d="M83.2 44L82.6 45.3L81.2 46.5L79.6 47.5L78.6 48.5L78.4 49.7L79.2 51L80.3 52.6L81.2 54.1L81.1 55.5L80.1 56.5L78.3 57.1L76.5 57.5L75.2 58.1L74.8 59.2L75.1 60.8L75.6 62.6L75.8 64.4L75.2 65.5L73.8 66L71.9 65.9L70.1 65.7L68.7 65.9L68 66.9L67.8 68.5L67.7 70.5L67.2 72.1L66.2 72.9L64.7 72.8L62.9 72L61.3 71.2L60 71L59 71.8L58.3 73.3L57.5 75.1L56.4 76.4L55.2 76.7L53.8 75.9L52.4 74.6L51.2 73.3L50 72.8L48.8 73.3L47.6 74.6L46.2 75.9L44.8 76.7L43.6 76.4L42.5 75.1L41.7 73.3L41 71.8L40 71L38.7 71.2L37.1 72L35.3 72.8L33.8 72.9L32.8 72.1L32.3 70.5L32.2 68.5L32 66.9L31.3 65.9L29.9 65.7L28.1 65.9L26.2 66L24.8 65.5L24.2 64.4L24.4 62.6L24.9 60.8L25.2 59.2L24.8 58.1L23.5 57.5L21.7 57.1L19.9 56.5L18.9 55.5L18.8 54.1L19.7 52.6L20.8 51L21.6 49.7L21.4 48.5L20.4 47.5L18.8 46.5L17.4 45.3L16.8 44L17.4 42.7L18.8 41.5L20.4 40.5L21.4 39.5L21.6 38.3L20.8 37L19.7 35.4L18.8 33.9L18.9 32.5L19.9 31.5L21.7 30.9L23.5 30.5L24.8 29.9L25.2 28.8L24.9 27.2L24.4 25.4L24.2 23.6L24.8 22.5L26.2 22L28.1 22.1L29.9 22.3L31.3 22.1L32 21.1L32.2 19.5L32.3 17.5L32.8 15.9L33.8 15.1L35.3 15.2L37.1 16L38.7 16.8L40 17L41 16.2L41.7 14.7L42.5 12.9L43.6 11.6L44.8 11.3L46.2 12.1L47.6 13.4L48.8 14.7L50 15.2L51.2 14.7L52.4 13.4L53.8 12.1L55.2 11.3L56.4 11.6L57.5 12.9L58.3 14.7L59 16.2L60 17L61.3 16.8L62.9 16L64.7 15.2L66.2 15.1L67.2 15.9L67.7 17.5L67.8 19.5L68 21.1L68.7 22.1L70.1 22.3L71.9 22.1L73.8 22L75.2 22.5L75.8 23.6L75.6 25.4L75.1 27.2L74.8 28.8L75.2 29.9L76.5 30.5L78.3 30.9L80.1 31.5L81.1 32.5L81.2 33.9L80.3 35.4L79.2 37L78.4 38.3L78.6 39.5L79.6 40.5L81.2 41.5L82.6 42.7L83.2 44Z"/><circle class="g" cx="50" cy="44" r="23"/><circle cx="50" cy="40" r="5"/><path d="M47.6 44.4 45.8 54h8.4l-1.8-9.6"/></svg><span data-i18n="arc.8.key">Privacidad</span></li></ul>
+                </div>
+                <p class="marg altar__fine" data-i18n="of.fine">Precios de ejemplo para este prototipo. Sin IVA: en España se suma el 21 %. Migración gratis desde el plan Club.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cap cap--fases" id="fases" data-cap aria-labelledby="fases-title">
+        <div class="folio">
+            <header class="cap__head cap__head--split">
+                <span class="cap__num" aria-hidden="true">II</span>
+                <p class="runhead"><span data-i18n="ui.chapter">Capítulo</span><span class="runhead__n">II</span><span class="runhead__dot" aria-hidden="true"></span><span data-i18n="of.c2.name">Las fases</span></p>
+                <h2 class="cap__title" id="fases-title" data-i18n="of.c2.title">De luna nueva a luna llena.</h2>
+                <p class="cap__lead" data-i18n="of.c2.lead">Así se pone en marcha un club en Nagual. Las fechas dependen de tu club; el orden, no.</p>
+            </header>
+            <div class="fases">
+                <svg class="fases__arc" viewBox="0 0 1000 160" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0 120Q500 -40 1000 120" /></svg>
+                <ol class="fases__list">
+                    <li class="fase rv" style="--y: 85px"><svg class="moon" viewBox="-40 -40 80 80" aria-hidden="true" focusable="false"><defs><radialGradient id="moon-f1" cx="0.62" cy="0.38" r="0.8"><stop offset="0" class="moon__s1"/><stop offset="1" class="moon__s2"/></radialGradient></defs><circle class="moon__dark" r="34"/><circle class="moon__rim" r="34"/></svg><p class="fase__ph" data-i18n="of.f1.ph">Luna nueva</p><h3 class="fase__t" data-i18n="of.f1.t">Abres tu club</h3><p class="fase__d" data-i18n="of.f1.d">Nombre, ciudad y correo. El panel queda listo y puedes invitar a tu equipo.</p></li>
+                    <li class="fase rv" style="--y: 45px"><svg class="moon" viewBox="-40 -40 80 80" aria-hidden="true" focusable="false"><defs><radialGradient id="moon-f2" cx="0.62" cy="0.38" r="0.8"><stop offset="0" class="moon__s1"/><stop offset="1" class="moon__s2"/></radialGradient></defs><circle class="moon__dark" r="34"/><path class="moon__lit" d="M0 -34A34 34 0 0 1 0 34A19.04 34 0 0 0 0 -34Z" fill="url(#moon-f2)"/><circle class="moon__rim" r="34"/></svg><p class="fase__ph" data-i18n="of.f2.ph">Luna creciente</p><h3 class="fase__t" data-i18n="of.f2.t">Traemos a tus socios</h3><p class="fase__d" data-i18n="of.f2.d">Importas tu Excel o nos encargamos nosotros. Desde el plan Club, la migración es gratis.</p></li>
+                    <li class="fase rv" style="--y: 45px"><svg class="moon" viewBox="-40 -40 80 80" aria-hidden="true" focusable="false"><defs><radialGradient id="moon-f3" cx="0.62" cy="0.38" r="0.8"><stop offset="0" class="moon__s1"/><stop offset="1" class="moon__s2"/></radialGradient></defs><circle class="moon__dark" r="34"/><path class="moon__lit" d="M0 -34A34 34 0 0 1 0 34Z" fill="url(#moon-f3)"/><circle class="moon__rim" r="34"/></svg><p class="fase__ph" data-i18n="of.f3.ph">Cuarto creciente</p><h3 class="fase__t" data-i18n="of.f3.t">Repartes las llaves</h3><p class="fase__d" data-i18n="of.f3.d">Cada persona del equipo recibe su rol: admin, encargado o dispensador. Fijas los límites del mes.</p></li>
+                    <li class="fase rv" style="--y: 85px"><svg class="moon" viewBox="-40 -40 80 80" aria-hidden="true" focusable="false"><defs><radialGradient id="moon-f4" cx="0.62" cy="0.38" r="0.8"><stop offset="0" class="moon__s1"/><stop offset="1" class="moon__s2"/></radialGradient></defs><circle class="moon__dark" r="34"/><path class="moon__lit" d="M0 -34A34 34 0 0 1 0 34A34 34 0 0 1 0 -34Z" fill="url(#moon-f4)"/><circle class="moon__rim" r="34"/></svg><p class="fase__ph" data-i18n="of.f4.ph">Luna llena</p><h3 class="fase__t" data-i18n="of.f4.t">Abres la puerta</h3><p class="fase__d" data-i18n="of.f4.d">Cada socio recibe el enlace a su zona con su QR. Desde ese día, la puerta lleva la cuenta.</p></li>
+                </ol>
+            </div>
+        </div>
+    </section>
+
+    <section class="cap cap--oraculo" id="oraculo" data-cap aria-labelledby="oraculo-title">
+        <div class="folio">
+            <header class="cap__head">
+                <span class="cap__num" aria-hidden="true">III</span>
+                <p class="runhead"><span data-i18n="ui.chapter">Capítulo</span><span class="runhead__n">III</span><span class="runhead__dot" aria-hidden="true"></span><span data-i18n="of.c3.name">El oráculo</span></p>
+                <h2 class="cap__title" id="oraculo-title" data-i18n="of.c3.title">Preguntas al oráculo.</h2>
+                <p class="cap__lead" data-i18n="of.c3.lead">Lo que más nos preguntan los clubes antes de empezar.</p>
+            </header>
+            <div class="oraculo">
+                <article class="qa rv"><h3 class="qa__q" data-i18n="of.q1">¿Se puede probar gratis?</h3><p class="qa__a" data-i18n="of.a1">Sí. Creas tu club, importas a tus socios y trabajas con tu equipo durante la prueba. Si no es para ti, lo dejas: sin permanencia.</p></article>
+                <article class="qa rv"><h3 class="qa__q" data-i18n="of.q2">¿Los socios tienen que instalar una app?</h3><p class="qa__a" data-i18n="of.a2">No. La zona del socio se abre en el navegador del móvil: ahí están su QR, su límite del mes y su historial.</p></article>
+                <article class="qa rv"><h3 class="qa__q" data-i18n="of.q3">¿Cómo controla la CRM el límite mensual?</h3><p class="qa__a" data-i18n="of.a3">Fijas el límite de cada socio, por ejemplo 60 g al mes. Al registrar una retirada, la CRM suma lo que lleva el socio en el mes y no deja pasar del límite.</p></article>
+                <article class="qa rv"><h3 class="qa__q" data-i18n="of.q4">Tengo un Excel u otro programa. ¿Pierdo algo?</h3><p class="qa__a" data-i18n="of.a4">No. Importas el Excel tú mismo o lo migramos nosotros. Desde el plan Club, la migración es gratis.</p></article>
+                <article class="qa rv"><h3 class="qa__q" data-i18n="of.q5">¿Quién ve los datos de mis socios?</h3><p class="qa__a" data-i18n="of.a5">Solo tu equipo, cada uno según su rol. Los datos sensibles van cifrados y cada acceso queda en el registro. Cumplimos el RGPD y la LOPDGDD.</p></article>
+                <article class="qa rv"><h3 class="qa__q" data-i18n="of.q6">Tengo dos clubes. ¿Necesito dos cuentas?</h3><p class="qa__a" data-i18n="of.a6">No. Con la ofrenda Cadena llevas varios clubes desde una cuenta, cada uno con su equipo, sus socios y su caja.</p></article>
+                <article class="qa rv"><h3 class="qa__q" data-i18n="of.q7">¿En qué idiomas funciona?</h3><p class="qa__a" data-i18n="of.a7">El panel y la zona del socio hablan español, ruso e inglés.</p></article>
+                <article class="qa rv"><h3 class="qa__q" data-i18n="of.q8">¿Los precios llevan IVA?</h3><p class="qa__a" data-i18n="of.a8">No. Son precios sin IVA; en España se suma el 21 %. Y son precios de ejemplo de este prototipo.</p></article>
+            </div>
+        </div>
+    </section>
+
+    <section class="cierre">
+        <div class="spores" data-spores="14" aria-hidden="true"></div>
+        <div class="folio">
+            <p class="invocacion__word" data-i18n-html="of.end.title">El círculo <em>te espera.</em></p>
+            <div class="invocacion__act">
+                <p class="invocacion__text" data-i18n="of.end.text">Empieza gratis con tu equipo. Si no es para tu club, lo dejas: sin permanencia.</p>
+                <a class="seal" href="#altar" aria-label="Probar gratis" data-i18n-attr="aria-label:cta.trial"><svg class="seal__ring" viewBox="0 0 160 160" aria-hidden="true" focusable="false"><defs><path id="seal-c" d="M80 80m-61 0a61 61 0 1 1 122 0a61 61 0 1 1 -122 0"/></defs><circle class="seal__edge" cx="80" cy="80" r="77"/><circle class="seal__edge seal__edge--in" cx="80" cy="80" r="47"/><text class="seal__text"><textPath href="#seal-c" textLength="380" lengthAdjust="spacing" data-i18n="cta.ring">PROBAR GRATIS ✦ SIN PERMANENCIA ✦ </textPath></text></svg><span class="seal__core" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="colofon">
+<div class="colofon__inner">
+<div class="colofon__mark"><svg class="sigil sigil--foot" viewBox="-50 -50 100 100" aria-hidden="true" focusable="false"><circle class="s-g" r="42"/><circle class="s-j" r="35" stroke-dasharray="1.6 3.6"/><path class="s-g" d="M0 -42L0 -49M29.7 -29.7L34.6 -34.6M42 0L49 0M29.7 29.7L34.6 34.6M0 42L0 49M-29.7 29.7L-34.6 34.6M-42 0L-49 0M-29.7 -29.7L-34.6 -34.6"/><path class="s-n" d="M-13 19V-19L13 19V-19"/><circle class="s-e" cy="-27" r="3"/></svg><span class="colofon__word">NAGUAL</span></div>
+<p class="colofon__about" data-i18n="foot.about">Nagual es un CRM para asociaciones cannábicas y clubes sociales. Nació dentro de un club en Torrevieja, en la Costa Blanca.</p>
+<div class="colofon__cols">
+<div><p class="colofon__h" data-i18n="foot.pages">Páginas</p><nav class="colofon__nav" aria-label="Páginas" data-i18n-attr="aria-label:ui.pages"><a href="index.html" data-i18n="nav.home">Códice</a><a href="arcanos.html" data-i18n="nav.arc">Arcanos</a><a href="ofrendas.html" data-i18n="nav.of">Ofrendas</a><a href="diario.html" data-i18n="nav.dia">Diario</a></nav></div>
+<div><p class="colofon__h" data-i18n="foot.enter">Entrar</p><div class="colofon__nav"><a href="https://crm.nagual.club/" data-proto="crm" data-i18n="cta.crm">Entrar al CRM</a><a href="https://crm.nagual.club/socio" data-proto="socio" data-i18n="cta.member">Soy socio</a></div></div>
+<div><p class="colofon__h" data-i18n="foot.lang">Idioma y modo</p><div class="colofon__tools"><div class="langs " role="group" aria-label="Idioma" data-i18n-attr="aria-label:ui.lang"><button type="button" data-lang-btn="es" aria-pressed="true" lang="es" aria-label="Español">ES</button><button type="button" data-lang-btn="ru" aria-pressed="false" lang="ru" aria-label="Русский">RU</button></div><button type="button" class="mode-btn mode-btn--wide" data-mode-btn aria-pressed="false" aria-label="Modo claro" title="Modo claro" data-i18n-attr="aria-label:ui.light;title:ui.light"><svg class="ico ico--mode" viewBox="-12 -12 24 24" aria-hidden="true" focusable="false"><circle r="8.5"/><path class="fill" d="M0 -8.5A8.5 8.5 0 0 1 0 8.5Z"/></svg></button></div><p class="colofon__small" data-i18n="foot.speaks">El panel habla español, ruso e inglés.</p></div>
+</div>
+<div class="colofon__rule" aria-hidden="true"><span></span></div>
+<p class="colofon__fine"><span data-i18n="foot.copy">© 2026 Nagual · Torrevieja</span><span data-i18n="foot.fine">Prototipo de diseño · datos y precios de ejemplo</span><span class="colofon__type" data-i18n="foot.type">Compuesto en Cormorant Garamond, Forum y Geologica.</span></p>
+</div>
+</footer>
+<dialog class="wheel" id="wheel" aria-labelledby="wheel-title">
+<div class="wheel__frame">
+<p class="wheel__title" id="wheel-title" data-i18n="ui.index">Índice</p>
+<button type="button" class="wheel__close" data-wheel-close aria-label="Cerrar" data-i18n-attr="aria-label:ui.close"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+<div class="wheel__dial"><svg class="geo geo--wheel" viewBox="-100 -100 200 200" aria-hidden="true" focusable="false"><circle class="g" r="98"/><circle class="g2" r="96"/><path class="geo__ticks" d="M0 -96L0 -89M8.4 -95.6L8.1 -92.1M16.7 -94.5L16.1 -91.1M24.8 -92.7L23.9 -89.3M32.8 -90.2L31.6 -86.9M40.6 -87L39.1 -83.8M48 -83.1L44.5 -77.1M55.1 -78.6L53.1 -75.8M61.7 -73.5L59.5 -70.9M67.9 -67.9L65.4 -65.4M73.5 -61.7L70.9 -59.5M78.6 -55.1L75.8 -53.1M83.1 -48L77.1 -44.5M87 -40.6L83.8 -39.1M90.2 -32.8L86.9 -31.6M92.7 -24.8L89.3 -23.9M94.5 -16.7L91.1 -16.1M95.6 -8.4L92.1 -8.1M96 0L89 0M95.6 8.4L92.1 8.1M94.5 16.7L91.1 16.1M92.7 24.8L89.3 23.9M90.2 32.8L86.9 31.6M87 40.6L83.8 39.1M83.1 48L77.1 44.5M78.6 55.1L75.8 53.1M73.5 61.7L70.9 59.5M67.9 67.9L65.4 65.4M61.7 73.5L59.5 70.9M55.1 78.6L53.1 75.8M48 83.1L44.5 77.1M40.6 87L39.1 83.8M32.8 90.2L31.6 86.9M24.8 92.7L23.9 89.3M16.7 94.5L16.1 91.1M8.4 95.6L8.1 92.1M0 96L0 89M-8.4 95.6L-8.1 92.1M-16.7 94.5L-16.1 91.1M-24.8 92.7L-23.9 89.3M-32.8 90.2L-31.6 86.9M-40.6 87L-39.1 83.8M-48 83.1L-44.5 77.1M-55.1 78.6L-53.1 75.8M-61.7 73.5L-59.5 70.9M-67.9 67.9L-65.4 65.4M-73.5 61.7L-70.9 59.5M-78.6 55.1L-75.8 53.1M-83.1 48L-77.1 44.5M-87 40.6L-83.8 39.1M-90.2 32.8L-86.9 31.6M-92.7 24.8L-89.3 23.9M-94.5 16.7L-91.1 16.1M-95.6 8.4L-92.1 8.1M-96 0L-89 0M-95.6 -8.4L-92.1 -8.1M-94.5 -16.7L-91.1 -16.1M-92.7 -24.8L-89.3 -23.9M-90.2 -32.8L-86.9 -31.6M-87 -40.6L-83.8 -39.1M-83.1 -48L-77.1 -44.5M-78.6 -55.1L-75.8 -53.1M-73.5 -61.7L-70.9 -59.5M-67.9 -67.9L-65.4 -65.4M-61.7 -73.5L-59.5 -70.9M-55.1 -78.6L-53.1 -75.8M-48 -83.1L-44.5 -77.1M-40.6 -87L-39.1 -83.8M-32.8 -90.2L-31.6 -86.9M-24.8 -92.7L-23.9 -89.3M-16.7 -94.5L-16.1 -91.1M-8.4 -95.6L-8.1 -92.1"/><circle class="j" r="80" stroke-dasharray="1 4"/><path class="g2" d="M0 -62L43.8 43.8L-62 0L43.8 -43.8L0 62L-43.8 -43.8L62 0L-43.8 43.8L0 -62Z"/><circle class="j" r="44"/></svg>
+<nav class="wheel__pages" aria-label="Páginas" data-i18n-attr="aria-label:ui.pages"><a class="wheel__page" href="index.html" style="--a:-90deg"><b data-i18n="nav.home">Códice</b><small data-i18n="nav.home.sub">Inicio</small></a><a class="wheel__page" href="arcanos.html" style="--a:0deg"><b data-i18n="nav.arc">Arcanos</b><small data-i18n="nav.arc.sub">Funciones</small></a><a class="wheel__page" href="ofrendas.html" style="--a:90deg" aria-current="page"><b data-i18n="nav.of">Ofrendas</b><small data-i18n="nav.of.sub">Precios y comienzo</small></a><a class="wheel__page" href="diario.html" style="--a:180deg"><b data-i18n="nav.dia">Diario</b><small data-i18n="nav.dia.sub">Guías</small></a></nav>
+<div class="wheel__core"><svg class="sigil sigil--core" viewBox="-50 -50 100 100" aria-hidden="true" focusable="false"><circle class="s-g" r="42"/><circle class="s-j" r="35" stroke-dasharray="1.6 3.6"/><path class="s-g" d="M0 -42L0 -49M29.7 -29.7L34.6 -34.6M42 0L49 0M29.7 29.7L34.6 34.6M0 42L0 49M-29.7 29.7L-34.6 34.6M-42 0L-49 0M-29.7 -29.7L-34.6 -34.6"/><path class="s-n" d="M-13 19V-19L13 19V-19"/><circle class="s-e" cy="-27" r="3"/></svg><a class="btn btn--jade" href="https://crm.nagual.club/" data-proto="crm" data-i18n="cta.crm">Entrar al CRM</a><a class="wheel__member" href="https://crm.nagual.club/socio" data-proto="socio" data-i18n="cta.member">Soy socio</a></div>
+</div>
+<nav class="wheel__chapters" aria-label="Capítulos de esta página" data-i18n-attr="aria-label:ui.chapters"><ol><li><a class="wheel__cap" href="#altar"><span class="wheel__num">I</span><span data-i18n="of.c1.name">El altar</span></a></li><li><a class="wheel__cap" href="#fases"><span class="wheel__num">II</span><span data-i18n="of.c2.name">Las fases</span></a></li><li><a class="wheel__cap" href="#oraculo"><span class="wheel__num">III</span><span data-i18n="of.c3.name">El oráculo</span></a></li></ol></nav>
+<div class="wheel__tools"><div class="langs " role="group" aria-label="Idioma" data-i18n-attr="aria-label:ui.lang"><button type="button" data-lang-btn="es" aria-pressed="true" lang="es" aria-label="Español">ES</button><button type="button" data-lang-btn="ru" aria-pressed="false" lang="ru" aria-label="Русский">RU</button></div><button type="button" class="mode-btn mode-btn--wide" data-mode-btn aria-pressed="false" aria-label="Modo claro" title="Modo claro" data-i18n-attr="aria-label:ui.light;title:ui.light"><svg class="ico ico--mode" viewBox="-12 -12 24 24" aria-hidden="true" focusable="false"><circle r="8.5"/><path class="fill" d="M0 -8.5A8.5 8.5 0 0 1 0 8.5Z"/></svg></button></div>
+</div>
+</dialog>
+<div class="toast" role="status" aria-live="polite" hidden></div>
+<span class="vh" id="turn-lbl" data-i18n="ui.turn">Girar la carta</span>
+<script src="nagual.js"></script>
+</body>
+</html>

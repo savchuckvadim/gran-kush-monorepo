@@ -1,0 +1,643 @@
+/* Directions 4–7 on the same markup:
+   cristal — white minimal glass; the visual effect is a prism lens that follows the cursor.
+   nagual  — the alternative brand: healer, green magic, sacred geometry, rising spores.
+   boombap — 90s hip-hop: VHS hero, extruded Cross Colours type, newsprint halftone, hard shadows.
+   grind   — metal / grindcore: blackletter with xerox edges, blood red on black. */
+
+:root[data-dir="cristal"] {
+    --bg: #f3f4f6;
+    --bg-2: #ffffff;
+    --fg: #0b0c0e;
+    --fg-2: #464a52;
+    --muted: #747983;
+    --line: rgba(11, 12, 14, 0.1);
+    --accent: #0b0c0e;
+    --accent-2: #5b6cff;
+    --on-accent: #ffffff;
+    --glass: rgba(255, 255, 255, 0.42);
+    --glass-strong: rgba(255, 255, 255, 0.74);
+    --glass-line: rgba(255, 255, 255, 0.92);
+    --glow: rgba(40, 50, 90, 0.16);
+    --ok: #11875a;
+    --warn: #a8650a;
+    --bad: #c8243f;
+    --f-display: "Commissioner", "Helvetica Neue", sans-serif;
+    --f-tag: "Commissioner", sans-serif;
+    --f-body: "Commissioner", system-ui, sans-serif;
+    --display-weight: 250;
+    --display-case: none;
+    --display-track: -0.05em;
+    --display-leading: 0.95;
+    --radius: 28px;
+    --radius-s: 16px;
+    --video-filter: invert(1) grayscale(1) brightness(1.2) contrast(0.82);
+    --hero-tint: linear-gradient(180deg, rgba(243, 244, 246, 0.05) 0%, rgba(243, 244, 246, 0.35) 62%, var(--bg) 100%);
+    --fluid-blend: multiply;
+    --holo: linear-gradient(100deg, #0b0c0e, #5d6474 60%, #0b0c0e);
+    color-scheme: light;
+}
+
+:root[data-dir="nagual"] {
+    --bg: #050b08;
+    --bg-2: #0b1510;
+    --fg: #e8f3ea;
+    --fg-2: #a9c2b0;
+    --muted: #7a9683;
+    --line: rgba(170, 255, 200, 0.12);
+    --accent: #34e39a;
+    --accent-2: #e7c76a;
+    --on-accent: #03140b;
+    --glass: rgba(180, 255, 210, 0.05);
+    --glass-strong: rgba(6, 18, 12, 0.72);
+    --glass-line: rgba(190, 255, 215, 0.16);
+    --glow: rgba(52, 227, 154, 0.3);
+    --ok: #6fe8a8;
+    --warn: #e7c76a;
+    --bad: #ff7a6b;
+    --f-display: "Cormorant Garamond", "Georgia", serif;
+    --f-tag: "Forum", "Cormorant Garamond", serif;
+    --f-body: "Geologica", system-ui, sans-serif;
+    --display-weight: 500;
+    --display-case: none;
+    --display-track: -0.015em;
+    --display-leading: 0.92;
+    --radius: 22px;
+    --radius-s: 12px;
+    --video-filter: sepia(0.9) hue-rotate(78deg) saturate(2.4) brightness(0.62) contrast(1.2);
+    --hero-tint: radial-gradient(90% 70% at 50% 115%, rgba(52, 227, 154, 0.32), transparent 62%),
+        radial-gradient(60% 50% at 85% 10%, rgba(231, 199, 106, 0.16), transparent 60%),
+        linear-gradient(180deg, rgba(5, 11, 8, 0.2) 0%, rgba(5, 11, 8, 0.45) 60%, var(--bg) 100%);
+    --fluid-blend: screen;
+    --holo: linear-gradient(100deg, #34e39a, #a8f0c8 45%, #e7c76a);
+    color-scheme: dark;
+}
+
+:root[data-dir="boombap"] {
+    --bg: #f2e8d5;
+    --bg-2: #fff8ea;
+    --fg: #141414;
+    --fg-2: #3d3a33;
+    --muted: #625c51;
+    --line: rgba(20, 20, 20, 0.2);
+    --accent: #e4312b;
+    --accent-2: #ffc72c;
+    --c3: #009a49;
+    --c4: #0057b8;
+    --on-accent: #ffffff;
+    --glass: #fff8ea;
+    --glass-strong: rgba(242, 232, 213, 0.95);
+    --glass-line: #141414;
+    --glow: rgba(228, 49, 43, 0.25);
+    --ok: #007a3a;
+    --warn: #8a5f00;
+    --bad: #c4231d;
+    --f-display: "Rubik Mono One", "Arial Black", sans-serif;
+    --f-tag: "Rubik Bubbles", "Rubik Mono One", cursive;
+    --f-body: "Geologica", system-ui, sans-serif;
+    --display-weight: 400;
+    --display-case: uppercase;
+    --display-track: -0.03em;
+    --display-leading: 0.95;
+    --radius: 6px;
+    --radius-s: 4px;
+    --video-filter: sepia(0.45) saturate(2.2) hue-rotate(-25deg) contrast(1.3) brightness(0.85);
+    --hero-tint: linear-gradient(180deg, rgba(10, 8, 6, 0.25) 0%, rgba(10, 8, 6, 0.55) 70%, rgba(10, 8, 6, 0.85) 100%);
+    --fluid-blend: screen;
+    --holo: linear-gradient(100deg, var(--accent), var(--accent-2));
+    color-scheme: light;
+}
+
+:root[data-dir="grind"] {
+    --bg: #050505;
+    --bg-2: #0e0e0e;
+    --fg: #ececec;
+    --fg-2: #b3b3b3;
+    --muted: #858585;
+    --line: rgba(255, 255, 255, 0.14);
+    --accent: #e0102c;
+    --accent-2: #e9e4da;
+    --on-accent: #ffffff;
+    --glass: #0a0a0a;
+    --glass-strong: rgba(6, 6, 6, 0.92);
+    --glass-line: rgba(233, 228, 218, 0.28);
+    --glow: rgba(224, 16, 44, 0.35);
+    --ok: #9ad19a;
+    --warn: #e9e4da;
+    --bad: #ff2a3c;
+    --f-display: "Pirata One", "Ruslan Display", "Times New Roman", serif;
+    --f-tag: "Pirata One", "Ruslan Display", serif;
+    --f-body: "JetBrains Mono", ui-monospace, monospace;
+    --display-weight: 400;
+    --display-case: none;
+    --display-track: 0;
+    --display-leading: 0.86;
+    --radius: 0px;
+    --radius-s: 0px;
+    --video-filter: grayscale(1) contrast(2.1) brightness(0.62);
+    --hero-tint: radial-gradient(80% 60% at 50% 120%, rgba(224, 16, 44, 0.45), transparent 60%),
+        linear-gradient(180deg, rgba(5, 5, 5, 0.25) 0%, rgba(5, 5, 5, 0.5) 60%, var(--bg) 100%);
+    --fluid-blend: screen;
+    --holo: linear-gradient(100deg, var(--accent), var(--accent));
+    color-scheme: dark;
+}
+
+:root[data-dir="cristal"] [data-only~="cristal"],
+:root[data-dir="nagual"] [data-only~="nagual"],
+:root[data-dir="boombap"] [data-only~="boombap"],
+:root[data-dir="grind"] [data-only~="grind"] {
+    display: revert;
+}
+
+/* ---------- cristal: prism lens, chromatic fringe, airy glass ---------- */
+
+.lens {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 0;
+    width: 220px;
+    height: 220px;
+    margin: -110px 0 0 -110px;
+    border-radius: 50%;
+    pointer-events: none;
+    border: 1px solid rgba(255, 255, 255, 0.95);
+    background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.05) 45%, transparent 70%);
+    -webkit-backdrop-filter: blur(1px) brightness(1.08) saturate(1.6);
+    backdrop-filter: blur(1px) brightness(1.08) saturate(1.6);
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.4),
+        inset 0 -18px 40px rgba(91, 108, 255, 0.18),
+        0 30px 60px -24px rgba(20, 30, 60, 0.35);
+    transform: translate(var(--lx, 72vw), var(--ly, 46vh));
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.liquid-ok .lens {
+    -webkit-backdrop-filter: url(#prism) brightness(1.06) saturate(1.5);
+    backdrop-filter: url(#prism) brightness(1.06) saturate(1.5);
+}
+
+:root[data-dir="cristal"] .hero h1 em {
+    font-weight: 600;
+    background: none;
+    color: var(--fg);
+    -webkit-text-fill-color: var(--fg);
+    text-shadow: -2px 0 rgba(255, 0, 90, 0.32), 2px 0 rgba(0, 150, 255, 0.32);
+}
+
+:root[data-dir="cristal"] .glass {
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    backdrop-filter: blur(28px) saturate(180%);
+    box-shadow:
+        inset 0 1px 0 #fff,
+        inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+        0 30px 70px -36px rgba(30, 40, 80, 0.3);
+}
+
+:root[data-dir="cristal"] .card__big,
+:root[data-dir="cristal"] .steps li::before,
+:root[data-dir="cristal"] .final__word {
+    font-weight: 200;
+}
+
+:root[data-dir="cristal"] .card:hover {
+    transform: translateY(-3px);
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* ---------- nagual: sacred geometry, spores, glow ---------- */
+
+.geo {
+    position: absolute;
+    z-index: 0;
+    right: -6%;
+    top: 50%;
+    width: min(62vw, 760px);
+    aspect-ratio: 1;
+    pointer-events: none;
+    opacity: 0.55;
+    filter: drop-shadow(0 0 18px rgba(52, 227, 154, 0.45));
+    animation: geo-spin 140s linear infinite;
+    transform: translateY(-50%);
+}
+
+.geo * {
+    fill: none;
+    stroke-width: 0.6;
+    vector-effect: non-scaling-stroke;
+}
+
+@keyframes geo-spin {
+    to {
+        transform: translateY(-50%) rotate(360deg);
+    }
+}
+
+.spores {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.spores span {
+    position: absolute;
+    bottom: -10px;
+    width: var(--s);
+    height: var(--s);
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--c), transparent 70%);
+    box-shadow: 0 0 12px var(--c);
+    opacity: 0;
+    animation: spore var(--t) linear var(--d) infinite;
+}
+
+@keyframes spore {
+    10% {
+        opacity: 0.9;
+    }
+    80% {
+        opacity: 0.6;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--dx), -95vh);
+    }
+}
+
+:root[data-dir="nagual"] .hero h1 {
+    font-size: clamp(3.4rem, 1rem + 8.4vw, 10.5rem);
+}
+
+:root[data-dir="nagual"] .hero h1 em,
+:root[data-dir="nagual"] .manifesto .dim {
+    font-style: italic;
+    font-weight: 400;
+}
+
+:root[data-dir="nagual"] .kicker,
+:root[data-dir="nagual"] .eyebrow {
+    font-family: var(--f-tag);
+    letter-spacing: 0.22em;
+}
+
+:root[data-dir="nagual"] .card h3,
+:root[data-dir="nagual"] .plan h3 {
+    font-size: clamp(1.7rem, 1.3rem + 1vw, 2.4rem);
+    font-weight: 600;
+}
+
+:root[data-dir="nagual"] .btn:not(.btn--ghost) {
+    background: linear-gradient(100deg, var(--accent), #a8f0c8 55%, var(--accent-2));
+}
+
+:root[data-dir="nagual"] .logo {
+    font-family: var(--f-tag);
+    letter-spacing: 0.24em;
+}
+
+/* ---------- boombap: VHS hero, extruded type, newsprint, hard shadows ---------- */
+
+.osd {
+    position: absolute;
+    inset: 104px 4% 28px;
+    z-index: 0;
+    pointer-events: none;
+    font: 400 clamp(1.4rem, 1rem + 1.4vw, 2.4rem)/1 "VT323", ui-monospace, monospace;
+    color: #f6f2e6;
+    text-shadow: 2px 0 rgba(255, 0, 60, 0.55), -2px 0 rgba(0, 200, 255, 0.55);
+}
+
+.osd span {
+    position: absolute;
+}
+
+.osd .tl {
+    top: 0;
+    left: 0;
+}
+
+.osd .tr {
+    top: 0;
+    right: 0;
+}
+
+.osd .br {
+    right: 0;
+    bottom: 0;
+}
+
+.osd .tl i {
+    font-style: normal;
+    animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+:root[data-dir="boombap"] .hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        linear-gradient(180deg, transparent 0 46%, rgba(255, 255, 255, 0.09) 48%, transparent 52%) 0 0 / 100% 300% no-repeat,
+        repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.22) 0 1px, transparent 1px 3px);
+    animation: tracking 7s linear infinite;
+}
+
+@keyframes tracking {
+    from {
+        background-position: 0 -100%, 0 0;
+    }
+    to {
+        background-position: 0 200%, 0 0;
+    }
+}
+
+:root[data-dir="boombap"] .hero {
+    --fg: #fff6e6;
+    --fg-2: #f1e3c8;
+    --muted: #cfc0a3;
+    --glass: rgba(255, 246, 230, 0.12);
+    --glass-line: rgba(255, 246, 230, 0.4);
+}
+
+:root[data-dir="boombap"] .hero h1 {
+    font-size: clamp(2.4rem, 0.6rem + 6vw, 7.4rem);
+    color: #fff6e6;
+    text-shadow:
+        3px 3px 0 #e4312b,
+        6px 6px 0 #ffc72c,
+        9px 9px 0 #009a49,
+        12px 12px 0 #0057b8;
+    max-width: 16ch;
+}
+
+:root[data-dir="boombap"] .hero h1 em {
+    background: none;
+    color: #ffc72c;
+    -webkit-text-fill-color: #ffc72c;
+}
+
+:root[data-dir="boombap"] .sec {
+    background-image: radial-gradient(rgba(20, 20, 20, 0.13) 1px, transparent 1.6px);
+    background-size: 7px 7px;
+}
+
+:root[data-dir="boombap"] .glass,
+:root[data-dir="boombap"] .glass--liquid {
+    background: var(--glass);
+    border: 2px solid var(--fg);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: 6px 6px 0 var(--fg);
+}
+
+:root[data-dir="boombap"] .hero .glass {
+    border-color: rgba(255, 246, 230, 0.5);
+    box-shadow: none;
+}
+
+:root[data-dir="boombap"] .hdr {
+    background: var(--bg-2);
+    border-color: #141414;
+}
+
+:root[data-dir="boombap"] .btn {
+    border: 2px solid #141414;
+    border-radius: 6px;
+    box-shadow: 4px 4px 0 #141414;
+    font-family: var(--f-display);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+
+:root[data-dir="boombap"] .btn--ghost {
+    background: var(--bg-2);
+    color: #141414;
+}
+
+:root[data-dir="boombap"] .hero .btn--ghost {
+    background: #fff6e6;
+}
+
+:root[data-dir="boombap"] .marquee {
+    background:
+        repeating-linear-gradient(90deg, #e4312b 0 25%, #ffc72c 25% 50%, #009a49 50% 75%, #0057b8 75% 100%) 0 100% / 100% 8px no-repeat,
+        #141414;
+    color: #fff6e6;
+    border: 0;
+}
+
+:root[data-dir="boombap"] .marquee__track span i {
+    color: #ffc72c;
+}
+
+:root[data-dir="boombap"] .card:nth-child(4n + 1) .card__icon {
+    background: #e4312b;
+    color: #fff;
+}
+
+:root[data-dir="boombap"] .card:nth-child(4n + 2) .card__icon {
+    background: #ffc72c;
+    color: #141414;
+}
+
+:root[data-dir="boombap"] .card:nth-child(4n + 3) .card__icon {
+    background: #009a49;
+    color: #fff;
+}
+
+:root[data-dir="boombap"] .card:nth-child(4n + 4) .card__icon {
+    background: #0057b8;
+    color: #fff;
+}
+
+:root[data-dir="boombap"] .sec__head h2,
+:root[data-dir="boombap"] .manifesto {
+    font-size: clamp(1.8rem, 0.9rem + 3vw, 3.9rem);
+    text-shadow: 3px 3px 0 #ffc72c;
+}
+
+:root[data-dir="boombap"] .card h3,
+:root[data-dir="boombap"] .plan h3 {
+    font-size: clamp(1.05rem, 0.9rem + 0.6vw, 1.45rem);
+    line-height: 1.1;
+}
+
+:root[data-dir="boombap"] .final__word {
+    background: none;
+    color: #e4312b;
+    -webkit-text-fill-color: #e4312b;
+    text-shadow: 6px 6px 0 #141414;
+    font-size: clamp(3rem, 0.5rem + 11vw, 11rem);
+}
+
+:root[data-dir="boombap"] .card__big,
+:root[data-dir="boombap"] .steps li::before,
+:root[data-dir="boombap"] .success__mark {
+    background: none;
+    color: #0057b8;
+    -webkit-text-fill-color: #0057b8;
+}
+
+:root[data-dir="boombap"] .sticker {
+    font: 400 1.1rem/1 var(--f-tag);
+    background: #ffc72c;
+    border: 2px solid #141414;
+    transform: rotate(6deg);
+}
+
+:root[data-dir="boombap"] .plan.is-reco {
+    box-shadow: 8px 8px 0 #e4312b;
+}
+
+:root[data-dir="boombap"] .trust div {
+    background: var(--bg-2);
+}
+
+/* ---------- grind: blackletter, xerox edges, blood red ---------- */
+
+:root[data-dir="grind"] .display,
+:root[data-dir="grind"] .logo,
+:root[data-dir="grind"] .marquee__track span {
+    filter: url(#rough);
+}
+
+:root[data-dir="grind"] .hero h1 {
+    font-size: clamp(4rem, 1rem + 11vw, 13rem);
+    color: var(--accent-2);
+}
+
+:root[data-dir="grind"] .hero h1 em,
+:root[data-dir="grind"] .card__big,
+:root[data-dir="grind"] .steps li::before,
+:root[data-dir="grind"] .final__word,
+:root[data-dir="grind"] .success__mark {
+    background: none;
+    color: var(--accent);
+    -webkit-text-fill-color: var(--accent);
+}
+
+:root[data-dir="grind"] .hero h1:hover .w {
+    animation: shake 0.18s steps(2) 3;
+}
+
+@keyframes shake {
+    50% {
+        transform: translate(2px, -1px) rotate(-0.6deg);
+    }
+}
+
+:root[data-dir="grind"] .glass,
+:root[data-dir="grind"] .glass--liquid {
+    background: var(--glass);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
+}
+
+:root[data-dir="grind"] .hdr {
+    background: rgba(5, 5, 5, 0.88);
+    border-radius: 0;
+}
+
+:root[data-dir="grind"] .btn {
+    border-radius: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.82rem;
+}
+
+:root[data-dir="grind"] .gnav a,
+:root[data-dir="grind"] .gnav__pill {
+    border-radius: 0;
+}
+
+:root[data-dir="grind"] .marquee {
+    background: var(--accent);
+    color: #050505;
+    border: 0;
+}
+
+:root[data-dir="grind"] .marquee__track span {
+    text-transform: none;
+    font-size: clamp(2rem, 1.2rem + 3vw, 4rem);
+}
+
+:root[data-dir="grind"] .marquee__track span i {
+    color: #050505;
+}
+
+:root[data-dir="grind"] .grain {
+    opacity: 0.16;
+}
+
+:root[data-dir="grind"] .sticker {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 0;
+    transform: rotate(-7deg);
+    font: 400 1.1rem/1 var(--f-display);
+}
+
+:root[data-dir="grind"] .card {
+    transition: background 0.2s, color 0.2s;
+}
+
+:root[data-dir="grind"] .card:hover {
+    background: var(--accent-2);
+    color: #050505;
+}
+
+:root[data-dir="grind"] .card:hover p {
+    color: #2a2a2a;
+}
+
+:root[data-dir="grind"] .sec__head h2 {
+    font-size: clamp(3rem, 1.4rem + 5.2vw, 6.8rem);
+}
+
+:root[data-dir="grind"] .card h3,
+:root[data-dir="grind"] .plan h3 {
+    font-size: clamp(1.9rem, 1.4rem + 1.2vw, 2.7rem);
+}
+
+/* ---------- dock with seven directions ---------- */
+
+.dock {
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.dock::-webkit-scrollbar {
+    display: none;
+}
+
+.dock button {
+    flex: none;
+}
+
+@media (max-width: 640px) {
+    .dock {
+        justify-content: flex-start;
+        width: calc(100% - 24px);
+    }
+    .geo {
+        width: 120vw;
+        right: -40%;
+        opacity: 0.35;
+    }
+    .lens {
+        display: none;
+    }
+    .osd {
+        inset: 84px 16px 20px;
+    }
+}
