@@ -48,3 +48,9 @@ prisma/migrations
 
 # OpenAPI generated
 **/openapi.json
+
+# Payload generated (pnpm --filter site generate / migrate:create): keep the generator's own
+# format, otherwise every `pnpm dev` rewrites them
+apps/site/payload-types.ts
+apps/site/migrations
+apps/site/app/(payload)/admin/importMap.js

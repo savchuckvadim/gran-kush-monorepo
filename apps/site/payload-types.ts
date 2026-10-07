@@ -13,915 +13,901 @@
  * via the `definition` "supportedTimezones".
  */
 export type SupportedTimezones =
-    | "Pacific/Midway"
-    | "Pacific/Niue"
-    | "Pacific/Honolulu"
-    | "Pacific/Rarotonga"
-    | "America/Anchorage"
-    | "Pacific/Gambier"
-    | "America/Los_Angeles"
-    | "America/Tijuana"
-    | "America/Denver"
-    | "America/Phoenix"
-    | "America/Chicago"
-    | "America/Guatemala"
-    | "America/New_York"
-    | "America/Bogota"
-    | "America/Caracas"
-    | "America/Santiago"
-    | "America/Buenos_Aires"
-    | "America/Sao_Paulo"
-    | "Atlantic/South_Georgia"
-    | "Atlantic/Azores"
-    | "Atlantic/Cape_Verde"
-    | "Europe/London"
-    | "Europe/Berlin"
-    | "Africa/Lagos"
-    | "Europe/Athens"
-    | "Africa/Cairo"
-    | "Europe/Moscow"
-    | "Asia/Riyadh"
-    | "Asia/Dubai"
-    | "Asia/Baku"
-    | "Asia/Karachi"
-    | "Asia/Tashkent"
-    | "Asia/Calcutta"
-    | "Asia/Dhaka"
-    | "Asia/Almaty"
-    | "Asia/Jakarta"
-    | "Asia/Bangkok"
-    | "Asia/Shanghai"
-    | "Asia/Singapore"
-    | "Asia/Tokyo"
-    | "Asia/Seoul"
-    | "Australia/Brisbane"
-    | "Australia/Sydney"
-    | "Pacific/Guam"
-    | "Pacific/Noumea"
-    | "Pacific/Auckland"
-    | "Pacific/Fiji";
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
 
 export interface Config {
-    auth: {
-        users: UserAuthOperations;
-    };
-    blocks: {};
-    collections: {
-        pages: Page;
-        plans: Plan;
-        sites: Site;
-        media: Media;
-        users: User;
-        "payload-kv": PayloadKv;
-        "payload-locked-documents": PayloadLockedDocument;
-        "payload-preferences": PayloadPreference;
-        "payload-migrations": PayloadMigration;
-    };
-    collectionsJoins: {};
-    collectionsSelect: {
-        pages: PagesSelect<false> | PagesSelect<true>;
-        plans: PlansSelect<false> | PlansSelect<true>;
-        sites: SitesSelect<false> | SitesSelect<true>;
-        media: MediaSelect<false> | MediaSelect<true>;
-        users: UsersSelect<false> | UsersSelect<true>;
-        "payload-kv": PayloadKvSelect<false> | PayloadKvSelect<true>;
-        "payload-locked-documents":
-            | PayloadLockedDocumentsSelect<false>
-            | PayloadLockedDocumentsSelect<true>;
-        "payload-preferences": PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
-        "payload-migrations": PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
-    };
-    db: {
-        defaultIDType: number;
-    };
-    fallbackLocale:
-        | ("false" | "none" | "null")
-        | false
-        | null
-        | ("es" | "ru" | "en")
-        | ("es" | "ru" | "en")[];
-    globals: {};
-    globalsSelect: {};
-    locale: "es" | "ru" | "en";
-    widgets: {
-        collections: CollectionsWidget;
-    };
-    user: User;
-    jobs: {
-        tasks: unknown;
-        workflows: unknown;
-    };
+  auth: {
+    users: UserAuthOperations;
+  };
+  blocks: {};
+  collections: {
+    pages: Page;
+    plans: Plan;
+    sites: Site;
+    media: Media;
+    users: User;
+    'payload-kv': PayloadKv;
+    'payload-locked-documents': PayloadLockedDocument;
+    'payload-preferences': PayloadPreference;
+    'payload-migrations': PayloadMigration;
+  };
+  collectionsJoins: {};
+  collectionsSelect: {
+    pages: PagesSelect<false> | PagesSelect<true>;
+    plans: PlansSelect<false> | PlansSelect<true>;
+    sites: SitesSelect<false> | SitesSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+  };
+  db: {
+    defaultIDType: number;
+  };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('es' | 'ru' | 'en') | ('es' | 'ru' | 'en')[];
+  globals: {};
+  globalsSelect: {};
+  locale: 'es' | 'ru' | 'en';
+  widgets: {
+    collections: CollectionsWidget;
+  };
+  user: User;
+  jobs: {
+    tasks: unknown;
+    workflows: unknown;
+  };
 }
 export interface UserAuthOperations {
-    forgotPassword: {
-        email: string;
-        password: string;
-    };
-    login: {
-        email: string;
-        password: string;
-    };
-    registerFirstUser: {
-        email: string;
-        password: string;
-    };
-    unlock: {
-        email: string;
-        password: string;
-    };
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
 export interface Page {
-    id: number;
-    title: string;
-    site: "pafpaf" | "nagual";
-    /**
-     * home — the main page; precios — /es/precios
-     */
-    slug: string;
-    seo?: {
-        title?: string | null;
-        description?: string | null;
-    };
-    layout?:
-        | (
-              | HeroBlock
-              | QrDoorBlock
-              | FeatureGridBlock
-              | LimitFlaskBlock
-              | ClubsMergeBlock
-              | PrivacyRolesBlock
-              | PricingTeaserBlock
-              | PricingTableBlock
-              | AddonsBlock
-              | FaqBlock
-              | FinalCtaBlock
-          )[]
-        | null;
-    updatedAt: string;
-    createdAt: string;
+  id: number;
+  title: string;
+  site: 'pafpaf' | 'nagual';
+  /**
+   * home — the main page; precios — /es/precios
+   */
+  slug: string;
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+  };
+  layout?:
+    | (
+        | HeroBlock
+        | QrDoorBlock
+        | FeatureGridBlock
+        | LimitFlaskBlock
+        | ClubsMergeBlock
+        | PrivacyRolesBlock
+        | PricingTeaserBlock
+        | PricingTableBlock
+        | AddonsBlock
+        | FaqBlock
+        | FinalCtaBlock
+      )[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "HeroBlock".
  */
 export interface HeroBlock {
-    eyebrow?: string | null;
-    title: string;
-    text?: string | null;
-    primary?: {
-        label?: string | null;
-        /**
-         * /precios — page of this site, #entrada — anchor, https://… — external
-         */
-        href?: string | null;
-    };
-    secondary?: {
-        label?: string | null;
-        /**
-         * /precios — page of this site, #entrada — anchor, https://… — external
-         */
-        href?: string | null;
-    };
-    hint?: string | null;
-    showLiveBar?: boolean | null;
-    id?: string | null;
-    blockName?: string | null;
-    blockType: "hero";
+  eyebrow?: string | null;
+  title: string;
+  text?: string | null;
+  primary?: {
+    label?: string | null;
+    /**
+     * /precios — page of this site, #entrada — anchor, https://… — external
+     */
+    href?: string | null;
+  };
+  secondary?: {
+    label?: string | null;
+    /**
+     * /precios — page of this site, #entrada — anchor, https://… — external
+     */
+    href?: string | null;
+  };
+  hint?: string | null;
+  showLiveBar?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'hero';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "QrDoorBlock".
  */
 export interface QrDoorBlock {
-    eyebrow?: string | null;
-    title: string;
-    text?: string | null;
-    /**
-     * Id for in-page links and the nav highlight, e.g. funciones
-     */
-    anchor?: string | null;
-    id?: string | null;
-    blockName?: string | null;
-    blockType: "qrDoor";
+  eyebrow?: string | null;
+  title: string;
+  text?: string | null;
+  /**
+   * Id for in-page links and the nav highlight, e.g. funciones
+   */
+  anchor?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'qrDoor';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "FeatureGridBlock".
  */
 export interface FeatureGridBlock {
-    eyebrow?: string | null;
-    title: string;
-    /**
-     * Id for in-page links and the nav highlight, e.g. funciones
-     */
-    anchor?: string | null;
-    items?:
-        | {
-              icon:
-                  | "users"
-                  | "scan"
-                  | "gauge"
-                  | "package"
-                  | "wallet"
-                  | "phone"
-                  | "shield"
-                  | "layers";
-              title: string;
-              text?: string | null;
-              id?: string | null;
-          }[]
-        | null;
-    id?: string | null;
-    blockName?: string | null;
-    blockType: "featureGrid";
+  eyebrow?: string | null;
+  title: string;
+  /**
+   * Id for in-page links and the nav highlight, e.g. funciones
+   */
+  anchor?: string | null;
+  items?:
+    | {
+        icon: 'users' | 'scan' | 'gauge' | 'package' | 'wallet' | 'phone' | 'shield' | 'layers';
+        title: string;
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'featureGrid';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LimitFlaskBlock".
  */
 export interface LimitFlaskBlock {
-    eyebrow?: string | null;
-    title: string;
-    text?: string | null;
-    used?: number | null;
-    limit?: number | null;
-    maxDraw?: number | null;
-    id?: string | null;
-    blockName?: string | null;
-    blockType: "limitFlask";
+  eyebrow?: string | null;
+  title: string;
+  text?: string | null;
+  used?: number | null;
+  limit?: number | null;
+  maxDraw?: number | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'limitFlask';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ClubsMergeBlock".
  */
 export interface ClubsMergeBlock {
-    eyebrow?: string | null;
-    title: string;
-    text?: string | null;
-    clubs?:
-        | {
-              name: string;
-              id?: string | null;
-          }[]
-        | null;
-    merged?: string | null;
-    id?: string | null;
-    blockName?: string | null;
-    blockType: "clubsMerge";
+  eyebrow?: string | null;
+  title: string;
+  text?: string | null;
+  clubs?:
+    | {
+        name: string;
+        id?: string | null;
+      }[]
+    | null;
+  merged?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'clubsMerge';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "PrivacyRolesBlock".
  */
 export interface PrivacyRolesBlock {
-    eyebrow?: string | null;
-    title: string;
-    text?: string | null;
-    /**
-     * Id for in-page links and the nav highlight, e.g. funciones
-     */
-    anchor?: string | null;
-    id?: string | null;
-    blockName?: string | null;
-    blockType: "privacyRoles";
+  eyebrow?: string | null;
+  title: string;
+  text?: string | null;
+  /**
+   * Id for in-page links and the nav highlight, e.g. funciones
+   */
+  anchor?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'privacyRoles';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "PricingTeaserBlock".
  */
 export interface PricingTeaserBlock {
-    eyebrow?: string | null;
-    title: string;
-    text?: string | null;
-    cta?: {
-        label?: string | null;
-        /**
-         * /precios — page of this site, #entrada — anchor, https://… — external
-         */
-        href?: string | null;
-    };
-    id?: string | null;
-    blockName?: string | null;
-    blockType: "pricingTeaser";
+  eyebrow?: string | null;
+  title: string;
+  text?: string | null;
+  cta?: {
+    label?: string | null;
+    /**
+     * /precios — page of this site, #entrada — anchor, https://… — external
+     */
+    href?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'pricingTeaser';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "PricingTableBlock".
  */
 export interface PricingTableBlock {
-    eyebrow?: string | null;
-    title: string;
-    text?: string | null;
-    defaultMembers?: number | null;
-    id?: string | null;
-    blockName?: string | null;
-    blockType: "pricingTable";
+  eyebrow?: string | null;
+  title: string;
+  text?: string | null;
+  defaultMembers?: number | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'pricingTable';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "AddonsBlock".
  */
 export interface AddonsBlock {
-    eyebrow?: string | null;
-    title: string;
-    items?:
-        | {
-              title: string;
-              subtitle?: string | null;
-              price: string;
-              id?: string | null;
-          }[]
-        | null;
-    id?: string | null;
-    blockName?: string | null;
-    blockType: "addons";
+  eyebrow?: string | null;
+  title: string;
+  items?:
+    | {
+        title: string;
+        subtitle?: string | null;
+        price: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'addons';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "FaqBlock".
  */
 export interface FaqBlock {
-    eyebrow?: string | null;
-    title: string;
-    items?:
-        | {
-              question: string;
-              answer: string;
-              id?: string | null;
-          }[]
-        | null;
-    id?: string | null;
-    blockName?: string | null;
-    blockType: "faq";
+  eyebrow?: string | null;
+  title: string;
+  items?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'faq';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "FinalCtaBlock".
  */
 export interface FinalCtaBlock {
-    title: string;
-    text?: string | null;
-    cta?: {
-        label?: string | null;
-        /**
-         * /precios — page of this site, #entrada — anchor, https://… — external
-         */
-        href?: string | null;
-    };
-    id?: string | null;
-    blockName?: string | null;
-    blockType: "finalCta";
+  title: string;
+  text?: string | null;
+  cta?: {
+    label?: string | null;
+    /**
+     * /precios — page of this site, #entrada — anchor, https://… — external
+     */
+    href?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'finalCta';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "plans".
  */
 export interface Plan {
-    id: number;
-    code: "calada" | "club" | "cadena";
-    name: string;
-    order?: number | null;
-    forWhom?: string | null;
-    features?:
-        | {
-              text: string;
-              id?: string | null;
-          }[]
-        | null;
-    /**
-     * Calculator threshold; empty means no limit
-     */
-    maxMembers?: number | null;
-    highlight?: boolean | null;
-    /**
-     * Fallback prices in EUR without VAT, used only when the billing API is down
-     */
-    billing?: {
-        monthlyCode?: string | null;
-        yearlyCode?: string | null;
-        fallbackMonthly?: number | null;
-        fallbackYearly?: number | null;
-    };
-    updatedAt: string;
-    createdAt: string;
+  id: number;
+  code: 'calada' | 'club' | 'cadena';
+  name: string;
+  order?: number | null;
+  forWhom?: string | null;
+  features?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Calculator threshold; empty means no limit
+   */
+  maxMembers?: number | null;
+  highlight?: boolean | null;
+  /**
+   * Fallback prices in EUR without VAT, used only when the billing API is down
+   */
+  billing?: {
+    monthlyCode?: string | null;
+    yearlyCode?: string | null;
+    fallbackMonthly?: number | null;
+    fallbackYearly?: number | null;
+  };
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "sites".
  */
 export interface Site {
-    id: number;
-    code: "pafpaf" | "nagual";
-    name: string;
-    domain?: string | null;
-    contacts?: {
-        email?: string | null;
-        phone?: string | null;
-        whatsapp?: string | null;
-        telegram?: string | null;
-    };
-    footerNote?: string | null;
-    legalNote?: string | null;
-    updatedAt: string;
-    createdAt: string;
+  id: number;
+  code: 'pafpaf' | 'nagual';
+  name: string;
+  domain?: string | null;
+  contacts?: {
+    email?: string | null;
+    phone?: string | null;
+    whatsapp?: string | null;
+    telegram?: string | null;
+  };
+  footerNote?: string | null;
+  legalNote?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
-    id: number;
-    alt?: string | null;
-    updatedAt: string;
-    createdAt: string;
-    url?: string | null;
-    thumbnailURL?: string | null;
-    filename?: string | null;
-    mimeType?: string | null;
-    filesize?: number | null;
-    width?: number | null;
-    height?: number | null;
-    focalX?: number | null;
-    focalY?: number | null;
+  id: number;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-    id: number;
-    name?: string | null;
-    updatedAt: string;
-    createdAt: string;
-    email: string;
-    resetPasswordToken?: string | null;
-    resetPasswordExpiration?: string | null;
-    salt?: string | null;
-    hash?: string | null;
-    resetPasswordRequestedAt?: string | null;
-    loginAttempts?: number | null;
-    lockUntil?: string | null;
-    sessions?:
-        | {
-              id: string;
-              createdAt?: string | null;
-              expiresAt: string;
-          }[]
-        | null;
-    password?: string | null;
-    collection: "users";
+  id: number;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-    id: number;
-    key: string;
-    data:
-        | {
-              [k: string]: unknown;
-          }
-        | unknown[]
-        | string
-        | number
-        | boolean
-        | null;
+  id: number;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-    id: number;
-    document?:
-        | ({
-              relationTo: "pages";
-              value: number | Page;
-          } | null)
-        | ({
-              relationTo: "plans";
-              value: number | Plan;
-          } | null)
-        | ({
-              relationTo: "sites";
-              value: number | Site;
-          } | null)
-        | ({
-              relationTo: "media";
-              value: number | Media;
-          } | null)
-        | ({
-              relationTo: "users";
-              value: number | User;
-          } | null);
-    globalSlug?: string | null;
-    user: {
-        relationTo: "users";
+  id: number;
+  document?:
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'plans';
+        value: number | Plan;
+      } | null)
+    | ({
+        relationTo: 'sites';
+        value: number | Site;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'users';
         value: number | User;
-    };
-    updatedAt: string;
-    createdAt: string;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: number | User;
+  };
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-    id: number;
-    user: {
-        relationTo: "users";
-        value: number | User;
-    };
-    key?: string | null;
-    value?:
-        | {
-              [k: string]: unknown;
-          }
-        | unknown[]
-        | string
-        | number
-        | boolean
-        | null;
-    updatedAt: string;
-    createdAt: string;
+  id: number;
+  user: {
+    relationTo: 'users';
+    value: number | User;
+  };
+  key?: string | null;
+  value?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-    id: number;
-    name?: string | null;
-    batch?: number | null;
-    updatedAt: string;
-    createdAt: string;
+  id: number;
+  name?: string | null;
+  batch?: number | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages_select".
  */
 export interface PagesSelect<T extends boolean = true> {
-    title?: T;
-    site?: T;
-    slug?: T;
-    seo?:
-        | T
-        | {
-              title?: T;
-              description?: T;
-          };
-    layout?:
-        | T
-        | {
-              hero?: T | HeroBlockSelect<T>;
-              qrDoor?: T | QrDoorBlockSelect<T>;
-              featureGrid?: T | FeatureGridBlockSelect<T>;
-              limitFlask?: T | LimitFlaskBlockSelect<T>;
-              clubsMerge?: T | ClubsMergeBlockSelect<T>;
-              privacyRoles?: T | PrivacyRolesBlockSelect<T>;
-              pricingTeaser?: T | PricingTeaserBlockSelect<T>;
-              pricingTable?: T | PricingTableBlockSelect<T>;
-              addons?: T | AddonsBlockSelect<T>;
-              faq?: T | FaqBlockSelect<T>;
-              finalCta?: T | FinalCtaBlockSelect<T>;
-          };
-    updatedAt?: T;
-    createdAt?: T;
+  title?: T;
+  site?: T;
+  slug?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  layout?:
+    | T
+    | {
+        hero?: T | HeroBlockSelect<T>;
+        qrDoor?: T | QrDoorBlockSelect<T>;
+        featureGrid?: T | FeatureGridBlockSelect<T>;
+        limitFlask?: T | LimitFlaskBlockSelect<T>;
+        clubsMerge?: T | ClubsMergeBlockSelect<T>;
+        privacyRoles?: T | PrivacyRolesBlockSelect<T>;
+        pricingTeaser?: T | PricingTeaserBlockSelect<T>;
+        pricingTable?: T | PricingTableBlockSelect<T>;
+        addons?: T | AddonsBlockSelect<T>;
+        faq?: T | FaqBlockSelect<T>;
+        finalCta?: T | FinalCtaBlockSelect<T>;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "HeroBlock_select".
  */
 export interface HeroBlockSelect<T extends boolean = true> {
-    eyebrow?: T;
-    title?: T;
-    text?: T;
-    primary?:
-        | T
-        | {
-              label?: T;
-              href?: T;
-          };
-    secondary?:
-        | T
-        | {
-              label?: T;
-              href?: T;
-          };
-    hint?: T;
-    showLiveBar?: T;
-    id?: T;
-    blockName?: T;
+  eyebrow?: T;
+  title?: T;
+  text?: T;
+  primary?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+      };
+  secondary?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+      };
+  hint?: T;
+  showLiveBar?: T;
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "QrDoorBlock_select".
  */
 export interface QrDoorBlockSelect<T extends boolean = true> {
-    eyebrow?: T;
-    title?: T;
-    text?: T;
-    anchor?: T;
-    id?: T;
-    blockName?: T;
+  eyebrow?: T;
+  title?: T;
+  text?: T;
+  anchor?: T;
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "FeatureGridBlock_select".
  */
 export interface FeatureGridBlockSelect<T extends boolean = true> {
-    eyebrow?: T;
-    title?: T;
-    anchor?: T;
-    items?:
-        | T
-        | {
-              icon?: T;
-              title?: T;
-              text?: T;
-              id?: T;
-          };
-    id?: T;
-    blockName?: T;
+  eyebrow?: T;
+  title?: T;
+  anchor?: T;
+  items?:
+    | T
+    | {
+        icon?: T;
+        title?: T;
+        text?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LimitFlaskBlock_select".
  */
 export interface LimitFlaskBlockSelect<T extends boolean = true> {
-    eyebrow?: T;
-    title?: T;
-    text?: T;
-    used?: T;
-    limit?: T;
-    maxDraw?: T;
-    id?: T;
-    blockName?: T;
+  eyebrow?: T;
+  title?: T;
+  text?: T;
+  used?: T;
+  limit?: T;
+  maxDraw?: T;
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ClubsMergeBlock_select".
  */
 export interface ClubsMergeBlockSelect<T extends boolean = true> {
-    eyebrow?: T;
-    title?: T;
-    text?: T;
-    clubs?:
-        | T
-        | {
-              name?: T;
-              id?: T;
-          };
-    merged?: T;
-    id?: T;
-    blockName?: T;
+  eyebrow?: T;
+  title?: T;
+  text?: T;
+  clubs?:
+    | T
+    | {
+        name?: T;
+        id?: T;
+      };
+  merged?: T;
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "PrivacyRolesBlock_select".
  */
 export interface PrivacyRolesBlockSelect<T extends boolean = true> {
-    eyebrow?: T;
-    title?: T;
-    text?: T;
-    anchor?: T;
-    id?: T;
-    blockName?: T;
+  eyebrow?: T;
+  title?: T;
+  text?: T;
+  anchor?: T;
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "PricingTeaserBlock_select".
  */
 export interface PricingTeaserBlockSelect<T extends boolean = true> {
-    eyebrow?: T;
-    title?: T;
-    text?: T;
-    cta?:
-        | T
-        | {
-              label?: T;
-              href?: T;
-          };
-    id?: T;
-    blockName?: T;
+  eyebrow?: T;
+  title?: T;
+  text?: T;
+  cta?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+      };
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "PricingTableBlock_select".
  */
 export interface PricingTableBlockSelect<T extends boolean = true> {
-    eyebrow?: T;
-    title?: T;
-    text?: T;
-    defaultMembers?: T;
-    id?: T;
-    blockName?: T;
+  eyebrow?: T;
+  title?: T;
+  text?: T;
+  defaultMembers?: T;
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "AddonsBlock_select".
  */
 export interface AddonsBlockSelect<T extends boolean = true> {
-    eyebrow?: T;
-    title?: T;
-    items?:
-        | T
-        | {
-              title?: T;
-              subtitle?: T;
-              price?: T;
-              id?: T;
-          };
-    id?: T;
-    blockName?: T;
+  eyebrow?: T;
+  title?: T;
+  items?:
+    | T
+    | {
+        title?: T;
+        subtitle?: T;
+        price?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "FaqBlock_select".
  */
 export interface FaqBlockSelect<T extends boolean = true> {
-    eyebrow?: T;
-    title?: T;
-    items?:
-        | T
-        | {
-              question?: T;
-              answer?: T;
-              id?: T;
-          };
-    id?: T;
-    blockName?: T;
+  eyebrow?: T;
+  title?: T;
+  items?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "FinalCtaBlock_select".
  */
 export interface FinalCtaBlockSelect<T extends boolean = true> {
-    title?: T;
-    text?: T;
-    cta?:
-        | T
-        | {
-              label?: T;
-              href?: T;
-          };
-    id?: T;
-    blockName?: T;
+  title?: T;
+  text?: T;
+  cta?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+      };
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "plans_select".
  */
 export interface PlansSelect<T extends boolean = true> {
-    code?: T;
-    name?: T;
-    order?: T;
-    forWhom?: T;
-    features?:
-        | T
-        | {
-              text?: T;
-              id?: T;
-          };
-    maxMembers?: T;
-    highlight?: T;
-    billing?:
-        | T
-        | {
-              monthlyCode?: T;
-              yearlyCode?: T;
-              fallbackMonthly?: T;
-              fallbackYearly?: T;
-          };
-    updatedAt?: T;
-    createdAt?: T;
+  code?: T;
+  name?: T;
+  order?: T;
+  forWhom?: T;
+  features?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  maxMembers?: T;
+  highlight?: T;
+  billing?:
+    | T
+    | {
+        monthlyCode?: T;
+        yearlyCode?: T;
+        fallbackMonthly?: T;
+        fallbackYearly?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "sites_select".
  */
 export interface SitesSelect<T extends boolean = true> {
-    code?: T;
-    name?: T;
-    domain?: T;
-    contacts?:
-        | T
-        | {
-              email?: T;
-              phone?: T;
-              whatsapp?: T;
-              telegram?: T;
-          };
-    footerNote?: T;
-    legalNote?: T;
-    updatedAt?: T;
-    createdAt?: T;
+  code?: T;
+  name?: T;
+  domain?: T;
+  contacts?:
+    | T
+    | {
+        email?: T;
+        phone?: T;
+        whatsapp?: T;
+        telegram?: T;
+      };
+  footerNote?: T;
+  legalNote?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
-    alt?: T;
-    updatedAt?: T;
-    createdAt?: T;
-    url?: T;
-    thumbnailURL?: T;
-    filename?: T;
-    mimeType?: T;
-    filesize?: T;
-    width?: T;
-    height?: T;
-    focalX?: T;
-    focalY?: T;
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
-    name?: T;
-    updatedAt?: T;
-    createdAt?: T;
-    email?: T;
-    resetPasswordToken?: T;
-    resetPasswordExpiration?: T;
-    salt?: T;
-    hash?: T;
-    resetPasswordRequestedAt?: T;
-    loginAttempts?: T;
-    lockUntil?: T;
-    sessions?:
-        | T
-        | {
-              id?: T;
-              createdAt?: T;
-              expiresAt?: T;
-          };
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  resetPasswordRequestedAt?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
-    key?: T;
-    data?: T;
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
-    document?: T;
-    globalSlug?: T;
-    user?: T;
-    updatedAt?: T;
-    createdAt?: T;
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences_select".
  */
 export interface PayloadPreferencesSelect<T extends boolean = true> {
-    user?: T;
-    key?: T;
-    value?: T;
-    updatedAt?: T;
-    createdAt?: T;
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations_select".
  */
 export interface PayloadMigrationsSelect<T extends boolean = true> {
-    name?: T;
-    batch?: T;
-    updatedAt?: T;
-    createdAt?: T;
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
-    data?: {
-        [k: string]: unknown;
-    };
-    width: "full";
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
-    [k: string]: unknown;
+  [k: string]: unknown;
 }
 
-declare module "payload" {
-    export interface GeneratedTypes extends Config {}
+
+declare module 'payload' {
+  export interface GeneratedTypes extends Config {}
 }
