@@ -1,0 +1,18 @@
+{
+    "$schema": "https://turbo.build/schema.json",
+    "extends": ["//"],
+    "tasks": {
+        "build": {
+            "env": [
+                "NEXT_PUBLIC_SITE",
+                "NEXT_PUBLIC_SERVER_URL",
+                "NEXT_PUBLIC_CRM_URL",
+                "NEXT_PUBLIC_MEMBER_URL",
+                "DATABASE_URL",
+                "PAYLOAD_SECRET",
+                "PAYLOAD_DB_PUSH",
+                "BILLING_API_URL"
+            ]
+        }
+    }
+}

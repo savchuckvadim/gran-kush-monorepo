@@ -1,0 +1,100 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useLocale } from "next-intl";
+
+import { BURST_EVENT, type BurstDetail } from "../ui/mode";
+
+// A glass lens follows the pointer over the hero; a click splashes the smoke.
+export const HeroLens = () => {
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const lens = ref.current;
+        const hero = lens?.closest<HTMLElement>(".hero");
+        if (!lens || !hero) return;
+        const enter = () => hero.classList.add("is-hover");
+        const leave = () => hero.classList.remove("is-hover");
+        const move = (event: PointerEvent) => {
+            const r = hero.getBoundingClientRect();
+            lens.style.setProperty("--lx", `${event.clientX - r.left}px`);
+            lens.style.setProperty("--ly", `${event.clientY - r.top}px`);
+        };
+        const splash = (event: MouseEvent) => {
+            if (event.target instanceof Element && event.target.closest("a,button")) return;
+            window.dispatchEvent(
+                new CustomEvent<BurstDetail>(BURST_EVENT, {
+                    detail: { x: event.clientX, y: event.clientY },
+                })
+            );
+        };
+        hero.addEventListener("pointerenter", enter);
+        hero.addEventListener("pointerleave", leave);
+        hero.addEventListener("pointermove", move);
+        hero.addEventListener("click", splash);
+        return () => {
+            hero.removeEventListener("pointerenter", enter);
+            hero.removeEventListener("pointerleave", leave);
+            hero.removeEventListener("pointermove", move);
+            hero.removeEventListener("click", splash);
+        };
+    }, []);
+
+    return <div ref={ref} className="lens glass" aria-hidden="true" />;
+};
+
+interface LiveBarProps {
+    labels: { inside: string; pickups: string; cash: string };
+}
+
+// Example numbers that tick like a live club evening.
+export const LiveBar = ({ labels }: LiveBarProps) => {
+    const locale = useLocale();
+    const [live, setLive] = useState({ inside: 23, pickups: 64, cash: 1284.5 });
+    const [bumped, setBumped] = useState<"inside" | "pickups" | null>(null);
+
+    useEffect(() => {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        const timer = window.setInterval(() => {
+            if (Math.random() < 0.45) {
+                setLive((v) => ({ ...v, inside: v.inside + (Math.random() < 0.7 ? 1 : -1) }));
+                setBumped("inside");
+            } else {
+                const ticket = [7.5, 8, 15, 6.5][Math.floor(Math.random() * 4)] ?? 7.5;
+                setLive((v) => ({ ...v, pickups: v.pickups + 1, cash: v.cash + ticket }));
+                setBumped("pickups");
+            }
+            window.setTimeout(() => setBumped(null), 600);
+        }, 3200);
+        return () => window.clearInterval(timer);
+    }, []);
+
+    const number = new Intl.NumberFormat(locale);
+    const money = new Intl.NumberFormat(locale, { style: "currency", currency: "EUR" });
+
+    return (
+        <div className="livebar glass fade-late">
+            <div>
+                <small>
+                    <i />
+                    <span>{labels.inside}</span>
+                </small>
+                <b className={bumped === "inside" ? "bump" : undefined}>
+                    {number.format(live.inside)}
+                </b>
+            </div>
+            <div>
+                <small>{labels.pickups}</small>
+                <b className={bumped === "pickups" ? "bump" : undefined}>
+                    {number.format(live.pickups)}
+                </b>
+            </div>
+            <div>
+                <small>{labels.cash}</small>
+                <b className={bumped === "pickups" ? "bump" : undefined}>
+                    {money.format(live.cash)}
+                </b>
+            </div>
+        </div>
+    );
+};

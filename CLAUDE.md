@@ -10,6 +10,7 @@ gran-kush/
 │   ├── api/          # NestJS 11 backend (port 3000)
 │   ├── crm/          # Next.js 16 CRM for employees (port 5000)
 │   ├── web/          # Next.js 16 member portal / LK (port 5001)
+│   ├── site/         # Next.js 16 + Payload 3: product sites PafPaf / Nagual (port 5002)
 │   └── admin/        # Admin app
 ├── packages/
 │   ├── api-client/   # OpenAPI-generated API client (@workspace/api-client)
@@ -46,6 +47,10 @@ pnpm --filter crm typecheck     # tsc --noEmit
 pnpm --filter web dev           # Next.js + turbopack, port 5001
 pnpm --filter web build
 pnpm --filter web typecheck
+
+pnpm --filter site dev          # Next.js + Payload, port 5002 (documentation/site/PRODUCT_SITES.md)
+pnpm --filter site seed         # PafPaf content in es/ru/en
+pnpm --filter site generate     # payload-types.ts + admin import map
 ```
 
 ### Database (from apps/api)

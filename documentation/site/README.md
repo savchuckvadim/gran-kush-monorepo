@@ -1,5 +1,7 @@
 # Site Documentation - Public Website & Member Portal
 
+> Product sites that sell the CRM (PafPaf, Nagual) live in `apps/site`: see [PRODUCT_SITES.md](PRODUCT_SITES.md).
+
 ## Overview
 
 The site application (`apps/web`) is a Next.js 16 application that serves both as a public website for attracting new members and a member portal (portfolio) for registered members. The application is built with React 19, TypeScript, and follows Feature-Sliced Design (FSD) architecture.

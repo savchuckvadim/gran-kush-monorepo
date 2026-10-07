@@ -1,0 +1,48 @@
+{
+    "name": "site",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev -p 5002",
+        "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
+        "start": "cross-env NODE_OPTIONS=--no-deprecation next start -p 5002",
+        "lint": "cross-env NODE_OPTIONS=--no-deprecation eslint .",
+        "typecheck": "tsc --noEmit",
+        "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+        "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+        "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
+        "generate": "pnpm generate:types && pnpm generate:importmap",
+        "db:ensure": "node scripts/ensure-db.mjs",
+        "seed": "cross-env NODE_OPTIONS=--no-deprecation payload run payload/seed/run.ts"
+    },
+    "dependencies": {
+        "@payloadcms/db-postgres": "3.90.1",
+        "@payloadcms/next": "3.90.1",
+        "@payloadcms/richtext-lexical": "3.90.1",
+        "@payloadcms/ui": "3.90.1",
+        "cross-env": "^7.0.3",
+        "graphql": "^16.8.2",
+        "next": "16.3.3",
+        "next-intl": "^4.8.3",
+        "payload": "3.90.1",
+        "pg": "8.20.0",
+        "react": "19.2.6",
+        "react-dom": "19.2.6",
+        "server-only": "^0.0.1",
+        "sharp": "0.35.4"
+    },
+    "devDependencies": {
+        "@types/node": "22.19.9",
+        "@types/pg": "^8.11.10",
+        "@types/react": "19.2.14",
+        "@types/react-dom": "19.2.3",
+        "@workspace/eslint-config": "workspace:*",
+        "@workspace/typescript-config": "workspace:*",
+        "eslint": "^9.16.0",
+        "typescript": "5.9.3"
+    },
+    "engines": {
+        "node": ">=20.9.0"
+    }
+}

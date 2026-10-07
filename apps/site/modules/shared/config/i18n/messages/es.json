@@ -1,0 +1,75 @@
+{
+    "nav": {
+        "home": "Inicio",
+        "features": "Funciones",
+        "privacy": "Privacidad",
+        "pricing": "Precios",
+        "crm": "Entrar",
+        "member": "Soy socio"
+    },
+    "a11y": {
+        "language": "Idioma",
+        "mode": "Día o noche",
+        "billing": "Facturación",
+        "roles": "Rol",
+        "main": "Principal"
+    },
+    "hero": {
+        "hint": "Toca el humo"
+    },
+    "live": {
+        "inside": "Dentro ahora",
+        "pickups": "Retiradas hoy",
+        "cash": "Caja de hoy"
+    },
+    "phone": {
+        "member": "Socia Nº 0147",
+        "fee": "Cuota al día",
+        "sponsor": "Aval Nº 0098",
+        "limit": "41 / 60 g",
+        "ok": "Entrada registrada"
+    },
+    "flask": {
+        "today": "Retirada de hoy",
+        "of": "de {limit} g este mes",
+        "ok": "Cabe: quedan {n} g este mes.",
+        "over": "Se pasa {n} g: la CRM no la registra."
+    },
+    "units": {
+        "g": "g"
+    },
+    "roles": {
+        "disp": "Dispensación",
+        "manager": "Encargado",
+        "admin": "Administración"
+    },
+    "record": {
+        "since": "Socia desde 2024",
+        "number": "Nº de socio",
+        "limit": "Límite del mes",
+        "fee": "Cuota",
+        "feeValue": "Al día",
+        "sponsor": "Avalista",
+        "phone": "Teléfono",
+        "id": "DNI / NIE",
+        "files": "Documentos",
+        "filesValue": "3 archivos"
+    },
+    "pricing": {
+        "monthly": "Mensual",
+        "yearly": "Anual · −20 %",
+        "perMonth": "/mes",
+        "vat": "IVA aparte · {value} con IVA",
+        "members": "¿Cuántos socios tiene tu club?",
+        "reco": "Para {n} socios te recomendamos <b>{plan}</b>.",
+        "badge": "Para tu club",
+        "choose": "Elegir {plan}"
+    },
+    "footer": {
+        "rights": "© {year} PafPaf · paf-paf.app"
+    },
+    "notFound": {
+        "title": "Esta página se ha esfumado.",
+        "back": "Volver al inicio"
+    }
+}
