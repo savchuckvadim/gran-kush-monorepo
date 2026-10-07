@@ -312,7 +312,8 @@ export function createFluid(canvas, options) {
         var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
         var w = Math.max(1, Math.floor(canvas.clientWidth * dpr));
         var h = Math.max(1, Math.floor(canvas.clientHeight * dpr));
-        if (canvas.width !== w || canvas.height !== h) {
+        // `!dye`: a second instance on the same canvas (React remount) finds the size already set.
+        if (!dye || canvas.width !== w || canvas.height !== h) {
             canvas.width = w;
             canvas.height = h;
             initTargets();

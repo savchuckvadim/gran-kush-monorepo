@@ -8,6 +8,21 @@ import { PAGES, PLANS, SITE_DOC } from "./content";
 // The default locale goes first so required fields exist before the translations.
 const ORDER = [DEFAULT_LOCALE, ...LOCALES.filter((locale) => locale !== DEFAULT_LOCALE)];
 
+// Each block type is one table for all pages, so the readable ids from content.ts get a page prefix:
+// unique across pages and sites, and still the same in every locale.
+const scopeIds = <T>(value: T, prefix: string): T => {
+    if (Array.isArray(value)) return value.map((item: unknown) => scopeIds(item, prefix)) as T;
+    if (value && typeof value === "object") {
+        return Object.fromEntries(
+            Object.entries(value).map(([key, item]) => [
+                key,
+                key === "id" && typeof item === "string" ? `${prefix}-${item}` : scopeIds(item, prefix),
+            ]),
+        ) as T;
+    }
+    return value;
+};
+
 export async function seedContent(payload: Payload): Promise<void> {
     const siteFound = await payload.find({
         collection: "sites",
@@ -60,7 +75,7 @@ export async function seedContent(payload: Payload): Promise<void> {
                 site: SITE_DOC.code,
                 slug: page.slug,
                 seo: { title: page.seoTitle[locale], description: page.seoDescription[locale] },
-                layout: page.layout(locale),
+                layout: scopeIds(page.layout(locale), `${SITE_DOC.code}-${page.slug}`),
             };
             if (id === undefined) {
                 id = (await payload.create({ collection: "pages", data, locale })).id;
