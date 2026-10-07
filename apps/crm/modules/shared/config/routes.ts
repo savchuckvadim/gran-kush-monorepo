@@ -40,6 +40,8 @@ export const ROUTES = {
     CRM_SETTINGS_INVITATIONS: "/crm/settings/invitations",
     /** Ссылки-формы регистрации */
     CRM_SETTINGS_REGISTRATION_LINKS: "/crm/settings/registration-links",
+    /** Оформление: темы, светлый/тёмный режим, энергосбережение */
+    CRM_SETTINGS_APPEARANCE: "/crm/settings/appearance",
     /** Записи смарт-процессов: `${ROUTES.CRM_ENTITIES}/${code}` */
     CRM_ENTITIES: "/crm/entities",
     LOGIN: "/auth/login",

@@ -435,11 +435,121 @@
                     "existing": "Unidades existentes",
                     "loading": "Cargando unidades...",
                     "empty": "Aún no hay unidades"
+                },
+                "links": {
+                    "entities": {
+                        "title": "Campos, formularios y etapas",
+                        "description": "Constructor de entidades: miembros, pedidos, procesos inteligentes."
+                    },
+                    "invitations": {
+                        "title": "Invitaciones de empleados",
+                        "description": "Enlaces de invitación para el equipo del portal."
+                    },
+                    "registrationLinks": {
+                        "title": "Enlaces de formularios de registro",
+                        "description": "Enlaces públicos y códigos QR para miembros."
+                    },
+                    "appearance": {
+                        "title": "Apariencia",
+                        "description": "Temas, modo claro u oscuro, ahorro de energía."
+                    }
                 }
             },
             "profile": {
                 "title": "Perfil del empleado",
                 "description": "Cuenta y ajustes del empleado actual."
+            }
+        },
+        "appearance": {
+            "title": "Apariencia",
+            "description": "Temas de autor para la CRM. Tu elección se guarda en este dispositivo.",
+            "open": "Tema",
+            "sheetTitle": "Temas",
+            "sheetDescription": "Tu elección se guarda en este dispositivo.",
+            "selected": "Tuyo",
+            "default": "Predeterminado",
+            "mode": {
+                "title": "Modo",
+                "both": "Elige claro u oscuro.",
+                "single": "Este tema tiene un solo modo.",
+                "light": "Claro",
+                "dark": "Oscuro"
+            },
+            "eco": {
+                "title": "Ahorro de energía",
+                "hint": "Apaga animaciones, desenfoques y fondos. Para la tablet de la barra que está encendida 12 horas.",
+                "forced": "Siempre activo en Asceta."
+            },
+            "tags": {
+                "calm": "Sin efectos",
+                "motion": "Animación",
+                "bg": "Fondo",
+                "events": "Efectos en eventos",
+                "glass": "Cristal",
+                "oled": "OLED",
+                "type": "Tipografía"
+            },
+            "skins": {
+                "clasico": {
+                    "name": "Clásico",
+                    "description": "El tema actual de la CRM: blanco, verde lima, sin efectos. Se queda tal cual."
+                },
+                "pafpaf": {
+                    "name": "PafPaf",
+                    "description": "Minimalismo blanco con esquinas grandes. Bordes con gradiente que fluye en lo importante."
+                },
+                "nagual": {
+                    "name": "Nagual",
+                    "description": "Esmeralda y oro, serifas y geometría sagrada. Luciérnagas al registrar una entrada; respiración al cerrar caja."
+                },
+                "unicornio": {
+                    "name": "Unicornio",
+                    "description": "Cristal arcoíris y pastel. Chispas tras el cursor y confeti cuando entra un socio."
+                },
+                "galaxia": {
+                    "name": "Galaxia lejana",
+                    "description": "Estrellas con paralaje y rótulos de HUD. Salto al hiperespacio al cambiar de sección.",
+                    "modes": {
+                        "light": "Lado luminoso",
+                        "dark": "Lado oscuro"
+                    }
+                },
+                "asceta": {
+                    "name": "Asceta",
+                    "description": "Negro puro para pantallas OLED, un solo acento, botones grandes, cero animaciones. Se atenúa tras 20 s sin uso."
+                },
+                "cristal": {
+                    "name": "Cristal",
+                    "description": "Paneles de cristal sobre la foto de tu club. Sube tu propio fondo."
+                },
+                "vapor": {
+                    "name": "Vapor",
+                    "description": "Vapor holográfico: bordes iridiscentes, cifras con brillo y niebla de colores."
+                },
+                "brasa": {
+                    "name": "Brasa",
+                    "description": "Lounge cálido: brasas que suben por el fondo y titulares estrechos."
+                },
+                "trap": {
+                    "name": "Trap",
+                    "description": "Calle: rosa y amarillo ácido, estados como pegatinas y tags de grafiti en los títulos."
+                },
+                "noventa": {
+                    "name": "90s",
+                    "description": "Papel de periódico y sombras duras. Contadores que pasan como en un casete y registro con código de tiempo VHS."
+                },
+                "grind": {
+                    "name": "Grind",
+                    "description": "Negro y sangre. Un acceso denegado deja un sello rojo y sacude la ficha."
+                },
+                "mediterraneo": {
+                    "name": "Mediterráneo",
+                    "description": "Costa Blanca: cal, azul de mar, terracota y azulejos en el menú. Tranquilo, sin efectos.",
+                    "modes": {
+                        "light": "Día",
+                        "dark": "Noche"
+                    }
+                }
             }
         }
     }

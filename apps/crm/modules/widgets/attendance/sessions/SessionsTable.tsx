@@ -37,11 +37,17 @@ function SessionRow({ session }: { session: SchemaPresenceSessionDto }) {
             </td>
             <td className="px-3 py-2">
                 {isActive ? (
-                    <span className="rounded-full bg-green-500/10 px-2 py-0.5 text-xs text-green-700">
+                    <span
+                        data-slot="badge"
+                        className="rounded-full bg-green-500/10 px-2 py-0.5 text-xs text-green-700"
+                    >
                         {t("statusActive")}
                     </span>
                 ) : (
-                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                    <span
+                        data-slot="badge"
+                        className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                    >
                         {t("statusClosed")}
                     </span>
                 )}

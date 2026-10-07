@@ -132,6 +132,7 @@ export function RegistrationLinksSettingsPage() {
                                     </p>
                                 </div>
                                 <span
+                                    data-slot="badge"
                                     className={`rounded-full px-2 py-0.5 text-xs ${
                                         link.isActive
                                             ? "bg-green-500/10 text-green-700"

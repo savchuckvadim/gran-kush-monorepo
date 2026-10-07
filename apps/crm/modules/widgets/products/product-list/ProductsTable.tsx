@@ -80,11 +80,17 @@ export function ProductsTable() {
             header: t("colStatus"),
             cell: (product: SchemaProductListDto) =>
                 product.isActive ? (
-                    <span className="rounded-full bg-green-500/10 px-2 py-0.5 text-xs text-green-700">
+                    <span
+                        data-slot="badge"
+                        className="rounded-full bg-green-500/10 px-2 py-0.5 text-xs text-green-700"
+                    >
                         {t("active")}
                     </span>
                 ) : (
-                    <span className="rounded-full bg-red-500/10 px-2 py-0.5 text-xs text-red-700">
+                    <span
+                        data-slot="badge"
+                        className="rounded-full bg-red-500/10 px-2 py-0.5 text-xs text-red-700"
+                    >
                         {t("inactive")}
                     </span>
                 ),

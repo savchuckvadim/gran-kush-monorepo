@@ -7,8 +7,13 @@ import { Moon, Sun } from "lucide-react";
 
 import { Button } from "@workspace/ui/components/button";
 
-export function ThemeToggle() {
-    const { theme, setTheme } = useTheme();
+interface ThemeToggleProps {
+    /** Shown when the app forces one theme (next-themes `forcedTheme`) and the toggle is off. */
+    forcedHint?: string;
+}
+
+export function ThemeToggle({ forcedHint }: ThemeToggleProps) {
+    const { theme, setTheme, forcedTheme } = useTheme();
     const [mounted, setMounted] = React.useState(false);
 
     React.useEffect(() => {
@@ -21,6 +26,22 @@ export function ThemeToggle() {
                 <Sun className="size-4" />
                 <span className="sr-only">Toggle theme</span>
             </Button>
+        );
+    }
+
+    if (forcedTheme) {
+        // A disabled button gets no hover, so the hint sits on a wrapper.
+        return (
+            <span title={forcedHint} className="inline-flex">
+                <Button variant="ghost" size="icon" className="size-8" disabled>
+                    {forcedTheme === "light" ? (
+                        <Moon className="size-4" />
+                    ) : (
+                        <Sun className="size-4" />
+                    )}
+                    <span className="sr-only">{forcedHint ?? "Toggle theme"}</span>
+                </Button>
+            </span>
         );
     }
 

@@ -27,7 +27,9 @@ const ROLE_STYLES: Record<string, string> = {
 function RoleBadge({ role }: { role: string }) {
     const cls = ROLE_STYLES[role] ?? "bg-muted text-muted-foreground";
     return (
-        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${cls}`}>{role}</span>
+        <span data-slot="badge" className={`rounded-full px-2 py-0.5 text-xs font-medium ${cls}`}>
+            {role}
+        </span>
     );
 }
 

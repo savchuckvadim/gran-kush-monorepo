@@ -77,6 +77,7 @@ export function OrdersTable() {
             header: t("colStatus"),
             cell: (order: SchemaOrderListDto) => (
                 <span
+                    data-slot="badge"
                     className={`rounded-full px-2 py-0.5 text-xs ${
                         STATUS_COLORS[order.status] ?? "bg-muted text-muted-foreground"
                     }`}
@@ -90,6 +91,7 @@ export function OrdersTable() {
             header: t("colPayment"),
             cell: (order: SchemaOrderListDto) => (
                 <span
+                    data-slot="badge"
                     className={`rounded-full px-2 py-0.5 text-xs ${
                         PAYMENT_COLORS[order.paymentStatus] ?? "bg-muted text-muted-foreground"
                     }`}

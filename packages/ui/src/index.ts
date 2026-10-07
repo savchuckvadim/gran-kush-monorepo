@@ -17,6 +17,7 @@ export { default as Iridescence } from "./components/Iridescence";
 export { Label } from "./components/label";
 export { Select } from "./components/select";
 export { Separator } from "./components/separator";
+export { Switch } from "./components/switch";
 export { ThemeToggle } from "./components/theme-toggle";
 export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./components/tooltip";
 export { Card, type CardProps } from "./shared/card/card";

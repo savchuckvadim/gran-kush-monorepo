@@ -43,6 +43,7 @@ export function Sidebar({ title, items, homeHref, footer }: ISidebarProps) {
             )}
 
             <aside
+                data-slot="sidebar"
                 className={cn(
                     "fixed left-0 top-0 z-40 flex h-dvh w-56 flex-col bg-card transition-all duration-300 ease-in-out",
                     "md:relative md:z-auto md:h-auto md:min-h-screen md:w-16 lg:w-56",
@@ -87,6 +88,8 @@ export function Sidebar({ title, items, homeHref, footer }: ISidebarProps) {
                             href={item.url}
                             title={item.title}
                             onClick={close}
+                            data-slot="sidebar-link"
+                            data-active={item.isActive || undefined}
                             className={cn(
                                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                                 "md:justify-center md:px-2",

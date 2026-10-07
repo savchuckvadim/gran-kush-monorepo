@@ -21,12 +21,13 @@ function TransactionRow({ tx }: { tx: SchemaFinancialTransactionListDto }) {
                 {new Date(tx.transactionDate).toLocaleString()}
             </td>
             <td className="px-3 py-2">
-                <span className="rounded bg-muted px-1.5 py-0.5 text-xs">
+                <span data-slot="badge" className="rounded bg-muted px-1.5 py-0.5 text-xs">
                     {t(`type.${tx.type}`)}
                 </span>
             </td>
             <td className="px-3 py-2">
                 <span
+                    data-slot="badge"
                     className={`rounded-full px-2 py-0.5 text-xs ${
                         isIncome ? "bg-green-500/10 text-green-700" : "bg-red-500/10 text-red-700"
                     }`}

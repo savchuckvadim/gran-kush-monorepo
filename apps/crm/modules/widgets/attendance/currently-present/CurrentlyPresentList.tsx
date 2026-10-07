@@ -60,7 +60,10 @@ export function CurrentlyPresentList() {
                 <Users className="h-5 w-5 text-muted-foreground" />
                 <h2 className="text-base font-medium">{t("title")}</h2>
                 {sessions && (
-                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                    <span
+                        data-slot="badge"
+                        className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
+                    >
                         {sessions.length}
                     </span>
                 )}

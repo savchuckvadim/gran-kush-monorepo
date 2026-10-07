@@ -435,11 +435,121 @@
                     "existing": "Existing units",
                     "loading": "Loading units...",
                     "empty": "No units yet"
+                },
+                "links": {
+                    "entities": {
+                        "title": "Fields, forms and stages",
+                        "description": "Entity builder: members, orders, smart processes."
+                    },
+                    "invitations": {
+                        "title": "Employee invitations",
+                        "description": "Invite links for the portal team."
+                    },
+                    "registrationLinks": {
+                        "title": "Registration form links",
+                        "description": "Public links and QR codes for members."
+                    },
+                    "appearance": {
+                        "title": "Appearance",
+                        "description": "Themes, light or dark mode, energy saving."
+                    }
                 }
             },
             "profile": {
                 "title": "Employee Profile",
                 "description": "Current employee account and settings."
+            }
+        },
+        "appearance": {
+            "title": "Appearance",
+            "description": "Authored themes for the CRM. Your choice is saved on this device.",
+            "open": "Theme",
+            "sheetTitle": "Themes",
+            "sheetDescription": "Your choice is saved on this device.",
+            "selected": "Yours",
+            "default": "Default",
+            "mode": {
+                "title": "Mode",
+                "both": "Light or dark.",
+                "single": "This theme has a single mode.",
+                "light": "Light",
+                "dark": "Dark"
+            },
+            "eco": {
+                "title": "Energy saving",
+                "hint": "Turns off animations, blur and backgrounds. For the bar tablet that stays on 12 hours a day.",
+                "forced": "Always on in Ascetic."
+            },
+            "tags": {
+                "calm": "No effects",
+                "motion": "Animation",
+                "bg": "Background",
+                "events": "Event effects",
+                "glass": "Glass",
+                "oled": "OLED",
+                "type": "Typography"
+            },
+            "skins": {
+                "clasico": {
+                    "name": "Classic",
+                    "description": "The current CRM theme: white, lime green, no effects. It stays as it is."
+                },
+                "pafpaf": {
+                    "name": "PafPaf",
+                    "description": "White minimalism with large corners. Flowing gradient borders on what matters."
+                },
+                "nagual": {
+                    "name": "Nagual",
+                    "description": "Emerald and gold, serifs and sacred geometry. Fireflies on check-in; a breathing pause when closing the till."
+                },
+                "unicornio": {
+                    "name": "Unicorn",
+                    "description": "Rainbow glass and pastels. Sparkles follow the cursor, confetti when a member walks in."
+                },
+                "galaxia": {
+                    "name": "Distant galaxy",
+                    "description": "Parallax stars and HUD labels. A jump to hyperspace when you switch sections.",
+                    "modes": {
+                        "light": "Light side",
+                        "dark": "Dark side"
+                    }
+                },
+                "asceta": {
+                    "name": "Ascetic",
+                    "description": "Pure black for OLED screens, one accent, big buttons, zero animation. Dims after 20 s idle."
+                },
+                "cristal": {
+                    "name": "Crystal",
+                    "description": "Glass panels over a photo of your club. Upload your own background."
+                },
+                "vapor": {
+                    "name": "Vapor",
+                    "description": "Holographic vapor: iridescent borders, shimmering figures and coloured mist."
+                },
+                "brasa": {
+                    "name": "Embers",
+                    "description": "Warm lounge: embers rising through the background, narrow headlines."
+                },
+                "trap": {
+                    "name": "Trap",
+                    "description": "Street: pink and acid yellow, statuses as stickers, graffiti tags on titles."
+                },
+                "noventa": {
+                    "name": "90s",
+                    "description": "Newsprint and hard shadows. Counters flip like a tape deck, the log runs on VHS timecode."
+                },
+                "grind": {
+                    "name": "Grind",
+                    "description": "Black and blood. A denied entry leaves a red stamp and shakes the card."
+                },
+                "mediterraneo": {
+                    "name": "Mediterranean",
+                    "description": "Costa Blanca: whitewash, sea blue, terracotta and azulejos in the menu. Calm, no effects.",
+                    "modes": {
+                        "light": "Day",
+                        "dark": "Night"
+                    }
+                }
             }
         }
     }
