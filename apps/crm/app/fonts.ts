@@ -26,7 +26,8 @@ import type { CSSProperties } from "react";
 /*
  * Every font gets its own variable on <html>; globals.css maps --font-sans/--font-mono to Geist
  * and skins.css remaps them per skin. Skin fonts are not preloaded: the browser fetches a file
- * only when text in that skin (or its gallery preview) needs it.
+ * only when text in that skin (or its gallery preview) needs it. Onest is the exception — the
+ * default skin (PafPaf) sets every screen in it, and without a preload the text would swap.
  */
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
@@ -36,7 +37,6 @@ const onest = Onest({
     subsets: ["latin", "cyrillic"],
     variable: "--font-onest",
     display: "swap",
-    preload: false,
 });
 const cormorant = Cormorant_Garamond({
     subsets: ["latin", "cyrillic"],

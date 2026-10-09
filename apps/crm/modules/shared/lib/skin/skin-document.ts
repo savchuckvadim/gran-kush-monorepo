@@ -1,4 +1,4 @@
-import { DEFAULT_SKIN, getSkin, resolveSkin } from "@/modules/shared/config/skins";
+import { BASE_SKIN, getSkin, resolveSkin } from "@/modules/shared/config/skins";
 
 import type { SkinPreferences } from "./skin-storage";
 
@@ -21,7 +21,7 @@ export const applySkinToDocument = (preferences: SkinPreferences): void => {
     const root = document.documentElement;
     const resume = suspendTransitions();
 
-    if (skin.id === DEFAULT_SKIN) {
+    if (skin.id === BASE_SKIN) {
         root.removeAttribute("data-skin");
     } else {
         root.setAttribute("data-skin", skin.id);

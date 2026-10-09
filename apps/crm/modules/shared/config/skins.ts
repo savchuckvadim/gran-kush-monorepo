@@ -35,7 +35,10 @@ export interface SkinDefinition {
 }
 
 /** Clásico: the tokens in globals.css, rendered without a data-skin attribute. */
-export const DEFAULT_SKIN: SkinId = "clasico";
+export const BASE_SKIN: SkinId = "clasico";
+
+/** What an account sees until it picks a skin. */
+export const DEFAULT_SKIN: SkinId = "pafpaf";
 
 const BOTH: readonly [SkinMode, SkinMode] = ["light", "dark"];
 const DARK_FIRST: readonly [SkinMode, SkinMode] = ["dark", "light"];
@@ -133,7 +136,7 @@ export const getEffectiveMode = (skin: SkinDefinition, preferred: SkinMode): Ski
     skin.modes.includes(preferred) ? preferred : skin.modes[0];
 
 /**
- * Personal choice wins over the club default. Today the club default is always Clásico;
+ * Personal choice wins over the club default. Today the club default is always PafPaf;
  * TASK-410 brings it from the Portal.
  */
 export const resolveSkin = (personal: SkinId | null, clubDefault: SkinId = DEFAULT_SKIN): SkinId =>
