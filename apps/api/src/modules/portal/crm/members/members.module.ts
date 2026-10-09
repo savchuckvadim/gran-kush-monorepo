@@ -2,6 +2,7 @@ import { BullModule } from "@nestjs/bullmq";
 import { Module } from "@nestjs/common";
 
 import { PrismaModule } from "@common/prisma/prisma.module";
+import { MEMBER_FILES_JOB_OPTIONS } from "@common/queue/job-options";
 import { AccountModule } from "@modules/account/account.module";
 import { EntityFieldsModule } from "@modules/portal/crm/entity-fields/entity-fields.module";
 import { CrmMembersController } from "@modules/portal/crm/members/api/controllers/crm-members.controller";
@@ -25,6 +26,7 @@ import { UsersModule } from "@modules/users";
         AccountModule,
         BullModule.registerQueue({
             name: MEMBER_FILES_QUEUE_NAME,
+            defaultJobOptions: MEMBER_FILES_JOB_OPTIONS,
         }),
     ],
     providers: [

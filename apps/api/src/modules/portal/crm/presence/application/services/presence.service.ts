@@ -200,15 +200,12 @@ export class PresenceService {
      * Используется для закрытия «забытых» сессий в конце дня.
      */
     async autoCloseAllSessions(): Promise<number> {
-        const activeSessions = await this.sessionRepository.findAllActive();
+        const count = await this.sessionRepository.closeAllActive(ExitMethod.AUTO_CRON);
 
-        if (activeSessions.length === 0) {
+        if (count === 0) {
             this.logger.log("⏰ Auto-close: нет активных сессий для закрытия");
             return 0;
         }
-
-        const ids = activeSessions.map((s) => s.id);
-        const count = await this.sessionRepository.closeMany(ids, ExitMethod.AUTO_CRON);
 
         this.logger.log(`⏰ Auto-close: закрыто ${count} сессий (cron)`);
 

@@ -97,12 +97,14 @@ export class MailProcessor extends WorkerHost {
                     emailSentAt: new Date().toISOString(),
                 };
 
+                // Само письмо теперь повторяется при сбое SMTP (TASK-111), поэтому событие
+                // «письмо отправлено» дедуплицируется по порталу — иначе каждая повторная
+                // отправка порождала бы ещё одно событие.
                 await this.portalEventsQueue.add(
                     PORTAL_EVENTS_JOB_NAMES.PORTAL_REGISTRATION_EMAIL_CONFIRMED,
                     payload,
                     {
-                        removeOnComplete: true,
-                        removeOnFail: false,
+                        jobId: `${PORTAL_EVENTS_JOB_NAMES.PORTAL_REGISTRATION_EMAIL_CONFIRMED}:${payload.portalId}`,
                     }
                 );
             } catch (error) {

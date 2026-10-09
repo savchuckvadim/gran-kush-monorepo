@@ -2,6 +2,7 @@ import { BullModule } from "@nestjs/bullmq";
 import { Module } from "@nestjs/common";
 
 import { PrismaModule } from "@common/prisma/prisma.module";
+import { PORTAL_EVENTS_JOB_OPTIONS } from "@common/queue/job-options";
 import { EmployeeAuthModule } from "@modules/portal/auth/employees/employee-auth.module";
 import { SharedAuthModule } from "@modules/portal/auth/shared/shared-auth.module";
 import { EntityFieldsModule } from "@modules/portal/crm/entity-fields/entity-fields.module";
@@ -24,6 +25,7 @@ import { PortalEventsProcessor } from "@modules/portal/crm/portals/infrastructur
         MembersModule,
         BullModule.registerQueue({
             name: PORTAL_EVENTS_QUEUE_NAME,
+            defaultJobOptions: PORTAL_EVENTS_JOB_OPTIONS,
         }),
     ],
     controllers: [

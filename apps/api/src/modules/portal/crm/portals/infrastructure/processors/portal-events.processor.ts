@@ -30,14 +30,11 @@ export class PortalEventsProcessor extends WorkerHost {
             case PORTAL_EVENTS_JOB_NAMES.PORTAL_REGISTRATION_INIT: {
                 const payload = job.data as PortalRegistrationInitPayload;
 
-                // Admin notification should be immediate (not coupled to email sending).
-                await this.telegramService.sendPortalRegistrationNotification({
-                    ownerEmail: payload.ownerEmail,
-                    ownerName: payload.ownerName,
-                    portalSlug: payload.portalSlug,
-                    portalDisplayName: payload.portalDisplayName,
-                });
-
+                // Письмо владельцу ставится в очередь первым и с фиксированным jobId.
+                // Раньше первым шло уведомление в Telegram, и его падение (недоступный
+                // API, протухший токен) уносило с собой письмо о регистрации: владелец
+                // не получал ничего. Теперь порядок обратный, а повтор задачи (TASK-111)
+                // не отправляет письмо дважды — постановка дедуплицируется по порталу.
                 await this.mailService.sendPortalRegistrationEmail({
                     portal: {
                         id: payload.portalId,
@@ -50,6 +47,13 @@ export class PortalEventsProcessor extends WorkerHost {
                         name: payload.ownerName,
                     },
                     language: payload.language,
+                });
+
+                await this.telegramService.sendPortalRegistrationNotification({
+                    ownerEmail: payload.ownerEmail,
+                    ownerName: payload.ownerName,
+                    portalSlug: payload.portalSlug,
+                    portalDisplayName: payload.portalDisplayName,
                 });
                 return;
             }
