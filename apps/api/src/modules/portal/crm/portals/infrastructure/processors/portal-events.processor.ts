@@ -73,9 +73,9 @@ export class PortalEventsProcessor extends WorkerHost {
     }
 
     @OnWorkerEvent(APP_EVENTS.QUEUE.FAILED)
-    onFailed(job: Job): void {
+    onFailed(job: Job, error: Error): void {
         this.logger.error(
-            `Portal events job failed: jobId=${job.id} name=${String(job.name)} error=${String(job?.data)}`
+            `Portal events job failed: jobId=${job.id} name=${String(job.name)} attempt=${job.attemptsMade} error=${error.message}`
         );
     }
 }
