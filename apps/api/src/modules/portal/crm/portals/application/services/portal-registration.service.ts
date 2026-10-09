@@ -6,6 +6,7 @@ import { hash } from "bcrypt";
 import { Queue } from "bullmq";
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { buildJobId } from "@common/queue/job-options";
 import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
 import { ProvisionPortalFromTemplatesService } from "@modules/portal/crm/entity-fields/application/services/provision-portal-from-templates.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
@@ -168,7 +169,10 @@ export class PortalRegistrationService {
             PORTAL_EVENTS_JOB_NAMES.PORTAL_REGISTRATION_INIT,
             initPayload,
             {
-                jobId: `${PORTAL_EVENTS_JOB_NAMES.PORTAL_REGISTRATION_INIT}:${created.portal.id}`,
+                jobId: buildJobId(
+                    PORTAL_EVENTS_JOB_NAMES.PORTAL_REGISTRATION_INIT,
+                    created.portal.id
+                ),
             }
         );
 

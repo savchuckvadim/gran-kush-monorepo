@@ -3,6 +3,7 @@ import { Injectable, Logger } from "@nestjs/common";
 
 import { Job, Queue } from "bullmq";
 
+import { buildJobId } from "@common/queue/job-options";
 import { TelegramService } from "@common/telegram/telegram.service";
 import {
     PORTAL_EVENTS_JOB_NAMES,
@@ -104,7 +105,10 @@ export class MailProcessor extends WorkerHost {
                     PORTAL_EVENTS_JOB_NAMES.PORTAL_REGISTRATION_EMAIL_CONFIRMED,
                     payload,
                     {
-                        jobId: `${PORTAL_EVENTS_JOB_NAMES.PORTAL_REGISTRATION_EMAIL_CONFIRMED}:${payload.portalId}`,
+                        jobId: buildJobId(
+                            PORTAL_EVENTS_JOB_NAMES.PORTAL_REGISTRATION_EMAIL_CONFIRMED,
+                            payload.portalId
+                        ),
                     }
                 );
             } catch (error) {

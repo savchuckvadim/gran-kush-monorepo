@@ -6,6 +6,8 @@ import { User } from "@prisma/client";
 import { render } from "@react-email/components";
 import { Queue } from "bullmq";
 
+import { buildJobId } from "@common/queue/job-options";
+
 import {
     DEFAULT_EMAIL_FROM,
     DEFAULT_EMAIL_FROM_NAME,
@@ -207,7 +209,11 @@ export class MailService {
                 // Приветственное письмо у портала одно. Обработчик события портала теперь
                 // повторяется (TASK-111), и без фиксированного jobId каждый повтор слал бы
                 // владельцу ещё одну копию.
-                jobId: `${MAIL_QUEUE_JOB_NAMES.SEND_EMAIL}:portal-registration:${params.portal.id}`,
+                jobId: buildJobId(
+                    MAIL_QUEUE_JOB_NAMES.SEND_EMAIL,
+                    "portal-registration",
+                    params.portal.id
+                ),
             }
         );
 
