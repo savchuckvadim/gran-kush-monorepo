@@ -12,15 +12,19 @@ import {
 export class RefreshTokenPrismaRepository implements RefreshTokenRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    async create(data: {
+    async upsertForUserDevice(data: {
         token: string;
         principalType: PrincipalType;
-        userId?: string;
-        platformAdminId?: string;
+        userId: string;
         deviceId: string;
         expiresAt: Date;
     }): Promise<RefreshToken> {
-        return this.prisma.refreshToken.create({ data });
+        const { principalType, userId, deviceId } = data;
+        return this.prisma.refreshToken.upsert({
+            where: { principalType_userId_deviceId: { principalType, userId, deviceId } },
+            create: data,
+            update: { token: data.token, expiresAt: data.expiresAt, revoked: false },
+        });
     }
 
     async findActiveByToken(
@@ -38,22 +42,16 @@ export class RefreshTokenPrismaRepository implements RefreshTokenRepository {
         });
     }
 
-    async revokeById(id: string): Promise<void> {
-        await this.prisma.refreshToken.update({
-            where: { id },
-            data: { revoked: true },
+    async replaceToken(
+        id: string,
+        currentToken: string,
+        next: { token: string; expiresAt: Date }
+    ): Promise<boolean> {
+        const { count } = await this.prisma.refreshToken.updateMany({
+            where: { id, token: currentToken, revoked: false, expiresAt: { gt: new Date() } },
+            data: { token: next.token, expiresAt: next.expiresAt },
         });
-    }
-
-    async revokeAllActiveForUserDevice(
-        principalType: PrincipalType,
-        userId: string,
-        deviceId: string
-    ): Promise<void> {
-        await this.prisma.refreshToken.updateMany({
-            where: { principalType, userId, deviceId, revoked: false },
-            data: { revoked: true },
-        });
+        return count === 1;
     }
 
     async revokeAllForUser(userId: string): Promise<number> {

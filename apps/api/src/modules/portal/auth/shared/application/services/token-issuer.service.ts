@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { JwtService, JwtSignOptions } from "@nestjs/jwt";
 
 import { PrincipalType } from "@prisma/client";
+import { randomUUID } from "crypto";
 
 import { JWT_DEFAULTS, JWT_ENV_KEYS } from "@modules/portal/auth/domain/constants/jwt.constants";
 import {
@@ -46,12 +47,7 @@ export class TokenIssuerService {
 
         const { accessToken, refreshToken, refreshExpiresAt } = await this.signPair(payload);
 
-        await this.refreshTokenRepository.revokeAllActiveForUserDevice(
-            toPrincipalType(principalType),
-            user.id,
-            deviceId
-        );
-        await this.refreshTokenRepository.create({
+        await this.refreshTokenRepository.upsertForUserDevice({
             token: refreshToken,
             principalType: toPrincipalType(principalType),
             userId: user.id,
@@ -63,8 +59,12 @@ export class TokenIssuerService {
     }
 
     /**
-     * Ротация: старый refresh отзывается, выдаётся новая пара.
-     * Возвращает пару и user из токен-записи.
+     * Ротация: новый refresh записывается в ту же строку устройства, старый перестаёт
+     * находиться. Возвращает пару и user из токен-записи.
+     *
+     * Раньше старая строка помечалась revoked, а новая вставлялась рядом — и падала на
+     * `@@unique(principalType, userId, deviceId)`: refresh не работал вовсе, сессия CRM
+     * умирала вместе с access-токеном.
      */
     async rotate(
         refreshToken: string,
@@ -81,13 +81,28 @@ export class TokenIssuerService {
             throw new UnauthorizedException("User is inactive");
         }
 
-        await this.refreshTokenRepository.revokeById(tokenRecord.id);
-        const tokens = await this.issueForUser(
-            { id: tokenRecord.user.id, email: tokenRecord.user.email },
-            principalType,
-            tokenRecord.deviceId
+        const {
+            accessToken,
+            refreshToken: nextRefreshToken,
+            refreshExpiresAt,
+        } = await this.signPair({
+            sub: tokenRecord.user.id,
+            email: tokenRecord.user.email,
+            type: principalType,
+        });
+
+        // compare-and-set по старому токену: из двух одновременных refresh одним токеном
+        // (две вкладки) проходит один, второй получает 401, а не затирает пару победителя.
+        const rotated = await this.refreshTokenRepository.replaceToken(
+            tokenRecord.id,
+            refreshToken,
+            { token: nextRefreshToken, expiresAt: refreshExpiresAt }
         );
-        return { tokens, tokenRecord };
+        if (!rotated) {
+            throw new UnauthorizedException("Invalid or expired refresh token");
+        }
+
+        return { tokens: { accessToken, refreshToken: nextRefreshToken }, tokenRecord };
     }
 
     async revokeByToken(refreshToken: string): Promise<void> {
@@ -111,14 +126,19 @@ export class TokenIssuerService {
             this.configService.get<string>(JWT_ENV_KEYS.REFRESH_TOKEN_EXPIRES_IN) ||
             JWT_DEFAULTS.REFRESH_TOKEN_EXPIRES_IN;
 
-        // env-строка вида "15m"/"7d" — до ms.StringValue сужается только кастом
+        // env-строка вида "15m"/"7d" — до ms.StringValue сужается только кастом.
+        // jwtid обязателен: iat считается в секундах, и без него две пары одного пользователя
+        // за одну секунду (регистрация и сразу вход, двойной клик, две вкладки на refresh)
+        // совпадают байт в байт — вставка refresh-токена падала на уникальном индексе с 500.
         const signOptions: JwtSignOptions = {
             secret: jwtSecret || JWT_DEFAULTS.SECRET,
             expiresIn: accessTokenExpiresIn as JwtSignOptions["expiresIn"],
+            jwtid: randomUUID(),
         };
         const refreshSignOptions: JwtSignOptions = {
             secret: refreshSecret || JWT_DEFAULTS.SECRET,
             expiresIn: refreshTokenExpiresIn as JwtSignOptions["expiresIn"],
+            jwtid: randomUUID(),
         };
 
         const [accessToken, refreshToken] = await Promise.all([

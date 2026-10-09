@@ -5,11 +5,14 @@ export type RefreshTokenWithUser = Prisma.RefreshTokenGetPayload<{
 }>;
 
 export abstract class RefreshTokenRepository {
-    abstract create(data: {
+    /**
+     * Refresh устройства: одна строка на principal+user+device (`@@unique` в схеме).
+     * Новый вход с того же устройства заменяет прежний токен в этой строке.
+     */
+    abstract upsertForUserDevice(data: {
         token: string;
         principalType: PrincipalType;
-        userId?: string;
-        platformAdminId?: string;
+        userId: string;
         deviceId: string;
         expiresAt: Date;
     }): Promise<RefreshToken>;
@@ -20,14 +23,15 @@ export abstract class RefreshTokenRepository {
         principalType: PrincipalType
     ): Promise<RefreshTokenWithUser | null>;
 
-    abstract revokeById(id: string): Promise<void>;
-
-    /** Перед новым логином с того же устройства — снять все активные refresh этого principal+device */
-    abstract revokeAllActiveForUserDevice(
-        principalType: PrincipalType,
-        userId: string,
-        deviceId: string
-    ): Promise<void>;
+    /**
+     * Ротация compare-and-set: токен меняется, только если в строке всё ещё `currentToken`
+     * и он активен. `false` — строку уже ротировал параллельный запрос или токен отозван.
+     */
+    abstract replaceToken(
+        id: string,
+        currentToken: string,
+        next: { token: string; expiresAt: Date }
+    ): Promise<boolean>;
 
     /**
      * Снять все активные refresh глобального аккаунта — во всех порталах и на всех
