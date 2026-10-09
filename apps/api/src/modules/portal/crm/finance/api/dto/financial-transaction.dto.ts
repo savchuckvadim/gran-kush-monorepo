@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional, IntersectionType } from "@nestjs/swagger";
 
 import { Type } from "class-transformer";
 import {
@@ -13,6 +13,7 @@ import {
     Min,
 } from "class-validator";
 
+import { PaginationDto } from "@common/paginate/dto/pagination.dto";
 import {
     PaymentMethod,
     TransactionDirection,
@@ -247,6 +248,12 @@ export class TransactionFilterDto {
     @Type(() => Date)
     endDate?: Date;
 }
+
+/** Один `@Query()` DTO на хендлер: два DTO на одном query несовместимы с forbidNonWhitelisted */
+export class TransactionListQueryDto extends IntersectionType(
+    PaginationDto,
+    TransactionFilterDto
+) {}
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Reports DTOs

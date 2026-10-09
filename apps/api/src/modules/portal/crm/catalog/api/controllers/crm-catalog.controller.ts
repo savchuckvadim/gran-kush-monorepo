@@ -16,7 +16,6 @@ import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
-import { PaginationDto } from "@common/paginate/dto/pagination.dto";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
@@ -30,8 +29,8 @@ import {
 import {
     CreateProductDto,
     ProductDetailDto,
-    ProductFilterDto,
     ProductListDto,
+    ProductListQueryDto,
     UpdateProductDto,
 } from "@modules/portal/crm/catalog/api/dto/product.dto";
 import {
@@ -75,22 +74,13 @@ export class CrmCatalogController {
     @ApiErrorResponse([401, 403])
     async listProducts(
         @PortalId() portalId: string,
-        @Query() pagination: PaginationDto,
-        @Query() filters: ProductFilterDto
+        @Query() query: ProductListQueryDto
     ): Promise<PaginatedResult<ProductListDto>> {
-        const page = pagination.page ?? 1;
-        const limit = pagination.limit ?? 10;
+        const { page = 1, limit = 10, sortBy, sortOrder, ...filters } = query;
         const skip = PaginationUtil.getSkip(page, limit);
 
         const [products, total] = await Promise.all([
-            this.productsService.findAll(
-                portalId,
-                filters,
-                limit,
-                skip,
-                pagination.sortBy,
-                pagination.sortOrder
-            ),
+            this.productsService.findAll(portalId, filters, limit, skip, sortBy, sortOrder),
             this.productsService.count(portalId, filters),
         ]);
 

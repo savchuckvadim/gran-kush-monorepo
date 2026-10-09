@@ -1,4 +1,4 @@
-import { INestApplication, ValidationPipe } from "@nestjs/common";
+import { INestApplication } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 
 import { EmployeeRole } from "@prisma/client";
@@ -124,7 +124,6 @@ describe("Entity records RBAC + isolation (e2e)", () => {
         }).compile();
 
         app = moduleFixture.createNestApplication();
-        app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
         app.use(cookieParser());
         await app.init();
 

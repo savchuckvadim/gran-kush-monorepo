@@ -41,16 +41,10 @@ export class MailProcessor extends WorkerHost {
     }
 
     async process(job: Job<SendEmailJobData>): Promise<void> {
-        const { to, subject, html, context, attachments } = job.data;
+        const { to, subject, html, attachments } = job.data;
 
         try {
-            await this.mailService.sendEmail({
-                subject,
-                html,
-                to,
-                context: context || {},
-                attachments,
-            });
+            await this.mailService.sendEmail({ subject, html, to, attachments });
 
             this.logger.log(`📧 Email successfully sent to ${to.join(", ")}`);
         } catch (error) {

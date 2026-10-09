@@ -1,6 +1,5 @@
 import {
     ArgumentsHost,
-    BadRequestException,
     Catch,
     ExceptionFilter,
     HttpException,
@@ -8,102 +7,121 @@ import {
     Logger,
 } from "@nestjs/common";
 
-import { Request, Response } from "express";
-import * as path from "path";
+import type { Request, Response } from "express";
 
-export interface ApiResponse {
+/** Тело любой ошибки API — контракт в documentation/backend/HTTP_API_CONTRACT.md */
+export interface ApiErrorBody {
     message: string;
-    errors?: string[];
+    errors: string[];
+    [extra: string]: unknown;
 }
+
+const INTERNAL_ERROR_MESSAGE = "Internal server error";
+const VALIDATION_FAILED_MESSAGE = "Validation failed";
+
+/** Служебные поля штатного формата Nest `{ statusCode, message, error }` — наружу не идут */
+const NEST_RESPONSE_KEYS = new Set(["statusCode", "error", "message", "errors"]);
+
+/** Ошибки express-мидлварей (body-parser и прочие `http-errors`): статус лежит в самом объекте */
+interface HttpLikeError {
+    statusCode?: unknown;
+    status?: unknown;
+    expose?: unknown;
+    message?: unknown;
+}
+
+const httpLikeStatus = (exception: unknown): number | undefined => {
+    if (typeof exception !== "object" || exception === null) {
+        return undefined;
+    }
+    const { statusCode, status } = exception as HttpLikeError;
+    const candidate = typeof statusCode === "number" ? statusCode : status;
+    return typeof candidate === "number" && candidate >= 400 && candidate <= 599
+        ? candidate
+        : undefined;
+};
+
+const toStrings = (value: unknown): string[] =>
+    Array.isArray(value) ? value.map((item) => String(item)) : [];
+
+const fromHttpException = (exception: HttpException): ApiErrorBody => {
+    const res: unknown = exception.getResponse();
+    if (typeof res !== "object" || res === null) {
+        return { message: String(res), errors: [] };
+    }
+
+    const { message, errors } = res as { message?: unknown; errors?: unknown };
+    // Поля вроде `checks` у readiness-ответа остаются рядом с message/errors
+    const extra = Object.fromEntries(
+        Object.entries(res).filter(([key]) => !NEST_RESPONSE_KEYS.has(key))
+    );
+
+    // ValidationPipe кладёт в message массив нарушений — это и есть `errors` контракта
+    if (Array.isArray(message)) {
+        return { ...extra, message: VALIDATION_FAILED_MESSAGE, errors: toStrings(message) };
+    }
+
+    return {
+        ...extra,
+        message: typeof message === "string" && message.length > 0 ? message : exception.message,
+        errors: toStrings(errors),
+    };
+};
+
+const describeException = (exception: unknown): { status: number; body: ApiErrorBody } => {
+    if (exception instanceof HttpException) {
+        return { status: exception.getStatus(), body: fromHttpException(exception) };
+    }
+
+    const status = httpLikeStatus(exception);
+    if (status !== undefined) {
+        const { expose, message } = exception as HttpLikeError;
+        // body-parser выставляет expose: true на 4xx (413 entity.too.large, 400 entity.parse.failed)
+        const exposed = status < 500 && expose !== false && typeof message === "string";
+        return {
+            status,
+            body: { message: exposed ? message : INTERNAL_ERROR_MESSAGE, errors: [] },
+        };
+    }
+
+    // Всё прочее — 500 без деталей: текст исключения может содержать SQL, пути и ключи
+    return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        body: { message: INTERNAL_ERROR_MESSAGE, errors: [] },
+    };
+};
+
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
     private readonly logger = new Logger(GlobalExceptionFilter.name);
 
-    constructor() {}
-
-    catch(exception: unknown, host: ArgumentsHost) {
+    catch(exception: unknown, host: ArgumentsHost): void {
         const ctx = host.switchToHttp();
         const request = ctx.getRequest<Request>();
         const response = ctx.getResponse<Response>();
 
-        const status =
-            exception instanceof HttpException
-                ? exception.getStatus()
-                : HttpStatus.INTERNAL_SERVER_ERROR;
+        const { status, body } = describeException(exception);
+        this.log(exception, status, body, request);
 
-        const error = exception instanceof Error ? exception : new Error(JSON.stringify(exception));
-
-        // Обработка валидационных ошибок
-        if (
-            exception instanceof BadRequestException &&
-            typeof exception.getResponse === "function"
-        ) {
-            return this.handleValidationException(exception, request, response);
+        if (response.headersSent) {
+            response.end();
+            return;
         }
-
-        // Разбор stack trace
-        let file = "";
-        let line = "";
-        let func = "";
-        let code = "";
-        try {
-            const stackLines = error.stack?.split("\n") || [];
-            const target = stackLines.find((l) => l.includes("/src/") || l.includes("src\\"));
-            if (target) {
-                const match = target.match(/\((.*):(\d+):(\d+)\)/);
-                if (match) {
-                    const [, filepath, lineno] = match;
-                    file = path.relative(process.cwd(), filepath);
-                    line = lineno;
-                }
-            }
-
-            func = stackLines[1]?.trim().split(" ")[1] || "unknown";
-            code = stackLines[1] || "";
-        } catch (e) {
-            console.warn("Stack trace parse failed", e);
-        }
-
-        const ip =
-            (request.headers["x-forwarded-for"] as string | undefined) ||
-            request.socket.remoteAddress ||
-            "unknown";
-        const userAgent = request.headers["user-agent"] || "unknown";
-        const referer = request.headers["referer"] || "n/a";
-
-        const message = `⚠️ Ошибка: ${error.name}\n\n📄 Файл: ${file}\n🔢 Строка: ${String(line)}\n🔧 Функция: ${func}\n\n💥 Код: ${code}\n\n📬 Сообщение: ${error.message}\n\n📍 URL: ${request.method} ${request.url}\n🧭 User-Agent: ${userAgent}\n🌍 IP: ${String(ip)}\n🔗 Referer: ${referer}
-        `;
-        this.logger.error(message);
-        const responseBody: ApiResponse = {
-            message: error.message,
-            errors: [],
-        };
-        response.status(status).json(responseBody);
+        response.status(status).json(body);
     }
 
-    private handleValidationException(
-        exception: BadRequestException,
-        request: Request,
-        response: Response
-    ) {
-        const res = exception.getResponse();
+    private log(exception: unknown, status: number, body: ApiErrorBody, request: Request): void {
+        const line = `${request.method} ${request.originalUrl} -> ${status} ${body.message}`;
 
-        const messageArray =
-            typeof res === "object" && res !== null && "message" in res
-                ? (res as { message: string | string[] }).message
-                : [];
-
-        const validationMessages = Array.isArray(messageArray)
-            ? messageArray.join("\n- ")
-            : String(messageArray);
-
-        const fullMessage = `❌ Validation error:\n- ${validationMessages}\n\n📍 URL: ${request.method} ${request.url} `;
-        this.logger.warn(fullMessage);
-
-        return response.status(400).json({
-            // result: null,
-            message: "Validation failed",
-            errors: messageArray,
-        });
+        if (status >= 500) {
+            const stack = exception instanceof Error ? exception.stack : String(exception);
+            this.logger.error(line, stack);
+            return;
+        }
+        if (body.errors.length > 0) {
+            this.logger.warn(`${line}: ${body.errors.join("; ")}`);
+            return;
+        }
+        this.logger.debug(line);
     }
 }

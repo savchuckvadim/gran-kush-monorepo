@@ -6121,8 +6121,8 @@ export interface operations {
                 limit?: number;
                 sortBy?: string;
                 sortOrder?: "asc" | "desc";
-                isActive?: boolean;
                 role?: "portal_owner" | "admin" | "manager" | "employee";
+                isActive?: boolean;
             };
             header?: never;
             path?: never;

@@ -12,11 +12,11 @@ export interface EmployeeFilters {
     limit?: number;
 }
 
+/** Зеркало UpdateEmployeeDto: должность и отдел — динамические поля, едут внутри fields */
 export interface UpdateEmployeePayload {
     role?: string;
-    position?: string;
-    department?: string;
     isActive?: boolean;
+    fields?: Record<string, unknown>;
 }
 
 // Endpoints are not yet regenerated in the OpenAPI schema.

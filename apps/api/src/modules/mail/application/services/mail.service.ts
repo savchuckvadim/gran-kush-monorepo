@@ -1,8 +1,7 @@
 import { InjectQueue } from "@nestjs/bullmq";
-import { Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
-import { ISendMailOptions, MailerService } from "@nestjs-modules/mailer";
 import { User } from "@prisma/client";
 import { render } from "@react-email/components";
 import { Queue } from "bullmq";
@@ -15,6 +14,12 @@ import {
     JOB_OPTIONS,
     SupportedLanguage,
 } from "../../consts/mail.constants";
+import {
+    MAIL_TRANSPORT,
+    type MailAttachment,
+    type MailTransport,
+    type OutgoingMail,
+} from "../../domain/mail-transport.interface";
 import {
     EmailType,
     MAIL_QUEUE_JOB_NAMES,
@@ -35,7 +40,7 @@ export class MailService {
     private readonly siteFrontendUrl: string;
 
     constructor(
-        private readonly mailerService: MailerService,
+        @Inject(MAIL_TRANSPORT) private readonly transport: MailTransport,
         @InjectQueue(MAIL_QUEUE_NAME) private readonly queue: Queue,
         private readonly configService: ConfigService
     ) {
@@ -219,43 +224,28 @@ export class MailService {
         subject: string;
         html: string;
         to: string[];
-        context: ISendMailOptions["context"];
-        attachments?: Array<{
-            filename: string;
-            content: Buffer;
-            cid?: string;
-            contentType: string;
-        }>;
+        attachments?: MailAttachment[];
     }): Promise<boolean> {
+        // В лог — только адресаты и тема: в html лежат ссылки с токенами подтверждения и сброса
+        const recipients = params.to.join(", ");
         try {
-            const from = `"${this.smtpFromName}" <${this.smtpFrom}>`;
-
-            const emailsList: string[] = params.to;
-
-            if (!emailsList) {
-                throw new Error(
-                    `No recipients found in SMTP_TO env var, please check your .env file`
-                );
+            if (params.to.length === 0) {
+                throw new Error("Email has no recipients");
             }
 
-            const sendMailParams: ISendMailOptions = {
-                to: emailsList,
-                from: from,
+            const mail: OutgoingMail = {
+                from: `"${this.smtpFromName}" <${this.smtpFrom}>`,
+                to: params.to,
                 subject: params.subject,
                 html: params.html,
                 attachments: params.attachments,
             };
-            await this.mailerService.sendMail(sendMailParams);
-            this.logger.log(
-                `Email sent successfully to recipients with the following parameters : ${JSON.stringify(
-                    sendMailParams
-                )}`,
-                undefined
-            );
+            await this.transport.send(mail);
+            this.logger.log(`Email sent to ${recipients}: ${params.subject}`);
             return true;
         } catch (error: unknown) {
             this.logger.error(
-                `Error while sending mail with the following parameters : ${JSON.stringify(params)}`,
+                `Error sending email to ${recipients}: ${params.subject}`,
                 error instanceof Error ? error.stack : String(error)
             );
             return false;

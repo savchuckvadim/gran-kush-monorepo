@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional, IntersectionType } from "@nestjs/swagger";
 
 import { Type } from "class-transformer";
 import {
@@ -15,6 +15,7 @@ import {
     ValidateNested,
 } from "class-validator";
 
+import { PaginationDto } from "@common/paginate/dto/pagination.dto";
 import { OrderStatus, PaymentStatus } from "@modules/portal/crm/orders/domain/entity/order.entity";
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -331,6 +332,9 @@ export class OrderFilterDto {
     @Type(() => Date)
     endDate?: Date;
 }
+
+/** Один `@Query()` DTO на хендлер: два DTO на одном query несовместимы с forbidNonWhitelisted */
+export class OrderListQueryDto extends IntersectionType(PaginationDto, OrderFilterDto) {}
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Cancel Order (Member)

@@ -26,49 +26,52 @@ export function FinanceSummaryCard() {
     if (!summary) return null;
 
     return (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            {/* Доход */}
-            <Card className="p-4">
-                <div className="flex items-center gap-2">
-                    <div className="rounded-md bg-green-500/10 p-2">
-                        <TrendingUp className="h-5 w-5 text-green-600" />
+        <div className="space-y-2">
+            <p className="text-xs text-muted-foreground">{t("period")}</p>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                {/* Доход */}
+                <Card className="p-4">
+                    <div className="flex items-center gap-2">
+                        <div className="rounded-md bg-green-500/10 p-2">
+                            <TrendingUp className="h-5 w-5 text-green-600" />
+                        </div>
+                        <div>
+                            <p className="text-xs text-muted-foreground">{t("totalIncome")}</p>
+                            <p className="text-xl font-bold text-green-700">
+                                €{summary.totalIncome ?? 0}
+                            </p>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-xs text-muted-foreground">{t("totalIncome")}</p>
-                        <p className="text-xl font-bold text-green-700">
-                            €{summary.totalIncome ?? 0}
-                        </p>
-                    </div>
-                </div>
-            </Card>
+                </Card>
 
-            {/* Расход */}
-            <Card className="p-4">
-                <div className="flex items-center gap-2">
-                    <div className="rounded-md bg-red-500/10 p-2">
-                        <TrendingDown className="h-5 w-5 text-red-600" />
+                {/* Расход */}
+                <Card className="p-4">
+                    <div className="flex items-center gap-2">
+                        <div className="rounded-md bg-red-500/10 p-2">
+                            <TrendingDown className="h-5 w-5 text-red-600" />
+                        </div>
+                        <div>
+                            <p className="text-xs text-muted-foreground">{t("totalExpense")}</p>
+                            <p className="text-xl font-bold text-red-700">
+                                €{summary.totalExpense ?? 0}
+                            </p>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-xs text-muted-foreground">{t("totalExpense")}</p>
-                        <p className="text-xl font-bold text-red-700">
-                            €{summary.totalExpense ?? 0}
-                        </p>
-                    </div>
-                </div>
-            </Card>
+                </Card>
 
-            {/* Баланс */}
-            <Card className="p-4">
-                <div className="flex items-center gap-2">
-                    <div className="rounded-md bg-blue-500/10 p-2">
-                        <DollarSign className="h-5 w-5 text-blue-600" />
+                {/* Баланс */}
+                <Card className="p-4">
+                    <div className="flex items-center gap-2">
+                        <div className="rounded-md bg-blue-500/10 p-2">
+                            <DollarSign className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                            <p className="text-xs text-muted-foreground">{t("netBalance")}</p>
+                            <p className="text-xl font-bold">€{summary.netTotal ?? 0}</p>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-xs text-muted-foreground">{t("netBalance")}</p>
-                        <p className="text-xl font-bold">€{summary.netTotal ?? 0}</p>
-                    </div>
-                </div>
-            </Card>
+                </Card>
+            </div>
         </div>
     );
 }

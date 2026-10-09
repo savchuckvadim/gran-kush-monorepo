@@ -1,4 +1,3 @@
-import { ValidationPipe } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
 import type { NestExpressApplication } from "@nestjs/platform-express";
@@ -25,14 +24,7 @@ async function bootstrap() {
     const trustProxyHops = Number(process.env.TRUST_PROXY_HOPS ?? 1);
     app.set("trust proxy", Number.isFinite(trustProxyHops) ? trustProxyHops : 1);
 
-    // Глобальная валидация и трансформация типов
-    app.useGlobalPipes(
-        new ValidationPipe({
-            transform: true, // Автоматически преобразует типы (строки в числа и т.д.)
-            whitelist: true, // Удаляет свойства, которых нет в DTO
-            forbidNonWhitelisted: false, // Не выбрасывает ошибку при лишних свойствах
-        })
-    );
+    // Валидация DTO и формат ошибок — APP_PIPE / APP_FILTER в AppModule
     const configService = app.get(ConfigService);
 
     app.use(cookieParser(configService.get<string>("COOKIE_SECRET") || undefined));

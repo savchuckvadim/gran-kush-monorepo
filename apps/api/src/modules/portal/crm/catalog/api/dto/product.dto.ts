@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional, IntersectionType } from "@nestjs/swagger";
 
 import { Type } from "class-transformer";
 import {
@@ -11,6 +11,9 @@ import {
     MaxLength,
     Min,
 } from "class-validator";
+
+import { IsQueryBoolean } from "@common/decorators/dto/query-boolean.decorator";
+import { PaginationDto } from "@common/paginate/dto/pagination.dto";
 
 import { MeasurementUnitDto } from "./measurement-unit.dto";
 import { ProductCategoryDto } from "./product-category.dto";
@@ -281,14 +284,12 @@ export class ProductFilterDto {
 
     @ApiPropertyOptional({ example: true, type: Boolean })
     @IsOptional()
-    @Type(() => Boolean)
-    @IsBoolean()
+    @IsQueryBoolean()
     isActive?: boolean;
 
     @ApiPropertyOptional({ example: true, type: Boolean })
     @IsOptional()
-    @Type(() => Boolean)
-    @IsBoolean()
+    @IsQueryBoolean()
     isAvailable?: boolean;
 
     @ApiPropertyOptional({
@@ -314,3 +315,6 @@ export class ProductFilterDto {
     @Min(0)
     maxPrice?: number;
 }
+
+/** Один `@Query()` DTO на хендлер: два DTO на одном query несовместимы с forbidNonWhitelisted */
+export class ProductListQueryDto extends IntersectionType(PaginationDto, ProductFilterDto) {}

@@ -22,12 +22,11 @@ export function useSubmitLoginForm(setError: UseFormSetError<LoginFormData>) {
             }
             // configureOpenApiClient();
             // return EmployeeAuthenticationCrmService.employeeAuthLogin(data as EmployeeLoginDto);
+            // Портал уезжает заголовком, в теле его нет: API отвергает поля вне DTO
             const response = await $api.POST("/crm/auth/login", {
                 body: {
                     email: data.email,
                     password: data.password,
-                    domain: effectivePortalSlug,
-
                 },
                 headers: { "x-portal-slug": effectivePortalSlug },
             });

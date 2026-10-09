@@ -1,16 +1,10 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional, IntersectionType } from "@nestjs/swagger";
 
 import { Type } from "class-transformer";
-import {
-    IsBoolean,
-    IsEnum,
-    IsNotEmpty,
-    IsOptional,
-    IsString,
-    IsUUID,
-    MaxLength,
-} from "class-validator";
+import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from "class-validator";
 
+import { IsQueryBoolean } from "@common/decorators/dto/query-boolean.decorator";
+import { PaginationDto } from "@common/paginate/dto/pagination.dto";
 import {
     EntryMethod,
     ExitMethod,
@@ -170,8 +164,7 @@ export class PresenceFilterDto {
         description: "true = только присутствующие, false = только ушедшие",
     })
     @IsOptional()
-    @Type(() => Boolean)
-    @IsBoolean()
+    @IsQueryBoolean()
     isActive?: boolean;
 
     @ApiPropertyOptional({ enum: EntryMethod })
@@ -189,6 +182,9 @@ export class PresenceFilterDto {
     @Type(() => Date)
     endDate?: Date;
 }
+
+/** Один `@Query()` DTO на хендлер: два DTO на одном query несовместимы с forbidNonWhitelisted */
+export class PresenceListQueryDto extends IntersectionType(PaginationDto, PresenceFilterDto) {}
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Stats

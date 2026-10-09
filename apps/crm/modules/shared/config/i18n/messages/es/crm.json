@@ -354,6 +354,7 @@
             "subtitle": "Informes financieros, transacciones y analítica",
             "summary": {
                 "loading": "Cargando...",
+                "period": "Mes actual",
                 "totalIncome": "Ingresos totales",
                 "totalExpense": "Gastos totales",
                 "netBalance": "Balance neto"

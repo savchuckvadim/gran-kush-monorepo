@@ -15,7 +15,6 @@ import { ApiErrorResponse } from "@common/decorators/response/api-error-response
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { IdempotencyScope, Idempotent } from "@common/idempotency";
-import { PaginationDto } from "@common/paginate/dto/pagination.dto";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
@@ -27,9 +26,9 @@ import {
     FinancialTransactionDetailDto,
     FinancialTransactionListDto,
     ReportPeriodDto,
-    TransactionFilterDto,
     TransactionGroupedByDateDto,
     TransactionGroupedByTypeDto,
+    TransactionListQueryDto,
     TransactionSummaryDto,
 } from "@modules/portal/crm/finance/api/dto/financial-transaction.dto";
 import {
@@ -58,23 +57,14 @@ export class CrmFinanceController {
     })
     @ApiErrorResponse([401, 403])
     async listTransactions(
-        @Query() pagination: PaginationDto,
-        @Query() filters: TransactionFilterDto,
+        @Query() query: TransactionListQueryDto,
         @PortalId() portalId: string
     ): Promise<PaginatedResult<FinancialTransactionListDto>> {
-        const page = pagination.page ?? 1;
-        const limit = pagination.limit ?? 10;
+        const { page = 1, limit = 10, sortBy, sortOrder, ...filters } = query;
         const skip = PaginationUtil.getSkip(page, limit);
 
         const [txns, total] = await Promise.all([
-            this.financeService.findAll(
-                portalId,
-                filters,
-                limit,
-                skip,
-                pagination.sortBy,
-                pagination.sortOrder
-            ),
+            this.financeService.findAll(portalId, filters, limit, skip, sortBy, sortOrder),
             this.financeService.count(portalId, filters),
         ]);
 

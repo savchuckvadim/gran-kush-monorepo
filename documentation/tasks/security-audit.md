@@ -35,6 +35,7 @@
 | SQL-инъекции | все `$queryRaw`/`$executeRaw` | чисто: только теговые шаблоны, `*Unsafe` не используется |
 | Уязвимости зависимостей | `pnpm audit` | 220 advisories (TASK-306) |
 | Загрузка файлов (2026-09-02) | три пути загрузки, превью, `S3Service`, потолки тела | тип и размер не проверялись, объекты не удалялись (TASK-309) |
+| Формат ошибок и whitelist (2026-09-05) | фильтр и пайп по коду vs доки; все 104 вызова `$api.*` в crm/web/admin против DTO | фильтр не зарегистрирован, строгий режим выключен, `domain` в логине (TASK-308, TASK-310) |
 
 ---
 
@@ -200,58 +201,142 @@ DTO принимал произвольного получателя, тему �
 Access. Очередь для `/lk/auth/member/files` оставлена как есть: с проверкой до `add` она уже не
 принимает мусор, а переводить маршрут в синхронный — отдельное решение о контракте с фронтом.
 
+### TASK-308: `forbidNonWhitelisted` расходится с документацией `[x]` (2026-09-05, ветка `fix/exception-filter-contract`)
+
+Включён `forbidNonWhitelisted: true` — как обещали `CLAUDE.md` и контракт. Пайп переехал из
+`main.ts` в `AppModule` (`APP_PIPE`, `common/config/validation`): раньше каждая e2e-сьюта
+ставила свой `ValidationPipe({ whitelist: true })` без строгого режима, и прогон тестов
+проверял не ту конфигурацию, что крутится в проде.
+
+**Что сломалось бы при простом переключении флага.**
+
+- **Два `@Query()` DTO на одном хендлере.** Все пять списков (`/crm/orders`, `/lk/orders`,
+  `/crm/presence/sessions`, `/crm/finance/transactions`, `/crm/catalog/products`) принимали
+  `PaginationDto` и `XxxFilterDto` отдельными параметрами. Каждый DTO валидируется против
+  всего query, так что `page` отвергал бы `status`, а `status` — `page`: 400 на любой запрос
+  списка. Заменено на один `XxxListQueryDto extends IntersectionType(PaginationDto, XxxFilterDto)`.
+- **`/crm/employees`** — `PaginationDto` плюс сырые `@Query("role")` / `@Query("isActive")`
+  с ручным разбором; невалидная роль молча игнорировалась. Теперь `EmployeeListQueryDto`,
+  невалидная роль — 400. Boolean из query-string — через `Transform`, а не `Type(() => Boolean)`
+  (`Boolean("false") === true`).
+- **Фронты.** Аудит всех 104 вызовов `$api.*` в crm/web/admin: единственное живое лишнее поле —
+  `domain` в теле `POST /crm/auth/login` (crm и admin); портал и так едет заголовком
+  `X-Portal-Slug`. Убрано. Тип `UpdateEmployeePayload` в CRM обещал `position` / `department`,
+  которых нет в `UpdateEmployeeDto`, — приведён к DTO. TypeScript здесь не защищает:
+  openapi-fetch типизирует body через mapped type, и лишнее свойство в литерале проходит `tsc`.
+
+**Замечено попутно, исправлено вторым коммитом.**
+
+- `ReportPeriodDto` требует непустые даты, а виджеты сводки и отчёта по типам в CRM без фильтра
+  слали `startDate=&endDate=` — оба виджета получали 400 и молча рендерили пустоту. Теперь
+  без явного периода фронт подставляет текущий месяц и подписывает это в карточках.
+- `isActive` в `PresenceFilterDto` и `ProductFilterDto` шёл через `@Type(() => Boolean)`:
+  `isActive=false` превращался в `true`. Общий `@IsQueryBoolean()`
+  (`common/decorators/dto`) разбирает `"true"`/`"false"`, остальное — 400; e2e проверяет,
+  что `isActive=false` действительно фильтрует.
+
+- [x] `forbidNonWhitelisted: true`, пайп в `AppModule`, e2e-сьюты без своих пайпов
+- [x] списки — один query DTO, `/crm/employees` — типизированные фильтры
+- [x] фронты: `domain` из логина убран, `UpdateEmployeePayload` по DTO
+- [x] e2e `error-contract.e2e-spec.ts`: лишнее поле тела и query → 400 с именем поля, списки
+      с пагинацией и фильтром → 200, невалидная роль → 400
+
+### TASK-310: `GlobalExceptionFilter` не зарегистрирован `[x]` (2026-09-05, ветка `fix/exception-filter-contract`)
+
+Фильтр зарегистрирован через `APP_FILTER` в `AppModule` и переписан под контракт
+`{ message, errors }`:
+
+- **Валидация** — только когда `message` в ответе исключения массив (так кладёт
+  `ValidationPipe`): `Validation failed` + `errors`. Прежний фильтр считал валидацией любой
+  `BadRequestException` и для `throw new BadRequestException("File type not supported")`
+  отдал бы `message: "Validation failed", errors: "File type…"` — строку вместо массива и
+  сломанные проверки `res.body.message` в e2e загрузок.
+- **Ошибки body-parser** (413 `entity.too.large`, 400 `entity.parse.failed`) — не
+  `HttpException`, а `http-errors` со `statusCode` в объекте. Прежний фильтр отдал бы на них
+  500. Теперь статус и текст берутся из ошибки.
+- **500 без деталей.** Прежний фильтр отдавал клиенту `error.message` любого исключения —
+  текст ошибки Prisma с именами таблиц, адрес БД из `ECONNREFUSED`. Теперь
+  `Internal server error`, подробности и stack — в лог.
+- **Дополнительные поля объектного ответа** (`checks` у `GET /health/ready`) сохраняются,
+  служебные `statusCode` / `error` Nest — нет.
+- **Лог**: 5xx — error со stack, 400 с нарушениями — warn одной строкой, остальные 4xx —
+  debug. Прежний фильтр на каждый 401 писал многострочный error с разбором stack trace.
+- `errors` теперь всегда массив (пустой, если деталей нет) — клиентам не нужно различать
+  «нет поля» и «пустой список».
+
+- [x] `APP_FILTER` в `AppModule`, юнит-тесты фильтра (7 кейсов)
+- [x] e2e `error-contract.e2e-spec.ts`: 400/401/404/413 и битый JSON — один формат, без `statusCode`
+- [x] доки: `HTTP_API_CONTRACT.md`, `backend/README.md`, `CLAUDE.md`, `MODULE_DEVELOPMENT_PRINCIPLES.md`
+
+### TASK-306: уязвимости зависимостей `[x]` (2026-09-05, ветка `fix/exception-filter-contract`)
+
+На старте `pnpm audit` давал **230** advisories (3 critical, 104 high), из них 61 — через
+`@nestjs-modules/mailer`. Разбиралось только то, что доезжает до рантайма; dev-цепочки
+(`@nestjs/cli`, `eslint`, `turbo`, `prisma`, `react-email` preview) не трогались.
+
+**Что сделано.**
+
+- **`@nestjs-modules/mailer` удалён.** Письма рендерит React Email, обёртка лишь передавала
+  html в nodemailer, а тянула `handlebars` (critical, JS injection), `liquidjs` (critical, RCE),
+  `mjml` → `html-minifier` (ReDoS), `preview-email` со своим старым `nodemailer@7`.
+  Вместо неё — `MailTransport` (domain-интерфейс) и `SmtpMailTransport` на голом `nodemailer`
+  в `modules/mail/infrastructure/transport`; `MailService` зависит от интерфейса и тестируется
+  фейковым транспортом. Попутно: `MailService` больше не пишет в лог всё письмо целиком —
+  в html лежат ссылки с токенами подтверждения и сброса пароля, теперь в логе только адресат
+  и тема.
+- `nodemailer` 8.0.1 → 10.0.0: в 8.x — SMTP command injection через `envelope.size` и CRLF
+  в `name` (исправлено с 8.0.5), а в 8.0.11 ещё и обход `disableFileAccess`/`disableUrlAccess`
+  через message-level `raw` (исправлено с 9.0.1). У 10.x типы встроены, `@types/nodemailer`
+  не нужен; подпути `nodemailer/lib/*` заменены на именованные экспорты главного модуля.
+- `bull@4` (старая библиотека очередей, тянула `lodash` 4.17.21 с code injection и `uuid` 8)
+  удалён: в коде ни одного импорта, очереди давно на `bullmq`.
+- `qs` 6.14.2 → 6.16.0 и `body-parser` 2.2.2 → 2.3.0 под express 5 (DoS в `qs.stringify`
+  и обход array-limit; body-parser молча отключал лимит при невалидном значении) —
+  `pnpm update --depth Infinity`, диапазоны express это допускают.
+- **Nest 11.1.13 → 11.2.3** (`common`, `core`, `platform-express`, `testing`, `bullmq`):
+  приносит `multer` 2.0.2 → 2.2.0 (три DoS: incomplete cleanup, resource exhaustion,
+  uncontrolled recursion — доезжало через `PATCH /crm/members/:id/files`) и `path-to-regexp`
+  8.3.0 → 8.4.2 (ReDoS в роутинге). Overrides не понадобились.
+- `@nestjs/swagger` 11.2.6 → 11.4.7 (свой `path-to-regexp`), `@nestjs/config` 4.0.3 → 4.0.4
+  (`lodash` 4.18, code injection в `_.template`), `@aws-sdk/client-s3` → 3.1127 (`fast-xml-parser`),
+  `@nestjs/schedule` → 6.1.3.
+- **`next` 16.1.6 → 16.3.4** во всех трёх фронтах. 16.1.7 закрывал request smuggling и DoS
+  в Server Components, но **обход middleware через segment-prefetch маршруты** (high) исправлен
+  только в 16.2.6 — а именно `apps/crm/middleware.ts` и `apps/web/proxy.ts` держат
+  edge-защиту. Заодно `sharp` (CVE libvips) — у 16.3 диапазон `^0.35.4`.
+  `next-intl` 4.8.3 → 4.14.2 (open redirect, prototype pollution через каталог переводов).
+  Сборки crm/web/admin на новом next проходят.
+- `axios` 1.13.5 → 1.20.0 в `api-client`, crm, web, admin: 29 advisories (SSRF через
+  NO_PROXY, prototype pollution в merge конфига, header injection, утечка
+  `Proxy-Authorization` на редиректе). Реально axios использует только
+  `apps/web/modules/shared/lib/api.ts` — экземпляр без единого потребителя; сама зависимость
+  во всех четырёх пакетах — кандидат на удаление.
+
+**Итог `pnpm audit`:** 230 → 151 advisories (critical 3 → 2, high 104 → 72). В цепочках,
+доезжающих до рантайма, остался один moderate — `uuid@11.1.0` под `bullmq` (bounds check
+в v3/v5/v6 при переданном `buf`; bullmq использует v4). Всё остальное — dev-инструменты:
+оба critical — `handlebars` под `ts-jest`/`@turbo/gen` и `basic-ftp` под `@turbo/gen`;
+дальше `react-email` preview (minimatch, ajv, fast-uri, socket.io), `@nestjs/cli`, `eslint`,
+`turbo`, `prisma`, `@parcel/watcher` из next-intl.
+
+**Осталось / решить.**
+
+- [ ] `tls.rejectUnauthorized: false` в SMTP-конфиге унаследован как есть: сертификат
+      почтового сервера не проверяется. Включать строгую проверку — зависит от провайдера,
+      решение за Вадимом (`common/config/mail/mailer.config.ts`).
+- [ ] Удалить `axios` из `api-client`, crm, admin и мёртвый `apps/web/modules/shared/lib/api.ts`.
+- [ ] `react-email` / `@react-email/preview-server` (dev) тянут minimatch/ajv/socket.io с
+      advisories; в рантайме не живут — обновить при следующем касании шаблонов.
+
 ---
 
 ## Открытые задачи
-
-### TASK-306: уязвимости зависимостей `[ ]`
-
-`pnpm audit` — 220 уникальных advisories (3 critical, 97 high). Подавляющая часть — транзитивные
-dev- и build-зависимости (`@prisma/dev`, `@nestjs/cli`, `eslint`, `turbo`), они в рантайме не
-живут. Разбирать имеет смысл то, что реально доезжает до продакшена.
-
-- [ ] **`@nestjs-modules/mailer` — главный источник.** Тянет `handlebars` (critical, JS injection),
-      `liquidjs` (critical, RCE), `mjml`, `preview-email`, `lodash`, `html-minifier`. При этом
-      письма рендерятся **React Email**-шаблонами (`.tsx`), а handlebars/liquid/mjml не
-      используются: почти весь этот подграф — мёртвый вес с критическими CVE.
-      Оценить замену на голый `nodemailer` + уже имеющийся React Email
-- [ ] `multer` (DoS, incomplete cleanup) — доезжает: загрузка документов участника
-      (`POST /lk/account/documents`, `POST /lk/auth/member/files`)
-- [ ] `path-to-regexp` (DoS) — роутинг Nest
-- [ ] `next` (DoS в Server Components) и `sharp` в `apps/admin`
-- [ ] `axios` (обход NO_PROXY) в `@workspace/api-client`
 
 ### TASK-307: security-заголовки `[ ]`
 
 - [ ] `helmet` не подключён. API отдаёт JSON и стоит за nginx, поэтому приоритет невысокий,
       но `X-Content-Type-Options`, `Referrer-Policy` и запрет кэша на auth-ответах стоит выставить
 - [ ] Решить, где им место: в приложении или в шаблоне nginx (`infra/docker/nginx/templates`)
-
-### TASK-308: `forbidNonWhitelisted` расходится с документацией `[ ]`
-
-`CLAUDE.md` и [MODULE_DEVELOPMENT_PRINCIPLES](../backend/MODULE_DEVELOPMENT_PRINCIPLES.md)
-утверждают `forbidNonWhitelisted: true` — «неизвестные поля отвергаются». В `main.ts` стоит
-`false`: лишние поля молча срезаются `whitelist`.
-
-Это не дыра (поля всё равно не доезжают до сервиса), но расхождение кода и доков опаснее обоих
-вариантов по отдельности: читающий доку рассчитывает на строгость, которой нет.
-
-- [ ] Выбрать одно: включить `true` и прогнать e2e, либо поправить доки
-- [ ] Если включать — проверить фронты: лишнее поле в теле начнёт давать 400
-
-### TASK-310: `GlobalExceptionFilter` не зарегистрирован `[ ]`
-
-Найдено в TASK-309. `CLAUDE.md` и [контракт HTTP API](../backend/HTTP_API_CONTRACT.md) описывают
-формат ошибок `{ message, errors }` из `GlobalExceptionFilter`, но ни `APP_FILTER`, ни
-`useGlobalFilters` в коде нет — работает штатный `BaseExceptionFilter` Nest с форматом
-`{ statusCode, message, error }`. Фронты живут на `getApiErrorMessage`, который читает `message`,
-поэтому расхождение незаметно. Тот же класс проблемы, что TASK-308: док обещает то, чего нет.
-
-- [ ] Решить: зарегистрировать фильтр (и тогда починить в нём ошибки body-parser — сейчас он
-      отдал бы 500 на 413 от `entity.too.large`, потому что смотрит только на `HttpException`)
-      либо удалить фильтр и поправить доки
-- [ ] Если регистрировать — прогнать e2e: ответы валидации станут `{ message: "Validation
-      failed", errors: [...] }`, и клиентские тесты на `body.message` это заметят
 
 ---
 
