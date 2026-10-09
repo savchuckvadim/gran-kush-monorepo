@@ -49,4 +49,16 @@ export class RegisterPortalDto {
     @IsString()
     @MaxLength(100)
     ownerSurname?: string;
+
+    @ApiPropertyOptional({
+        example: "club-month",
+        description:
+            "Billing plan code chosen on the product site (?plan=). Unknown or inactive codes fall back to the trial plan",
+        type: String,
+    })
+    @IsOptional()
+    @IsString()
+    @MaxLength(40)
+    @Matches(/^[a-z0-9-]+$/)
+    planCode?: string;
 }

@@ -30,7 +30,12 @@ type GlobalTemplateFull = Prisma.GlobalEntityTemplateGetPayload<{
 export class ProvisionPortalFromTemplatesService {
     constructor(private readonly prisma: PrismaService) {}
 
-    async provisionPortal(portalId: string, portalType: PortalTypeEnum, tx?: Tx): Promise<void> {
+    async provisionPortal(
+        portalId: string,
+        portalType: PortalTypeEnum,
+        tx?: Tx,
+        options: { planCode?: string } = {}
+    ): Promise<void> {
         const db = tx ?? this.prisma;
         await ensureGlobalEntityTemplates(db);
         await this.ensureDefaultBillingPlan(db);
@@ -57,7 +62,7 @@ export class ProvisionPortalFromTemplatesService {
             await this.materializeTemplate(db, portalId, gt);
         }
 
-        await this.ensurePortalTrialSubscription(db, portalId);
+        await this.ensurePortalTrialSubscription(db, portalId, options.planCode);
     }
 
     private templateAppliesToPortalType(
@@ -242,12 +247,23 @@ export class ProvisionPortalFromTemplatesService {
         });
     }
 
-    private async ensurePortalTrialSubscription(db: Tx, portalId: string): Promise<void> {
+    private async ensurePortalTrialSubscription(
+        db: Tx,
+        portalId: string,
+        planCode?: string
+    ): Promise<void> {
         const sub = await db.portalSubscription.findUnique({ where: { portalId } });
         if (sub) {
             return;
         }
-        const plan = await db.billingPlan.findFirst({ where: { code: "trial", isActive: true } });
+        // Тариф, выбранный на сайте, если он есть в каталоге. Иначе trial: сайт показывает
+        // тарифы раньше, чем их заводят в БД, и неизвестный код не должен ронять регистрацию.
+        const chosen = planCode
+            ? await db.billingPlan.findFirst({ where: { code: planCode, isActive: true } })
+            : null;
+        const plan =
+            chosen ??
+            (await db.billingPlan.findFirst({ where: { code: "trial", isActive: true } }));
         if (!plan) {
             return;
         }

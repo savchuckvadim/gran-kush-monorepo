@@ -76,7 +76,9 @@ export class PortalRegistrationService {
                 },
             });
 
-            await this.provisionFromTemplates.provisionPortal(portal.id, portal.type, tx);
+            await this.provisionFromTemplates.provisionPortal(portal.id, portal.type, tx, {
+                planCode: dto.planCode,
+            });
 
             const user = await tx.user.create({
                 data: {
