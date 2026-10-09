@@ -1,57 +1,72 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useLocale } from "next-intl";
 
 import { Button, FieldInput } from "@workspace/ui";
 
+import { usePortal } from "@/modules/processes";
 import { ROUTES } from "@/modules/shared/config/routes";
+import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
 import { useLoginForm } from "../hooks/useLoginForm";
-import { useSubmitLoginForm } from "../hooks/useSubmitLoginForm";
+import { useLoginSession } from "../hooks/useLoginSession";
+import { InvalidCredentialsError, useSubmitLoginForm } from "../hooks/useSubmitLoginForm";
+import { resolveClubTarget } from "../lib/club-target";
 
+import { ClubPicker } from "./club-picker";
 
 export function LoginForm() {
-  
+    const { t, register, handleSubmit, errors, isSubmitting } = useLoginForm();
+    const locale = useLocale();
+    const localizedLink = useLocalizedLink();
+    const { portalSlug } = usePortal();
+    const from = useSearchParams().get("from");
 
-    const { 
-    
-         t, 
-         
-         register, 
-         handleSubmit, 
-         setError, 
-          errors, 
-          isSubmitting 
-         } = useLoginForm();
+    const session = useLoginSession();
+    const login = useSubmitLoginForm(session.refetch);
 
-  
+    const target = session.clubs
+        ? resolveClubTarget(session.clubs, locale, portalSlug, from)
+        : null;
 
-    const { 
-        localizedLink,
-        onSubmit, 
-         isError, portalSlug, 
-         isPending, 
+    useEffect(() => {
+        if (target) {
+            window.location.assign(target);
+        }
+    }, [target]);
 
-         } =
-         useSubmitLoginForm(setError);
+    if (session.isLoading || target) {
+        return <p className="text-center text-sm text-muted-foreground">{t("loadingClubs")}</p>;
+    }
+
+    if (session.clubs) {
+        const deniedClub =
+            portalSlug && !session.clubs.some((club) => club.slug === portalSlug)
+                ? portalSlug
+                : null;
+        return (
+            <ClubPicker
+                clubs={session.clubs}
+                deniedClub={deniedClub}
+                onSignOut={session.signOut}
+                isSigningOut={session.isSigningOut}
+            />
+        );
+    }
+
+    const isPending = isSubmitting || login.isPending;
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {isError && (
+        <form onSubmit={handleSubmit((data) => login.mutate(data))} className="space-y-4">
+            {login.error && (
                 <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
-                    {t("error")}
+                    {login.error instanceof InvalidCredentialsError
+                        ? t("error")
+                        : t("genericError")}
                 </div>
-            )}
-
-            {!portalSlug && (
-                <FieldInput
-                    label="Club"
-                    type="text"
-                    error={errors.club?.message}
-                    required
-                    {...register("club")}
-                    placeholder="green-club"
-                />
             )}
 
             <FieldInput
@@ -59,21 +74,21 @@ export function LoginForm() {
                 type="email"
                 error={errors.email?.message}
                 required
+                autoComplete="email"
                 {...register("email")}
                 placeholder="your.email@example.com"
             />
 
             <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                    <FieldInput
-                        label={t("password")}
-                        type="password"
-                        error={errors.password?.message}
-                        required
-                        {...register("password")}
-                        placeholder="••••••••"
-                    />
-                </div>
+                <FieldInput
+                    label={t("password")}
+                    type="password"
+                    error={errors.password?.message}
+                    required
+                    autoComplete="current-password"
+                    {...register("password")}
+                    placeholder="••••••••"
+                />
                 <Link
                     href={localizedLink(ROUTES.FORGOT_PASSWORD)}
                     className="text-sm text-primary hover:underline"
@@ -82,8 +97,8 @@ export function LoginForm() {
                 </Link>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isSubmitting || isPending}>
-                {isSubmitting || isPending ? t("submitting") : t("submit")}
+            <Button type="submit" className="w-full" disabled={isPending}>
+                {isPending ? t("submitting") : t("submit")}
             </Button>
 
             <div className="text-center text-sm text-muted-foreground">

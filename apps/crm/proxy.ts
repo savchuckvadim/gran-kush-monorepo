@@ -38,13 +38,17 @@ export default function proxy(request: NextRequest) {
     const second = segments[1]; // portal slug or "auth"
     const third = segments[2]; // "crm", "auth", "scan", "member", ...
 
-    // Access-cookie живёт 15 минут; живой refresh-cookie означает,
+    // Access-cookie живёт столько же, сколько access-токен; живой refresh-cookie означает,
     // что клиент восстановит сессию через /crm/auth/refresh
-    const hasAuthCookie =
-        request.cookies.has(CRM_ACCESS_COOKIE) || request.cookies.has(CRM_REFRESH_COOKIE);
+    const hasAccessCookie = request.cookies.has(CRM_ACCESS_COOKIE);
+    const hasAuthCookie = hasAccessCookie || request.cookies.has(CRM_REFRESH_COOKIE);
 
     // [locale]/[portal]/crm/* and [locale]/[portal]/scan — protected
-    if (second && second !== "auth" && (third === "crm" || third === "scan" || third === "member")) {
+    if (
+        second &&
+        second !== "auth" &&
+        (third === "crm" || third === "scan" || third === "member")
+    ) {
         if (!hasAuthCookie) {
             const loginUrl = new URL(`/${locale}/${second}/auth/login`, request.url);
             loginUrl.searchParams.set("from", pathname);
@@ -52,8 +56,10 @@ export default function proxy(request: NextRequest) {
         }
     }
 
-    // [locale]/[portal]/auth/* — redirect to CRM if already authenticated
-    if (second && second !== "auth" && third === "auth" && hasAuthCookie) {
+    // [locale]/[portal]/auth/* — redirect to CRM only with a live access cookie. A refresh cookie
+    // alone may be dead (revoked by a password reset), and bouncing on it looped /auth ↔ /crm.
+    // The login page itself finds a session that refresh can restore and leaves for the club.
+    if (second && second !== "auth" && third === "auth" && hasAccessCookie) {
         return NextResponse.redirect(new URL(`/${locale}/${second}/crm`, request.url));
     }
 

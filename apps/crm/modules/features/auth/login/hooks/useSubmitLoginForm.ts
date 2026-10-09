@@ -1,71 +1,25 @@
-import { useRouter } from "next/navigation";
-
 import { useMutation } from "@tanstack/react-query";
-import { UseFormSetError } from "react-hook-form";
 
-import { usePortal } from "@/modules/processes";
-import { getRouteContext } from "@/modules/processes/auth/utils/auth-routing";
-import { $api, ROUTES,  useLocalizedLink } from "@/modules/shared";
+import { $api } from "@/modules/shared";
 
 import { LoginFormData } from "../type/login-form.type";
-import { setCrmPortalSlugForApiClient } from "@/modules/processes/portal/utils/crm-portal-context";
 
-export function useSubmitLoginForm(setError: UseFormSetError<LoginFormData>) {
-    const { portalSlug } = usePortal();
-    const localizedLink = useLocalizedLink();
-    const router = useRouter();
+/** 401 from /crm/auth/login: wrong email or password, shown as such rather than a generic failure. */
+export class InvalidCredentialsError extends Error {}
 
-    const mutation = useMutation({
+export function useSubmitLoginForm(onSignedIn: () => void) {
+    return useMutation({
         mutationFn: async (data: LoginFormData) => {
-            const effectivePortalSlug = (portalSlug ?? data.club ?? "").trim().toLowerCase();
-            if (!effectivePortalSlug) {
-                throw new Error("Club is required");
-            }
-            setCrmPortalSlugForApiClient(effectivePortalSlug);
-            // Портал уезжает заголовком X-Portal-Slug (см. setCrmPortalSlugForApiClient),
-            // в теле его нет: API отвергает поля вне DTO
             const response = await $api.POST("/crm/auth/login", {
-                body: {
-                    email: data.email,
-                    password: data.password,
-                },
+                body: { email: data.email, password: data.password },
             });
+            if (response.response.status === 401) {
+                throw new InvalidCredentialsError();
+            }
             if (!response.response.ok) {
                 throw new Error(`Login failed: ${response.response.status}`);
             }
-            return { effectivePortalSlug };
         },
-        onSuccess: ({ effectivePortalSlug }) => {
-            // setSessionTokens({
-            //     accessToken: response.accessToken,
-            //     refreshToken: response.refreshToken,
-            // });
-            if (portalSlug) {
-                window.location.href = localizedLink(ROUTES.CRM_HOME);
-                return;
-            }
-            const { locale } = getRouteContext(window.location.pathname);
-            router.replace(`/${locale}/${effectivePortalSlug}${ROUTES.CRM_HOME}`);
-        },
-        onError: (error) => {
-            console.error("Login error:", error);
-            if (!portalSlug) {
-                setError("club", { message: "Club is required or not found" });
-            }
-        },
+        onSuccess: onSignedIn,
     });
-
-    const onSubmit = (data: LoginFormData) => {
-        mutation.mutate(data);
-    };
-    return {
-        onSubmit, mutation, isError: mutation.isError, portalSlug,
-        localizedLink,
-
-        isPending: mutation.isPending,
-        isSuccess: mutation.isSuccess,
-
-        isIdle: mutation.isIdle,
-
-    };
 }
