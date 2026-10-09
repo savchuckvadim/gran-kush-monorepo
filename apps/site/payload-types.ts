@@ -168,14 +168,14 @@ export interface HeroBlock {
   primary?: {
     label?: string | null;
     /**
-     * /precios — page of this site, #entrada — anchor, https://… — external
+     * /precios — page of this site, #entrada — anchor, crm:register / crm:login — the CRM, https://… — external
      */
     href?: string | null;
   };
   secondary?: {
     label?: string | null;
     /**
-     * /precios — page of this site, #entrada — anchor, https://… — external
+     * /precios — page of this site, #entrada — anchor, crm:register / crm:login — the CRM, https://… — external
      */
     href?: string | null;
   };
@@ -285,7 +285,7 @@ export interface PricingTeaserBlock {
   cta?: {
     label?: string | null;
     /**
-     * /precios — page of this site, #entrada — anchor, https://… — external
+     * /precios — page of this site, #entrada — anchor, crm:register / crm:login — the CRM, https://… — external
      */
     href?: string | null;
   };
@@ -353,7 +353,7 @@ export interface FinalCtaBlock {
   cta?: {
     label?: string | null;
     /**
-     * /precios — page of this site, #entrada — anchor, https://… — external
+     * /precios — page of this site, #entrada — anchor, crm:register / crm:login — the CRM, https://… — external
      */
     href?: string | null;
   };

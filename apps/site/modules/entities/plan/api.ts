@@ -60,5 +60,7 @@ export const getPlans = async (locale: Locale): Promise<PlanView[]> => {
         highlight: Boolean(doc.highlight),
         monthly: price(doc.billing?.monthlyCode, doc.billing?.fallbackMonthly),
         yearly: price(doc.billing?.yearlyCode, doc.billing?.fallbackYearly),
+        monthlyCode: doc.billing?.monthlyCode ?? null,
+        yearlyCode: doc.billing?.yearlyCode ?? null,
     }));
 };

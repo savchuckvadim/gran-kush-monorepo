@@ -4,8 +4,7 @@ import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import type { Locale } from "@/modules/shared/config/locales";
-import { ROUTES } from "@/modules/shared/config/routes";
-import { CRM_URL } from "@/modules/shared/config/site";
+import { crmHref, ROUTES } from "@/modules/shared/config/routes";
 import type { Site } from "@/payload-types";
 
 import { GlassLight, Reveal } from "./ui/effects";
@@ -56,7 +55,7 @@ export const SiteFrame = async ({ locale, site, current, children }: SiteFramePr
                 items={items}
                 homeHref={home}
                 activeId={current}
-                crm={{ label: t("nav.crm"), href: CRM_URL }}
+                crm={{ label: t("nav.crm"), href: crmHref(locale, "login") }}
                 labels={labels}
             />
             <div className="topctl glass">
@@ -76,7 +75,7 @@ export const SiteFrame = async ({ locale, site, current, children }: SiteFramePr
                                 {item.label}
                             </NextLink>
                         ))}
-                        <a href={CRM_URL}>{t("nav.crm")}</a>
+                        <a href={crmHref(locale, "login")}>{t("nav.crm")}</a>
                     </div>
                 </div>
                 {(site?.footerNote || site?.legalNote) && (

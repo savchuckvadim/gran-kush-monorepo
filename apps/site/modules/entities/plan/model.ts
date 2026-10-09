@@ -7,6 +7,9 @@ export interface PlanView {
     highlight: boolean;
     monthly: number | null;
     yearly: number | null;
+    // API billing codes ("club-month"): the sign-up link hands the chosen one to the CRM
+    monthlyCode: string | null;
+    yearlyCode: string | null;
 }
 
 export const VAT_RATE = 0.21;

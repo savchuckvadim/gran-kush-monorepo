@@ -23,7 +23,7 @@ const FINAL = (locale: Locale): Block => ({
         { es: "Prueba gratis. Sin tarjeta.", ru: "Бесплатный пробный период. Без карты.", en: "Free trial. No card needed." },
         locale,
     ),
-    cta: { label: pick(TRY, locale), href: "/precios" },
+    cta: { label: pick(TRY, locale), href: "crm:register" },
 });
 
 const FEATURES: { id: string; icon: NonNullable<Extract<Block, { blockType: "featureGrid" }>["items"]>[number]["icon"]; title: L; text: L }[] = [
@@ -91,7 +91,7 @@ export const homeLayout = (locale: Locale): Block[] => [
             },
             locale,
         ),
-        primary: { label: pick(TRY, locale), href: "/precios" },
+        primary: { label: pick(TRY, locale), href: "crm:register" },
         secondary: {
             label: pick({ es: "Ver cómo fluye", ru: "Как это работает", en: "See how it flows" }, locale),
             href: "#entrada",

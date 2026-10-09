@@ -4,6 +4,8 @@ import { type CSSProperties, useState, useSyncExternalStore } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { type PlanView, recommendPlan, withVat } from "@/modules/entities/plan/model";
+import { DEFAULT_LOCALE, isLocale } from "@/modules/shared/config/locales";
+import { crmHref } from "@/modules/shared/config/routes";
 
 import { LiquidButton } from "../ui/liquid-button";
 
@@ -125,6 +127,7 @@ export const PricingCalculator = ({
 }) => {
     const t = useTranslations("pricing");
     const locale = useLocale();
+    const siteLocale = isLocale(locale) ? locale : DEFAULT_LOCALE;
     const money = useMoney();
     const { yearly, setYearly } = useBilling();
     const [members, setMembers] = useState(defaultMembers);
@@ -188,7 +191,14 @@ export const PricingCalculator = ({
                                     <li key={feature}>{feature}</li>
                                 ))}
                             </ul>
-                            <LiquidButton href="#" variant={plan.highlight ? "primary" : "glass"}>
+                            <LiquidButton
+                                href={crmHref(
+                                    siteLocale,
+                                    "register",
+                                    yearly ? plan.yearlyCode : plan.monthlyCode
+                                )}
+                                variant={plan.highlight ? "primary" : "glass"}
+                            >
                                 {t("choose", { plan: plan.name })}
                             </LiquidButton>
                         </article>

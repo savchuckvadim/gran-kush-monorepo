@@ -44,7 +44,7 @@ export const link = (name: string, label: string): GroupField => ({
             type: "text",
             admin: {
                 description:
-                    "/precios — page of this site, #entrada — anchor, https://… — external",
+                    "/precios — page of this site, #entrada — anchor, crm:register / crm:login — the CRM, https://… — external",
             },
         },
     ],
