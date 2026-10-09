@@ -128,6 +128,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/platform/billing/plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Активные тарифы платформы для сайта продукта
+         * @description Публичный: без авторизации и без заголовков портала (`/platform/*` не проходит через PortalContextMiddleware).
+         */
+        get: operations["PlatformBillingPlans_listPlans"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -2260,6 +2280,42 @@ export interface components {
             email: string;
             password: string;
         };
+        BillingPlanCatalogItemDto: {
+            /** @example club-month */
+            code: string;
+            /** @example Club */
+            name: string;
+            /**
+             * @description Цена за один `interval`: десятичная строка с двумя знаками после точки, без перевода в float
+             * @example 49.00
+             */
+            priceAmount: string;
+            /**
+             * @description Код валюты ISO 4217
+             * @example EUR
+             */
+            currency: string;
+            /**
+             * @description Период списания
+             * @example month
+             */
+            interval: string;
+            /**
+             * @description Флаги возможностей тарифа (`featuresJson`)
+             * @example {
+             *       "crm": true,
+             *       "sites": true,
+             *       "messenger": false
+             *     }
+             */
+            features: {
+                [key: string]: boolean;
+            };
+        };
+        BillingPlanCatalogResponseDto: {
+            /** @description Активные тарифы по возрастанию цены, при равной цене — по коду */
+            plans: components["schemas"]["BillingPlanCatalogItemDto"][];
+        };
         HealthResponseDto: {
             /** @example ok */
             status: string;
@@ -3183,6 +3239,11 @@ export interface components {
             ownerName: string;
             /** @example Surname */
             ownerSurname?: string;
+            /**
+             * @description Billing plan code chosen on the product site (?plan=). Unknown or inactive codes fall back to the trial plan
+             * @example club-month
+             */
+            planCode?: string;
         };
         RegisteredPortalDto: {
             /** @example f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f */
@@ -4560,6 +4621,8 @@ export type SchemaDeleteAccountDocumentResponseDto = components['schemas']['Dele
 export type SchemaAccountSignatureDto = components['schemas']['AccountSignatureDto'];
 export type SchemaUploadAccountSignatureDto = components['schemas']['UploadAccountSignatureDto'];
 export type SchemaPlatformLoginDto = components['schemas']['PlatformLoginDto'];
+export type SchemaBillingPlanCatalogItemDto = components['schemas']['BillingPlanCatalogItemDto'];
+export type SchemaBillingPlanCatalogResponseDto = components['schemas']['BillingPlanCatalogResponseDto'];
 export type SchemaHealthResponseDto = components['schemas']['HealthResponseDto'];
 export type SchemaReadinessChecksDto = components['schemas']['ReadinessChecksDto'];
 export type SchemaReadinessResponseDto = components['schemas']['ReadinessResponseDto'];
@@ -5010,6 +5073,28 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    PlatformBillingPlans_listPlans: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Каталог тарифов */
+            200: {
+                headers: {
+                    /** @description Каталог одинаков для всех — его можно держать в общих кэшах */
+                    "Cache-Control"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BillingPlanCatalogResponseDto"];
+                };
             };
         };
     };
