@@ -1,168 +1,225 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
 import { assertOpenApiOk, getApiErrorMessage } from "@workspace/api-client/core";
 import { Button, FieldInput } from "@workspace/ui";
 
-import { getRouteContext } from "@/modules/processes/auth/utils/auth-routing";
 import { $api } from "@/modules/shared";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { notifyApiError } from "@/modules/shared/lib/notify-api-error";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
-const registrationSchema = z
-    .object({
-        displayName: z
-            .string()
-            .min(2, "Club display name is required")
-            .max(20, "Club display name must be less than 20 characters"),
-        ownerName: z
-            .string()
-            .min(2, "Owner name is required")
-            .max(20, "Owner name must be less than 20 characters"),
-        // ownerSurname: z.string().optional(),
-        email: z.string().email("Invalid email"),
-        password: z.string().min(8, "Password must be at least 8 characters"),
-        passwordConfirmation: z
-            .string()
-            .min(8, "Password confirmation must be at least 8 characters"),
-    })
-    .refine((data) => data.password === data.passwordConfirmation, {
-        message: "Passwords do not match",
-        path: ["passwordConfirmation"],
+import {
+    makePortalSlug,
+    PORTAL_SLUG_MAX,
+    PORTAL_SLUG_MIN,
+    PORTAL_SLUG_PATTERN,
+} from "./lib/portal-slug";
+
+/** Same rule as RegisterPortalDto.password on the API. */
+const PASSWORD_RULE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
+
+type Translate = ReturnType<typeof useTranslations>;
+
+const createRegistrationSchema = (t: Translate) =>
+    z
+        .object({
+            displayName: z
+                .string()
+                .trim()
+                .min(2, t("errors.displayName"))
+                .max(100, t("errors.displayName")),
+            slug: z
+                .string()
+                .min(PORTAL_SLUG_MIN, t("errors.slugLength"))
+                .max(PORTAL_SLUG_MAX, t("errors.slugLength"))
+                .regex(PORTAL_SLUG_PATTERN, t("errors.slugChars")),
+            ownerName: z
+                .string()
+                .trim()
+                .min(2, t("errors.ownerName"))
+                .max(100, t("errors.ownerName")),
+            email: z.string().trim().email(t("errors.email")),
+            password: z
+                .string()
+                .min(8, t("errors.passwordLength"))
+                .regex(PASSWORD_RULE, t("errors.passwordRule")),
+            passwordConfirmation: z.string(),
+        })
+        .refine((data) => data.password === data.passwordConfirmation, {
+            message: t("errors.passwordMismatch"),
+            path: ["passwordConfirmation"],
+        });
+
+type RegistrationFormData = z.infer<ReturnType<typeof createRegistrationSchema>>;
+
+// The product site passes the API billing code: /{locale}/auth/register?plan=club-month
+const usePlanFromUrl = () => {
+    const plan = useSearchParams().get("plan");
+    return plan && plan.length <= PORTAL_SLUG_MAX && PORTAL_SLUG_PATTERN.test(plan)
+        ? plan
+        : undefined;
+};
+
+const usePlanName = (planCode: string | undefined) =>
+    useQuery({
+        queryKey: ["billing-plans"],
+        enabled: Boolean(planCode),
+        queryFn: () => $api.GET("/platform/billing/plans"),
+        select: (response) =>
+            response.data?.plans.find((plan) => plan.code === planCode)?.name ?? null,
     });
 
-type RegistrationFormData = z.infer<typeof registrationSchema>;
-
-function makePortalSlug(value: string): string {
-    return value
-        .toLowerCase()
-        .trim()
-        .replace(/\s+/g, "-")
-        .replace(/[^a-z0-9-]/g, "")
-        .replace(/-+/g, "-")
-        .replace(/^-+|-+$/g, "");
-}
-
 export function RegistrationForm() {
+    const t = useTranslations("auth.portalRegister");
+    const locale = useLocale();
     const router = useRouter();
     const localizedLink = useLocalizedLink();
+    const planCode = usePlanFromUrl();
+    const { data: planName } = usePlanName(planCode);
+    const [slugEdited, setSlugEdited] = useState(false);
+
     const {
         register,
         handleSubmit,
-        formState: { errors, isSubmitting },
+        setValue,
+        control,
+        formState: { errors, isSubmitting, isSubmitted },
     } = useForm<RegistrationFormData>({
-        resolver: zodResolver(registrationSchema),
+        resolver: zodResolver(createRegistrationSchema(t)),
+        defaultValues: { slug: "" },
     });
+
+    const slug = useWatch({ control, name: "slug" });
+    const crmAddress = `/${locale}/${slug || "…"}${ROUTES.CRM_HOME}`;
 
     const mutation = useMutation({
         mutationFn: async (data: RegistrationFormData) => {
-            const generatedSlug = makePortalSlug(data.displayName);
-            if (generatedSlug.length < 3) {
-                throw new Error("Club name is too short to generate slug");
-            }
-
-            const payload = {
-                name: generatedSlug,
-                displayName: data.displayName.trim(),
-                email: data.email.trim().toLowerCase(),
-                password: data.password,
-                ownerName: data.ownerName.trim(),
-                // ownerSurname: data.ownerSurname?.trim() || undefined,
-            };
-
-            const postResult = await $api.POST("/platform/portals/register", { body: payload });
+            const postResult = await $api.POST("/platform/portals/register", {
+                body: {
+                    name: data.slug,
+                    displayName: data.displayName,
+                    email: data.email.toLowerCase(),
+                    password: data.password,
+                    ownerName: data.ownerName,
+                    ...(planCode ? { planCode } : {}),
+                },
+            });
             const apiData = await assertOpenApiOk(postResult);
-
-            if (!apiData?.portal?.name) {
-                throw new Error("Registration succeeded but portal slug was not returned");
-            }
-
             return apiData.portal.name;
         },
         onError: (error) => {
-            notifyApiError(error, "Registration failed");
+            notifyApiError(error, t("errors.failed"));
         },
         onSuccess: (portalSlug) => {
-            const { locale } = getRouteContext(window.location.pathname);
             router.replace(`/${locale}/${portalSlug}${ROUTES.CRM_HOME}`);
         },
     });
 
-    const onSubmit = (data: RegistrationFormData) => {
-        mutation.mutate(data);
-    };
-
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit((data) => mutation.mutate(data))} className="space-y-4">
             {mutation.error && (
                 <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
                     {getApiErrorMessage(mutation.error)}
                 </div>
             )}
-            <FieldInput
-                label="Club display name"
-                type="text"
-                error={errors.displayName?.message}
-                required
-                {...register("displayName")}
-                placeholder="Green Club"
-            />
+            {planName && (
+                <p className="rounded-lg border bg-muted/40 p-3 text-sm">
+                    {t("plan", { plan: planName })}
+                </p>
+            )}
 
             <div className="grid gap-4 md:grid-cols-2">
                 <FieldInput
-                    label="Owner name"
+                    label={t("displayName")}
+                    type="text"
+                    error={errors.displayName?.message}
+                    required
+                    {...register("displayName", {
+                        onChange: (event: { target: { value: string } }) => {
+                            if (!slugEdited) {
+                                setValue("slug", makePortalSlug(event.target.value), {
+                                    shouldValidate: isSubmitted,
+                                });
+                            }
+                        },
+                    })}
+                    placeholder="Green Club"
+                />
+                <FieldInput
+                    label={t("slug")}
+                    type="text"
+                    error={errors.slug?.message}
+                    helperText={t("slugHelp", { url: crmAddress })}
+                    required
+                    autoCapitalize="none"
+                    spellCheck={false}
+                    {...register("slug", {
+                        onChange: () => setSlugEdited(true),
+                        setValueAs: (value: string) => value.trim().toLowerCase(),
+                    })}
+                    placeholder="green-club"
+                />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+                <FieldInput
+                    label={t("ownerName")}
                     type="text"
                     error={errors.ownerName?.message}
                     required
                     {...register("ownerName")}
-                    placeholder="John"
                 />
                 <FieldInput
-                    label="Email"
+                    label={t("email")}
                     type="email"
                     error={errors.email?.message}
                     required
+                    autoComplete="email"
                     {...register("email")}
                     placeholder="owner@greenclub.com"
                 />
             </div>
+
             <div className="grid gap-4 md:grid-cols-2">
                 <FieldInput
-                    label="Password"
+                    label={t("password")}
                     type="password"
                     error={errors.password?.message}
+                    helperText={t("passwordHelp")}
                     required
+                    autoComplete="new-password"
                     {...register("password")}
                     placeholder="••••••••"
                 />
-
                 <FieldInput
-                    label="Password confirmation"
+                    label={t("passwordConfirmation")}
                     type="password"
                     error={errors.passwordConfirmation?.message}
                     required
+                    autoComplete="new-password"
                     {...register("passwordConfirmation")}
                     placeholder="••••••••"
                 />
             </div>
+
             <Button type="submit" className="w-full" disabled={isSubmitting || mutation.isPending}>
-                {isSubmitting || mutation.isPending
-                    ? "Creating portal..."
-                    : "Create portal and login"}
+                {isSubmitting || mutation.isPending ? t("submitting") : t("submit")}
             </Button>
 
             <div className="text-center text-sm text-muted-foreground">
-                Already have an account?{" "}
+                {t("hasAccount")}{" "}
                 <Link href={localizedLink(ROUTES.LOGIN)} className="text-primary hover:underline">
-                    Login
+                    {t("login")}
                 </Link>
             </div>
         </form>

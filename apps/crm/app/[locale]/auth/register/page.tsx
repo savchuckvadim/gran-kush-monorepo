@@ -7,7 +7,7 @@ import { Card } from "@workspace/ui";
 import { RegistrationForm } from "@/modules/features/auth";
 
 export default function RegisterPage() {
-    const t = useTranslations("auth.register");
+    const t = useTranslations("auth.portalRegister");
 
     return (
         <div className="container flex min-h-[calc(100vh-8rem)] items-center justify-center py-12">
