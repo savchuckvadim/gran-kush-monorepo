@@ -107,6 +107,7 @@ describe("CRM role-based access (e2e)", () => {
                 email: `owner-crmrbac-${suffix}@test.local`,
                 password: PASSWORD,
                 ownerName: "Owner",
+                acceptTerms: true,
             });
         expect(res.status).toBe(201);
         portalId = res.body.portal.id as string;

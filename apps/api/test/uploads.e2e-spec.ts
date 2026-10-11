@@ -62,6 +62,7 @@ describe("Uploads (e2e)", () => {
                 email: `owner-${suffix}@test.local`,
                 password: PASSWORD,
                 ownerName: "Owner",
+                acceptTerms: true,
             });
         expect(portalRes.status).toBe(201);
         portalId = portalRes.body.portal.id as string;

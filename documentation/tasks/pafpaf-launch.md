@@ -520,6 +520,15 @@
   регистрации клуба с сохранением `LEGAL_VERSION` и даты; ссылки в кабинете участника — на страницы сайта.
 - Тексты исходят из того, что бэкапы (TASK-551) и почта в ЕС (TASK-552) настроены: до этого обещания о резервных
   копиях и субобработчике почты не соответствуют действительности.
+- 2026-10-11, ветка `feat/legal-consent`: на юр. страницах email `savchuckvadim@gmail.com`. Регистрация клуба в CRM:
+  обязательная галочка со ссылками на Términos, Contrato de encargo и Privacidad. `POST /platform/portals/register`
+  без `acceptTerms: true` отвечает 400; в `portals` пишутся `terms_accepted_at`, `terms_version`
+  (`LEGAL_TERMS_VERSION` в `apps/api/src/common/legal/legal-terms.ts`, менять вместе с `LEGAL_VERSION`) и
+  `terms_accepted_by_user_id`. Та же галочка в старой форме регистрации `apps/admin`. Кабинет участника: ссылки
+  в футере и форме регистрации ведут на `/{locale}/legal/privacidad` и `/terminos` сайта. Адрес сайта во фронтах —
+  `NEXT_PUBLIC_SITE_URL`, по умолчанию `https://paf-paf.app`.
+- Осталось: NIF и адрес, проверка юристом, затем `LEGAL_INDEXABLE = true`. Клубы, зарегистрированные до этого
+  изменения, согласия не давали: попросить принять условия при входе или письмом.
 
 ### TASK-553: остальное по проду `[ ]` P1
 

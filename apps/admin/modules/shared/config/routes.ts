@@ -48,3 +48,9 @@ export type Route = (typeof ROUTES)[keyof typeof ROUTES];
 export const CRM_PUBLIC_URL = (
     process.env.NEXT_PUBLIC_CRM_URL || "https://crm.paf-paf.app"
 ).replace(/\/$/, "");
+
+/** Product site with the legal pages: `${SITE_PUBLIC_URL}/{locale}/legal/{doc}`. */
+export const SITE_PUBLIC_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://paf-paf.app").replace(
+    /\/$/,
+    ""
+);

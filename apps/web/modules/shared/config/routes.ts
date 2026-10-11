@@ -16,8 +16,6 @@ export const ROUTES = {
     PROFILE_SETTINGS: "/profile/settings",
     PROFILE_QR_CODE: "/profile/qr-code",
     PROFILE_PRESENCE: "/profile/presence",
-    PRIVACY: "/privacy",
-    TERMS: "/terms",
 } as const;
 
 export type Route = (typeof ROUTES)[keyof typeof ROUTES];

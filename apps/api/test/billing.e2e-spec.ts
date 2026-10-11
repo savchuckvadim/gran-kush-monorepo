@@ -142,6 +142,7 @@ describe("Billing: Stripe subscription flow (e2e)", () => {
                 email,
                 password: PASSWORD,
                 ownerName: "Owner",
+                acceptTerms: true,
             });
         expect(res.status).toBe(201);
         cookies = cookieHeader(res);

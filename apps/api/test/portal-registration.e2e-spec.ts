@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import request from "supertest";
 
 import { AppModule } from "../src/app.module";
+import { LEGAL_TERMS_VERSION } from "../src/common/legal/legal-terms";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 
 jest.setTimeout(120_000);
@@ -23,18 +24,20 @@ describe("Portal registration from the product site (e2e)", () => {
     const inactivePlanCode = `e2e-off-${suffix}`;
     const slugs: string[] = [];
 
+    const registrationBody = (slug: string) => ({
+        name: slug,
+        displayName: `Registration ${slug}`,
+        email: `owner-${slug}@test.local`,
+        password: PASSWORD,
+        ownerName: "Owner",
+        acceptTerms: true,
+    });
+
     const register = (slug: string, planCode?: string) => {
         slugs.push(slug);
         return request(app.getHttpServer())
             .post("/platform/portals/register")
-            .send({
-                name: slug,
-                displayName: `Registration ${slug}`,
-                email: `owner-${slug}@test.local`,
-                password: PASSWORD,
-                ownerName: "Owner",
-                ...(planCode ? { planCode } : {}),
-            });
+            .send({ ...registrationBody(slug), ...(planCode ? { planCode } : {}) });
     };
 
     const subscriptionPlanCode = async (portalId: string): Promise<string | undefined> => {
@@ -110,5 +113,41 @@ describe("Portal registration from the product site (e2e)", () => {
         const res = await register(`reg-bad-${suffix}`, "Club Month!");
 
         expect(res.status).toBe(400);
+    });
+
+    it.each([
+        ["without acceptTerms", undefined],
+        ["with acceptTerms: false", false],
+    ])("rejects a sign-up %s", async (_case, acceptTerms) => {
+        const slug = `reg-noterms-${acceptTerms === false ? "f" : "u"}-${suffix}`;
+        slugs.push(slug);
+
+        const res = await request(app.getHttpServer())
+            .post("/platform/portals/register")
+            .send({ ...registrationBody(slug), acceptTerms });
+
+        expect(res.status).toBe(400);
+        expect(res.body.errors).toEqual(
+            expect.arrayContaining([expect.stringContaining("acceptTerms")])
+        );
+        expect(await prisma.portal.findUnique({ where: { name: slug } })).toBeNull();
+    });
+
+    it("stores which terms version the owner accepted", async () => {
+        const slug = `reg-terms-${suffix}`;
+        const res = await register(slug);
+
+        expect(res.status).toBe(201);
+        const portal = await prisma.portal.findUniqueOrThrow({
+            where: { id: res.body.portal.id as string },
+            select: { termsAcceptedAt: true, termsVersion: true, termsAcceptedByUserId: true },
+        });
+        const owner = await prisma.user.findUniqueOrThrow({
+            where: { email: `owner-${slug}@test.local` },
+            select: { id: true },
+        });
+        expect(portal.termsVersion).toBe(LEGAL_TERMS_VERSION);
+        expect(portal.termsAcceptedAt).toBeInstanceOf(Date);
+        expect(portal.termsAcceptedByUserId).toBe(owner.id);
     });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -11,9 +11,10 @@ import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
 import { assertOpenApiOk, getApiErrorMessage } from "@workspace/api-client/core";
-import { Button, FieldInput } from "@workspace/ui";
+import { Button, Field, FieldInput } from "@workspace/ui";
 
 import { $api } from "@/modules/shared";
+import { type LegalDoc, legalPageUrl } from "@/modules/shared/config/legal";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { notifyApiError } from "@/modules/shared/lib/notify-api-error";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
@@ -53,6 +54,7 @@ const createRegistrationSchema = (t: Translate) =>
                 .min(PASSWORD_MIN_LENGTH, t("errors.passwordLength"))
                 .regex(PASSWORD_RULE, t("errors.passwordRule")),
             passwordConfirmation: z.string(),
+            acceptTerms: z.boolean().refine((accepted) => accepted, t("errors.acceptTerms")),
         })
         .refine((data) => data.password === data.passwordConfirmation, {
             message: t("errors.passwordMismatch"),
@@ -60,6 +62,20 @@ const createRegistrationSchema = (t: Translate) =>
         });
 
 type RegistrationFormData = z.infer<ReturnType<typeof createRegistrationSchema>>;
+
+const legalLink = (locale: string, doc: LegalDoc) =>
+    function LegalLink(chunks: ReactNode) {
+        return (
+            <a
+                href={legalPageUrl(locale, doc)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:text-primary"
+            >
+                {chunks}
+            </a>
+        );
+    };
 
 // The product site passes the API billing code: /{locale}/auth/register?plan=club-month
 const usePlanFromUrl = () => {
@@ -95,7 +111,7 @@ export function RegistrationForm() {
         formState: { errors, isSubmitting, isSubmitted },
     } = useForm<RegistrationFormData>({
         resolver: zodResolver(createRegistrationSchema(t)),
-        defaultValues: { slug: "" },
+        defaultValues: { slug: "", acceptTerms: false },
     });
 
     const slug = useWatch({ control, name: "slug" });
@@ -110,6 +126,7 @@ export function RegistrationForm() {
                     email: data.email.toLowerCase(),
                     password: data.password,
                     ownerName: data.ownerName,
+                    acceptTerms: data.acceptTerms,
                     locale: toMailLocale(locale),
                     ...(planCode ? { planCode } : {}),
                 },
@@ -211,6 +228,24 @@ export function RegistrationForm() {
                     placeholder="••••••••"
                 />
             </div>
+
+            <Field error={errors.acceptTerms?.message}>
+                <label className="flex items-start gap-2 text-sm">
+                    <input
+                        type="checkbox"
+                        className="mt-0.5 size-4 shrink-0 accent-primary"
+                        aria-invalid={errors.acceptTerms ? "true" : undefined}
+                        {...register("acceptTerms")}
+                    />
+                    <span>
+                        {t.rich("acceptTerms", {
+                            terms: legalLink(locale, "terminos"),
+                            dpa: legalLink(locale, "encargo"),
+                            privacy: legalLink(locale, "privacidad"),
+                        })}
+                    </span>
+                </label>
+            </Field>
 
             <Button type="submit" className="w-full" disabled={isSubmitting || mutation.isPending}>
                 {isSubmitting || mutation.isPending ? t("submitting") : t("submit")}
