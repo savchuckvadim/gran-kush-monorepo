@@ -140,7 +140,11 @@ export class AdminBillingService {
         }
         const planId = plan?.id ?? subscription.plan.id;
         const planPrice = plan?.priceAmount ?? subscription.plan.priceAmount;
+        const planInterval = plan?.interval ?? subscription.plan.interval;
         const currency = plan?.currency ?? subscription.plan.currency;
+        // Цена годового тарифа — за год: сумма по умолчанию идёт от месячной доли
+        const monthlyCents =
+            planInterval === "year" ? amountToCents(planPrice) / 12 : amountToCents(planPrice);
 
         // Продление оплаченного срока идёт от его конца, а не от сегодняшнего дня
         const now = new Date();
@@ -157,7 +161,7 @@ export class AdminBillingService {
             currentPeriodEnd: addMonths(periodStart, input.months),
             payment: {
                 externalId: randomUUID(),
-                amount: input.amount ?? centsToAmount(amountToCents(planPrice) * input.months),
+                amount: input.amount ?? centsToAmount(Math.round(monthlyCents * input.months)),
                 currency,
                 paidAt: now,
             },

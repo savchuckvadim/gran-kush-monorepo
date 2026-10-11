@@ -27,8 +27,8 @@ import {
     type ClubSubscription,
     type ClubSubscriptionRow,
     MANUAL_PAYMENT_MAX_MONTHS,
+    manualPaymentAmount,
     type ManualPaymentInput,
-    multiplyAmount,
     useBillingFormat,
     useBillingPlans,
     useRecordManualPayment,
@@ -91,7 +91,7 @@ function ManualPaymentForm({
 
     const selectedPlan = plans.find((plan) => plan.code === planCode) ?? subscription.plan;
     const defaultAmount = Number.isInteger(months)
-        ? format.money(multiplyAmount(selectedPlan.priceAmount, months), selectedPlan.currency)
+        ? format.money(manualPaymentAmount(selectedPlan, months), selectedPlan.currency)
         : "—";
     const otherPlans = plans.filter(
         (plan) => plan.isActive && plan.code !== subscription.plan.code
@@ -147,8 +147,8 @@ function ManualPaymentForm({
                 helperText={t("amountHint", { amount: defaultAmount })}
                 error={errors.amount?.message}
                 inputMode="decimal"
-                placeholder={multiplyAmount(
-                    selectedPlan.priceAmount,
+                placeholder={manualPaymentAmount(
+                    selectedPlan,
                     Number.isInteger(months) ? months : 1
                 )}
                 {...register("amount")}

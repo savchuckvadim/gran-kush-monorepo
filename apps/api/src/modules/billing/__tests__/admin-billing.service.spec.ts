@@ -128,6 +128,26 @@ describe("AdminBillingService", () => {
             expect(months).toBe(3);
         });
 
+        it("a yearly plan defaults to its monthly share × months", async () => {
+            const { service, applyManualPayment } = build({
+                subscription: subscriptionView({
+                    plan: {
+                        id: "plan-club-year",
+                        code: "club-year",
+                        name: "Club",
+                        priceAmount: "468.00",
+                        currency: "EUR",
+                        interval: "year",
+                    },
+                }),
+            });
+
+            await service.recordManualPayment("portal-1", { months: 3 });
+
+            const [, state] = applyManualPayment.mock.calls[0];
+            expect(state.payment.amount).toBe("117.00");
+        });
+
         it("extends a running paid period from its end, not from today", async () => {
             const paidUntil = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
             const { service, applyManualPayment } = build({

@@ -33,6 +33,10 @@ const login = async (request: NextRequest, upstream: Response): Promise<NextResp
 
 const proxy = async (request: NextRequest, { params }: RouteParams): Promise<NextResponse> => {
     const { path } = await params;
+    // encodeURIComponent не трогает точки: «..» вывел бы запрос за пределы /platform
+    if (path.some((segment) => segment === "." || segment === "..")) {
+        return apiErrorResponse(400, "Invalid path");
+    }
     const apiPath = `/platform/${path.map(encodeURIComponent).join("/")}`;
     const body = request.method === "GET" ? undefined : await request.text();
 

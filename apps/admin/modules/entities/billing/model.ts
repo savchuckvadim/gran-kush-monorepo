@@ -24,9 +24,18 @@ export const isManagedByStripe = (subscription: ClubSubscription | null): boolea
     subscription?.provider === "stripe" &&
     (subscription.status === "active" || subscription.status === "past_due");
 
-/** Сумма × количество без ошибок плавающей точки: "49.00" × 3 → "147.00". */
-export const multiplyAmount = (amount: string, times: number): string =>
-    ((Math.round(Number(amount) * 100) * times) / 100).toFixed(2);
+/**
+ * Сумма ручной оплаты за `months` месяцев — так же, как её считает API: "49.00" × 3 → "147.00",
+ * у годового тарифа — от месячной доли: "468.00"/год × 3 → "117.00".
+ */
+export const manualPaymentAmount = (
+    plan: { priceAmount: string; interval: string },
+    months: number
+): string => {
+    const cents = Math.round(Number(plan.priceAmount) * 100);
+    const monthlyCents = plan.interval === "year" ? cents / 12 : cents;
+    return (Math.round(monthlyCents * months) / 100).toFixed(2);
+};
 
 // Даты сроков показываются и вводятся в UTC, иначе `<input type="date">` сдвигал бы день
 export const dateInputToIso = (value: string): string =>
