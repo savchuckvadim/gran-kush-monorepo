@@ -71,7 +71,13 @@
         "choose": "Choose {plan}"
     },
     "footer": {
-        "rights": "© {year} PafPaf · paf-paf.app"
+        "rights": "© {year} PafPaf · paf-paf.app",
+        "legal": {
+            "aviso-legal": "Legal notice",
+            "privacidad": "Privacy",
+            "cookies": "Cookies",
+            "terminos": "Terms"
+        }
     },
     "notFound": {
         "meta": "Page not found",

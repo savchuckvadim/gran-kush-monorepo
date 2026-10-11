@@ -7,6 +7,7 @@ export const ROUTES = {
     home: (locale: Locale) => `/${locale}`,
     page: (locale: Locale, slug: string) =>
         slug === HOME_SLUG ? `/${locale}` : `/${locale}/${slug}`,
+    legal: (locale: Locale, doc: string) => `/${locale}/legal/${doc}`,
 };
 
 const CRM_PATHS = {

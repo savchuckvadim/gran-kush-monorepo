@@ -14,6 +14,8 @@ import { SmokeLayer } from "./ui/smoke-layer";
 import { LogoMark, SvgDefs } from "./ui/svg-defs";
 import { LangList, LangToggle, ModeSwitch } from "./ui/switches";
 
+const LEGAL_FOOTER_LINKS = ["aviso-legal", "privacidad", "cookies", "terminos"] as const;
+
 interface SiteFrameProps {
     locale: Locale;
     site: Site | null;
@@ -91,6 +93,15 @@ export const SiteFrame = async ({ locale, site, current, children }: SiteFramePr
                         {site?.legalNote && <span>{site.legalNote}</span>}
                     </div>
                 )}
+                <div className="foot__row">
+                    <div className="foot__links">
+                        {LEGAL_FOOTER_LINKS.map((doc) => (
+                            <NextLink key={doc} href={ROUTES.legal(locale, doc)}>
+                                {t(`footer.legal.${doc}`)}
+                            </NextLink>
+                        ))}
+                    </div>
+                </div>
                 <div className="foot__row">
                     <span>{t("footer.rights", { year: new Date().getFullYear() })}</span>
                     <LangList />
