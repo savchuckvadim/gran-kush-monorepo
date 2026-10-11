@@ -615,7 +615,7 @@
     --shadow-card: 0 20px 44px -32px rgb(0 0 0 / 0.8);
 }
 
-/* Sociopath: graphite and one red; the Red John smiley is the wallpaper. No borders — only radius */
+/* Sociopath: graphite and one red, the Red John smiley behind the content. No borders — only radius */
 
 [data-skin="sociopath"] {
     --radius: 1rem;
@@ -643,7 +643,6 @@
     --display-weight: 800;
     --display-tracking: -0.045em;
     --shadow-card: none;
-    --sociopath-tile: url("/skins/sociopath/tile-light.svg");
 }
 
 [data-skin="sociopath"].dark {
@@ -665,7 +664,6 @@
     --chart-5: #323232;
     --success: #6cc08b;
     --warning: #e2a54a;
-    --sociopath-tile: url("/skins/sociopath/tile-dark.svg");
 }
 
 /* Infierno: black metal — pitch black, bone white and fraktur; colour only in a warning */

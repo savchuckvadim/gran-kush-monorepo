@@ -126,8 +126,18 @@
     }
 }
 
-/* Sociopath: no borders, the blocks are told apart by fill; the smiley is the wallpaper of the
-   content and "sociopath." sits in its corner, under the content */
+/* glass skins: on phones the menu opens over the page, so it gets a solid backing */
+@media (max-width: 767.98px) {
+    :root:is([data-skin="unicornio"], [data-skin="galaxia"], [data-skin="cristal"])
+        [data-slot="sidebar"] {
+        background: linear-gradient(var(--sidebar), var(--sidebar)), var(--background);
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
+    }
+}
+
+/* Sociopath: no borders, the blocks are told apart by fill. Like its start page, one big faded
+   smiley sits behind the content and stays put while scrolling; "sociopath." in the corner */
 
 :root[data-skin="sociopath"] [data-slot="app-header"] {
     background: var(--sidebar);
@@ -136,9 +146,34 @@
 }
 
 :root[data-skin="sociopath"] [data-slot="app-main"] {
-    background:
-        var(--sociopath-tile) 0 0 / 132px 132px repeat,
-        color-mix(in oklab, var(--card) 35%, var(--background));
+    background: transparent;
+}
+
+:root[data-skin="sociopath"] [data-slot="app-main"]::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-color: var(--foreground);
+    opacity: 0.05;
+    -webkit-mask: url("/skins/sociopath/mark.svg") var(--sociopath-ghost-x, 50%) 58% / auto
+        min(78vh, 64vw) no-repeat;
+    mask: url("/skins/sociopath/mark.svg") var(--sociopath-ghost-x, 50%) 58% / auto min(78vh, 64vw)
+        no-repeat;
+    pointer-events: none;
+}
+
+/* centred in the content area, not in the window: shifted by half the sidebar */
+@media (min-width: 768px) {
+    :root[data-skin="sociopath"] {
+        --sociopath-ghost-x: calc(50% + 2.5rem);
+    }
+}
+
+@media (min-width: 1024px) {
+    :root[data-skin="sociopath"] {
+        --sociopath-ghost-x: calc(50% + 7.5rem);
+    }
 }
 
 :root[data-skin="sociopath"] [data-slot="app-main"] > * {
