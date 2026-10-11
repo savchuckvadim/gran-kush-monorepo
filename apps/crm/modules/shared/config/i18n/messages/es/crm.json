@@ -49,7 +49,7 @@
         },
         "members": {
             "title": "Miembros",
-            "subtitle": "Miembros del club creados (vista temporal sin autenticación)",
+            "subtitle": "Socios del club: búsqueda, estados y perfiles",
             "statusSelect": {
                 "placeholder": "Estado",
                 "confirmTitle": "¿Cambiar el estado del miembro?",
@@ -161,6 +161,21 @@
                 "expiresAt": "Expira en",
                 "createdAt": "Creado en",
                 "note": "El código QR se utiliza para la entrada del miembro al club. Cuando se regenera, el código QR antiguo dejará de funcionar."
+            },
+            "create": {
+                "button": "Nuevo socio",
+                "title": "Nuevo socio",
+                "description": "Los campos y cuáles son obligatorios vienen del formulario «Creación en el CRM» de tu club (Ajustes → Socios → Formularios del socio). El socio activa su cuenta por email, no hace falta crearle contraseña.",
+                "email": "Email",
+                "emailHelp": "A esta dirección el socio recibirá el acceso a su cuenta",
+                "emailInvalid": "Introduce un email válido",
+                "filesLater": "súbelo en el perfil del socio después de crearlo",
+                "submit": "Crear socio",
+                "submitting": "Creando…",
+                "cancel": "Cancelar",
+                "loading": "Cargando el formulario…",
+                "created": "Socio creado",
+                "createdExisting": "Socio añadido: este email ya tenía cuenta en PafPaf"
             }
         },
         "attendance": {
@@ -634,6 +649,112 @@
             "pages": {
                 "billing": "Suscripción",
                 "appearance": "Apariencia"
+            }
+        },
+        "settingsHub": {
+            "title": "Ajustes",
+            "description": "Todo el club por categorías. Pasa el cursor por una tarjeta para ver los detalles.",
+            "tabs": {
+                "members": {
+                    "title": "Socios",
+                    "description": "Campos, formularios, estados, alta"
+                },
+                "team": {
+                    "title": "Equipo",
+                    "description": "Empleados e invitaciones"
+                },
+                "catalog": {
+                    "title": "Catálogo",
+                    "description": "Categorías y unidades"
+                },
+                "entities": {
+                    "title": "Entidades",
+                    "description": "Tus listas y procesos"
+                },
+                "billing": {
+                    "title": "Suscripción",
+                    "description": "Plan, pago, facturas"
+                },
+                "appearance": {
+                    "title": "Apariencia",
+                    "description": "Tema y modo"
+                }
+            },
+            "tiles": {
+                "memberFields": {
+                    "title": "Campos del socio",
+                    "description": "Qué guarda el club de cada socio: nombre, teléfono, documentos y campos propios.",
+                    "metric": "activos"
+                },
+                "memberForms": {
+                    "title": "Formularios del socio",
+                    "description": "Qué campos muestra cada formulario, en qué orden y cuáles son obligatorios.",
+                    "metric": "formularios",
+                    "purposes": {
+                        "public_registration": "Alta por enlace",
+                        "crm_create": "Creación en el CRM",
+                        "crm_detail": "Ficha en el CRM",
+                        "member_cabinet": "Área del socio"
+                    }
+                },
+                "memberStatuses": {
+                    "title": "Estados del socio",
+                    "description": "Las etapas por las que pasa un socio, de la solicitud a la aprobación.",
+                    "metric": "estados"
+                },
+                "registrationLinks": {
+                    "title": "Enlaces de alta",
+                    "description": "Enlaces públicos y códigos QR con los que los socios se dan de alta solos.",
+                    "metric": "de {total} activos"
+                },
+                "newMember": {
+                    "title": "Nuevo socio",
+                    "description": "Añadir un socio a mano con el formulario «Creación en el CRM»."
+                },
+                "employees": {
+                    "title": "Empleados",
+                    "description": "Quién trabaja en el CRM del club y con qué permisos.",
+                    "metric": "activos"
+                },
+                "invitations": {
+                    "title": "Invitaciones",
+                    "description": "Invita a un empleado por email y mira quién aún no ha aceptado.",
+                    "metric": "pendientes"
+                },
+                "categories": {
+                    "title": "Categorías de productos",
+                    "description": "Grupos del catálogo en los que se ordenan los productos.",
+                    "metric": "categorías"
+                },
+                "units": {
+                    "title": "Unidades de medida",
+                    "description": "Gramos, piezas, mililitros: cómo se cuentan el stock y los pedidos.",
+                    "metric": "unidades"
+                },
+                "entities": {
+                    "title": "Todas las entidades",
+                    "description": "Constructor: tus propias listas y procesos con sus campos, formularios y etapas.",
+                    "metric": "entidades"
+                },
+                "entity": {
+                    "description": "Campos, formularios, etapas y estados de esta entidad.",
+                    "system": "del sistema",
+                    "custom": "propia"
+                },
+                "billing": {
+                    "title": "Plan y pago",
+                    "description": "Plan actual, pago con tarjeta, facturas y cancelación.",
+                    "until": "hasta el {date}"
+                },
+                "appearance": {
+                    "title": "Tema",
+                    "description": "Todos los temas, modo claro u oscuro y ahorro de energía.",
+                    "eco": "ahorro de energía"
+                },
+                "quickSkin": {
+                    "title": "Cambiar tema",
+                    "description": "Abrir la galería de temas sin salir de la página."
+                }
             }
         }
     }

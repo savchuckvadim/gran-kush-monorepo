@@ -49,7 +49,7 @@
         },
         "members": {
             "title": "Members",
-            "subtitle": "Created club members (temporary no-auth preview)",
+            "subtitle": "Club members: search, statuses and profiles",
             "statusSelect": {
                 "placeholder": "Status",
                 "confirmTitle": "Change member status?",
@@ -161,6 +161,21 @@
                 "expiresAt": "Expires at",
                 "createdAt": "Created at",
                 "note": "QR code is used for member entry to the club. When regenerated, the old QR code will stop working."
+            },
+            "create": {
+                "button": "New member",
+                "title": "New member",
+                "description": "Fields and which of them are required come from your club's “Create in CRM” form (Settings → Members → Member forms). The member activates the account by email, so you don't set a password.",
+                "email": "Email",
+                "emailHelp": "The member gets access to the cabinet at this address",
+                "emailInvalid": "Enter a valid email",
+                "filesLater": "upload it in the member's profile after creating",
+                "submit": "Create member",
+                "submitting": "Creating…",
+                "cancel": "Cancel",
+                "loading": "Loading the form…",
+                "created": "Member created",
+                "createdExisting": "Member added: this email already had a PafPaf account"
             }
         },
         "attendance": {
@@ -634,6 +649,112 @@
             "pages": {
                 "billing": "Subscription",
                 "appearance": "Appearance"
+            }
+        },
+        "settingsHub": {
+            "title": "Settings",
+            "description": "Everything about the club by category. Hover a tile to see the details.",
+            "tabs": {
+                "members": {
+                    "title": "Members",
+                    "description": "Fields, forms, statuses, sign-up"
+                },
+                "team": {
+                    "title": "Team",
+                    "description": "Employees and invitations"
+                },
+                "catalog": {
+                    "title": "Catalog",
+                    "description": "Categories and units"
+                },
+                "entities": {
+                    "title": "Entities",
+                    "description": "Your own lists and processes"
+                },
+                "billing": {
+                    "title": "Subscription",
+                    "description": "Plan, payment, invoices"
+                },
+                "appearance": {
+                    "title": "Appearance",
+                    "description": "Theme and mode"
+                }
+            },
+            "tiles": {
+                "memberFields": {
+                    "title": "Member fields",
+                    "description": "What the club keeps about a member: name, phone, documents and custom fields.",
+                    "metric": "active"
+                },
+                "memberForms": {
+                    "title": "Member forms",
+                    "description": "Which fields each form shows, in what order, and which are required.",
+                    "metric": "forms",
+                    "purposes": {
+                        "public_registration": "Sign-up by link",
+                        "crm_create": "Create in CRM",
+                        "crm_detail": "CRM profile",
+                        "member_cabinet": "Member cabinet"
+                    }
+                },
+                "memberStatuses": {
+                    "title": "Member statuses",
+                    "description": "The stages a member goes through, from application to approval.",
+                    "metric": "statuses"
+                },
+                "registrationLinks": {
+                    "title": "Sign-up links",
+                    "description": "Public links and QR codes members use to sign up themselves.",
+                    "metric": "of {total} active"
+                },
+                "newMember": {
+                    "title": "New member",
+                    "description": "Add a member by hand with the “Create in CRM” form."
+                },
+                "employees": {
+                    "title": "Employees",
+                    "description": "Who works in the club's CRM and with which rights.",
+                    "metric": "active"
+                },
+                "invitations": {
+                    "title": "Invitations",
+                    "description": "Invite an employee by email and see who hasn't accepted yet.",
+                    "metric": "pending"
+                },
+                "categories": {
+                    "title": "Product categories",
+                    "description": "Catalog groups that products are sorted into.",
+                    "metric": "categories"
+                },
+                "units": {
+                    "title": "Units",
+                    "description": "Grams, pieces, millilitres — how stock and orders are counted.",
+                    "metric": "units"
+                },
+                "entities": {
+                    "title": "All entities",
+                    "description": "Builder: your own lists and processes with their fields, forms and stages.",
+                    "metric": "entities"
+                },
+                "entity": {
+                    "description": "Fields, forms, stages and statuses of this entity.",
+                    "system": "system",
+                    "custom": "custom"
+                },
+                "billing": {
+                    "title": "Plan and payment",
+                    "description": "Current plan, card payment, invoices and cancellation.",
+                    "until": "until {date}"
+                },
+                "appearance": {
+                    "title": "Theme",
+                    "description": "All themes, light or dark mode and energy saving.",
+                    "eco": "energy saving"
+                },
+                "quickSkin": {
+                    "title": "Change theme",
+                    "description": "Open the theme gallery without leaving the page."
+                }
             }
         }
     }

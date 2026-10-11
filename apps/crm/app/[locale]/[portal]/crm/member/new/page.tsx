@@ -1,22 +1,19 @@
 import { getTranslations } from "next-intl/server";
 
-import { RegisterMemberForm } from "@/modules/features";
+import { CreateMemberForm } from "@/modules/features";
 
-
-export default async function CrmMemberNewPage({ params }: { params: Promise<{ locale: string }> }) {
-    const { locale } = await params;
-    const t = await getTranslations("crm.members");
+export default async function CrmMemberNewPage() {
+    const t = await getTranslations("crm.members.create");
 
     return (
         <div className="space-y-4">
             <div className="rounded-lg border bg-background p-6">
-                <h2 className="text-lg font-semibold">Register member</h2>
-                <p className="mt-1 mb-4 text-sm text-muted-foreground">
-                    Create a member account for this portal.
+                <h1 className="text-2xl font-semibold">{t("title")}</h1>
+                <p className="mt-1 mb-6 max-w-2xl text-sm text-muted-foreground">
+                    {t("description")}
                 </p>
-                <RegisterMemberForm />
+                <CreateMemberForm />
             </div>
-
         </div>
     );
 }

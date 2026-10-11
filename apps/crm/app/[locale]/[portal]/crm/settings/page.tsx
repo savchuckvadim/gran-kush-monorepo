@@ -1,24 +1,11 @@
-import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 
-import {
-    CategoryManagementWidget,
-    MeasurementUnitManagementWidget,
-    SettingsNavLinks,
-} from "@/modules/widgets/settings";
+import { SettingsHubPage } from "@/modules/pages";
 
-export default async function CrmSettingsPage() {
-    const t = await getTranslations("crm.sections.settings");
+export default function CrmSettingsPage() {
     return (
-        <div className="space-y-6">
-            <div className="rounded-lg border bg-background p-6">
-                <h1 className="text-2xl font-semibold">{t("title")}</h1>
-                <p className="mt-2 text-sm text-muted-foreground">{t("description")}</p>
-            </div>
-
-            <SettingsNavLinks />
-
-            <CategoryManagementWidget />
-            <MeasurementUnitManagementWidget />
-        </div>
+        <Suspense>
+            <SettingsHubPage />
+        </Suspense>
     );
 }

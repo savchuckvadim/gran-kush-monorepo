@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { FieldsTab } from "./fields-tab";
 import { FormsTab } from "./forms-tab";
@@ -16,8 +17,12 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
+const isTabId = (value: string | null): value is TabId => TABS.some((item) => item.id === value);
+
 export function EntitySettingsPage({ code }: { code: string }) {
-    const [tab, setTab] = useState<TabId>("fields");
+    // ?tab= lets the settings tiles open a tab directly
+    const requested = useSearchParams().get("tab");
+    const [tab, setTab] = useState<TabId>(isTabId(requested) ? requested : "fields");
 
     return (
         <div className="space-y-6">

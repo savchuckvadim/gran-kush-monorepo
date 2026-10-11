@@ -1,14 +1,17 @@
 import {
+    assertOpenApiOk,
+    SchemaCrmCreateMemberDto,
+    SchemaCrmCreateMemberResponseDto,
     SchemaCrmMemberDto,
     SchemaCrmMemberFieldsPatchDto,
     SchemaCrmMemberFullDto,
+    SchemaMemberFormSchemaResponseDto,
     SchemaMemberLifecycleStatusItemDto,
 } from "@workspace/api-client/core";
 
 import { $api } from "@/modules/shared";
+
 import { CrmMemberDetails, CrmMemberListFilters, CrmMemberListItem } from "../type/member.type";
-
-
 
 export async function getCrmMembers(
     limit: number = 100,
@@ -71,4 +74,19 @@ export async function updateCrmMemberStatus(
         body: { statusItemId },
     });
     return member.data as CrmMemberDetails;
+}
+
+/** Форма «Новый участник» — своя у каждого клуба (purpose crm_create), по ней же API проверяет данные. */
+export async function getCrmMemberCreateSchema(): Promise<SchemaMemberFormSchemaResponseDto> {
+    const response = await $api.GET("/crm/members/form-schema", {
+        params: { query: { purpose: "crm_create" } },
+    });
+    // Ответ описан в OpenAPI как Object — форма та же, что у настроек сущности
+    return (await assertOpenApiOk(response)) as SchemaMemberFormSchemaResponseDto;
+}
+
+export async function createCrmMember(
+    body: SchemaCrmCreateMemberDto
+): Promise<SchemaCrmCreateMemberResponseDto> {
+    return assertOpenApiOk(await $api.POST("/crm/members", { body }));
 }

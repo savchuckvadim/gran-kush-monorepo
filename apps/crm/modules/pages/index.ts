@@ -6,3 +6,4 @@ export * from "./entity-records";
 export * from "./entities-settings";
 export * from "./invitations-settings";
 export * from "./registration-links-settings";
+export * from "./settings-hub";
