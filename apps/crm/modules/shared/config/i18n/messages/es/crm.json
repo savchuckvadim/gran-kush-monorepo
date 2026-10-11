@@ -44,7 +44,9 @@
                 "ecoForced": "Este tema siempre ahorra energía",
                 "lightMode": "Modo claro",
                 "darkMode": "Modo oscuro"
-            }
+            },
+            "collapseMenu": "Contraer menú",
+            "pinMenu": "Fijar menú"
         },
         "subscription": {
             "pastDueTitle": "Suscripción vencida",

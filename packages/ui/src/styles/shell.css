@@ -198,6 +198,13 @@
     z-index: 0;
 }
 
+/* Peek: the folded rail slides the full menu over the content, on a solid backing */
+
+[data-slot="sidebar-panel"][data-peek] {
+    background: linear-gradient(var(--sidebar), var(--sidebar)), var(--background);
+    border-radius: inherit;
+}
+
 /* =================== brand =================== */
 
 :is([data-slot="brand-blood"], [data-slot="brand-initial"]) {
@@ -212,7 +219,7 @@
 
 @media (min-width: 768px) and (max-width: 1023.98px) {
     :root:is([data-skin="grind"], [data-skin="infierno"])
-        [data-slot="sidebar"]
+        [data-slot="sidebar"]:not([data-peek])
         [data-slot="brand-initial"] {
         display: block;
     }

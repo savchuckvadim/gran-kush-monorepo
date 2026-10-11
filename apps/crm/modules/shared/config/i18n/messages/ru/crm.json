@@ -44,7 +44,9 @@
                 "ecoForced": "Эта тема всегда экономит энергию",
                 "lightMode": "Светлый режим",
                 "darkMode": "Тёмный режим"
-            }
+            },
+            "collapseMenu": "Свернуть меню",
+            "pinMenu": "Закрепить меню"
         },
         "subscription": {
             "pastDueTitle": "Подписка просрочена",

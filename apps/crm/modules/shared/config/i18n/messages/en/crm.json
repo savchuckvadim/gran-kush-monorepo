@@ -44,7 +44,9 @@
                 "ecoForced": "This theme always saves energy",
                 "lightMode": "Light mode",
                 "darkMode": "Dark mode"
-            }
+            },
+            "collapseMenu": "Collapse menu",
+            "pinMenu": "Pin menu"
         },
         "subscription": {
             "pastDueTitle": "Subscription past due",
