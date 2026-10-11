@@ -38,6 +38,10 @@
     --display-tracking: -0.01em;
     --display-case: none;
     --shadow-card: 0 1px 2px rgb(0 0 0 / 0.05);
+    --control-h: 2rem;
+    --control-h-sm: 1.75rem;
+    --control-h-lg: 2.25rem;
+    --control-px: 0.625rem;
     --success-text: color-mix(in oklab, var(--success) 74%, var(--foreground));
     --warning-text: color-mix(in oklab, var(--warning) 74%, var(--foreground));
     --destructive-text: color-mix(in oklab, var(--destructive) 74%, var(--foreground));
@@ -143,6 +147,10 @@
     --display-tracking: -0.035em;
     --shadow-card: 0 1px 2px rgb(13 13 18 / 0.04), 0 18px 40px -30px rgb(13 13 18 / 0.25);
     --flow-stops: #6c4dff, #ff4f9a, #ffb03b, #39c8ff, #6c4dff;
+    --control-h: 2.5rem;
+    --control-h-sm: 2.125rem;
+    --control-h-lg: 2.75rem;
+    --control-px: 1rem;
 }
 
 [data-skin="pafpaf"].dark {
@@ -605,6 +613,22 @@
     --warning: #e9c46a;
     --terracotta: #e08a5f;
     --shadow-card: 0 20px 44px -32px rgb(0 0 0 / 0.8);
+}
+
+/* Control sizes: PafPaf sets its own above; skins with big touch targets or pills here */
+
+[data-skin="asceta"] {
+    --control-h: 2.75rem;
+    --control-h-sm: 2.25rem;
+    --control-h-lg: 3rem;
+    --control-px: 1.125rem;
+}
+
+:is([data-skin="unicornio"], [data-skin="trap"], [data-skin="noventa"]) {
+    --control-h: 2.25rem;
+    --control-h-sm: 1.875rem;
+    --control-h-lg: 2.5rem;
+    --control-px: 0.875rem;
 }
 
 /* =================== shared features =================== */

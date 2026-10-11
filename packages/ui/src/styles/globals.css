@@ -8,6 +8,11 @@
 @custom-variant dark (&:is(.dark *));
 :root {
     --radius: 0.65rem;
+    /* Controls (button, input, select): a skin makes them taller or roomier */
+    --control-h: 2rem;
+    --control-h-sm: 1.75rem;
+    --control-h-lg: 2.25rem;
+    --control-px: 0.625rem;
     --background: oklch(1 0 0);
     --foreground: oklch(0.141 0.005 285.823);
     --card: oklch(1 0 0);
