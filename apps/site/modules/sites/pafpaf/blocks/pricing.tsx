@@ -172,12 +172,15 @@ export const PricingCalculator = ({
             <div className="plans">
                 {plans.map((plan) => {
                     const value = yearly ? plan.yearly : plan.monthly;
+                    const isReco = reco?.code === plan.code;
                     return (
                         <article
                             key={plan.code}
-                            className={`plan glass${reco?.code === plan.code ? " is-reco" : ""}`}
+                            className={`plan glass${isReco ? " is-reco" : ""}`}
                         >
-                            <span className="plan__badge">{t("badge")}</span>
+                            <div className="plan__tag">
+                                {isReco && <span className="plan__badge">{t("badge")}</span>}
+                            </div>
                             <h3>{plan.name}</h3>
                             <p className="plan__for">{plan.forWhom}</p>
                             <Price plan={plan} yearly={yearly} />

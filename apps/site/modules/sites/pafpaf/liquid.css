@@ -1406,21 +1406,28 @@ main,
     }
 }
 
-.plan__badge {
-    align-self: flex-start;
+/* every card keeps the badge's room, so headings stay level while the recommendation moves */
+.plan__tag {
+    display: flex;
+    min-height: 26px;
     margin-bottom: 14px;
+}
+
+.plan__badge {
     padding: 4px 12px;
     border-radius: 99px;
     background: var(--aurora);
     color: #fff;
     font-size: 12px;
     font-weight: 700;
-    opacity: 0;
-    transition: opacity 0.4s;
+    line-height: 18px;
+    animation: badge-in 0.4s;
 }
 
-.plan.is-reco .plan__badge {
-    opacity: 1;
+@keyframes badge-in {
+    from {
+        opacity: 0;
+    }
 }
 
 .plan h3 {
@@ -1797,7 +1804,7 @@ main,
     margin-top: 2px;
 }
 
-/* mobile: language and day/night live in a small pill at the top right */
+/* mobile: language, day/night, sign-in and sign-up live in a small pill at the top right */
 
 .topctl {
     position: fixed;
@@ -1810,6 +1817,19 @@ main,
     padding: 4px;
     --r: 999px;
     --blur: 20px;
+}
+
+/* link chips are inline: without this their text sits at the top of the 34px pill */
+.topctl .chipbtn,
+.nav__side .chipbtn {
+    display: inline-flex;
+    align-items: center;
+}
+
+.topctl .lbtn--sm {
+    height: 34px;
+    padding: 0 14px;
+    font-size: 13px;
 }
 
 @media (max-width: 900px) {

@@ -5,6 +5,7 @@
         "privacy": "Приватность",
         "pricing": "Цены",
         "crm": "Войти",
+        "register": "Начать",
         "member": "Я участник"
     },
     "a11y": {
@@ -13,6 +14,9 @@
         "billing": "Оплата",
         "roles": "Роль",
         "main": "Основное"
+    },
+    "meta": {
+        "tagline": "CRM для социальных клубов и ассоциаций"
     },
     "hero": {
         "hint": "Коснитесь дыма"
@@ -53,7 +57,8 @@
         "phone": "Телефон",
         "id": "DNI / NIE",
         "files": "Документы",
-        "filesValue": "3 файла"
+        "filesValue": "3 файла",
+        "sponsorNo": "№ {n}"
     },
     "pricing": {
         "monthly": "Помесячно",
@@ -69,6 +74,7 @@
         "rights": "© {year} PafPaf · paf-paf.app"
     },
     "notFound": {
+        "meta": "Страница не найдена",
         "title": "Эта страница растворилась в дыму.",
         "back": "На главную"
     }

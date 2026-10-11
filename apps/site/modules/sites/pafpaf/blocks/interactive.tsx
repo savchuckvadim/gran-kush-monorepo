@@ -196,7 +196,7 @@ export const RolesRecord = () => {
         { label: t("record.number"), value: "0147", min: "disp" },
         { label: t("record.limit"), value: `41 / 60 ${t("units.g")}`, min: "disp" },
         { label: t("record.fee"), value: t("record.feeValue"), min: "manager" },
-        { label: t("record.sponsor"), value: "Nº 0098", min: "manager" },
+        { label: t("record.sponsor"), value: t("record.sponsorNo", { n: "0098" }), min: "manager" },
         { label: t("record.phone"), value: "+34 612 48 90 17", min: "manager" },
         { label: t("record.id"), value: "Y1234567X", min: "admin" },
         { label: t("record.files"), value: t("record.filesValue"), min: "admin" },

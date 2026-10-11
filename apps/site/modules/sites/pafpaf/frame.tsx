@@ -8,6 +8,7 @@ import { crmHref, ROUTES } from "@/modules/shared/config/routes";
 import type { Site } from "@/payload-types";
 
 import { GlassLight, Reveal } from "./ui/effects";
+import { LiquidButton } from "./ui/liquid-button";
 import { Nav, type NavItem } from "./ui/nav";
 import { SmokeLayer } from "./ui/smoke-layer";
 import { LogoMark, SvgDefs } from "./ui/svg-defs";
@@ -61,6 +62,12 @@ export const SiteFrame = async ({ locale, site, current, children }: SiteFramePr
             <div className="topctl glass">
                 <LangToggle label={labels.language} />
                 <ModeSwitch label={labels.mode} />
+                <a className="chipbtn" href={crmHref(locale, "login")}>
+                    {t("nav.crm")}
+                </a>
+                <LiquidButton href={crmHref(locale, "register")} variant="primary" size="sm">
+                    {t("nav.register")}
+                </LiquidButton>
             </div>
             <main>{children}</main>
             <footer className="foot glass">

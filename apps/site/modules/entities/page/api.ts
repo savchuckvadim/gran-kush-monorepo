@@ -17,3 +17,22 @@ export const getPage = async (slug: string, locale: Locale): Promise<Page | null
     });
     return docs[0] ?? null;
 };
+
+export interface PageEntry {
+    slug: string;
+    updatedAt: string;
+}
+
+// Pages have no drafts: every document of this site is live in all locales.
+export const listPages = async (): Promise<PageEntry[]> => {
+    const payload = await getPayloadClient();
+    const { docs } = await payload.find({
+        collection: "pages",
+        where: { site: { equals: SITE } },
+        select: { slug: true, updatedAt: true },
+        sort: "createdAt",
+        depth: 0,
+        pagination: false,
+    });
+    return docs.map(({ slug, updatedAt }) => ({ slug, updatedAt }));
+};

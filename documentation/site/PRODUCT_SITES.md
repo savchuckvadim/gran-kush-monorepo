@@ -88,7 +88,7 @@ pnpm --filter site dev                         # http://localhost:5002/es
   - заводит админа CMS из `PAYLOAD_ADMIN_EMAIL` и `PAYLOAD_ADMIN_PASSWORD`, так что открытая форма «создать первого пользователя» на публичном домене не появляется;
   - заливает стартовый контент при `PAYLOAD_SEED_IF_EMPTY=true`.
 - **Загрузки Payload** лежат в `apps/site/media`. В dev папка в git-ignore, в проде это том.
-- **Адрес сайта** для canonical и OpenGraph задаёт `NEXT_PUBLIC_SERVER_URL`. Без него берётся прод-домен сайта из `modules/shared/config/site.ts`.
+- **Адрес сайта** для canonical, OpenGraph, `robots.txt`, `sitemap.xml` и JSON-LD задаёт `NEXT_PUBLIC_SERVER_URL`. Без него берётся прод-домен сайта из `modules/shared/config/site.ts`.
 
 ## Тарифы в API
 

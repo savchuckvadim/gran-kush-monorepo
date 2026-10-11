@@ -34,7 +34,14 @@ export const Nav = ({ items, homeHref, activeId, crm, labels }: NavProps) => {
     const place = useCallback((id: string) => {
         const box = linksRef.current;
         const link = box?.querySelector<HTMLAnchorElement>(`[data-id="${id}"]`);
-        if (!box || !link || !blobRef.current || !dropRef.current) return;
+        if (!box || !blobRef.current || !dropRef.current) return;
+        // A page outside the menu (404) lights no item, and the drop hides with it.
+        dropRef.current.style.opacity = link ? "" : "0";
+        if (!link) {
+            blobRef.current.style.width = "0px";
+            box.querySelectorAll("[data-id]").forEach((el) => el.classList.remove("is-on"));
+            return;
+        }
         const b = box.getBoundingClientRect();
         const r = link.getBoundingClientRect();
         blobRef.current.style.left = `${r.left - b.left}px`;

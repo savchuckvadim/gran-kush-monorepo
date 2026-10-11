@@ -11,5 +11,12 @@ export const LOCALE_LABELS: Record<Locale, string> = {
     en: "EN",
 };
 
+// og:locale wants language_TERRITORY
+export const OG_LOCALES: Record<Locale, string> = {
+    es: "es_ES",
+    ru: "ru_RU",
+    en: "en_US",
+};
+
 export const isLocale = (value: string | undefined): value is Locale =>
     (LOCALES as readonly string[]).includes(value ?? "");

@@ -33,7 +33,7 @@
 
 | Направление | Состояние |
 |---|---|
-| Сайт | Работает. Кнопки тарифов и «Войти» ведут в CRM (ветка `feat/site-to-crm-entry`). Кнопку «Probar gratis» на проде нужно поправить в CMS на `crm:register` |
+| Сайт | Работает. Кнопки тарифов и «Войти» ведут в CRM (ветка `feat/site-to-crm-entry`). Кнопку «Probar gratis» на проде нужно поправить в CMS на `crm:register`. SEO, иконки и вход с телефона — TASK-534 (`feat/site-seo`) |
 | Auth в CRM | Регистрация с тарифом и адресом клуба, вход без адреса клуба с выбором клуба (`feat/site-to-crm-entry`). Refresh не работал вовсе — починен там же. Восстановления пароля в CRM ещё нет: ссылка ведёт на 404 |
 | Оплата | Есть схема, журнал вебхуков, гейт 402 и публичный каталог тарифов. Нет провайдера, тарифов в БД (там только `trial`), окончания триала и кнопки «Оплатить» |
 | Тема CRM | PafPaf — тема по умолчанию (`feat/crm-pafpaf-default`). Clásico и порядок тем не тронуты |
@@ -305,7 +305,7 @@
   - в сайдбаре иконка lucide `Cannabis` и подпись «CRM» (`shared/ui/Sidebar/Sidebar.tsx:56-63`);
   - `app/favicon.ico` старый;
   - `metadata` и `title` не заданы.
-- У сайта фавикона тоже нет.
+- ~~У сайта фавикона тоже нет.~~ Фавикон, `icon.svg` и apple-icon сайта сделаны в TASK-534.
 - Сделано в CRM (`feat/crm-shell-mobile`): знак PafPaf (`shared/ui/Brand`) вместо `Cannabis` в сайдбаре и мобильной
   шапке, подпись PafPaf. Общий компонент в `packages/ui`, favicon и og — ещё нет.
 
@@ -379,9 +379,36 @@
   5. Обновить ссылки в доках и памяти агентов (`api.github.com/repos/savchuckvadim/gran-kush-monorepo`).
 - Если пропустить первый шаг, прод молча останется на старых образах.
 
-### TASK-534: SEO сайта `[ ]` P1
+### TASK-534: SEO сайта `[x]` P1 — `feat/site-seo`
 
-- Это TASK-408: `sitemap.ts`, `robots.ts` и hreflang для es/ru/en в `apps/site`.
+- Это TASK-408: `sitemap.ts`, `robots.ts` и hreflang для es/ru/en в `apps/site`. Сделано по аудиту paf-paf.app от 2026-10-11.
+- `robots.txt`: всё открыто, кроме `/admin` и `/api`; строка `Sitemap:` строится от `NEXT_PUBLIC_SERVER_URL`.
+- `sitemap.xml`: все страницы сайта из Payload в трёх локалях, `home` → `/{locale}`, с hreflang (плюс `x-default` → es)
+  и `lastmod` из `updatedAt`. Читается из базы на запросе: в Docker-сборке базы нет.
+- Иконки: `app/icon.svg` (знак из `LogoMark`, градиент встроен), `app/favicon.ico` 16/32/48 из того же SVG,
+  `app/apple-icon.tsx` 180×180 на чёрном. Proxy next-intl больше не уводит `/apple-icon` в `/es/apple-icon`.
+- Open Graph и Twitter в `cmsPageMetadata`: канонический `og:url`, `website`, `og:site_name`, `og:locale`
+  (`es_ES`/`ru_RU`/`en_US`) с `alternateLocale`, `summary_large_image`. Картинка — `opengraph-image.tsx` 1200×630:
+  чёрный фон, aurora, знак и слоган на языке страницы (`meta.tagline` в i18n). Файл лежит и в `[slug]`: страница берёт
+  картинки только из своей папки.
+- JSON-LD (`modules/pages/json-ld.tsx`): `Organization` (контакты — только если заполнены в `sites.contacts`, сейчас пусты),
+  `WebSite`, `SoftwareApplication` с `offers` из тех же тарифов, что видит страница цен, и `FAQPage` из блока FAQ.
+  JSON экранирован (`<`, `>`, `&`).
+- `htmlLimitedBots` в `next.config.ts`: шире стандартного списка Next, в него попадают Googlebot, Telegram и
+  любые `bot`/`crawl`/`spider`/`preview`. Для них метаданные блокирующие и всегда в `<head>`.
+- Заголовки на всех ответах: HSTS (`max-age=31536000; includeSubDomains`), `nosniff`,
+  `Referrer-Policy: strict-origin-when-cross-origin`, CSP только `frame-ancestors 'self'`. Админка Payload работает.
+- `/{locale}/home` → 308 на `/{locale}`.
+- 404 (`[locale]/not-found.tsx`): рамка сайта (шапка, футер) и локализованный `<title>`, статус 404 и `noindex`.
+  Ограничение Next 16: при `notFound()` сервер отдаёт оболочку с `<head>`, а тело страницы дорисовывает клиент.
+  Полностью серверная 404 — только через `global-not-found` (experimental) и проверку slug в proxy, отдельной задачей.
+- Мобильная шапка (≤900px): в пилюле сверху теперь «Entrar» и CTA на регистрацию в CRM. Проверено на 320–390px.
+  Ссылки-чипы в пилюлях центрированы по вертикали, раньше текст прилипал к верху.
+- Мелочи: «Nº/№/No.» в карточке участника по локали; бейдж «Para tu club» рендерится только у рекомендуемого
+  тарифа, место под него держат все карточки, поэтому заголовки не прыгают. На странице вне меню (404) капля меню скрыта.
+- Hero-видео (7,4 МБ) грузится только при `min-width: 901px` и без `prefers-reduced-motion`, иначе остаётся постер.
+- Руками на проде: если `sites.contacts` заполнят, они сами появятся в JSON-LD. HSTS с `includeSubDomains` требует
+  HTTPS на всех поддоменах `paf-paf.app`. Sitemap отправить в Google Search Console и Яндекс Вебмастер.
 
 ---
 

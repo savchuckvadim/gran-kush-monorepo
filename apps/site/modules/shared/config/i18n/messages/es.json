@@ -5,6 +5,7 @@
         "privacy": "Privacidad",
         "pricing": "Precios",
         "crm": "Entrar",
+        "register": "Empezar",
         "member": "Soy socio"
     },
     "a11y": {
@@ -13,6 +14,9 @@
         "billing": "Facturación",
         "roles": "Rol",
         "main": "Principal"
+    },
+    "meta": {
+        "tagline": "La CRM para clubes sociales y asociaciones"
     },
     "hero": {
         "hint": "Toca el humo"
@@ -53,7 +57,8 @@
         "phone": "Teléfono",
         "id": "DNI / NIE",
         "files": "Documentos",
-        "filesValue": "3 archivos"
+        "filesValue": "3 archivos",
+        "sponsorNo": "Nº {n}"
     },
     "pricing": {
         "monthly": "Mensual",
@@ -69,6 +74,7 @@
         "rights": "© {year} PafPaf · paf-paf.app"
     },
     "notFound": {
+        "meta": "Página no encontrada",
         "title": "Esta página se ha esfumado.",
         "back": "Volver al inicio"
     }

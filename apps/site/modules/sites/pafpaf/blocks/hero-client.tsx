@@ -5,6 +5,45 @@ import { useLocale } from "next-intl";
 
 import { BURST_EVENT, type BurstDetail } from "../ui/mode";
 
+const VIDEO_SRC = "/media/hero-smoke.mp4";
+const POSTER_SRC = "/media/hero-smoke.jpg";
+const VIDEO_MEDIA = "(min-width: 901px) and (prefers-reduced-motion: no-preference)";
+
+// Phones and reduced motion keep the poster: the 7 MB smoke video loads only on wide screens.
+export const HeroVideo = () => {
+    const ref = useRef<HTMLVideoElement>(null);
+
+    useEffect(() => {
+        const video = ref.current;
+        if (!video) return;
+        const query = window.matchMedia(VIDEO_MEDIA);
+        const sync = () => {
+            if (query.matches) {
+                if (!video.getAttribute("src")) video.src = VIDEO_SRC;
+                void video.play().catch(() => undefined);
+            } else {
+                video.pause();
+            }
+        };
+        sync();
+        query.addEventListener("change", sync);
+        return () => query.removeEventListener("change", sync);
+    }, []);
+
+    return (
+        <video
+            ref={ref}
+            className="hero__video"
+            muted
+            loop
+            playsInline
+            preload="none"
+            poster={POSTER_SRC}
+            aria-hidden="true"
+        />
+    );
+};
+
 // A glass lens follows the pointer over the hero; a click splashes the smoke.
 export const HeroLens = () => {
     const ref = useRef<HTMLDivElement>(null);

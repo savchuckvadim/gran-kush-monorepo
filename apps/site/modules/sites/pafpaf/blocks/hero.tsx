@@ -7,22 +7,13 @@ import type { HeroBlock } from "@/payload-types";
 import { LiquidButton } from "../ui/liquid-button";
 import { SmokeText } from "../ui/smoke-text";
 
-import { HeroLens, LiveBar } from "./hero-client";
+import { HeroLens, HeroVideo, LiveBar } from "./hero-client";
 
 export const Hero = async ({ block, locale }: { block: HeroBlock; locale: Locale }) => {
     const t = await getTranslations("live");
     return (
         <section className="hero" id="top">
-            <video
-                className="hero__video"
-                autoPlay
-                muted
-                loop
-                playsInline
-                poster="/media/hero-smoke.jpg"
-                src="/media/hero-smoke.mp4"
-                aria-hidden="true"
-            />
+            <HeroVideo />
             <HeroLens />
             <div className="hero__inner wrap">
                 {block.eyebrow && <span className="eyebrow">{block.eyebrow}</span>}
