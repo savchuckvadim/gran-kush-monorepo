@@ -1,10 +1,12 @@
 {
     "crm": {
         "shell": {
-            "brand": "Gran Kush",
+            "brand": "PafPaf",
             "title": "CRM",
             "workspace": "Internal workspace",
             "profile": "Employee profile",
+            "openMenu": "Open menu",
+            "closeMenu": "Close menu",
             "nav": {
                 "clients": "Members",
                 "products": "Products",

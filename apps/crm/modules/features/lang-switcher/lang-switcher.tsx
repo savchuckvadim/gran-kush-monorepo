@@ -6,9 +6,12 @@ import { useLocale } from "next-intl";
 
 import { Check, Globe } from "lucide-react";
 
+import { cn } from "@workspace/ui/lib/utils";
+
 import { type Locale, localeNames, locales } from "@/modules/shared/config/i18n";
 
-export function LangSwitcher() {
+/** `align` — which edge of the button the menu sticks to; `start` inside the mobile drawer. */
+export function LangSwitcher({ align = "end" }: { align?: "start" | "end" }) {
     const locale = useLocale() as Locale;
     const router = useRouter();
     const pathname = usePathname();
@@ -64,7 +67,12 @@ export function LangSwitcher() {
             </button>
 
             {isOpen ? (
-                <div className="absolute right-0 z-50 mt-2 min-w-[150px] overflow-hidden rounded-md border bg-popover p-1 shadow-md">
+                <div
+                    className={cn(
+                        "absolute z-50 mt-2 min-w-[150px] overflow-hidden rounded-md border bg-popover p-1 shadow-md",
+                        align === "start" ? "left-0" : "right-0"
+                    )}
+                >
                     {locales.map((loc) => (
                         <button
                             key={loc}

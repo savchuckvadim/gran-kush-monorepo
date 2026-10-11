@@ -9,6 +9,7 @@ import { Building2, Check, ChevronsUpDown } from "lucide-react";
 
 import type { SchemaMyPortalDto } from "@workspace/api-client/core";
 import { Button } from "@workspace/ui";
+import { cn } from "@workspace/ui/lib/utils";
 
 import { usePortal } from "@/modules/processes";
 import { $api } from "@/modules/shared";
@@ -22,7 +23,8 @@ function useMyPortals(enabled: boolean) {
     });
 }
 
-export function PortalSwitcher() {
+/** `align` — which edge of the button the menu sticks to; `start` inside the mobile drawer. */
+export function PortalSwitcher({ align = "end" }: { align?: "start" | "end" }) {
     const router = useRouter();
     const locale = useLocale();
     const { portalSlug } = usePortal();
@@ -54,7 +56,12 @@ export function PortalSwitcher() {
             {isOpen ? (
                 <>
                     <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-                    <div className="absolute right-0 z-50 mt-1 w-64 rounded-md border bg-background p-1 shadow-md">
+                    <div
+                        className={cn(
+                            "absolute z-50 mt-1 rounded-md border bg-background p-1 shadow-md",
+                            align === "start" ? "left-0 w-52" : "right-0 w-64"
+                        )}
+                    >
                         {isLoading ? (
                             <p className="px-3 py-2 text-sm text-muted-foreground">Загрузка…</p>
                         ) : portals.length === 0 ? (

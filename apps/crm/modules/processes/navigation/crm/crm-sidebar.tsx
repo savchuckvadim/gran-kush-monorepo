@@ -9,16 +9,18 @@ import { Sidebar } from "@/modules/shared/ui/Sidebar";
 
 import { useCrmNavigation } from "./crm-navigation.hook";
 
-export function CrmSidebar() {
+/** `mobilePanel` — header controls that move into the drawer on phones. */
+export function CrmSidebar({ mobilePanel }: { mobilePanel?: React.ReactNode }) {
     const t = useTranslations("crm.shell");
     const localizedLink = useLocalizedLink();
     const items = useCrmNavigation();
 
     return (
         <Sidebar
-            title={t("title")}
+            title={t("brand")}
             items={items}
             homeHref={localizedLink(ROUTES.CRM_HOME)}
+            mobilePanel={mobilePanel}
             footer={<CrmLogoutButton variant="outline" />}
         />
     );

@@ -76,6 +76,7 @@
 }
 
 @import "./skins.css";
+@import "./burger.css";
 
 /* Apps that put next/font variables on <html> (--font-geist, ...) let skins remap these;
    apps that still set --font-sans on <body> keep overriding them there */

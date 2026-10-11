@@ -1,4 +1,4 @@
-import { Cat, Gamepad2, Gem, Hop, PiggyBank, Rabbit, Settings } from "lucide-react";
+import { CalendarCheck, Package, Settings, ShoppingBag, UserCog, Users, Wallet } from "lucide-react";
 
 import { ROUTES } from "@/modules/shared/config/routes";
 
@@ -12,7 +12,7 @@ export const CRM_NAVIGATION: ICrmNavigation[] = [
         title: "Clients",
         isActive: false,
         isAdmin: false,
-        icon: <Cat />,
+        icon: <Users />,
     },
     {
         id: 2,
@@ -21,7 +21,7 @@ export const CRM_NAVIGATION: ICrmNavigation[] = [
         title: "Products",
         isActive: false,
         isAdmin: false,
-        icon: <Hop />,
+        icon: <Package />,
     },
     {
         id: 3,
@@ -30,7 +30,7 @@ export const CRM_NAVIGATION: ICrmNavigation[] = [
         title: "Orders",
         isActive: false,
         isAdmin: false,
-        icon: <Gem />,
+        icon: <ShoppingBag />,
     },
     {
         id: 4,
@@ -39,7 +39,7 @@ export const CRM_NAVIGATION: ICrmNavigation[] = [
         title: "Attendance",
         isActive: false,
         isAdmin: false,
-        icon: <Gamepad2 />,
+        icon: <CalendarCheck />,
     },
     {
         id: 5,
@@ -48,7 +48,7 @@ export const CRM_NAVIGATION: ICrmNavigation[] = [
         title: "Finance",
         isActive: false,
         isAdmin: false,
-        icon: <PiggyBank />,
+        icon: <Wallet />,
     },
     {
         id: 6,
@@ -57,7 +57,7 @@ export const CRM_NAVIGATION: ICrmNavigation[] = [
         title: "Employees",
         isActive: false,
         isAdmin: true,
-        icon: <Rabbit />,
+        icon: <UserCog />,
     },
     {
         id: 7,

@@ -1,22 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { Menu, Rabbit, X } from "lucide-react";
-
-import { Button, ThemeToggle } from "@workspace/ui";
-import { cn } from "@workspace/ui/lib/utils";
-
-import { EmailConfirmBanner, LangSwitcher, SkinPickerDialog } from "@/modules/features";
-import { CrmSidebar, useAuth } from "@/modules/processes";
+import { EmailConfirmBanner } from "@/modules/features";
+import { CrmSidebar } from "@/modules/processes";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
+import { BrandMark } from "@/modules/shared/ui/Brand";
+import { BurgerButton } from "@/modules/shared/ui/Burger";
 import { useSidebar } from "@/modules/shared/ui/Sidebar";
 import { SkinBackdrop } from "@/modules/shared/ui/SkinBackdrop";
-import { PortalSwitcher } from "@/modules/widgets/portal-switcher";
 import { SubscriptionGate } from "@/modules/widgets/subscription-gate";
+
+import { HeaderActions } from "./header-actions";
 
 interface CrmShellProps {
     children: React.ReactNode;
@@ -24,71 +21,38 @@ interface CrmShellProps {
 
 export function CrmShell({ children }: CrmShellProps) {
     const t = useTranslations("crm.shell");
-    const tAppearance = useTranslations("crm.appearance");
     const localizedLink = useLocalizedLink();
-    const pathname = usePathname();
-    const { isOpen: isSidebarOpen, toggle: toggleSidebar } = useSidebar();
-    const isCrm = pathname.includes(ROUTES.CRM_HOME);
-    const { currentUser } = useAuth();
+    const { isOpen: isSidebarOpen, toggle: toggleSidebar, close: closeSidebar } = useSidebar();
+
     return (
         <div className="flex min-h-screen min-w-full flex-row">
             <SkinBackdrop />
-            <CrmSidebar />
-            <div className="flex flex-1 flex-col w-full justify-center">
+            <CrmSidebar mobilePanel={<HeaderActions variant="drawer" onNavigate={closeSidebar} />} />
+            <div className="flex w-full min-w-0 flex-1 flex-col justify-center">
                 <header
                     data-slot="app-header"
-                    className={cn(
-                        "  sticky top-0 flex w-full justify-center  bg-background/80 backdrop-blur-sm ",
-                        isCrm ? "" : "z-50"
-                    )}
+                    className="sticky top-0 z-30 flex w-full justify-center bg-background/80 backdrop-blur-sm"
                 >
-                    <div className="container flex h-16 items-center justify-between px-4 md:px-0">
-                        <div className="flex items-center gap-6">
-                            {isCrm && (
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="md:hidden"
-                                    onClick={toggleSidebar}
-                                    aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
-                                    aria-expanded={isSidebarOpen}
-                                >
-                                    {isSidebarOpen ? (
-                                        <X className="size-6" />
-                                    ) : (
-                                        <Menu className="size-6" />
-                                    )}
-                                </Button>
-                            )}
-                            {/* <div className="flex items-center gap-2">
-                                <span className="rounded bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
-                                    {t("title")}
-                                </span>
-                                <span className="text-sm text-muted-foreground">{t("workspace")}</span>
-                            </div> */}
+                    <div className="container flex h-16 items-center justify-between gap-2 px-4 md:px-0">
+                        <div className="flex min-w-0 items-center gap-2 md:hidden">
+                            <BurgerButton
+                                isOpen={isSidebarOpen}
+                                onToggle={toggleSidebar}
+                                openLabel={t("openMenu")}
+                                closeLabel={t("closeMenu")}
+                            />
+                            <Link
+                                href={localizedLink(ROUTES.CRM_HOME)}
+                                onClick={closeSidebar}
+                                className="flex items-center gap-2 text-lg font-bold"
+                            >
+                                <BrandMark />
+                                <span>{t("brand")}</span>
+                            </Link>
                         </div>
 
-                        <div
-                            className={cn("items-center gap-4 md:flex", isCrm ? "flex" : "hidden")}
-                        >
-                            <PortalSwitcher />
-                            <LangSwitcher />
-                            <SkinPickerDialog />
-                            <ThemeToggle forcedHint={tAppearance("mode.single")} />
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                asChild
-                                className="text-primary border-primary hover:bg-primary hover:text-background"
-                                style={{ cursor: "pointer" }}
-                            >
-                                <Link href={localizedLink(ROUTES.CRM_PROFILE)}>
-                                    <div className="flex items-center gap-2">
-                                        <Rabbit className="size-4" />
-                                        <span>{currentUser ? currentUser.email : t("profile")}</span>
-                                    </div>
-                                </Link>
-                            </Button>
+                        <div className="ml-auto hidden md:flex">
+                            <HeaderActions variant="bar" />
                         </div>
                     </div>
                 </header>

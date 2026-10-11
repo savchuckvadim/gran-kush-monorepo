@@ -1,0 +1,367 @@
+/* =================== burger =================== */
+
+/* Three bars become a cross. Bars move with the individual translate / rotate / scale
+   properties, so a skin can time each of them on its own. The energy-saving mode (.eco)
+   switches every transition and animation off in skins.css. */
+
+[data-slot="burger"] {
+    --burger-w: 1.25rem;
+    --burger-h: 2px;
+    --burger-gap: 6px;
+    --burger-ease: cubic-bezier(0.4, 0, 0.2, 1);
+    --burger-time: 0.3s;
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius);
+    color: var(--foreground);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+[data-slot="burger"]:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+}
+
+@media (hover: hover) {
+    [data-slot="burger"]:hover {
+        background-color: var(--accent);
+    }
+}
+
+[data-slot="burger"] > span {
+    position: absolute;
+    inset: 0;
+    width: var(--burger-w);
+    height: var(--burger-h);
+    margin: auto;
+    border-radius: 999px;
+    background: var(--burger-bar, currentColor);
+    transition:
+        translate var(--burger-time) var(--burger-ease),
+        rotate var(--burger-time) var(--burger-ease),
+        scale var(--burger-time) var(--burger-ease),
+        opacity var(--burger-time) var(--burger-ease),
+        width var(--burger-time) var(--burger-ease);
+}
+
+[data-slot="burger"] > span:nth-child(1) {
+    translate: 0 calc(var(--burger-gap) * -1);
+}
+
+[data-slot="burger"] > span:nth-child(3) {
+    translate: 0 var(--burger-gap);
+}
+
+[data-slot="burger"][data-state="open"] > span:nth-child(1) {
+    translate: 0 0;
+    rotate: 45deg;
+}
+
+[data-slot="burger"][data-state="open"] > span:nth-child(2) {
+    opacity: 0;
+    scale: 0 1;
+}
+
+[data-slot="burger"][data-state="open"] > span:nth-child(3) {
+    translate: 0 0;
+    rotate: -45deg;
+}
+
+/* PafPaf — a smoke trail that thins out; the middle bar puffs away as a ring */
+
+:root[data-skin="pafpaf"] [data-slot="burger"] {
+    --burger-h: 3px;
+    --burger-bar: linear-gradient(90deg, #8f7bff, #ff6fae 55%, #ffbf5a);
+    --burger-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --burger-time: 0.45s;
+}
+
+:root[data-skin="pafpaf"] [data-slot="burger"][data-state="closed"] > span:nth-child(2) {
+    width: calc(var(--burger-w) * 0.75);
+    translate: calc(var(--burger-w) * -0.125) 0;
+}
+
+:root[data-skin="pafpaf"] [data-slot="burger"][data-state="closed"] > span:nth-child(3) {
+    width: calc(var(--burger-w) * 0.5);
+    translate: calc(var(--burger-w) * -0.25) var(--burger-gap);
+}
+
+:root[data-skin="pafpaf"] [data-slot="burger"][data-state="open"] > span:nth-child(2) {
+    width: var(--burger-h);
+    animation: burger-puff 0.6s ease-out forwards;
+}
+
+/* Nagual — the bars whirl once more than they need to */
+
+:root[data-skin="nagual"] [data-slot="burger"] {
+    --burger-bar: var(--primary);
+    --burger-ease: cubic-bezier(0.65, 0, 0.35, 1);
+    --burger-time: 0.6s;
+}
+
+:root[data-skin="nagual"] [data-slot="burger"][data-state="open"] > span:nth-child(1) {
+    rotate: 225deg;
+}
+
+:root[data-skin="nagual"] [data-slot="burger"][data-state="open"] > span:nth-child(2) {
+    rotate: 180deg;
+}
+
+:root[data-skin="nagual"] [data-slot="burger"][data-state="open"] > span:nth-child(3) {
+    rotate: -225deg;
+}
+
+/* Unicornio — rainbow bars that bounce, and a sparkle when it opens */
+
+:root[data-skin="unicornio"] [data-slot="burger"] {
+    --burger-h: 3px;
+    --burger-bar: linear-gradient(90deg, #ff6ad5, #c774e8, #8795e8, #94d0ff);
+    --burger-ease: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    --burger-time: 0.5s;
+}
+
+:root[data-skin="unicornio"] [data-slot="burger"]::after {
+    content: "✦";
+    position: absolute;
+    top: 3px;
+    right: 4px;
+    font-size: 10px;
+    line-height: 1;
+    color: #ff6ad5;
+    opacity: 0;
+    scale: 0;
+    transition:
+        opacity 0.3s,
+        scale 0.45s var(--burger-ease),
+        rotate 0.6s;
+}
+
+:root[data-skin="unicornio"] [data-slot="burger"][data-state="open"]::after {
+    opacity: 1;
+    scale: 1;
+    rotate: 180deg;
+}
+
+/* Galaxia — the middle bar becomes a moon orbiting the cross */
+
+:root[data-skin="galaxia"] [data-slot="burger"] {
+    --burger-time: 0.4s;
+}
+
+:root[data-skin="galaxia"] [data-slot="burger"][data-state="open"] > span:nth-child(2) {
+    width: 4px;
+    height: 4px;
+    opacity: 1;
+    scale: 1;
+    background: var(--primary);
+    box-shadow: 0 0 6px var(--primary);
+    animation: burger-orbit 1.6s linear infinite;
+}
+
+/* Asceta — two hairlines, no motion */
+
+:root[data-skin="asceta"] [data-slot="burger"] {
+    --burger-h: 1px;
+    --burger-gap: 4px;
+    --burger-time: 0s;
+}
+
+:root[data-skin="asceta"] [data-slot="burger"] > span:nth-child(2) {
+    display: none;
+}
+
+/* Cristal — glass button; the bars meet in the middle first, then turn */
+
+:root[data-skin="cristal"] [data-slot="burger"] {
+    --burger-time: 0.22s;
+    border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
+    background: color-mix(in oklab, var(--card) 50%, transparent);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+}
+
+:root[data-skin="cristal"] [data-slot="burger"] > span {
+    transition:
+        rotate var(--burger-time) var(--burger-ease),
+        translate var(--burger-time) var(--burger-ease) var(--burger-time),
+        scale var(--burger-time),
+        opacity var(--burger-time);
+}
+
+:root[data-skin="cristal"] [data-slot="burger"][data-state="open"] > span {
+    transition:
+        translate var(--burger-time) var(--burger-ease),
+        rotate var(--burger-time) var(--burger-ease) var(--burger-time),
+        scale var(--burger-time),
+        opacity var(--burger-time);
+}
+
+/* Vapor — chromatic bars that glitch on every toggle */
+
+:root[data-skin="vapor"] [data-slot="burger"] > span {
+    box-shadow:
+        -2px 0 #ff71ce,
+        2px 0 #01cdfe;
+}
+
+:root[data-skin="vapor"] [data-slot="burger"][data-state="open"] {
+    animation: burger-glitch-open 0.35s steps(2);
+}
+
+:root[data-skin="vapor"] [data-slot="burger"][data-state="closed"] {
+    animation: burger-glitch-close 0.35s steps(2);
+}
+
+/* Brasa — the cross smoulders */
+
+:root[data-skin="brasa"] [data-slot="burger"] {
+    --burger-bar: linear-gradient(90deg, #ffb347, #ff6a2b);
+}
+
+:root[data-skin="brasa"] [data-slot="burger"][data-state="open"] > span {
+    animation: burger-ember 1.4s ease-in-out infinite alternate;
+}
+
+/* Trap — heavy bars, elastic snap, the middle one drops out */
+
+:root[data-skin="trap"] [data-slot="burger"] {
+    --burger-h: 3px;
+    --burger-bar: var(--primary);
+    --burger-ease: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+    --burger-time: 0.55s;
+}
+
+:root[data-skin="trap"] [data-slot="burger"][data-state="open"] > span:nth-child(2) {
+    translate: 0 18px;
+    scale: 1;
+}
+
+/* Noventa — chunky pixels that move in steps */
+
+:root[data-skin="noventa"] [data-slot="burger"] {
+    --burger-h: 4px;
+    --burger-gap: 7px;
+    --burger-ease: steps(3, end);
+    border: 2px solid var(--foreground);
+    border-radius: 0;
+    box-shadow: 3px 3px 0 var(--foreground);
+}
+
+:root[data-skin="noventa"] [data-slot="burger"]:active {
+    translate: 2px 2px;
+    box-shadow: 1px 1px 0 var(--foreground);
+}
+
+:root[data-skin="noventa"] [data-slot="burger"] > span {
+    border-radius: 0;
+}
+
+/* Grind — the middle bar grinds off the rail */
+
+:root[data-skin="grind"] [data-slot="burger"] {
+    --burger-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --burger-time: 0.4s;
+    overflow: hidden;
+}
+
+:root[data-skin="grind"] [data-slot="burger"][data-state="open"] > span:nth-child(2) {
+    translate: 150% 0;
+    scale: 1;
+}
+
+/* Mediterráneo — the bars sway like a swell and settle into the cross one after another */
+
+:root[data-skin="mediterraneo"] [data-slot="burger"] {
+    --burger-ease: cubic-bezier(0.37, 0, 0.63, 1);
+    --burger-time: 0.45s;
+}
+
+:root[data-skin="mediterraneo"] [data-slot="burger"][data-state="closed"] > span:nth-child(1) {
+    translate: -3px calc(var(--burger-gap) * -1);
+}
+
+:root[data-skin="mediterraneo"] [data-slot="burger"][data-state="closed"] > span:nth-child(2) {
+    translate: 3px 0;
+}
+
+:root[data-skin="mediterraneo"] [data-slot="burger"][data-state="closed"] > span:nth-child(3) {
+    translate: -3px var(--burger-gap);
+}
+
+:root[data-skin="mediterraneo"] [data-slot="burger"] > span:nth-child(2) {
+    transition-delay: 60ms;
+}
+
+:root[data-skin="mediterraneo"] [data-slot="burger"] > span:nth-child(3) {
+    transition-delay: 120ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-slot="burger"],
+    [data-slot="burger"]::after,
+    [data-slot="burger"] > span {
+        transition-duration: 0s !important;
+        transition-delay: 0s !important;
+        animation: none !important;
+    }
+}
+
+@keyframes burger-puff {
+    from {
+        opacity: 1;
+        scale: 1;
+    }
+    to {
+        opacity: 0;
+        scale: 6;
+    }
+}
+
+@keyframes burger-orbit {
+    from {
+        transform: rotate(0deg) translateX(13px);
+    }
+    to {
+        transform: rotate(360deg) translateX(13px);
+    }
+}
+
+@keyframes burger-ember {
+    from {
+        box-shadow: 0 0 2px #ff6a2b;
+    }
+    to {
+        box-shadow:
+            0 0 8px #ffb347,
+            0 0 2px #ff6a2b;
+    }
+}
+
+@keyframes burger-glitch-open {
+    25% {
+        transform: translateX(-2px) skewX(-12deg);
+    }
+    50% {
+        transform: translateX(2px);
+    }
+    75% {
+        transform: translateX(-1px) skewX(10deg);
+    }
+}
+
+/* same frames under a second name, so the animation restarts on every toggle */
+@keyframes burger-glitch-close {
+    25% {
+        transform: translateX(2px) skewX(12deg);
+    }
+    50% {
+        transform: translateX(-2px);
+    }
+    75% {
+        transform: translateX(1px) skewX(-10deg);
+    }
+}
