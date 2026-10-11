@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ApiClientError, assertOpenApiOk, getApiErrorMessage } from "@workspace/api-client/core";
 import { Button } from "@workspace/ui";
@@ -21,27 +21,30 @@ export function ConfirmEmailByToken({ token }: { token: string }) {
     const t = useTranslations("auth.confirmEmail");
     const locale = useLocale();
     const queryClient = useQueryClient();
-    const started = useRef(false);
 
-    const mutation = useMutation({
-        mutationFn: async () =>
+    // A query, not a mutation: the token is single-use, and a query keyed by it runs once even
+    // when StrictMode remounts the page (a mutation fired from an effect lost its result there)
+    const confirmation = useQuery({
+        queryKey: ["crm-confirm-email", token],
+        queryFn: async () =>
             assertOpenApiOk(await $api.POST("/crm/auth/confirm-email", { body: { token } })),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: authKeys.current() }),
+        retry: false,
+        staleTime: Infinity,
+        gcTime: Infinity,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
     });
 
     useEffect(() => {
-        // The token is single-use: a second request (StrictMode re-runs effects) would get 404
-        if (started.current) {
-            return;
+        if (confirmation.isSuccess) {
+            void queryClient.invalidateQueries({ queryKey: authKeys.current() });
         }
-        started.current = true;
-        mutation.mutate();
-    }, [mutation]);
+    }, [confirmation.isSuccess, queryClient]);
 
     // The login page sends a live session straight to its club
     const continueHref = `/${locale}${ROUTES.LOGIN}`;
 
-    if (mutation.isSuccess) {
+    if (confirmation.isSuccess) {
         return (
             <div className="space-y-4">
                 <p className="rounded-lg border bg-muted/40 p-4 text-sm">{t("success")}</p>
@@ -52,13 +55,14 @@ export function ConfirmEmailByToken({ token }: { token: string }) {
         );
     }
 
-    if (mutation.isError) {
+    if (confirmation.isError) {
         const linkIsDead =
-            mutation.error instanceof ApiClientError && isDeadTokenStatus(mutation.error.status);
+            confirmation.error instanceof ApiClientError &&
+            isDeadTokenStatus(confirmation.error.status);
         return (
             <div className="space-y-4">
                 <p className="rounded-lg border border-destructive bg-destructive/10 p-4 text-sm text-destructive">
-                    {linkIsDead ? t("invalidLink") : getApiErrorMessage(mutation.error)}
+                    {linkIsDead ? t("invalidLink") : getApiErrorMessage(confirmation.error)}
                 </p>
                 <ResendConfirmationButton />
                 <Button asChild variant="ghost" className="w-full">
