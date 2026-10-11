@@ -3,6 +3,7 @@ import createClient from "openapi-fetch";
 import { getAuthMiddleware } from "../auth/api-auth.middleware";
 import { ApiAuthType } from "../auth/api-auth.type";
 import { getIdempotencyMiddleware } from "../idempotency/idempotency.middleware";
+import { getLocaleMiddleware } from "../locale/locale.middleware";
 import { paths } from "../schema/schema";
 
 export type ApiAuthStrategy = "token" | "cookie";
@@ -13,6 +14,8 @@ export const configureApiClient = (
     options?: {
         authStrategy?: ApiAuthStrategy;
         getPortalSlug?: () => string | null;
+        /** Язык интерфейса для `Accept-Language` (подписи системных полей и статусов). */
+        getLocale?: () => string | null | undefined;
         /** Проставлять Idempotency-Key на мутациях. По умолчанию включено. */
         idempotency?: boolean;
     }
@@ -26,9 +29,12 @@ export const configureApiClient = (
                 : undefined,
     });
     // До auth-middleware: тот клонирует запрос для ретрая после 401 уже с ключом,
-    // поэтому повтор идёт под тем же Idempotency-Key.
+    // поэтому повтор идёт под тем же Idempotency-Key и с тем же языком.
     if (options?.idempotency !== false) {
         client.use(getIdempotencyMiddleware());
+    }
+    if (options?.getLocale) {
+        client.use(getLocaleMiddleware(options.getLocale));
     }
     const authMiddleware = getAuthMiddleware(type, baseurl, authStrategy, options?.getPortalSlug);
     client.use(authMiddleware);

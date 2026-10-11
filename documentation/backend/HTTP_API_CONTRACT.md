@@ -52,6 +52,7 @@ Configured in `apps/api/src/common/config/cors/cors.config.ts`.
   - `X-Portal-Id`, `X-Portal-Slug` — portal resolution / tenant context
   - `X-Device-Id` — device binding for auth flows
   - `Idempotency-Key` — ключ идемпотентности мутаций (см. ниже)
+  - `Accept-Language` — язык подписей системных полей и статусов (`es` | `ru` | `en`, по умолчанию `es`; см. [CONTENT_I18N.md](CONTENT_I18N.md))
 
 Frontend apps must use **`fetch(..., { credentials: "include" })`** when calling the API with cookies (see CRM `configureApiClient` with `authStrategy: "cookie"`).
 

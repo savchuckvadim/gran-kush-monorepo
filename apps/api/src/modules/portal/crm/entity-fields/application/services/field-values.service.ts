@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 
 import { PortalFieldType, Prisma } from "@prisma/client";
 
+import { ContentLocale, resolveLabel } from "@common/i18n";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 
@@ -131,7 +132,10 @@ export class FieldValuesService {
         });
     }
 
-    async getMemberFieldsPayload(memberId: string): Promise<
+    async getMemberFieldsPayload(
+        memberId: string,
+        locale: ContentLocale
+    ): Promise<
         {
             fieldKey: string;
             type: PortalFieldType;
@@ -140,11 +144,14 @@ export class FieldValuesService {
         }[]
     > {
         const entityRecordId = await this.resolveMemberEntityRecordId(memberId, this.prisma);
-        return this.getRecordFieldsPayload(entityRecordId);
+        return this.getRecordFieldsPayload(entityRecordId, locale);
     }
 
     /** Универсальное чтение значений записи (сгруппировано по полям, multi → массив). */
-    async getRecordFieldsPayload(entityRecordId: string): Promise<
+    async getRecordFieldsPayload(
+        entityRecordId: string,
+        locale: ContentLocale
+    ): Promise<
         {
             fieldKey: string;
             type: PortalFieldType;
@@ -180,7 +187,7 @@ export class FieldValuesService {
             out.push({
                 fieldKey: def.fieldKey,
                 type: def.type,
-                label: def.label,
+                label: resolveLabel(def, locale),
                 value,
                 sortOrder: def.sortOrder,
             });

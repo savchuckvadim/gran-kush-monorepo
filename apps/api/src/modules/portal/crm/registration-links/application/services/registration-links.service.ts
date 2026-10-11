@@ -14,6 +14,7 @@ import {
 import { AccountProvisioningService } from "@users/application/services/account-provisioning.service";
 import { randomBytes } from "crypto";
 
+import { ContentLocale } from "@common/i18n";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { FormSchemaService } from "@modules/portal/crm/entity-fields/application/services/form-schema.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
@@ -112,7 +113,10 @@ export class RegistrationLinksService {
         return link;
     }
 
-    async getPublicInfo(token: string): Promise<{
+    async getPublicInfo(
+        token: string,
+        locale: ContentLocale
+    ): Promise<{
         portalSlug: string;
         portalDisplayName: string;
         schema: unknown;
@@ -121,7 +125,8 @@ export class RegistrationLinksService {
         const schema = await this.formSchemaService.getFormSchema(
             link.portalId,
             ENTITY_DEFINITION_CODES.MEMBER,
-            FormPurpose.public_registration
+            FormPurpose.public_registration,
+            locale
         );
         return {
             portalSlug: link.portal.name,

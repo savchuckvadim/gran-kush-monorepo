@@ -34,7 +34,8 @@ HTTP API: `crm/settings/entities/...` — работа с полями **member*
 
 ## 4. Регистрация member
 
-Динамическая валидация по форме `public_registration` для сущности с кодом **`member`** (`DynamicPayloadValidatorService` + `FormSchemaService.getFormSchema(portalId, 'member', purpose)`).
+Динамическая валидация по форме `public_registration` для сущности с кодом **`member`** (`DynamicPayloadValidatorService` + `FormSchemaService.getFormSchema(portalId, 'member', purpose, locale)`).
+Подписи полей в схеме — на языке `Accept-Language`, см. [CONTENT_I18N.md](./CONTENT_I18N.md).
 
 ---
 

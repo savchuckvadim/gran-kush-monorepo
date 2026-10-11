@@ -7,6 +7,7 @@ import {
 
 import { FormPurpose, PortalFieldType, Prisma } from "@prisma/client";
 
+import { ContentLocale, resolveLabel } from "@common/i18n";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { DynamicPayloadValidatorService } from "@modules/portal/crm/entity-fields/application/services/dynamic-payload-validator.service";
 import { FieldValuesService } from "@modules/portal/crm/entity-fields/application/services/field-values.service";
@@ -76,7 +77,8 @@ export class EntityRecordsService {
         code: string,
         limit: number,
         skip: number,
-        filters: EntityRecordListFilters
+        filters: EntityRecordListFilters,
+        locale: ContentLocale
     ): Promise<{ items: EntityRecordView[]; total: number }> {
         const def = await this.getDefinition(portalId, code);
 
@@ -128,12 +130,17 @@ export class EntityRecordsService {
             this.prisma.entityRecord.count({ where }),
         ]);
 
-        return { items: rows.map((r) => this.toView(code, r)), total };
+        return { items: rows.map((r) => this.toView(code, r, locale)), total };
     }
 
-    async getById(portalId: string, code: string, recordId: string): Promise<EntityRecordView> {
+    async getById(
+        portalId: string,
+        code: string,
+        recordId: string,
+        locale: ContentLocale
+    ): Promise<EntityRecordView> {
         const def = await this.getDefinition(portalId, code);
-        return this.fetchView(portalId, code, def.id, recordId);
+        return this.fetchView(portalId, code, def.id, recordId, locale);
     }
 
     /** Полное представление записи, когда definition уже разрезолвлен. */
@@ -141,7 +148,8 @@ export class EntityRecordsService {
         portalId: string,
         code: string,
         entityDefinitionId: string,
-        recordId: string
+        recordId: string,
+        locale: ContentLocale
     ): Promise<EntityRecordView> {
         const row = await this.prisma.entityRecord.findFirst({
             where: { id: recordId, portalId, entityDefinitionId },
@@ -150,7 +158,7 @@ export class EntityRecordsService {
         if (!row) {
             throw new NotFoundException("Record not found");
         }
-        return this.toView(code, row);
+        return this.toView(code, row, locale);
     }
 
     private async getRecordOrThrow(
@@ -171,6 +179,7 @@ export class EntityRecordsService {
         portalId: string,
         code: string,
         fields: Record<string, unknown>,
+        locale: ContentLocale,
         createdByEmployeeId?: string
     ): Promise<EntityRecordView> {
         const def = await this.getDefinition(portalId, code);
@@ -205,14 +214,15 @@ export class EntityRecordsService {
             return created;
         });
 
-        return this.fetchView(portalId, code, def.id, record.id);
+        return this.fetchView(portalId, code, def.id, record.id, locale);
     }
 
     async update(
         portalId: string,
         code: string,
         recordId: string,
-        input: { fields?: Record<string, unknown>; isActive?: boolean }
+        input: { fields?: Record<string, unknown>; isActive?: boolean },
+        locale: ContentLocale
     ): Promise<EntityRecordView> {
         const def = await this.getDefinition(portalId, code);
         this.assertMutable(def);
@@ -247,7 +257,7 @@ export class EntityRecordsService {
             });
         }
 
-        return this.fetchView(portalId, code, def.id, recordId);
+        return this.fetchView(portalId, code, def.id, recordId, locale);
     }
 
     async delete(portalId: string, code: string, recordId: string): Promise<void> {
@@ -261,7 +271,8 @@ export class EntityRecordsService {
         portalId: string,
         code: string,
         recordId: string,
-        stageId: string | null
+        stageId: string | null,
+        locale: ContentLocale
     ): Promise<EntityRecordView> {
         const def = await this.getDefinition(portalId, code);
         await this.getRecordOrThrow(portalId, def.id, recordId);
@@ -281,14 +292,15 @@ export class EntityRecordsService {
             where: { id: recordId },
             data: { stageId },
         });
-        return this.fetchView(portalId, code, def.id, recordId);
+        return this.fetchView(portalId, code, def.id, recordId, locale);
     }
 
     async setStatus(
         portalId: string,
         code: string,
         recordId: string,
-        statusItemId: string | null
+        statusItemId: string | null,
+        locale: ContentLocale
     ): Promise<EntityRecordView> {
         const def = await this.getDefinition(portalId, code);
         await this.getRecordOrThrow(portalId, def.id, recordId);
@@ -308,7 +320,7 @@ export class EntityRecordsService {
             where: { id: recordId },
             data: { statusItemId },
         });
-        return this.fetchView(portalId, code, def.id, recordId);
+        return this.fetchView(portalId, code, def.id, recordId, locale);
     }
 
     // ─── Relations (type=relation → RecordRelation с referential integrity) ──
@@ -410,7 +422,11 @@ export class EntityRecordsService {
 
     // ─── Helpers ─────────────────────────────────────────────────────────────
 
-    private toView(entityCode: string, row: EntityRecordWithRelations): EntityRecordView {
+    private toView(
+        entityCode: string,
+        row: EntityRecordWithRelations,
+        locale: ContentLocale
+    ): EntityRecordView {
         const byDef = new Map<
             string,
             { def: (typeof row.fieldValues)[0]["fieldDefinition"]; values: unknown[] }
@@ -429,7 +445,7 @@ export class EntityRecordsService {
             .map(({ def, values }) => ({
                 fieldKey: def.fieldKey,
                 type: def.type,
-                label: def.labelOverride ?? def.label,
+                label: resolveLabel(def, locale),
                 value: def.isMultiple ? values : (values[0] ?? null),
             }));
 
@@ -446,7 +462,12 @@ export class EntityRecordsService {
             entityCode,
             isActive: row.isActive,
             stage: row.stage,
-            statusItem: row.statusItem,
+            statusItem: row.statusItem && {
+                id: row.statusItem.id,
+                key: row.statusItem.key,
+                label: resolveLabel(row.statusItem, locale),
+                color: row.statusItem.color,
+            },
             fields,
             relations: [...relationsByKey.entries()].map(([fieldKey, targetRecordIds]) => ({
                 fieldKey,

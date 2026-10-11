@@ -28,6 +28,7 @@ import { CurrentPrincipal } from "@common/decorators/auth/current-principal.deco
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { type ContentLocale, RequestLocale } from "@common/i18n";
 import type { PortalPrincipal } from "@common/portal";
 import { mimeForStoragePath, UPLOAD_LIMITS } from "@common/upload";
 import { Admin, AdminGuard, RequireEmployeeJwt } from "@modules/portal/auth/employees";
@@ -84,6 +85,7 @@ export class CrmMembersController {
     @ApiErrorResponse([401, 403, 400])
     async list(
         @PortalId() portalId: string,
+        @RequestLocale() locale: ContentLocale,
         @Query("limit") limit?: string,
         @Query("statusItemId") statusItemId?: string,
         @Query("filterFieldKey") filterFieldKey?: string,
@@ -98,7 +100,7 @@ export class CrmMembersController {
                 filterValue !== "" && { filterFieldKey, filterValue }),
         });
 
-        return members.map((m) => this.membersService.toCrmMemberListDto(m));
+        return members.map((m) => this.membersService.toCrmMemberListDto(m, locale));
     }
 
     @Get("form-schema")
@@ -108,7 +110,8 @@ export class CrmMembersController {
     @ApiErrorResponse([401, 403, 404])
     async memberFormSchema(
         @PortalId() portalId: string,
-        @Query("purpose") purposeParam: string
+        @Query("purpose") purposeParam: string,
+        @RequestLocale() locale: ContentLocale
     ): Promise<unknown> {
         if (!Object.values(FormPurpose).includes(purposeParam as FormPurpose)) {
             throw new BadRequestException(`Invalid form purpose: ${purposeParam}`);
@@ -116,7 +119,8 @@ export class CrmMembersController {
         return this.formSchema.getFormSchema(
             portalId,
             ENTITY_DEFINITION_CODES.MEMBER,
-            purposeParam as FormPurpose
+            purposeParam as FormPurpose,
+            locale
         );
     }
 
@@ -126,14 +130,18 @@ export class CrmMembersController {
         description: "Member details",
     })
     @ApiErrorResponse([401, 403, 400])
-    async byId(@Param("id") id: string, @PortalId() portalId: string): Promise<CrmMemberFullDto> {
+    async byId(
+        @Param("id") id: string,
+        @PortalId() portalId: string,
+        @RequestLocale() locale: ContentLocale
+    ): Promise<CrmMemberFullDto> {
         const member = await this.membersService.findByIdForPortal(id, portalId);
 
         if (!member) {
             throw new NotFoundException("Member not found");
         }
 
-        return this.membersService.toCrmMemberFullDto(member);
+        return this.membersService.toCrmMemberFullDto(member, locale);
     }
 
     @Patch(":id")
@@ -147,13 +155,14 @@ export class CrmMembersController {
     async update(
         @Param("id") id: string,
         @Body() dto: CrmMemberFieldsPatchDto,
-        @PortalId() portalId: string
+        @PortalId() portalId: string,
+        @RequestLocale() locale: ContentLocale
     ): Promise<CrmMemberFullDto> {
         const updated = await this.membersService.updateCrmMember(id, portalId, dto);
         if (!updated) {
             throw new NotFoundException("Member not found");
         }
-        return this.membersService.toCrmMemberFullDto(updated);
+        return this.membersService.toCrmMemberFullDto(updated, locale);
     }
 
     @Patch(":id/status")
@@ -167,7 +176,8 @@ export class CrmMembersController {
     async updateStatus(
         @Param("id") id: string,
         @Body() dto: CrmMemberStatusPatchDto,
-        @PortalId() portalId: string
+        @PortalId() portalId: string,
+        @RequestLocale() locale: ContentLocale
     ): Promise<CrmMemberFullDto> {
         const updated = await this.membersService.updateMemberStatus(
             id,
@@ -177,7 +187,7 @@ export class CrmMembersController {
         if (!updated) {
             throw new NotFoundException("Member not found");
         }
-        return this.membersService.toCrmMemberFullDto(updated);
+        return this.membersService.toCrmMemberFullDto(updated, locale);
     }
 
     @Patch(":id/files")
@@ -225,9 +235,10 @@ export class CrmMembersController {
             documentSecond?: MulterFile[];
             signature?: MulterFile[];
         },
-        @PortalId() portalId: string
+        @PortalId() portalId: string,
+        @RequestLocale() locale: ContentLocale
     ): Promise<CrmMemberFullDto> {
-        return this.membersService.updateCrmMemberFiles(id, portalId, dto, files);
+        return this.membersService.updateCrmMemberFiles(id, portalId, dto, files, locale);
     }
 
     @Get(":id/documents/:documentId/preview")

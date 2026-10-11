@@ -3,6 +3,7 @@ import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { type ContentLocale, RequestLocale } from "@common/i18n";
 import { CurrentMember, RequireMemberJwt } from "@modules/portal/auth/members";
 import { CrmMemberFullDto } from "@modules/portal/crm/members/api/dto/crm-member.dto";
 import { MembersService } from "@modules/portal/crm/members/application/services/members.service";
@@ -20,13 +21,16 @@ export class LkMembersController {
         description: "Current member details",
     })
     @ApiErrorResponse([401, 404])
-    async getMe(@CurrentMember() member: Member): Promise<CrmMemberFullDto> {
+    async getMe(
+        @CurrentMember() member: Member,
+        @RequestLocale() locale: ContentLocale
+    ): Promise<CrmMemberFullDto> {
         const fullMember = await this.membersService.findByIdForPortal(member.id, member.portalId);
 
         if (!fullMember) {
             throw new NotFoundException("Member not found");
         }
 
-        return this.membersService.toCrmMemberFullDto(fullMember);
+        return this.membersService.toCrmMemberFullDto(fullMember, locale);
     }
 }

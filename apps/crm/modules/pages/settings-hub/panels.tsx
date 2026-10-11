@@ -22,7 +22,11 @@ import {
 
 import { useCategories } from "@/modules/entities/category";
 import { useEmployees } from "@/modules/entities/employee";
-import { useEntityDefinitions, useEntityFields } from "@/modules/entities/entity-settings";
+import {
+    getFieldDisplayLabel,
+    useEntityDefinitions,
+    useEntityFields,
+} from "@/modules/entities/entity-settings";
 import { useInvitations } from "@/modules/entities/invitations";
 import { useMeasurementUnits } from "@/modules/entities/measurement-unit";
 import { useMemberStatusItems } from "@/modules/entities/member";
@@ -50,6 +54,7 @@ const FORM_PURPOSES = [
 
 export function MembersPanel() {
     const t = useTranslations("crm.settingsHub.tiles");
+    const locale = useLocale();
     const link = useLocalizedLink();
     const fields = useEntityFields(MEMBER);
     const statuses = useMemberStatusItems(true);
@@ -67,9 +72,7 @@ export function MembersPanel() {
                 description={t("memberFields.description")}
                 metric={activeFields.length}
                 metricLabel={t("memberFields.metric")}
-                items={activeFields.map(
-                    (field) => field.labelOverride ?? field.label ?? field.fieldKey
-                )}
+                items={activeFields.map((field) => getFieldDisplayLabel(field, locale))}
                 loading={fields.isLoading}
                 href={link(`${entityPage}?tab=fields`)}
             />

@@ -8,6 +8,7 @@ import { CurrentPrincipal } from "@common/decorators/auth/current-principal.deco
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { type ContentLocale, RequestLocale } from "@common/i18n";
 import type { PortalPrincipal } from "@common/portal";
 import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
 import {
@@ -49,6 +50,7 @@ export class CrmEntityRecordsController {
         @PortalId() portalId: string,
         @Param("code") code: string,
         @Req() request: Request,
+        @RequestLocale() locale: ContentLocale,
         @Query("limit") limitRaw?: string,
         @Query("skip") skipRaw?: string,
         @Query("stageId") stageId?: string,
@@ -67,11 +69,14 @@ export class CrmEntityRecordsController {
             }
         }
 
-        return this.recordsService.list(portalId, code, limit, skip, {
-            stageId,
-            statusItemId,
-            fields,
-        });
+        return this.recordsService.list(
+            portalId,
+            code,
+            limit,
+            skip,
+            { stageId, statusItemId, fields },
+            locale
+        );
     }
 
     @Post()
@@ -83,9 +88,16 @@ export class CrmEntityRecordsController {
         @PortalId() portalId: string,
         @Param("code") code: string,
         @Body() dto: CreateEntityRecordDto,
-        @CurrentPrincipal() principal: PortalPrincipal
+        @CurrentPrincipal() principal: PortalPrincipal,
+        @RequestLocale() locale: ContentLocale
     ): Promise<EntityRecordDto> {
-        return this.recordsService.create(portalId, code, dto.fields, principal.membershipId);
+        return this.recordsService.create(
+            portalId,
+            code,
+            dto.fields,
+            locale,
+            principal.membershipId
+        );
     }
 
     @Get(":id")
@@ -95,9 +107,10 @@ export class CrmEntityRecordsController {
     async byId(
         @PortalId() portalId: string,
         @Param("code") code: string,
-        @Param("id") id: string
+        @Param("id") id: string,
+        @RequestLocale() locale: ContentLocale
     ): Promise<EntityRecordDto> {
-        return this.recordsService.getById(portalId, code, id);
+        return this.recordsService.getById(portalId, code, id, locale);
     }
 
     @Patch(":id")
@@ -109,9 +122,10 @@ export class CrmEntityRecordsController {
         @PortalId() portalId: string,
         @Param("code") code: string,
         @Param("id") id: string,
-        @Body() dto: UpdateEntityRecordDto
+        @Body() dto: UpdateEntityRecordDto,
+        @RequestLocale() locale: ContentLocale
     ): Promise<EntityRecordDto> {
-        return this.recordsService.update(portalId, code, id, dto);
+        return this.recordsService.update(portalId, code, id, dto, locale);
     }
 
     @Delete(":id")
@@ -137,9 +151,10 @@ export class CrmEntityRecordsController {
         @PortalId() portalId: string,
         @Param("code") code: string,
         @Param("id") id: string,
-        @Body() dto: SetRecordStageDto
+        @Body() dto: SetRecordStageDto,
+        @RequestLocale() locale: ContentLocale
     ): Promise<EntityRecordDto> {
-        return this.recordsService.setStage(portalId, code, id, dto.stageId);
+        return this.recordsService.setStage(portalId, code, id, dto.stageId, locale);
     }
 
     @Patch(":id/status")
@@ -151,8 +166,9 @@ export class CrmEntityRecordsController {
         @PortalId() portalId: string,
         @Param("code") code: string,
         @Param("id") id: string,
-        @Body() dto: SetRecordStatusDto
+        @Body() dto: SetRecordStatusDto,
+        @RequestLocale() locale: ContentLocale
     ): Promise<EntityRecordDto> {
-        return this.recordsService.setStatus(portalId, code, id, dto.statusItemId);
+        return this.recordsService.setStatus(portalId, code, id, dto.statusItemId, locale);
     }
 }

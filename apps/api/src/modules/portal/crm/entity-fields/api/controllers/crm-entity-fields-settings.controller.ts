@@ -16,6 +16,7 @@ import { FormPurpose } from "@prisma/client";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { type ContentLocale, RequestLocale } from "@common/i18n";
 import { Admin, AdminGuard, RequireEmployeeJwt } from "@modules/portal/auth/employees";
 import {
     DeleteMemberFieldResponseDto,
@@ -73,8 +74,11 @@ export class CrmEntityFieldsSettingsController {
     @ApiOperation({ summary: "Member lifecycle status items (for filters and selects)" })
     @ApiSuccessResponse(MemberLifecycleStatusItemDto, { isArray: true })
     @ApiErrorResponse([401, 403])
-    async memberStatusItems(@PortalId() portalId: string): Promise<MemberLifecycleStatusItemDto[]> {
-        return await this.formSchema.getMemberLifecycleStatusItems(portalId);
+    async memberStatusItems(
+        @PortalId() portalId: string,
+        @RequestLocale() locale: ContentLocale
+    ): Promise<MemberLifecycleStatusItemDto[]> {
+        return await this.formSchema.getMemberLifecycleStatusItems(portalId, locale);
     }
 
     @Get(":code/form-schema/:purpose")
@@ -84,9 +88,15 @@ export class CrmEntityFieldsSettingsController {
     async entityFormSchema(
         @PortalId() portalId: string,
         @Param("code") code: string,
-        @Param("purpose") purposeParam: string
+        @Param("purpose") purposeParam: string,
+        @RequestLocale() locale: ContentLocale
     ): Promise<MemberFormSchemaResponseDto> {
-        return this.formSchema.getFormSchema(portalId, code, this.parsePurpose(purposeParam));
+        return this.formSchema.getFormSchema(
+            portalId,
+            code,
+            this.parsePurpose(purposeParam),
+            locale
+        );
     }
 
     @Get(":code/filter-fields")
@@ -95,9 +105,10 @@ export class CrmEntityFieldsSettingsController {
     @ApiErrorResponse([401, 403])
     async entityFilterFields(
         @PortalId() portalId: string,
-        @Param("code") code: string
+        @Param("code") code: string,
+        @RequestLocale() locale: ContentLocale
     ): Promise<MemberFormFieldSchemaItemDto[]> {
-        return this.formSchema.getFilterableFields(portalId, code);
+        return this.formSchema.getFilterableFields(portalId, code, locale);
     }
 
     @Get(":code/fields")

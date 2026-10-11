@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiOperation, ApiProperty, ApiTags } from "@nestjs/swagg
 
 import { PrismaService } from "@common/prisma/prisma.service";
 import { ensureGlobalEntityTemplates } from "@common/reference-data/global-templates.seed";
+import { syncSystemLabelTranslations } from "@common/reference-data/system-label-translations.sync";
 import { PlatformJwtAuthGuard } from "@modules/platform/auth/infrastructure/guards/platform-jwt-auth.guard";
 
 export class SeedReferenceDataResponseDto {
@@ -25,6 +26,7 @@ export class PlatformReferenceDataController {
     })
     async seedReferenceData(): Promise<SeedReferenceDataResponseDto> {
         await ensureGlobalEntityTemplates(this.prisma);
+        await syncSystemLabelTranslations(this.prisma);
         return { globalTemplatesEnsured: true };
     }
 }

@@ -6,7 +6,7 @@ import { Prisma } from "@prisma/client";
  */
 export const ENTITY_RECORD_INCLUDE = {
     stage: { select: { id: true, name: true, color: true, semantic: true } },
-    statusItem: { select: { id: true, key: true, label: true, color: true } },
+    statusItem: { select: { id: true, key: true, label: true, labelI18n: true, color: true } },
     fieldValues: {
         orderBy: [{ fieldDefinitionId: "asc" as const }, { valueIndex: "asc" as const }],
         include: {
@@ -16,6 +16,7 @@ export const ENTITY_RECORD_INCLUDE = {
                     fieldKey: true,
                     type: true,
                     label: true,
+                    labelI18n: true,
                     labelOverride: true,
                     isMultiple: true,
                     sortOrder: true,

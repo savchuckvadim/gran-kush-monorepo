@@ -7,10 +7,13 @@ export interface EmployeeFilters {
     isActive?: boolean;
 }
 
+/** Подпись не разрешена в язык: `label` / `labelI18n` / `labelOverride` → resolveLabel. */
 export interface EmployeeProfileField {
     fieldKey: string;
     type: string;
     label: string | null;
+    labelI18n: unknown;
+    labelOverride: string | null;
     value: unknown;
 }
 

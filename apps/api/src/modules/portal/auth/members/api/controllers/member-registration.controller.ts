@@ -15,6 +15,7 @@ import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { Public } from "@common/decorators/auth/public.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { type ContentLocale, RequestLocale } from "@common/i18n";
 import { AllowUnconfirmed } from "@modules/portal/auth/members/api/decorators/allow-unconfirmed.decorator";
 import { CheckUserExistsDto } from "@modules/portal/auth/members/api/dto/check-user-exists.dto";
 import { CheckUserExistsResponseDto } from "@modules/portal/auth/members/api/dto/check-user-exists-response.dto";
@@ -49,11 +50,15 @@ export class MemberRegistrationController {
     @Public()
     @ApiOperation({ summary: "Public schema for dynamic member registration form" })
     @ApiSuccessResponse(Object, { description: "Field definitions for registration" })
-    async registrationSchema(@PortalId() portalId: string): Promise<unknown> {
+    async registrationSchema(
+        @PortalId() portalId: string,
+        @RequestLocale() locale: ContentLocale
+    ): Promise<unknown> {
         return this.formSchemaService.getFormSchema(
             portalId,
             ENTITY_DEFINITION_CODES.MEMBER,
-            FormPurpose.public_registration
+            FormPurpose.public_registration,
+            locale
         );
     }
 

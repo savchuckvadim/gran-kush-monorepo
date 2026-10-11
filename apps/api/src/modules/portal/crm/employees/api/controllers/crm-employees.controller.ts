@@ -21,6 +21,7 @@ import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { type ContentLocale, RequestLocale } from "@common/i18n";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import type { PortalPrincipal } from "@common/portal";
@@ -54,7 +55,8 @@ export class CrmEmployeesController {
     @ApiErrorResponse([401, 403])
     async listEmployees(
         @Query() query: EmployeeListQueryDto,
-        @PortalId() portalId: string
+        @PortalId() portalId: string,
+        @RequestLocale() locale: ContentLocale
     ): Promise<PaginatedResult<EmployeeListItemDto>> {
         const { page = 1, limit = 20, role, isActive } = query;
         const skip = PaginationUtil.getSkip(page, limit);
@@ -66,7 +68,7 @@ export class CrmEmployeesController {
             this.employeesService.countByPortal(portalId, filters),
         ]);
 
-        const items = employees.map(mapEmployeeToListDto);
+        const items = employees.map((employee) => mapEmployeeToListDto(employee, locale));
         return PaginationUtil.createPaginatedResult(items, total, page, limit);
     }
 
@@ -77,7 +79,8 @@ export class CrmEmployeesController {
     @ApiErrorResponse([401, 403, 404])
     async employeeFormSchema(
         @PortalId() portalId: string,
-        @Query("purpose") purposeParam: string
+        @Query("purpose") purposeParam: string,
+        @RequestLocale() locale: ContentLocale
     ): Promise<unknown> {
         if (!Object.values(FormPurpose).includes(purposeParam as FormPurpose)) {
             throw new BadRequestException(`Invalid form purpose: ${purposeParam}`);
@@ -85,7 +88,8 @@ export class CrmEmployeesController {
         return this.formSchema.getFormSchema(
             portalId,
             ENTITY_DEFINITION_CODES.EMPLOYEE,
-            purposeParam as FormPurpose
+            purposeParam as FormPurpose,
+            locale
         );
     }
 
@@ -120,10 +124,11 @@ export class CrmEmployeesController {
     @ApiErrorResponse([401, 403, 404])
     async getEmployee(
         @Param("id") id: string,
-        @PortalId() portalId: string
+        @PortalId() portalId: string,
+        @RequestLocale() locale: ContentLocale
     ): Promise<EmployeeListItemDto> {
         const employee = await this.employeesService.findByIdInPortal(id, portalId);
-        return mapEmployeeToListDto(employee);
+        return mapEmployeeToListDto(employee, locale);
     }
 
     @Patch(":id")
@@ -136,7 +141,8 @@ export class CrmEmployeesController {
         @Param("id") id: string,
         @Body() dto: UpdateEmployeeDto,
         @PortalId() portalId: string,
-        @CurrentPrincipal() principal: PortalPrincipal
+        @CurrentPrincipal() principal: PortalPrincipal,
+        @RequestLocale() locale: ContentLocale
     ): Promise<EmployeeListItemDto> {
         const employee = await this.employeesService.updateEmployee(
             id,
@@ -144,7 +150,7 @@ export class CrmEmployeesController {
             principal.membershipId,
             dto
         );
-        return mapEmployeeToListDto(employee);
+        return mapEmployeeToListDto(employee, locale);
     }
 
     @Delete(":id")
@@ -157,13 +163,14 @@ export class CrmEmployeesController {
     async deactivateEmployee(
         @Param("id") id: string,
         @PortalId() portalId: string,
-        @CurrentPrincipal() principal: PortalPrincipal
+        @CurrentPrincipal() principal: PortalPrincipal,
+        @RequestLocale() locale: ContentLocale
     ): Promise<EmployeeListItemDto> {
         const employee = await this.employeesService.deactivateEmployee(
             id,
             portalId,
             principal.membershipId
         );
-        return mapEmployeeToListDto(employee);
+        return mapEmployeeToListDto(employee, locale);
     }
 }

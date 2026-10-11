@@ -6,6 +6,7 @@ import { MulterFile } from "@storage/domain/interfaces/storage-file.interface";
 import { AccountProvisioningService } from "@users/application/services/account-provisioning.service";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 
+import { ContentLocale, resolveLabel } from "@common/i18n";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { AccountFilesService } from "@modules/account/application/services/account-files.service";
 import { UserDocumentRepository } from "@modules/account/domain/repositories/user-document-repository.interface";
@@ -58,18 +59,19 @@ export class MembersService {
     }
 
     mapStatus(
-        si: NonNullable<MemberWithRelations["profile"]>["statusItem"] | null
+        si: NonNullable<MemberWithRelations["profile"]>["statusItem"] | null,
+        locale: ContentLocale
     ): CrmMemberStatusDto | null {
         if (!si) return null;
         return {
             id: si.id,
             key: si.key,
-            label: si.label,
+            label: resolveLabel(si, locale),
             color: si.color,
         };
     }
 
-    toCrmMemberListDto(member: MemberWithRelations): CrmMemberDto {
+    toCrmMemberListDto(member: MemberWithRelations, locale: ContentLocale): CrmMemberDto {
         const fieldMap = buildMemberFieldMap(this.fieldRows(member));
         const { firstName, lastName } = getMemberDisplayNameParts(fieldMap);
         const phone = fieldMap[MEMBER_FIELD_KEYS.PHONE];
@@ -81,14 +83,17 @@ export class MembersService {
             surname: lastName,
             phone: typeof phone === "string" ? phone : null,
             status: member.profile.statusItem?.key ?? "",
-            statusItem: this.mapStatus(member.profile.statusItem),
+            statusItem: this.mapStatus(member.profile.statusItem, locale),
             isActive: member.isActive,
             emailConfirmed: member.user.emailConfirmed,
             createdAt: member.createdAt.toISOString(),
         };
     }
 
-    async toCrmMemberFullDto(member: MemberWithRelations): Promise<CrmMemberFullDto> {
+    async toCrmMemberFullDto(
+        member: MemberWithRelations,
+        locale: ContentLocale
+    ): Promise<CrmMemberFullDto> {
         const fieldMap = buildMemberFieldMap(this.fieldRows(member));
         const { firstName, lastName } = getMemberDisplayNameParts(fieldMap);
         const phone = fieldMap[MEMBER_FIELD_KEYS.PHONE];
@@ -96,7 +101,7 @@ export class MembersService {
         const address = fieldMap[MEMBER_FIELD_KEYS.ADDRESS];
         const notes = fieldMap[MEMBER_FIELD_KEYS.NOTES];
 
-        const fieldsPayload = await this.fieldValues.getMemberFieldsPayload(member.id);
+        const fieldsPayload = await this.fieldValues.getMemberFieldsPayload(member.id, locale);
         const fields: CrmMemberDynamicFieldDto[] = fieldsPayload.map((f) => ({
             fieldKey: f.fieldKey,
             type: f.type,
@@ -110,7 +115,7 @@ export class MembersService {
         ]);
 
         const birthday = fieldValueToOptionalDateString(birthdayRaw);
-        const st = this.mapStatus(member.profile.statusItem);
+        const st = this.mapStatus(member.profile.statusItem, locale);
 
         return {
             id: member.id,
@@ -304,7 +309,8 @@ export class MembersService {
             documentFirst?: MulterFile[];
             documentSecond?: MulterFile[];
             signature?: MulterFile[];
-        }
+        },
+        locale: ContentLocale
     ): Promise<CrmMemberFullDto> {
         const member = await this.memberRepository.findByIdForPortal(memberId, portalId);
         if (!member) {
@@ -352,7 +358,7 @@ export class MembersService {
         if (!result) {
             throw new NotFoundException("Member not found");
         }
-        return this.toCrmMemberFullDto(result);
+        return this.toCrmMemberFullDto(result, locale);
     }
 
     /** Приватные превью для CRM: документ/подпись читаются из аккаунта member'а */

@@ -114,10 +114,14 @@ export class PortalFieldSettingsService {
             throw new BadRequestException("Field is not customizable by portal");
         }
 
+        // Переименованное клубом поле показывается его словом на всех языках
+        const renamed = dto.label !== undefined && dto.label !== def.label;
+
         return this.prisma.fieldDefinition.update({
             where: { id: def.id },
             data: {
                 ...(dto.label !== undefined && { label: dto.label }),
+                ...(renamed && { labelI18n: Prisma.DbNull }),
                 ...(dto.helpText !== undefined && { helpText: dto.helpText }),
                 ...(dto.isActive !== undefined && { isActive: dto.isActive }),
                 ...(dto.showInFilters !== undefined && { showInFilters: dto.showInFilters }),

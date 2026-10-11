@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 
 import { EncryptionService } from "@encryption/application/services/encryption.service";
 
+import { DEFAULT_CONTENT_LOCALE } from "@common/i18n";
 import { MembersService } from "@modules/portal/crm/members/application/services/members.service";
 import { QrCode, QrCodePayload } from "@modules/portal/crm/qr-codes/domain/entity/qr-code.entity";
 import { QrCodeRepository } from "@modules/portal/crm/qr-codes/domain/repositories/qr-code-repository.interface";
@@ -61,7 +62,9 @@ export class QrCodesService {
             throw new NotFoundException(`Участник с ID "${memberId}" не найден`);
         }
         if (!member.isActive) {
-            const label = this.membersService.toCrmMemberListDto(member).name || member.id;
+            const label =
+                this.membersService.toCrmMemberListDto(member, DEFAULT_CONTENT_LOCALE).name ||
+                member.id;
             throw new BadRequestException(
                 `Участник "${label}" не активен. QR-код может быть выдан только активным участникам.`
             );
