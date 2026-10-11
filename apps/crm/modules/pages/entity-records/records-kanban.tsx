@@ -3,7 +3,7 @@
 import { type EntityRecord } from "@/modules/entities/entity-records";
 
 import { recordTitle } from "./record-display";
-import { StageSelect, type EntityStage } from "./stage-select";
+import { type EntityStage, StageSelect } from "./stage-select";
 
 export function RecordsKanban({
     records,
@@ -48,7 +48,7 @@ export function RecordsKanban({
                                     </button>
                                     {stages.length > 0 ? (
                                         <StageSelect
-                                            className="mt-2 h-7 w-full rounded border border-input bg-background px-1 text-xs"
+                                            className="mt-2 text-xs"
                                             stages={stages}
                                             value={record.stage?.id ?? ""}
                                             onChange={(stageId) =>

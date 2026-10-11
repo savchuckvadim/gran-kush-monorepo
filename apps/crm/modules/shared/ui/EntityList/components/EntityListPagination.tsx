@@ -4,7 +4,7 @@ import * as React from "react";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import { Button } from "@workspace/ui";
+import { Button, FieldSelect } from "@workspace/ui";
 
 import type { EntityListPaginationProps } from "../EntityList";
 
@@ -37,17 +37,17 @@ export function EntityListPagination({ pagination }: { pagination: EntityListPag
                 </Button>
 
                 {pagination.pageSizeOptions?.length && pagination.onPageSizeChange ? (
-                    <select
+                    <FieldSelect
+                        size="sm"
+                        className="w-auto"
+                        aria-label="Записей на странице"
+                        options={pagination.pageSizeOptions.map((opt) => ({
+                            value: String(opt),
+                            label: opt,
+                        }))}
                         value={String(pagination.pageSize ?? pagination.pageSizeOptions[0])}
-                        onChange={(e) => pagination.onPageSizeChange?.(Number(e.target.value))}
-                        className="rounded-md border bg-background px-2 py-1 text-sm"
-                    >
-                        {pagination.pageSizeOptions.map((opt) => (
-                            <option key={opt} value={opt}>
-                                {opt}
-                            </option>
-                        ))}
-                    </select>
+                        onValueChange={(value) => pagination.onPageSizeChange?.(Number(value))}
+                    />
                 ) : null}
             </div>
         </div>

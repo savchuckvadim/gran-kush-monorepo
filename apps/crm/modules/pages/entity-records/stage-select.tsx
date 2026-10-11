@@ -1,5 +1,7 @@
 "use client";
 
+import { FieldSelect } from "@workspace/ui";
+
 import { type EntityStageCategory } from "@/modules/entities/entity-settings";
 
 export type EntityStage = EntityStageCategory["stages"][number];
@@ -16,17 +18,16 @@ export function StageSelect({
     className?: string;
 }) {
     return (
-        <select
+        <FieldSelect
+            size="sm"
             className={className}
+            aria-label="Стадия"
+            options={[
+                { value: "", label: "— без стадии —" },
+                ...stages.map((stage) => ({ value: stage.id, label: stage.name })),
+            ]}
             value={value}
-            onChange={(e) => onChange(e.target.value)}
-        >
-            <option value="">— без стадии —</option>
-            {stages.map((stage) => (
-                <option key={stage.id} value={stage.id}>
-                    {stage.name}
-                </option>
-            ))}
-        </select>
+            onValueChange={onChange}
+        />
     );
 }

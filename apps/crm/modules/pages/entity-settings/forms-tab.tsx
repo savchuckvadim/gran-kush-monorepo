@@ -5,13 +5,13 @@ import { useMemo, useState } from "react";
 import { ArrowDown, ArrowUp, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@workspace/ui";
+import { Button, FieldSelect } from "@workspace/ui";
 
 import {
+    type FormPurpose,
     useEntityFields,
     useEntityFormSchema,
     useUpdateEntityForm,
-    type FormPurpose,
 } from "@/modules/entities/entity-settings";
 import { getApiErrorMessage } from "@/modules/shared";
 
@@ -221,18 +221,18 @@ export function FormsTab({ code }: { code: string }) {
 
                     {availableFields.length > 0 ? (
                         <div className="flex items-center gap-2">
-                            <select
-                                className="rounded-md border bg-background px-2 py-1.5 text-sm"
+                            <FieldSelect
+                                size="sm"
+                                className="w-auto"
+                                aria-label="Поле для добавления"
+                                placeholder="Добавить поле…"
+                                options={availableFields.map((field) => ({
+                                    value: field.fieldKey,
+                                    label: field.label ?? field.fieldKey,
+                                }))}
                                 value={fieldToAdd}
-                                onChange={(e) => setFieldToAdd(e.target.value)}
-                            >
-                                <option value="">Добавить поле…</option>
-                                {availableFields.map((field) => (
-                                    <option key={field.fieldKey} value={field.fieldKey}>
-                                        {field.label ?? field.fieldKey}
-                                    </option>
-                                ))}
-                            </select>
+                                onValueChange={setFieldToAdd}
+                            />
                             <Button
                                 variant="outline"
                                 size="sm"
