@@ -12,6 +12,22 @@ export {
     DialogTitle,
     DialogTrigger,
 } from "./components/dialog";
+export {
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenuSeparator,
+    DropdownMenuShortcut,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
+    DropdownMenuTrigger,
+} from "./components/dropdown-menu";
 export { Input } from "./components/input";
 export { default as Iridescence } from "./components/Iridescence";
 export { Label } from "./components/label";

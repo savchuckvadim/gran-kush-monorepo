@@ -13,6 +13,7 @@ import { PresenceModule } from "@modules/portal/crm/presence/presence.module";
 import { QrCodesModule } from "@modules/portal/crm/qr-codes/qr-codes.module";
 import { RecordsModule } from "@modules/portal/crm/records/records.module";
 import { RegistrationLinksModule } from "@modules/portal/crm/registration-links/registration-links.module";
+import { SearchModule } from "@modules/portal/crm/search/search.module";
 import { PublicPortalModule } from "@modules/portal/public/public-portal.module";
 
 /** CRM и портальный контекст поверх общего ядра. */
@@ -31,6 +32,7 @@ import { PublicPortalModule } from "@modules/portal/public/public-portal.module"
         InvitationsModule,
         RegistrationLinksModule,
         RecordsModule,
+        SearchModule,
         PublicPortalModule,
     ],
 })

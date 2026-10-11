@@ -19,6 +19,14 @@ export class PortalSubscriptionInfoDto {
         description: "Конец бесплатного периода (пока status = trialing)",
     })
     trialEndsAt!: string | null;
+
+    @ApiProperty({
+        type: "object",
+        additionalProperties: { type: "boolean" },
+        example: { customBrand: true },
+        description: "Возможности тарифа. customBrand — в CRM название клуба вместо PafPaf",
+    })
+    features!: Record<string, boolean>;
 }
 
 export class PortalInfoDto {

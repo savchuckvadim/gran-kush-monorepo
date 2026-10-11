@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 
-import { PortalStatus, PortalTypeEnum, SubscriptionStatus } from "@prisma/client";
+import { PortalStatus, PortalTypeEnum, Prisma, SubscriptionStatus } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 
@@ -15,7 +15,21 @@ export type PortalInfoView = {
         planName: string | null;
         graceEndsAt: Date | null;
         trialEndsAt: Date | null;
+        /** Флаги тарифа: `customBrand` — название клуба вместо PafPaf и т.п. */
+        features: Record<string, boolean>;
     } | null;
+};
+
+/** Из `featuresJson` наружу идут только булевы флаги. */
+const planFeatures = (json: Prisma.JsonValue | undefined): Record<string, boolean> => {
+    if (json === null || json === undefined || typeof json !== "object" || Array.isArray(json)) {
+        return {};
+    }
+    return Object.fromEntries(
+        Object.entries(json).filter(
+            (entry): entry is [string, boolean] => typeof entry[1] === "boolean"
+        )
+    );
 };
 
 @Injectable()
@@ -27,7 +41,7 @@ export class PortalResolutionService {
         const portal = await this.prisma.portal.findUnique({
             where: { id: portalId },
             include: {
-                subscription: { include: { plan: { select: { name: true } } } },
+                subscription: { include: { plan: { select: { name: true, featuresJson: true } } } },
             },
         });
         if (!portal) {
@@ -45,6 +59,7 @@ export class PortalResolutionService {
                       planName: portal.subscription.plan?.name ?? null,
                       graceEndsAt: portal.subscription.graceEndsAt,
                       trialEndsAt: portal.subscription.trialEndsAt,
+                      features: planFeatures(portal.subscription.plan?.featuresJson),
                   }
                 : null,
         };

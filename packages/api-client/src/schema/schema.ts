@@ -2338,6 +2338,26 @@ export interface paths {
         patch: operations["CrmEntityRecords_setStatus"];
         trace?: never;
     };
+    "/crm/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Быстрый поиск по клубу (Ctrl K)
+         * @description Участники по имени, телефону, номеру и email; товары по названию и SKU; заказы по номеру.
+         */
+        get: operations["CrmSearch_search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/public/portals/map": {
         parameters: {
             query?: never;
@@ -3796,6 +3816,15 @@ export interface components {
              * @description Конец бесплатного периода (пока status = trialing)
              */
             trialEndsAt: string | null;
+            /**
+             * @description Возможности тарифа. customBrand — в CRM название клуба вместо PafPaf
+             * @example {
+             *       "customBrand": true
+             *     }
+             */
+            features: {
+                [key: string]: boolean;
+            };
         };
         PortalInfoDto: {
             /** Format: uuid */
@@ -4998,6 +5027,36 @@ export interface components {
         SetRecordStatusDto: {
             statusItemId: string | null;
         };
+        CrmSearchMemberDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example Lucía Martín */
+            name: string;
+            /** @example 0142 */
+            membershipNumber: string | null;
+            /** @example lucia@example.com */
+            email: string;
+        };
+        CrmSearchProductDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            sku: string | null;
+        };
+        CrmSearchOrderDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example ORD-0001 */
+            orderNumber: string;
+            memberName: string;
+            /** Format: date-time */
+            orderedAt: string;
+        };
+        CrmSearchResponseDto: {
+            members: components["schemas"]["CrmSearchMemberDto"][];
+            products: components["schemas"]["CrmSearchProductDto"][];
+            orders: components["schemas"]["CrmSearchOrderDto"][];
+        };
         PublicPortalMapItemDto: {
             id: string;
             /** @example green-club */
@@ -5280,6 +5339,10 @@ export type SchemaUpdateEntityRecordDto = components['schemas']['UpdateEntityRec
 export type SchemaDeleteRecordResponseDto = components['schemas']['DeleteRecordResponseDto'];
 export type SchemaSetRecordStageDto = components['schemas']['SetRecordStageDto'];
 export type SchemaSetRecordStatusDto = components['schemas']['SetRecordStatusDto'];
+export type SchemaCrmSearchMemberDto = components['schemas']['CrmSearchMemberDto'];
+export type SchemaCrmSearchProductDto = components['schemas']['CrmSearchProductDto'];
+export type SchemaCrmSearchOrderDto = components['schemas']['CrmSearchOrderDto'];
+export type SchemaCrmSearchResponseDto = components['schemas']['CrmSearchResponseDto'];
 export type SchemaPublicPortalMapItemDto = components['schemas']['PublicPortalMapItemDto'];
 export type SchemaPublicPortalsMapResponseDto = components['schemas']['PublicPortalsMapResponseDto'];
 export type SchemaCreateReviewDto = components['schemas']['CreateReviewDto'];
@@ -12823,6 +12886,58 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmSearch_search: {
+        parameters: {
+            query: {
+                /** @description Минимум 2 символа */
+                q: string;
+                /** @description Сколько результатов в каждой группе */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CrmSearchResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -544,6 +544,26 @@ describe("Cross-portal isolation (e2e)", () => {
             expect(JSON.stringify(res.body)).not.toContain(productBId);
         });
 
+        it("search (Ctrl K) finds portal B data only for employee B", async () => {
+            const search = (portal: PortalContext, q: string) =>
+                request(app.getHttpServer())
+                    .get("/crm/search")
+                    .query({ q })
+                    .set("Cookie", portal.cookies)
+                    .set("X-Portal-Slug", portal.slug);
+
+            const byA = await search(portalA, `Isolation Product ${suffix}`);
+            expect(byA.status).toBe(200);
+            expect(byA.body.products).toEqual([]);
+            const memberByA = await search(portalA, `member-b-${suffix}`);
+            expect(memberByA.body.members).toEqual([]);
+
+            const byB = await search(portalB, `Isolation Product ${suffix}`);
+            expect(byB.body.products.map((p: { id: string }) => p.id)).toEqual([productBId]);
+            const memberByB = await search(portalB, `member-b-${suffix}`);
+            expect(memberByB.body.members.map((m: { id: string }) => m.id)).toEqual([memberBId]);
+        });
+
         it("returns 404 for portal B product by id", async () => {
             const res = await request(app.getHttpServer())
                 .get(`/crm/catalog/products/${productBId}`)
