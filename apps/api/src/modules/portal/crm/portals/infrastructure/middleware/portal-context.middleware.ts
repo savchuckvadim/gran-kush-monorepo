@@ -104,6 +104,8 @@ export class PortalContextMiddleware implements NestMiddleware {
             "/crm/auth/refresh",
             "/crm/auth/logout",
             "/crm/auth/me",
+            "/crm/auth/password",
+            "/crm/auth/confirm-email",
             "/crm/mobile/auth",
             "/lk/auth",
             "/lk/mobile/auth",

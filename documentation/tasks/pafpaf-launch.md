@@ -136,7 +136,7 @@
   давали одинаковый JWT. Исправлено так: upsert строки устройства, ротация compare-and-set, `jti`.
   e2e — `test/auth-sessions.e2e-spec.ts`.
 
-### TASK-505: восстановление пароля в CRM `[ ]`
+### TASK-505: восстановление пароля в CRM `[x]` — `feat/crm-email-auth`
 
 - В CRM нет страниц `forgot-password` и `reset-password`, поэтому ссылка из `login-form.tsx:78` ведёт на 404.
 - `requestPasswordReset` всегда отправляет тип `site` (`email-verification.service.ts:117`). Сотрудник CRM
@@ -144,8 +144,12 @@
 - Шаблон письма ведёт на `${baseUrl}/auth/recovery/${token}` (`reset-password.template.tsx:38`). Такого роута
   нет ни в CRM, ни в web: web ждёт `/{locale}/auth/reset-password?token=`. Значит, в кабинете участника
   сброс пароля тоже сломан.
+- Сделано: `POST /crm/auth/password/reset` и `/reset/confirm`, страницы `/{locale}/auth/forgot-password` и
+  `/{locale}/auth/reset-password?token=` в CRM. Письмо ведёт на `{CRM|кабинет}/{locale}/auth/reset-password?token=`,
+  поэтому заодно заработал сброс в кабинете участника. Язык письма — из `locale` запроса, тексты на es/ru/en
+  вместо русского «TeaCoder». Сброс подтверждает email: ссылка из письма доказывает владение адресом.
 
-### TASK-506: подтверждение email владельца и сотрудников `[ ]`
+### TASK-506: подтверждение email владельца и сотрудников `[x]` — `feat/crm-email-auth`
 
 - Сейчас регистрация ставит `emailConfirmed: true` (`portal-registration.service.ts:85`), а `confirm-email`
   в CRM — заглушка на `setTimeout` (`app/[locale]/auth/confirm-email/page.tsx:28`).
@@ -153,6 +157,10 @@
   подтверждения и повторная отправка.
 - Предложение: автологин после регистрации оставить, а в CRM показывать баннер «подтвердите почту».
   Без подтверждения не работают оплата и приглашения сотрудников.
+- Сделано: регистрация клуба создаёт неподтверждённый email и шлёт письмо на языке формы; `/{locale}/auth/confirm/{token}`
+  в CRM, баннер «Подтвердите почту» с повторной отправкой (`POST /crm/auth/confirm-email/resend`, только с сессией),
+  `emailConfirmed` в `GET /crm/auth/me`. Заглушка `auth/confirm-email` удалена. e2e — `test/crm-email-auth.e2e-spec.ts`.
+- Не сделано: блокировка приглашений сотрудников без подтверждённой почты (оплаты пока нет) — отдельно, если нужно.
 
 ### TASK-508: «У вас уже есть клуб — завести ещё один?» `[ ]`
 
@@ -165,11 +173,12 @@
 - CRM: пункт «+ новый клуб» в переключателе порталов. Предлагать тариф для нескольких клубов
   (рабочее название «Пабло»; уточнить, это переименованный Cadena или новый тариф).
 
-### TASK-507: прод-настройки auth `[ ]`
+### TASK-507: прод-настройки auth `[~]`
 
 - `JWT_ACCESS_TOKEN_EXPIRES_IN` в Dokploy по умолчанию `1d` (`infra/dokploy/docker-compose.yml:93`), а
   access-токен не отзывается. Вернуть `15m`, но только после выкладки починки refresh (TASK-504).
   До неё короткий access означает вылет из CRM каждые 15 минут.
+- Сделано в `feat/crm-email-auth`: дефолт в compose — `15m`. Проверить, что в Environment Dokploy не задано `1d`.
 - P2: эндпоинт «выйти везде» (`logoutAll` в сервисе есть, роута нет).
 - P2: обнаружение повторного использования refresh и хранение хэша вместо самого токена.
 - ~~P2: гонка между `findActive` и `revokeById`~~ — закрыта ротацией compare-and-set (TASK-504).

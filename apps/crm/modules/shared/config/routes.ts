@@ -9,8 +9,11 @@ export const ROUTES = {
     CONTACTS: "/contacts",
     PROFILE: "/profile",
     PROFILE_SETTINGS: "/profile/settings",
-    CONFIRM_EMAIL: "/auth/confirm-email",
+    /** Ссылка из письма: `${ROUTES.CONFIRM_EMAIL}/${token}` */
+    CONFIRM_EMAIL: "/auth/confirm",
     FORGOT_PASSWORD: "/auth/forgot-password",
+    /** Ссылка из письма: `?token=` */
+    RESET_PASSWORD: "/auth/reset-password",
     PRIVACY: "/privacy",
     TERMS: "/terms",
     CRM_HOME: "/crm",

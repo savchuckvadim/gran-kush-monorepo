@@ -4,6 +4,10 @@ import {
     type PortalRegistrationEmailTexts,
 } from "../../consts/portal-registration-email";
 import {
+    RESET_PASSWORD_EMAIL_TEXTS,
+    type ResetPasswordEmailTexts,
+} from "../../consts/reset-password-email";
+import {
     Language,
     VERIFICATION_EMAIL_TEXTS,
     VerificationEmailTexts,
@@ -22,4 +26,10 @@ export const getPortalRegistrationEmailTexts = (
         PORTAL_REGISTRATION_EMAIL_TEXTS[language] ||
         PORTAL_REGISTRATION_EMAIL_TEXTS[DEFAULT_LANGUAGE]
     );
+};
+
+export const getResetPasswordEmailTexts = (
+    language: Language = DEFAULT_LANGUAGE
+): ResetPasswordEmailTexts => {
+    return RESET_PASSWORD_EMAIL_TEXTS[language] || RESET_PASSWORD_EMAIL_TEXTS[DEFAULT_LANGUAGE];
 };

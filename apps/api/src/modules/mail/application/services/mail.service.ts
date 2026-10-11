@@ -133,7 +133,6 @@ export class MailService {
     public async sendPasswordReset(
         user: Pick<User, "id" | "email">,
         name: string,
-        surname: string,
         token: string,
         language: SupportedLanguage = DEFAULT_LANGUAGE,
         type: "crm" | "site" = "site"
@@ -142,10 +141,9 @@ export class MailService {
 
         const html = await render(
             ResetPasswordTemplate({
-                user,
                 name,
-                surname,
                 token,
+                language,
                 baseUrl,
             })
         );

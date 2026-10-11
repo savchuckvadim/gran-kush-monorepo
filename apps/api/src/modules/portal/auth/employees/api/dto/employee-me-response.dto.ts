@@ -24,6 +24,9 @@ export class EmployeeMeResponseDto {
     @ApiProperty({ example: "employee@example.com", type: String })
     email: string;
 
+    @ApiProperty({ example: false, type: Boolean })
+    emailConfirmed: boolean;
+
     @ApiProperty({ type: () => [EmployeeEmploymentDto] })
     employments: EmployeeEmploymentDto[];
 }

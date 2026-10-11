@@ -266,6 +266,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/crm/auth/password/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request password reset: email with a link to the CRM */
+        post: operations["EmployeeAuth_requestPasswordReset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/auth/password/reset/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set a new password using the token from the email */
+        post: operations["EmployeeAuth_confirmPasswordReset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/auth/confirm-email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm email using the token from the email */
+        post: operations["EmployeeAuth_confirmEmail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/auth/confirm-email/resend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send the email confirmation letter to the current account again */
+        post: operations["EmployeeAuth_resendEmailConfirmation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/crm/mobile/auth/login": {
         parameters: {
             query?: never;
@@ -2404,7 +2472,64 @@ export interface components {
             id: string;
             /** @example employee@example.com */
             email: string;
+            /** @example false */
+            emailConfirmed: boolean;
             employments: components["schemas"]["EmployeeEmploymentDto"][];
+        };
+        RequestPasswordResetDto: {
+            /** @example user@example.com */
+            email: string;
+            /**
+             * @description Language of the email and of the page the link opens
+             * @example es
+             * @enum {string}
+             */
+            locale?: "ru" | "es" | "en";
+        };
+        PasswordResetResponseDto: {
+            /** @example true */
+            success: boolean;
+            /** @example Password reset successfully */
+            message: string;
+        };
+        ResetPasswordDto: {
+            /**
+             * @description Password reset token from email
+             * @example abc123def456...
+             */
+            token: string;
+            /**
+             * @description New password (must contain uppercase, lowercase and number)
+             * @example NewPassword123
+             */
+            newPassword: string;
+        };
+        VerifyEmailDto: {
+            /**
+             * @description Email verification token from email
+             * @example abc123def456...
+             */
+            token: string;
+        };
+        VerifyEmailResponseDto: {
+            /** @example true */
+            success: boolean;
+            /** @example Email confirmed successfully */
+            message: string;
+        };
+        ResendEmailConfirmationDto: {
+            /**
+             * @description Language of the email and of the page the link opens
+             * @example es
+             * @enum {string}
+             */
+            locale?: "ru" | "es" | "en";
+        };
+        ResendEmailConfirmationResponseDto: {
+            /** @example true */
+            success: boolean;
+            /** @example Confirmation email sent */
+            message: string;
         };
         EmployeeAuthResponseDto: {
             /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
@@ -2502,28 +2627,6 @@ export interface components {
             /** @example true */
             emailConfirmed: boolean;
             memberships: components["schemas"]["MemberMembershipDto"][];
-        };
-        RequestPasswordResetDto: {
-            /** @example user@example.com */
-            email: string;
-        };
-        PasswordResetResponseDto: {
-            /** @example true */
-            success: boolean;
-            /** @example Password reset successfully */
-            message: string;
-        };
-        ResetPasswordDto: {
-            /**
-             * @description Password reset token from email
-             * @example abc123def456...
-             */
-            token: string;
-            /**
-             * @description New password (must contain uppercase, lowercase and number)
-             * @example NewPassword123
-             */
-            newPassword: string;
         };
         MemberAuthResponseDto: {
             /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
@@ -2644,19 +2747,6 @@ export interface components {
              * @example Email confirmed successfully
              */
             message: string;
-        };
-        VerifyEmailResponseDto: {
-            /** @example true */
-            success: boolean;
-            /** @example Email confirmed successfully */
-            message: string;
-        };
-        VerifyEmailDto: {
-            /**
-             * @description Email verification token from email
-             * @example abc123def456...
-             */
-            token: string;
         };
         EmployeeProfileFieldDto: {
             /** @example first_name */
@@ -3244,6 +3334,12 @@ export interface components {
              * @example club-month
              */
             planCode?: string;
+            /**
+             * @description Language of the welcome and email confirmation letters
+             * @example es
+             * @enum {string}
+             */
+            locale?: "ru" | "es" | "en";
         };
         RegisteredPortalDto: {
             /** @example f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f */
@@ -4634,6 +4730,13 @@ export type SchemaEmployeeRefreshTokenResponseDto = components['schemas']['Emplo
 export type SchemaEmployeeLogoutResponseDto = components['schemas']['EmployeeLogoutResponseDto'];
 export type SchemaEmployeeEmploymentDto = components['schemas']['EmployeeEmploymentDto'];
 export type SchemaEmployeeMeResponseDto = components['schemas']['EmployeeMeResponseDto'];
+export type SchemaRequestPasswordResetDto = components['schemas']['RequestPasswordResetDto'];
+export type SchemaPasswordResetResponseDto = components['schemas']['PasswordResetResponseDto'];
+export type SchemaResetPasswordDto = components['schemas']['ResetPasswordDto'];
+export type SchemaVerifyEmailDto = components['schemas']['VerifyEmailDto'];
+export type SchemaVerifyEmailResponseDto = components['schemas']['VerifyEmailResponseDto'];
+export type SchemaResendEmailConfirmationDto = components['schemas']['ResendEmailConfirmationDto'];
+export type SchemaResendEmailConfirmationResponseDto = components['schemas']['ResendEmailConfirmationResponseDto'];
 export type SchemaEmployeeAuthResponseDto = components['schemas']['EmployeeAuthResponseDto'];
 export type SchemaRefreshTokenDto = components['schemas']['RefreshTokenDto'];
 export type SchemaRegisterEmployeeDto = components['schemas']['RegisterEmployeeDto'];
@@ -4645,9 +4748,6 @@ export type SchemaMemberRefreshTokenResponseDto = components['schemas']['MemberR
 export type SchemaMemberLogoutResponseDto = components['schemas']['MemberLogoutResponseDto'];
 export type SchemaMemberMembershipDto = components['schemas']['MemberMembershipDto'];
 export type SchemaMemberMeResponseDto = components['schemas']['MemberMeResponseDto'];
-export type SchemaRequestPasswordResetDto = components['schemas']['RequestPasswordResetDto'];
-export type SchemaPasswordResetResponseDto = components['schemas']['PasswordResetResponseDto'];
-export type SchemaResetPasswordDto = components['schemas']['ResetPasswordDto'];
 export type SchemaMemberAuthResponseDto = components['schemas']['MemberAuthResponseDto'];
 export type SchemaCheckUserExistsDto = components['schemas']['CheckUserExistsDto'];
 export type SchemaCheckUserExistsResponseDto = components['schemas']['CheckUserExistsResponseDto'];
@@ -4658,8 +4758,6 @@ export type SchemaUploadMemberFilesDto = components['schemas']['UploadMemberFile
 export type SchemaUploadMemberFilesResponseDto = components['schemas']['UploadMemberFilesResponseDto'];
 export type SchemaMemberConfirmEmailDto = components['schemas']['MemberConfirmEmailDto'];
 export type SchemaMemberConfirmEmailResponseDto = components['schemas']['MemberConfirmEmailResponseDto'];
-export type SchemaVerifyEmailResponseDto = components['schemas']['VerifyEmailResponseDto'];
-export type SchemaVerifyEmailDto = components['schemas']['VerifyEmailDto'];
 export type SchemaEmployeeProfileFieldDto = components['schemas']['EmployeeProfileFieldDto'];
 export type SchemaEmployeeListItemDto = components['schemas']['EmployeeListItemDto'];
 export type SchemaPaginatedResponseEmployeeListItemDto = components['schemas']['PaginatedResponse_EmployeeListItemDto'];
@@ -5276,6 +5374,183 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EmployeeMeResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmployeeAuth_requestPasswordReset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestPasswordResetDto"];
+            };
+        };
+        responses: {
+            /** @description Password reset email sent (if email exists) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PasswordResetResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmployeeAuth_confirmPasswordReset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetPasswordDto"];
+            };
+        };
+        responses: {
+            /** @description Password reset successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PasswordResetResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmployeeAuth_confirmEmail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyEmailDto"];
+            };
+        };
+        responses: {
+            /** @description Email confirmed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerifyEmailResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmployeeAuth_resendEmailConfirmation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResendEmailConfirmationDto"];
+            };
+        };
+        responses: {
+            /** @description Letter queued (nothing is sent when the email is already confirmed) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResendEmailConfirmationResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
             /** @description Unauthorized */

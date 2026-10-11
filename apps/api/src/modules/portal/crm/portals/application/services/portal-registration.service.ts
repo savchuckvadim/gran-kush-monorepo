@@ -1,5 +1,5 @@
 import { InjectQueue } from "@nestjs/bullmq";
-import { ConflictException, Injectable } from "@nestjs/common";
+import { ConflictException, Injectable, Logger } from "@nestjs/common";
 
 import { EmployeeRole } from "@prisma/client";
 import { hash } from "bcrypt";
@@ -8,6 +8,7 @@ import { Queue } from "bullmq";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { buildJobId } from "@common/queue/job-options";
 import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
+import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
 import { ProvisionPortalFromTemplatesService } from "@modules/portal/crm/entity-fields/application/services/provision-portal-from-templates.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 import { RegisterPortalDto } from "@modules/portal/crm/portals/api/dto/register-portal.dto";
@@ -39,10 +40,13 @@ type RegisterPortalResult = {
 
 @Injectable()
 export class PortalRegistrationService {
+    private readonly logger = new Logger(PortalRegistrationService.name);
+
     constructor(
         private readonly prisma: PrismaService,
         private readonly provisionFromTemplates: ProvisionPortalFromTemplatesService,
         private readonly employeeAuthService: EmployeeAuthService,
+        private readonly emailVerificationService: EmailVerificationService,
         @InjectQueue(PORTAL_EVENTS_QUEUE_NAME) private readonly portalEventsQueue: Queue
     ) {}
 
@@ -85,7 +89,7 @@ export class PortalRegistrationService {
                     email: normalizedEmail,
                     passwordHash,
                     isActive: true,
-                    emailConfirmed: true,
+                    emailConfirmed: false,
                 },
             });
 
@@ -162,6 +166,7 @@ export class PortalRegistrationService {
             ownerId: created.employee.id,
             ownerEmail: created.employee.user.email,
             ownerName: dto.ownerName.trim(),
+            language: dto.locale,
         };
 
         // Portal events are processed asynchronously in PortalEventsProcessor.
@@ -177,6 +182,20 @@ export class PortalRegistrationService {
                 ),
             }
         );
+
+        // Владелец уже внутри CRM; письмо с подтверждением можно запросить повторно из баннера,
+        // поэтому сбой постановки в очередь не должен ронять уже созданный клуб.
+        try {
+            await this.emailVerificationService.sendVerificationEmailToUserId(
+                created.employee.user.id,
+                { app: "crm", language: dto.locale }
+            );
+        } catch (error: unknown) {
+            this.logger.error(
+                `Email confirmation for portal ${created.portal.id} was not queued`,
+                error instanceof Error ? error.stack : String(error)
+            );
+        }
 
         return {
             portal: {

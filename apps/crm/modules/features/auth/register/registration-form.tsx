@@ -18,15 +18,14 @@ import { ROUTES } from "@/modules/shared/config/routes";
 import { notifyApiError } from "@/modules/shared/lib/notify-api-error";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
+import { PASSWORD_MIN_LENGTH, PASSWORD_RULE, toMailLocale } from "../lib/credentials";
+
 import {
     makePortalSlug,
     PORTAL_SLUG_MAX,
     PORTAL_SLUG_MIN,
     PORTAL_SLUG_PATTERN,
 } from "./lib/portal-slug";
-
-/** Same rule as RegisterPortalDto.password on the API. */
-const PASSWORD_RULE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
 
 type Translate = ReturnType<typeof useTranslations>;
 
@@ -51,7 +50,7 @@ const createRegistrationSchema = (t: Translate) =>
             email: z.string().trim().email(t("errors.email")),
             password: z
                 .string()
-                .min(8, t("errors.passwordLength"))
+                .min(PASSWORD_MIN_LENGTH, t("errors.passwordLength"))
                 .regex(PASSWORD_RULE, t("errors.passwordRule")),
             passwordConfirmation: z.string(),
         })
@@ -111,6 +110,7 @@ export function RegistrationForm() {
                     email: data.email.toLowerCase(),
                     password: data.password,
                     ownerName: data.ownerName,
+                    locale: toMailLocale(locale),
                     ...(planCode ? { planCode } : {}),
                 },
             });

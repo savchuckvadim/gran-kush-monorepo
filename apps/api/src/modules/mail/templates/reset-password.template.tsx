@@ -1,5 +1,3 @@
-import React from "react";
-
 import {
     Body,
     Button,
@@ -8,36 +6,34 @@ import {
     Head,
     Heading,
     Html,
-    Img,
     Preview,
     Section,
     Tailwind,
     Text,
 } from "@react-email/components";
-import { getVerificationEmailTexts } from "../lib/utils/template.util";
+import React from "react";
+
+import { MAIL_BRAND_NAME } from "../consts/mail.constants";
+import { Language } from "../consts/verifiaction-email";
+import { getResetPasswordEmailTexts } from "../lib/utils/template.util";
 
 interface ResetPasswordTemplateProps {
-    /** Минимум для шаблона / логов (полный Prisma User не обязателен). */
-    user: { email: string };
     name: string;
-    surname: string;
     token: string;
-    language?: "ru" | "es" | "en";
+    language?: Language;
     baseUrl: string;
 }
 
 export function ResetPasswordTemplate({
-    user,
     name,
-    surname,
     token,
     language = "en",
     baseUrl,
 }: ResetPasswordTemplateProps) {
-    const logo = `${baseUrl}/touch-icons/512x512.png`;
-    const resetLink = `${baseUrl}/auth/recovery/${token}`;
+    // Both the CRM and the member portal serve this page at /{locale}/auth/reset-password
+    const resetLink = `${baseUrl}/${language}/auth/reset-password?token=${token}`;
     const currentYear = new Date().getFullYear();
-    const texts = getVerificationEmailTexts(language);
+    const texts = getResetPasswordEmailTexts(language);
     return (
         <Html>
             <Head>
@@ -52,51 +48,47 @@ export function ResetPasswordTemplate({
             </Head>
             <Tailwind>
                 <Body>
-                    <Preview>Сброс пароля на TeaCoder</Preview>
+                    <Preview>{texts.preview}</Preview>
                     <Container className="mx-auto my-10 max-w-[500px] rounded-lg bg-white p-8 shadow-lg">
                         <Section className="text-center">
-                            <Img
-                                src={logo}
-                                width="100"
-                                height="100"
-                                alt="TeaCoder"
-                                className="mx-auto mb-4"
-                            />
+                            <Text
+                                className="mb-4 text-xl font-bold text-gray-900"
+                                style={{ fontFamily: "Geist, Arial" }}
+                            >
+                                {MAIL_BRAND_NAME}
+                            </Text>
                             <Heading
                                 className="text-2xl font-bold text-blue-600"
                                 style={{ fontFamily: "Geist, Arial" }}
                             >
-                                Сброс пароля
+                                {texts.heading}
                             </Heading>
                             <Text
                                 className="mb-6 text-gray-500"
                                 style={{ fontFamily: "Geist, Arial" }}
                             >
-                                Привет, {name} {surname ?? ""}! Мы получили запрос на сброс пароля
-                                для вашего аккаунта.
+                                {texts.greeting(name)}
                             </Text>
                             <Section className="mb-8 rounded-lg border border-blue-100 bg-blue-50 p-6">
                                 <Text
                                     className="mb-4 text-gray-800"
                                     style={{ fontFamily: "Geist, Arial" }}
                                 >
-                                    Нажмите на кнопку ниже, чтобы создать новый пароль. Ссылка
-                                    действительна в течение 1 часа.
+                                    {texts.instruction}
                                 </Text>
                                 <Button
                                     href={resetLink}
                                     className="inline-flex items-center justify-center rounded-full bg-blue-600 px-8 py-3 text-sm font-medium text-white hover:bg-blue-600/90 leading-none"
                                     style={{ fontFamily: "Geist, Arial" }}
                                 >
-                                    Сбросить пароль
+                                    {texts.buttonText}
                                 </Button>
                             </Section>
                             <Text
                                 className="text-sm text-gray-500"
                                 style={{ fontFamily: "Geist, Arial" }}
                             >
-                                Если вы не запрашивали сброс пароля, просто проигнорируйте это
-                                письмо.
+                                {texts.ignoreText}
                             </Text>
                             <Text
                                 className="mt-6 text-sm text-gray-400"

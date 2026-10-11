@@ -1,5 +1,3 @@
-import React from "react";
-
 import {
     Body,
     Button,
@@ -8,15 +6,16 @@ import {
     Head,
     Heading,
     Html,
-    Img,
     Preview,
     Section,
     Tailwind,
     Text,
 } from "@react-email/components";
+import React from "react";
 
-import { getVerificationEmailTexts } from "../lib/utils/template.util";
+import { MAIL_BRAND_NAME } from "../consts/mail.constants";
 import { Language } from "../consts/verifiaction-email";
+import { getVerificationEmailTexts } from "../lib/utils/template.util";
 
 interface EmailVerificationTemplateProps {
     name: string;
@@ -33,9 +32,8 @@ export function EmailVerificationTemplate({
     language = "en",
     baseUrl,
 }: EmailVerificationTemplateProps) {
-    const logo = `${baseUrl}/touch-icons/512x512.png`;
-    // const verfiyLink = `${baseUrl}/auth/verify/${token}`
-    const verfiyLink = `${baseUrl}/auth/confirm/${token}`;
+    // Both the CRM and the member portal serve this page at /{locale}/auth/confirm/{token}
+    const verfiyLink = `${baseUrl}/${language}/auth/confirm/${token}`;
     const texts = getVerificationEmailTexts(language);
     const currentYear = new Date().getFullYear();
 
@@ -59,13 +57,12 @@ export function EmailVerificationTemplate({
                     <Preview>{texts.preview}</Preview>
                     <Container className="mx-auto my-10 max-w-[500px] rounded-lg bg-white p-8 shadow-lg">
                         <Section className="text-center">
-                            <Img
-                                src={logo}
-                                width="100"
-                                height="100"
-                                alt="April"
-                                className="mx-auto mb-4"
-                            />
+                            <Text
+                                className="mb-4 text-xl font-bold text-gray-900"
+                                style={{ fontFamily: "Geist, Arial" }}
+                            >
+                                {MAIL_BRAND_NAME}
+                            </Text>
                             <Heading
                                 className="text-2xl font-bold text-blue-600"
                                 style={{ fontFamily: "Geist, Arial" }}

@@ -95,6 +95,7 @@ export class EmployeeMobileAuthController {
         return {
             id: user.id,
             email: user.email,
+            emailConfirmed: user.emailConfirmed,
             employments: user.employees.map((e) => ({
                 portalId: e.portalId,
                 employeeId: e.id,

@@ -90,7 +90,7 @@ export function LoginForm() {
                     placeholder="••••••••"
                 />
                 <Link
-                    href={localizedLink(ROUTES.FORGOT_PASSWORD)}
+                    href={`/${locale}${ROUTES.FORGOT_PASSWORD}`}
                     className="text-sm text-primary hover:underline"
                 >
                     {t("forgotPassword")}

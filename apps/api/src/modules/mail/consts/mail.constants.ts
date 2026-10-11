@@ -14,6 +14,11 @@ export const DEFAULT_EMAIL_FROM = "manager@april-app.ru";
 export const DEFAULT_EMAIL_FROM_NAME = "App";
 
 /**
+ * Product name in email texts — until the shared brand package (TASK-531) exists
+ */
+export const MAIL_BRAND_NAME = "PafPaf";
+
+/**
  * Email subjects by language and type
  */
 export const EMAIL_SUBJECTS = {
@@ -37,7 +42,8 @@ export const EMAIL_SUBJECTS = {
 /**
  * Supported languages
  */
-export type SupportedLanguage = "ru" | "es" | "en";
+export const SUPPORTED_LANGUAGES = ["ru", "es", "en"] as const;
+export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
 /**
  * Default language

@@ -1,4 +1,3 @@
-import React from "react";
 import {
     Body,
     Button,
@@ -7,15 +6,16 @@ import {
     Head,
     Heading,
     Html,
-    Img,
     Preview,
     Section,
     Tailwind,
     Text,
 } from "@react-email/components";
+import React from "react";
 
-import { getPortalRegistrationEmailTexts } from "../lib/utils/template.util";
+import { MAIL_BRAND_NAME } from "../consts/mail.constants";
 import { Language } from "../consts/verifiaction-email";
+import { getPortalRegistrationEmailTexts } from "../lib/utils/template.util";
 
 interface PortalRegistrationTemplateProps {
     ownerName: string;
@@ -30,9 +30,7 @@ export function PortalRegistrationTemplate({
     portalDisplayName,
     loginLink,
     language = "en",
-    baseUrl,
 }: PortalRegistrationTemplateProps) {
-    const logo = `${baseUrl}/touch-icons/512x512.png`;
     const currentYear = new Date().getFullYear();
     const texts = getPortalRegistrationEmailTexts(language);
 
@@ -50,18 +48,19 @@ export function PortalRegistrationTemplate({
                     />
                 </Head>
 
-                <Body style={{ backgroundColor: "#f8f9fa", fontFamily: "Inter, Arial, sans-serif" }}>
+                <Body
+                    style={{ backgroundColor: "#f8f9fa", fontFamily: "Inter, Arial, sans-serif" }}
+                >
                     <Preview>{texts.preview}</Preview>
 
                     <Container className="mx-auto my-10 max-w-[500px] rounded-lg bg-white p-8 shadow-lg">
                         <Section className="text-center">
-                            <Img
-                                src={logo}
-                                width="100"
-                                height="100"
-                                alt="April"
-                                className="mx-auto mb-4"
-                            />
+                            <Text
+                                className="mb-4 text-xl font-bold text-gray-900"
+                                style={{ fontFamily: "Geist, Arial" }}
+                            >
+                                {MAIL_BRAND_NAME}
+                            </Text>
 
                             <Heading
                                 className="text-2xl font-bold text-blue-600"
@@ -70,7 +69,10 @@ export function PortalRegistrationTemplate({
                                 {texts.heading}
                             </Heading>
 
-                            <Text className="mb-6 text-gray-500" style={{ fontFamily: "Geist, Arial" }}>
+                            <Text
+                                className="mb-6 text-gray-500"
+                                style={{ fontFamily: "Geist, Arial" }}
+                            >
                                 {texts.greeting(ownerName)}
                             </Text>
 
@@ -91,11 +93,17 @@ export function PortalRegistrationTemplate({
                                 </Button>
                             </Section>
 
-                            <Text className="text-sm text-gray-500" style={{ fontFamily: "Geist, Arial" }}>
+                            <Text
+                                className="text-sm text-gray-500"
+                                style={{ fontFamily: "Geist, Arial" }}
+                            >
                                 {texts.ignoreText}
                             </Text>
 
-                            <Text className="mt-6 text-sm text-gray-400" style={{ fontFamily: "Geist, Arial" }}>
+                            <Text
+                                className="mt-6 text-sm text-gray-400"
+                                style={{ fontFamily: "Geist, Arial" }}
+                            >
                                 {texts.footerNote(currentYear, portalDisplayName)}
                             </Text>
                         </Section>
@@ -105,4 +113,3 @@ export function PortalRegistrationTemplate({
         </Tailwind>
     );
 }
-

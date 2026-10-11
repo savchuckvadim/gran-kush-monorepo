@@ -1,10 +1,22 @@
 import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 
 import { MailService } from "@mail/application/services/mail.service";
+import { DEFAULT_LANGUAGE, type SupportedLanguage } from "@mail/consts/mail.constants";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
+import { hash } from "bcrypt";
 import { randomBytes } from "crypto";
 
 import { RefreshTokenRepository } from "@modules/portal/auth/shared/domain/repositories/refresh-token-repository.interface";
+
+/** Which frontend the link in the email opens: CRM for employees, member portal for members. */
+export type AuthMailApp = "crm" | "member";
+
+export interface AuthMailOptions {
+    app: AuthMailApp;
+    language?: SupportedLanguage;
+}
+
+const MEMBER_MAIL: AuthMailOptions = { app: "member" };
 
 @Injectable()
 export class EmailVerificationService {
@@ -31,7 +43,10 @@ export class EmailVerificationService {
     /**
      * Отправка письма подтверждения глобальному аккаунту.
      */
-    async sendVerificationEmailToUserId(userId: string): Promise<void> {
+    async sendVerificationEmailToUserId(
+        userId: string,
+        options: AuthMailOptions = MEMBER_MAIL
+    ): Promise<void> {
         const user = await this.userRepository.findById(userId);
         if (!user || user.emailConfirmed) {
             return;
@@ -46,14 +61,23 @@ export class EmailVerificationService {
             emailVerificationExpiresAt: expiresAt,
         });
 
-        await this.mailService.sendMamberEmailVerification(
-            {
-                name: user.displayName ?? user.email,
-                surname: null,
-            },
-            { id: user.id, email: user.email },
-            token
-        );
+        const recipient = { name: user.displayName ?? user.email, surname: null };
+        const language = options.language ?? DEFAULT_LANGUAGE;
+        if (options.app === "crm") {
+            await this.mailService.sendEmployeeEmailVerification(
+                recipient,
+                { id: user.id, email: user.email },
+                token,
+                language
+            );
+        } else {
+            await this.mailService.sendMamberEmailVerification(
+                recipient,
+                { id: user.id, email: user.email },
+                token,
+                language
+            );
+        }
     }
 
     /**
@@ -94,7 +118,10 @@ export class EmailVerificationService {
     /**
      * Запрос на сброс пароля
      */
-    async requestPasswordReset(email: string): Promise<{ success: boolean; message: string }> {
+    async requestPasswordReset(
+        email: string,
+        options: AuthMailOptions = MEMBER_MAIL
+    ): Promise<{ success: boolean; message: string }> {
         const user = await this.userRepository.findByEmail(email);
 
         if (!user) {
@@ -117,8 +144,9 @@ export class EmailVerificationService {
         await this.mailService.sendPasswordReset(
             { id: user.id, email: user.email },
             user.displayName ?? user.email,
-            "",
-            token
+            token,
+            options.language ?? DEFAULT_LANGUAGE,
+            options.app === "crm" ? "crm" : "site"
         );
 
         return {
@@ -144,13 +172,12 @@ export class EmailVerificationService {
             throw new UnauthorizedException("Reset token has expired");
         }
 
-        // Хешируем новый пароль
-        const bcrypt = await import("bcrypt");
-        const passwordHash = await bcrypt.hash(newPassword, 10);
+        const passwordHash = await hash(newPassword, 10);
 
-        // Обновляем пароль и очищаем токен
+        // Ссылка из письма доказывает владение адресом, поэтому email заодно подтверждается
         await this.userRepository.update(user.id, {
             passwordHash,
+            emailConfirmed: true,
             resetPasswordToken: null,
             resetPasswordExpiresAt: null,
         });

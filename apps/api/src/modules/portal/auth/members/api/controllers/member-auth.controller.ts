@@ -160,7 +160,10 @@ export class MemberAuthController {
     async requestPasswordReset(
         @Body() dto: RequestPasswordResetDto
     ): Promise<PasswordResetResponseDto> {
-        return this.emailVerificationService.requestPasswordReset(dto.email);
+        return this.emailVerificationService.requestPasswordReset(dto.email, {
+            app: "member",
+            language: dto.locale,
+        });
     }
 
     @Post("password/reset/confirm")

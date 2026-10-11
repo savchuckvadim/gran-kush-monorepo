@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
-import { IsOptional, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { SUPPORTED_LANGUAGES, type SupportedLanguage } from "@mail/consts/mail.constants";
+import { IsIn, IsOptional, IsString, Matches, MaxLength, MinLength } from "class-validator";
 
 import { IsEmailWithLowerCase } from "@common/decorators/dto/is-email-with-lower-case.decorator";
 
@@ -61,4 +62,13 @@ export class RegisterPortalDto {
     @MaxLength(40)
     @Matches(/^[a-z0-9-]+$/)
     planCode?: string;
+
+    @ApiPropertyOptional({
+        enum: SUPPORTED_LANGUAGES,
+        example: "es",
+        description: "Language of the welcome and email confirmation letters",
+    })
+    @IsOptional()
+    @IsIn(SUPPORTED_LANGUAGES)
+    locale?: SupportedLanguage;
 }
