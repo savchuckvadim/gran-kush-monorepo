@@ -601,6 +601,14 @@
                         "light": "Día",
                         "dark": "Noche"
                     }
+                },
+                "sociopath": {
+                    "name": "Sociópata",
+                    "description": "Grafito y un solo rojo. Una sonrisa sangrante de fondo, sin bordes: solo esquinas redondeadas."
+                },
+                "infierno": {
+                    "name": "Infierno",
+                    "description": "Black metal: negro absoluto, blanco hueso y letra fraktur. El color, solo para las alertas."
                 }
             }
         },

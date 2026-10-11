@@ -615,6 +615,89 @@
     --shadow-card: 0 20px 44px -32px rgb(0 0 0 / 0.8);
 }
 
+/* Sociopath: graphite and one red; the Red John smiley is the wallpaper. No borders — only radius */
+
+[data-skin="sociopath"] {
+    --radius: 1rem;
+    --background: #ebebeb;
+    --foreground: #212121;
+    --card: #ffffff;
+    --primary: #f44848;
+    --primary-foreground: #ffffff;
+    --secondary: #e8e8e8;
+    --muted: #e6e6e6;
+    --muted-foreground: #595959;
+    --accent: #fde4e4;
+    --destructive: #d62f2f;
+    --border: transparent;
+    --input: transparent;
+    --sidebar: #f4f4f4;
+    --chart-1: #f44848;
+    --chart-2: #323232;
+    --chart-3: #9a9a9a;
+    --chart-4: #ff9d9d;
+    --chart-5: #595959;
+    --success: #2f8a57;
+    --warning: #b8740f;
+    --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+    --display-weight: 800;
+    --display-tracking: -0.045em;
+    --shadow-card: none;
+    --sociopath-tile: url("/skins/sociopath/tile-light.svg");
+}
+
+[data-skin="sociopath"].dark {
+    --background: #141414;
+    --foreground: #f4f4f4;
+    --card: #262626;
+    --primary: #f44848;
+    --primary-foreground: #ffffff;
+    --secondary: #2e2e2e;
+    --muted: #2b2b2b;
+    --muted-foreground: #9a9a9a;
+    --accent: #3a2222;
+    --destructive: #ff6b6b;
+    --sidebar: #1c1c1c;
+    --chart-1: #f44848;
+    --chart-2: #ebebeb;
+    --chart-3: #595959;
+    --chart-4: #ff9d9d;
+    --chart-5: #323232;
+    --success: #6cc08b;
+    --warning: #e2a54a;
+    --sociopath-tile: url("/skins/sociopath/tile-dark.svg");
+}
+
+/* Infierno: black metal — pitch black, bone white and fraktur; colour only in a warning */
+
+[data-skin="infierno"] {
+    --radius: 0.15rem;
+    --background: #000000;
+    --foreground: #e9e4da;
+    --card: #0b0b0b;
+    --primary: #e9e4da;
+    --primary-foreground: #000000;
+    --secondary: #141414;
+    --muted: #0e0e0e;
+    --muted-foreground: #8d877d;
+    --accent: #1a1918;
+    --destructive: #b3121f;
+    --border: #3a3632;
+    --sidebar: #000000;
+    --chart-1: #e9e4da;
+    --chart-2: #8d877d;
+    --chart-3: #b3121f;
+    --chart-4: #4a4744;
+    --chart-5: #262422;
+    --success: #9db48a;
+    --warning: #c9a14a;
+    --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+    --font-display: var(--font-fraktur), var(--font-ruslan), serif;
+    --display-weight: 400;
+    --display-tracking: 0.01em;
+    --shadow-card: none;
+}
+
 /* Control sizes: PafPaf sets its own above; skins with big touch targets or pills here */
 
 [data-skin="asceta"] {
@@ -1039,7 +1122,7 @@
     color: #ffffff;
 }
 
-/* Mediterráneo: azulejos under the menu, terracotta line under the header */
+/* Mediterráneo: azulejos under the menu, terracotta frame around the content */
 
 :root[data-skin="mediterraneo"] [data-slot="sidebar"] {
     background-color: var(--sidebar);
@@ -1057,8 +1140,43 @@
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%237fb2ea' stroke-width='1.4'%3E%3Crect x='1' y='1' width='38' height='38'/%3E%3Cpath d='M20 4 L36 20 L20 36 L4 20Z'/%3E%3Ccircle cx='20' cy='20' r='5'/%3E%3Cpath d='M1 1 L8 8 M39 1 L32 8 M1 39 L8 32 M39 39 L32 32'/%3E%3C/g%3E%3C/svg%3E");
 }
 
-:root[data-skin="mediterraneo"] [data-slot="app-header"] {
-    box-shadow: inset 0 -2px 0 var(--terracotta);
+/* From md up the terracotta line is the content frame (shell.css); on phones it stays under the header */
+@media (max-width: 767.98px) {
+    :root[data-skin="mediterraneo"] [data-slot="app-header"] {
+        box-shadow: inset 0 -2px 0 var(--terracotta);
+    }
+}
+
+/* Sociopath: with no borders, fields and outline buttons are told apart by fill */
+
+:root[data-skin="sociopath"] :is([data-slot="input"], [data-slot="select-trigger"], textarea) {
+    background-color: var(--muted);
+    border-color: transparent;
+}
+
+:root[data-skin="sociopath"] [data-slot="button"][data-variant="outline"] {
+    background-color: var(--secondary);
+    border-color: transparent;
+}
+
+:root[data-skin="sociopath"] [data-slot="sidebar-link"][data-active="true"] {
+    background: var(--primary);
+    color: var(--primary-foreground);
+}
+
+/* Infierno: bone on black, raw grain under everything */
+
+:root[data-skin="infierno"] body {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+:root[data-skin="infierno"] [data-slot="sidebar-link"][data-active="true"] {
+    background: var(--primary);
+    color: var(--primary-foreground);
+}
+
+:root[data-skin="infierno"] h1 {
+    text-shadow: 0 0 18px rgb(233 228 218 / 0.18);
 }
 
 /* =================== energy saving =================== */

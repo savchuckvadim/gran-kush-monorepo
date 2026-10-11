@@ -601,6 +601,14 @@
                         "light": "Day",
                         "dark": "Night"
                     }
+                },
+                "sociopath": {
+                    "name": "Sociopath",
+                    "description": "Graphite and a single red. A bleeding smiley as wallpaper, no frames — only rounded corners."
+                },
+                "infierno": {
+                    "name": "Inferno",
+                    "description": "Black metal: pitch black, bone white and fraktur lettering. Colour only for warnings."
                 }
             }
         },

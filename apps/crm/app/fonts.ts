@@ -19,6 +19,7 @@ import {
     Rubik_Mono_One,
     Ruslan_Display,
     Unbounded,
+    UnifrakturMaguntia,
 } from "next/font/google";
 
 import type { CSSProperties } from "react";
@@ -128,6 +129,13 @@ const pirata = Pirata_One({
     display: "swap",
     preload: false,
 });
+// Latin only, like Pirata One: Infierno takes Cyrillic from Ruslan Display.
+const fraktur = UnifrakturMaguntia({
+    subsets: ["latin"],
+    weight: "400",
+    display: "swap",
+    preload: false,
+});
 const ruslan = Ruslan_Display({
     subsets: ["latin", "cyrillic"],
     weight: "400",
@@ -181,4 +189,5 @@ type CustomProperties = CSSProperties & Record<`--${string}`, string>;
  */
 export const fontStyle: CustomProperties = {
     "--font-pirata": pirata.style.fontFamily.split(",")[0] ?? "serif",
+    "--font-fraktur": fraktur.style.fontFamily.split(",")[0] ?? "serif",
 };

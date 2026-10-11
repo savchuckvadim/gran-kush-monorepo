@@ -28,13 +28,8 @@ export function ShellBrand({ name, clubName, className }: ShellBrandProps) {
             )}
             <span data-slot="brand-name" className="relative min-w-0">
                 <span className="block truncate text-lg font-bold tracking-tight">{label}</span>
-                <span data-slot="brand-blood" aria-hidden="true">
-                    <i />
-                    <i />
-                    <i />
-                    <i />
-                    <i />
-                </span>
+                {/* Grind: a still drip band; Infierno: thorns (packages/ui/src/styles/shell.css) */}
+                <span data-slot="brand-blood" aria-hidden="true" />
             </span>
         </span>
     );
