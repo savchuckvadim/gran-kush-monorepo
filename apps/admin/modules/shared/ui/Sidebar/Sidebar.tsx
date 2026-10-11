@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 
-import { Cannabis, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ShieldCheck } from "lucide-react";
 
 import { Button } from "@workspace/ui";
 import { cn } from "@workspace/ui/lib/utils";
@@ -52,7 +52,7 @@ export function Sidebar({ title, items, homeHref, footer }: ISidebarProps) {
             >
                 <div className="flex justify-between h-16 items-center px-6 py-8 md:justify-center md:px-0 lg:justify-between lg:px-6">
                     <Link href={homeHref} className="flex items-center gap-2" onClick={close}>
-                        <Cannabis className="h-6 w-6 shrink-0 text-primary" />
+                        <ShieldCheck className="h-6 w-6 shrink-0 text-primary" />
                         <span
                             className={cn(
                                 "text-lg font-bold md:hidden",

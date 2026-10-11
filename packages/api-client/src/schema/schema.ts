@@ -3005,7 +3005,7 @@ export interface components {
             portalId: string;
             /** @example 123e4567-e89b-12d3-a456-426614174999 */
             memberId: string;
-            /** @example GK-000123 */
+            /** @example MBR-000123 */
             membershipNumber?: string;
             /** @example true */
             isActive: boolean;
@@ -3848,15 +3848,15 @@ export interface components {
             id: string;
             /**
              * @description Уникальный код категории
-             * @example flower
+             * @example drinks
              */
             code: string;
             /**
              * @description Название категории
-             * @example Цветы
+             * @example Напитки
              */
             name: string;
-            /** @example Категория цветочной продукции */
+            /** @example Категория напитков */
             description?: string | null;
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
             parentId?: string | null;
@@ -3908,7 +3908,7 @@ export interface components {
         ProductListDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
             id: string;
-            /** @example OG Kush */
+            /** @example Producto A */
             name: string;
             /** @example SKU-001 */
             sku?: string | null;
@@ -3966,7 +3966,7 @@ export interface components {
         ProductDetailDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
             id: string;
-            /** @example OG Kush */
+            /** @example Producto A */
             name: string;
             /** @example SKU-001 */
             sku?: string | null;
@@ -3984,7 +3984,7 @@ export interface components {
             measurementUnit?: components["schemas"]["MeasurementUnitDto"];
             /** @example 2026-03-16T12:00:00.000Z */
             createdAt: string;
-            /** @example Классический сорт */
+            /** @example Descripción del producto */
             description?: string | null;
             /** @example 1000 */
             initialQuantity: number;
@@ -3994,7 +3994,7 @@ export interface components {
             thc?: number | null;
             /** @example 0.5 */
             cbd?: number | null;
-            /** @example Indica */
+            /** @example Variante A */
             strain?: string | null;
             images: components["schemas"]["ProductImageDto"][];
             /** @example 2026-03-16T12:00:00.000Z */
@@ -4011,9 +4011,9 @@ export interface components {
              * @example 550e8400-e29b-41d4-a716-446655440000
              */
             measurementUnitId: string;
-            /** @example OG Kush */
+            /** @example Producto A */
             name: string;
-            /** @example Классический сорт */
+            /** @example Descripción del producto */
             description?: string;
             /** @example SKU-001 */
             sku?: string;
@@ -4038,7 +4038,7 @@ export interface components {
             thc?: number;
             /** @example 0.5 */
             cbd?: number;
-            /** @example Indica */
+            /** @example Variante A */
             strain?: string;
         };
         UpdateProductDto: {
@@ -4046,9 +4046,9 @@ export interface components {
             categoryId?: string;
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
             measurementUnitId?: string;
-            /** @example OG Kush */
+            /** @example Producto A */
             name?: string;
-            /** @example Классический сорт */
+            /** @example Descripción del producto */
             description?: string | null;
             /** @example SKU-001 */
             sku?: string | null;
@@ -4070,7 +4070,7 @@ export interface components {
             thc?: number | null;
             /** @example 0.5 */
             cbd?: number | null;
-            /** @example Indica */
+            /** @example Variante A */
             strain?: string | null;
         };
         ProductCategoryTreeDto: {
@@ -4078,15 +4078,15 @@ export interface components {
             id: string;
             /**
              * @description Уникальный код категории
-             * @example flower
+             * @example drinks
              */
             code: string;
             /**
              * @description Название категории
-             * @example Цветы
+             * @example Напитки
              */
             name: string;
-            /** @example Категория цветочной продукции */
+            /** @example Категория напитков */
             description?: string | null;
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
             parentId?: string | null;
@@ -4105,11 +4105,11 @@ export interface components {
             children?: components["schemas"]["ProductCategoryDto"][];
         };
         CreateProductCategoryDto: {
-            /** @example flower */
+            /** @example drinks */
             code: string;
-            /** @example Цветы */
+            /** @example Напитки */
             name: string;
-            /** @example Категория цветочной продукции */
+            /** @example Категория напитков */
             description?: string;
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
             parentId?: string;
@@ -4120,11 +4120,11 @@ export interface components {
             sortOrder: number;
         };
         UpdateProductCategoryDto: {
-            /** @example flower */
+            /** @example drinks */
             code?: string;
-            /** @example Цветы */
+            /** @example Напитки */
             name?: string;
-            /** @example Категория цветочной продукции */
+            /** @example Категория напитков */
             description?: string | null;
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
             parentId?: string | null;
@@ -4492,7 +4492,7 @@ export interface components {
         OrderItemProductDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
             id: string;
-            /** @example OG Kush */
+            /** @example Producto A */
             name: string;
             /** @example SKU-001 */
             sku?: string | null;
@@ -4520,7 +4520,7 @@ export interface components {
              * @example 38.75
              */
             totalPrice: number;
-            /** @example Без стеблей */
+            /** @example Подарочная упаковка */
             notes?: string | null;
             product: components["schemas"]["OrderItemProductDto"];
         };
@@ -4611,7 +4611,7 @@ export interface components {
              * @example 2.5
              */
             quantity: number;
-            /** @example Без стеблей */
+            /** @example Подарочная упаковка */
             notes?: string;
         };
         CreateOrderDto: {

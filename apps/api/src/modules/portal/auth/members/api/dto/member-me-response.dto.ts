@@ -7,7 +7,7 @@ export class MemberMembershipDto {
     @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174999", type: String })
     memberId: string;
 
-    @ApiPropertyOptional({ example: "GK-000123", type: String })
+    @ApiPropertyOptional({ example: "MBR-000123", type: String })
     membershipNumber?: string;
 
     @ApiProperty({ example: true, type: Boolean })

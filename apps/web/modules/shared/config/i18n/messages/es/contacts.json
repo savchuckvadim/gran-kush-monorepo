@@ -1,17 +1,10 @@
 {
     "contacts": {
-        "title": "Contáctanos",
-        "subtitle": "Ponte en contacto con nosotros. Estamos aquí para ayudar.",
-        "email": "Correo electrónico",
-        "phone": "Teléfono",
-        "address": "Dirección",
-        "sendMessage": "Envíanos un mensaje",
-        "name": "Nombre",
-        "message": "Mensaje",
-        "send": "Enviar mensaje",
-        "emailPlaceholder": "example@email.com",
-        "emailValue": "info@grankush.com",
-        "phoneValue": "+1 (234) 567-890",
-        "addressValue": "123 Main Street\nCity, State 12345\nCountry"
+        "title": "Contacto",
+        "subtitle": "Las dudas sobre la membresía, las visitas o los documentos las resuelve tu club.",
+        "clubsLabel": "Dirección del club",
+        "clubsValue": "Busca tu club en el catálogo",
+        "myClubsLabel": "Tus clubes",
+        "myClubsValue": "Clubes de los que eres miembro"
     }
 }

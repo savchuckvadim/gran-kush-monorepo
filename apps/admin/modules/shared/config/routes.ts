@@ -5,8 +5,6 @@
 
 export const ROUTES = {
     HOME: "/",
-    ABOUT: "/about-us",
-    CONTACTS: "/contacts",
     PROFILE: "/profile",
     PROFILE_SETTINGS: "/profile/settings",
     CONFIRM_EMAIL: "/auth/confirm-email",

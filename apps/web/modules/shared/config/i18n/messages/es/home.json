@@ -2,29 +2,29 @@
     "home": {
         "hero": {
             "title": "Bienvenido a",
-            "subtitle": "Tu club de cannabis de confianza. Únete a nuestra comunidad y experimenta productos de calidad premium con servicio profesional.",
+            "subtitle": "Tu área de miembro: únete a clubes, muestra tu código QR en la entrada y guarda tus visitas y documentos en un solo lugar.",
             "getStarted": "Comenzar",
-            "personalCabinet": "Cabina Personal"
+            "personalCabinet": "Área personal"
         },
         "about": {
-            "title": "Sobre nosotros",
-            "description": "Gran Kush es una asociación privada sin fines de lucro en el centro de Torrevieja. Creamos un espacio cultural seguro para compartir, relajarse y mantener un enfoque responsable del cannabis.",
+            "title": "Cómo funciona",
+            "description": "Clubes, salones y asociaciones gestionan a sus miembros con PafPaf. Te registras una vez y usas la misma cuenta en todos tus clubes.",
             "quality": {
-                "title": "Calidad y responsabilidad",
-                "description": "Compartimos información actualizada sobre variedades, reducción de riesgos y consumo consciente."
+                "title": "Una sola cuenta",
+                "description": "Tu perfil, tus documentos y tu firma se guardan en tu cuenta y se envían al club cuando te unes a él."
             },
             "community": {
-                "title": "Comunidad",
-                "description": "Encuentros regulares, noches temáticas y eventos culturales unen a los miembros en un ambiente de respeto."
+                "title": "Entrada con código QR",
+                "description": "Muestra tu código QR personal en la entrada del club. Tus visitas quedan en tu historial."
             },
             "service": {
-                "title": "Formato del club",
-                "description": "El acceso es exclusivo para miembros. No hacemos publicidad ni ventas."
+                "title": "Todos tus clubes en un lugar",
+                "description": "La membresía, las visitas y los gastos de cada club, en tu área personal."
             }
         },
         "cta": {
             "title": "¿Listo para comenzar?",
-            "description": "Únete a Gran Kush hoy y forma parte de nuestra comunidad. Regístrate ahora para comenzar.",
+            "description": "Crea tu cuenta y únete a tu club.",
             "button": "Registrarse ahora"
         }
     }

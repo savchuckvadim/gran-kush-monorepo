@@ -43,7 +43,7 @@ export class ProductListDto {
     @ApiProperty({ example: "550e8400-e29b-41d4-a716-446655440000", type: String })
     id: string;
 
-    @ApiProperty({ example: "OG Kush", type: String })
+    @ApiProperty({ example: "Producto A", type: String })
     name: string;
 
     @ApiPropertyOptional({ example: "SKU-001", type: String, nullable: true })
@@ -77,7 +77,7 @@ export class ProductListDto {
 // ─── Response — деталка ─────────────────────────────────────────────────────
 
 export class ProductDetailDto extends ProductListDto {
-    @ApiPropertyOptional({ example: "Классический сорт", type: String, nullable: true })
+    @ApiPropertyOptional({ example: "Descripción del producto", type: String, nullable: true })
     description?: string | null;
 
     @ApiProperty({ example: 1000.0, type: Number })
@@ -92,7 +92,7 @@ export class ProductDetailDto extends ProductListDto {
     @ApiPropertyOptional({ example: 0.5, type: Number, nullable: true })
     cbd?: number | null;
 
-    @ApiPropertyOptional({ example: "Indica", type: String, nullable: true })
+    @ApiPropertyOptional({ example: "Variante A", type: String, nullable: true })
     strain?: string | null;
 
     @ApiProperty({ type: () => [ProductImageDto] })
@@ -123,13 +123,13 @@ export class CreateProductDto {
     @IsNotEmpty()
     measurementUnitId: string;
 
-    @ApiProperty({ example: "OG Kush", type: String })
+    @ApiProperty({ example: "Producto A", type: String })
     @IsString()
     @IsNotEmpty()
     @MaxLength(255)
     name: string;
 
-    @ApiPropertyOptional({ example: "Классический сорт", type: String })
+    @ApiPropertyOptional({ example: "Descripción del producto", type: String })
     @IsOptional()
     @IsString()
     description?: string;
@@ -178,7 +178,7 @@ export class CreateProductDto {
     @Min(0)
     cbd?: number;
 
-    @ApiPropertyOptional({ example: "Indica", type: String })
+    @ApiPropertyOptional({ example: "Variante A", type: String })
     @IsOptional()
     @IsString()
     @MaxLength(100)
@@ -198,13 +198,13 @@ export class UpdateProductDto {
     @IsUUID()
     measurementUnitId?: string;
 
-    @ApiPropertyOptional({ example: "OG Kush", type: String })
+    @ApiPropertyOptional({ example: "Producto A", type: String })
     @IsOptional()
     @IsString()
     @MaxLength(255)
     name?: string;
 
-    @ApiPropertyOptional({ example: "Классический сорт", type: String, nullable: true })
+    @ApiPropertyOptional({ example: "Descripción del producto", type: String, nullable: true })
     @IsOptional()
     @IsString()
     description?: string | null;
@@ -267,7 +267,7 @@ export class UpdateProductDto {
     @Min(0)
     cbd?: number | null;
 
-    @ApiPropertyOptional({ example: "Indica", type: String, nullable: true })
+    @ApiPropertyOptional({ example: "Variante A", type: String, nullable: true })
     @IsOptional()
     @IsString()
     @MaxLength(100)
@@ -293,7 +293,7 @@ export class ProductFilterDto {
     isAvailable?: boolean;
 
     @ApiPropertyOptional({
-        example: "OG Kush",
+        example: "Producto A",
         type: String,
         description: "Поиск по name, sku, strain",
     })

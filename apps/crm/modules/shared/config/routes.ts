@@ -5,8 +5,6 @@
 
 export const ROUTES = {
     HOME: "/",
-    ABOUT: "/about-us",
-    CONTACTS: "/contacts",
     PROFILE: "/profile",
     PROFILE_SETTINGS: "/profile/settings",
     /** Ссылка из письма: `${ROUTES.CONFIRM_EMAIL}/${token}` */

@@ -363,13 +363,24 @@
   Читают его api, crm, admin и site. Сейчас такие константы есть только у сайта (`apps/site/modules/shared/config/site.ts`).
 - В i18n остаются только фразы с параметром `{brand}`.
 
-### TASK-532: чистка клубных текстов Gran Kush `[ ]` P0
+### TASK-532: чистка клубных текстов Gran Kush `[x]` P0 — `chore/legacy-club-texts`
 
 - Это TASK-402. В 38 файлах i18n: `home`, `about-us`, `contacts` (`info@grankush.com`), `common.companyName`,
   `crm.shell.brand`.
 - В crm и admin эти неймспейсы не нужны: удалить вместе с их типами в `types.ts`. В `apps/web` заменить
   тексты, когда будем включать `club.`.
 - Примеры «OG Kush» в Swagger (`product.dto.ts`, `order.dto.ts`) заменить на нейтральные: они видны в публичной схеме.
+- 2026-10-11, ветка `chore/legacy-club-texts`. crm и admin: удалены `home`, `about-us`, `contacts` во всех языках
+  (их и не загружал `i18n.ts`), ключи `common.companyName/companyTagline`, `navigation.about/contacts`, `crm.shell.brand`
+  в admin, `ROUTES.ABOUT/CONTACTS` и эти ключи в `types.ts`; в мёртвом `Sidebar` admin иконка-лист заменена. Кабинет
+  участника (`apps/web`): главная, «О нас» и «Контакты» переписаны на es/ru/en без бренда клуба — про кабинет участника
+  PafPaf; `companyName` — PafPaf. В «Контактах» вместо `info@grankush.com`, телефона-заглушки и формы, которая никуда
+  не отправляла, — ссылки на каталог клубов (адрес — на странице клуба из портала) и «Мои клубы». Иконка-лист в меню
+  кабинета заменена. API: примеры Swagger «OG Kush», «Indica», «Классический сорт», «Без стеблей», категория «flower»,
+  номер «GK-000123» заменены на нейтральные, `schema.ts` перегенерирован.
+- Осталось вне задачи: корневые `README.md`, `CLAUDE.md`, `TASKS.md`, `DOCUMENTATION.md` (TASK-560/561), `APP_NAME` в
+  `infra` (TASK-533), прототипы в `design/`. Поля товара `thc`, `cbd`, `strain` в схеме БД и форме CRM — это функции, не
+  тексты. В `apps/web` страницы каталога клубов и профиля пишут русские строки прямо в коде, без i18n.
 
 ### TASK-536: подписи системных полей на языке интерфейса `[ ]` P1
 
