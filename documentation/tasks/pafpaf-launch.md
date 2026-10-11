@@ -498,7 +498,7 @@
 - После 2026-08-26 записей нет. Не попали: загрузки (TASK-309), аудит безопасности, темы CRM, `apps/site`,
   Dokploy, публичные тарифы.
 
-### TASK-564: скилл `project-checkin` `[ ]`
+### TASK-564: скилл `project-checkin` `[x]` — `chore/checkin-skill`
 
 - `.claude/skills/project-checkin/SKILL.md`: заменить Gran Kush на PafPaf и удалить список «известных пробелов»
   от 2026-07-14 — они давно закрыты. Основным чек-листом сделать этот файл.
