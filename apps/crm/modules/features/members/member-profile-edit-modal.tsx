@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 
 import { Pencil } from "lucide-react";
 
-import { Button, FieldInput } from "@workspace/ui";
+import { Button, FieldInput, FieldSelect } from "@workspace/ui";
 
 import { CrmMemberDetails, useMemberStatusItems, useUpdateCrmMember } from "@/modules/entities/member";
 
@@ -168,27 +168,21 @@ export function MemberProfileEditModal({ member }: MemberProfileEditModalProps) 
                                     }))
                                 }
                             />
-                            <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium">{t("fields.status")}</label>
-                                <select
-                                    className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-                                    value={profileForm.statusItemId}
-                                    onChange={(e) =>
-                                        setProfileForm((prev) => ({
-                                            ...prev,
-                                            statusItemId: e.target.value,
-                                        }))
-                                    }
-                                    disabled={statusQuery.isPending || statusQuery.isError || statusQuery.isLoading}
-                                >
-                                    <option value="">—</option>
-                                    {(statusQuery.data ?? []).map((s) => (
-                                        <option key={s.id} value={s.id}>
-                                            {s.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                            <FieldSelect
+                                label={t("fields.status")}
+                                options={[
+                                    { value: "", label: "—" },
+                                    ...(statusQuery.data ?? []).map((s) => ({
+                                        value: s.id,
+                                        label: s.label,
+                                    })),
+                                ]}
+                                value={profileForm.statusItemId}
+                                onValueChange={(statusItemId) =>
+                                    setProfileForm((prev) => ({ ...prev, statusItemId }))
+                                }
+                                disabled={statusQuery.isPending || statusQuery.isError || statusQuery.isLoading}
+                            />
                             <FieldInput
                                 label={t("fields.documentType")}
                                 value={profileForm.documentType}

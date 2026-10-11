@@ -5,14 +5,14 @@ import { useState } from "react";
 import { ArrowDown, ArrowUp, Loader2, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button, Card, Input } from "@workspace/ui";
+import { Button, Card, FieldSelect, Input } from "@workspace/ui";
 
 import {
+    type EntityStageCategory,
     useCreateStageCategory,
     useDeleteStageCategory,
     useEntityStageCategories,
     useUpdateStageCategory,
-    type EntityStageCategory,
 } from "@/modules/entities/entity-settings";
 import { getApiErrorMessage } from "@/modules/shared";
 
@@ -202,19 +202,15 @@ function StageCategoryCard({ code, category }: { code: string; category: EntityS
                             className="h-8 w-10 cursor-pointer rounded border bg-background"
                             title="Цвет стадии"
                         />
-                        <select
-                            className="rounded-md border bg-background px-2 py-1.5 text-sm"
+                        <FieldSelect
+                            className="w-auto"
+                            aria-label="Семантика стадии"
+                            options={[...SEMANTICS]}
                             value={row.semantic}
-                            onChange={(e) =>
-                                patchRow(index, { semantic: e.target.value as Semantic })
+                            onValueChange={(value) =>
+                                patchRow(index, { semantic: value as Semantic })
                             }
-                        >
-                            {SEMANTICS.map((s) => (
-                                <option key={s.value} value={s.value}>
-                                    {s.label}
-                                </option>
-                            ))}
-                        </select>
+                        />
                         <Button
                             variant="ghost"
                             size="icon"

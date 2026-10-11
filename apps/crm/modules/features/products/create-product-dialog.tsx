@@ -14,6 +14,7 @@ import {
     DialogTitle,
     DialogTrigger,
     FieldInput,
+    FieldSelect,
 } from "@workspace/ui";
 
 import { useCategories } from "@/modules/entities/category";
@@ -110,47 +111,37 @@ export function CreateProductDialog() {
                         onChange={(e) => handleChange("sku", e.target.value)}
                     />
 
-                    <div className="space-y-1.5">
-                        <label className="text-sm font-medium">{t("category")}</label>
-                        <select
-                            value={form.categoryId}
-                            onChange={(e) => handleChange("categoryId", e.target.value)}
-                            disabled={isCategoriesLoading || !canSelectCategory}
-                            className="w-full rounded-md border bg-background px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                            <option value="">{t("selectCategory")}</option>
-                            {categories?.map((cat) => (
-                                <option key={cat.id} value={cat.id}>
-                                    {cat.name}
-                                </option>
-                            ))}
-                        </select>
-                        {!isCategoriesLoading && !canSelectCategory && (
-                            <p className="text-xs text-muted-foreground">
-                                {t("categoryRequiredHint")}
-                            </p>
-                        )}
-                    </div>
+                    <FieldSelect
+                        label={t("category")}
+                        placeholder={t("selectCategory")}
+                        options={(categories ?? []).map((cat) => ({
+                            value: cat.id,
+                            label: cat.name,
+                        }))}
+                        value={form.categoryId}
+                        onValueChange={(value) => handleChange("categoryId", value)}
+                        disabled={isCategoriesLoading || !canSelectCategory}
+                        helperText={
+                            !isCategoriesLoading && !canSelectCategory
+                                ? t("categoryRequiredHint")
+                                : undefined
+                        }
+                    />
 
-                    <div className="space-y-1.5">
-                        <label className="text-sm font-medium">{t("measurementUnit")}</label>
-                        <select
-                            value={form.measurementUnitId}
-                            onChange={(e) => handleChange("measurementUnitId", e.target.value)}
-                            disabled={isUnitsLoading || !canSelectUnit}
-                            className="w-full rounded-md border bg-background px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                            <option value="">{t("selectUnit")}</option>
-                            {units?.map((u) => (
-                                <option key={u.id} value={u.id}>
-                                    {u.name} ({u.code})
-                                </option>
-                            ))}
-                        </select>
-                        {!isUnitsLoading && !canSelectUnit && (
-                            <p className="text-xs text-muted-foreground">{t("unitRequiredHint")}</p>
-                        )}
-                    </div>
+                    <FieldSelect
+                        label={t("measurementUnit")}
+                        placeholder={t("selectUnit")}
+                        options={(units ?? []).map((u) => ({
+                            value: u.id,
+                            label: `${u.name} (${u.code})`,
+                        }))}
+                        value={form.measurementUnitId}
+                        onValueChange={(value) => handleChange("measurementUnitId", value)}
+                        disabled={isUnitsLoading || !canSelectUnit}
+                        helperText={
+                            !isUnitsLoading && !canSelectUnit ? t("unitRequiredHint") : undefined
+                        }
+                    />
 
                     <div className="grid grid-cols-2 gap-4">
                         <FieldInput

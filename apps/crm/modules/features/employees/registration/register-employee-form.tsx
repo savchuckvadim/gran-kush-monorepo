@@ -4,10 +4,10 @@ import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Button, FieldInput } from "@workspace/ui";
+import { Button, FieldInput, FieldSelect } from "@workspace/ui";
 
 import { usePortal } from "@/modules/processes";
 import { $api } from "@/modules/shared";
@@ -25,11 +25,18 @@ const schema = z.object({
 type FormInput = z.input<typeof schema>;
 type FormOutput = z.output<typeof schema>;
 
+const ROLE_OPTIONS = [
+    { value: "employee", label: "employee" },
+    { value: "manager", label: "manager" },
+    { value: "admin", label: "admin" },
+];
+
 export function RegisterEmployeeForm() {
     const { portalSlug } = usePortal();
     const [createdEmail, setCreatedEmail] = useState<string | null>(null);
     const {
         register,
+        control,
         handleSubmit,
         reset,
         formState: { errors, isSubmitting },
@@ -105,17 +112,19 @@ export function RegisterEmployeeForm() {
                     {...register("department")}
                     error={errors.department?.message}
                 />
-                <label className="flex flex-col gap-1 text-sm">
-                    <span className="text-foreground">Role</span>
-                    <select
-                        {...register("role")}
-                        className="h-10 rounded-md border border-input bg-background px-3"
-                    >
-                        <option value="employee">employee</option>
-                        <option value="manager">manager</option>
-                        <option value="admin">admin</option>
-                    </select>
-                </label>
+                <Controller
+                    name="role"
+                    control={control}
+                    render={({ field }) => (
+                        <FieldSelect
+                            label="Role"
+                            name={field.name}
+                            options={ROLE_OPTIONS}
+                            value={field.value ?? ""}
+                            onValueChange={field.onChange}
+                        />
+                    )}
+                />
             </div>
 
             <Button type="submit" disabled={isSubmitting || mutation.isPending}>

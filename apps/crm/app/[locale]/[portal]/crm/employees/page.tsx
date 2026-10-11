@@ -6,17 +6,22 @@ import { Loader2, UserCheck, UserX } from "lucide-react";
 import { toast } from "sonner";
 
 import type { SchemaEmployeeListItemDto } from "@workspace/api-client/core";
-import { Button, Card } from "@workspace/ui";
+import { Button, Card, FieldSelect } from "@workspace/ui";
 
-import { RegisterEmployeeForm } from "@/modules/features";
 import {
     useDeactivateEmployee,
     useEmployees,
     useUpdateEmployee,
 } from "@/modules/entities/employee";
+import { RegisterEmployeeForm } from "@/modules/features";
 import { useAuth } from "@/modules/processes/auth/provider/AuthProvider";
 
 // ─── Role badge ──────────────────────────────────────────────────────────────
+
+const ROLE_OPTIONS = [
+    { value: "manager", label: "manager" },
+    { value: "admin", label: "admin" },
+];
 
 const ROLE_STYLES: Record<string, string> = {
     portal_owner: "bg-purple-500/10 text-purple-700",
@@ -69,8 +74,7 @@ function EmployeeRow({
         });
     }
 
-    function handleRoleChange(e: React.ChangeEvent<HTMLSelectElement>) {
-        const role = e.target.value;
+    function handleRoleChange(role: string) {
         updateMutation.mutate(
             { id: employee.id, data: { role } },
             {
@@ -93,15 +97,21 @@ function EmployeeRow({
             <td className="px-3 py-2 text-muted-foreground">{employee.email}</td>
             <td className="px-3 py-2">
                 {canModify ? (
-                    <select
-                        defaultValue={employee.role}
-                        onChange={handleRoleChange}
+                    <FieldSelect
+                        size="sm"
+                        className="text-xs"
+                        aria-label="Роль"
+                        options={ROLE_OPTIONS}
+                        // роли без пункта в списке (employee) видны подсказкой, а не пустым полем
+                        defaultValue={
+                            ROLE_OPTIONS.some((option) => option.value === employee.role)
+                                ? employee.role
+                                : undefined
+                        }
+                        placeholder={employee.role}
+                        onValueChange={handleRoleChange}
                         disabled={isPending}
-                        className="rounded border bg-background px-1.5 py-0.5 text-xs"
-                    >
-                        <option value="manager">manager</option>
-                        <option value="admin">admin</option>
-                    </select>
+                    />
                 ) : (
                     <RoleBadge role={employee.role} />
                 )}

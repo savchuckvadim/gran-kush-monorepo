@@ -40,13 +40,16 @@ export interface FieldSelectProps {
     id?: string;
     /** Ширина и прочее у самого триггера; по умолчанию он во всю ширину поля. */
     className?: string;
-    /** Подпись для экранных читалок, когда видимого `label` нет. */
+    /** `sm` — компактный триггер для таблиц, карточек и тулбаров. */
+    size?: "sm" | "default";
+    /** Подпись для экранных читалок; по умолчанию — `label`. */
     "aria-label"?: string;
 }
 
 /**
  * Выпадающий список в стиле полей CRM (shadcn Select): заменяет нативный `<select>`,
- * чья стрелка и список берутся из ОС. Значение — строка; `""` — допустимый пункт «пусто».
+ * чья стрелка и список берутся из ОС. Значение — строка; `""` — допустимый пункт «пусто»,
+ * а без такого пункта `""` значит «ничего не выбрано» и показывает `placeholder`.
  */
 export function FieldSelect({
     options,
@@ -62,19 +65,27 @@ export function FieldSelect({
     name,
     id,
     className,
+    size,
     "aria-label": ariaLabel,
 }: FieldSelectProps) {
+    // Radix показывает placeholder только при значении "", поэтому в EMPTY "" уходит лишь тогда,
+    // когда среди пунктов есть сам пункт «пусто».
+    const hasEmptyOption = options.some((option) => option.value === "");
+    const toRootValue = (next: string | undefined) =>
+        next === "" && hasEmptyOption ? EMPTY : next;
+
     const select = (
         <Select
-            value={value === undefined ? undefined : toItemValue(value)}
-            defaultValue={defaultValue === undefined ? undefined : toItemValue(defaultValue)}
+            value={toRootValue(value)}
+            defaultValue={toRootValue(defaultValue)}
             onValueChange={(next) => onValueChange?.(fromItemValue(next))}
             disabled={disabled}
             name={name}
         >
             <SelectTrigger
                 id={id}
-                aria-label={ariaLabel}
+                size={size}
+                aria-label={ariaLabel ?? label}
                 aria-invalid={error ? "true" : undefined}
                 className={cn("w-full", className)}
             >

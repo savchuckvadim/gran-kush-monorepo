@@ -6,7 +6,7 @@ import { useLocale } from "next-intl";
 import { Copy, Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button, Card, FieldInput } from "@workspace/ui";
+import { Button, Card, FieldInput, FieldSelect } from "@workspace/ui";
 
 import {
     useCreateInvitation,
@@ -18,6 +18,8 @@ import { getApiErrorMessage } from "@/modules/shared";
 type EmployeeRole = "portal_owner" | "admin" | "manager" | "employee";
 
 const ROLES: EmployeeRole[] = ["admin", "manager", "employee"];
+
+const ROLE_OPTIONS = ROLES.map((r) => ({ value: r, label: r }));
 
 const STATUS_STYLES: Record<string, string> = {
     pending: "bg-amber-500/10 text-amber-700",
@@ -82,20 +84,12 @@ export function InvitationsSettingsPage() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                     />
-                    <div className="flex flex-col gap-1">
-                        <label className="text-sm font-medium">Роль</label>
-                        <select
-                            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-                            value={role}
-                            onChange={(e) => setRole(e.target.value as EmployeeRole)}
-                        >
-                            {ROLES.map((r) => (
-                                <option key={r} value={r}>
-                                    {r}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    <FieldSelect
+                        label="Роль"
+                        options={ROLE_OPTIONS}
+                        value={role}
+                        onValueChange={(value) => setRole(value as EmployeeRole)}
+                    />
                     <div className="flex items-end">
                         <Button
                             onClick={handleCreate}

@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { ArrowLeft, Edit2, Loader2, Save, X } from "lucide-react";
 
 import type { SchemaUpdateProductDto } from "@workspace/api-client/core";
-import { Button, Card, FieldInput } from "@workspace/ui";
+import { Button, Card, FieldInput, FieldSelect } from "@workspace/ui";
 
 import { useCategories } from "@/modules/entities/category";
 import { useMeasurementUnits } from "@/modules/entities/measurement-unit";
@@ -152,37 +152,27 @@ export function ProductDetailCard({ productId }: ProductDetailCardProps) {
                             onChange={(e) => handleChange("sku", e.target.value)}
                         />
 
-                        <div className="space-y-1.5">
-                            <label className="text-sm font-medium">{t("category")}</label>
-                            <select
-                                value={form.categoryId ?? ""}
-                                onChange={(e) => handleChange("categoryId", e.target.value)}
-                                className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                            >
-                                <option value="">{t("selectCategory")}</option>
-                                {categories?.map((cat) => (
-                                    <option key={cat.id} value={cat.id}>
-                                        {cat.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                        <FieldSelect
+                            label={t("category")}
+                            placeholder={t("selectCategory")}
+                            options={(categories ?? []).map((cat) => ({
+                                value: cat.id,
+                                label: cat.name,
+                            }))}
+                            value={form.categoryId ?? ""}
+                            onValueChange={(value) => handleChange("categoryId", value)}
+                        />
 
-                        <div className="space-y-1.5">
-                            <label className="text-sm font-medium">{t("measurementUnit")}</label>
-                            <select
-                                value={form.measurementUnitId ?? ""}
-                                onChange={(e) => handleChange("measurementUnitId", e.target.value)}
-                                className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                            >
-                                <option value="">{t("selectUnit")}</option>
-                                {units?.map((u) => (
-                                    <option key={u.id} value={u.id}>
-                                        {u.name} ({u.code})
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                        <FieldSelect
+                            label={t("measurementUnit")}
+                            placeholder={t("selectUnit")}
+                            options={(units ?? []).map((u) => ({
+                                value: u.id,
+                                label: `${u.name} (${u.code})`,
+                            }))}
+                            value={form.measurementUnitId ?? ""}
+                            onValueChange={(value) => handleChange("measurementUnitId", value)}
+                        />
 
                         <div className="grid grid-cols-2 gap-4">
                             <FieldInput

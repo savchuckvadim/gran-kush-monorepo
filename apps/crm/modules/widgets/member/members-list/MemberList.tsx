@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { Button } from "@workspace/ui";
+import { Button, FieldSelect } from "@workspace/ui";
 
 import {
     CrmMemberListFilters,
@@ -24,6 +24,8 @@ export function MemberList() {
     const [statusItemId, setStatusItemId] = useState("");
     const [filterFieldKey, setFilterFieldKey] = useState("");
     const [filterValue, setFilterValue] = useState("");
+    const statusSelectId = useId();
+    const filterFieldSelectId = useId();
 
     const listFilters = useMemo((): CrmMemberListFilters => {
         const f: CrmMemberListFilters = {};
@@ -117,39 +119,46 @@ export function MemberList() {
         <div className="space-y-3">
             <div className="flex flex-col gap-3 rounded-lg border bg-muted/30 p-3 md:flex-row md:flex-wrap md:items-end">
                 <div className="flex min-w-[160px] flex-col gap-1">
-                    <label className="text-xs font-medium text-muted-foreground">Status</label>
-                    <select
-                        className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-                        value={statusItemId}
-                        onChange={(e) => setStatusItemId(e.target.value)}
-                        disabled={isMetaLoading || isMetaError}
+                    <label
+                        htmlFor={statusSelectId}
+                        className="text-xs font-medium text-muted-foreground"
                     >
-                        <option value="">All</option>
-                        {statuses?.map((s) => (
-                            <option key={s.id} value={s.id}>
-                                {s.label}
-                            </option>
-                        ))}
-                    </select>
+                        Status
+                    </label>
+                    <FieldSelect
+                        id={statusSelectId}
+                        options={[
+                            { value: "", label: "All" },
+                            ...(statuses ?? []).map((s) => ({ value: s.id, label: s.label })),
+                        ]}
+                        value={statusItemId}
+                        onValueChange={setStatusItemId}
+                        disabled={isMetaLoading || isMetaError}
+                    />
                 </div>
                 <div className="flex min-w-[160px] flex-col gap-1">
-                    <label className="text-xs font-medium text-muted-foreground">Filter field</label>
-                    <select
-                        className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                    <label
+                        htmlFor={filterFieldSelectId}
+                        className="text-xs font-medium text-muted-foreground"
+                    >
+                        Filter field
+                    </label>
+                    <FieldSelect
+                        id={filterFieldSelectId}
+                        options={[
+                            { value: "", label: "—" },
+                            ...(filterFields ?? []).map((f) => ({
+                                value: f.fieldKey,
+                                label: f.label ?? f.fieldKey,
+                            })),
+                        ]}
                         value={filterFieldKey}
-                        onChange={(e) => {
-                            setFilterFieldKey(e.target.value);
+                        onValueChange={(value) => {
+                            setFilterFieldKey(value);
                             setFilterValue("");
                         }}
                         disabled={isMetaLoading || isMetaError}
-                    >
-                        <option value="">—</option>
-                        {filterFields?.map((f) => (
-                            <option key={f.fieldKey} value={f.fieldKey}>
-                                {f.label ?? f.fieldKey}
-                            </option>
-                        ))}
-                    </select>
+                    />
                 </div>
                 <div className="flex min-w-[200px] flex-1 flex-col gap-1">
                     <label className="text-xs font-medium text-muted-foreground">Value</label>

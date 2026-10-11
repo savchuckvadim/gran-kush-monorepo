@@ -6,17 +6,22 @@ import { useLocale } from "next-intl";
 import { Copy, Loader2, Plus, QrCode } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button, Card, FieldInput, QrCodeDisplay } from "@workspace/ui";
+import { Button, Card, FieldInput, FieldSelect, QrCodeDisplay } from "@workspace/ui";
 
 import {
+    type RegistrationLink,
     useCreateRegistrationLink,
     useRegistrationLinks,
     useUpdateRegistrationLink,
-    type RegistrationLink,
 } from "@/modules/entities/registration-links";
 import { getApiErrorMessage } from "@/modules/shared";
 
 type LinkKind = "public_link" | "kiosk";
+
+const KIND_OPTIONS: { value: LinkKind; label: string }[] = [
+    { value: "public_link", label: "Публичная ссылка" },
+    { value: "kiosk", label: "Планшет (kiosk)" },
+];
 
 export function RegistrationLinksSettingsPage() {
     const locale = useLocale();
@@ -81,17 +86,12 @@ export function RegistrationLinksSettingsPage() {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                     />
-                    <div className="flex flex-col gap-1">
-                        <label className="text-sm font-medium">Тип</label>
-                        <select
-                            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-                            value={kind}
-                            onChange={(e) => setKind(e.target.value as LinkKind)}
-                        >
-                            <option value="public_link">Публичная ссылка</option>
-                            <option value="kiosk">Планшет (kiosk)</option>
-                        </select>
-                    </div>
+                    <FieldSelect
+                        label="Тип"
+                        options={KIND_OPTIONS}
+                        value={kind}
+                        onValueChange={(value) => setKind(value as LinkKind)}
+                    />
                     <FieldInput
                         label="Лимит использований"
                         type="number"

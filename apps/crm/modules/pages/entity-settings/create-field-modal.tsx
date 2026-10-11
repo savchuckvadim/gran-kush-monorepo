@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button, FieldInput } from "@workspace/ui";
+import { Button, FieldInput, FieldSelect } from "@workspace/ui";
 
 import { useCreateEntityField } from "@/modules/entities/entity-settings";
 import { getApiErrorMessage } from "@/modules/shared";
@@ -30,6 +30,8 @@ const FIELD_TYPES = [
 ] as const;
 
 type FieldType = (typeof FIELD_TYPES)[number];
+
+const FIELD_TYPE_OPTIONS = FIELD_TYPES.map((t) => ({ value: t, label: t }));
 
 export function CreateFieldModal({ code, onClose }: { code: string; onClose: () => void }) {
     const createMutation = useCreateEntityField(code);
@@ -92,20 +94,12 @@ export function CreateFieldModal({ code, onClose }: { code: string; onClose: () 
                         value={label}
                         onChange={(e) => setLabel(e.target.value)}
                     />
-                    <div className="flex flex-col gap-1">
-                        <label className="text-sm font-medium">Тип</label>
-                        <select
-                            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-                            value={type}
-                            onChange={(e) => setType(e.target.value as FieldType)}
-                        >
-                            {FIELD_TYPES.map((t) => (
-                                <option key={t} value={t}>
-                                    {t}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    <FieldSelect
+                        label="Тип"
+                        options={FIELD_TYPE_OPTIONS}
+                        value={type}
+                        onValueChange={(value) => setType(value as FieldType)}
+                    />
 
                     <div className="flex flex-wrap gap-4 text-sm">
                         <label className="inline-flex items-center gap-2">

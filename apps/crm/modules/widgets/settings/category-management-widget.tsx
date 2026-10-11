@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { Loader2, Plus } from "lucide-react";
 
-import { Button, Card, FieldInput } from "@workspace/ui";
+import { Button, Card, FieldInput, FieldSelect } from "@workspace/ui";
 
 import { useCategories, useCreateCategory } from "@/modules/entities/category";
 
@@ -74,21 +74,18 @@ export function CategoryManagementWidget() {
                     onChange={(e) => setDescription(e.target.value)}
                 />
 
-                <div className="space-y-1.5">
-                    <label className="text-sm font-medium">{t("fields.parentCategory")}</label>
-                    <select
-                        value={parentId}
-                        onChange={(e) => setParentId(e.target.value)}
-                        className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                    >
-                        <option value="">{t("fields.noParent")}</option>
-                        {sortedCategories.map((category) => (
-                            <option key={category.id} value={category.id}>
-                                {category.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                <FieldSelect
+                    label={t("fields.parentCategory")}
+                    options={[
+                        { value: "", label: t("fields.noParent") },
+                        ...sortedCategories.map((category) => ({
+                            value: category.id,
+                            label: category.name,
+                        })),
+                    ]}
+                    value={parentId}
+                    onValueChange={setParentId}
+                />
 
                 {createCategoryMutation.isError && (
                     <p className="text-sm text-destructive">{t("createError")}</p>

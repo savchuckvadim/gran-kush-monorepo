@@ -7,7 +7,7 @@ import { Button, Card } from "@workspace/ui";
 import { type EntityRecord } from "@/modules/entities/entity-records";
 
 import { recordTitle, renderValue } from "./record-display";
-import { StageSelect, type EntityStage } from "./stage-select";
+import { type EntityStage, StageSelect } from "./stage-select";
 
 export function RecordsTable({
     records,
@@ -43,7 +43,7 @@ export function RecordsTable({
                                 <td className="px-3 py-2">
                                     {stages.length > 0 ? (
                                         <StageSelect
-                                            className="h-8 rounded border border-input bg-background px-1.5 text-xs"
+                                            className="text-xs"
                                             stages={stages}
                                             value={record.stage?.id ?? ""}
                                             onChange={(stageId) =>
