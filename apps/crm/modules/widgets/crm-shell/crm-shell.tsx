@@ -11,6 +11,8 @@ import { PortalSwitcher } from "@/modules/widgets/portal-switcher";
 import { SubscriptionGate } from "@/modules/widgets/subscription-gate";
 
 import { AccountMenu } from "./account-menu";
+import { HeaderThemeToggle } from "./header-theme-toggle";
+import { HeaderTray } from "./header-tray";
 import { SearchTrigger } from "./search-trigger";
 
 interface CrmShellProps {
@@ -49,6 +51,8 @@ function CrmHeader() {
 
             <div className="ml-auto flex items-center gap-1 md:gap-2">
                 <SearchTrigger />
+                <HeaderTray />
+                <HeaderThemeToggle />
                 <AccountMenu />
             </div>
         </header>

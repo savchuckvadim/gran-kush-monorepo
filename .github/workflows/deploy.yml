@@ -8,6 +8,8 @@
 #
 # Repository secrets (deploy):
 #   SSH_HOST, SSH_USER, SSH_PRIVATE_KEY — dedicated deploy key, not a personal one
+#   DOKPLOY_URL, DOKPLOY_API_KEY, DOKPLOY_COMPOSE_ID — PafPaf on Dokploy: once the
+#     images are pushed, Dokploy is asked to redeploy (infra/dokploy/README.md)
 # Repository variables (build/smoke):
 #   NEXT_PUBLIC_API_URL, NEXT_PUBLIC_CRM_URL, NEXT_PUBLIC_MAIN_SITE_URL —
 #     inlined into the Next.js bundles at BUILD time (changing them = rebuild)
@@ -85,16 +87,40 @@ jobs:
           cache-to: type=gha,mode=max,scope=${{ matrix.app }}
 
   # Job-level `if` cannot read the secrets context, so a tiny job exports
-  # "are the SSH secrets configured" as an output for the deploy job.
+  # which deploy targets have their secrets configured.
   server-check:
     name: Check deploy target
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - id: check
-        run: echo "configured=${{ secrets.SSH_HOST != '' && secrets.SSH_USER != '' && secrets.SSH_PRIVATE_KEY != '' }}" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "configured=${{ secrets.SSH_HOST != '' && secrets.SSH_USER != '' && secrets.SSH_PRIVATE_KEY != '' }}" >> "$GITHUB_OUTPUT"
+          echo "dokploy=${{ secrets.DOKPLOY_URL != '' && secrets.DOKPLOY_API_KEY != '' && secrets.DOKPLOY_COMPOSE_ID != '' }}" >> "$GITHUB_OUTPUT"
     outputs:
       configured: ${{ steps.check.outputs.configured }}
+      dokploy: ${{ steps.check.outputs.dokploy }}
+
+  # Dokploy pulls :latest on deploy, so it must start only after every image is
+  # pushed. Its own Autodeploy (git push hook) would race the build — keep it off.
+  dokploy:
+    name: Deploy on Dokploy
+    needs: [build, server-check]
+    if: needs.server-check.outputs.dokploy == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger compose deploy
+        env:
+          DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
+          DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+          DOKPLOY_COMPOSE_ID: ${{ secrets.DOKPLOY_COMPOSE_ID }}
+        run: |
+          curl -fsS --retry 3 --retry-delay 10 -X POST "${DOKPLOY_URL%/}/api/compose.deploy" \
+            -H "x-api-key: ${DOKPLOY_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "{\"composeId\":\"${DOKPLOY_COMPOSE_ID}\"}" > /dev/null
+          echo "Dokploy deploy queued for ${{ github.sha }}"
 
   deploy:
     name: Deploy to server

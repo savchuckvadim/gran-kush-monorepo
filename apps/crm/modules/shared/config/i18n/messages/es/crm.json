@@ -18,10 +18,7 @@
             },
             "account": {
                 "open": "Menú de la cuenta",
-                "profile": "Perfil",
-                "appearance": "Apariencia",
-                "darkMode": "Modo oscuro",
-                "lightMode": "Modo claro",
+                "profile": "Mi cuenta",
                 "language": "Idioma",
                 "logout": "Cerrar sesión",
                 "roles": {
@@ -29,13 +26,24 @@
                     "admin": "Administrador",
                     "manager": "Gerente",
                     "employee": "Empleado"
-                }
+                },
+                "settings": "Ajustes",
+                "billing": "Plan y pago"
             },
             "club": {
                 "title": "Clubes",
                 "fallback": "Club",
                 "loading": "Cargando…",
                 "empty": "No hay clubes disponibles"
+            },
+            "tray": {
+                "open": "Más",
+                "close": "Ocultar",
+                "skins": "Temas",
+                "eco": "Ahorro de energía",
+                "ecoForced": "Este tema siempre ahorra energía",
+                "lightMode": "Modo claro",
+                "darkMode": "Modo oscuro"
             }
         },
         "subscription": {

@@ -70,9 +70,21 @@
 
 ## Обновления и откат
 
-- **Обновление.** Push в `main` → GitHub Actions «Deploy» собирает образы (около 10 минут) → в Dokploy нажать Deploy. Каждый деплой скачивает свежие образы.
+- **Обновление.** Push в `main` → GitHub Actions «Deploy» собирает образы (около 10 минут) → задача «Deploy on Dokploy» сама запускает деплой, если заданы секреты ниже. Без них — нажать Deploy в Dokploy. Каждый деплой скачивает свежие образы.
 - **Откат.** В Environment указать `TAG=sha-<полный хеш коммита>` и нажать Deploy. Когда исправление выкачено, вернуть `TAG=latest`.
 - **Изменились коллекции или блоки Payload.** Нужна миграция: локально выполнить `pnpm --filter site migrate:create <имя>` и закоммитить. В проде она применится при старте сайта.
+
+### Автодеплой из GitHub Actions
+
+Переключатель Autodeploy в Dokploy не подходит. С провайдером Git он срабатывает только от webhook в настройках репозитория, а если сработает — начнёт деплой сразу после push, пока образы ещё собираются, и выкатит старые. Поэтому он выключен, а деплой запускает сам workflow после сборки.
+
+1. Dokploy → Settings → Profile → API Keys: создать ключ.
+2. ID compose-сервиса — последняя часть адреса страницы сервиса в Dokploy: `…/services/compose/<composeId>`.
+3. GitHub → Settings → Secrets and variables → Actions → New repository secret:
+   - `DOKPLOY_URL` — адрес панели, например `https://dokploy.example.com`;
+   - `DOKPLOY_API_KEY` — ключ из шага 1;
+   - `DOKPLOY_COMPOSE_ID` — из шага 2.
+4. Проверка: после следующего push в `main` в Actions → Deploy зелёная задача «Deploy on Dokploy», а в Dokploy → Deployments появился новый деплой.
 
 ## Почта
 
@@ -105,6 +117,3 @@
 
    Если `pg_restore` пишет, что формат не тот, дамп — обычный SQL: вместо `pg_restore` подать его в `psql -U pafpaf -d restore_check`. Количество клубов и участников должно совпасть с продом.
 
-## Пока не сделано
-
-- Автоматический деплой после сборки образов, например вебхуком Dokploy из `deploy.yml`. Пока деплой запускается кнопкой.
