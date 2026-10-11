@@ -115,6 +115,7 @@ services:
       # работает ручное продление из админки
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_AUTOMATIC_TAX: ${STRIPE_AUTOMATIC_TAX:-false}
       BILLING_TRIAL_DAYS: ${BILLING_TRIAL_DAYS:-365}
       BILLING_GRACE_DAYS: ${BILLING_GRACE_DAYS:-7}
     depends_on:

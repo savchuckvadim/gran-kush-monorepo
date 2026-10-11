@@ -4,6 +4,7 @@ import {
     Injectable,
     ServiceUnavailableException,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 
 import Stripe from "stripe";
 
@@ -38,8 +39,18 @@ const isStripeEvent = (payload: unknown): payload is Stripe.Event =>
 export class StripeBillingProvider extends BillingProvider {
     readonly name = BILLING_PROVIDERS.STRIPE;
 
-    constructor(@Inject(STRIPE_CLIENT) private readonly stripe: Stripe | null) {
+    /**
+     * Stripe Tax: IVA сверху цены тарифа (цены у нас «без IVA»), NIF/CIF и адрес клиента
+     * в checkout. Включать после настройки Stripe Tax в кабинете Stripe.
+     */
+    private readonly automaticTax: boolean;
+
+    constructor(
+        @Inject(STRIPE_CLIENT) private readonly stripe: Stripe | null,
+        config?: ConfigService
+    ) {
         super();
+        this.automaticTax = config?.get<string>("STRIPE_AUTOMATIC_TAX") === "true";
     }
 
     isConfigured(): boolean {
@@ -84,7 +95,17 @@ export class StripeBillingProvider extends BillingProvider {
             // Метаданные подписки едут во все её события и счета: по ним находится портал
             subscription_data: { metadata: { portalId: request.portalId } },
             allow_promotion_codes: true,
-            billing_address_collection: "auto",
+            billing_address_collection: this.automaticTax ? "required" : "auto",
+            ...(this.automaticTax
+                ? {
+                      automatic_tax: { enabled: true },
+                      tax_id_collection: { enabled: true },
+                      // Налог считается по адресу: у уже известного клиента его нужно разрешить обновить
+                      ...(request.customerId
+                          ? { customer_update: { address: "auto", name: "auto" } }
+                          : {}),
+                  }
+                : {}),
             success_url: request.successUrl,
             cancel_url: request.cancelUrl,
             ...(request.locale ? { locale: request.locale } : {}),

@@ -187,6 +187,23 @@
 
 ## B. Оплата: ежемесячная подписка в евро — P0/P1
 
+**Сделано 2026-10-11** (`feat/billing-stripe`). Устройство — [backend/BILLING.md](../backend/BILLING.md), подключение Stripe по шагам —
+[backend/STRIPE_SETUP.md](../backend/STRIPE_SETUP.md). Коротко:
+
+- оплата — Stripe Checkout, автосписание и повторы — Stripe, карта и отмена — Stripe Customer Portal;
+- вебхук `/platform/billing/webhooks/stripe`: подпись по сырому телу, на каждое событие читается актуальная подписка;
+- тарифы в админке по id цены Stripe, скрытые тарифы по ссылке `?plan=`;
+- бесплатный год при регистрации, крон: конец триала или ручного срока → past_due + 7 дней → expired;
+  портал не гасится, CRM закрывает гард 402, страница «Suscripción» открыта всегда;
+- ручная оплата и конец триала — в админке (`platform/admin/billing/*`, экраны в `apps/admin`);
+- `STRIPE_AUTOMATIC_TAX=true` включает IVA через Stripe Tax; facturas по Verifactu — не сделано.
+
+Решения Вадима 2026-10-11: бесплатный период по умолчанию — **1 год**; провайдер — **Stripe**; три вида тарифов —
+бесплатный `trial` (разработка, первые клубы), тестовый `prueba-month` за 5 €/мес для проверки оплаты настоящей
+картой, боевые помесячные в евро.
+
+Было:
+
 Сейчас:
 
 - триал бессрочный: `currentPeriodEnd` не заполняется;
@@ -195,7 +212,7 @@
 
 А если бы сработал, портал стал бы `suspended` и отдавал 404 даже на `portal/info`. Экран оплаты был бы недоступен.
 
-### TASK-510: тарифы через админ-API `[ ]` P0
+### TASK-510: тарифы через админ-API `[x]` P0 — `feat/billing-stripe`
 
 - Платформенный CRUD: `GET/POST/PATCH /platform/admin/billing/plans` и архивирование через `isActive=false`
   вместо удаления, потому что на тариф ссылаются подписки. Доступ только для платформенного админа.
@@ -204,7 +221,7 @@
   `site/PRODUCT_SITES.md` («Тарифы в API») остаётся справкой по кодам и ценам.
 - Убрать `trial` из публичного `GET /platform/billing/plans`: сейчас он попадает в выдачу.
 
-### TASK-511: долгий бесплатный период `[ ]` P0
+### TASK-511: долгий бесплатный период `[x]` P0 — `feat/billing-stripe`
 
 - Добавить поля `trialEndsAt` и `cancelAtPeriodEnd`. `trialEndsAt` выставлять при регистрации:
   регистрация + настраиваемая длительность. Это env или настройка платформы, по умолчанию N лет — решение №4.
@@ -213,7 +230,7 @@
 - Гард: портал без подписки получает 402, то есть fail-closed (`common/guards/portal-crm-subscription.guard.ts:33-35`).
 - На сайте обещание «первые N лет бесплатно» — контент в Payload, цифра должна совпадать с настройкой.
 
-### TASK-512: портал с истёкшей подпиской не должен пропадать `[ ]` P0
+### TASK-512: портал с истёкшей подпиской не должен пропадать `[x]` P0 — `feat/billing-stripe`
 
 - Крон ставит порталу `suspended` (`cron/services/billing-cron.service.ts:33`), а `ensureActive`
   (`portal-resolution.service.ts:69`) отвечает на это 404 «Portal is not available». Это касается
@@ -221,21 +238,21 @@
 - Предложение: при истечении подписки `Portal.status` не трогать, доступ закрывает гард через 402.
   `suspended` оставить для ручной блокировки со стороны платформы.
 
-### TASK-513: страница «Подписка» в CRM `[ ]` P0
+### TASK-513: страница «Подписка» в CRM `[x]` P0 — `feat/billing-stripe`
 
 - `GET /crm/billing`: текущий тариф, статус и даты. Доступ только owner/admin, гейт 402 не применяется.
 - В CRM — раздел в настройках и кнопка в `SubscriptionGate`
   (`modules/widgets/subscription-gate/subscription-gate.tsx`). Пока провайдера нет, кнопка показывает
   «Свяжитесь с нами» и реквизиты.
 
-### TASK-514: ручное продление в админке `[ ]` P0 — для первой офлайн-продажи
+### TASK-514: ручное продление в админке `[x]` P0 — `feat/billing-stripe`
 
 - В `apps/admin` сделать список порталов с подписками (`GET /platform/portals` уже есть, только на чтение)
   и действие «Отметить оплату». Оно создаёт `Payment` с `provider=manual`, ставит `active` и новый
   `currentPeriodEnd`.
 - Проводить через `PaymentsService.recordProviderPayment`: он идемпотентен по `(provider, externalId)`.
 
-### TASK-515: Stripe `[ ]` P1
+### TASK-515: Stripe `[x]` P1 — `feat/billing-stripe`
 
 - Аккаунт Stripe подать заранее: проверка бизнеса идёт дольше, чем интеграция.
 - Адаптер `PaymentWebhookVerifier` для Stripe (`stripe.webhooks.constructEvent`), клиент Stripe API, переменные окружения.
@@ -248,7 +265,7 @@
   - в `Payment` — `subscriptionId` и оплаченный период.
 - Чек-лист перед подключением: `backend/IDEMPOTENCY_AND_SCALING.md` §4.
 
-### TASK-516: checkout и машина состояний `[ ]` P1
+### TASK-516: checkout и машина состояний `[x]` P1 — `feat/billing-stripe`
 
 - `POST /crm/billing/checkout` и `POST /crm/billing/portal`: только для owner, без гейта.
 - Обработчики событий с compare-and-set по статусу:
@@ -256,7 +273,7 @@
   - оплата не прошла → `past_due` и `graceEndsAt`;
   - отмена → `canceled` в конце периода.
 
-### TASK-517: счета и IVA `[ ]` P1
+### TASK-517: счета и IVA `[~]` P1
 
 - IVA 21% и reverse charge для B2B внутри ЕС.
 - Сбор NIF/CIF и адреса клиента.
