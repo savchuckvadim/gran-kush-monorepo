@@ -411,8 +411,8 @@ export const SITE_DOC = {
         en: "Prices exclude VAT; 21% is added in Spain.",
     } satisfies L,
     legalNote: {
-        es: "PafPaf es una CRM para asociaciones sin ánimo de lucro. No vende ni promociona productos.",
-        ru: "PafPaf — CRM для некоммерческих ассоциаций. Мы ничего не продаём и не рекламируем.",
-        en: "PafPaf is a CRM for non-profit associations. It does not sell or promote any products.",
+        es: "PafPaf: CRM por suscripción para clubes sociales, asociaciones y salones.",
+        ru: "PafPaf — CRM по подписке для социальных клубов, ассоциаций и салонов.",
+        en: "PafPaf: a subscription CRM for social clubs, associations and salons.",
     } satisfies L,
 };
