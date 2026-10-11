@@ -74,7 +74,37 @@
 - **Откат.** В Environment указать `TAG=sha-<полный хеш коммита>` и нажать Deploy. Когда исправление выкачено, вернуть `TAG=latest`.
 - **Изменились коллекции или блоки Payload.** Нужна миграция: локально выполнить `pnpm --filter site migrate:create <имя>` и закоммитить. В проде она применится при старте сайта.
 
+## Почта
+
+Письма (подтверждение email, сброс пароля, приглашения) уходят по SMTP. Провайдер должен быть в ЕС: передавать адреса участников клубов за пределы ЕЭЗ нельзя, а для России, например Beget, нет решения об адекватности.
+
+- **Amazon SES, регион `eu-north-1`.** AWS у нас уже субобработчик, файлы лежат в том же регионе. Хост `email-smtp.eu-north-1.amazonaws.com`. SMTP-логин и пароль создаются в консоли SES, ключи IAM для этого не подходят. Домен `paf-paf.app` подтвердить записями DKIM в Cloudflare и запросить production access: в sandbox SES шлёт только на подтверждённые адреса.
+- **Brevo** (Франция) — запасной вариант: `smtp-relay.brevo.com`.
+
+В Environment: `MAIL_HOST`, `MAIL_PORT=587` (Hetzner закрывает 25 и 465), `MAIL_LOGIN`, `MAIL_PASSWORD`, `SMTP_FROM`, например `PafPaf <no-reply@paf-paf.app>`. В DNS — SPF и DMARC для домена отправителя.
+
+Если `MAIL_HOST` пустой, API пытается слать через localhost: письма не уходят, а в логах `pafpaf-api` появляется `Error sending email`. Проверить после настройки три письма: регистрация клуба, сброс пароля в CRM, приглашение сотрудника. В логах должно быть `Email successfully sent`.
+
+## Бэкапы
+
+Настраиваются в Dokploy, в репозитории для них ничего нет.
+
+1. **Хранилище.** Settings → S3 Destinations: отдельный bucket в ЕС (AWS `eu-north-1` или Hetzner Object Storage) с отдельным ключом доступа только к нему. Срок хранения 30 дней: правило lifecycle в bucket или число копий в настройке бэкапа.
+2. **Базы.** В Compose-сервисе `pafpaf`, вкладка Backups: сервис `pafpaf-postgres`, PostgreSQL, пользователь `POSTGRES_USER`. Две задачи — базы `pafpaf` и `site`, каждый день ночью, например `30 3 * * *`. Если такой вкладки у Compose нет, сначала обновить Dokploy: копия тома работающего Postgres ненадёжна.
+3. **Медиа сайта.** Volume Backups: том `site_media`, раз в сутки.
+4. **Файлы участников** (сканы, подписи) лежат в S3 `AWS_BUCKET_NAME`, не на сервере. Включить в этом bucket versioning, чтобы удаление можно было откатить.
+5. **Проверка восстановления** — один раз сразу после настройки, потом раз в квартал. Скачать свежий дамп `pafpaf` из bucket и развернуть его во временную базу на сервере:
+
+   ```bash
+   C=$(docker ps --format '{{.Names}}' | grep pafpaf-postgres)
+   docker exec "$C" createdb -U pafpaf restore_check
+   gunzip -c pafpaf-backup.sql.gz | docker exec -i "$C" pg_restore -U pafpaf -d restore_check --no-owner
+   docker exec "$C" psql -U pafpaf -d restore_check -c "select count(*) from portals; select count(*) from members;"
+   docker exec "$C" dropdb -U pafpaf restore_check
+   ```
+
+   Если `pg_restore` пишет, что формат не тот, дамп — обычный SQL: вместо `pg_restore` подать его в `psql -U pafpaf -d restore_check`. Количество клубов и участников должно совпасть с продом.
+
 ## Пока не сделано
 
-- Бэкапы Postgres и тома с медиа сайта: `pg_dump` по расписанию или Volume Backups в Dokploy.
 - Автоматический деплой после сборки образов, например вебхуком Dokploy из `deploy.yml`. Пока деплой запускается кнопкой.

@@ -50,8 +50,6 @@ export class PortalEventsProcessor extends WorkerHost {
                 });
 
                 await this.telegramService.sendPortalRegistrationNotification({
-                    ownerEmail: payload.ownerEmail,
-                    ownerName: payload.ownerName,
                     portalSlug: payload.portalSlug,
                     portalDisplayName: payload.portalDisplayName,
                 });

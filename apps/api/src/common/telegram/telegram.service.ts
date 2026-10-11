@@ -1,14 +1,16 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
+/*
+ * Telegram is outside the EEA with no adequacy decision, so notifications carry no personal data:
+ * no emails or names of owners, employees or members. Who and what is looked up in the admin by slug.
+ */
+
 export interface EmailVerificationNotification {
-    email: string;
     subject: string;
 }
 
 export interface PortalRegistrationNotification {
-    ownerEmail: string;
-    ownerName: string;
     portalSlug: string;
     portalDisplayName: string;
 }
@@ -32,7 +34,6 @@ export class TelegramService {
 
         const message = `📧 *Email Verification Sent*
 
-📬 Email: ${data.email}
 📝 Subject: ${data.subject}
 ⏰ Time: ${new Date().toLocaleString()}`;
 
@@ -99,7 +100,6 @@ export class TelegramService {
     async sendPortalRegistrationNotification(data: PortalRegistrationNotification): Promise<void> {
         const message = `🏢 *Portal registered*
 
-👤 Owner: ${data.ownerName} (${data.ownerEmail})
 🧾 Portal: ${data.portalDisplayName} (\`${data.portalSlug}\`)
 ⏰ Time: ${new Date().toLocaleString()}`;
 

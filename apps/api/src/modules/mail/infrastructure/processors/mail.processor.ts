@@ -64,11 +64,8 @@ export class MailProcessor extends WorkerHost {
         // Check if this is an email verification job
         if (emailType === EmailType.VERIFICATION) {
             try {
-                await this.telegramService.sendEmailVerificationNotification({
-                    email: to[0],
-                    subject,
-                });
-                this.logger.log(`📱 Telegram notification sent for email verification to ${to[0]}`);
+                await this.telegramService.sendEmailVerificationNotification({ subject });
+                this.logger.log(`📱 Telegram notification sent for email verification`);
             } catch (error) {
                 this.logger.error(
                     `❌ Failed to send Telegram notification: ${error instanceof Error ? error.message : String(error)}`
