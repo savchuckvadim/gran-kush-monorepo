@@ -23,7 +23,8 @@
             "pastDueUntil": "Your subscription payment is overdue. Access remains until {date} — please renew.",
             "blockedTitle": "Subscription inactive",
             "blockedDescription": "Access to the CRM of \"{portal}\" is suspended: the subscription has expired or was canceled. Renew it to continue.",
-            "plan": "Plan"
+            "plan": "Plan",
+            "goToBilling": "Go to subscription"
         },
         "members": {
             "title": "Members",
@@ -440,6 +441,10 @@
                     "empty": "No units yet"
                 },
                 "links": {
+                    "billing": {
+                        "title": "Subscription",
+                        "description": "Plan, payment by card, invoices."
+                    },
                     "entities": {
                         "title": "Fields, forms and stages",
                         "description": "Entity builder: members, orders, smart processes."
@@ -554,6 +559,42 @@
                     }
                 }
             }
+        },
+        "billing": {
+            "title": "Subscription",
+            "description": "Your club plan, payment and invoices.",
+            "loading": "Loading subscription…",
+            "onlyOwner": "Only the club owner or an admin can manage the subscription.",
+            "currentPlan": "Current plan",
+            "trialUntil": "Free until {date}",
+            "renewsOn": "Renews on {date}",
+            "endsOn": "Ends on {date}",
+            "graceUntil": "Payment failed — access until {date}",
+            "inactive": "Access to the CRM is closed until payment",
+            "status": {
+                "trialing": "Free period",
+                "active": "Active",
+                "past_due": "Payment problem",
+                "canceled": "Canceled",
+                "expired": "Expired"
+            },
+            "interval": {
+                "month": "/ month",
+                "year": "/ year"
+            },
+            "manage": "Card, plan and invoices",
+            "manageHint": "Opens the secure Stripe page: change the card, switch or cancel the plan, download invoices.",
+            "choosePlan": "Choose a plan",
+            "paymentsSoon": "Online payment is being set up. To pay now, write to us and we will activate the plan manually.",
+            "payEndsTrial": "Paying now ends the free period: the first charge is made today, then automatically every period.",
+            "vatNote": "VAT not included",
+            "pay": "Pay by card",
+            "redirecting": "Opening payment…",
+            "noPlans": "No plans available yet.",
+            "checkoutSuccessTitle": "Thank you!",
+            "checkoutWaiting": "Payment received, activating the subscription…",
+            "checkoutSuccess": "The subscription is active.",
+            "checkoutCanceled": "Payment was canceled. You can choose a plan again whenever you want."
         }
     }
 }

@@ -1,20 +1,25 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { TriangleAlert } from "lucide-react";
 
 import { SchemaPortalInfoDto } from "@workspace/api-client/core";
-import { Alert, AlertDescription, AlertTitle } from "@workspace/ui";
+import { Alert, AlertDescription, AlertTitle, Button } from "@workspace/ui";
 
 import { usePortalInfo } from "@/modules/entities/portal";
+import { ROUTES } from "@/modules/shared/config/routes";
+import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
 const BLOCKING_STATUSES = new Set(["canceled", "expired"]);
 
 function isSubscriptionBlocked(info: SchemaPortalInfoDto): boolean {
     const subscription = info.subscription;
+    // Без подписки API отвечает 402 на всё (fail-closed) — показываем то же самое
     if (!subscription) {
-        return false;
+        return true;
     }
     if (BLOCKING_STATUSES.has(subscription.status)) {
         return true;
@@ -29,11 +34,21 @@ interface SubscriptionGateProps {
     children: React.ReactNode;
 }
 
-/** Баннер при past_due (grace) и hard-block вместо контента при canceled/expired/grace-истёк. */
+/**
+ * Баннер при past_due (grace) и hard-block вместо контента при canceled/expired/grace-истёк.
+ * Страница «Подписка» открыта всегда: оплатить нужно именно тогда, когда CRM закрыта.
+ */
 export function SubscriptionGate({ children }: SubscriptionGateProps) {
     const t = useTranslations("crm.subscription");
+    const localizedLink = useLocalizedLink();
+    const pathname = usePathname();
     const { data: info } = usePortalInfo();
     const subscription = info?.subscription;
+    const billingHref = localizedLink(ROUTES.CRM_SETTINGS_BILLING);
+
+    if (pathname.endsWith(ROUTES.CRM_SETTINGS_BILLING)) {
+        return <>{children}</>;
+    }
 
     if (info && isSubscriptionBlocked(info)) {
         return (
@@ -48,6 +63,9 @@ export function SubscriptionGate({ children }: SubscriptionGateProps) {
                         {t("plan")}: {subscription.planName}
                     </p>
                 )}
+                <Button asChild>
+                    <Link href={billingHref}>{t("goToBilling")}</Link>
+                </Button>
             </div>
         );
     }
@@ -63,7 +81,10 @@ export function SubscriptionGate({ children }: SubscriptionGateProps) {
                             ? t("pastDueUntil", {
                                   date: new Date(subscription.graceEndsAt).toLocaleDateString(),
                               })
-                            : t("pastDueDescription")}
+                            : t("pastDueDescription")}{" "}
+                        <Link href={billingHref} className="font-medium underline">
+                            {t("goToBilling")}
+                        </Link>
                     </AlertDescription>
                 </Alert>
             )}

@@ -23,7 +23,8 @@
             "pastDueUntil": "El pago de la suscripción está vencido. El acceso se mantiene hasta {date} — renuévala.",
             "blockedTitle": "Suscripción inactiva",
             "blockedDescription": "El acceso al CRM de «{portal}» está suspendido: la suscripción expiró o fue cancelada. Renuévala para continuar.",
-            "plan": "Plan"
+            "plan": "Plan",
+            "goToBilling": "Ir a la suscripción"
         },
         "members": {
             "title": "Miembros",
@@ -440,6 +441,10 @@
                     "empty": "Aún no hay unidades"
                 },
                 "links": {
+                    "billing": {
+                        "title": "Suscripción",
+                        "description": "Plan, pago con tarjeta, facturas."
+                    },
                     "entities": {
                         "title": "Campos, formularios y etapas",
                         "description": "Constructor de entidades: miembros, pedidos, procesos inteligentes."
@@ -554,6 +559,42 @@
                     }
                 }
             }
+        },
+        "billing": {
+            "title": "Suscripción",
+            "description": "El plan de tu club, el pago y las facturas.",
+            "loading": "Cargando la suscripción…",
+            "onlyOwner": "Solo el propietario del club o un administrador puede gestionar la suscripción.",
+            "currentPlan": "Plan actual",
+            "trialUntil": "Gratis hasta el {date}",
+            "renewsOn": "Se renueva el {date}",
+            "endsOn": "Termina el {date}",
+            "graceUntil": "El pago no se ha realizado — acceso hasta el {date}",
+            "inactive": "El acceso a la CRM está cerrado hasta el pago",
+            "status": {
+                "trialing": "Periodo gratuito",
+                "active": "Activa",
+                "past_due": "Problema con el pago",
+                "canceled": "Cancelada",
+                "expired": "Caducada"
+            },
+            "interval": {
+                "month": "/ mes",
+                "year": "/ año"
+            },
+            "manage": "Tarjeta, plan y facturas",
+            "manageHint": "Se abrirá la página segura de Stripe: cambiar la tarjeta, el plan o cancelar, descargar facturas.",
+            "choosePlan": "Elige un plan",
+            "paymentsSoon": "Estamos activando el pago en línea. Para pagar ahora, escríbenos y activaremos el plan manualmente.",
+            "payEndsTrial": "Pagar ahora termina el periodo gratuito: el primer cargo es hoy y luego automático en cada periodo.",
+            "vatNote": "IVA no incluido",
+            "pay": "Pagar con tarjeta",
+            "redirecting": "Abriendo el pago…",
+            "noPlans": "Todavía no hay planes.",
+            "checkoutSuccessTitle": "¡Gracias!",
+            "checkoutWaiting": "Pago recibido, activando la suscripción…",
+            "checkoutSuccess": "La suscripción está activa.",
+            "checkoutCanceled": "Has cancelado el pago. Puedes elegir un plan cuando quieras."
         }
     }
 }

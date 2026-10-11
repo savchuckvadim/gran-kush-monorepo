@@ -43,6 +43,8 @@ export const ROUTES = {
     CRM_SETTINGS_INVITATIONS: "/crm/settings/invitations",
     /** Ссылки-формы регистрации */
     CRM_SETTINGS_REGISTRATION_LINKS: "/crm/settings/registration-links",
+    /** Подписка клуба: тариф, оплата, кабинет Stripe. Открыта и при 402 */
+    CRM_SETTINGS_BILLING: "/crm/settings/billing",
     /** Оформление: темы, светлый/тёмный режим, энергосбережение */
     CRM_SETTINGS_APPEARANCE: "/crm/settings/appearance",
     /** Записи смарт-процессов: `${ROUTES.CRM_ENTITIES}/${code}` */

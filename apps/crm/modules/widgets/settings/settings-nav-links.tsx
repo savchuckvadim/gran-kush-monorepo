@@ -3,7 +3,7 @@
 import NextLink from "next/link";
 import { useTranslations } from "next-intl";
 
-import { Link2, Palette, Settings2, UserPlus } from "lucide-react";
+import { CreditCard, Link2, Palette, Settings2, UserPlus } from "lucide-react";
 
 import { Card } from "@workspace/ui";
 
@@ -11,6 +11,7 @@ import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
 const LINKS = [
+    { href: ROUTES.CRM_SETTINGS_BILLING, key: "billing", icon: CreditCard },
     { href: ROUTES.CRM_SETTINGS_ENTITIES, key: "entities", icon: Settings2 },
     { href: ROUTES.CRM_SETTINGS_INVITATIONS, key: "invitations", icon: UserPlus },
     { href: ROUTES.CRM_SETTINGS_REGISTRATION_LINKS, key: "registrationLinks", icon: Link2 },
