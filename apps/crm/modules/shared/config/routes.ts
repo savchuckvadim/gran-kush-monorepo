@@ -14,8 +14,6 @@ export const ROUTES = {
     FORGOT_PASSWORD: "/auth/forgot-password",
     /** Ссылка из письма: `?token=` */
     RESET_PASSWORD: "/auth/reset-password",
-    PRIVACY: "/privacy",
-    TERMS: "/terms",
     CRM_HOME: "/crm",
     /** Префикс раздела клиентов: list, details, new */
     CRM_MEMBER_BASE: "/crm/member",

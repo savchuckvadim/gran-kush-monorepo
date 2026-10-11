@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -9,11 +10,11 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { assertOpenApiOk, getApiErrorMessage } from "@workspace/api-client/core";
-import { Button, FieldInput } from "@workspace/ui";
+import { Button, Field, FieldInput } from "@workspace/ui";
 
 import { getRouteContext } from "@/modules/processes/auth/utils/auth-routing";
 import { $api } from "@/modules/shared";
-import { ROUTES } from "@/modules/shared/config/routes";
+import { ROUTES, SITE_PUBLIC_URL } from "@/modules/shared/config/routes";
 import { notifyApiError } from "@/modules/shared/lib/notify-api-error";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
@@ -33,6 +34,7 @@ const registrationSchema = z
         passwordConfirmation: z
             .string()
             .min(8, "Password confirmation must be at least 8 characters"),
+        acceptTerms: z.boolean().refine((accepted) => accepted, "Accept the terms to continue"),
     })
     .refine((data) => data.password === data.passwordConfirmation, {
         message: "Passwords do not match",
@@ -53,6 +55,7 @@ function makePortalSlug(value: string): string {
 
 export function RegistrationForm() {
     const router = useRouter();
+    const locale = useLocale();
     const localizedLink = useLocalizedLink();
     const {
         register,
@@ -60,7 +63,9 @@ export function RegistrationForm() {
         formState: { errors, isSubmitting },
     } = useForm<RegistrationFormData>({
         resolver: zodResolver(registrationSchema),
+        defaultValues: { acceptTerms: false },
     });
+    const legalUrl = (doc: string) => `${SITE_PUBLIC_URL}/${locale}/legal/${doc}`;
 
     const mutation = useMutation({
         mutationFn: async (data: RegistrationFormData) => {
@@ -76,6 +81,7 @@ export function RegistrationForm() {
                 password: data.password,
                 ownerName: data.ownerName.trim(),
                 // ownerSurname: data.ownerSurname?.trim() || undefined,
+                acceptTerms: data.acceptTerms,
             };
 
             const postResult = await $api.POST("/platform/portals/register", { body: payload });
@@ -153,6 +159,45 @@ export function RegistrationForm() {
                     placeholder="••••••••"
                 />
             </div>
+            <Field error={errors.acceptTerms?.message}>
+                <label className="flex items-start gap-2 text-sm">
+                    <input
+                        type="checkbox"
+                        className="mt-0.5 size-4 shrink-0 accent-primary"
+                        aria-invalid={errors.acceptTerms ? "true" : undefined}
+                        {...register("acceptTerms")}
+                    />
+                    <span>
+                        I accept the{" "}
+                        <a
+                            href={legalUrl("terminos")}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline underline-offset-2 hover:text-primary"
+                        >
+                            Terms and conditions
+                        </a>{" "}
+                        and the{" "}
+                        <a
+                            href={legalUrl("encargo")}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline underline-offset-2 hover:text-primary"
+                        >
+                            Data processing agreement
+                        </a>
+                        , and I have read the{" "}
+                        <a
+                            href={legalUrl("privacidad")}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline underline-offset-2 hover:text-primary"
+                        >
+                            Privacy policy
+                        </a>
+                    </span>
+                </label>
+            </Field>
             <Button type="submit" className="w-full" disabled={isSubmitting || mutation.isPending}>
                 {isSubmitting || mutation.isPending
                     ? "Creating portal..."

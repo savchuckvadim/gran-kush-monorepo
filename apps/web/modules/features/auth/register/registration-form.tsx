@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Loader2 } from "lucide-react";
@@ -17,6 +17,7 @@ import {
     RegisterFormSubmitData,
     useSubmitRegister,
 } from "@/modules/features/auth/register/hooks/submit-register.hook";
+import { legalPageUrl } from "@/modules/shared/config/legal";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
@@ -52,6 +53,7 @@ type RegistrationFormData = z.output<typeof registrationSchema>;
 
 export function RegistrationForm() {
     const t = useTranslations("auth.register");
+    const locale = useLocale();
     const localizedLink = useLocalizedLink();
     const router = useRouter();
     const [documentFirst, setDocumentFirst] = useState<File | null>(null);
@@ -465,19 +467,23 @@ export function RegistrationForm() {
 
                 <div className="text-center text-sm text-muted-foreground">
                     {t("privacy")}{" "}
-                    <Link
-                        href={localizedLink(ROUTES.TERMS)}
+                    <a
+                        href={legalPageUrl(locale, "terminos")}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="text-primary hover:underline"
                     >
                         {t("terms")}
-                    </Link>{" "}
+                    </a>{" "}
                     {t("and")}{" "}
-                    <Link
-                        href={localizedLink(ROUTES.PRIVACY)}
+                    <a
+                        href={legalPageUrl(locale, "privacidad")}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="text-primary hover:underline"
                     >
                         {t("privacyPolicy")}
-                    </Link>
+                    </a>
                 </div>
 
                 <div className="text-center text-sm text-muted-foreground">

@@ -6,10 +6,13 @@ export const PROVIDER = {
     name: "Vadim Savchuk",
     nif: null as string | null,
     address: null as string | null,
-    email: null as string | null,
+    email: "savchuckvadim@gmail.com" as string | null,
 };
 
-/** Bumped with every change of the texts; registration will store the version a club accepted. */
+/**
+ * Bumped with every change of the texts, together with LEGAL_TERMS_VERSION in
+ * apps/api/src/common/legal/legal-terms.ts: club registration stores that version.
+ */
 export const LEGAL_VERSION = "2026-10-11";
 
 /** Draft texts with placeholders stay out of search results. */

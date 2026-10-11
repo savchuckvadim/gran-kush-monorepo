@@ -1,14 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
+import { legalPageUrl } from "@/modules/shared/config/legal";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
 export function Footer() {
     const t = useTranslations("navigation");
     const tCommon = useTranslations("common");
+    const locale = useLocale();
     const localizedLink = useLocalizedLink();
 
     return (
@@ -81,20 +83,24 @@ export function Footer() {
                         <h4 className="text-sm font-semibold">{t("legalSection")}</h4>
                         <ul className="space-y-2 text-sm">
                             <li>
-                                <Link
-                                    href={localizedLink(ROUTES.PRIVACY)}
+                                <a
+                                    href={legalPageUrl(locale, "privacidad")}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="text-muted-foreground hover:text-foreground transition-colors"
                                 >
                                     {t("privacy")}
-                                </Link>
+                                </a>
                             </li>
                             <li>
-                                <Link
-                                    href={localizedLink(ROUTES.TERMS)}
+                                <a
+                                    href={legalPageUrl(locale, "terminos")}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="text-muted-foreground hover:text-foreground transition-colors"
                                 >
                                     {t("terms")}
-                                </Link>
+                                </a>
                             </li>
                         </ul>
                     </div>

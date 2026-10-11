@@ -67,6 +67,7 @@ describe("CRM email confirmation and password reset (e2e)", () => {
                 email,
                 password: PASSWORD,
                 ownerName: "Owner",
+                acceptTerms: true,
                 locale: "es",
             });
         expect(res.status).toBe(201);

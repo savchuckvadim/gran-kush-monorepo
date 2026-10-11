@@ -124,22 +124,27 @@ enum PaymentStatus {
 // ========================
 
 model Portal {
-  id                String         @id @default(uuid())
-  name              String         @unique @db.VarChar(40)
-  displayName       String         @map("display_name") @db.VarChar(255)
-  status            PortalStatus   @default(active)
-  type              PortalTypeEnum @default(CLUB) @map("type")
-  publicDescription String?        @map("public_description") @db.Text
-  coverImageUrl     String?        @map("cover_image_url") @db.VarChar(500)
-  address           String?        @db.VarChar(500)
-  city              String?        @db.VarChar(120)
-  country           String?        @db.VarChar(120)
-  latitude          Decimal?       @db.Decimal(9, 6)
-  longitude         Decimal?       @db.Decimal(9, 6)
-  isListedOnMap     Boolean        @default(false) @map("is_listed_on_map")
-  createdAt         DateTime       @default(now()) @map("created_at")
-  updatedAt         DateTime       @updatedAt @map("updated_at")
+  id                    String         @id @default(uuid())
+  name                  String         @unique @db.VarChar(40)
+  displayName           String         @map("display_name") @db.VarChar(255)
+  status                PortalStatus   @default(active)
+  type                  PortalTypeEnum @default(CLUB) @map("type")
+  publicDescription     String?        @map("public_description") @db.Text
+  coverImageUrl         String?        @map("cover_image_url") @db.VarChar(500)
+  address               String?        @db.VarChar(500)
+  city                  String?        @db.VarChar(120)
+  country               String?        @db.VarChar(120)
+  latitude              Decimal?       @db.Decimal(9, 6)
+  longitude             Decimal?       @db.Decimal(9, 6)
+  isListedOnMap         Boolean        @default(false) @map("is_listed_on_map")
+  // Términos + Contrato de encargo accepted at sign-up; version = LEGAL_TERMS_VERSION
+  termsAcceptedAt       DateTime?      @map("terms_accepted_at")
+  termsVersion          String?        @map("terms_version") @db.VarChar(32)
+  termsAcceptedByUserId String?        @map("terms_accepted_by_user_id")
+  createdAt             DateTime       @default(now()) @map("created_at")
+  updatedAt             DateTime       @updatedAt @map("updated_at")
 
+  termsAcceptedBy       User?                  @relation("PortalTermsAcceptedBy", fields: [termsAcceptedByUserId], references: [id], onDelete: SetNull)
   members               Member[]
   employees             Employee[]
   entityDefinitions     EntityDefinition[]
@@ -186,14 +191,15 @@ model User {
   createdAt                  DateTime          @default(now()) @map("created_at")
   updatedAt                  DateTime          @updatedAt @map("updated_at")
 
-  members        Member[]
-  employees      Employee[]
-  platformAdmin  PlatformAdmin?
-  refreshTokens  RefreshToken[]
-  documents      UserDocument[]
-  signature      UserSignature?
-  portalReviews  PortalReview[]
-  productReviews ProductReview[]
+  members              Member[]
+  employees            Employee[]
+  platformAdmin        PlatformAdmin?
+  refreshTokens        RefreshToken[]
+  documents            UserDocument[]
+  signature            UserSignature?
+  portalReviews        PortalReview[]
+  productReviews       ProductReview[]
+  termsAcceptedPortals Portal[]        @relation("PortalTermsAcceptedBy")
 
   @@index([email])
   @@index([status])

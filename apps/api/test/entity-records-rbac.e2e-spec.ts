@@ -113,6 +113,7 @@ describe("Entity records RBAC + isolation (e2e)", () => {
                 email,
                 password: PASSWORD,
                 ownerName: "Owner",
+                acceptTerms: true,
             });
         expect(res.status).toBe(201);
         return { id: res.body.portal.id as string, cookies: extractCookies(res) };

@@ -5,6 +5,7 @@ import { EmployeeRole } from "@prisma/client";
 import { hash } from "bcrypt";
 import { Queue } from "bullmq";
 
+import { LEGAL_TERMS_VERSION } from "@common/legal/legal-terms";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { buildJobId } from "@common/queue/job-options";
 import { BillingSettings } from "@modules/billing/application/billing-settings";
@@ -75,18 +76,6 @@ export class PortalRegistrationService {
         const passwordHash = await hash(dto.password, 10);
 
         const created = await this.prisma.$transaction(async (tx) => {
-            const portal = await tx.portal.create({
-                data: {
-                    name: normalizedName,
-                    displayName: dto.displayName.trim(),
-                },
-            });
-
-            await this.provisionFromTemplates.provisionPortal(portal.id, portal.type, tx, {
-                planCode: dto.planCode,
-                trialEndsAt: this.billingSettings.trialEndFrom(new Date()),
-            });
-
             const user = await tx.user.create({
                 data: {
                     email: normalizedEmail,
@@ -94,6 +83,21 @@ export class PortalRegistrationService {
                     isActive: true,
                     emailConfirmed: false,
                 },
+            });
+
+            const portal = await tx.portal.create({
+                data: {
+                    name: normalizedName,
+                    displayName: dto.displayName.trim(),
+                    termsAcceptedAt: new Date(),
+                    termsVersion: LEGAL_TERMS_VERSION,
+                    termsAcceptedByUserId: user.id,
+                },
+            });
+
+            await this.provisionFromTemplates.provisionPortal(portal.id, portal.type, tx, {
+                planCode: dto.planCode,
+                trialEndsAt: this.billingSettings.trialEndFrom(new Date()),
             });
 
             const employeeDef = await tx.entityDefinition.findUniqueOrThrow({

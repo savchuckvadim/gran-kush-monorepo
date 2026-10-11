@@ -46,6 +46,7 @@ describe("Error contract (e2e)", () => {
                 email: `owner-${suffix}@test.local`,
                 password: "Password123",
                 ownerName: "Owner",
+                acceptTerms: true,
             });
         expect(portalRes.status).toBe(201);
         employeeCookies = extractCookies(portalRes);
@@ -82,6 +83,7 @@ describe("Error contract (e2e)", () => {
                     email: `extra-${suffix}@test.local`,
                     password: "Password123",
                     ownerName: "Owner",
+                    acceptTerms: true,
                     extra: "field",
                 });
             expect(res.status).toBe(400);

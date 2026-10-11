@@ -3731,6 +3731,11 @@ export interface components {
              * @enum {string}
              */
             locale?: "ru" | "es" | "en";
+            /**
+             * @description The owner accepts the Terms and conditions and the Data processing agreement and has read the Privacy policy. Must be true
+             * @example true
+             */
+            acceptTerms: boolean;
         };
         RegisteredPortalDto: {
             /** @example f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f */

@@ -52,6 +52,7 @@ describe("Idempotency-Key (e2e)", () => {
                 email,
                 password: PASSWORD,
                 ownerName: "Owner",
+                acceptTerms: true,
             });
         expect(res.status).toBe(201);
 

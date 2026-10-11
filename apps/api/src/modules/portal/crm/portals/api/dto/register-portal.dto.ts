@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from "@mail/consts/mail.constants";
-import { IsIn, IsOptional, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { Equals, IsIn, IsOptional, IsString, Matches, MaxLength, MinLength } from "class-validator";
 
 import { IsEmailWithLowerCase } from "@common/decorators/dto/is-email-with-lower-case.decorator";
 
@@ -71,4 +71,15 @@ export class RegisterPortalDto {
     @IsOptional()
     @IsIn(SUPPORTED_LANGUAGES)
     locale?: SupportedLanguage;
+
+    @ApiProperty({
+        example: true,
+        description:
+            "The owner accepts the Terms and conditions and the Data processing agreement and has read the Privacy policy. Must be true",
+        type: Boolean,
+    })
+    @Equals(true, {
+        message: "acceptTerms must be true: accept the Terms and the Data processing agreement",
+    })
+    acceptTerms: boolean;
 }
