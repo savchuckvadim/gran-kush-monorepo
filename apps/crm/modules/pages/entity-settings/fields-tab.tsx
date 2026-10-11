@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from "next-intl";
 
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -12,6 +13,7 @@ import type {
 import { Button } from "@workspace/ui";
 
 import {
+    getFieldDisplayLabel,
     useAddEntityFieldOption,
     useDeleteEntityField,
     useEntityFields,
@@ -70,6 +72,7 @@ function AddOptionInline({ code, fieldKey }: { code: string; fieldKey: string })
 }
 
 export function FieldsTab({ code }: { code: string }) {
+    const locale = useLocale();
     const { data: fields = [], isLoading } = useEntityFields(code);
     const deleteMutation = useDeleteEntityField(code);
     const updateMutation = useUpdateEntityField(code);
@@ -129,7 +132,7 @@ export function FieldsTab({ code }: { code: string }) {
                                 <tr key={field.id} className="border-b align-top last:border-b-0">
                                     <td className="px-3 py-2 font-mono text-xs">{field.fieldKey}</td>
                                     <td className="px-3 py-2">
-                                        {field.labelOverride ?? field.label ?? "—"}
+                                        {getFieldDisplayLabel(field, locale)}
                                         {isSelect ? (
                                             <div className="mt-1 flex flex-wrap gap-1">
                                                 {field.options.map((option) => (

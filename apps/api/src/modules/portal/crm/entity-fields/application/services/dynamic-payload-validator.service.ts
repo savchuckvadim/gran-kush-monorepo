@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 
 import { FormPurpose, PortalFieldType, Prisma } from "@prisma/client";
 
+import { DEFAULT_CONTENT_LOCALE } from "@common/i18n";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { FormSchemaService } from "@modules/portal/crm/entity-fields/application/services/form-schema.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
@@ -28,7 +29,12 @@ export class DynamicPayloadValidatorService {
         purpose: FormPurpose,
         payload: Record<string, unknown>
     ): Promise<Record<string, unknown>> {
-        const { fields } = await this.formSchema.getFormSchema(portalId, entityCode, purpose);
+        const { fields } = await this.formSchema.getFormSchema(
+            portalId,
+            entityCode,
+            purpose,
+            DEFAULT_CONTENT_LOCALE
+        );
         const result: Record<string, unknown> = {};
 
         for (const item of fields) {

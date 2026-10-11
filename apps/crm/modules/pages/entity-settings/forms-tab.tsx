@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useLocale } from "next-intl";
 
 import { ArrowDown, ArrowUp, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
@@ -9,6 +10,7 @@ import { Button, FieldSelect } from "@workspace/ui";
 
 import {
     type FormPurpose,
+    getFieldDisplayLabel,
     useEntityFields,
     useEntityFormSchema,
     useUpdateEntityForm,
@@ -32,6 +34,7 @@ interface LayoutRow {
 }
 
 export function FormsTab({ code }: { code: string }) {
+    const locale = useLocale();
     const [purpose, setPurpose] = useState<FormPurpose>("crm_create");
     const { data, isLoading, isFetching } = useEntityFormSchema(code, purpose);
     const { data: allFields = [] } = useEntityFields(code);
@@ -83,7 +86,7 @@ export function FormsTab({ code }: { code: string }) {
             ...effectiveRows,
             {
                 fieldKey: field.fieldKey,
-                label: field.label ?? field.fieldKey,
+                label: getFieldDisplayLabel(field, locale),
                 required: false,
                 visible: true,
                 readOnly: false,
@@ -228,7 +231,7 @@ export function FormsTab({ code }: { code: string }) {
                                 placeholder="Добавить поле…"
                                 options={availableFields.map((field) => ({
                                     value: field.fieldKey,
-                                    label: field.label ?? field.fieldKey,
+                                    label: getFieldDisplayLabel(field, locale),
                                 }))}
                                 value={fieldToAdd}
                                 onValueChange={setFieldToAdd}

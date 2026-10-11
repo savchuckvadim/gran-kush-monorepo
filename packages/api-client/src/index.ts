@@ -7,4 +7,5 @@ export {
     IDEMPOTENCY_HEADER,
     newIdempotencyKey,
 } from "./idempotency/idempotency.middleware";
+export { ACCEPT_LANGUAGE_HEADER, getLocaleMiddleware } from "./locale/locale.middleware";
 export * from "./schema/schema";

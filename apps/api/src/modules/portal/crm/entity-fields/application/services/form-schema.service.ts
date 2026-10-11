@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 
 import { FormPurpose, Prisma } from "@prisma/client";
 
+import { ContentLocale, resolveLabel } from "@common/i18n";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { MemberLifecycleStatusItemDto } from "@modules/portal/crm/entity-fields/api/dto/entity-fields-settings-response.dto";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
@@ -37,10 +38,12 @@ export class FormSchemaService {
         return ed.id;
     }
 
+    /** `locale` — язык подписей полей (см. {@link resolveLabel}). */
     async getFormSchema(
         portalId: string,
         entityCode: string,
-        purpose: FormPurpose
+        purpose: FormPurpose,
+        locale: ContentLocale
     ): Promise<{ purpose: FormPurpose; fields: FormFieldSchemaItem[] }> {
         const entityDefinitionId = await this.getEntityDefinitionId(portalId, entityCode);
         const form = await this.prisma.formDefinition.findUnique({
@@ -74,12 +77,11 @@ export class FormSchemaService {
             if (!def.isActive) {
                 continue;
             }
-            const label = def.labelOverride ?? def.label;
             const readOnly = def.readOnlyOverride || item.readOnly;
             fields.push({
                 fieldKey: def.fieldKey,
                 type: def.type,
-                label,
+                label: resolveLabel(def, locale),
                 helpText: def.helpText,
                 required: item.required,
                 visible: def.hidden ? false : item.visible,
@@ -101,14 +103,11 @@ export class FormSchemaService {
         return { purpose, fields };
     }
 
-    async getFilterableMemberFields(portalId: string): Promise<FormFieldSchemaItem[]> {
-        return this.getFilterableFields(portalId, ENTITY_DEFINITION_CODES.MEMBER);
-    }
-
     /** Фильтруемые поля любой сущности портала. */
     async getFilterableFields(
         portalId: string,
-        entityCode: string
+        entityCode: string,
+        locale: ContentLocale
     ): Promise<FormFieldSchemaItem[]> {
         const entityDefinitionId = await this.getEntityDefinitionId(portalId, entityCode);
         const defs = await this.prisma.fieldDefinition.findMany({
@@ -126,7 +125,7 @@ export class FormSchemaService {
         return defs.map((def) => ({
             fieldKey: def.fieldKey,
             type: def.type,
-            label: def.labelOverride ?? def.label,
+            label: resolveLabel(def, locale),
             helpText: def.helpText,
             required: false,
             visible: !def.hidden,
@@ -145,7 +144,10 @@ export class FormSchemaService {
         }));
     }
 
-    async getMemberLifecycleStatusItems(portalId: string): Promise<MemberLifecycleStatusItemDto[]> {
+    async getMemberLifecycleStatusItems(
+        portalId: string,
+        locale: ContentLocale
+    ): Promise<MemberLifecycleStatusItemDto[]> {
         const entityDefinitionId = await this.getEntityDefinitionId(
             portalId,
             ENTITY_DEFINITION_CODES.MEMBER
@@ -162,7 +164,7 @@ export class FormSchemaService {
         return set.items.map((i) => ({
             id: i.id,
             key: i.key,
-            label: i.label,
+            label: resolveLabel(i, locale),
             color: i.color,
             sortOrder: i.sortOrder,
         }));

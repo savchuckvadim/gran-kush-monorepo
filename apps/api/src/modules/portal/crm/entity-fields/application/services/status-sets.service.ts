@@ -1,5 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 
+import { Prisma } from "@prisma/client";
+
 import { PrismaService } from "@common/prisma/prisma.service";
 
 export type StatusItemView = {
@@ -182,16 +184,19 @@ export class StatusSetsService {
 
         const item = await this.prisma.statusItem.findFirst({
             where: { id: itemId, statusSetId },
-            select: { id: true },
+            select: { id: true, label: true },
         });
         if (!item) {
             throw new NotFoundException("Status item not found");
         }
+        // Переименованный клубом статус показывается его словом на всех языках
+        const renamed = input.label !== undefined && input.label !== item.label;
 
         return this.prisma.statusItem.update({
             where: { id: itemId },
             data: {
                 ...(input.label !== undefined ? { label: input.label } : {}),
+                ...(renamed ? { labelI18n: Prisma.DbNull } : {}),
                 ...(input.color !== undefined ? { color: input.color } : {}),
                 ...(input.sortOrder !== undefined ? { sortOrder: input.sortOrder } : {}),
                 ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),

@@ -4,6 +4,7 @@ import { getMessages } from "next-intl/server";
 
 import { locales } from "@/i18n";
 import { PortalProvider } from "@/modules/processes";
+import { ApiLocaleSync } from "@/modules/shared/providers/api-locale-sync";
 
 // Force dynamic rendering to avoid cache conflicts
 export const dynamic = "force-dynamic";
@@ -27,6 +28,7 @@ export default async function LocaleLayout({
     return (
         <PortalProvider portalSlug={null}>
             <NextIntlClientProvider locale={locale} messages={messages}>
+                <ApiLocaleSync />
                 <div className="min-h-screen">{children}</div>
             </NextIntlClientProvider>
         </PortalProvider>

@@ -45,7 +45,9 @@ function mapRow(row: EmployeeWithProfileRow): EmployeeWithProfile {
         fields: row.profile.fieldValues.map((fv) => ({
             fieldKey: fv.fieldDefinition.fieldKey,
             type: fv.fieldDefinition.type,
-            label: fv.fieldDefinition.labelOverride ?? fv.fieldDefinition.label,
+            label: fv.fieldDefinition.label,
+            labelI18n: fv.fieldDefinition.labelI18n,
+            labelOverride: fv.fieldDefinition.labelOverride,
             value: fv.valueJson,
         })),
     };

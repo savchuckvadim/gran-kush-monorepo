@@ -1,5 +1,7 @@
 import { PortalFieldType, PortalTypeEnum, Prisma, StageSemantic } from "@prisma/client";
 
+import type { LabelTranslations } from "../i18n/content-locale";
+
 type Db = Prisma.TransactionClient;
 
 const ALL_PORTAL_TYPES: PortalTypeEnum[] = [
@@ -11,7 +13,8 @@ const ALL_PORTAL_TYPES: PortalTypeEnum[] = [
 export interface GlobalFieldSeed {
     fieldKey: string;
     type: PortalFieldType;
-    label: string;
+    /** Базовая подпись в БД — `labelI18n.en`. */
+    labelI18n: LabelTranslations;
     sortOrder: number;
     showInFilters?: boolean;
     isMultiple?: boolean;
@@ -21,9 +24,17 @@ export interface GlobalFieldSeed {
     options?: { valueKey: string; label: string; sortOrder: number; color?: string }[];
 }
 
+export interface GlobalStatusItemSeed {
+    key: string;
+    /** Базовая подпись в БД — `labelI18n.en`. */
+    labelI18n: LabelTranslations;
+    color: string | null;
+    sortOrder: number;
+}
+
 export interface GlobalStatusSetSeed {
     code: string;
-    items: { key: string; label: string; color: string | null; sortOrder: number }[];
+    items: GlobalStatusItemSeed[];
 }
 
 export interface GlobalStageCategorySeed {
@@ -47,6 +58,10 @@ export interface GlobalEntityTemplateSeed {
     stageCategories: GlobalStageCategorySeed[];
 }
 
+const FIRST_NAME: LabelTranslations = { es: "Nombre", ru: "Имя", en: "First name" };
+const LAST_NAME: LabelTranslations = { es: "Apellidos", ru: "Фамилия", en: "Last name" };
+const PHONE: LabelTranslations = { es: "Teléfono", ru: "Телефон", en: "Phone" };
+
 const MEMBER_TEMPLATE: GlobalEntityTemplateSeed = {
     code: "member",
     name: "Member",
@@ -54,46 +69,70 @@ const MEMBER_TEMPLATE: GlobalEntityTemplateSeed = {
         {
             fieldKey: "first_name",
             type: PortalFieldType.string,
-            label: "First name",
+            labelI18n: FIRST_NAME,
             sortOrder: 0,
             showInFilters: true,
             requiredInPurposes: ["public_registration", "crm_create"],
         },
-        { fieldKey: "last_name", type: PortalFieldType.string, label: "Last name", sortOrder: 1 },
+        { fieldKey: "last_name", type: PortalFieldType.string, labelI18n: LAST_NAME, sortOrder: 1 },
         {
             fieldKey: "phone",
             type: PortalFieldType.phone,
-            label: "Phone",
+            labelI18n: PHONE,
             sortOrder: 2,
             showInFilters: true,
         },
-        { fieldKey: "birthday", type: PortalFieldType.date, label: "Birthday", sortOrder: 3 },
-        { fieldKey: "address", type: PortalFieldType.text, label: "Address", sortOrder: 4 },
-        { fieldKey: "notes", type: PortalFieldType.text, label: "Notes", sortOrder: 5 },
+        {
+            fieldKey: "birthday",
+            type: PortalFieldType.date,
+            labelI18n: { es: "Fecha de nacimiento", ru: "Дата рождения", en: "Birthday" },
+            sortOrder: 3,
+        },
+        {
+            fieldKey: "address",
+            type: PortalFieldType.text,
+            labelI18n: { es: "Dirección", ru: "Адрес", en: "Address" },
+            sortOrder: 4,
+        },
+        {
+            fieldKey: "notes",
+            type: PortalFieldType.text,
+            labelI18n: { es: "Notas", ru: "Заметки", en: "Notes" },
+            sortOrder: 5,
+        },
         {
             fieldKey: "is_medical",
             type: PortalFieldType.boolean,
-            label: "Medical use",
+            labelI18n: { es: "Uso medicinal", ru: "Медицинское", en: "Medical use" },
             sortOrder: 6,
         },
-        { fieldKey: "is_mj", type: PortalFieldType.boolean, label: "MJ", sortOrder: 7 },
+        {
+            fieldKey: "is_mj",
+            type: PortalFieldType.boolean,
+            labelI18n: { es: "MJ", ru: "MJ", en: "MJ" },
+            sortOrder: 7,
+        },
         {
             fieldKey: "is_recreation",
             type: PortalFieldType.boolean,
-            label: "Recreation",
+            labelI18n: { es: "Uso recreativo", ru: "Рекреационное", en: "Recreation" },
             sortOrder: 8,
         },
         {
             fieldKey: "identity_document",
             type: PortalFieldType.document,
-            label: "Identity document",
+            labelI18n: {
+                es: "Documento de identidad",
+                ru: "Документ, удостоверяющий личность",
+                en: "Identity document",
+            },
             sortOrder: 9,
             documentType: "identity",
         },
         {
             fieldKey: "signature",
             type: PortalFieldType.signature,
-            label: "Signature",
+            labelI18n: { es: "Firma", ru: "Подпись", en: "Signature" },
             sortOrder: 10,
         },
     ],
@@ -101,10 +140,30 @@ const MEMBER_TEMPLATE: GlobalEntityTemplateSeed = {
         {
             code: "member_lifecycle",
             items: [
-                { key: "inProgress", label: "In progress", color: "#64748b", sortOrder: 0 },
-                { key: "pending", label: "Pending", color: "#ca8a04", sortOrder: 1 },
-                { key: "approved", label: "Approved", color: "#16a34a", sortOrder: 2 },
-                { key: "rejected", label: "Rejected", color: "#dc2626", sortOrder: 3 },
+                {
+                    key: "inProgress",
+                    labelI18n: { es: "En curso", ru: "В работе", en: "In progress" },
+                    color: "#64748b",
+                    sortOrder: 0,
+                },
+                {
+                    key: "pending",
+                    labelI18n: { es: "Pendiente", ru: "На рассмотрении", en: "Pending" },
+                    color: "#ca8a04",
+                    sortOrder: 1,
+                },
+                {
+                    key: "approved",
+                    labelI18n: { es: "Aprobado", ru: "Одобрен", en: "Approved" },
+                    color: "#16a34a",
+                    sortOrder: 2,
+                },
+                {
+                    key: "rejected",
+                    labelI18n: { es: "Rechazado", ru: "Отклонён", en: "Rejected" },
+                    color: "#dc2626",
+                    sortOrder: 3,
+                },
             ],
         },
     ],
@@ -118,15 +177,25 @@ const EMPLOYEE_TEMPLATE: GlobalEntityTemplateSeed = {
         {
             fieldKey: "first_name",
             type: PortalFieldType.string,
-            label: "First name",
+            labelI18n: FIRST_NAME,
             sortOrder: 0,
             showInFilters: true,
             requiredInPurposes: ["crm_create"],
         },
-        { fieldKey: "last_name", type: PortalFieldType.string, label: "Last name", sortOrder: 1 },
-        { fieldKey: "phone", type: PortalFieldType.phone, label: "Phone", sortOrder: 2 },
-        { fieldKey: "position", type: PortalFieldType.string, label: "Position", sortOrder: 3 },
-        { fieldKey: "department", type: PortalFieldType.string, label: "Department", sortOrder: 4 },
+        { fieldKey: "last_name", type: PortalFieldType.string, labelI18n: LAST_NAME, sortOrder: 1 },
+        { fieldKey: "phone", type: PortalFieldType.phone, labelI18n: PHONE, sortOrder: 2 },
+        {
+            fieldKey: "position",
+            type: PortalFieldType.string,
+            labelI18n: { es: "Cargo", ru: "Должность", en: "Position" },
+            sortOrder: 3,
+        },
+        {
+            fieldKey: "department",
+            type: PortalFieldType.string,
+            labelI18n: { es: "Departamento", ru: "Отдел", en: "Department" },
+            sortOrder: 4,
+        },
     ],
     statusSets: [],
     stageCategories: [],
@@ -241,7 +310,8 @@ export async function ensureGlobalEntityTemplates(db: Db): Promise<void> {
                     create: seed.fields.map((f) => ({
                         fieldKey: f.fieldKey,
                         type: f.type,
-                        label: f.label,
+                        label: f.labelI18n.en,
+                        labelI18n: f.labelI18n,
                         isSystem: true,
                         isImmutable: true,
                         deletableByPortal: false,
@@ -279,7 +349,8 @@ export async function ensureGlobalEntityTemplates(db: Db): Promise<void> {
                         items: {
                             create: s.items.map((i) => ({
                                 key: i.key,
-                                label: i.label,
+                                label: i.labelI18n.en,
+                                labelI18n: i.labelI18n,
                                 color: i.color,
                                 sortOrder: i.sortOrder,
                                 isSystem: true,

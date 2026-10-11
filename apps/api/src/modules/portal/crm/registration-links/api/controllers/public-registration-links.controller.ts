@@ -6,6 +6,7 @@ import { PUBLIC_TOKEN_THROTTLE } from "@common/config/throttler/throttler.config
 import { Public } from "@common/decorators/auth/public.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { type ContentLocale, RequestLocale } from "@common/i18n";
 
 import { RegistrationLinksService } from "../../application/services/registration-links.service";
 import {
@@ -25,8 +26,11 @@ export class PublicRegistrationLinksController {
     @ApiOperation({ summary: "Портал и схема формы по токену ссылки-регистрации" })
     @ApiSuccessResponse(PublicRegistrationLinkInfoDto)
     @ApiErrorResponse([404])
-    async info(@Param("token") token: string): Promise<PublicRegistrationLinkInfoDto> {
-        return this.registrationLinksService.getPublicInfo(token);
+    async info(
+        @Param("token") token: string,
+        @RequestLocale() locale: ContentLocale
+    ): Promise<PublicRegistrationLinkInfoDto> {
+        return this.registrationLinksService.getPublicInfo(token, locale);
     }
 
     @Post(":token/register")

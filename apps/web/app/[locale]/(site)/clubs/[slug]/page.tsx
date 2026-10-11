@@ -61,7 +61,8 @@ export default function ClubPage() {
 
     const schemaQuery = useQuery({
         enabled: joining,
-        queryKey: ["registration-schema", params.slug],
+        // Подписи полей приходят на языке интерфейса — кэш раздельный по языку
+        queryKey: ["registration-schema", params.slug, params.locale],
         queryFn: async () => {
             const res = await $api.GET("/lk/auth/member/registration-schema", {
                 headers: { "X-Portal-Slug": params.slug },

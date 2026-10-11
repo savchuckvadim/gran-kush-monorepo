@@ -5,6 +5,7 @@ import { PrismaClient } from "@prisma/client";
 import { hash } from "bcrypt";
 
 import { ensureGlobalEntityTemplates } from "../src/common/reference-data/global-templates.seed";
+import { syncSystemLabelTranslations } from "../src/common/reference-data/system-label-translations.sync";
 
 function getRequiredEnv(name: string): string {
     const value = process.env[name];
@@ -102,7 +103,10 @@ async function seedPlatformBootstrapAdmin(): Promise<void> {
 async function run(): Promise<void> {
     await seedPlatformBootstrapAdmin();
     await ensureGlobalEntityTemplates(prisma);
-    console.log("[seed-admin] Global entity templates ensured");
+    const filled = await syncSystemLabelTranslations(prisma);
+    console.log(
+        `[seed-admin] Global entity templates ensured, label translations filled: ${JSON.stringify(filled)}`
+    );
 }
 
 void run()

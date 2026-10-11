@@ -35,7 +35,8 @@ export default function JoinByLinkPage() {
     const [serverError, setServerError] = useState<string | null>(null);
 
     const infoQuery = useQuery({
-        queryKey: ["reg-link", params.token],
+        // Подписи полей приходят на языке интерфейса — кэш раздельный по языку
+        queryKey: ["reg-link", params.token, params.locale],
         queryFn: async () => {
             const res = await $api.GET("/public/reg-links/{token}", {
                 params: { path: { token: params.token } },

@@ -10,6 +10,8 @@ The backend API is built with **NestJS 11**, following Domain-Driven Design (DDD
 
 **Идемпотентность, реплики, оплата, изоляция порталов:** [IDEMPOTENCY_AND_SCALING.md](./IDEMPOTENCY_AND_SCALING.md)
 
+**Перевод подписей полей и статусов (Accept-Language, labelI18n):** [CONTENT_I18N.md](./CONTENT_I18N.md)
+
 ## Architecture
 
 ### Design Patterns
