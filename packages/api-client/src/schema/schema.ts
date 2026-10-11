@@ -148,6 +148,175 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/platform/billing/webhooks/{provider}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Вебхук платёжного провайдера (Stripe: /platform/billing/webhooks/stripe)
+         * @description Без подписи провайдера — 401. Ошибка обработки — 5xx, и провайдер повторит доставку.
+         */
+        post: operations["PlatformBillingWebhooks_receive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/admin/billing/plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Все тарифы, включая скрытые и архивные */
+        get: operations["PlatformAdminBilling_listPlans"];
+        put?: never;
+        /**
+         * Новый тариф
+         * @description С stripePriceId цена, валюта и период берутся из Stripe. Без него — тариф для ручной оплаты, нужен priceAmount.
+         */
+        post: operations["PlatformAdminBilling_createPlan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/admin/billing/plans/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Изменить тариф
+         * @description Удаления нет: на тариф ссылаются подписки. Снять с продажи — isActive=false, скрыть с сайта — isPublic=false.
+         */
+        patch: operations["PlatformAdminBilling_updatePlan"];
+        trace?: never;
+    };
+    "/platform/admin/billing/subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Клубы и их подписки */
+        get: operations["PlatformAdminBilling_listSubscriptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/admin/billing/subscriptions/{portalId}/manual-payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Отметить оплату вне Stripe
+         * @description Подписка становится active на указанное число месяцев (от конца оплаченного срока, если он ещё идёт).
+         */
+        post: operations["PlatformAdminBilling_recordManualPayment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/admin/billing/subscriptions/{portalId}/trial": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Изменить конец бесплатного периода клуба */
+        patch: operations["PlatformAdminBilling_setTrialEnd"];
+        trace?: never;
+    };
+    "/crm/billing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Подписка клуба и тарифы, которые можно оплатить */
+        get: operations["CrmBilling_getOverview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/billing/checkout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Страница оплаты Stripe для выбранного тарифа
+         * @description Ответ — адрес Stripe Checkout. После оплаты Stripe вернёт на страницу подписки.
+         */
+        post: operations["CrmBilling_checkout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/billing/manage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Кабинет Stripe: карта, смена тарифа, отмена, счета */
+        post: operations["CrmBilling_manage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -2384,6 +2553,208 @@ export interface components {
             /** @description Активные тарифы по возрастанию цены, при равной цене — по коду */
             plans: components["schemas"]["BillingPlanCatalogItemDto"][];
         };
+        PaymentWebhookAckDto: {
+            received: boolean;
+            /** @enum {string} */
+            outcome: "processed" | "duplicate";
+        };
+        AdminBillingPlanDto: {
+            /** @example club-month */
+            code: string;
+            /** @example Club */
+            name: string;
+            /** @example 49.00 */
+            priceAmount: string;
+            /** @example EUR */
+            currency: string;
+            /** @example month */
+            interval: string;
+            features: {
+                [key: string]: boolean;
+            };
+            isActive: boolean;
+            isPublic: boolean;
+            stripePriceId: string | null;
+        };
+        CreateBillingPlanDto: {
+            /** @example Club */
+            name?: string;
+            /**
+             * @description Цена в Stripe. Сумма, валюта и период берутся из неё; null — отвязать тариф от Stripe
+             * @example price_1QxYz...
+             */
+            stripePriceId?: string | null;
+            /**
+             * @description Только для тарифа без Stripe (ручная оплата)
+             * @example 49.00
+             */
+            priceAmount?: string;
+            /** @example EUR */
+            currency?: string;
+            /**
+             * @example month
+             * @enum {string}
+             */
+            interval?: "month" | "year";
+            /**
+             * @example {
+             *       "crm": true,
+             *       "messenger": false
+             *     }
+             */
+            features?: {
+                [key: string]: boolean;
+            };
+            /** @description false — архив: не продаётся, подписки живут */
+            isActive?: boolean;
+            /** @description false — скрыт с сайта, выбирается только по ссылке ?plan=<code> */
+            isPublic?: boolean;
+            /** @example club-month */
+            code: string;
+        };
+        UpdateBillingPlanDto: {
+            /** @example Club */
+            name?: string;
+            /**
+             * @description Цена в Stripe. Сумма, валюта и период берутся из неё; null — отвязать тариф от Stripe
+             * @example price_1QxYz...
+             */
+            stripePriceId?: string | null;
+            /**
+             * @description Только для тарифа без Stripe (ручная оплата)
+             * @example 49.00
+             */
+            priceAmount?: string;
+            /** @example EUR */
+            currency?: string;
+            /**
+             * @example month
+             * @enum {string}
+             */
+            interval?: "month" | "year";
+            /**
+             * @example {
+             *       "crm": true,
+             *       "messenger": false
+             *     }
+             */
+            features?: {
+                [key: string]: boolean;
+            };
+            /** @description false — архив: не продаётся, подписки живут */
+            isActive?: boolean;
+            /** @description false — скрыт с сайта, выбирается только по ссылке ?plan=<code> */
+            isPublic?: boolean;
+        };
+        BillingSubscriptionPlanDto: {
+            /** @example club-month */
+            code: string;
+            /** @example Club */
+            name: string;
+            /** @example 49.00 */
+            priceAmount: string;
+            /** @example EUR */
+            currency: string;
+            /** @example month */
+            interval: string;
+        };
+        BillingSubscriptionDto: {
+            /**
+             * @example trialing
+             * @enum {string}
+             */
+            status: "active" | "trialing" | "past_due" | "canceled" | "expired";
+            plan: components["schemas"]["BillingSubscriptionPlanDto"];
+            /** Format: date-time */
+            trialEndsAt: string | null;
+            /** Format: date-time */
+            currentPeriodEnd: string | null;
+            /** Format: date-time */
+            graceEndsAt: string | null;
+            /** @description Отменена и закончится в конце оплаченного периода */
+            cancelAtPeriodEnd: boolean;
+            /**
+             * @description stripe — списания делает Stripe; manual — продление из админки; null — оплаты не было
+             * @example stripe
+             */
+            provider: string | null;
+        };
+        AdminPortalSubscriptionDto: {
+            /** Format: uuid */
+            portalId: string;
+            /** @description Адрес клуба (slug) */
+            portalName: string;
+            portalDisplayName: string;
+            /** Format: date-time */
+            portalCreatedAt: string;
+            subscription: components["schemas"]["BillingSubscriptionDto"] | null;
+        };
+        ManualPaymentDto: {
+            /**
+             * @description Сколько месяцев оплачено
+             * @example 1
+             */
+            months: number;
+            /**
+             * @description Полученная сумма; по умолчанию цена тарифа × месяцы
+             * @example 49.00
+             */
+            amount?: string;
+            /**
+             * @description Сменить тариф
+             * @example club-month
+             */
+            planCode?: string;
+        };
+        TrialEndDto: {
+            /**
+             * Format: date-time
+             * @example 2027-10-11T00:00:00.000Z
+             */
+            trialEndsAt: string;
+        };
+        CrmBillingPlanOptionDto: {
+            /** @example club-month */
+            code: string;
+            /** @example Club */
+            name: string;
+            /** @example 49.00 */
+            priceAmount: string;
+            /** @example EUR */
+            currency: string;
+            /** @example month */
+            interval: string;
+            /** @description Можно оплатить онлайн прямо сейчас */
+            purchasable: boolean;
+        };
+        CrmBillingOverviewDto: {
+            subscription: components["schemas"]["BillingSubscriptionDto"];
+            /** @description Онлайн-оплата подключена (заданы ключи Stripe) */
+            paymentsEnabled: boolean;
+            /** @description Есть кабинет Stripe: карта, отмена, счета */
+            canManage: boolean;
+            plans: components["schemas"]["CrmBillingPlanOptionDto"][];
+        };
+        CrmBillingCheckoutDto: {
+            /** @example club-month */
+            planCode: string;
+            /**
+             * @example es
+             * @enum {string}
+             */
+            locale?: "ru" | "es" | "en";
+        };
+        BillingRedirectDto: {
+            /** @description Страница Stripe, куда перевести пользователя */
+            url: string;
+        };
+        CrmBillingManageDto: {
+            /**
+             * @example es
+             * @enum {string}
+             */
+            locale?: "ru" | "es" | "en";
+        };
         HealthResponseDto: {
             /** @example ok */
             status: string;
@@ -3420,6 +3791,11 @@ export interface components {
             planName: string | null;
             /** Format: date-time */
             graceEndsAt: string | null;
+            /**
+             * Format: date-time
+             * @description Конец бесплатного периода (пока status = trialing)
+             */
+            trialEndsAt: string | null;
         };
         PortalInfoDto: {
             /** Format: uuid */
@@ -4719,6 +5095,20 @@ export type SchemaUploadAccountSignatureDto = components['schemas']['UploadAccou
 export type SchemaPlatformLoginDto = components['schemas']['PlatformLoginDto'];
 export type SchemaBillingPlanCatalogItemDto = components['schemas']['BillingPlanCatalogItemDto'];
 export type SchemaBillingPlanCatalogResponseDto = components['schemas']['BillingPlanCatalogResponseDto'];
+export type SchemaPaymentWebhookAckDto = components['schemas']['PaymentWebhookAckDto'];
+export type SchemaAdminBillingPlanDto = components['schemas']['AdminBillingPlanDto'];
+export type SchemaCreateBillingPlanDto = components['schemas']['CreateBillingPlanDto'];
+export type SchemaUpdateBillingPlanDto = components['schemas']['UpdateBillingPlanDto'];
+export type SchemaBillingSubscriptionPlanDto = components['schemas']['BillingSubscriptionPlanDto'];
+export type SchemaBillingSubscriptionDto = components['schemas']['BillingSubscriptionDto'];
+export type SchemaAdminPortalSubscriptionDto = components['schemas']['AdminPortalSubscriptionDto'];
+export type SchemaManualPaymentDto = components['schemas']['ManualPaymentDto'];
+export type SchemaTrialEndDto = components['schemas']['TrialEndDto'];
+export type SchemaCrmBillingPlanOptionDto = components['schemas']['CrmBillingPlanOptionDto'];
+export type SchemaCrmBillingOverviewDto = components['schemas']['CrmBillingOverviewDto'];
+export type SchemaCrmBillingCheckoutDto = components['schemas']['CrmBillingCheckoutDto'];
+export type SchemaBillingRedirectDto = components['schemas']['BillingRedirectDto'];
+export type SchemaCrmBillingManageDto = components['schemas']['CrmBillingManageDto'];
 export type SchemaHealthResponseDto = components['schemas']['HealthResponseDto'];
 export type SchemaReadinessChecksDto = components['schemas']['ReadinessChecksDto'];
 export type SchemaReadinessResponseDto = components['schemas']['ReadinessResponseDto'];
@@ -5192,6 +5582,501 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BillingPlanCatalogResponseDto"];
+                };
+            };
+        };
+    };
+    PlatformBillingWebhooks_receive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentWebhookAckDto"];
+                };
+            };
+        };
+    };
+    PlatformAdminBilling_listPlans: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminBillingPlanDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    PlatformAdminBilling_createPlan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateBillingPlanDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminBillingPlanDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    PlatformAdminBilling_updatePlan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateBillingPlanDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminBillingPlanDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    PlatformAdminBilling_listSubscriptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminPortalSubscriptionDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    PlatformAdminBilling_recordManualPayment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                portalId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ManualPaymentDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BillingSubscriptionDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    PlatformAdminBilling_setTrialEnd: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                portalId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrialEndDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BillingSubscriptionDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmBilling_getOverview: {
+        parameters: {
+            query?: {
+                /** @description Скрытый тариф по прямой ссылке — добавляется в список выбора */
+                plan?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CrmBillingOverviewDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmBilling_checkout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CrmBillingCheckoutDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BillingRedirectDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmBilling_manage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CrmBillingManageDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BillingRedirectDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
         };

@@ -16,6 +16,9 @@ export interface RecordProviderPaymentInput {
     currency: string;
     status: PaymentStatus;
     paidAt?: Date | null;
+    /** Оплаченный период подписки */
+    periodStart?: Date | null;
+    periodEnd?: Date | null;
 }
 
 @Injectable()
@@ -47,6 +50,8 @@ export class PaymentsService {
                     currency: input.currency,
                     status: input.status,
                     paidAt: input.paidAt ?? null,
+                    periodStart: input.periodStart ?? null,
+                    periodEnd: input.periodEnd ?? null,
                 },
             ],
             skipDuplicates: true,

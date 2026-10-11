@@ -111,6 +111,12 @@ services:
       AWS_BUCKET_NAME: ${AWS_BUCKET_NAME:-}
       AWS_ACCESS_KEY: ${AWS_ACCESS_KEY:-}
       AWS_SECRET_KEY: ${AWS_SECRET_KEY:-}
+      # Оплата (documentation/backend/BILLING.md). Без ключей онлайн-оплата выключена,
+      # работает ручное продление из админки
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      BILLING_TRIAL_DAYS: ${BILLING_TRIAL_DAYS:-365}
+      BILLING_GRACE_DAYS: ${BILLING_GRACE_DAYS:-7}
     depends_on:
       pafpaf-postgres:
         condition: service_healthy

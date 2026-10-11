@@ -15,7 +15,43 @@ export interface BillingPlanCatalogItem {
     features: BillingPlanFeatures;
 }
 
+/** Тариф целиком — для админки и для оплаты. */
+export interface BillingPlanView extends BillingPlanCatalogItem {
+    id: string;
+    isActive: boolean;
+    isPublic: boolean;
+    stripePriceId: string | null;
+}
+
+export interface BillingPlanCreateInput {
+    code: string;
+    name: string;
+    priceAmount: string;
+    currency: string;
+    interval: string;
+    features: BillingPlanFeatures;
+    isActive: boolean;
+    isPublic: boolean;
+    stripePriceId: string | null;
+}
+
+export type BillingPlanUpdateInput = Partial<Omit<BillingPlanCreateInput, "code">>;
+
 export abstract class BillingPlanRepository {
-    /** Активные тарифы по возрастанию цены; при равной цене — по коду, чтобы порядок не плавал. */
+    /**
+     * Публичный каталог: активные и не скрытые тарифы по возрастанию цены;
+     * при равной цене — по коду, чтобы порядок не плавал.
+     */
     abstract findActivePlansForCatalog(): Promise<BillingPlanCatalogItem[]>;
+
+    /** Все тарифы, включая архивные и скрытые. */
+    abstract findAll(): Promise<BillingPlanView[]>;
+
+    abstract findByCode(code: string): Promise<BillingPlanView | null>;
+
+    abstract findByStripePriceId(stripePriceId: string): Promise<BillingPlanView | null>;
+
+    abstract create(input: BillingPlanCreateInput): Promise<BillingPlanView>;
+
+    abstract update(code: string, input: BillingPlanUpdateInput): Promise<BillingPlanView>;
 }

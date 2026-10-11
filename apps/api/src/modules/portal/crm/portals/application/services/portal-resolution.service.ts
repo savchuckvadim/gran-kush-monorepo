@@ -14,6 +14,7 @@ export type PortalInfoView = {
         status: SubscriptionStatus;
         planName: string | null;
         graceEndsAt: Date | null;
+        trialEndsAt: Date | null;
     } | null;
 };
 
@@ -43,6 +44,7 @@ export class PortalResolutionService {
                       status: portal.subscription.status,
                       planName: portal.subscription.plan?.name ?? null,
                       graceEndsAt: portal.subscription.graceEndsAt,
+                      trialEndsAt: portal.subscription.trialEndsAt,
                   }
                 : null,
         };

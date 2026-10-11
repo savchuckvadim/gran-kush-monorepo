@@ -36,6 +36,7 @@ export class CrmPortalInfoController {
                       status: portal.subscription.status,
                       planName: portal.subscription.planName,
                       graceEndsAt: portal.subscription.graceEndsAt?.toISOString() ?? null,
+                      trialEndsAt: portal.subscription.trialEndsAt?.toISOString() ?? null,
                   }
                 : null,
         };

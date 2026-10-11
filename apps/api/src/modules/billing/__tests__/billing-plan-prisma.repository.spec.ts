@@ -33,7 +33,7 @@ describe("BillingPlanPrismaRepository — публичный каталог та
 
         expect(prisma.billingPlan.findMany).toHaveBeenCalledWith(
             expect.objectContaining({
-                where: { isActive: true },
+                where: { isActive: true, isPublic: true },
                 orderBy: [{ priceAmount: "asc" }, { code: "asc" }],
             })
         );

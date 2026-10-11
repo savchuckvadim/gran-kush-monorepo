@@ -14,6 +14,9 @@ import { PrismaService } from "@common/prisma/prisma.service";
  * Блокирует CRM-запросы портала при неактивной подписке (после grace / expired / canceled).
  * Просроченная подписка → 402 Payment Required; past_due в grace-периоде пропускается
  * с заголовком `X-Subscription-Warning: past_due`.
+ *
+ * Портал без подписки — тоже 402 (fail-closed): подписку получает каждый клуб при регистрации,
+ * старым её выдала миграция billing_stripe. Её отсутствие — сбой, а не бесплатный доступ.
  */
 @Injectable()
 export class PortalCrmSubscriptionGuard implements CanActivate {
@@ -31,7 +34,7 @@ export class PortalCrmSubscriptionGuard implements CanActivate {
             where: { portalId },
         });
         if (!sub) {
-            return true;
+            throw new HttpException("Portal has no subscription", HttpStatus.PAYMENT_REQUIRED);
         }
 
         const now = new Date();

@@ -11,6 +11,14 @@ export class PortalSubscriptionInfoDto {
 
     @ApiProperty({ type: String, format: "date-time", nullable: true })
     graceEndsAt!: string | null;
+
+    @ApiProperty({
+        type: String,
+        format: "date-time",
+        nullable: true,
+        description: "Конец бесплатного периода (пока status = trialing)",
+    })
+    trialEndsAt!: string | null;
 }
 
 export class PortalInfoDto {

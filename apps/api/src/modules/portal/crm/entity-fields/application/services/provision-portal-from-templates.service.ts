@@ -34,7 +34,7 @@ export class ProvisionPortalFromTemplatesService {
         portalId: string,
         portalType: PortalTypeEnum,
         tx?: Tx,
-        options: { planCode?: string } = {}
+        options: { planCode?: string; trialEndsAt?: Date } = {}
     ): Promise<void> {
         const db = tx ?? this.prisma;
         await ensureGlobalEntityTemplates(db);
@@ -62,7 +62,7 @@ export class ProvisionPortalFromTemplatesService {
             await this.materializeTemplate(db, portalId, gt);
         }
 
-        await this.ensurePortalTrialSubscription(db, portalId, options.planCode);
+        await this.ensurePortalTrialSubscription(db, portalId, options);
     }
 
     private templateAppliesToPortalType(
@@ -242,6 +242,8 @@ export class ProvisionPortalFromTemplatesService {
                 priceAmount: 0,
                 currency: "EUR",
                 interval: "month",
+                // Бесплатный период не продаётся: на сайте его нет
+                isPublic: false,
                 featuresJson: { crm: true, sites: true, messenger: false } as Prisma.InputJsonValue,
             },
         });
@@ -250,7 +252,7 @@ export class ProvisionPortalFromTemplatesService {
     private async ensurePortalTrialSubscription(
         db: Tx,
         portalId: string,
-        planCode?: string
+        { planCode, trialEndsAt }: { planCode?: string; trialEndsAt?: Date }
     ): Promise<void> {
         const sub = await db.portalSubscription.findUnique({ where: { portalId } });
         if (sub) {
@@ -272,6 +274,7 @@ export class ProvisionPortalFromTemplatesService {
                 portalId,
                 planId: plan.id,
                 status: SubscriptionStatus.trialing,
+                trialEndsAt: trialEndsAt ?? null,
             },
         });
     }

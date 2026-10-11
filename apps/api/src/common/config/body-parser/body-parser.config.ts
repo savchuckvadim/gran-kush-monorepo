@@ -1,6 +1,6 @@
 import { MiddlewareConsumer, RequestMethod } from "@nestjs/common";
 
-import { json, urlencoded } from "express";
+import { json, raw, urlencoded } from "express";
 
 import { JSON_BODY_LIMIT, UPLOAD_JSON_BODY_LIMIT } from "@common/upload/upload.config";
 
@@ -21,7 +21,11 @@ const UPLOAD_JSON_ROUTES = [
  * становится no-op. Приложение, поднятое без `bodyParser: false` (тесты), получит штатный
  * парсер на 100 КБ раньше обоих.
  */
+/** Вебхуки провайдеров оплаты: подпись считается по байтам тела, разбирать его в JSON нельзя. */
+const RAW_BODY_ROUTES = [{ path: "platform/billing/webhooks/:provider", method: RequestMethod.POST }];
+
 export const configureBodyParsers = (consumer: MiddlewareConsumer): void => {
+    consumer.apply(raw({ type: "*/*", limit: "1mb" })).forRoutes(...RAW_BODY_ROUTES);
     consumer.apply(json({ limit: UPLOAD_JSON_BODY_LIMIT })).forRoutes(...UPLOAD_JSON_ROUTES);
     consumer
         .apply(

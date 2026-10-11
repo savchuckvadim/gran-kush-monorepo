@@ -6,6 +6,7 @@ import { hash } from "bcrypt";
 import { Queue } from "bullmq";
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { BillingSettings } from "@modules/billing/application/billing-settings";
 import { buildJobId } from "@common/queue/job-options";
 import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
 import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
@@ -47,6 +48,7 @@ export class PortalRegistrationService {
         private readonly provisionFromTemplates: ProvisionPortalFromTemplatesService,
         private readonly employeeAuthService: EmployeeAuthService,
         private readonly emailVerificationService: EmailVerificationService,
+        private readonly billingSettings: BillingSettings,
         @InjectQueue(PORTAL_EVENTS_QUEUE_NAME) private readonly portalEventsQueue: Queue
     ) {}
 
@@ -82,6 +84,7 @@ export class PortalRegistrationService {
 
             await this.provisionFromTemplates.provisionPortal(portal.id, portal.type, tx, {
                 planCode: dto.planCode,
+                trialEndsAt: this.billingSettings.trialEndFrom(new Date()),
             });
 
             const user = await tx.user.create({
