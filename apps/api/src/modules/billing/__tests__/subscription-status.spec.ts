@@ -1,6 +1,9 @@
 import { SubscriptionStatus } from "@prisma/client";
 
-import { graceEndFor, toSubscriptionStatus } from "@modules/billing/application/subscription-status";
+import {
+    graceEndFor,
+    toSubscriptionStatus,
+} from "@modules/billing/application/subscription-status";
 import { amountToCents, centsToAmount } from "@modules/billing/domain/money";
 
 describe("toSubscriptionStatus", () => {

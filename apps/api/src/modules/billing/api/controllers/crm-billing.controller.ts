@@ -52,7 +52,8 @@ export class CrmBillingController {
     @RequireAdmin()
     @ApiOperation({
         summary: "Страница оплаты Stripe для выбранного тарифа",
-        description: "Ответ — адрес Stripe Checkout. После оплаты Stripe вернёт на страницу подписки.",
+        description:
+            "Ответ — адрес Stripe Checkout. После оплаты Stripe вернёт на страницу подписки.",
     })
     @ApiSuccessResponse(BillingRedirectDto)
     @ApiErrorResponse([400, 401, 403, 404, 409, 503])

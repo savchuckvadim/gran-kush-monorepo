@@ -11,6 +11,11 @@ const UPLOAD_JSON_ROUTES = [
     { path: "lk/auth/member/files", method: RequestMethod.POST },
 ];
 
+/** Вебхуки провайдеров оплаты: подпись считается по байтам тела, разбирать его в JSON нельзя. */
+const RAW_BODY_ROUTES = [
+    { path: "platform/billing/webhooks/:provider", method: RequestMethod.POST },
+];
+
 /**
  * Разбор тела с разными потолками: широкий — только там, где в JSON едут файлы, узкий —
  * везде. Штатный парсер Nest один на всё приложение, поэтому в `main.ts` он выключен
@@ -21,9 +26,6 @@ const UPLOAD_JSON_ROUTES = [
  * становится no-op. Приложение, поднятое без `bodyParser: false` (тесты), получит штатный
  * парсер на 100 КБ раньше обоих.
  */
-/** Вебхуки провайдеров оплаты: подпись считается по байтам тела, разбирать его в JSON нельзя. */
-const RAW_BODY_ROUTES = [{ path: "platform/billing/webhooks/:provider", method: RequestMethod.POST }];
-
 export const configureBodyParsers = (consumer: MiddlewareConsumer): void => {
     consumer.apply(raw({ type: "*/*", limit: "1mb" })).forRoutes(...RAW_BODY_ROUTES);
     consumer.apply(json({ limit: UPLOAD_JSON_BODY_LIMIT })).forRoutes(...UPLOAD_JSON_ROUTES);

@@ -47,27 +47,28 @@ const build = (options: { configured?: boolean; subscription?: PortalSubscriptio
             productName: "PafPaf Prueba",
         }),
     } as unknown as BillingProvider;
+    const createPlan = jest.fn(async (input: object) => ({ id: "new", ...input }));
     const plans = {
         findByCode: jest.fn().mockResolvedValue(null),
-        create: jest.fn(async (input) => ({ id: "new", ...input })),
+        create: createPlan,
     } as unknown as BillingPlanRepository;
+    const applyManualPayment = jest.fn();
     const subscriptions = {
         findByPortalId: jest.fn().mockResolvedValue(options.subscription ?? subscriptionView()),
-        applyManualPayment: jest.fn(),
+        applyManualPayment,
         setTrialEnd: jest.fn(),
     } as unknown as PortalSubscriptionRepository;
     return {
         service: new AdminBillingService(provider, plans, subscriptions),
-        provider,
-        plans,
-        subscriptions,
+        createPlan,
+        applyManualPayment,
     };
 };
 
 describe("AdminBillingService", () => {
     describe("plans", () => {
         it("takes amount, currency and interval from the Stripe price, not from the form", async () => {
-            const { service, plans } = build();
+            const { service, createPlan } = build();
 
             await service.createPlan({
                 code: "prueba-month",
@@ -76,7 +77,7 @@ describe("AdminBillingService", () => {
                 isPublic: false,
             });
 
-            expect(plans.create).toHaveBeenCalledWith(
+            expect(createPlan).toHaveBeenCalledWith(
                 expect.objectContaining({
                     code: "prueba-month",
                     name: "PafPaf Prueba",
@@ -98,11 +99,11 @@ describe("AdminBillingService", () => {
         });
 
         it("a plan without Stripe is for manual payments and needs a price", async () => {
-            const { service, plans } = build({ configured: false });
+            const { service, createPlan } = build({ configured: false });
 
             await service.createPlan({ code: "cash-month", priceAmount: "40.00" });
 
-            expect(plans.create).toHaveBeenCalledWith(
+            expect(createPlan).toHaveBeenCalledWith(
                 expect.objectContaining({ priceAmount: "40.00", stripePriceId: null })
             );
         });
@@ -110,16 +111,18 @@ describe("AdminBillingService", () => {
 
     describe("manual payment", () => {
         it("charges plan price × months and activates from today", async () => {
-            const { service, subscriptions } = build();
+            const { service, applyManualPayment } = build();
             const before = Date.now();
 
             await service.recordManualPayment("portal-1", { months: 3 });
 
-            const [, state] = (subscriptions.applyManualPayment as jest.Mock).mock.calls[0];
+            const [, state] = applyManualPayment.mock.calls[0];
             expect(state.payment.amount).toBe("147.00");
             expect(state.currentPeriodStart.getTime()).toBeGreaterThanOrEqual(before);
             const months =
-                (state.currentPeriodEnd.getUTCFullYear() - state.currentPeriodStart.getUTCFullYear()) * 12 +
+                (state.currentPeriodEnd.getUTCFullYear() -
+                    state.currentPeriodStart.getUTCFullYear()) *
+                    12 +
                 state.currentPeriodEnd.getUTCMonth() -
                 state.currentPeriodStart.getUTCMonth();
             expect(months).toBe(3);
@@ -127,7 +130,7 @@ describe("AdminBillingService", () => {
 
         it("extends a running paid period from its end, not from today", async () => {
             const paidUntil = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
-            const { service, subscriptions } = build({
+            const { service, applyManualPayment } = build({
                 subscription: subscriptionView({
                     status: SubscriptionStatus.active,
                     provider: "manual",
@@ -137,13 +140,13 @@ describe("AdminBillingService", () => {
 
             await service.recordManualPayment("portal-1", { months: 1, amount: "45.00" });
 
-            const [, state] = (subscriptions.applyManualPayment as jest.Mock).mock.calls[0];
+            const [, state] = applyManualPayment.mock.calls[0];
             expect(state.currentPeriodStart).toEqual(paidUntil);
             expect(state.payment.amount).toBe("45.00");
         });
 
         it("does not touch a club that Stripe bills", async () => {
-            const { service, subscriptions } = build({
+            const { service, applyManualPayment } = build({
                 subscription: subscriptionView({
                     status: SubscriptionStatus.active,
                     provider: "stripe",
@@ -151,10 +154,10 @@ describe("AdminBillingService", () => {
                 }),
             });
 
-            await expect(service.recordManualPayment("portal-1", { months: 1 })).rejects.toBeInstanceOf(
-                ConflictException
-            );
-            expect(subscriptions.applyManualPayment).not.toHaveBeenCalled();
+            await expect(
+                service.recordManualPayment("portal-1", { months: 1 })
+            ).rejects.toBeInstanceOf(ConflictException);
+            expect(applyManualPayment).not.toHaveBeenCalled();
         });
     });
 });

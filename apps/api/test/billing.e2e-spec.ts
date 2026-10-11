@@ -7,10 +7,13 @@ import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
-import { MailService } from "../src/modules/mail/application/services/mail.service";
-import { BillingProvider, ProviderSubscription } from "../src/modules/billing/domain/billing-provider.interface";
+import {
+    BillingProvider,
+    ProviderSubscription,
+} from "../src/modules/billing/domain/billing-provider.interface";
 import { StripeBillingProvider } from "../src/modules/billing/infrastructure/stripe/stripe-billing.provider";
 import { BillingCronService } from "../src/modules/cron/services/billing-cron.service";
+import { MailService } from "../src/modules/mail/application/services/mail.service";
 
 jest.setTimeout(120_000);
 
@@ -81,7 +84,10 @@ describe("Billing: Stripe subscription flow (e2e)", () => {
             .send(payload);
     };
     const crm = (method: "get" | "post", path: string) =>
-        request(app.getHttpServer())[method](path).set("Cookie", cookies).set("X-Portal-Slug", slug);
+        request(app.getHttpServer())
+            [method](path)
+            .set("Cookie", cookies)
+            .set("X-Portal-Slug", slug);
     const subscription = () => prisma.portalSubscription.findUniqueOrThrow({ where: { portalId } });
     const activeRemote = (status = "active"): ProviderSubscription => ({
         id: "sub_e2e",
@@ -128,13 +134,15 @@ describe("Billing: Stripe subscription flow (e2e)", () => {
             },
         });
 
-        const res = await request(app.getHttpServer()).post("/platform/portals/register").send({
-            name: slug,
-            displayName: `Billing ${suffix}`,
-            email,
-            password: PASSWORD,
-            ownerName: "Owner",
-        });
+        const res = await request(app.getHttpServer())
+            .post("/platform/portals/register")
+            .send({
+                name: slug,
+                displayName: `Billing ${suffix}`,
+                email,
+                password: PASSWORD,
+                ownerName: "Owner",
+            });
         expect(res.status).toBe(201);
         cookies = cookieHeader(res);
         portalId = res.body.portal.id;
@@ -145,7 +153,9 @@ describe("Billing: Stripe subscription flow (e2e)", () => {
         await prisma.portal.deleteMany({ where: { name: slug } });
         await prisma.user.deleteMany({ where: { email } });
         await prisma.billingPlan.deleteMany({ where: { code: planCode } });
-        await prisma.paymentEvent.deleteMany({ where: { eventId: { startsWith: `evt_${suffix}` } } });
+        await prisma.paymentEvent.deleteMany({
+            where: { eventId: { startsWith: `evt_${suffix}` } },
+        });
         await app.close();
     });
 

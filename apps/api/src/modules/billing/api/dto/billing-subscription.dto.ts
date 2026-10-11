@@ -37,14 +37,18 @@ export class BillingSubscriptionDto {
     @ApiProperty({ type: String, format: "date-time", nullable: true })
     graceEndsAt: string | null;
 
-    @ApiProperty({ type: Boolean, description: "Отменена и закончится в конце оплаченного периода" })
+    @ApiProperty({
+        type: Boolean,
+        description: "Отменена и закончится в конце оплаченного периода",
+    })
     cancelAtPeriodEnd: boolean;
 
     @ApiProperty({
         type: String,
         nullable: true,
         example: "stripe",
-        description: "stripe — списания делает Stripe; manual — продление из админки; null — оплаты не было",
+        description:
+            "stripe — списания делает Stripe; manual — продление из админки; null — оплаты не было",
     })
     provider: string | null;
 }

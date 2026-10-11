@@ -55,8 +55,7 @@ export class StripeBillingProvider extends BillingProvider {
             throw new BadRequestException("Stripe price must have a fixed amount");
         }
         const product = price.product;
-        const productName =
-            typeof product === "object" && !product.deleted ? product.name : null;
+        const productName = typeof product === "object" && !product.deleted ? product.name : null;
         return {
             id: price.id,
             amount: centsToAmount(price.unit_amount),

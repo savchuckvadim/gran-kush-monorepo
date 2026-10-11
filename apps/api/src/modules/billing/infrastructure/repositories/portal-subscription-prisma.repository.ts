@@ -88,7 +88,11 @@ export class PortalSubscriptionPrismaRepository implements PortalSubscriptionRep
 
     async linkProvider(
         portalId: string,
-        link: { provider: string; providerCustomerId: string; providerSubscriptionId: string | null }
+        link: {
+            provider: string;
+            providerCustomerId: string;
+            providerSubscriptionId: string | null;
+        }
     ): Promise<void> {
         await this.prisma.portalSubscription.update({
             where: { portalId },

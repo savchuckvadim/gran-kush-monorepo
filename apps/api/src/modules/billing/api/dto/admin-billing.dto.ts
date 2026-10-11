@@ -69,7 +69,10 @@ class BillingPlanFieldsDto {
     @IsObject()
     features?: Record<string, boolean>;
 
-    @ApiPropertyOptional({ type: Boolean, description: "false — архив: не продаётся, подписки живут" })
+    @ApiPropertyOptional({
+        type: Boolean,
+        description: "false — архив: не продаётся, подписки живут",
+    })
     @IsOptional()
     @IsBoolean()
     isActive?: boolean;

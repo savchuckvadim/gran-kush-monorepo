@@ -2,7 +2,10 @@ import { Injectable, Logger } from "@nestjs/common";
 
 import { PaymentStatus } from "@prisma/client";
 
-import { BillingProvider, ProviderInvoice } from "@modules/billing/domain/billing-provider.interface";
+import {
+    BillingProvider,
+    ProviderInvoice,
+} from "@modules/billing/domain/billing-provider.interface";
 import { BILLING_PROVIDERS } from "@modules/billing/domain/billing-providers";
 import { PaymentEventInput } from "@modules/billing/domain/payment-webhook.types";
 import { BillingPlanRepository } from "@modules/billing/domain/repositories/billing-plan-repository.interface";
@@ -61,7 +64,9 @@ export class SubscriptionSyncService {
         }
         const local = await this.subscriptions.findByPortalId(event.portalId);
         if (!local) {
-            this.logger.warn(`Checkout completed for portal ${event.portalId} without a subscription`);
+            this.logger.warn(
+                `Checkout completed for portal ${event.portalId} without a subscription`
+            );
             return;
         }
         await this.subscriptions.linkProvider(event.portalId, {

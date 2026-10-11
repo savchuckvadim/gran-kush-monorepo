@@ -71,7 +71,11 @@ export abstract class PortalSubscriptionRepository {
     /** Портал оплатил через провайдера: запомнить клиента и подписку до прихода её состояния. */
     abstract linkProvider(
         portalId: string,
-        link: { provider: string; providerCustomerId: string; providerSubscriptionId: string | null }
+        link: {
+            provider: string;
+            providerCustomerId: string;
+            providerSubscriptionId: string | null;
+        }
     ): Promise<void>;
 
     abstract applyProviderState(portalId: string, state: ProviderSubscriptionState): Promise<void>;

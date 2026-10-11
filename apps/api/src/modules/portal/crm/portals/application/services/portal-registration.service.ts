@@ -6,8 +6,8 @@ import { hash } from "bcrypt";
 import { Queue } from "bullmq";
 
 import { PrismaService } from "@common/prisma/prisma.service";
-import { BillingSettings } from "@modules/billing/application/billing-settings";
 import { buildJobId } from "@common/queue/job-options";
+import { BillingSettings } from "@modules/billing/application/billing-settings";
 import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
 import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
 import { ProvisionPortalFromTemplatesService } from "@modules/portal/crm/entity-fields/application/services/provision-portal-from-templates.service";

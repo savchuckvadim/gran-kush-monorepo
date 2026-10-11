@@ -20,8 +20,8 @@ import { BillingPlanRepository } from "./domain/repositories/billing-plan-reposi
 import { PortalSubscriptionRepository } from "./domain/repositories/portal-subscription-repository.interface";
 import { BillingPlanPrismaRepository } from "./infrastructure/repositories/billing-plan-prisma.repository";
 import { PortalSubscriptionPrismaRepository } from "./infrastructure/repositories/portal-subscription-prisma.repository";
-import { StripeBillingProvider } from "./infrastructure/stripe/stripe-billing.provider";
 import { stripeClientProvider } from "./infrastructure/stripe/stripe.client";
+import { StripeBillingProvider } from "./infrastructure/stripe/stripe-billing.provider";
 import { StripeWebhookVerifier } from "./infrastructure/stripe/stripe-webhook.verifier";
 
 /**
