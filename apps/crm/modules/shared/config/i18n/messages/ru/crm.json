@@ -15,6 +15,27 @@
                 "finance": "Финансы",
                 "employees": "Сотрудники",
                 "settings": "Настройки"
+            },
+            "account": {
+                "open": "Меню аккаунта",
+                "profile": "Профиль",
+                "appearance": "Оформление",
+                "darkMode": "Тёмный режим",
+                "lightMode": "Светлый режим",
+                "language": "Язык",
+                "logout": "Выйти",
+                "roles": {
+                    "portal_owner": "Владелец",
+                    "admin": "Администратор",
+                    "manager": "Менеджер",
+                    "employee": "Сотрудник"
+                }
+            },
+            "club": {
+                "title": "Клубы",
+                "fallback": "Клуб",
+                "loading": "Загрузка…",
+                "empty": "Нет доступных клубов"
             }
         },
         "subscription": {
@@ -595,6 +616,25 @@
             "checkoutWaiting": "Оплата получена, включаем подписку…",
             "checkoutSuccess": "Подписка активна.",
             "checkoutCanceled": "Оплата отменена. Выбрать тариф можно в любой момент."
+        },
+        "search": {
+            "title": "Поиск",
+            "description": "Участники, товары, заказы и разделы CRM",
+            "placeholder": "Имя, номер, email, товар или заказ…",
+            "trigger": "Поиск…",
+            "empty": "Ничего не найдено",
+            "searching": "Ищем…",
+            "memberNumber": "№ {number}",
+            "groups": {
+                "members": "Участники",
+                "products": "Товары",
+                "orders": "Заказы",
+                "pages": "Разделы"
+            },
+            "pages": {
+                "billing": "Подписка",
+                "appearance": "Оформление"
+            }
         }
     }
 }

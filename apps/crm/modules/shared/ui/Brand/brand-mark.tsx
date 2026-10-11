@@ -7,7 +7,12 @@ export function BrandMark({ className }: { className?: string }) {
     const gradientId = useId();
 
     return (
-        <svg viewBox="0 0 24 24" aria-hidden="true" className={cn("size-6 shrink-0", className)}>
+        <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            data-slot="brand-mark"
+            className={cn("size-6 shrink-0", className)}
+        >
             <defs>
                 <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
                     <stop offset="0" stopColor="#7b61ff" />

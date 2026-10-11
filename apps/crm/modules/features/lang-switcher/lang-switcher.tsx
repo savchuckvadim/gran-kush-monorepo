@@ -1,20 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
 
 import { Check, Globe } from "lucide-react";
 
 import { cn } from "@workspace/ui/lib/utils";
 
-import { type Locale, localeNames, locales } from "@/modules/shared/config/i18n";
+import { localeNames, locales } from "@/modules/shared/config/i18n";
+
+import { useChangeLocale } from "./use-change-locale";
 
 /** `align` — which edge of the button the menu sticks to; `start` inside the mobile drawer. */
 export function LangSwitcher({ align = "end" }: { align?: "start" | "end" }) {
-    const locale = useLocale() as Locale;
-    const router = useRouter();
-    const pathname = usePathname();
+    const { locale, changeLocale } = useChangeLocale();
     const [isOpen, setIsOpen] = useState(false);
     const rootRef = useRef<HTMLDivElement>(null);
 
@@ -33,20 +31,7 @@ export function LangSwitcher({ align = "end" }: { align?: "start" | "end" }) {
     }, []);
 
     const handleLocaleChange = (newLocale: string) => {
-        if (newLocale === locale) {
-            return;
-        }
-
-        // Replace locale in pathname
-        const segments = pathname.split("/");
-        if (segments[1] && locales.includes(segments[1] as Locale)) {
-            segments[1] = newLocale;
-        } else {
-            segments.splice(1, 0, newLocale);
-        }
-        // Avoid forcing an extra refresh while Radix Select portal is closing.
-        // The navigation itself is enough to reload locale-bound messages.
-        router.replace(segments.join("/"));
+        changeLocale(newLocale);
         setIsOpen(false);
     };
 

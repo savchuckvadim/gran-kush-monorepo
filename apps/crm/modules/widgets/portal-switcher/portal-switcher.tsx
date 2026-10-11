@@ -2,17 +2,26 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { useQuery } from "@tanstack/react-query";
-import { Building2, Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown } from "lucide-react";
 
 import type { SchemaMyPortalDto } from "@workspace/api-client/core";
-import { Button } from "@workspace/ui";
+import {
+    Button,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuTrigger,
+} from "@workspace/ui";
 import { cn } from "@workspace/ui/lib/utils";
 
+import { usePortalInfo } from "@/modules/entities/portal";
 import { usePortal } from "@/modules/processes";
 import { $api } from "@/modules/shared";
+import { ClubBadge } from "@/modules/shared/ui/Brand";
 
 function useMyPortals(enabled: boolean) {
     return useQuery({
@@ -23,76 +32,65 @@ function useMyPortals(enabled: boolean) {
     });
 }
 
-/** `align` — which edge of the button the menu sticks to; `start` inside the mobile drawer. */
-export function PortalSwitcher({ align = "end" }: { align?: "start" | "end" }) {
+/** Текущий клуб и переход в другой клуб сотрудника. */
+export function PortalSwitcher({ className }: { className?: string }) {
+    const t = useTranslations("crm.shell.club");
     const router = useRouter();
     const locale = useLocale();
     const { portalSlug } = usePortal();
     const [isOpen, setIsOpen] = useState(false);
+    const { data: info } = usePortalInfo();
     const { data: portals = [], isLoading } = useMyPortals(isOpen);
 
-    const activePortal = portals.find((portal) => portal.slug === portalSlug);
-    const label = activePortal?.displayName ?? portalSlug ?? "Портал";
+    const label = info?.displayName ?? portalSlug ?? t("fallback");
 
     function selectPortal(slug: string) {
-        setIsOpen(false);
         if (slug === portalSlug) return;
         router.push(`/${locale}/${slug}/crm`);
     }
 
     return (
-        <div className="relative">
-            <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsOpen((prev) => !prev)}
-                className="gap-2"
-            >
-                <Building2 className="size-4" />
-                <span className="max-w-[140px] truncate">{label}</span>
-                <ChevronsUpDown className="size-3 opacity-60" />
-            </Button>
+        <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+            <DropdownMenuTrigger asChild>
+                <Button
+                    variant="ghost"
+                    className={cn("min-w-0 gap-2 pl-1.5 pr-2 font-semibold", className)}
+                >
+                    <ClubBadge name={label} className="size-6 text-[0.625rem]" />
+                    <span className="max-w-44 truncate">{label}</span>
+                    <ChevronsUpDown className="text-muted-foreground" />
+                </Button>
+            </DropdownMenuTrigger>
 
-            {isOpen ? (
-                <>
-                    <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-                    <div
-                        className={cn(
-                            "absolute z-50 mt-1 rounded-md border bg-background p-1 shadow-md",
-                            align === "start" ? "left-0 w-52" : "right-0 w-64"
-                        )}
-                    >
-                        {isLoading ? (
-                            <p className="px-3 py-2 text-sm text-muted-foreground">Загрузка…</p>
-                        ) : portals.length === 0 ? (
-                            <p className="px-3 py-2 text-sm text-muted-foreground">
-                                Нет доступных порталов
-                            </p>
-                        ) : (
-                            portals.map((portal) => (
-                                <button
-                                    key={portal.portalId}
-                                    type="button"
-                                    onClick={() => selectPortal(portal.slug)}
-                                    className="flex w-full items-center justify-between gap-2 rounded px-3 py-2 text-left text-sm hover:bg-muted"
-                                >
-                                    <span className="min-w-0">
-                                        <span className="block truncate font-medium">
-                                            {portal.displayName}
-                                        </span>
-                                        <span className="block truncate text-xs text-muted-foreground">
-                                            {portal.slug} · {portal.role}
-                                        </span>
-                                    </span>
-                                    {portal.slug === portalSlug ? (
-                                        <Check className="size-4 shrink-0 text-primary" />
-                                    ) : null}
-                                </button>
-                            ))
-                        )}
-                    </div>
-                </>
-            ) : null}
-        </div>
+            <DropdownMenuContent align="start" className="w-64">
+                <DropdownMenuLabel className="text-muted-foreground text-xs font-medium">
+                    {t("title")}
+                </DropdownMenuLabel>
+                {isLoading ? (
+                    <p className="text-muted-foreground px-2 py-1.5 text-sm">{t("loading")}</p>
+                ) : portals.length === 0 ? (
+                    <p className="text-muted-foreground px-2 py-1.5 text-sm">{t("empty")}</p>
+                ) : (
+                    portals.map((portal) => (
+                        <DropdownMenuItem
+                            key={portal.portalId}
+                            onSelect={() => selectPortal(portal.slug)}
+                            className="gap-2.5"
+                        >
+                            <ClubBadge name={portal.displayName} className="size-7" />
+                            <span className="min-w-0 flex-1">
+                                <span className="block truncate font-medium">
+                                    {portal.displayName}
+                                </span>
+                                <span className="text-muted-foreground block truncate text-xs">
+                                    {portal.slug}
+                                </span>
+                            </span>
+                            {portal.slug === portalSlug && <Check className="text-primary" />}
+                        </DropdownMenuItem>
+                    ))
+                )}
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 }

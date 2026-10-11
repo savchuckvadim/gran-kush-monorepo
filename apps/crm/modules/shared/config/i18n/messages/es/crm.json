@@ -15,6 +15,27 @@
                 "finance": "Finanzas",
                 "employees": "Empleados",
                 "settings": "Configuración"
+            },
+            "account": {
+                "open": "Menú de la cuenta",
+                "profile": "Perfil",
+                "appearance": "Apariencia",
+                "darkMode": "Modo oscuro",
+                "lightMode": "Modo claro",
+                "language": "Idioma",
+                "logout": "Cerrar sesión",
+                "roles": {
+                    "portal_owner": "Propietario",
+                    "admin": "Administrador",
+                    "manager": "Gerente",
+                    "employee": "Empleado"
+                }
+            },
+            "club": {
+                "title": "Clubes",
+                "fallback": "Club",
+                "loading": "Cargando…",
+                "empty": "No hay clubes disponibles"
             }
         },
         "subscription": {
@@ -595,6 +616,25 @@
             "checkoutWaiting": "Pago recibido, activando la suscripción…",
             "checkoutSuccess": "La suscripción está activa.",
             "checkoutCanceled": "Has cancelado el pago. Puedes elegir un plan cuando quieras."
+        },
+        "search": {
+            "title": "Buscar",
+            "description": "Socios, productos, pedidos y secciones del CRM",
+            "placeholder": "Nombre, número, email, producto o pedido…",
+            "trigger": "Buscar…",
+            "empty": "Sin resultados",
+            "searching": "Buscando…",
+            "memberNumber": "N.º {number}",
+            "groups": {
+                "members": "Socios",
+                "products": "Productos",
+                "orders": "Pedidos",
+                "pages": "Secciones"
+            },
+            "pages": {
+                "billing": "Suscripción",
+                "appearance": "Apariencia"
+            }
         }
     }
 }

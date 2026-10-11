@@ -15,6 +15,27 @@
                 "finance": "Finance",
                 "employees": "Employees",
                 "settings": "Settings"
+            },
+            "account": {
+                "open": "Account menu",
+                "profile": "Profile",
+                "appearance": "Appearance",
+                "darkMode": "Dark mode",
+                "lightMode": "Light mode",
+                "language": "Language",
+                "logout": "Log out",
+                "roles": {
+                    "portal_owner": "Owner",
+                    "admin": "Admin",
+                    "manager": "Manager",
+                    "employee": "Employee"
+                }
+            },
+            "club": {
+                "title": "Clubs",
+                "fallback": "Club",
+                "loading": "Loading…",
+                "empty": "No clubs available"
             }
         },
         "subscription": {
@@ -595,6 +616,25 @@
             "checkoutWaiting": "Payment received, activating the subscription…",
             "checkoutSuccess": "The subscription is active.",
             "checkoutCanceled": "Payment was canceled. You can choose a plan again whenever you want."
+        },
+        "search": {
+            "title": "Search",
+            "description": "Members, products, orders and CRM sections",
+            "placeholder": "Name, number, email, product or order…",
+            "trigger": "Search…",
+            "empty": "Nothing found",
+            "searching": "Searching…",
+            "memberNumber": "No. {number}",
+            "groups": {
+                "members": "Members",
+                "products": "Products",
+                "orders": "Orders",
+                "pages": "Sections"
+            },
+            "pages": {
+                "billing": "Subscription",
+                "appearance": "Appearance"
+            }
         }
     }
 }

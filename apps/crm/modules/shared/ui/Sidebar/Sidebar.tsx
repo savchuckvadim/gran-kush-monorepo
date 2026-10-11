@@ -8,8 +8,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@workspace/ui";
 import { cn } from "@workspace/ui/lib/utils";
 
-import { BrandMark } from "../Brand";
-
 import { useSidebar } from "./sidebar-context";
 
 export interface ISidebarItem {
@@ -22,15 +20,50 @@ export interface ISidebarItem {
 }
 
 export interface ISidebarProps {
-    title: string;
+    /** Знак и название; подпись с `data-slot="brand-name"` прячется в узком сайдбаре. */
+    brand: React.ReactNode;
     items: ISidebarItem[];
+    /** Пункты внизу сайдбара (сканер QR и т.п.). */
+    footerItems?: ISidebarItem[];
     homeHref: string;
-    footer?: React.ReactNode;
-    /** Shown only in the mobile drawer: the header controls that do not fit a phone header. */
-    mobilePanel?: React.ReactNode;
 }
 
-export function Sidebar({ title, items, homeHref, footer, mobilePanel }: ISidebarProps) {
+function SidebarLink({
+    item,
+    showText,
+    onNavigate,
+}: {
+    item: ISidebarItem;
+    showText: boolean;
+    onNavigate: () => void;
+}) {
+    return (
+        <Link
+            // `href` уже полный путь с locale и portal — его собирает родитель (useCrmNavigation)
+            href={item.url}
+            title={item.title}
+            onClick={onNavigate}
+            data-slot="sidebar-link"
+            data-active={item.isActive || undefined}
+            aria-current={item.isActive ? "page" : undefined}
+            className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                "md:justify-center md:px-2",
+                showText ? "lg:justify-start lg:px-3" : "lg:justify-center lg:px-2",
+                item.isActive
+                    ? "bg-primary/15 text-primary"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            )}
+        >
+            <span className="shrink-0 [&_svg]:size-[1.125rem]">{item.icon}</span>
+            <span className={cn("truncate md:hidden", showText ? "lg:block" : "lg:hidden")}>
+                {item.title}
+            </span>
+        </Link>
+    );
+}
+
+export function Sidebar({ brand, items, footerItems = [], homeHref }: ISidebarProps) {
     const { isOpen, close } = useSidebar();
     const [isDesktopCollapsed, setIsDesktopCollapsed] = React.useState(false);
 
@@ -49,80 +82,80 @@ export function Sidebar({ title, items, homeHref, footer, mobilePanel }: ISideba
             {/* On phones the drawer opens under the 4rem header, so the burger stays on top as a cross */}
             <aside
                 data-slot="sidebar"
+                data-collapsed={isDesktopCollapsed || undefined}
                 className={cn(
                     "fixed left-0 top-16 z-40 flex h-[calc(100dvh-4rem)] w-64 flex-col bg-card transition-all duration-300 ease-in-out",
-                    "md:relative md:top-0 md:z-auto md:h-auto md:min-h-screen md:w-16 lg:w-56",
+                    "md:sticky md:top-0 md:z-auto md:h-dvh md:w-16 md:self-start lg:w-56",
                     isDesktopCollapsed ? "lg:w-16" : "lg:w-56",
                     isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
                 )}
             >
-                <div className="hidden h-16 items-center justify-center py-8 md:flex lg:justify-between lg:px-6">
-                    <Link href={homeHref} className="flex items-center gap-2" onClick={close}>
-                        <BrandMark />
-                        <span
-                            className={cn(
-                                "text-lg font-bold md:hidden",
-                                showText ? "lg:block" : "lg:hidden"
-                            )}
-                        >
-                            {title}
-                        </span>
+                <div
+                    className={cn(
+                        "flex h-16 shrink-0 items-center gap-2 px-4 md:justify-center md:px-0",
+                        showText ? "lg:justify-between lg:px-4" : "lg:justify-center lg:px-0"
+                    )}
+                >
+                    <Link
+                        href={homeHref}
+                        onClick={close}
+                        className={cn(
+                            "flex min-w-0 items-center",
+                            "md:[&_[data-slot=brand-name]]:hidden",
+                            showText
+                                ? "lg:[&_[data-slot=brand-name]]:block"
+                                : "lg:[&_[data-slot=brand-name]]:hidden"
+                        )}
+                    >
+                        {brand}
                     </Link>
 
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        aria-label={showText ? "Свернуть sidebar" : "Развернуть sidebar"}
-                        className="hidden ml-2 h-2 w-2 items-center justify-center rounded-md border bg-card text-muted-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground lg:flex"
-                        onClick={() => setIsDesktopCollapsed((v) => !v)}
-                    >
-                        {showText ? (
-                            <ChevronLeft className="h-4 w-4" />
-                        ) : (
-                            <ChevronRight className="h-4 w-4" />
-                        )}
-                    </Button>
+                    {showText && (
+                        <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label="Свернуть меню"
+                            className="hidden shrink-0 text-muted-foreground lg:inline-flex"
+                            onClick={() => setIsDesktopCollapsed(true)}
+                        >
+                            <ChevronLeft />
+                        </Button>
+                    )}
                 </div>
 
-                <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto p-2 lg:p-4">
+                <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto p-2 lg:px-3">
                     {items.map((item) => (
-                        <Link
-                            // `id` может повторяться — делаем key уникальным по комбинации.
-                            // `href` уже полный путь с locale и portal — родитель (например useCrmNavigation) обязан передать итоговый URL; useLocalizedLink внутри Sidebar не вызываем, чтобы не дублировать префиксы.
+                        // `id` может повторяться — key по комбинации
+                        <SidebarLink
                             key={`${item.id}-${item.url}`}
-                            href={item.url}
-                            title={item.title}
-                            onClick={close}
-                            data-slot="sidebar-link"
-                            data-active={item.isActive || undefined}
-                            className={cn(
-                                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                                "md:justify-center md:px-2",
-                                showText ? "lg:justify-start lg:px-3" : "lg:justify-center lg:px-2",
-                                item.isActive
-                                    ? "bg-primary/20 text-primary"
-                                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                            )}
-                        >
-                            <span className="shrink-0">{item.icon}</span>
-                            <span className={cn("md:hidden", showText ? "lg:block" : "lg:hidden")}>
-                                {item.title}
-                            </span>
-                            {item.isActive && (
-                                <ChevronRight
-                                    className={cn(
-                                        "ml-auto h-4 w-4 md:hidden",
-                                        showText ? "lg:block" : "lg:hidden"
-                                    )}
-                                />
-                            )}
-                        </Link>
+                            item={item}
+                            showText={showText}
+                            onNavigate={close}
+                        />
                     ))}
                 </nav>
 
-                {mobilePanel && <div className="shrink-0 px-2 pb-2 md:hidden">{mobilePanel}</div>}
-
-                {footer && <div className="mb-2 w-full shrink-0 px-2">{footer}</div>}
+                <div className="shrink-0 space-y-1 p-2 lg:px-3">
+                    {footerItems.map((item) => (
+                        <SidebarLink
+                            key={`${item.id}-${item.url}`}
+                            item={item}
+                            showText={showText}
+                            onNavigate={close}
+                        />
+                    ))}
+                    {!showText && (
+                        <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label="Развернуть меню"
+                            className="hidden w-full text-muted-foreground lg:inline-flex"
+                            onClick={() => setIsDesktopCollapsed(false)}
+                        >
+                            <ChevronRight />
+                        </Button>
+                    )}
+                </div>
             </aside>
         </>
     );

@@ -1,6 +1,17 @@
 export { Alert, AlertAction, AlertDescription, AlertTitle } from "./components/alert";
 export { Button, buttonVariants } from "./components/button";
 export {
+    Command,
+    CommandDialog,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+    CommandSeparator,
+    CommandShortcut,
+} from "./components/command";
+export {
     Dialog,
     DialogClose,
     DialogContent,
