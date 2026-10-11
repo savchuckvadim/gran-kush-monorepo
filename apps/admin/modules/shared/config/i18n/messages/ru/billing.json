@@ -1,0 +1,129 @@
+{
+    "billing": {
+        "interval": {
+            "month": "мес",
+            "year": "год"
+        },
+        "status": {
+            "trialing": "Бесплатный период",
+            "active": "Оплачено",
+            "past_due": "Просрочено",
+            "canceled": "Отменено",
+            "expired": "Истекло"
+        },
+        "provider": {
+            "stripe": "Stripe",
+            "manual": "Вручную",
+            "none": "—"
+        },
+        "errors": {
+            "loadFailed": "Не удалось загрузить данные",
+            "retry": "Повторить",
+            "stripeNotConfigured": "В API не заданы ключи Stripe — цену из Stripe проверить нельзя. Заведите тариф с ручной оплатой или задайте STRIPE_SECRET_KEY.",
+            "stripeManaged": "Клуб платит через Stripe — подписку меняют в кабинете Stripe.",
+            "planExists": "Тариф с таким кодом уже есть."
+        },
+        "plans": {
+            "title": "Тарифы",
+            "description": "Тарифы, которые клубы выбирают на сайте и в CRM. Удалить тариф нельзя — на него ссылаются подписки: снимите его с продажи (архив) или скройте.",
+            "hiddenHintTitle": "Скрытый тариф",
+            "hiddenHint": "Скрытый тариф (trial, тестовый за 5 €) не показывается на сайте и в CRM. Клуб выбирает его только по ссылке:",
+            "empty": "Тарифов пока нет",
+            "edit": "Изменить",
+            "public": "Публичный",
+            "hidden": "Скрытый",
+            "active": "Активен",
+            "archived": "Архив",
+            "columns": {
+                "code": "Код",
+                "name": "Название",
+                "price": "Цена",
+                "visibility": "Видимость",
+                "state": "Продажа",
+                "stripePriceId": "Stripe price id"
+            },
+            "form": {
+                "createTitle": "Новый тариф",
+                "createDescription": "С price id сумма, валюта и период берутся из Stripe. Без него — тариф для ручной оплаты (перевод, наличные).",
+                "editTitle": "Тариф {code}",
+                "editDescription": "Код тарифа не меняется. Снять с продажи — выключить «Активен», убрать с сайта — выключить «Публичный».",
+                "code": "Код",
+                "codeHint": "Латиница в нижнем регистре, цифры и дефис, например club-month. Потом не меняется.",
+                "codeInvalid": "Только a-z, 0-9 и дефис",
+                "name": "Название",
+                "nameHint": "Не задано — возьмём название продукта из Stripe или код.",
+                "source": "Откуда цена",
+                "sourceStripe": "Цена из Stripe (price id)",
+                "sourceManual": "Ручная оплата (сумма)",
+                "stripePriceId": "Stripe price id",
+                "stripePriceIdHint": "Сумма, валюта и период подтянутся из Stripe.",
+                "stripePriceIdEditHint": "Пусто — отвязать тариф от Stripe. Новая цена в Stripe не меняет оформленные подписки: для новой цены лучше завести новый тариф, а этот скрыть.",
+                "stripePriceIdInvalid": "Формат: price_…",
+                "priceAmount": "Сумма",
+                "priceAmountHint": "Например 49.00",
+                "priceAmountInvalid": "Формат: 49 или 49.00",
+                "currency": "Валюта",
+                "currencyInvalid": "Три заглавные буквы, например EUR",
+                "interval": "Период",
+                "intervalMonth": "Месяц",
+                "intervalYear": "Год",
+                "manualPriceHint": "Сумму, валюту и период можно менять только у тарифа без Stripe.",
+                "isPublic": "Публичный — виден на сайте и в CRM",
+                "isActive": "Активен — можно оформить",
+                "create": "Создать тариф",
+                "creating": "Создаём…",
+                "created": "Тариф {code} создан",
+                "save": "Сохранить",
+                "saving": "Сохраняем…",
+                "saved": "Тариф {code} сохранён"
+            }
+        },
+        "clubs": {
+            "title": "Клубы",
+            "description": "Подписки клубов. Оплату переводом или наличными отмечайте здесь — подписка станет активной на оплаченный срок.",
+            "search": "Поиск по названию или адресу",
+            "empty": "Клубов пока нет",
+            "notFound": "Ничего не найдено",
+            "since": "с {date}",
+            "noSubscription": "Нет подписки",
+            "noSubscriptionHint": "У клуба нет подписки — действия недоступны",
+            "cancelAtPeriodEnd": "Отменена, закончится в конце периода",
+            "managedByStripe": "Управляется в Stripe",
+            "markPayment": "Отметить оплату",
+            "trialEnd": "Конец триала",
+            "columns": {
+                "club": "Клуб",
+                "plan": "Тариф",
+                "status": "Статус",
+                "trialEndsAt": "Бесплатно до",
+                "currentPeriodEnd": "Оплачено до",
+                "graceEndsAt": "Льгота до",
+                "provider": "Кто ведёт"
+            },
+            "payment": {
+                "title": "Оплата — {club}",
+                "description": "Подписка станет активной. Срок продлевается от конца оплаченного периода, если он ещё идёт, иначе — от сегодня.",
+                "months": "Оплачено месяцев",
+                "monthsInvalid": "От 1 до 36",
+                "amount": "Полученная сумма",
+                "amountHint": "Не задана — цена тарифа × месяцы: {amount}",
+                "amountInvalid": "Формат: 49 или 49.00",
+                "plan": "Тариф",
+                "planCurrent": "Текущий — {plan}",
+                "submit": "Отметить оплату",
+                "submitting": "Сохраняем…",
+                "success": "{club}: оплачено до {date}"
+            },
+            "trial": {
+                "title": "Конец бесплатного периода — {club}",
+                "description": "Клуб пользуется CRM бесплатно до этой даты. Можно продлить или сократить.",
+                "date": "Бесплатно до",
+                "dateRequired": "Укажите дату",
+                "activeWarning": "Клуб сейчас на оплаченном периоде — после сохранения статус сменится на «Бесплатный период».",
+                "submit": "Сохранить",
+                "submitting": "Сохраняем…",
+                "success": "{club}: бесплатно до {date}"
+            }
+        }
+    }
+}

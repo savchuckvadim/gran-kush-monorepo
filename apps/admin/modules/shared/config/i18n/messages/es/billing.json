@@ -1,0 +1,129 @@
+{
+    "billing": {
+        "interval": {
+            "month": "mes",
+            "year": "año"
+        },
+        "status": {
+            "trialing": "Periodo gratuito",
+            "active": "Pagado",
+            "past_due": "Vencido",
+            "canceled": "Cancelado",
+            "expired": "Expirado"
+        },
+        "provider": {
+            "stripe": "Stripe",
+            "manual": "Manual",
+            "none": "—"
+        },
+        "errors": {
+            "loadFailed": "No se pudieron cargar los datos",
+            "retry": "Reintentar",
+            "stripeNotConfigured": "La API no tiene las claves de Stripe, así que no se puede comprobar el precio de Stripe. Crea un plan de pago manual o configura STRIPE_SECRET_KEY.",
+            "stripeManaged": "Este club paga con Stripe: la suscripción se cambia en el panel de Stripe.",
+            "planExists": "Ya existe un plan con este código."
+        },
+        "plans": {
+            "title": "Planes",
+            "description": "Planes que los clubes eligen en la web y en el CRM. Un plan no se puede eliminar porque las suscripciones lo usan: retíralo de la venta (archivo) u ocúltalo.",
+            "hiddenHintTitle": "Plan oculto",
+            "hiddenHint": "Un plan oculto (trial, plan de prueba de 5 €) no se muestra en la web ni en el CRM. El club solo puede elegirlo con el enlace:",
+            "empty": "Todavía no hay planes",
+            "edit": "Editar",
+            "public": "Público",
+            "hidden": "Oculto",
+            "active": "En venta",
+            "archived": "Archivado",
+            "columns": {
+                "code": "Código",
+                "name": "Nombre",
+                "price": "Precio",
+                "visibility": "Visibilidad",
+                "state": "Venta",
+                "stripePriceId": "Stripe price id"
+            },
+            "form": {
+                "createTitle": "Nuevo plan",
+                "createDescription": "Con un price id, el importe, la moneda y el periodo vienen de Stripe. Sin él, el plan se paga manualmente (transferencia, efectivo).",
+                "editTitle": "Plan {code}",
+                "editDescription": "El código del plan no se puede cambiar. Retirarlo de la venta: desactiva En venta; quitarlo de la web: desactiva Público.",
+                "code": "Código",
+                "codeHint": "Letras latinas minúsculas, dígitos y guiones, por ejemplo club-month. No se puede cambiar después.",
+                "codeInvalid": "Solo a-z, 0-9 y guiones",
+                "name": "Nombre",
+                "nameHint": "Vacío: se usa el nombre del producto de Stripe o el código.",
+                "source": "Origen del precio",
+                "sourceStripe": "Precio de Stripe (price id)",
+                "sourceManual": "Pago manual (importe)",
+                "stripePriceId": "Stripe price id",
+                "stripePriceIdHint": "El importe, la moneda y el periodo se toman de Stripe.",
+                "stripePriceIdEditHint": "Vacío: desvincular el plan de Stripe. Un precio nuevo en Stripe no cambia las suscripciones existentes: para un precio nuevo es mejor crear otro plan y ocultar este.",
+                "stripePriceIdInvalid": "Formato: price_…",
+                "priceAmount": "Importe",
+                "priceAmountHint": "Por ejemplo 49.00",
+                "priceAmountInvalid": "Formato: 49 o 49.00",
+                "currency": "Moneda",
+                "currencyInvalid": "Tres letras mayúsculas, por ejemplo EUR",
+                "interval": "Periodo",
+                "intervalMonth": "Mes",
+                "intervalYear": "Año",
+                "manualPriceHint": "El importe, la moneda y el periodo solo se pueden cambiar en un plan sin Stripe.",
+                "isPublic": "Público: visible en la web y en el CRM",
+                "isActive": "En venta: los clubes pueden suscribirse",
+                "create": "Crear plan",
+                "creating": "Creando…",
+                "created": "Plan {code} creado",
+                "save": "Guardar",
+                "saving": "Guardando…",
+                "saved": "Plan {code} guardado"
+            }
+        },
+        "clubs": {
+            "title": "Clubes",
+            "description": "Suscripciones de los clubes. Registra aquí los pagos por transferencia o en efectivo: la suscripción queda activa durante el periodo pagado.",
+            "search": "Buscar por nombre o dirección",
+            "empty": "Todavía no hay clubes",
+            "notFound": "No se encontró nada",
+            "since": "desde {date}",
+            "noSubscription": "Sin suscripción",
+            "noSubscriptionHint": "El club no tiene suscripción: las acciones no están disponibles",
+            "cancelAtPeriodEnd": "Cancelada, termina al final del periodo",
+            "managedByStripe": "Gestionado en Stripe",
+            "markPayment": "Registrar pago",
+            "trialEnd": "Fin de la prueba",
+            "columns": {
+                "club": "Club",
+                "plan": "Plan",
+                "status": "Estado",
+                "trialEndsAt": "Gratis hasta",
+                "currentPeriodEnd": "Pagado hasta",
+                "graceEndsAt": "Gracia hasta",
+                "provider": "Gestiona"
+            },
+            "payment": {
+                "title": "Pago — {club}",
+                "description": "La suscripción pasa a activa. El periodo se amplía desde el final del periodo pagado si sigue vigente; si no, desde hoy.",
+                "months": "Meses pagados",
+                "monthsInvalid": "De 1 a 36",
+                "amount": "Importe recibido",
+                "amountHint": "Vacío: precio del plan × meses: {amount}",
+                "amountInvalid": "Formato: 49 o 49.00",
+                "plan": "Plan",
+                "planCurrent": "Actual — {plan}",
+                "submit": "Registrar pago",
+                "submitting": "Guardando…",
+                "success": "{club}: pagado hasta {date}"
+            },
+            "trial": {
+                "title": "Fin del periodo gratuito — {club}",
+                "description": "El club usa el CRM gratis hasta esta fecha. Puedes ampliarla o acortarla.",
+                "date": "Gratis hasta",
+                "dateRequired": "Elige una fecha",
+                "activeWarning": "El club está ahora en un periodo pagado: al guardar, el estado cambia a Periodo gratuito.",
+                "submit": "Guardar",
+                "submitting": "Guardando…",
+                "success": "{club}: gratis hasta {date}"
+            }
+        }
+    }
+}

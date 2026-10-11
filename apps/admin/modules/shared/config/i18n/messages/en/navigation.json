@@ -1,5 +1,8 @@
 {
     "navigation": {
+        "adminTitle": "PafPaf · Admin",
+        "clubs": "Clubs",
+        "plans": "Plans",
         "home": "Home",
         "about": "About Us",
         "contacts": "Contacts",

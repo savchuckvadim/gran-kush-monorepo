@@ -13,6 +13,10 @@ export const ROUTES = {
     FORGOT_PASSWORD: "/auth/forgot-password",
     PRIVACY: "/privacy",
     TERMS: "/terms",
+    /** Платформенная админка: клубы и их подписки */
+    CLUBS: "/clubs",
+    /** Платформенная админка: тарифы */
+    PLANS: "/plans",
     CRM_HOME: "/crm",
     /** Префикс раздела клиентов: list, details, new */
     CRM_MEMBER_BASE: "/crm/member",
@@ -39,3 +43,8 @@ export const ROUTES = {
 } as const;
 
 export type Route = (typeof ROUTES)[keyof typeof ROUTES];
+
+/** Публичный адрес CRM: из него собирается ссылка на скрытый тариф. */
+export const CRM_PUBLIC_URL = (
+    process.env.NEXT_PUBLIC_CRM_URL || "https://crm.paf-paf.app"
+).replace(/\/$/, "");

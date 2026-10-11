@@ -35,11 +35,12 @@ export default getRequestConfig(async ({ requestLocale }) => {
     try {
         // Load all message files
         // Используем явные пути для каждого locale, чтобы Next.js мог их статически проанализировать
-        const [common, auth, crm, navigation] = await Promise.all([
+        const [common, auth, crm, navigation, billing] = await Promise.all([
             import(`./modules/shared/config/i18n/messages/${validLocale}/common.json`),
             import(`./modules/shared/config/i18n/messages/${validLocale}/auth.json`),
             import(`./modules/shared/config/i18n/messages/${validLocale}/crm.json`),
             import(`./modules/shared/config/i18n/messages/${validLocale}/navigation.json`),
+            import(`./modules/shared/config/i18n/messages/${validLocale}/billing.json`),
         ]);
 
         return {
@@ -49,6 +50,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
                 ...auth.default,
                 ...crm.default,
                 ...navigation.default,
+                ...billing.default,
             },
         };
     } catch (error) {

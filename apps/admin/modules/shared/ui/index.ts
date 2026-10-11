@@ -1,3 +1,4 @@
+export * from "./Badge";
 export * from "./EntityCard";
 export * from "./EntityList";
 export * from "./Loading";

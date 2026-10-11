@@ -21,6 +21,8 @@ export class ApiRefreshHelper {
         // Important: callers rely on this method to *finish* refreshing tokens (or throw),
         // so we must return/await the shared `refreshPromise`.
         if (!refreshPromise) {
+            // finally в той же цепочке: отдельный `refreshPromise.finally()` никто не ловил,
+            // и неудачный refresh всплывал в консоли необработанным reject
             refreshPromise = (async () => {
                 const response =
                     this.authStrategy === "cookie"
@@ -46,9 +48,7 @@ export class ApiRefreshHelper {
                     this.storage.setAccessToken(accessToken);
                     this.storage.setRefreshToken(refreshToken);
                 }
-            })();
-
-            refreshPromise.finally(() => {
+            })().finally(() => {
                 refreshPromise = null;
             });
         }

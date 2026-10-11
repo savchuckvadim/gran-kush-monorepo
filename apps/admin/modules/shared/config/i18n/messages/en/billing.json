@@ -1,0 +1,129 @@
+{
+    "billing": {
+        "interval": {
+            "month": "mo",
+            "year": "yr"
+        },
+        "status": {
+            "trialing": "Free period",
+            "active": "Paid",
+            "past_due": "Past due",
+            "canceled": "Canceled",
+            "expired": "Expired"
+        },
+        "provider": {
+            "stripe": "Stripe",
+            "manual": "Manual",
+            "none": "—"
+        },
+        "errors": {
+            "loadFailed": "Could not load data",
+            "retry": "Retry",
+            "stripeNotConfigured": "Stripe keys are not set in the API, so the Stripe price cannot be checked. Create a manual-payment plan or set STRIPE_SECRET_KEY.",
+            "stripeManaged": "This club pays through Stripe — change the subscription in the Stripe dashboard.",
+            "planExists": "A plan with this code already exists."
+        },
+        "plans": {
+            "title": "Plans",
+            "description": "Plans that clubs choose on the website and in the CRM. A plan cannot be deleted because subscriptions refer to it: take it off sale (archive) or hide it.",
+            "hiddenHintTitle": "Hidden plan",
+            "hiddenHint": "A hidden plan (trial, a 5 € test plan) is not shown on the website or in the CRM. A club can pick it only via the link:",
+            "empty": "No plans yet",
+            "edit": "Edit",
+            "public": "Public",
+            "hidden": "Hidden",
+            "active": "On sale",
+            "archived": "Archived",
+            "columns": {
+                "code": "Code",
+                "name": "Name",
+                "price": "Price",
+                "visibility": "Visibility",
+                "state": "Sale",
+                "stripePriceId": "Stripe price id"
+            },
+            "form": {
+                "createTitle": "New plan",
+                "createDescription": "With a price id, amount, currency and interval come from Stripe. Without it, the plan is paid manually (bank transfer, cash).",
+                "editTitle": "Plan {code}",
+                "editDescription": "The plan code cannot be changed. Take it off sale — turn off On sale; remove it from the website — turn off Public.",
+                "code": "Code",
+                "codeHint": "Lowercase latin letters, digits and dashes, e.g. club-month. Cannot be changed later.",
+                "codeInvalid": "Only a-z, 0-9 and dashes",
+                "name": "Name",
+                "nameHint": "Empty — the Stripe product name or the code is used.",
+                "source": "Price source",
+                "sourceStripe": "Price from Stripe (price id)",
+                "sourceManual": "Manual payment (amount)",
+                "stripePriceId": "Stripe price id",
+                "stripePriceIdHint": "Amount, currency and interval are taken from Stripe.",
+                "stripePriceIdEditHint": "Empty — unlink the plan from Stripe. A new Stripe price does not change existing subscriptions: for a new price, better create a new plan and hide this one.",
+                "stripePriceIdInvalid": "Format: price_…",
+                "priceAmount": "Amount",
+                "priceAmountHint": "For example 49.00",
+                "priceAmountInvalid": "Format: 49 or 49.00",
+                "currency": "Currency",
+                "currencyInvalid": "Three capital letters, e.g. EUR",
+                "interval": "Interval",
+                "intervalMonth": "Month",
+                "intervalYear": "Year",
+                "manualPriceHint": "Amount, currency and interval can only be changed for a plan without Stripe.",
+                "isPublic": "Public — shown on the website and in the CRM",
+                "isActive": "On sale — clubs can subscribe",
+                "create": "Create plan",
+                "creating": "Creating…",
+                "created": "Plan {code} created",
+                "save": "Save",
+                "saving": "Saving…",
+                "saved": "Plan {code} saved"
+            }
+        },
+        "clubs": {
+            "title": "Clubs",
+            "description": "Club subscriptions. Record bank transfer or cash payments here — the subscription becomes active for the paid period.",
+            "search": "Search by name or address",
+            "empty": "No clubs yet",
+            "notFound": "Nothing found",
+            "since": "since {date}",
+            "noSubscription": "No subscription",
+            "noSubscriptionHint": "The club has no subscription — actions are unavailable",
+            "cancelAtPeriodEnd": "Canceled, ends at the end of the period",
+            "managedByStripe": "Managed in Stripe",
+            "markPayment": "Record payment",
+            "trialEnd": "Trial end",
+            "columns": {
+                "club": "Club",
+                "plan": "Plan",
+                "status": "Status",
+                "trialEndsAt": "Free until",
+                "currentPeriodEnd": "Paid until",
+                "graceEndsAt": "Grace until",
+                "provider": "Billed by"
+            },
+            "payment": {
+                "title": "Payment — {club}",
+                "description": "The subscription becomes active. The period is extended from the end of the paid period if it is still running, otherwise from today.",
+                "months": "Months paid",
+                "monthsInvalid": "From 1 to 36",
+                "amount": "Amount received",
+                "amountHint": "Empty — plan price × months: {amount}",
+                "amountInvalid": "Format: 49 or 49.00",
+                "plan": "Plan",
+                "planCurrent": "Current — {plan}",
+                "submit": "Record payment",
+                "submitting": "Saving…",
+                "success": "{club}: paid until {date}"
+            },
+            "trial": {
+                "title": "Free period end — {club}",
+                "description": "The club uses the CRM for free until this date. You can extend or shorten it.",
+                "date": "Free until",
+                "dateRequired": "Pick a date",
+                "activeWarning": "The club is on a paid period now — after saving, the status changes to Free period.",
+                "submit": "Save",
+                "submitting": "Saving…",
+                "success": "{club}: free until {date}"
+            }
+        }
+    }
+}
