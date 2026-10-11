@@ -83,5 +83,25 @@
         "meta": "Page not found",
         "title": "This page has gone up in smoke.",
         "back": "Back to home"
+    },
+    "perks": {
+        "eyebrow": "Still deciding?",
+        "title": "Every plan includes all of this.",
+        "items": {
+            "minimal": {
+                "title": "Nothing extra",
+                "text": "Not one button too many, no AI nobody asked for. Open it and get to work."
+            },
+            "eu": {
+                "title": "Your data stays in the EU",
+                "text": "Servers in Germany, every club walled off from the rest. Nobody else sees your members."
+            },
+            "freedom": {
+                "title": "No lock-in",
+                "text": "Cancel in two clicks right in the CRM. No calls, no fine print."
+            }
+        },
+        "cta": "Try a year free",
+        "note": "No card. When the year ends, pick a plan or walk away."
     }
 }

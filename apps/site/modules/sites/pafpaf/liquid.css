@@ -1608,6 +1608,109 @@ main,
 
 /* ---------- final + footer ---------- */
 
+/* ---------- perks under the prices: bright cards, then the free year ---------- */
+
+.perks-sec {
+    padding-top: 0;
+}
+
+.perks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin-top: 40px;
+}
+
+.perk {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: grid;
+    align-content: space-between;
+    gap: 36px;
+    min-height: 240px;
+    padding: 28px;
+    border-radius: 30px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--p1), var(--p2));
+    box-shadow: var(--shadow);
+    transition: transform 0.5s var(--spring);
+}
+
+.perk:hover {
+    transform: translateY(-4px) rotate(-0.4deg);
+}
+
+.perk::after {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    z-index: -1;
+    background: radial-gradient(circle at 28% 18%, rgba(255, 255, 255, 0.38), transparent 42%);
+    pointer-events: none;
+}
+
+.perk:nth-child(1) {
+    --p1: var(--a1);
+    --p2: var(--a2);
+}
+
+.perk:nth-child(2) {
+    --p1: var(--a2);
+    --p2: var(--a3);
+}
+
+.perk:nth-child(3) {
+    --p1: var(--a3);
+    --p2: var(--a1);
+}
+
+.perk__ico {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.perk__ico svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.perk h3 {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+}
+
+.perk p {
+    margin-top: 6px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.perks-cta {
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+    margin-top: 44px;
+    text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .perk,
+    .perk:hover {
+        transition: none;
+        transform: none;
+    }
+}
+
 .final {
     padding: clamp(130px, 16vw, 220px) 0;
     text-align: center;

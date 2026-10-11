@@ -17,6 +17,7 @@ import { SmokeText } from "../ui/smoke-text";
 
 import { LimitFlask, Metaballs, RolesRecord } from "./interactive";
 import { PricingCalculator, PricingTeaserPlans } from "./pricing";
+import { PricingPerks } from "./pricing-perks";
 
 interface IntroProps {
     eyebrow?: string | null;
@@ -98,19 +99,33 @@ export const PricingTeaser = ({
     </section>
 );
 
-export const PricingTable = ({ block, plans }: { block: PricingTableBlock; plans: PlanView[] }) => (
-    <section className="sec center p-hero">
-        <div className="wrap">
-            {block.eyebrow && <span className="eyebrow">{block.eyebrow}</span>}
-            <SmokeText as="h1" className="h1 p-hero__h" text={block.title} now />
-            {block.text && (
-                <p className="lede fade-late" style={{ marginLeft: "auto", marginRight: "auto" }}>
-                    {block.text}
-                </p>
-            )}
-            <PricingCalculator plans={plans} defaultMembers={block.defaultMembers ?? 400} />
-        </div>
-    </section>
+export const PricingTable = ({
+    block,
+    plans,
+    locale,
+}: {
+    block: PricingTableBlock;
+    plans: PlanView[];
+    locale: Locale;
+}) => (
+    <>
+        <section className="sec center p-hero">
+            <div className="wrap">
+                {block.eyebrow && <span className="eyebrow">{block.eyebrow}</span>}
+                <SmokeText as="h1" className="h1 p-hero__h" text={block.title} now />
+                {block.text && (
+                    <p
+                        className="lede fade-late"
+                        style={{ marginLeft: "auto", marginRight: "auto" }}
+                    >
+                        {block.text}
+                    </p>
+                )}
+                <PricingCalculator plans={plans} defaultMembers={block.defaultMembers ?? 400} />
+            </div>
+        </section>
+        <PricingPerks locale={locale} />
+    </>
 );
 
 export const Addons = ({ block }: { block: AddonsBlock }) => (

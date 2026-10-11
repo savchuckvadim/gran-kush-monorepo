@@ -83,5 +83,25 @@
         "meta": "Página no encontrada",
         "title": "Esta página se ha esfumado.",
         "back": "Volver al inicio"
+    },
+    "perks": {
+        "eyebrow": "¿Aún dudas?",
+        "title": "Todo esto va en cualquier plan.",
+        "items": {
+            "minimal": {
+                "title": "Nada que sobre",
+                "text": "Ni un botón de más ni una IA que nadie pidió. Lo abres y trabajas."
+            },
+            "eu": {
+                "title": "Tus datos, en la UE",
+                "text": "Servidores en Alemania y cada club aislado del resto. Nadie más ve a tus socios."
+            },
+            "freedom": {
+                "title": "Sin permanencia",
+                "text": "Cancelas en dos clics desde la propia CRM. Sin llamadas ni letra pequeña."
+            }
+        },
+        "cta": "Probar un año gratis",
+        "note": "Sin tarjeta. Al terminar el año eliges plan o te vas."
     }
 }

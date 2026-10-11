@@ -40,7 +40,7 @@ export const RenderBlocks = ({ blocks, locale, plans }: RenderBlocksProps) =>
             case "pricingTeaser":
                 return <PricingTeaser key={key} block={block} plans={plans} locale={locale} />;
             case "pricingTable":
-                return <PricingTable key={key} block={block} plans={plans} />;
+                return <PricingTable key={key} block={block} plans={plans} locale={locale} />;
             case "addons":
                 return <Addons key={key} block={block} />;
             case "faq":
