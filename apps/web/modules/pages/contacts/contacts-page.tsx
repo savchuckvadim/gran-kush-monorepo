@@ -2,35 +2,33 @@
 
 import { useTranslations } from "next-intl";
 
-import { Mail, MapPin, Phone } from "lucide-react";
+import { MapPin, Users } from "lucide-react";
 
-import { ContactsFormCard } from "./components/contacts-form-card";
+import { ROUTES } from "@/modules/shared/config/routes";
+import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
+
 import { ContactsHero } from "./components/contacts-hero";
 import { ContactsInfoList } from "./components/contacts-info-list";
 import { ContactsInfoItem, ContactsPageContent, ContactsTranslationKey } from "./types";
 
-function buildContactsContent(t: (key: ContactsTranslationKey) => string): ContactsPageContent {
+function buildContactsContent(
+    t: (key: ContactsTranslationKey) => string,
+    localizedLink: (path: string) => string
+): ContactsPageContent {
     const infoItems: ContactsInfoItem[] = [
         {
-            key: "email",
-            icon: Mail,
-            label: t("email"),
-            value: t("emailValue"),
-            href: `mailto:${t("emailValue")}`,
-        },
-        {
-            key: "phone",
-            icon: Phone,
-            label: t("phone"),
-            value: t("phoneValue"),
-            href: `tel:${t("phoneValue")}`,
-        },
-        {
-            key: "address",
+            key: "clubs",
             icon: MapPin,
-            label: t("address"),
-            value: t("addressValue"),
-            multiline: true,
+            label: t("clubsLabel"),
+            value: t("clubsValue"),
+            href: localizedLink(ROUTES.CLUBS),
+        },
+        {
+            key: "myClubs",
+            icon: Users,
+            label: t("myClubsLabel"),
+            value: t("myClubsValue"),
+            href: localizedLink(ROUTES.PROFILE_CLUBS),
         },
     ];
 
@@ -38,29 +36,19 @@ function buildContactsContent(t: (key: ContactsTranslationKey) => string): Conta
         title: t("title"),
         subtitle: t("subtitle"),
         infoItems,
-        form: {
-            title: t("sendMessage"),
-            nameLabel: t("name"),
-            emailLabel: t("email"),
-            emailPlaceholder: t("emailPlaceholder"),
-            messageLabel: t("message"),
-            submitLabel: t("send"),
-        },
     };
 }
 
 export function ContactsPage() {
     const t = useTranslations("contacts");
-    const content = buildContactsContent((key) => t(key));
+    const localizedLink = useLocalizedLink();
+    const content = buildContactsContent((key) => t(key), localizedLink);
 
     return (
         <div className="container min-w-full py-20">
             <div className="mx-auto max-w-3xl space-y-12">
                 <ContactsHero title={content.title} subtitle={content.subtitle} />
-                <div className="grid gap-8 md:grid-cols-2">
-                    <ContactsInfoList items={content.infoItems} />
-                    <ContactsFormCard form={content.form} />
-                </div>
+                <ContactsInfoList items={content.infoItems} />
             </div>
         </div>
     );

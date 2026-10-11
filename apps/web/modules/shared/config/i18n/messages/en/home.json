@@ -2,29 +2,29 @@
     "home": {
         "hero": {
             "title": "Welcome to",
-            "subtitle": "Your trusted cannabis club. Join our community and experience premium quality products with professional service.",
+            "subtitle": "Your member account: join clubs, show your QR code at the entrance and keep your visits and documents in one place.",
             "getStarted": "Get Started",
             "personalCabinet": "Personal Cabinet"
         },
         "about": {
-            "title": "About Us",
-            "description": "Gran Kush is a private non-profit association in central Torrevieja. We build a safe cultural space for connection, relaxation, and a responsible approach to cannabis.",
+            "title": "How it works",
+            "description": "Clubs, salons and associations manage their members with PafPaf. You register once and use the same account in every club you belong to.",
             "quality": {
-                "title": "Quality and responsibility",
-                "description": "We share up-to-date information about strains, harm reduction, and mindful use."
+                "title": "One account",
+                "description": "Your profile, documents and signature are kept in your account and passed to a club when you join it."
             },
             "community": {
-                "title": "Community",
-                "description": "Regular meetups, themed evenings, and cultural events bring members together in a respectful atmosphere."
+                "title": "Entry by QR code",
+                "description": "Show your personal QR code at the club entrance. Your visits are saved to your history."
             },
             "service": {
-                "title": "Club format",
-                "description": "Access is members-only. We do not advertise or sell products."
+                "title": "All your clubs in one place",
+                "description": "Membership, visits and spending for each club are in your personal cabinet."
             }
         },
         "cta": {
             "title": "Ready to Get Started?",
-            "description": "Join Gran Kush today and become part of our community. Register now to get started.",
+            "description": "Create an account and join your club.",
             "button": "Register Now"
         }
     }

@@ -39,7 +39,7 @@ export class OrderItemProductDto {
     @ApiProperty({ example: "550e8400-e29b-41d4-a716-446655440000", type: String })
     id: string;
 
-    @ApiProperty({ example: "OG Kush", type: String })
+    @ApiProperty({ example: "Producto A", type: String })
     name: string;
 
     @ApiPropertyOptional({ example: "SKU-001", type: String, nullable: true })
@@ -99,7 +99,7 @@ export class OrderItemDto {
     @ApiProperty({ example: 38.75, type: Number, description: "Итого по позиции" })
     totalPrice: number;
 
-    @ApiPropertyOptional({ example: "Без стеблей", type: String, nullable: true })
+    @ApiPropertyOptional({ example: "Подарочная упаковка", type: String, nullable: true })
     notes?: string | null;
 
     @ApiProperty({ type: () => OrderItemProductDto })
@@ -201,7 +201,7 @@ export class CreateOrderItemDto {
     @Min(0.001)
     quantity: number;
 
-    @ApiPropertyOptional({ example: "Без стеблей", type: String })
+    @ApiPropertyOptional({ example: "Подарочная упаковка", type: String })
     @IsOptional()
     @IsString()
     @MaxLength(500)

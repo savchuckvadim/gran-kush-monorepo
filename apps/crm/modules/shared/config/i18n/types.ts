@@ -16,15 +16,11 @@ export type CommonTranslationKey =
     | "back"
     | "next"
     | "required"
-    | "companyName"
-    | "companyTagline"
     | "allRightsReserved";
 
 // Navigation translation keys
 export type NavigationTranslationKey =
     | "home"
-    | "about"
-    | "contacts"
     | "login"
     | "register"
     | "profile"

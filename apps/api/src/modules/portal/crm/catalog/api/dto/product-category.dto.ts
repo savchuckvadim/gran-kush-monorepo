@@ -18,13 +18,13 @@ export class ProductCategoryDto {
     @ApiProperty({ example: "550e8400-e29b-41d4-a716-446655440000", type: String })
     id: string;
 
-    @ApiProperty({ example: "flower", type: String, description: "Уникальный код категории" })
+    @ApiProperty({ example: "drinks", type: String, description: "Уникальный код категории" })
     code: string;
 
-    @ApiProperty({ example: "Цветы", type: String, description: "Название категории" })
+    @ApiProperty({ example: "Напитки", type: String, description: "Название категории" })
     name: string;
 
-    @ApiPropertyOptional({ example: "Категория цветочной продукции", type: String, nullable: true })
+    @ApiPropertyOptional({ example: "Категория напитков", type: String, nullable: true })
     description?: string | null;
 
     @ApiPropertyOptional({
@@ -55,19 +55,19 @@ export class ProductCategoryTreeDto extends ProductCategoryDto {
 // ─── Create DTO ──────────────────────────────────────────────────────────────
 
 export class CreateProductCategoryDto {
-    @ApiProperty({ example: "flower", type: String })
+    @ApiProperty({ example: "drinks", type: String })
     @IsString()
     @IsNotEmpty()
     @MaxLength(50)
     code: string;
 
-    @ApiProperty({ example: "Цветы", type: String })
+    @ApiProperty({ example: "Напитки", type: String })
     @IsString()
     @IsNotEmpty()
     @MaxLength(255)
     name: string;
 
-    @ApiPropertyOptional({ example: "Категория цветочной продукции", type: String })
+    @ApiPropertyOptional({ example: "Категория напитков", type: String })
     @IsOptional()
     @IsString()
     description?: string;
@@ -88,19 +88,19 @@ export class CreateProductCategoryDto {
 // ─── Update DTO ──────────────────────────────────────────────────────────────
 
 export class UpdateProductCategoryDto {
-    @ApiPropertyOptional({ example: "flower", type: String })
+    @ApiPropertyOptional({ example: "drinks", type: String })
     @IsOptional()
     @IsString()
     @MaxLength(50)
     code?: string;
 
-    @ApiPropertyOptional({ example: "Цветы", type: String })
+    @ApiPropertyOptional({ example: "Напитки", type: String })
     @IsOptional()
     @IsString()
     @MaxLength(255)
     name?: string;
 
-    @ApiPropertyOptional({ example: "Категория цветочной продукции", type: String, nullable: true })
+    @ApiPropertyOptional({ example: "Категория напитков", type: String, nullable: true })
     @IsOptional()
     @IsString()
     description?: string | null;
