@@ -106,10 +106,13 @@ module-name/
 **Domain Model**:
 - `Member` - Core row: `userId`, `portalId`, `membershipNumber`, `statusItemId` (FK to `status_items`), `isActive`; profile attributes live in `field_values` keyed by `portal_field_definitions`
   - Relations: `User`, `FieldValue[]`, `IdentityDocument[]`, `Signature`, `MemberMjStatus[]`, `MemberDocument[]`
+  - Consent (TASK-663): `consentStatus` (`confirmed` | `pending`), `consentToken`, `consentRequestedAt`, `consentConfirmedAt`, `signatureShared`. A club that adds an **existing** account by email gets a `pending` membership: the owner confirms it from the email (`/{locale}/consent/{token}` in the CRM, password required) or declines (membership deleted). `GET /lk/portals` hides `pending` memberships.
+- `MemberDocumentShare` (`member_document_shares`) - which account documents a membership may see. Documents and the signature belong to the account; the CRM lists, previews and replaces only what is shared with that membership (`MemberDocumentShareRepository`, `AccountFilesService.replace*({ share })`). Self-initiated joins (LK, registration link, kiosk) share everything; a CRM-created membership gets only what the club uploads itself or what the owner selects when confirming.
 
 **API Endpoints**:
-- `POST /lk/auth/member/check` - Check if user exists for member registration
 - `POST /lk/auth/member/register` - Register new member account (portal-scoped; `PortalId` from context)
+- `GET /public/consent/:token`, `POST /public/consent/:token/confirm`, `POST /public/consent/:token/decline` - membership consent of an existing account (public, `PUBLIC_TOKEN_THROTTLE`, token valid 14 days)
+- `POST /crm/members/:id/consent/resend` - send the consent email again (`EMAIL_THROTTLE`)
 - `POST /lk/auth/member/files` - Queue private documents/signature upload (BullMQ)
 - `POST /lk/auth/login` - Member login (web cookies under `lk/auth`)
 - `POST /lk/auth/refresh` - Refresh member session (cookie-based for web)

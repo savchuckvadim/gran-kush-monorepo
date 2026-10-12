@@ -178,38 +178,141 @@ describe("Security (e2e)", () => {
             expect(accepted.body).not.toHaveProperty("refreshToken");
         });
 
-        it.failing(
-            "TASK-663: adding an existing account by email does not expose its documents",
-            async () => {
-                const victim = await prisma.user.findUnique({ where: { email: clubB.ownerEmail } });
-                if (!victim) throw new Error("victim user missing");
-                const document = await prisma.userDocument.create({
-                    data: {
-                        userId: victim.id,
-                        type: "passport",
-                        side: "single",
-                        number: "X-SECRET-1",
-                        storagePath: `private/test/${suffix}/passport.jpg`,
-                    },
+        it("TASK-663: adding an existing account by email does not expose its documents until the owner confirms", async () => {
+            const victim = await prisma.user.findUnique({ where: { email: clubB.ownerEmail } });
+            if (!victim) throw new Error("victim user missing");
+            const document = await prisma.userDocument.create({
+                data: {
+                    userId: victim.id,
+                    type: "passport",
+                    side: "single",
+                    number: "X-SECRET-1",
+                    storagePath: `private/test/${suffix}/passport.jpg`,
+                },
+            });
+            const consentToken = async (memberId: string): Promise<string> => {
+                const row = await prisma.member.findUnique({
+                    where: { id: memberId },
+                    select: { consentToken: true },
                 });
+                if (!row?.consentToken) throw new Error("consent token missing");
+                return row.consentToken;
+            };
+            const publicConsent = (token: string) =>
+                request(app.getHttpServer()).get(`/public/consent/${token}`);
 
-                try {
-                    const created = await as(clubA)
-                        .post("/crm/members")
-                        .send({ email: clubB.ownerEmail, fields: { first_name: "Victim" } });
-                    // the fix may answer with "waiting for the account's consent" instead of a member
-                    if (created.status === 201) {
-                        const full = await as(clubA).get(
-                            `/crm/members/${created.body.memberId as string}`
-                        );
-                        expect(full.status).toBe(200);
-                        expect(full.body.documents).toEqual([]);
-                    }
-                } finally {
-                    await prisma.userDocument.delete({ where: { id: document.id } });
-                }
+            try {
+                const created = await as(clubA)
+                    .post("/crm/members")
+                    .send({ email: clubB.ownerEmail, fields: { first_name: "Victim" } });
+                expect(created.status).toBe(201);
+                expect(created.body.awaitingConsent).toBe(true);
+                const memberId = created.body.memberId as string;
+
+                const hidden = await as(clubA).get(`/crm/members/${memberId}`);
+                expect(hidden.status).toBe(200);
+                expect(hidden.body.consentStatus).toBe("pending");
+                expect(hidden.body.documents).toEqual([]);
+                expect(hidden.body.hasSignature).toBe(false);
+                expect(
+                    (
+                        await as(clubA).get(
+                            `/crm/members/${memberId}/documents/${document.id}/preview`
+                        )
+                    ).status
+                ).toBe(404);
+                expect(
+                    (
+                        await as(clubA)
+                            .patch(`/crm/members/${memberId}/files`)
+                            .attach("signature", Buffer.from("png"), "signature.png")
+                    ).status
+                ).toBe(403);
+
+                const token = await consentToken(memberId);
+                const info = await publicConsent(token);
+                expect(info.status).toBe(200);
+                expect(info.body.portalSlug).toBe(clubA.slug);
+                expect(info.body.email).toBe(clubB.ownerEmail);
+                expect(info.body.documents.map((d: { id: string }) => d.id)).toEqual([document.id]);
+
+                const wrongPassword = await request(app.getHttpServer())
+                    .post(`/public/consent/${token}/confirm`)
+                    .send({ password: "Attacker123", shareDocumentIds: [document.id] });
+                expect(wrongPassword.status).toBe(401);
+                expect((await as(clubA).get(`/crm/members/${memberId}`)).body.documents).toEqual(
+                    []
+                );
+
+                const confirmed = await request(app.getHttpServer())
+                    .post(`/public/consent/${token}/confirm`)
+                    .send({ password: PASSWORD, shareDocumentIds: [document.id] });
+                expect(confirmed.status).toBe(200);
+                expect(confirmed.body).toEqual({ portalSlug: clubA.slug, memberId });
+
+                const visible = await as(clubA).get(`/crm/members/${memberId}`);
+                expect(visible.body.consentStatus).toBe("confirmed");
+                expect(visible.body.documents.map((d: { id: string }) => d.id)).toEqual([
+                    document.id,
+                ]);
+                expect((await publicConsent(token)).status).toBe(404);
+            } finally {
+                await prisma.userDocument.delete({ where: { id: document.id } });
             }
-        );
+        });
+
+        it("TASK-663: the owner can decline; the resend rotates the token", async () => {
+            const created = await as(clubB)
+                .post("/crm/members")
+                .send({ email: clubA.ownerEmail, fields: { first_name: "Owner A" } });
+            expect(created.status).toBe(201);
+            expect(created.body.awaitingConsent).toBe(true);
+            const memberId = created.body.memberId as string;
+            const first = await prisma.member.findUnique({
+                where: { id: memberId },
+                select: { consentToken: true },
+            });
+
+            expect((await as(clubB).post(`/crm/members/${memberId}/consent/resend`)).status).toBe(
+                204
+            );
+            const rotated = await prisma.member.findUnique({
+                where: { id: memberId },
+                select: { consentToken: true },
+            });
+            expect(rotated?.consentToken).toBeTruthy();
+            expect(rotated?.consentToken).not.toBe(first?.consentToken);
+            expect(
+                (
+                    await request(app.getHttpServer()).get(
+                        `/public/consent/${first?.consentToken as string}`
+                    )
+                ).status
+            ).toBe(404);
+
+            const declined = await request(app.getHttpServer())
+                .post(`/public/consent/${rotated?.consentToken as string}/decline`)
+                .send({ password: PASSWORD });
+            expect(declined.status).toBe(200);
+            expect(await prisma.member.findUnique({ where: { id: memberId } })).toBeNull();
+            expect((await as(clubB).get(`/crm/members/${memberId}`)).status).toBe(404);
+        });
+
+        it("TASK-663: a registration link does not take someone else's account with a wrong password", async () => {
+            const link = await as(clubA)
+                .post("/crm/settings/registration-links")
+                .send({ name: "sec-663", kind: "public_link" });
+            expect(link.status).toBe(201);
+
+            const res = await request(app.getHttpServer())
+                .post(`/public/reg-links/${link.body.token as string}/register`)
+                .send({
+                    email: clubB.ownerEmail,
+                    password: "Attacker123",
+                    fields: { first_name: "X" },
+                });
+            expect(res.status).toBe(401);
+        });
 
         it("TASK-665: POST /lk/auth/member/check is gone", async () => {
             const res = await request(app.getHttpServer())

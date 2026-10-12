@@ -30,6 +30,14 @@ export function MemberStatuses({ member }: IMemberStatusesProps) {
             >
                 {member.isActive ? t("emailConfirmed") : t("emailNotConfirmed")}
             </span>
+            {member.consentStatus === "pending" && (
+                <span
+                    data-slot="badge"
+                    className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-xs text-amber-700"
+                >
+                    {t("consent.pending")}
+                </span>
+            )}
         </div>
     );
 }

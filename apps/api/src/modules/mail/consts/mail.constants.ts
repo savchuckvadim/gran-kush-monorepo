@@ -37,6 +37,11 @@ export const EMAIL_SUBJECTS = {
         es: "Registro del portal en CRM",
         en: "Portal registration in CRM",
     },
+    MEMBERSHIP_CONSENT: {
+        ru: "Подтвердите вступление в клуб",
+        es: "Confirma tu ingreso en el club",
+        en: "Confirm joining the club",
+    },
 } as const;
 
 /**

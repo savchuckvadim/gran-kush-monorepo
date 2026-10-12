@@ -19,40 +19,38 @@ export interface IMemberDocumentsProps {
 export function MemberDocuments({ member }: IMemberDocumentsProps) {
     const t = useTranslations("crm.members");
     const toAppPath = useLocalizedLink();
-    const memberDocumentsPath = toAppPath(
-        `${ROUTES.CRM_MEMBER_DETAILS}/${member.id}/documents`
-    );
+    const memberDocumentsPath = toAppPath(`${ROUTES.CRM_MEMBER_DETAILS}/${member.id}/documents`);
 
     const signatureTitle = t("signatureTitle");
     const documentsTitle = t("documents");
     const openDocumentsRoute = t("openDocumentsRoute");
+    // Until the account owner confirms, the club neither sees nor replaces the account's files
+    const awaitingConsent = member.consentStatus === "pending";
     return (
         <section className="rounded-lg border bg-background p-4">
             <div className="mb-3 flex items-center justify-between gap-2">
                 <h2 className="text-base font-medium">{documentsTitle}</h2>
-                <Button variant="outline" size="sm" asChild>
-                    <NextLink href={memberDocumentsPath}>
-                        <span className="inline-flex items-center gap-2">
-                            <Pencil className="h-4 w-4" />
-                            {openDocumentsRoute}
-                        </span>
-                    </NextLink>
-                </Button>
+                {!awaitingConsent && (
+                    <Button variant="outline" size="sm" asChild>
+                        <NextLink href={memberDocumentsPath}>
+                            <span className="inline-flex items-center gap-2">
+                                <Pencil className="h-4 w-4" />
+                                {openDocumentsRoute}
+                            </span>
+                        </NextLink>
+                    </Button>
+                )}
             </div>
+            {awaitingConsent && (
+                <p className="text-sm text-muted-foreground">{t("consent.pendingHint")}</p>
+            )}
             {(member.documents.length > 0 || member.hasSignature) && (
                 <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {member.documents.map((doc) => (
-                        <MemberDocumentCard
-                            key={doc.id}
-                            memberId={member.id}
-                            document={doc}
-                        />
+                        <MemberDocumentCard key={doc.id} memberId={member.id} document={doc} />
                     ))}
                     {member.hasSignature && (
-                        <MemberSignatureCard
-                            memberId={member.id}
-                            signatureTitle={signatureTitle}
-                        />
+                        <MemberSignatureCard memberId={member.id} signatureTitle={signatureTitle} />
                     )}
                 </div>
             )}

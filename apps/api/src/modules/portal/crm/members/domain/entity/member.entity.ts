@@ -1,4 +1,4 @@
-import { MemberJoinSource, Prisma } from "@prisma/client";
+import { MemberConsentStatus, MemberJoinSource, Prisma } from "@prisma/client";
 
 /**
  * Domain Entity - Member
@@ -14,6 +14,8 @@ export class Member {
     isActive: boolean;
     joinSource: MemberJoinSource;
     claimedAt?: Date;
+    /** pending — клуб завёл существующий аккаунт по email, владелец ещё не подтвердил */
+    consentStatus?: MemberConsentStatus;
     createdAt: Date;
     updatedAt: Date;
 
@@ -24,6 +26,7 @@ export class Member {
 
 export const memberWithRelationsInclude = {
     user: true,
+    portal: { select: { id: true, name: true, displayName: true } },
     profile: {
         include: {
             statusItem: true,

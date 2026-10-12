@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 
-import { MemberJoinSource, Prisma } from "@prisma/client";
+import { MemberConsentStatus, MemberJoinSource, Prisma } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
@@ -101,6 +101,13 @@ export class MemberPrismaRepository implements MemberRepository {
         });
     }
 
+    async findByConsentToken(token: string): Promise<MemberWithRelations | null> {
+        return this.prisma.member.findUnique({
+            where: { consentToken: token },
+            include: memberWithRelationsInclude,
+        });
+    }
+
     async create(data: {
         userId: string;
         portalId: string;
@@ -109,6 +116,7 @@ export class MemberPrismaRepository implements MemberRepository {
         joinSource?: MemberJoinSource;
         registrationLinkId?: string;
         createdByEmployeeId?: string;
+        consent?: { token: string; requestedAt: Date };
     }): Promise<MemberWithRelations> {
         return this.prisma.$transaction(async (tx) => {
             const def = await tx.entityDefinition.findUniqueOrThrow({
@@ -136,6 +144,13 @@ export class MemberPrismaRepository implements MemberRepository {
                     joinSource: data.joinSource ?? MemberJoinSource.self,
                     registrationLinkId: data.registrationLinkId ?? null,
                     createdByEmployeeId: data.createdByEmployeeId ?? null,
+                    ...(data.consent
+                        ? {
+                              consentStatus: MemberConsentStatus.pending,
+                              consentToken: data.consent.token,
+                              consentRequestedAt: data.consent.requestedAt,
+                          }
+                        : {}),
                 },
                 include: memberWithRelationsInclude,
             });
@@ -148,12 +163,28 @@ export class MemberPrismaRepository implements MemberRepository {
             membershipNumber: string | null;
             isActive: boolean;
             claimedAt: Date;
+            consentStatus: MemberConsentStatus;
+            consentToken: string | null;
+            consentRequestedAt: Date | null;
+            consentConfirmedAt: Date | null;
+            signatureShared: boolean;
         }>
     ): Promise<MemberWithRelations> {
         return this.prisma.member.update({
             where: { id },
             data,
             include: memberWithRelationsInclude,
+        });
+    }
+
+    async deleteWithProfile(id: string): Promise<void> {
+        await this.prisma.$transaction(async (tx) => {
+            const member = await tx.member.findUniqueOrThrow({
+                where: { id },
+                select: { entityRecordId: true },
+            });
+            await tx.member.delete({ where: { id } });
+            await tx.entityRecord.delete({ where: { id: member.entityRecordId } });
         });
     }
 }

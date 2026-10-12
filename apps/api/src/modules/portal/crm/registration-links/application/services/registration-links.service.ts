@@ -237,6 +237,7 @@ export class RegistrationLinksService {
             const { user, created, claimed } =
                 await this.accountProvisioning.ensureUserWithPassword(dto.email, dto.password, {
                     emailVerified: false,
+                    verifyPassword: true,
                 });
             const accountCreated = created || claimed;
 

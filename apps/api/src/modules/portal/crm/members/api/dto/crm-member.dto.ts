@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional, IntersectionType } from "@nestjs/swagger";
 
-import { UserDocumentSide } from "@prisma/client";
+import { MemberConsentStatus, UserDocumentSide } from "@prisma/client";
 import { IsBoolean, IsObject, IsOptional, IsString, IsUUID } from "class-validator";
 
 import { PaginationDto } from "@common/paginate/dto/pagination.dto";
@@ -51,11 +51,14 @@ export class CrmMemberDto {
     isActive: boolean;
     @ApiProperty({ example: true, type: Boolean })
     emailConfirmed: boolean;
+    /** pending — владелец существующего аккаунта ещё не подтвердил членство (TASK-663) */
+    @ApiProperty({ enum: MemberConsentStatus, example: MemberConsentStatus.confirmed })
+    consentStatus: MemberConsentStatus;
     @ApiProperty({ example: "2024-01-01T00:00:00.000Z", type: String })
     createdAt: string;
 }
 
-/** Документ аккаунта (UserDocument) member'а — общий для всех клубов. */
+/** Документ аккаунта (UserDocument) member'а, показанный этому клубу. */
 export class CrmMemberAccountDocumentDto {
     @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174000", type: String })
     id: string;

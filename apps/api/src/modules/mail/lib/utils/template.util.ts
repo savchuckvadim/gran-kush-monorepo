@@ -1,5 +1,9 @@
 import { DEFAULT_LANGUAGE } from "../../consts/mail.constants";
 import {
+    MEMBERSHIP_CONSENT_EMAIL_TEXTS,
+    type MembershipConsentEmailTexts,
+} from "../../consts/membership-consent-email";
+import {
     PORTAL_REGISTRATION_EMAIL_TEXTS,
     type PortalRegistrationEmailTexts,
 } from "../../consts/portal-registration-email";
@@ -25,6 +29,14 @@ export const getPortalRegistrationEmailTexts = (
     return (
         PORTAL_REGISTRATION_EMAIL_TEXTS[language] ||
         PORTAL_REGISTRATION_EMAIL_TEXTS[DEFAULT_LANGUAGE]
+    );
+};
+
+export const getMembershipConsentEmailTexts = (
+    language: Language = DEFAULT_LANGUAGE
+): MembershipConsentEmailTexts => {
+    return (
+        MEMBERSHIP_CONSENT_EMAIL_TEXTS[language] || MEMBERSHIP_CONSENT_EMAIL_TEXTS[DEFAULT_LANGUAGE]
     );
 };
 

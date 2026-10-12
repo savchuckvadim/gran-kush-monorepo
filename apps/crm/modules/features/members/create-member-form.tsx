@@ -78,8 +78,16 @@ export function CreateMemberForm({
         createMember.mutate(
             { email: parsedEmail.data, fields: toSubmitPayload(values) },
             {
-                onSuccess: ({ memberId, isNewUser }) => {
-                    toast.success(t(isNewUser ? "created" : "createdExisting"));
+                onSuccess: ({ memberId, isNewUser, awaitingConsent }) => {
+                    toast.success(
+                        t(
+                            awaitingConsent
+                                ? "createdAwaitingConsent"
+                                : isNewUser
+                                  ? "created"
+                                  : "createdExisting"
+                        )
+                    );
                     router.push(localizedLink(`${ROUTES.CRM_MEMBER_DETAILS}/${memberId}`));
                 },
             }

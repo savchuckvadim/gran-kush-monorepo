@@ -3,6 +3,7 @@ import { BadRequestException, ConflictException, Injectable } from "@nestjs/comm
 import { FormPurpose, MemberJoinSource } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { MemberDocumentShareRepository } from "@modules/account/domain/repositories/member-document-share-repository.interface";
 import { DynamicPayloadValidatorService } from "@modules/portal/crm/entity-fields/application/services/dynamic-payload-validator.service";
 import { FieldValuesService } from "@modules/portal/crm/entity-fields/application/services/field-values.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
@@ -17,6 +18,8 @@ export interface JoinPortalInput {
     purpose?: FormPurpose;
     createdByEmployeeId?: string;
     registrationLinkId?: string;
+    /** CRM завёл чужой аккаунт по email: членство ждёт согласия владельца (TASK-663). */
+    consent?: { token: string; requestedAt: Date };
 }
 
 /**
@@ -24,6 +27,10 @@ export interface JoinPortalInput {
  * профильную EntityRecord + FieldValues по форме портала.
  * Используется: самостоятельным join из ЛК, регистрацией по ссылке-форме,
  * созданием member из CRM.
+ *
+ * Документы аккаунта клуб видит только через MemberDocumentShare: когда участник вступает
+ * сам (ЛК, ссылка-форма, киоск), ему показывают всё; созданное из CRM членство получает
+ * только то, что загрузит сам клуб или что владелец выберет при подтверждении.
  */
 @Injectable()
 export class JoinPortalService {
@@ -31,7 +38,8 @@ export class JoinPortalService {
         private readonly memberRepository: MemberRepository,
         private readonly prisma: PrismaService,
         private readonly dynamicValidator: DynamicPayloadValidatorService,
-        private readonly fieldValues: FieldValuesService
+        private readonly fieldValues: FieldValuesService,
+        private readonly shares: MemberDocumentShareRepository
     ) {}
 
     async joinPortal(input: JoinPortalInput): Promise<MemberWithRelations> {
@@ -64,9 +72,13 @@ export class JoinPortalService {
             joinSource: input.joinSource,
             createdByEmployeeId: input.createdByEmployeeId,
             registrationLinkId: input.registrationLinkId,
+            consent: input.consent,
         });
 
         await this.fieldValues.upsertMemberFieldValues(input.portalId, member.id, validatedFields);
+        if (input.joinSource !== MemberJoinSource.crm) {
+            await this.shares.shareAllOfUser(member.id, input.userId);
+        }
 
         const result = await this.memberRepository.findByIdForPortal(member.id, input.portalId);
         return result ?? member;

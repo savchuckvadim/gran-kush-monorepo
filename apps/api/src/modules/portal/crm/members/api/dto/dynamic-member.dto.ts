@@ -67,4 +67,11 @@ export class CrmCreateMemberResponseDto {
         description: "true если аккаунт создан сейчас и ждёт клейма",
     })
     isNewUser: boolean;
+
+    @ApiProperty({
+        type: Boolean,
+        description:
+            "true если аккаунт уже был: членство ждёт подтверждения владельца по письму, документы клубу пока не видны",
+    })
+    awaitingConsent: boolean;
 }

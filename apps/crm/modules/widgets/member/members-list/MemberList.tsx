@@ -69,7 +69,20 @@ export function MemberList() {
         {
             key: "name",
             header: t("columns.name"),
-            cell: (member: CrmMemberListItem) => `${member.name} ${member.surname ?? ""}`,
+            cell: (member: CrmMemberListItem) =>
+                member.consentStatus === "pending" ? (
+                    <span className="inline-flex flex-wrap items-center gap-2">
+                        {member.name} {member.surname ?? ""}
+                        <span
+                            data-slot="badge"
+                            className="rounded-md border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-xs text-amber-700"
+                        >
+                            {t("consent.pending")}
+                        </span>
+                    </span>
+                ) : (
+                    `${member.name} ${member.surname ?? ""}`
+                ),
         },
         {
             key: "email",

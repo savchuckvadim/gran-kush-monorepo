@@ -1,7 +1,7 @@
 import { Body, Controller, Get, NotFoundException, Param, Post } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
-import { MemberJoinSource } from "@prisma/client";
+import { MemberConsentStatus, MemberJoinSource } from "@prisma/client";
 
 import { CurrentAuthUser } from "@common/decorators/auth/current-auth-user.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
@@ -31,7 +31,8 @@ export class LkPortalsController {
     @ApiErrorResponse([401])
     async myClubs(@CurrentAuthUser() user: AuthenticatedUser): Promise<MyClubsResponseDto> {
         const members = await this.prisma.member.findMany({
-            where: { userId: user.userId },
+            // Членство, которое клуб завёл без согласия владельца, клубом ещё не считается
+            where: { userId: user.userId, consentStatus: MemberConsentStatus.confirmed },
             include: { portal: { select: PORTAL_SUMMARY_SELECT } },
             orderBy: { createdAt: "desc" },
         });

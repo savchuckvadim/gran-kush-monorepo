@@ -53,6 +53,12 @@ enum MemberJoinSource {
   crm
 }
 
+/// Согласие владельца аккаунта на членство, которое завёл клуб (TASK-663)
+enum MemberConsentStatus {
+  confirmed
+  pending
+}
+
 enum UserDocumentSide {
   front
   back
@@ -220,12 +226,28 @@ model UserDocument {
   createdAt   DateTime         @default(now()) @map("created_at")
   updatedAt   DateTime         @updatedAt @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shares MemberDocumentShare[]
 
   @@unique([userId, type, side])
   @@index([userId])
   @@index([type])
   @@map("user_documents")
+}
+
+/// Документ аккаунта показан этому членству (клубу). Без строки клуб документ не видит.
+model MemberDocumentShare {
+  id             String   @id @default(uuid())
+  memberId       String   @map("member_id")
+  userDocumentId String   @map("user_document_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  member   Member       @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  document UserDocument @relation(fields: [userDocumentId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, userDocumentId])
+  @@index([userDocumentId])
+  @@map("member_document_shares")
 }
 
 model UserSignature {
@@ -294,6 +316,13 @@ model Member {
   registrationLinkId  String?          @map("registration_link_id")
   createdByEmployeeId String?          @map("created_by_employee_id")
   claimedAt           DateTime?        @map("claimed_at")
+  /// pending — клуб завёл существующий аккаунт по email, владелец ещё не подтвердил
+  consentStatus       MemberConsentStatus @default(confirmed) @map("consent_status")
+  consentToken        String?          @unique @map("consent_token") @db.VarChar(128)
+  consentRequestedAt  DateTime?        @map("consent_requested_at")
+  consentConfirmedAt  DateTime?        @map("consent_confirmed_at")
+  /// подпись аккаунта показана этому клубу
+  signatureShared     Boolean          @default(false) @map("signature_shared")
   createdAt           DateTime         @default(now()) @map("created_at")
   updatedAt           DateTime         @updatedAt @map("updated_at")
 
@@ -303,6 +332,7 @@ model Member {
   registrationLink  RegistrationLink? @relation(fields: [registrationLinkId], references: [id], onDelete: SetNull)
   createdByEmployee Employee?         @relation("MemberCreatedBy", fields: [createdByEmployeeId], references: [id], onDelete: SetNull)
   orders            Order[]
+  documentShares    MemberDocumentShare[]
 
   @@unique([userId, portalId])
   @@unique([portalId, membershipNumber])

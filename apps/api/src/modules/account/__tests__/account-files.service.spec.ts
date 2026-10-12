@@ -6,6 +6,7 @@ import { StorageService } from "@storage/application/services/storage.service";
 import { UPLOAD_LIMITS } from "@common/upload";
 
 import { AccountFilesService } from "../application/services/account-files.service";
+import { MemberDocumentShareRepository } from "../domain/repositories/member-document-share-repository.interface";
 import { UserDocumentRepository } from "../domain/repositories/user-document-repository.interface";
 import { UserSignatureRepository } from "../domain/repositories/user-signature-repository.interface";
 
@@ -46,20 +47,30 @@ const createMocks = () => ({
         upsertByUser: jest.fn().mockResolvedValue({ storagePath: NEW_PATH } as UserSignature),
         deleteByUser: jest.fn(),
     },
+    shares: {
+        findDocumentIdsForMember: jest.fn().mockResolvedValue([]),
+        shareDocuments: jest.fn().mockResolvedValue(undefined),
+        shareAllOfUser: jest.fn().mockResolvedValue(undefined),
+        shareWithConfirmedMemberships: jest.fn().mockResolvedValue(undefined),
+        setSignatureShared: jest.fn().mockResolvedValue(undefined),
+        markSignatureSharedForConfirmedMemberships: jest.fn().mockResolvedValue(undefined),
+    },
 });
 
 describe("AccountFilesService", () => {
     let storage: ReturnType<typeof createMocks>["storage"];
     let documents: ReturnType<typeof createMocks>["documents"];
     let signatures: ReturnType<typeof createMocks>["signatures"];
+    let shares: ReturnType<typeof createMocks>["shares"];
     let service: AccountFilesService;
 
     beforeEach(() => {
-        ({ storage, documents, signatures } = createMocks());
+        ({ storage, documents, signatures, shares } = createMocks());
         service = new AccountFilesService(
             storage as unknown as StorageService,
             documents as unknown as UserDocumentRepository,
-            signatures as unknown as UserSignatureRepository
+            signatures as unknown as UserSignatureRepository,
+            shares as unknown as MemberDocumentShareRepository
         );
     });
 
@@ -148,5 +159,41 @@ describe("AccountFilesService", () => {
 
         expect(documents.deleteById).toHaveBeenCalledWith("doc-1");
         expect(storage.deleteFile).toHaveBeenCalledWith(OLD_PATH);
+    });
+
+    describe("кому показать файл (TASK-663)", () => {
+        it("участник грузит сам — всем подтверждённым членствам", async () => {
+            await replaceFront();
+            await service.replaceSignature({ userId: "u1", file: PNG });
+
+            expect(shares.shareWithConfirmedMemberships).toHaveBeenCalledWith("u1", "doc-1");
+            expect(shares.markSignatureSharedForConfirmedMemberships).toHaveBeenCalledWith("u1");
+            expect(shares.shareDocuments).not.toHaveBeenCalled();
+        });
+
+        it("клуб грузит в карточке — только этому членству", async () => {
+            const share = { memberId: "m1" };
+            await service.replaceDocument({
+                userId: "u1",
+                type: "passport",
+                side: UserDocumentSide.front,
+                file: PNG,
+                share,
+            });
+            await service.replaceSignature({ userId: "u1", file: PNG, share });
+
+            expect(shares.shareDocuments).toHaveBeenCalledWith("m1", ["doc-1"]);
+            expect(shares.setSignatureShared).toHaveBeenCalledWith("m1", true);
+            expect(shares.shareWithConfirmedMemberships).not.toHaveBeenCalled();
+            expect(shares.markSignatureSharedForConfirmedMemberships).not.toHaveBeenCalled();
+        });
+
+        it("файл не сохранился — никому не показывается", async () => {
+            documents.upsertByUserTypeSide.mockRejectedValue(new Error("db down"));
+
+            await expect(replaceFront()).rejects.toThrow("db down");
+
+            expect(shares.shareWithConfirmedMemberships).not.toHaveBeenCalled();
+        });
     });
 });

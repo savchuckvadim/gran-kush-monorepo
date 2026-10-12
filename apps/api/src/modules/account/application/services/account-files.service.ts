@@ -5,8 +5,15 @@ import { StorageService } from "@storage/application/services/storage.service";
 import { StorageType } from "@storage/domain/enums/storage-type.enum";
 
 import { UPLOAD_LIMITS, UploadKind, ValidatedUpload, validateUpload } from "@common/upload";
+import { MemberDocumentShareRepository } from "@modules/account/domain/repositories/member-document-share-repository.interface";
 import { UserDocumentRepository } from "@modules/account/domain/repositories/user-document-repository.interface";
 import { UserSignatureRepository } from "@modules/account/domain/repositories/user-signature-repository.interface";
+
+/**
+ * Кому показать загруженный файл: участник грузит сам — всем клубам, где членство подтверждено;
+ * клуб грузит в карточке — только себе (TASK-663).
+ */
+export type FileShareTarget = "confirmed-memberships" | { memberId: string } | "none";
 
 /**
  * Единственный путь файла в аккаунт: проверка содержимого, приватный бакет, строка в БД,
@@ -20,7 +27,8 @@ export class AccountFilesService {
     constructor(
         private readonly storageService: StorageService,
         private readonly userDocumentRepository: UserDocumentRepository,
-        private readonly userSignatureRepository: UserSignatureRepository
+        private readonly userSignatureRepository: UserSignatureRepository,
+        private readonly shares: MemberDocumentShareRepository
     ) {}
 
     async replaceDocument(input: {
@@ -29,6 +37,7 @@ export class AccountFilesService {
         side: UserDocumentSide;
         file: Buffer;
         number?: string | null;
+        share?: FileShareTarget;
     }): Promise<UserDocument> {
         const upload = validateUpload(input.file, "document");
 
@@ -57,10 +66,21 @@ export class AccountFilesService {
             })
         );
         await this.discard(existing?.storagePath, storagePath);
+
+        const share = input.share ?? "confirmed-memberships";
+        if (share === "confirmed-memberships") {
+            await this.shares.shareWithConfirmedMemberships(input.userId, document.id);
+        } else if (share !== "none") {
+            await this.shares.shareDocuments(share.memberId, [document.id]);
+        }
         return document;
     }
 
-    async replaceSignature(input: { userId: string; file: Buffer }): Promise<UserSignature> {
+    async replaceSignature(input: {
+        userId: string;
+        file: Buffer;
+        share?: FileShareTarget;
+    }): Promise<UserSignature> {
         const upload = validateUpload(input.file, "signature");
         const existing = await this.userSignatureRepository.findByUser(input.userId);
 
@@ -69,6 +89,13 @@ export class AccountFilesService {
             this.userSignatureRepository.upsertByUser({ userId: input.userId, storagePath })
         );
         await this.discard(existing?.storagePath, storagePath);
+
+        const share = input.share ?? "confirmed-memberships";
+        if (share === "confirmed-memberships") {
+            await this.shares.markSignatureSharedForConfirmedMemberships(input.userId);
+        } else if (share !== "none") {
+            await this.shares.setSignatureShared(share.memberId, true);
+        }
         return signature;
     }
 

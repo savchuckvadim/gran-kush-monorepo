@@ -17,6 +17,10 @@ CRM is **portal-scoped**: after a portal exists, the app lives under a **`[porta
   - `/{locale}/` — entry  
   - `/{locale}/auth/login`, `/{locale}/auth/register`, `/{locale}/auth/confirm-email` — flows before a tenant slug is fixed
 
+- **Public pages (no portal, no session; segment listed in `NON_PORTAL_SEGMENTS`, `modules/processes/auth/utils/auth-routing.ts`)**  
+  - `/{locale}/join/{token}` — sign-up through a club's registration link / QR  
+  - `/{locale}/consent/{token}` — the owner of an existing account confirms (password) or declines a membership a club created by email, and picks which documents the club may see (TASK-663)
+
 - **Inside a portal (tenant)**  
   - `/{locale}/{portal}/crm/...` — main CRM shell (members, products, attendance, etc.)  
   - `/{locale}/{portal}/auth/login`, `register`, `confirm-email` — auth in tenant context

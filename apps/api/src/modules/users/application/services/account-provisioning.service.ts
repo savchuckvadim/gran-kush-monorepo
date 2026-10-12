@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
 
 import { UserAccountStatus } from "@prisma/client";
 import { User } from "@users/domain/entity/user.entity";
@@ -35,11 +35,13 @@ export class AccountProvisioningService {
      * Публичный флоу: найти аккаунт, либо создать/заклеймить его с паролем.
      * `emailVerified: true` — когда владение адресом доказано (ссылка пришла на email):
      * тогда аккаунт сразу активируется с подтверждённым email.
+     * `verifyPassword: true` — у существующего аккаунта пароль должен совпасть: иначе любой,
+     * кто знает чужой email, вступал бы в клуб от его имени и открывал клубу его документы.
      */
     async ensureUserWithPassword(
         email: string,
         password: string | undefined,
-        options: { emailVerified: boolean }
+        options: { emailVerified: boolean; verifyPassword?: boolean }
     ): Promise<{ user: User; created: boolean; claimed: boolean }> {
         const verifiedFlags = options.emailVerified ? { isActive: true, emailConfirmed: true } : {};
 
@@ -70,6 +72,15 @@ export class AccountProvisioningService {
                 ...verifiedFlags,
             });
             return { user, created: false, claimed: true };
+        }
+
+        if (options.verifyPassword) {
+            const matches = password
+                ? await bcrypt.compare(password, existing.passwordHash)
+                : false;
+            if (!matches) {
+                throw new UnauthorizedException("Invalid password for this account");
+            }
         }
 
         return { user: existing, created: false, claimed: false };

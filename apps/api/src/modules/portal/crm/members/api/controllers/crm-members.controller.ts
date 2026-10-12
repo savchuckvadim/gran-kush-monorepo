@@ -3,6 +3,7 @@ import {
     Body,
     Controller,
     Get,
+    HttpCode,
     NotFoundException,
     Param,
     Patch,
@@ -23,7 +24,7 @@ import { StorageService } from "@storage/application/services/storage.service";
 import { MulterFile } from "@storage/domain/interfaces/storage-file.interface";
 import type { Response } from "express";
 
-import { UPLOAD_THROTTLE } from "@common/config/throttler/throttler.config";
+import { EMAIL_THROTTLE, UPLOAD_THROTTLE } from "@common/config/throttler/throttler.config";
 import { CurrentPrincipal } from "@common/decorators/auth/current-principal.decorator";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
@@ -41,6 +42,7 @@ import {
     CrmCreateMemberDto,
     CrmCreateMemberResponseDto,
 } from "@modules/portal/crm/members/api/dto/dynamic-member.dto";
+import { MemberConsentService } from "@modules/portal/crm/members/application/services/member-consent.service";
 import { MembersService } from "@modules/portal/crm/members/application/services/members.service";
 
 import {
@@ -58,22 +60,38 @@ import { CrmMemberFilesRequestDto } from "../dto/crm-member-documents.dto";
 export class CrmMembersController {
     constructor(
         private readonly membersService: MembersService,
+        private readonly memberConsent: MemberConsentService,
         private readonly storageService: StorageService,
         private readonly formSchema: FormSchemaService
     ) {}
 
     @Post()
     @ApiOperation({
-        summary: "Create member from CRM (email + dynamic fields, account claimed later)",
+        summary:
+            "Create member from CRM (email + dynamic fields; an existing account gets a consent email)",
     })
     @ApiSuccessResponse(CrmCreateMemberResponseDto, { description: "Created member" })
     @ApiErrorResponse([401, 403, 400, 409])
     async create(
         @Body() dto: CrmCreateMemberDto,
         @PortalId() portalId: string,
-        @CurrentPrincipal() principal: PortalPrincipal
+        @CurrentPrincipal() principal: PortalPrincipal,
+        @RequestLocale() locale: ContentLocale
     ): Promise<CrmCreateMemberResponseDto> {
-        return this.membersService.createFromCrm(dto, portalId, principal.membershipId);
+        return this.membersService.createFromCrm(dto, portalId, locale, principal.membershipId);
+    }
+
+    @Post(":id/consent/resend")
+    @HttpCode(204)
+    @Throttle(EMAIL_THROTTLE)
+    @ApiOperation({ summary: "Resend the consent email to the account owner (membership pending)" })
+    @ApiErrorResponse([400, 401, 403, 404, 429])
+    async resendConsent(
+        @Param("id") id: string,
+        @PortalId() portalId: string,
+        @RequestLocale() locale: ContentLocale
+    ): Promise<void> {
+        await this.memberConsent.resend(id, portalId, locale);
     }
 
     @Get()

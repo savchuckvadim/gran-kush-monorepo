@@ -1186,8 +1186,25 @@ export interface paths {
         /** List members for CRM: page, text search `q`, field conditions `filter`, status */
         get: operations["CrmMembers_list"];
         put?: never;
-        /** Create member from CRM (email + dynamic fields, account claimed later) */
+        /** Create member from CRM (email + dynamic fields; an existing account gets a consent email) */
         post: operations["CrmMembers_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/members/{id}/consent/resend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resend the consent email to the account owner (membership pending) */
+        post: operations["CrmMembers_resendConsent"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1308,6 +1325,57 @@ export interface paths {
         get: operations["LkMembers_getMe"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/consent/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Клуб, email и документы аккаунта по токену из письма */
+        get: operations["PublicMemberConsent_info"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/consent/{token}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Подтвердить членство паролем аккаунта и выбрать, что показать клубу */
+        post: operations["PublicMemberConsent_confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/consent/{token}/decline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Отказаться: членство удаляется */
+        post: operations["PublicMemberConsent_decline"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3612,6 +3680,8 @@ export interface components {
             memberId: string;
             /** @description true если аккаунт создан сейчас и ждёт клейма */
             isNewUser: boolean;
+            /** @description true если аккаунт уже был: членство ждёт подтверждения владельца по письму, документы клубу пока не видны */
+            awaitingConsent: boolean;
         };
         CrmMemberStatusDto: {
             id: string;
@@ -3639,6 +3709,11 @@ export interface components {
             isActive: boolean;
             /** @example true */
             emailConfirmed: boolean;
+            /**
+             * @example confirmed
+             * @enum {string}
+             */
+            consentStatus: "confirmed" | "pending";
             /** @example 2024-01-01T00:00:00.000Z */
             createdAt: string;
         };
@@ -3707,6 +3782,11 @@ export interface components {
             isActive: boolean;
             /** @example true */
             emailConfirmed: boolean;
+            /**
+             * @example confirmed
+             * @enum {string}
+             */
+            consentStatus: "confirmed" | "pending";
             /** @example 2024-01-01T00:00:00.000Z */
             createdAt: string;
             /** @example 2024-01-01T00:00:00.000Z */
@@ -3737,6 +3817,36 @@ export interface components {
             statusItemId: string;
         };
         StreamableFile: Record<string, never>;
+        PublicConsentDocumentDto: {
+            id: string;
+            /** @example passport */
+            type: string;
+            /** @enum {string} */
+            side: "front" | "back" | "single";
+        };
+        PublicMemberConsentInfoDto: {
+            portalSlug: string;
+            portalDisplayName: string;
+            email: string;
+            documents: components["schemas"]["PublicConsentDocumentDto"][];
+            hasSignature: boolean;
+        };
+        ConfirmMemberConsentDto: {
+            /** @description Пароль аккаунта — доказательство, что он ваш */
+            password: string;
+            /** @description Документы аккаунта, которые показать этому клубу */
+            shareDocumentIds?: string[];
+            /** @description Показать клубу подпись */
+            shareSignature?: boolean;
+        };
+        MemberConsentResultDto: {
+            portalSlug: string;
+            /** @description Есть, когда членство подтверждено */
+            memberId?: string;
+        };
+        DeclineMemberConsentDto: {
+            password: string;
+        };
         RegisterPortalDto: {
             /**
              * @description Unique portal slug. Allowed chars: a-z, 0-9, dash
@@ -5329,6 +5439,11 @@ export type SchemaCrmMemberFullDto = components['schemas']['CrmMemberFullDto'];
 export type SchemaCrmMemberFieldsPatchDto = components['schemas']['CrmMemberFieldsPatchDto'];
 export type SchemaCrmMemberStatusPatchDto = components['schemas']['CrmMemberStatusPatchDto'];
 export type SchemaStreamableFile = components['schemas']['StreamableFile'];
+export type SchemaPublicConsentDocumentDto = components['schemas']['PublicConsentDocumentDto'];
+export type SchemaPublicMemberConsentInfoDto = components['schemas']['PublicMemberConsentInfoDto'];
+export type SchemaConfirmMemberConsentDto = components['schemas']['ConfirmMemberConsentDto'];
+export type SchemaMemberConsentResultDto = components['schemas']['MemberConsentResultDto'];
+export type SchemaDeclineMemberConsentDto = components['schemas']['DeclineMemberConsentDto'];
 export type SchemaRegisterPortalDto = components['schemas']['RegisterPortalDto'];
 export type SchemaRegisteredPortalDto = components['schemas']['RegisteredPortalDto'];
 export type SchemaPortalOwnerInfoDto = components['schemas']['PortalOwnerInfoDto'];
@@ -9011,6 +9126,55 @@ export interface operations {
             };
         };
     };
+    CrmMembers_resendConsent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
     CrmMembers_memberFormSchema: {
         parameters: {
             query: {
@@ -9400,6 +9564,134 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CrmMemberFullDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    PublicMemberConsent_info: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicMemberConsentInfoDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    PublicMemberConsent_confirm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmMemberConsentDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberConsentResultDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    PublicMemberConsent_decline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeclineMemberConsentDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberConsentResultDto"];
                 };
             };
             /** @description Unauthorized */

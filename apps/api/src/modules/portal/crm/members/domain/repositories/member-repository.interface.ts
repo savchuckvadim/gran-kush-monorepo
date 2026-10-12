@@ -1,4 +1,4 @@
-import { MemberJoinSource } from "@prisma/client";
+import { MemberConsentStatus, MemberJoinSource } from "@prisma/client";
 
 import type { EntityListFilter } from "@modules/portal/crm/entity-fields/domain/entity-filter";
 import { MemberWithRelations } from "@modules/portal/crm/members/domain/entity/member.entity";
@@ -23,6 +23,8 @@ export abstract class MemberRepository {
     ): Promise<MemberWithRelations | null>;
     abstract findAllByUser(userId: string): Promise<MemberWithRelations[]>;
     abstract countByPortal(portalId: string): Promise<number>;
+    /** Членство, которое ждёт согласия владельца аккаунта (TASK-663); токен — из письма. */
+    abstract findByConsentToken(token: string): Promise<MemberWithRelations | null>;
     abstract create(data: {
         userId: string;
         portalId: string;
@@ -31,6 +33,7 @@ export abstract class MemberRepository {
         joinSource?: MemberJoinSource;
         registrationLinkId?: string;
         createdByEmployeeId?: string;
+        consent?: { token: string; requestedAt: Date };
     }): Promise<MemberWithRelations>;
     abstract update(
         id: string,
@@ -38,6 +41,13 @@ export abstract class MemberRepository {
             membershipNumber: string | null;
             isActive: boolean;
             claimedAt: Date;
+            consentStatus: MemberConsentStatus;
+            consentToken: string | null;
+            consentRequestedAt: Date | null;
+            consentConfirmedAt: Date | null;
+            signatureShared: boolean;
         }>
     ): Promise<MemberWithRelations>;
+    /** Членство вместе с его записью-анкетой (владелец аккаунта отказался вступать). */
+    abstract deleteWithProfile(id: string): Promise<void>;
 }

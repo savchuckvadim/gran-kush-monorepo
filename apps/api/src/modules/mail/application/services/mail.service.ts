@@ -27,6 +27,7 @@ import {
     MAIL_QUEUE_NAME,
 } from "../../events/mail-events.constants";
 import { EmailVerificationTemplate } from "../../templates/email-verification.template";
+import { MembershipConsentTemplate } from "../../templates/membership-consent.template";
 import { PortalRegistrationTemplate } from "../../templates/portal-registration.template";
 import { ResetPasswordTemplate } from "../../templates/reset-password.template";
 
@@ -216,6 +217,39 @@ export class MailService {
         );
 
         this.logger.log(`📬 Portal registration email queued for ${params.owner.email}`);
+        return true;
+    }
+
+    /** Клуб добавил существующий аккаунт по email: владелец подтверждает членство (TASK-663). */
+    public async sendMembershipConsent(params: {
+        to: string;
+        token: string;
+        portalName: string;
+        language?: SupportedLanguage;
+    }): Promise<boolean> {
+        const language = params.language || DEFAULT_LANGUAGE;
+        const html = await render(
+            MembershipConsentTemplate({
+                portalName: params.portalName,
+                token: params.token,
+                language,
+                baseUrl: this.crmFrontendUrl,
+            })
+        );
+
+        await this.queue.add(
+            MAIL_QUEUE_JOB_NAMES.SEND_EMAIL,
+            {
+                to: [params.to],
+                subject: EMAIL_SUBJECTS.MEMBERSHIP_CONSENT[language],
+                html,
+                context: { portalName: params.portalName },
+                emailType: EmailType.MEMBERSHIP_CONSENT,
+            }
+            // Без jobId: кнопка «отправить ещё раз» в CRM должна доходить до адресата
+        );
+
+        this.logger.log(`📬 Membership consent email queued for ${params.to}`);
         return true;
     }
 

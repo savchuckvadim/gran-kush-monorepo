@@ -372,7 +372,7 @@ Semgrep, Trivy, ZAP по OpenAPI).
 - [ ] `CreateInvitationDto.role` не принимает `portal_owner`
 - [x] e2e `invite-accept-existing-account` — обычный тест в `security.e2e-spec.ts`
 
-### TASK-663: клуб присоединяет любой аккаунт по email и читает его документы `[ ]` P0 — critical
+### TASK-663: клуб присоединяет любой аккаунт по email и читает его документы `[x]` P0 — critical
 
 - `POST /crm/members` без роли; `createFromCrm` → `ensurePendingClaimUser` возвращает любого
   существующего пользователя (`account-provisioning.service.ts:19-23`,
@@ -382,14 +382,31 @@ Semgrep, Trivy, ZAP по OpenAPI).
   пользователя с номером (`members.service.ts:112-115,134`), превью стримит сканы и подпись
   (`crm-members.controller.ts:244-279`), `PATCH :id/files` перезаписывает и удаляет старые
   объекты (`members.service.ts:331-354`).
-- [ ] Существующий аккаунт вступает в клуб только после согласия владельца аккаунта:
+- [x] Существующий аккаунт вступает в клуб только после согласия владельца аккаунта:
       `createFromCrm` для существующего пользователя создаёт членство в статусе «ожидает
       подтверждения» без доступа к данным аккаунта, пользователю уходит письмо/уведомление в
       кабинет; до подтверждения карточка в CRM — только email
-- [ ] Документы — то, что пользователь показал этому клубу: связь «документ ↔ членство»
+- [x] Документы — то, что пользователь показал этому клубу: связь «документ ↔ членство»
       (или флаг `sharedWithPortalIds`), `toCrmMemberFullDto`/превью/`PATCH files` фильтруют по ней
-- [ ] Создание участника — роль `manager+` (решить с Вадимом: сейчас может любой сотрудник)
-- [ ] e2e `crm-create-member-existing-user`, `crm-files-foreign-account` (есть как `it.failing`)
+- [ ] Создание участника — роль `manager+` (решение Вадима: пока любой сотрудник, до настоящих прав)
+- [x] e2e `crm-create-member-existing-user`, `crm-files-foreign-account` (есть как `it.failing`)
+
+**Сделано 2026-10-12 (ветка `feat/member-consent`)** — ровно по схеме и правилам ниже:
+миграция `20261012200000_member_consent_document_shares` (поля `consent_*`, `signature_shared`,
+таблица `member_document_shares` + бэкфилл); `MemberDocumentShareRepository` в модуле `account`;
+`AccountFilesService.replace*` принимает `share` («всем подтверждённым членствам» — загрузка из ЛК,
+`{ memberId }` — загрузка из CRM); `JoinPortalService` при самостоятельном вступлении (ЛК, ссылка,
+киоск) показывает клубу всё, при создании из CRM — ничего; `MemberConsentService` +
+`GET/POST /public/consent/:token[/confirm|/decline]` (пароль bcrypt, токен 14 дней) и
+`POST /crm/members/:id/consent/resend` (`EMAIL_THROTTLE`); письмо `membership-consent`;
+`ensureUserWithPassword({ verifyPassword })` — публичная ссылка регистрации с чужим email и
+неверным паролем → 401; `GET /lk/portals` не показывает `pending`-членства. CRM: страница
+`/[locale]/consent/[token]`, бейдж «ждёт согласия» в списке и карточке, кнопка «отправить письмо
+ещё раз», документы скрыты до подтверждения. e2e: три теста в `security.e2e-spec.ts`.
+Не вошло: отдельная страница согласия в ЛК (`apps/web`) — на проде кабинет не поднят, ссылка из
+письма ведёт в CRM; `pending_claim`-аккаунт без пароля, заведённый другим клубом, по-прежнему
+присоединяется сразу (владельца, который мог бы подтвердить, ещё нет; его документы другому клубу
+всё равно не видны — share нет).
 
 **Решение Вадима (2026-10-12): вариант B — полный consent-флоу со схемой.** Участников по-прежнему
 создаёт любой сотрудник (права — отдельной задачей).

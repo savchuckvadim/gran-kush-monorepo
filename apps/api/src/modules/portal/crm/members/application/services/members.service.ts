@@ -1,7 +1,17 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import {
+    BadRequestException,
+    ForbiddenException,
+    Injectable,
+    NotFoundException,
+} from "@nestjs/common";
 
-import { MemberJoinSource, UserDocument, UserSignature } from "@prisma/client";
-import { UserDocumentSide } from "@prisma/client";
+import {
+    MemberConsentStatus,
+    MemberJoinSource,
+    UserDocument,
+    UserDocumentSide,
+    UserSignature,
+} from "@prisma/client";
 import { MulterFile } from "@storage/domain/interfaces/storage-file.interface";
 import { AccountProvisioningService } from "@users/application/services/account-provisioning.service";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
@@ -9,6 +19,7 @@ import { UserRepository } from "@users/domain/repositories/user-repository.inter
 import { ContentLocale, resolveLabel } from "@common/i18n";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { AccountFilesService } from "@modules/account/application/services/account-files.service";
+import { MemberDocumentShareRepository } from "@modules/account/domain/repositories/member-document-share-repository.interface";
 import { UserDocumentRepository } from "@modules/account/domain/repositories/user-document-repository.interface";
 import { UserSignatureRepository } from "@modules/account/domain/repositories/user-signature-repository.interface";
 import { DynamicPayloadValidatorService } from "@modules/portal/crm/entity-fields/application/services/dynamic-payload-validator.service";
@@ -30,6 +41,7 @@ import {
 } from "@modules/portal/crm/members/api/dto/crm-member.dto";
 import { CrmMemberFilesRequestDto } from "@modules/portal/crm/members/api/dto/crm-member-documents.dto";
 import { JoinPortalService } from "@modules/portal/crm/members/application/services/join-portal.service";
+import { MemberConsentService } from "@modules/portal/crm/members/application/services/member-consent.service";
 import { MemberWithRelations } from "@modules/portal/crm/members/domain/entity/member.entity";
 import {
     MemberListFilters,
@@ -48,7 +60,9 @@ export class MembersService {
         private readonly joinPortalService: JoinPortalService,
         private readonly prisma: PrismaService,
         private readonly dynamicValidator: DynamicPayloadValidatorService,
-        private readonly fieldValues: FieldValuesService
+        private readonly fieldValues: FieldValuesService,
+        private readonly shares: MemberDocumentShareRepository,
+        private readonly consent: MemberConsentService
     ) {}
 
     private fieldRows(member: MemberWithRelations) {
@@ -86,10 +100,12 @@ export class MembersService {
             statusItem: this.mapStatus(member.profile.statusItem, locale),
             isActive: member.isActive,
             emailConfirmed: member.user.emailConfirmed,
+            consentStatus: member.consentStatus,
             createdAt: member.createdAt.toISOString(),
         };
     }
 
+    /** Клубу видны только документы, показанные этому членству (TASK-663). */
     async toCrmMemberFullDto(
         member: MemberWithRelations,
         locale: ContentLocale
@@ -109,10 +125,12 @@ export class MembersService {
             value: jsonValueToScalar(f.value as never),
         }));
 
-        const [accountDocuments, signature] = await Promise.all([
+        const [accountDocuments, signature, sharedDocumentIds] = await Promise.all([
             this.userDocumentRepository.findAllByUser(member.userId),
             this.userSignatureRepository.findByUser(member.userId),
+            this.shares.findDocumentIdsForMember(member.id),
         ]);
+        const shared = new Set(sharedDocumentIds);
 
         const birthday = fieldValueToOptionalDateString(birthdayRaw);
         const st = this.mapStatus(member.profile.statusItem, locale);
@@ -128,11 +146,14 @@ export class MembersService {
             statusItem: st,
             isActive: member.isActive,
             emailConfirmed: member.user.emailConfirmed,
+            consentStatus: member.consentStatus,
             createdAt: member.createdAt.toISOString(),
             updatedAt: member.updatedAt.toISOString(),
             fields,
-            documents: accountDocuments.map((doc) => this.toAccountDocumentDto(doc)),
-            hasSignature: signature !== null,
+            documents: accountDocuments
+                .filter((doc) => shared.has(doc.id))
+                .map((doc) => this.toAccountDocumentDto(doc)),
+            hasSignature: signature !== null && member.signatureShared,
             birthday,
             address: typeof address === "string" ? address : null,
             membershipNumber: member.membershipNumber ?? null,
@@ -154,15 +175,19 @@ export class MembersService {
      * CRM: сотрудник добавляет member по email.
      * Если User с таким email нет — создаётся аккаунт со статусом pending_claim
      * (пользователь позже клеймит его, установив пароль при регистрации).
+     * Если аккаунт уже чей-то (есть пароль) — членство ждёт согласия владельца по письму;
+     * клуб знает только email, и этого недостаточно, чтобы открыть ему документы (TASK-663).
      */
     async createFromCrm(
         dto: { email: string; fields: Record<string, unknown> },
         portalId: string,
+        locale: ContentLocale,
         createdByEmployeeId?: string
-    ): Promise<{ userId: string; memberId: string; isNewUser: boolean }> {
+    ): Promise<{ userId: string; memberId: string; isNewUser: boolean; awaitingConsent: boolean }> {
         const { user, isNewUser } = await this.accountProvisioning.ensurePendingClaimUser(
             dto.email
         );
+        const awaitingConsent = !isNewUser && user.passwordHash !== null;
 
         const member = await this.joinPortalService.joinPortal({
             userId: user.id,
@@ -170,9 +195,16 @@ export class MembersService {
             fields: dto.fields,
             joinSource: MemberJoinSource.crm,
             createdByEmployeeId,
+            consent: awaitingConsent
+                ? { token: this.consent.newToken(), requestedAt: new Date() }
+                : undefined,
         });
 
-        return { userId: user.id, memberId: member.id, isNewUser };
+        if (awaitingConsent) {
+            await this.consent.sendRequest(member, locale);
+        }
+
+        return { userId: user.id, memberId: member.id, isNewUser, awaitingConsent };
     }
 
     async findByUserAndPortal(userId: string, portalId: string) {
@@ -288,6 +320,10 @@ export class MembersService {
         if (!member) {
             throw new NotFoundException("Member not found");
         }
+        if (member.consentStatus === MemberConsentStatus.pending) {
+            throw new ForbiddenException("The account owner has not confirmed this membership yet");
+        }
+        const share = { memberId: member.id };
 
         const documentType = dto.documentType ?? "passport";
 
@@ -307,6 +343,7 @@ export class MembersService {
                 type: documentType,
                 side: UserDocumentSide.front,
                 file: documentFirst.buffer,
+                share,
             });
         }
 
@@ -316,6 +353,7 @@ export class MembersService {
                 type: documentType,
                 side: UserDocumentSide.back,
                 file: documentSecond.buffer,
+                share,
             });
         }
 
@@ -323,6 +361,7 @@ export class MembersService {
             await this.accountFiles.replaceSignature({
                 userId: member.userId,
                 file: signature.buffer,
+                share,
             });
         }
 
@@ -333,7 +372,7 @@ export class MembersService {
         return this.toCrmMemberFullDto(result, locale);
     }
 
-    /** Приватные превью для CRM: документ/подпись читаются из аккаунта member'а */
+    /** Приватные превью для CRM: только документ/подпись, показанные этому членству */
     async getMemberAccountDocument(
         memberId: string,
         portalId: string,
@@ -343,8 +382,11 @@ export class MembersService {
         if (!member) {
             throw new NotFoundException("Member not found");
         }
-        const doc = await this.userDocumentRepository.findById(documentId);
-        if (!doc || doc.userId !== member.userId) {
+        const [doc, sharedDocumentIds] = await Promise.all([
+            this.userDocumentRepository.findById(documentId),
+            this.shares.findDocumentIdsForMember(member.id),
+        ]);
+        if (!doc || doc.userId !== member.userId || !sharedDocumentIds.includes(doc.id)) {
             throw new NotFoundException("Document not found");
         }
         return doc;
@@ -355,7 +397,9 @@ export class MembersService {
         if (!member) {
             throw new NotFoundException("Member not found");
         }
-        const signature = await this.userSignatureRepository.findByUser(member.userId);
+        const signature = member.signatureShared
+            ? await this.userSignatureRepository.findByUser(member.userId)
+            : null;
         if (!signature) {
             throw new NotFoundException("Signature not found");
         }
