@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Button, Card, FieldInput, FieldSelect, QrCodeDisplay } from "@workspace/ui";
 
 import {
+    buildJoinUrl,
     type RegistrationLink,
     useCreateRegistrationLink,
     useRegistrationLinks,
@@ -35,10 +36,7 @@ export function RegistrationLinksSettingsPage() {
     const [error, setError] = useState<string | null>(null);
     const [qrToken, setQrToken] = useState<string | null>(null);
 
-    function joinUrl(token: string): string {
-        const origin = typeof window !== "undefined" ? window.location.origin : "";
-        return `${origin}/${locale}/join/${token}`;
-    }
+    const joinUrl = (token: string) => buildJoinUrl(locale, token);
 
     async function handleCreate() {
         setError(null);

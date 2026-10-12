@@ -7,3 +7,4 @@ export * from "./entities-settings";
 export * from "./invitations-settings";
 export * from "./registration-links-settings";
 export * from "./settings-hub";
+export * from "./join-by-link";

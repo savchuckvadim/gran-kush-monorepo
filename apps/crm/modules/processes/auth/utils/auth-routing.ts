@@ -3,7 +3,7 @@ import { ROUTES } from "@/modules/shared/config/routes";
 
 // All /crm/* routes require authentication
 export const PROTECTED_ROUTES = ["/crm"] as const;
-const NON_PORTAL_SEGMENTS = new Set(["auth", "home", "scan"]);
+const NON_PORTAL_SEGMENTS = new Set(["auth", "home", "scan", "join"]);
 
 type RouteContext = {
     portalSlug: string | null;
