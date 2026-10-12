@@ -1,0 +1,25 @@
+# gitleaks config for the Security workflow (TASK-661). Default rules plus an allowlist for the
+# values that only look like secrets: CI fixtures, test suites, documentation placeholders and
+# Swagger examples.
+title = "PafPaf"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Fixtures and placeholders"
+paths = [
+    '''^\.github/workflows/.*\.yml$''',
+    '''^apps/api/test/.*\.ts$''',
+    '''^documentation/.*\.md$''',
+    '''^infra/.*\.example$''',
+    '''^apps/[^/]+/\.env\.example$''',
+    '''pnpm-lock\.yaml$''',
+]
+regexes = [
+    # the CI encryption key: a repeated hex alphabet, not a secret
+    '''(0123456789abcdef){2,}''',
+    # Swagger examples of a JWT header followed by an ellipsis
+    '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.\.\.''',
+    '''change-me[a-z0-9-]*''',
+]
