@@ -8,6 +8,8 @@
 [security-audit](security-audit.md), [scaling-roadmap](scaling-roadmap.md),
 [site/PRODUCT_SITES](../site/PRODUCT_SITES.md), [crm/THEMES](../crm/THEMES.md),
 [infra/dokploy/README](../../infra/dokploy/README.md).
+Продолжение после обратной связи 2026-10-12 — [crm-polish](crm-polish.md) (TASK-6xx: фильтры,
+ссылки регистрации, адаптив, лого и тема Барбери, «скоро в продаже», интеграции, рефакторинг и безопасность).
 
 ---
 
