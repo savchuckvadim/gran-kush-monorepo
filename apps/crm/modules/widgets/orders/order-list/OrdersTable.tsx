@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
@@ -9,10 +9,30 @@ import { Eye } from "lucide-react";
 import type { SchemaOrderListDto } from "@workspace/api-client/core";
 import { Button, Card } from "@workspace/ui";
 
-import { type OrderStatus, useOrders } from "@/modules/entities/order";
-import { EntityList, type EntityListTableColumn } from "@/modules/shared";
+import { type OrderStatus, type PaymentStatus, useOrders } from "@/modules/entities/order";
+import {
+    EntityFilter,
+    type EntityFilterField,
+    EntityList,
+    type EntityListTableColumn,
+    useEntityFilterParams,
+} from "@/modules/shared";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
+
+const STATUSES: OrderStatus[] = [
+    "pending",
+    "confirmed",
+    "preparing",
+    "ready",
+    "completed",
+    "cancelled",
+];
+const PAYMENTS: PaymentStatus[] = ["pending", "paid", "refunded"];
+
+/** A local calendar day as an ISO bound of `orderedAt`. */
+const dayBound = (day: string | undefined, isEnd: boolean): string | undefined =>
+    day ? new Date(`${day}T${isEnd ? "23:59:59.999" : "00:00:00"}`).toISOString() : undefined;
 
 const STATUS_COLORS: Record<string, string> = {
     pending: "bg-yellow-500/10 text-yellow-700",
@@ -32,28 +52,45 @@ const PAYMENT_COLORS: Record<string, string> = {
 export function OrdersTable() {
     const t = useTranslations("crm.orders.list");
     const toAppPath = useLocalizedLink();
-    const [page, setPage] = useState(1);
-    const [statusFilter, setStatusFilter] = useState<OrderStatus | undefined>();
 
-    const { data, isLoading, error } = useOrders({
+    const fields = useMemo<EntityFilterField[]>(
+        () => [
+            {
+                key: "status",
+                label: t("colStatus"),
+                type: "select",
+                isDefault: true,
+                options: STATUSES.map((s) => ({ value: s, label: t(`status.${s}`) })),
+            },
+            {
+                key: "payment",
+                label: t("colPayment"),
+                type: "select",
+                isDefault: true,
+                options: PAYMENTS.map((p) => ({ value: p, label: t(`payment.${p}`) })),
+            },
+            { key: "date", label: t("colDate"), type: "date", isDefault: true },
+        ],
+        [t]
+    );
+    const { state, setState, page, setPage } = useEntityFilterParams(fields);
+    const { status, payment, date } = state.values;
+    const period = typeof date === "object" && !Array.isArray(date) ? date : undefined;
+
+    const { data, isLoading, isFetching, error } = useOrders({
         page,
         limit: 20,
-        status: statusFilter,
+        search: state.q,
+        status: typeof status === "string" ? (status as OrderStatus) : undefined,
+        paymentStatus: typeof payment === "string" ? (payment as PaymentStatus) : undefined,
+        startDate: dayBound(period?.from, false),
+        endDate: dayBound(period?.to, true),
     });
 
     const orders = data?.items ?? [];
     const totalPages = data?.totalPages ?? 1;
 
     const orderPath = (id: string) => toAppPath(`${ROUTES.CRM_ORDER_DETAILS}/${id}`);
-
-    const statuses: OrderStatus[] = [
-        "pending",
-        "confirmed",
-        "preparing",
-        "ready",
-        "completed",
-        "cancelled",
-    ];
 
     const tableColumns = [
         {
@@ -116,25 +153,15 @@ export function OrdersTable() {
     ] as EntityListTableColumn<SchemaOrderListDto>[];
 
     const filterSlot = (
-        <div className="flex flex-wrap gap-1">
-            <Button
-                variant={!statusFilter ? "default" : "outline"}
-                size="sm"
-                onClick={() => setStatusFilter(undefined)}
-            >
-                {t("allStatuses")}
-            </Button>
-            {statuses.map((s) => (
-                <Button
-                    key={s}
-                    variant={statusFilter === s ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setStatusFilter(s)}
-                >
-                    {t(`status.${s}`)}
-                </Button>
-            ))}
-        </div>
+        <EntityFilter
+            fields={fields}
+            state={state}
+            onChange={setState}
+            total={data?.total}
+            isFetching={isFetching}
+            storageKey="crm-orders"
+            searchPlaceholder={t("searchPlaceholder")}
+        />
     );
 
     return (
@@ -143,7 +170,9 @@ export function OrdersTable() {
                 items={orders}
                 loading={isLoading}
                 error={error ? t("error") : undefined}
-                emptyState={<p className="py-8 text-center text-sm text-muted-foreground">{t("empty")}</p>}
+                emptyState={
+                    <p className="py-8 text-center text-sm text-muted-foreground">{t("empty")}</p>
+                }
                 getRowKey={(o) => o.id}
                 filterSlot={filterSlot}
                 tableColumns={tableColumns}

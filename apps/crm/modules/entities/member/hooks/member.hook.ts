@@ -1,28 +1,26 @@
 "use client";
 
-import {  useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-import {
-    getCrmMemberById,
-    getCrmMembers,
-} from "../api/member.api";
-import { CrmMemberListFilters } from "../type/member.type";
+import { getCrmMemberById, getCrmMembers } from "../api/member.api";
+import { CrmMemberListParams } from "../type/member.type";
 
 // Query keys
 export const memberKeys = {
     all: ["crm-members"] as const,
     lists: () => [...memberKeys.all, "list"] as const,
-    list: (limit?: number, filters?: CrmMemberListFilters) =>
-        [...memberKeys.lists(), limit, filters] as const,
+    list: (params: CrmMemberListParams) => [...memberKeys.lists(), params] as const,
     details: () => [...memberKeys.all, "detail"] as const,
     detail: (id: string) => [...memberKeys.details(), id] as const,
 };
 
-// Hook for fetching members list
-export function useCrmMembers(limit: number = 100, filters?: CrmMemberListFilters) {
+/** A page of members; the previous page stays on screen while the next one loads. */
+export function useCrmMembers(params: CrmMemberListParams, { enabled = true } = {}) {
     return useQuery({
-        queryKey: memberKeys.list(limit, filters),
-        queryFn: () => getCrmMembers(limit, filters),
+        queryKey: memberKeys.list(params),
+        queryFn: () => getCrmMembers(params),
+        placeholderData: keepPreviousData,
+        enabled,
     });
 }
 
@@ -34,4 +32,3 @@ export function useMemberDetails(memberId: string) {
         enabled: !!memberId,
     });
 }
-

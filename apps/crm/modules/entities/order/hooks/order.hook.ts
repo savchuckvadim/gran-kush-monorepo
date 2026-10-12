@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
     getOrderById,
@@ -22,6 +22,7 @@ export function useOrders(filters?: OrdersFilter) {
     return useQuery({
         queryKey: ORDER_KEYS.list(filters),
         queryFn: () => getOrders(filters),
+        placeholderData: keepPreviousData,
     });
 }
 

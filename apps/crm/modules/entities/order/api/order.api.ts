@@ -20,6 +20,11 @@ export interface OrdersFilter {
     status?: OrderStatus;
     paymentStatus?: PaymentStatus;
     memberId?: string;
+    /** Part of the order number. */
+    search?: string;
+    /** ISO date-time bounds of `orderedAt`. */
+    startDate?: string;
+    endDate?: string;
     page?: number;
     limit?: number;
 }
@@ -38,6 +43,9 @@ export async function getOrders(
                 status: filters?.status,
                 paymentStatus: filters?.paymentStatus,
                 memberId: filters?.memberId,
+                search: filters?.search?.trim() || undefined,
+                startDate: filters?.startDate,
+                endDate: filters?.endDate,
                 page: filters?.page ?? 1,
                 limit: filters?.limit ?? 20,
             },

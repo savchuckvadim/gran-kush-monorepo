@@ -74,7 +74,6 @@
                 "saving": "Сохранение…",
                 "errorTitle": "Не удалось сменить статус"
             },
-            "total": "Всего: {count}",
             "columns": {
                 "name": "Имя",
                 "email": "Email",
@@ -191,7 +190,10 @@
                 "loading": "Загружаем форму…",
                 "created": "Участник создан",
                 "createdExisting": "Участник добавлен: у этого email уже был аккаунт PafPaf"
-            }
+            },
+            "searchPlaceholder": "Имя, телефон, email или номер…",
+            "empty": "Никого не нашли",
+            "loadError": "Не удалось загрузить участников"
         },
         "attendance": {
             "title": "Посещаемость",
@@ -361,7 +363,8 @@
                     "pending": "Не оплачен",
                     "paid": "Оплачен",
                     "refunded": "Возвращён"
-                }
+                },
+                "searchPlaceholder": "Номер заказа…"
             },
             "detail": {
                 "loading": "Загрузка...",
@@ -863,6 +866,29 @@
                 "created": "Личная ссылка создана — анкета открыта в новой вкладке",
                 "popupBlocked": "Браузер заблокировал вкладку — ссылка скопирована, вставьте её сами"
             }
+        },
+        "entityFilter": {
+            "searchPlaceholder": "Поиск…",
+            "searchLabel": "Поиск по списку",
+            "filters": "Фильтр",
+            "openFilters": "Открыть фильтр",
+            "found": "Найдено: {count}",
+            "show": "Показать {count}",
+            "panelTitle": "Фильтр",
+            "reset": "Сбросить",
+            "done": "Готово",
+            "addField": "Поля",
+            "fieldPickerTitle": "Поля в фильтре",
+            "fieldPickerSearch": "Найти поле",
+            "fieldPickerLimit": "Не больше {max} полей сразу",
+            "noFields": "Добавьте поля кнопкой «Поля»",
+            "any": "Любое",
+            "yes": "Да",
+            "no": "Нет",
+            "from": "от",
+            "to": "до",
+            "contains": "Содержит…",
+            "removeChip": "Убрать условие «{label}»"
         }
     }
 }

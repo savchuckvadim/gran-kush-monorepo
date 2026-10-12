@@ -1,67 +1,69 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { Button, FieldSelect } from "@workspace/ui";
+import { Button } from "@workspace/ui";
 
+import { toFilterFields } from "@/modules/entities/entity-settings";
+import { CrmMemberListItem, useCrmMembers, useMembersListMeta } from "@/modules/entities/member";
 import {
-    CrmMemberListFilters,
-    CrmMemberListItem,
-    useCrmMembers,
-    useMembersListMeta,
-} from "@/modules/entities/member";
-import { EntityList, EntityListTableColumn } from "@/modules/shared";
+    EntityFilter,
+    type EntityFilterField,
+    EntityList,
+    EntityListTableColumn,
+    toFieldConditions,
+    useEntityFilterParams,
+} from "@/modules/shared";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
-import { MemberListCounter } from "./MemberListCounter";
+const PAGE_SIZE = 20;
+/** The status is a column of the member's record, not a field: it goes as `statusItemId`. */
+const STATUS_KEY = "status";
 
 export function MemberList() {
     const t = useTranslations("crm.members");
-    const [statusItemId, setStatusItemId] = useState("");
-    const [filterFieldKey, setFilterFieldKey] = useState("");
-    const [filterValue, setFilterValue] = useState("");
-    const statusSelectId = useId();
-    const filterFieldSelectId = useId();
-
-    const listFilters = useMemo((): CrmMemberListFilters => {
-        const f: CrmMemberListFilters = {};
-        if (statusItemId) {
-            f.statusItemId = statusItemId;
-        }
-        if (filterFieldKey && filterValue !== "") {
-            f.filterFieldKey = filterFieldKey;
-            f.filterValue = filterValue;
-        }
-        return f;
-    }, [statusItemId, filterFieldKey, filterValue]);
-
-    // const metaQuery = useQuery({
-    //     queryKey: ["crm-members-list-meta"],
-    //     queryFn: async () => ({
-    //         statuses: await fetchCrmMemberStatusItems(),
-    //         filterFields: await fetchCrmMemberFilterFields(),
-    //     }),
-    // });
-    const { statuses, filterFields, isMetaLoading, isMetaError } = useMembersListMeta(true);
-    const { data: members, isLoading, error } = useCrmMembers(100, listFilters);
     const router = useRouter();
     const toAppPath = useLocalizedLink();
     const makeMemberPath = (memberId: string) =>
         toAppPath(`${ROUTES.CRM_MEMBER_DETAILS}/${memberId}`);
 
-    if (isLoading) {
-        return <div>Loading...</div>;
-    }
-    if (error) {
-        return <div>Error: {error.message}</div>;
-    }
-    if (!members) {
-        return <div>No members found</div>;
-    }
+    const { statuses, filterFields } = useMembersListMeta(true);
+    const fields = useMemo<EntityFilterField[]>(
+        () => [
+            {
+                key: STATUS_KEY,
+                label: t("columns.status"),
+                type: "select",
+                isDefault: true,
+                options: (statuses ?? []).map((status) => ({
+                    value: status.id,
+                    label: status.label,
+                    color: status.color,
+                })),
+            },
+            ...toFilterFields(filterFields ?? []).filter((field) => field.key !== STATUS_KEY),
+        ],
+        [statuses, filterFields, t]
+    );
+    const isMetaReady = statuses !== undefined && filterFields !== undefined;
+
+    const { state, setState, page, setPage, hasFieldParams } = useEntityFilterParams(fields);
+    const status = state.values[STATUS_KEY];
+    const { data, isPending, isFetching, error } = useCrmMembers(
+        {
+            page,
+            limit: PAGE_SIZE,
+            q: state.q,
+            statusItemId: typeof status === "string" ? status : undefined,
+            conditions: toFieldConditions(state, fields, [STATUS_KEY]),
+        },
+        // a link with field conditions waits for the fields instead of loading everyone first
+        { enabled: isMetaReady || !hasFieldParams }
+    );
 
     const tableColumns = [
         {
@@ -112,91 +114,37 @@ export function MemberList() {
         },
     ] as EntityListTableColumn<CrmMemberListItem>[];
 
-    // const filterFieldOptions = metaQuery.data?.filterFields ?? [];
-    // const statusOptions = metaQuery.data?.statuses ?? [];
-
     return (
-        <div className="space-y-3">
-            <div className="flex flex-col gap-3 rounded-lg border bg-muted/30 p-3 md:flex-row md:flex-wrap md:items-end">
-                <div className="flex min-w-[160px] flex-col gap-1">
-                    <label
-                        htmlFor={statusSelectId}
-                        className="text-xs font-medium text-muted-foreground"
-                    >
-                        Status
-                    </label>
-                    <FieldSelect
-                        id={statusSelectId}
-                        options={[
-                            { value: "", label: "All" },
-                            ...(statuses ?? []).map((s) => ({ value: s.id, label: s.label })),
-                        ]}
-                        value={statusItemId}
-                        onValueChange={setStatusItemId}
-                        disabled={isMetaLoading || isMetaError}
-                    />
-                </div>
-                <div className="flex min-w-[160px] flex-col gap-1">
-                    <label
-                        htmlFor={filterFieldSelectId}
-                        className="text-xs font-medium text-muted-foreground"
-                    >
-                        Filter field
-                    </label>
-                    <FieldSelect
-                        id={filterFieldSelectId}
-                        options={[
-                            { value: "", label: "—" },
-                            ...(filterFields ?? []).map((f) => ({
-                                value: f.fieldKey,
-                                label: f.label ?? f.fieldKey,
-                            })),
-                        ]}
-                        value={filterFieldKey}
-                        onValueChange={(value) => {
-                            setFilterFieldKey(value);
-                            setFilterValue("");
-                        }}
-                        disabled={isMetaLoading || isMetaError}
-                    />
-                </div>
-                <div className="flex min-w-[200px] flex-1 flex-col gap-1">
-                    <label className="text-xs font-medium text-muted-foreground">Value</label>
-                    <input
-                        className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-                        value={filterValue}
-                        onChange={(e) => setFilterValue(e.target.value)}
-                        placeholder="Exact match"
-                        disabled={!filterFieldKey}
-                    />
-                </div>
-                <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    className="md:mb-0"
-                    onClick={() => {
-                        setStatusItemId("");
-                        setFilterFieldKey("");
-                        setFilterValue("");
-                    }}
-                >
-                    Clear
-                </Button>
-            </div>
-
-            <div className="flex w-full items-center justify-end">
-                <MemberListCounter filters={listFilters} />
-            </div>
-            <EntityList<CrmMemberListItem>
-                items={members ?? []}
-                getRowKey={(member) => member.id}
-                tableColumns={tableColumns}
-                isRowClickable={true}
-                onRowClick={(member) => {
-                    router.push(makeMemberPath(member.id));
-                }}
-            />
-        </div>
+        <EntityList<CrmMemberListItem>
+            items={data?.items ?? []}
+            loading={isPending}
+            error={error ? t("loadError") : undefined}
+            emptyState={
+                <p className="text-muted-foreground py-8 text-center text-sm">{t("empty")}</p>
+            }
+            filterSlot={
+                <EntityFilter
+                    fields={fields}
+                    state={state}
+                    onChange={setState}
+                    total={data?.total}
+                    isFetching={isFetching}
+                    storageKey="crm-members"
+                    searchPlaceholder={t("searchPlaceholder")}
+                />
+            }
+            getRowKey={(member) => member.id}
+            tableColumns={tableColumns}
+            isRowClickable={true}
+            onRowClick={(member) => {
+                router.push(makeMemberPath(member.id));
+            }}
+            pagination={{
+                page,
+                totalPages: data?.totalPages ?? 1,
+                totalCount: data?.total,
+                onPageChange: setPage,
+            }}
+        />
     );
 }

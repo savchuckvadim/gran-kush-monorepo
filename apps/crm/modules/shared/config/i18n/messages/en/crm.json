@@ -74,7 +74,6 @@
                 "saving": "Saving…",
                 "errorTitle": "Failed to change status"
             },
-            "total": "{count} total",
             "columns": {
                 "name": "Name",
                 "email": "Email",
@@ -191,7 +190,10 @@
                 "loading": "Loading the form…",
                 "created": "Member created",
                 "createdExisting": "Member added: this email already had a PafPaf account"
-            }
+            },
+            "searchPlaceholder": "Name, phone, email or number…",
+            "empty": "No members found",
+            "loadError": "Couldn't load the members"
         },
         "attendance": {
             "title": "Attendance",
@@ -361,7 +363,8 @@
                     "pending": "Unpaid",
                     "paid": "Paid",
                     "refunded": "Refunded"
-                }
+                },
+                "searchPlaceholder": "Order number…"
             },
             "detail": {
                 "loading": "Loading...",
@@ -863,6 +866,29 @@
                 "created": "Personal link created — the form is open in a new tab",
                 "popupBlocked": "The browser blocked the tab — the link is copied, paste it yourself"
             }
+        },
+        "entityFilter": {
+            "searchPlaceholder": "Search…",
+            "searchLabel": "Search the list",
+            "filters": "Filter",
+            "openFilters": "Open the filter",
+            "found": "Found: {count}",
+            "show": "Show {count}",
+            "panelTitle": "Filter",
+            "reset": "Reset",
+            "done": "Done",
+            "addField": "Fields",
+            "fieldPickerTitle": "Fields in the filter",
+            "fieldPickerSearch": "Find a field",
+            "fieldPickerLimit": "Up to {max} fields at once",
+            "noFields": "Add fields with the “Fields” button",
+            "any": "Any",
+            "yes": "Yes",
+            "no": "No",
+            "from": "from",
+            "to": "to",
+            "contains": "Contains…",
+            "removeChip": "Remove “{label}”"
         }
     }
 }

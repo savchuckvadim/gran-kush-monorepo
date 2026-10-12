@@ -42,6 +42,7 @@ export {
 export { Input } from "./components/input";
 export { default as Iridescence } from "./components/Iridescence";
 export { Label } from "./components/label";
+export { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "./components/popover";
 export {
     Select,
     SelectContent,

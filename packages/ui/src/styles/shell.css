@@ -241,6 +241,67 @@
     border-radius: var(--radius);
 }
 
+/* =================== entity filter =================== */
+
+/* The list filter: a search line with chips and a panel of fields under it (a sheet on a phone).
+   Glass on the theme's own tokens by default; PafPaf rounds it into a pill, the flat skins
+   (Infierno, Grind) and Clásico keep it solid. */
+
+[data-slot="entity-filter"] {
+    background: color-mix(in oklab, var(--card) 60%, transparent);
+    border-color: color-mix(in oklab, var(--border) 85%, transparent);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    backdrop-filter: blur(12px) saturate(140%);
+    transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
+}
+
+[data-slot="entity-filter"]:focus-within {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 30%, transparent);
+}
+
+[data-slot="entity-filter-panel"] {
+    background: color-mix(in oklab, var(--popover) 86%, transparent);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    backdrop-filter: blur(18px) saturate(160%);
+    box-shadow:
+        0 24px 60px -24px rgb(0 0 0 / 0.45),
+        0 0 0 1px color-mix(in oklab, var(--border) 70%, transparent);
+}
+
+/* the popover under the line (Popper sets data-side); the phone sheet keeps its square bottom */
+[data-slot="entity-filter-panel"][data-side] {
+    border-radius: calc(var(--radius) + 0.5rem);
+}
+
+:root[data-skin="pafpaf"] [data-slot="entity-filter"] {
+    border-radius: 9999px;
+    padding-left: 1rem;
+}
+
+:root:is([data-skin="infierno"], [data-skin="grind"], [data-skin="clasico"])
+    :is([data-slot="entity-filter"], [data-slot="entity-filter-panel"]) {
+    background: var(--card);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+:root:is([data-skin="infierno"], [data-skin="grind"])
+    :is(
+        [data-slot="entity-filter"],
+        [data-slot="entity-filter-panel"][data-side],
+        [data-slot="entity-filter-chip"],
+        [data-slot="entity-filter-option"]
+    ) {
+    border-radius: var(--radius);
+}
+
+:root[data-skin="sociopath"] [data-slot="entity-filter"] {
+    border-color: transparent;
+}
+
 /* =================== brand =================== */
 
 :is([data-slot="brand-blood"], [data-slot="brand-initial"]) {

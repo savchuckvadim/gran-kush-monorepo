@@ -74,7 +74,6 @@
                 "saving": "Guardando…",
                 "errorTitle": "No se pudo cambiar el estado"
             },
-            "total": "{count} en total",
             "columns": {
                 "name": "Nombre",
                 "email": "Correo",
@@ -191,7 +190,10 @@
                 "loading": "Cargando el formulario…",
                 "created": "Socio creado",
                 "createdExisting": "Socio añadido: este email ya tenía cuenta en PafPaf"
-            }
+            },
+            "searchPlaceholder": "Nombre, teléfono, email o número…",
+            "empty": "No se encontró a nadie",
+            "loadError": "No se pudieron cargar los socios"
         },
         "attendance": {
             "title": "Asistencia",
@@ -361,7 +363,8 @@
                     "pending": "Sin pagar",
                     "paid": "Pagado",
                     "refunded": "Reembolsado"
-                }
+                },
+                "searchPlaceholder": "Número de pedido…"
             },
             "detail": {
                 "loading": "Cargando...",
@@ -863,6 +866,29 @@
                 "created": "Enlace personal creado: el formulario está abierto en otra pestaña",
                 "popupBlocked": "El navegador bloqueó la pestaña: el enlace está copiado, pégalo tú"
             }
+        },
+        "entityFilter": {
+            "searchPlaceholder": "Buscar…",
+            "searchLabel": "Buscar en la lista",
+            "filters": "Filtro",
+            "openFilters": "Abrir el filtro",
+            "found": "Encontrados: {count}",
+            "show": "Mostrar {count}",
+            "panelTitle": "Filtro",
+            "reset": "Restablecer",
+            "done": "Listo",
+            "addField": "Campos",
+            "fieldPickerTitle": "Campos del filtro",
+            "fieldPickerSearch": "Buscar un campo",
+            "fieldPickerLimit": "Hasta {max} campos a la vez",
+            "noFields": "Añade campos con el botón «Campos»",
+            "any": "Cualquiera",
+            "yes": "Sí",
+            "no": "No",
+            "from": "desde",
+            "to": "hasta",
+            "contains": "Contiene…",
+            "removeChip": "Quitar «{label}»"
         }
     }
 }

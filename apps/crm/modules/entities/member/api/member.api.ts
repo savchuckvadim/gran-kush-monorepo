@@ -2,7 +2,6 @@ import {
     assertOpenApiOk,
     SchemaCrmCreateMemberDto,
     SchemaCrmCreateMemberResponseDto,
-    SchemaCrmMemberDto,
     SchemaCrmMemberFieldsPatchDto,
     SchemaCrmMemberFullDto,
     SchemaMemberFormSchemaResponseDto,
@@ -11,31 +10,22 @@ import {
 
 import { $api } from "@/modules/shared";
 
-import { CrmMemberDetails, CrmMemberListFilters, CrmMemberListItem } from "../type/member.type";
+import { CrmMemberDetails, CrmMemberListPage, CrmMemberListParams } from "../type/member.type";
 
-export async function getCrmMembers(
-    limit: number = 100,
-    filters?: CrmMemberListFilters
-): Promise<CrmMemberListItem[]> {
+export async function getCrmMembers(params: CrmMemberListParams): Promise<CrmMemberListPage> {
+    const { page, limit, q, statusItemId, conditions } = params;
     const response = await $api.GET("/crm/members", {
         params: {
             query: {
+                page,
                 limit,
-                ...(filters?.statusItemId ? { statusItemId: filters.statusItemId } : {}),
-                ...(filters?.filterFieldKey ? { filterFieldKey: filters.filterFieldKey } : {}),
-                ...(filters?.filterValue !== undefined && filters.filterValue !== ""
-                    ? { filterValue: filters.filterValue }
-                    : {}),
-            } as Record<string, string | number>,
+                ...(q?.trim() ? { q: q.trim() } : {}),
+                ...(statusItemId ? { statusItemId } : {}),
+                ...(conditions?.length ? { filter: JSON.stringify(conditions) } : {}),
+            },
         },
     });
-
-    if (!response.response.ok) {
-        throw new Error(`Failed to fetch members: ${response.response.status}`);
-    }
-
-    const members = response.data as SchemaCrmMemberDto[];
-    return members as CrmMemberListItem[];
+    return assertOpenApiOk<CrmMemberListPage>(response);
 }
 
 export async function getCrmMemberById(memberId: string): Promise<CrmMemberDetails | null> {
