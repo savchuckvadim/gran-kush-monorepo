@@ -6,7 +6,7 @@
 #   docker build -f infra/docker/api.Dockerfile -t gran-kush/api .
 # ─────────────────────────────────────────────────────────────
 
-FROM node:20-slim AS base
+FROM node:22-slim AS base
 ENV PNPM_HOME=/pnpm
 ENV PATH="$PNPM_HOME:$PATH"
 # openssl + ca-certificates are required by the Prisma query engine on Debian

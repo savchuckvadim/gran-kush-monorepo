@@ -9,7 +9,7 @@
 # APP is the directory name under apps/ (crm | web | admin | site).
 # ─────────────────────────────────────────────────────────────
 
-FROM node:20-slim AS base
+FROM node:22-slim AS base
 ENV PNPM_HOME=/pnpm
 ENV PATH="$PNPM_HOME:$PATH"
 ENV NEXT_TELEMETRY_DISABLED=1

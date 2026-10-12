@@ -391,6 +391,41 @@ Semgrep, Trivy, ZAP по OpenAPI).
 - [ ] Создание участника — роль `manager+` (решить с Вадимом: сейчас может любой сотрудник)
 - [ ] e2e `crm-create-member-existing-user`, `crm-files-foreign-account` (есть как `it.failing`)
 
+**Решение Вадима (2026-10-12): вариант B — полный consent-флоу со схемой.** Участников по-прежнему
+создаёт любой сотрудник (права — отдельной задачей).
+
+Схема:
+- `Member.consentStatus` (`confirmed | pending`, по умолчанию `confirmed`), `consentToken`
+  (32 байта, `@unique`), `consentRequestedAt`, `consentConfirmedAt`; `Member.signatureShared`.
+- `MemberDocumentShare { memberId, userDocumentId }` `@@unique` — «документ показан этому клубу».
+- Миграция-бэкфилл: все существующие членства `confirmed`, share на каждую пару (членство,
+  документ того же аккаунта), `signatureShared = true`, где подпись есть — клубы, которые сами
+  загрузили документы, ничего не теряют.
+
+Правила:
+- `createFromCrm` для аккаунта **с паролем** → членство `pending` + токен + письмо «Клуб X добавил
+  вас — подтвердите» со ссылкой `${CRM_FRONTEND_URL}/{lang}/consent/{token}` (кабинет на проде не
+  деплоится, страница живёт в CRM как `/join`); ответ `awaitingConsent: true`. Новый или
+  `pending_claim` аккаунт — как раньше, `confirmed` (это онбординг самим клубом).
+- Публичная ссылка регистрации и `/lk/auth/member/register` для существующего аккаунта с паролем
+  — только после проверки пароля (bcrypt, как в TASK-662), иначе 401; тогда членство `confirmed`.
+- `POST /lk/portals/:slug/join` (действует сам владелец) → `confirmed`.
+- Документы: `toCrmMemberFullDto` отдаёт только share этого членства, `hasSignature` =
+  `signatureShared`; превью и `getMemberAccountDocument` проверяют share; `PATCH :id/files` при
+  `pending` → 403, после подтверждения загруженное клубом автоматически share с этим членством;
+  документы, загруженные участником в потоке регистрации с контекстом клуба
+  (`/lk/auth/member/files`), — share с этим членством.
+- Публичные эндпоинты (`PUBLIC_TOKEN_THROTTLE`): `GET /public/consent/:token` (клуб, email, список
+  документов аккаунта — тип и сторона), `POST …/confirm { password, shareDocumentIds, shareSignature }`
+  (пароль сверяется, иначе 401; `confirmed` + share), `POST …/decline { password }` (членство
+  удаляется). Токен живёт 14 дней; `POST /crm/members/:id/consent/resend` — новое письмо.
+- CRM: бейдж «ожидает подтверждения» в списке и карточке, вместо документов — подпись «появятся
+  после подтверждения участником», кнопка «отправить письмо ещё раз»; страница
+  `/[locale]/consent/[token]` по образцу `/join` (`NON_PORTAL_SEGMENTS` + `consent`).
+- e2e: тест 663 переводится из `it.failing`; добавить: confirm с неверным паролем → 401; после
+  confirm документы видны только выбранные; `PATCH files` при `pending` → 403; публичная ссылка
+  для существующего аккаунта без пароля → 401.
+
 ### TASK-664: клейм и вход без подтверждённой почты `[ ]` P0 — high
 
 - `POST /lk/auth/member/register` ставит пароль на pending-аккаунт
@@ -473,8 +508,13 @@ Semgrep, Trivy, ZAP по OpenAPI).
 
 ### TASK-669: рантайм, зависимости, CI `[ ]` P1
 
-- [ ] Образы на Node 20 (`api.Dockerfile:9`, `next.Dockerfile:12`) — EOL с апреля 2026, CI на 22;
-      контейнер API работает от root
+- [x] Образы переведены на `node:22-slim` (`chore/next-16-3-8`, 2026-10-12): Node 20 — EOL, и
+      Next 16.3.8 зовёт `util.markAsUncloneable`, которого в Node 20 нет (образ `site` не
+      собирался). Проверено локальной docker-сборкой `site` и `api`
+- [ ] Контейнер API работает от root; образ API — 4,1 ГБ (runner копирует весь `/app` с
+      `node_modules` монорепы) — при каждом Deploy диск сервера забивается старыми версиями
+      (инцидент 12.10.2026: диск 100 %, все Postgres в Restarting). Ужать образ (`pnpm deploy
+      --prod` или `--filter api... --prod`), cron `docker image prune -f` на сервере
 - [ ] `apps/site`: `next-intl@4.8.3` (помечен в TASK-306), `next@16.3.3`
 - [x] `next` 16.3.8 во всех приложениях (SSRF в `next/image`), `sharp` 0.35.5, `source-map-js`,
       и pnpm overrides по пропатченным версиям внутри мажоров: `proxy-addr` >= 2.0.8 (critical —
