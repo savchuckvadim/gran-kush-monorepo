@@ -476,11 +476,16 @@ Semgrep, Trivy, ZAP по OpenAPI).
 - [ ] Образы на Node 20 (`api.Dockerfile:9`, `next.Dockerfile:12`) — EOL с апреля 2026, CI на 22;
       контейнер API работает от root
 - [ ] `apps/site`: `next-intl@4.8.3` (помечен в TASK-306), `next@16.3.3`
-- [ ] **Красные `pnpm audit` и Trivy в workflow `Security` (с 12.10.2026)** — high в рантайме:
-      `next` < 16.3.8 (SSRF в `next/image`, все четыре приложения и `@payloadcms/next`),
-      `sharp` < 0.35.5 (librsvg), `source-map-js` < 1.2.2 (через postcss в next); Trivy ещё
-      ругается на Dockerfile (root, Node 20). Поднять патч-версии (`next@16.3.8+`, `sharp`),
-      пересобрать, проверить сайт с Payload — после этого оба job зелёные
+- [x] `next` 16.3.8 во всех приложениях (SSRF в `next/image`), `sharp` 0.35.5, `source-map-js`,
+      и pnpm overrides по пропатченным версиям внутри мажоров: `proxy-addr` >= 2.0.8 (critical —
+      подмена IP через IPv4-mapped адреса, ломала лимиты по IP), `path-to-regexp` 8.x,
+      `picomatch`, `fast-uri`, `js-yaml`, `undici`, `ws`, `lodash`, `browserslist`
+      (`chore/next-16-3-8`, 2026-10-12). Внутренности Prisma CLI (`effect`, `hono`, `defu`,
+      `mysql2`, `deepmerge-ts`) не переопределяем: override `effect` ломает загрузку
+      `prisma.config.ts`, в рантайме образа их нет
+- [ ] Workflow `Security`: `pnpm audit` и Trivy падают только на critical; оставшиеся high —
+      CLI-цепочки Prisma/Payload/drizzle и `braces` под sass (без фикса) — закрывать при
+      обновлении Prisma и Payload; Trivy misconfig по Dockerfile (root, Node 20) — пункт выше
 - [ ] `ci.yml` без `permissions:`, actions не прибиты к SHA, SSH `StrictHostKeyChecking=accept-new`
 - [ ] Слабые дефолты вместо падения на старте: `ENCRYPTION_MASTER_KEY` → случайный ключ
       (`encryption.service.ts:33`), `JWT_DEFAULTS.SECRET = "default-secret"`

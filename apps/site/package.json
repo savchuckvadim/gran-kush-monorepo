@@ -25,14 +25,14 @@
         "@payloadcms/ui": "3.90.1",
         "cross-env": "^7.0.3",
         "graphql": "^16.8.2",
-        "next": "16.3.3",
+        "next": "16.3.8",
         "next-intl": "^4.8.3",
         "payload": "3.90.1",
         "pg": "8.20.0",
         "react": "19.2.6",
         "react-dom": "19.2.6",
         "server-only": "^0.0.1",
-        "sharp": "0.35.4"
+        "sharp": "0.35.5"
     },
     "devDependencies": {
         "@types/node": "22.19.9",
