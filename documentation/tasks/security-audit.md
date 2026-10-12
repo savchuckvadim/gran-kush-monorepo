@@ -476,6 +476,11 @@ Semgrep, Trivy, ZAP по OpenAPI).
 - [ ] Образы на Node 20 (`api.Dockerfile:9`, `next.Dockerfile:12`) — EOL с апреля 2026, CI на 22;
       контейнер API работает от root
 - [ ] `apps/site`: `next-intl@4.8.3` (помечен в TASK-306), `next@16.3.3`
+- [ ] **Красные `pnpm audit` и Trivy в workflow `Security` (с 12.10.2026)** — high в рантайме:
+      `next` < 16.3.8 (SSRF в `next/image`, все четыре приложения и `@payloadcms/next`),
+      `sharp` < 0.35.5 (librsvg), `source-map-js` < 1.2.2 (через postcss в next); Trivy ещё
+      ругается на Dockerfile (root, Node 20). Поднять патч-версии (`next@16.3.8+`, `sharp`),
+      пересобрать, проверить сайт с Payload — после этого оба job зелёные
 - [ ] `ci.yml` без `permissions:`, actions не прибиты к SHA, SSH `StrictHostKeyChecking=accept-new`
 - [ ] Слабые дефолты вместо падения на старте: `ENCRYPTION_MASTER_KEY` → случайный ключ
       (`encryption.service.ts:33`), `JWT_DEFAULTS.SECRET = "default-secret"`
