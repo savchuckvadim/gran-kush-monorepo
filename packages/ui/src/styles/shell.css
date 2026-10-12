@@ -452,6 +452,22 @@
     mask-size: auto 100%;
 }
 
+/* Burberry: the PafPaf mark wears a check flat cap */
+
+[data-slot="brand-hat"] {
+    display: none;
+}
+
+:root[data-skin="burberry"] [data-slot="brand-hat"] {
+    display: block;
+}
+
+:root[data-skin="burberry"] [data-slot="brand-name"] > span:first-child {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: 0;
+}
+
 /* Sociopath: the Red John smiley instead of the PafPaf mark, a red full stop after the name */
 
 :root[data-skin="sociopath"] [data-slot="brand-mark"] {

@@ -19,6 +19,7 @@ export const SKIN_IDS = [
     "mediterraneo",
     "sociopath",
     "infierno",
+    "burberry",
 ] as const;
 
 export type SkinId = (typeof SKIN_IDS)[number];
@@ -132,6 +133,13 @@ const SKIN_MAP: Record<SkinId, SkinDefinition> = {
         id: "infierno",
         modes: DARK_ONLY,
         tags: ["type"],
+        forcesEco: false,
+        hasModeNames: false,
+    },
+    burberry: {
+        id: "burberry",
+        modes: BOTH,
+        tags: ["bg", "type", "calm"],
         forcesEco: false,
         hasModeNames: false,
     },

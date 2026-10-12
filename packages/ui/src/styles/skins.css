@@ -696,6 +696,60 @@
     --shadow-card: none;
 }
 
+/* Burberry: the heritage check — camel, black, white and a red thread; cream cards, serif headings */
+
+[data-skin="burberry"] {
+    --radius: 0.5rem;
+    --background: #f6efe3;
+    --foreground: #1d1a17;
+    --card: #fffaf1;
+    --primary: #1d1a17;
+    --primary-foreground: #f6efe3;
+    --secondary: #e8dcc5;
+    --muted: #efe5d2;
+    --muted-foreground: #6b6256;
+    --accent: #eadbbd;
+    --destructive: #b3261e;
+    --border: #d9c9ad;
+    --sidebar: #dcc5a1;
+    --chart-1: #c9a267;
+    --chart-2: #1d1a17;
+    --chart-3: #b3261e;
+    --chart-4: #efe5d2;
+    --chart-5: #8a7352;
+    --success: #4f7a3a;
+    --warning: #a9671c;
+    --thread: #b3261e;
+    --font-display: var(--font-lora), Georgia, serif;
+    --display-weight: 600;
+    --display-tracking: -0.01em;
+    --shadow-card: 0 1px 2px rgb(29 26 23 / 0.06), 0 14px 30px -26px rgb(29 26 23 / 0.35);
+}
+
+[data-skin="burberry"].dark {
+    --background: #17150f;
+    --foreground: #f1e8d8;
+    --card: #211e17;
+    --primary: #dcc5a1;
+    --primary-foreground: #17150f;
+    --secondary: #2c281f;
+    --muted: #262219;
+    --muted-foreground: #a89c88;
+    --accent: #33291b;
+    --destructive: #e0503f;
+    --border: #3a3427;
+    --sidebar: #1f1b14;
+    --chart-1: #dcc5a1;
+    --chart-2: #f1e8d8;
+    --chart-3: #e0503f;
+    --chart-4: #8a7352;
+    --chart-5: #4a4134;
+    --success: #8fbf72;
+    --warning: #e0a04a;
+    --thread: #e0503f;
+    --shadow-card: 0 20px 44px -32px rgb(0 0 0 / 0.8);
+}
+
 /* Control sizes: PafPaf sets its own above; skins with big touch targets or pills here */
 
 [data-skin="asceta"] {
@@ -1175,6 +1229,47 @@
 
 :root[data-skin="infierno"] h1 {
     text-shadow: 0 0 18px rgb(233 228 218 / 0.18);
+}
+
+/* Burberry: the check on the sidebar and the header (a cream wash keeps the links readable), the
+   red thread under the header, the active item in black */
+
+:root[data-skin="burberry"] {
+    --check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect width='60' height='60' fill='%23dcc5a1'/%3E%3Cg fill='%231d1a17' fill-opacity='0.82'%3E%3Crect y='6' width='60' height='5'/%3E%3Crect y='49' width='60' height='5'/%3E%3Crect x='6' width='5' height='60'/%3E%3Crect x='49' width='5' height='60'/%3E%3C/g%3E%3Cg fill='%23fffaf1' fill-opacity='0.9'%3E%3Crect y='28.5' width='60' height='3'/%3E%3Crect x='28.5' width='3' height='60'/%3E%3C/g%3E%3Cg fill='%23b3261e'%3E%3Crect y='17' width='60' height='1.5'/%3E%3Crect x='17' width='1.5' height='60'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+:root[data-skin="burberry"] [data-slot="sidebar"] {
+    background-image:
+        linear-gradient(rgb(246 239 227 / 0.55), rgb(246 239 227 / 0.55)), var(--check);
+    background-size:
+        auto,
+        60px 60px;
+}
+
+:root[data-skin="burberry"] [data-slot="app-header"] {
+    background-image:
+        linear-gradient(rgb(246 239 227 / 0.78), rgb(246 239 227 / 0.78)), var(--check);
+    background-size:
+        auto,
+        60px 60px;
+    box-shadow: inset 0 -2px 0 var(--thread);
+}
+
+:root[data-skin="burberry"].dark [data-slot="sidebar"] {
+    background-image: linear-gradient(rgb(23 21 15 / 0.78), rgb(23 21 15 / 0.78)), var(--check);
+}
+
+:root[data-skin="burberry"].dark [data-slot="app-header"] {
+    background-image: linear-gradient(rgb(23 21 15 / 0.86), rgb(23 21 15 / 0.86)), var(--check);
+}
+
+:root[data-skin="burberry"] [data-slot="sidebar-link"][data-active="true"] {
+    background: var(--primary);
+    color: var(--primary-foreground);
+}
+
+:root[data-skin="burberry"] [data-slot="card-title"] {
+    font-family: var(--font-display);
 }
 
 /* =================== energy saving =================== */

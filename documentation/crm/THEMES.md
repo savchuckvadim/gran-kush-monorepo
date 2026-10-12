@@ -1,8 +1,8 @@
 # Темы CRM
 
 Авторские темы оформления CRM. Clásico — прежняя тема CRM, она же тема по умолчанию; её токены в
-`globals.css` не менялись. Ещё 12 тем: PafPaf, Nagual, Unicornio, Galaxia lejana, Asceta, Cristal,
-Vapor, Brasa, Trap, 90s, Grind, Mediterráneo.
+`globals.css` не менялись. Ещё 15 тем: PafPaf, Nagual, Unicornio, Galaxia lejana, Asceta, Cristal,
+Vapor, Brasa, Trap, 90s, Grind, Mediterráneo, Sociopath, Infierno, Burberry.
 
 ## Где выбрать
 

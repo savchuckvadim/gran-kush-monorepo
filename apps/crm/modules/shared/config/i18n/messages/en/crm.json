@@ -619,6 +619,10 @@
                 "infierno": {
                     "name": "Inferno",
                     "description": "Black metal: pitch black, bone white and fraktur lettering. Colour only for warnings."
+                },
+                "burberry": {
+                    "name": "Burberry",
+                    "description": "The heritage check — camel, black, white and a red thread — on the menu and the header, cream cards, serif headings. The mark wears a flat cap."
                 }
             }
         },

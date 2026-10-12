@@ -619,6 +619,10 @@
                 "infierno": {
                     "name": "Infierno",
                     "description": "Black metal: negro absoluto, blanco hueso y letra fraktur. El color, solo para las alertas."
+                },
+                "burberry": {
+                    "name": "Burberry",
+                    "description": "El cuadro clásico — camel, negro, blanco e hilo rojo — en el menú y la cabecera, tarjetas crema, titulares con serifa. El logo lleva gorra."
                 }
             }
         },
