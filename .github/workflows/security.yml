@@ -1,0 +1,199 @@
+# Security scanners (TASK-661). Every job writes a report artifact; only findings of high or
+# critical severity fail the run. ZAP is report-only for now: an API that answers 401 to most
+# requests gives the baseline little to see, and the rules need tuning against real noise first.
+#
+# Repository secrets: none required. Semgrep and ZAP run from public images; gitleaks is free
+# for a personal repository.
+
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 5 * * 1" # Mondays 05:17 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  audit:
+    name: pnpm audit (runtime deps, high+)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Audit (report)
+        run: pnpm audit --prod --json > pnpm-audit.json || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pnpm-audit
+          path: pnpm-audit.json
+      # dev chains (eslint, turbo, prisma cli, react-email preview) never reach the images
+      - name: Audit (fail on high)
+        run: pnpm audit --prod --audit-level=high
+
+  secrets:
+    name: gitleaks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  semgrep:
+    name: Semgrep
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan
+        # project rules: .semgrep/ (tenant scope, guards, token leaks)
+        run: >-
+          semgrep scan
+          --config p/typescript --config p/react --config p/nextjs --config p/jwt --config p/secrets
+          --config .semgrep
+          --exclude "**/schema.ts" --exclude "**/*.e2e-spec.ts" --exclude "**/*.spec.ts"
+          --sarif --output semgrep.sarif --error --severity ERROR
+          || echo "SEMGREP_FAILED=1" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: semgrep
+          path: semgrep.sarif
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep
+      - name: Fail on ERROR findings
+        if: env.SEMGREP_FAILED == '1'
+        run: exit 1
+
+  trivy:
+    name: Trivy (deps and Dockerfiles)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Filesystem scan (report)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scanners: vuln,misconfig
+          format: sarif
+          output: trivy.sarif
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy.sarif
+          category: trivy
+      - name: Filesystem scan (fail on high)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scanners: vuln,misconfig
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          skip-setup-trivy: true
+
+  zap-api:
+    name: ZAP API scan (report only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    continue-on-error: true
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: kush
+          POSTGRES_PASSWORD: kush
+          POSTGRES_DB: gran_kush_zap
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kush -d gran_kush_zap"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://kush:kush@localhost:5432/gran_kush_zap?schema=public
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: zap-access-secret
+      JWT_REFRESH_SECRET: zap-refresh-secret
+      COOKIE_SECRET: zap-cookie-secret
+      ENCRYPTION_MASTER_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      AUTH_COOKIE_SECURE: "false"
+      MAIL_HOST: localhost
+      MAIL_PORT: "1025"
+      MAIL_LOGIN: zap
+      MAIL_PASSWORD: zap
+      CORS_ORIGIN: http://localhost:5000
+      CRM_FRONTEND_URL: http://localhost:5000
+      MEMBER_FRONTEND_URL: http://localhost:5001
+      SWAGGER_ENABLED: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Apply migrations
+        run: pnpm --filter api prisma:migrate:deploy
+      - name: Build and start the API
+        working-directory: apps/api
+        run: |
+          pnpm build
+          nohup node dist/main.js > api.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -fsS http://localhost:3000/health && break
+            sleep 1
+          done
+      - name: ZAP API scan
+        uses: zaproxy/action-api-scan@v0.9.0
+        with:
+          target: http://localhost:3000/docs-json
+          format: openapi
+          fail_action: false
+          allow_issue_writing: false
+          artifact_name: zap-api
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zap-api-log
+          path: apps/api/api.log

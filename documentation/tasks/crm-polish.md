@@ -325,7 +325,11 @@ transform potrace, целые пиксели, viewBox по контуру, 23 К
 
 ## G. Анализ и рефакторинг — в конце
 
-### TASK-660: системный аудит и задачи на рефакторинг `[ ]`
+### TASK-660: системный аудит и задачи на рефакторинг `[x]` — 2026-10-12
+
+**Сделано.** Три аудита (API, CRM + пакеты, безопасность) → [refactor-plan](refactor-plan.md):
+10 багов «чинить сразу» (B1…B10), 16 общесистемных тем R1…R16, таблицы по модулям API и слоям CRM,
+порядок веток. Безопасность — в [security-audit](security-audit.md), TASK-662…670.
 
 - Пройти по модулям API (`portal/crm/*`, `billing`, `account`, `mail`) и фронтам (`crm`, `web`,
   `admin`, `site`): дубли, нарушения слоёв (Prisma в сервисах), `as unknown as`, `@ApiProperty` без
@@ -334,7 +338,16 @@ transform potrace, целые пиксели, viewBox по контуру, 23 К
   оценка, приоритет. Отдельно — общесистемное: FSD в `apps/crm` (дотянуть `widgets/features`),
   единый `EntityFilter` и `EntityList` для всех сущностей, типизация api-client.
 
-### TASK-661: проверка безопасности `[ ]`
+### TASK-661: проверка безопасности `[~]` — 2026-10-12
+
+**Сделано.** Аудит с двумя critical (перехват аккаунта через приглашение, чужие документы через
+`POST /crm/members`), тремя high и девятью medium — [security-audit](security-audit.md), раздел
+«Аудит 2026-10-12», задачи TASK-662…670. `apps/api/test/security.e2e-spec.ts`: держащиеся
+проверки — обычные тесты, дыры — `it.failing` (станут красными после фикса → перевести в обычные).
+`.github/workflows/security.yml`: pnpm audit (high+ по рантайм-цепочкам), gitleaks, Semgrep
+(паки + свои правила в `.semgrep/pafpaf.yml`), Trivy по зависимостям и Dockerfile, ZAP по
+OpenAPI (пока только отчёт). **Осталось:** закрыть TASK-662…665 до первого клиента, остальное по
+плану.
 
 - Это и e2e, и сканеры, два слоя:
   1. **e2e-сьюта безопасности** в `apps/api/test/security.e2e-spec.ts`: кросс-портальный доступ по

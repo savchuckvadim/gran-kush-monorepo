@@ -1,0 +1,53 @@
+# Project rules for the Security workflow (TASK-661). ERROR fails the run, WARNING only reports.
+rules:
+  - id: pafpaf-raw-sql-unsafe
+    message: "Unsafe raw SQL: use a tagged Prisma.sql template so values stay parameters"
+    severity: ERROR
+    languages: [typescript]
+    paths:
+      include: ["apps/api/src/**"]
+    pattern-either:
+      - pattern: $PRISMA.$queryRawUnsafe(...)
+      - pattern: $PRISMA.$executeRawUnsafe(...)
+      - pattern: Prisma.raw(...)
+
+  - id: pafpaf-tenant-write-by-id
+    message: >-
+      Write by `id` alone inside a portal module — scope it by portalId or the parent key
+      (`updateMany({ where: { id, portalId } })` + count check), see security-audit TASK-666
+    severity: WARNING
+    languages: [typescript]
+    paths:
+      include: ["apps/api/src/modules/portal/**"]
+      exclude: ["**/*.spec.ts"]
+    pattern-either:
+      - pattern: '$DB.$MODEL.update({ where: { id: $ID }, ... })'
+      - pattern: '$DB.$MODEL.delete({ where: { id: $ID } })'
+
+  - id: pafpaf-tokens-in-response-dto
+    message: >-
+      A response DTO carries a session token — web clients must get it only in an HttpOnly
+      cookie (security-audit TASK-668)
+    severity: WARNING
+    languages: [typescript]
+    paths:
+      include: ["apps/api/src/**/api/dto/**"]
+      exclude: ["**/mobile*", "**/*auth-response*"]
+    pattern-either:
+      - pattern: |
+          class $DTO { ... accessToken: $T; ... }
+      - pattern: |
+          class $DTO { ... refreshToken: $T; ... }
+
+  - id: pafpaf-account-provisioning-callers
+    message: >-
+      `ensureUserWithPassword` / `ensurePendingClaimUser` attach an existing account without
+      consent — every caller is a TASK-662/663 surface, review the flow
+    severity: WARNING
+    languages: [typescript]
+    paths:
+      include: ["apps/api/src/modules/**"]
+      exclude: ["**/account-provisioning.service.ts", "**/*.spec.ts"]
+    pattern-either:
+      - pattern: $SVC.ensureUserWithPassword(...)
+      - pattern: $SVC.ensurePendingClaimUser(...)
