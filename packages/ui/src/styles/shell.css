@@ -241,6 +241,21 @@
     border-radius: var(--radius);
 }
 
+/* =================== auth pages =================== */
+
+/* A lone form on the screen (sign-in, sign-up, password, invitation, sign-up by link): every
+   control a step larger than in the CRM, and 48px under a thumb on a phone. */
+
+[data-slot="auth-page"] {
+    --control-h: var(--control-h-lg);
+}
+
+@media (max-width: 639.98px) {
+    [data-slot="auth-page"] {
+        --control-h: 3rem;
+    }
+}
+
 /* =================== entity filter =================== */
 
 /* The list filter: a search line with chips and a panel of fields under it (a sheet on a phone).

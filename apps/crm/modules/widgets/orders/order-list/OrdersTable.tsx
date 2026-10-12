@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { Eye } from "lucide-react";
@@ -52,6 +53,7 @@ const PAYMENT_COLORS: Record<string, string> = {
 export function OrdersTable() {
     const t = useTranslations("crm.orders.list");
     const toAppPath = useLocalizedLink();
+    const router = useRouter();
 
     const fields = useMemo<EntityFilterField[]>(
         () => [
@@ -179,6 +181,12 @@ export function OrdersTable() {
                 defaultViewMode="table"
                 visibilityStorageKey="crm-orders-list"
                 viewModeStorageKey="crm-orders-list"
+                isRowClickable
+                onRowClick={(order) => router.push(orderPath(order.id))}
+                cardTitle={(order) => <span className="font-mono">{order.orderNumber}</span>}
+                defaultVisibleCardFieldKeys={["member", "status", "payment", "total", "orderedAt"]}
+                isCardClickable
+                onCardClick={(order) => router.push(orderPath(order.id))}
                 renderRowActions={(order) => (
                     <Button variant="ghost" size="sm" asChild>
                         <Link href={orderPath(order.id)}>

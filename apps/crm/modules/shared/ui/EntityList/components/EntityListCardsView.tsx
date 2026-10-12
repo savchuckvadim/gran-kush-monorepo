@@ -11,6 +11,7 @@ export function EntityListCardsView<T>({
     items,
     getRowKey,
     visibleFields,
+    cardTitle,
     isCardClickable,
     onCardClick,
     renderCardActions,
@@ -18,6 +19,7 @@ export function EntityListCardsView<T>({
     items: T[];
     getRowKey: (item: T) => string;
     visibleFields: EntityListCardField<T>[];
+    cardTitle?: (item: T) => React.ReactNode;
     isCardClickable?: boolean;
     onCardClick?: (item: T) => void;
     renderCardActions?: (item: T) => React.ReactNode;
@@ -43,6 +45,11 @@ export function EntityListCardsView<T>({
                             }
                         }}
                     >
+                        {cardTitle && (
+                            <div className="min-w-0 px-4 text-base font-semibold">
+                                {cardTitle(item)}
+                            </div>
+                        )}
                         <div className="space-y-2 px-4">
                             {visibleFields.map((field) => (
                                 <div

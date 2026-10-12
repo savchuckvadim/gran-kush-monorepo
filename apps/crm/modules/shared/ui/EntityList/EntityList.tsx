@@ -1,11 +1,15 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@workspace/ui";
 import { cn } from "@workspace/ui/lib/utils";
 
-import { readJsonArrayFromCookie, writeJsonArrayToCookie } from "../../lib/entity-list-prefs-cookie";
+import {
+    readJsonArrayFromCookie,
+    writeJsonArrayToCookie,
+} from "../../lib/entity-list-prefs-cookie";
 import { useIsMobile } from "../../lib/use-is-mobile";
 
 import { EntityListCardsView } from "./components/EntityListCardsView";
@@ -84,6 +88,8 @@ export interface EntityListProps<T> {
     // Card config
     cardFields?: EntityListCardField<T>[];
     defaultVisibleCardFieldKeys?: string[];
+    /** The heading of a card (a name, a number) above its fields. */
+    cardTitle?: (item: T) => React.ReactNode;
 
     enableVisibilitySettings?: boolean; // default = true
     visibilityStorageKey?: string;
@@ -125,14 +131,20 @@ export function EntityList<T>({
     defaultVisibleTableColumnKeys,
     cardFields,
     defaultVisibleCardFieldKeys,
+    cardTitle,
 
     enableVisibilitySettings = true,
     visibilityStorageKey,
 }: EntityListProps<T>) {
+    const t = useTranslations("crm.entityList");
     const isMobile = useIsMobile();
+    // a table does not fit a phone: there it is always cards, whatever was picked on a computer
+    const isPhone = useIsMobile("(max-width: 639px)");
 
-    const coerceViewMode = (v: string | undefined, fallback: EntityListViewMode): EntityListViewMode =>
-        v === "table" || v === "cards" ? v : fallback;
+    const coerceViewMode = (
+        v: string | undefined,
+        fallback: EntityListViewMode
+    ): EntityListViewMode => (v === "table" || v === "cards" ? v : fallback);
 
     const viewStorageKey = viewModeStorageKey ? `${viewModeStorageKey}:view` : null;
     const [viewMode, setViewMode] = React.useState<EntityListViewMode>(() => {
@@ -245,7 +257,7 @@ export function EntityList<T>({
                                 />
                             )}
 
-                        {enableViewToggle && (
+                        {enableViewToggle && !isPhone && (
                             <div className="inline-flex overflow-hidden rounded-lg border bg-background">
                                 <Button
                                     type="button"
@@ -257,7 +269,7 @@ export function EntityList<T>({
                                     )}
                                     onClick={() => setViewMode("cards")}
                                 >
-                                    Карточки
+                                    {t("cards")}
                                 </Button>
                                 <Button
                                     type="button"
@@ -269,7 +281,7 @@ export function EntityList<T>({
                                     )}
                                     onClick={() => setViewMode("table")}
                                 >
-                                    Таблица
+                                    {t("table")}
                                 </Button>
                             </div>
                         )}
@@ -279,15 +291,15 @@ export function EntityList<T>({
 
             {loading ? (
                 <div className="flex items-center justify-center py-12 text-muted-foreground">
-                    Загрузка...
+                    {t("loading")}
                 </div>
             ) : error ? (
                 <div className="py-4 text-destructive">{error}</div>
             ) : items.length === 0 ? (
                 (emptyState ?? (
-                    <div className="py-8 text-center text-muted-foreground">Ничего не найдено</div>
+                    <div className="py-8 text-center text-muted-foreground">{t("empty")}</div>
                 ))
-            ) : viewMode === "table" ? (
+            ) : viewMode === "table" && !isPhone ? (
                 <EntityListTableView
                     items={items}
                     getRowKey={getRowKey}
@@ -302,6 +314,7 @@ export function EntityList<T>({
                     items={items}
                     getRowKey={getRowKey}
                     visibleFields={visibleFields}
+                    cardTitle={cardTitle}
                     isCardClickable={isCardClickable}
                     onCardClick={onCardClick}
                     renderCardActions={renderCardActions}

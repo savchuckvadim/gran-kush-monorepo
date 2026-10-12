@@ -889,6 +889,20 @@
             "to": "to",
             "contains": "Contains…",
             "removeChip": "Remove “{label}”"
+        },
+        "entityList": {
+            "cards": "Cards",
+            "table": "Table",
+            "loading": "Loading…",
+            "empty": "Nothing found",
+            "actions": "Actions",
+            "page": "Page {page} of {total}",
+            "pageSize": "Rows per page",
+            "previous": "Previous page",
+            "next": "Next page",
+            "fieldsButton": "Fields",
+            "fieldsTitle": "Fields",
+            "fieldsDescription": "Choose what to show in the cards and in the table."
         }
     }
 }

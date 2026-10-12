@@ -139,6 +139,11 @@ export function MemberList() {
             onRowClick={(member) => {
                 router.push(makeMemberPath(member.id));
             }}
+            // a card opens by itself: no «Open profile» row in it
+            cardTitle={(member) => `${member.name} ${member.surname ?? ""}`.trim() || member.email}
+            defaultVisibleCardFieldKeys={["email", "phone", "status"]}
+            isCardClickable
+            onCardClick={(member) => router.push(makeMemberPath(member.id))}
             pagination={{
                 page,
                 totalPages: data?.totalPages ?? 1,

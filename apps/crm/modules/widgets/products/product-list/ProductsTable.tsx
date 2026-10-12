@@ -26,8 +26,7 @@ export function ProductsTable() {
     const products = data?.items ?? [];
     const totalPages = data?.totalPages ?? 1;
 
-    const productPath = (id: string) =>
-        toAppPath(`${ROUTES.CRM_PRODUCT_DETAILS}/${id}`);
+    const productPath = (id: string) => toAppPath(`${ROUTES.CRM_PRODUCT_DETAILS}/${id}`);
 
     const tableColumns = [
         {
@@ -109,7 +108,9 @@ export function ProductsTable() {
                 items={products}
                 loading={isLoading}
                 error={error ? t("error") : undefined}
-                emptyState={<p className="py-8 text-center text-sm text-muted-foreground">{t("empty")}</p>}
+                emptyState={
+                    <p className="py-8 text-center text-sm text-muted-foreground">{t("empty")}</p>
+                }
                 getRowKey={(p) => p.id}
                 tableColumns={tableColumns}
                 defaultViewMode="table"
@@ -118,6 +119,10 @@ export function ProductsTable() {
                 reserveFilterSpace={false}
                 isRowClickable
                 onRowClick={(p) => router.push(productPath(p.id))}
+                cardTitle={(p) => tableColumns[0]?.cell(p)}
+                defaultVisibleCardFieldKeys={["category", "price", "stock", "status"]}
+                isCardClickable
+                onCardClick={(p) => router.push(productPath(p.id))}
                 renderRowActions={(product) => (
                     <>
                         <Button variant="ghost" size="sm" asChild>

@@ -889,6 +889,20 @@
             "to": "hasta",
             "contains": "Contiene…",
             "removeChip": "Quitar «{label}»"
+        },
+        "entityList": {
+            "cards": "Tarjetas",
+            "table": "Tabla",
+            "loading": "Cargando…",
+            "empty": "No se encontró nada",
+            "actions": "Acciones",
+            "page": "Página {page} de {total}",
+            "pageSize": "Filas por página",
+            "previous": "Página anterior",
+            "next": "Página siguiente",
+            "fieldsButton": "Campos",
+            "fieldsTitle": "Campos",
+            "fieldsDescription": "Elige qué mostrar en las tarjetas y en la tabla."
         }
     }
 }

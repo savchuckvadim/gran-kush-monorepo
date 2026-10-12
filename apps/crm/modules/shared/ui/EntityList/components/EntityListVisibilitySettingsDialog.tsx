@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 import {
     Button,
@@ -31,6 +32,7 @@ export function EntityListVisibilitySettingsDialog({
     onToggleCardFieldKey: (key: string) => void;
     onToggleTableColumnKey: (key: string) => void;
 }) {
+    const t = useTranslations("crm.entityList");
     const showCards = resolvedCardFields.length > 0;
     const showTable = resolvedTableColumns.length > 0;
 
@@ -38,22 +40,20 @@ export function EntityListVisibilitySettingsDialog({
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
-                    Настройка полей
+                    {t("fieldsButton")}
                 </Button>
             </DialogTrigger>
 
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Поля</DialogTitle>
-                    <DialogDescription>
-                        Выберите, что показывать в карточках и/или таблице.
-                    </DialogDescription>
+                    <DialogTitle>{t("fieldsTitle")}</DialogTitle>
+                    <DialogDescription>{t("fieldsDescription")}</DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-4">
                     {showCards && (
                         <div>
-                            <div className="mb-2 text-sm font-medium">Карточки</div>
+                            <div className="mb-2 text-sm font-medium">{t("cards")}</div>
                             <div className="flex flex-wrap gap-2">
                                 {resolvedCardFields.map((field) => {
                                     const active = visibleCardFieldKeys.includes(field.key);
@@ -75,7 +75,7 @@ export function EntityListVisibilitySettingsDialog({
 
                     {showTable && (
                         <div>
-                            <div className="mb-2 text-sm font-medium">Таблица</div>
+                            <div className="mb-2 text-sm font-medium">{t("table")}</div>
                             <div className="flex flex-wrap gap-2">
                                 {resolvedTableColumns.map((col) => {
                                     const active = visibleTableColumnKeys.includes(col.key);
