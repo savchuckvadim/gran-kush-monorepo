@@ -105,9 +105,9 @@
             "consent": {
                 "pending": "Awaiting the member's consent",
                 "pendingHint": "This email already had a PafPaf account. Documents and the signature stay hidden, and cannot be replaced, until the account owner confirms the membership from the email we sent.",
-                "resend": "Resend email",
+                "resend": "Resend consent email",
                 "resending": "Sending…",
-                "resent": "The email has been sent again",
+                "resent": "The consent email has been sent again",
                 "resendError": "Could not send the email"
             },
             "documents": "Documents",

@@ -65,24 +65,28 @@ export function MemberList() {
         { enabled: isMetaReady || !hasFieldParams }
     );
 
+    // The "awaiting consent" badge travels with the name: table column and card title alike
+    const withConsentBadge = (member: CrmMemberListItem, name: string) =>
+        member.consentStatus === "pending" ? (
+            <span className="inline-flex flex-wrap items-center gap-2">
+                {name}
+                <span
+                    data-slot="badge"
+                    className="rounded-md border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-xs font-normal text-amber-700"
+                >
+                    {t("consent.pending")}
+                </span>
+            </span>
+        ) : (
+            name
+        );
+
     const tableColumns = [
         {
             key: "name",
             header: t("columns.name"),
             cell: (member: CrmMemberListItem) =>
-                member.consentStatus === "pending" ? (
-                    <span className="inline-flex flex-wrap items-center gap-2">
-                        {member.name} {member.surname ?? ""}
-                        <span
-                            data-slot="badge"
-                            className="rounded-md border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-xs text-amber-700"
-                        >
-                            {t("consent.pending")}
-                        </span>
-                    </span>
-                ) : (
-                    `${member.name} ${member.surname ?? ""}`
-                ),
+                withConsentBadge(member, `${member.name} ${member.surname ?? ""}`),
         },
         {
             key: "email",
@@ -153,7 +157,12 @@ export function MemberList() {
                 router.push(makeMemberPath(member.id));
             }}
             // a card opens by itself: no «Open profile» row in it
-            cardTitle={(member) => `${member.name} ${member.surname ?? ""}`.trim() || member.email}
+            cardTitle={(member) =>
+                withConsentBadge(
+                    member,
+                    `${member.name} ${member.surname ?? ""}`.trim() || member.email
+                )
+            }
             defaultVisibleCardFieldKeys={["email", "phone", "status"]}
             isCardClickable
             onCardClick={(member) => router.push(makeMemberPath(member.id))}

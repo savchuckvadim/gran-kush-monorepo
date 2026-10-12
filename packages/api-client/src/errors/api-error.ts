@@ -70,14 +70,27 @@ export async function parseApiErrorFromResponse(response: Response): Promise<Api
 type OpenApiResult<T> = {
     response: Response;
     data?: T;
+    error?: unknown;
 };
 
 /**
  * Throws {@link ApiClientError} with parsed message if `response.ok` is false.
  * Returns `data` when OK (caller should still validate shape if needed).
+ *
+ * openapi-fetch has already read the body of a failed response into `error` (a 401 that the
+ * auth middleware let through after a refresh attempt lands here too); reading the response
+ * again would fail and the message would degrade to "Request failed".
  */
 export async function assertOpenApiOk<T>(result: OpenApiResult<T>): Promise<T> {
     if (!result.response.ok) {
+        if (result.error !== undefined) {
+            throw new ApiClientError(
+                formatApiErrorMessage(result.error as ApiErrorBody),
+                result.response.status,
+                result.response.statusText,
+                result.error
+            );
+        }
         throw await parseApiErrorFromResponse(result.response);
     }
     return result.data as T;

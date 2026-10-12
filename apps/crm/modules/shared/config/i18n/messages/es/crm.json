@@ -105,9 +105,9 @@
             "consent": {
                 "pending": "Pendiente de la confirmación del socio",
                 "pendingHint": "Este email ya tenía cuenta en PafPaf. Los documentos y la firma no se muestran ni se pueden sustituir hasta que el titular de la cuenta confirme la membresía desde el email que le enviamos.",
-                "resend": "Reenviar email",
+                "resend": "Reenviar email de consentimiento",
                 "resending": "Enviando…",
-                "resent": "El email se ha enviado de nuevo",
+                "resent": "El email de consentimiento se ha enviado de nuevo",
                 "resendError": "No se pudo enviar el email"
             },
             "documents": "Documentos",

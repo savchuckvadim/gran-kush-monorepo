@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { CheckCircle2, Loader2, ShieldOff } from "lucide-react";
 
-import { getApiErrorMessage } from "@workspace/api-client/core";
+import { ApiClientError, getApiErrorMessage } from "@workspace/api-client/core";
 import { Button, Card, FieldInput, Switch } from "@workspace/ui";
 
 import {
@@ -34,6 +34,14 @@ export function MemberConsentPage({ token }: { token: string }) {
         retry: false,
     });
 
+    // 401 here means the password did not match the account, not a lost session
+    const showError = (error: unknown) =>
+        setServerError(
+            error instanceof ApiClientError && error.status === 401
+                ? t("errors.wrongPassword")
+                : getApiErrorMessage(error)
+        );
+
     const confirm = useMutation({
         mutationFn: () =>
             confirmMemberConsent(token, {
@@ -41,11 +49,11 @@ export function MemberConsentPage({ token }: { token: string }) {
                 shareDocumentIds: Array.from(sharedDocuments),
                 shareSignature,
             }),
-        onError: (error) => setServerError(getApiErrorMessage(error)),
+        onError: showError,
     });
     const decline = useMutation({
         mutationFn: () => declineMemberConsent(token, { password }),
-        onError: (error) => setServerError(getApiErrorMessage(error)),
+        onError: showError,
     });
     const busy = confirm.isPending || decline.isPending;
 
