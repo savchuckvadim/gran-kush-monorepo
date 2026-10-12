@@ -415,7 +415,9 @@
     display: none;
 }
 
-:root[data-skin="infierno"] [data-slot="brand-name"][data-lettering] > :not([data-slot="brand-lettering"]) {
+:root[data-skin="infierno"]
+    [data-slot="brand-name"][data-lettering]
+    > :not([data-slot="brand-lettering"]) {
     display: none;
 }
 
