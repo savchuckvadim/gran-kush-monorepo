@@ -1492,6 +1492,97 @@ main,
     width: 100%;
 }
 
+/* A plan that cannot be bought yet (NEXT_PUBLIC_PLANS_PURCHASABLE unset): the button stays, inert,
+   and on hover or focus a glass note flashes over it — «coming soon, try it free». No hover on a
+   touch screen, so there the note stands under the button from the start. */
+
+.plan__soon {
+    position: relative;
+    margin-top: auto;
+}
+
+.plan__soon-btn {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.plan__soon-note {
+    position: absolute;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    z-index: 2;
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    padding: 16px 14px 14px;
+    border-radius: 22px;
+    text-align: center;
+    /* solid aurora, like the «for your club» badge: the plan's features lie right under it */
+    background: var(--aurora);
+    color: #fff;
+    box-shadow:
+        0 24px 50px -20px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px) scale(0.96);
+    transition:
+        opacity 0.25s var(--ease),
+        transform 0.5s var(--spring),
+        visibility 0s 0.25s;
+}
+
+.plan__soon-note p {
+    margin: 0;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.plan__soon:hover .plan__soon-note,
+.plan__soon:focus-within .plan__soon-note {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition:
+        opacity 0.25s var(--ease),
+        transform 0.5s var(--spring),
+        visibility 0s;
+    animation: soon-flash 0.7s var(--ease);
+}
+
+.plan__soon .plan__soon-note .lbtn {
+    width: auto;
+    margin-top: 0;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.16);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+@keyframes soon-flash {
+    0% {
+        filter: brightness(2.4) blur(4px);
+    }
+    55% {
+        filter: brightness(1.25) blur(0);
+    }
+    100% {
+        filter: none;
+    }
+}
+
+@media (hover: none) {
+    .plan__soon-note {
+        position: static;
+        margin-top: 12px;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        animation: none;
+    }
+}
+
 .calc {
     display: grid;
     gap: 12px;
@@ -1881,8 +1972,14 @@ main,
     .gauge .w2,
     .okdrop,
     .hint i,
-    .plan.is-reco::before {
+    .plan.is-reco::before,
+    .plan__soon:is(:hover, :focus-within) .plan__soon-note {
         animation: none;
+    }
+
+    .plan__soon-note {
+        transform: none;
+        transition: none;
     }
 }
 

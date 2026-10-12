@@ -68,7 +68,9 @@
         "members": "How many members does your club have?",
         "reco": "For {n} members we recommend <b>{plan}</b>.",
         "badge": "For your club",
-        "choose": "Choose {plan}"
+        "choose": "Choose {plan}",
+        "soon": "Coming soon! In the meantime, try it free",
+        "soonTry": "Try it free"
     },
     "footer": {
         "rights": "© {year} PafPaf · paf-paf.app",

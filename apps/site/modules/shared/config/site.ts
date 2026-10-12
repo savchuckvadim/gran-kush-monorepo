@@ -28,4 +28,7 @@ export const absoluteUrl = (path: string) => new URL(path, SERVER_URL).toString(
 
 export const CRM_URL = process.env.NEXT_PUBLIC_CRM_URL || "https://crm.paf-paf.app";
 
+/** Until Stripe approves the account the plans are «coming soon»; `true` opens the plan buttons. */
+export const PLANS_PURCHASABLE = process.env.NEXT_PUBLIC_PLANS_PURCHASABLE === "true";
+
 export const MEMBER_URL = process.env.NEXT_PUBLIC_MEMBER_URL || "https://club.paf-paf.app";

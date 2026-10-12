@@ -1,11 +1,12 @@
 "use client";
 
-import { type CSSProperties, useState, useSyncExternalStore } from "react";
+import { type CSSProperties, useId, useState, useSyncExternalStore } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { type PlanView, recommendPlan, withVat } from "@/modules/entities/plan/model";
-import { DEFAULT_LOCALE, isLocale } from "@/modules/shared/config/locales";
+import { DEFAULT_LOCALE, isLocale, type Locale } from "@/modules/shared/config/locales";
 import { crmHref } from "@/modules/shared/config/routes";
+import { PLANS_PURCHASABLE } from "@/modules/shared/config/site";
 
 import { LiquidButton } from "../ui/liquid-button";
 
@@ -118,6 +119,34 @@ export const PricingTeaserPlans = ({ plans }: { plans: PlanView[] }) => {
     );
 };
 
+/**
+ * A plan that cannot be bought yet: the button stays, greyed and inert; on hover, focus or tap the
+ * «coming soon — try it free» note flashes over it and leads to the plain sign-up (free period).
+ */
+const SoonCta = ({ planName, locale }: { planName: string; locale: Locale }) => {
+    const t = useTranslations("pricing");
+    const noteId = useId();
+    return (
+        <div className="plan__soon">
+            <span
+                className="lbtn glass plan__soon-btn"
+                role="button"
+                tabIndex={0}
+                aria-disabled="true"
+                aria-describedby={noteId}
+            >
+                <span>{t("choose", { plan: planName })}</span>
+            </span>
+            <div className="plan__soon-note">
+                <p id={noteId}>{t("soon")}</p>
+                <LiquidButton href={crmHref(locale, "register")} variant="glass" size="sm">
+                    {t("soonTry")}
+                </LiquidButton>
+            </div>
+        </div>
+    );
+};
+
 export const PricingCalculator = ({
     plans,
     defaultMembers,
@@ -194,16 +223,20 @@ export const PricingCalculator = ({
                                     <li key={feature}>{feature}</li>
                                 ))}
                             </ul>
-                            <LiquidButton
-                                href={crmHref(
-                                    siteLocale,
-                                    "register",
-                                    yearly ? plan.yearlyCode : plan.monthlyCode
-                                )}
-                                variant={plan.highlight ? "primary" : "glass"}
-                            >
-                                {t("choose", { plan: plan.name })}
-                            </LiquidButton>
+                            {PLANS_PURCHASABLE ? (
+                                <LiquidButton
+                                    href={crmHref(
+                                        siteLocale,
+                                        "register",
+                                        yearly ? plan.yearlyCode : plan.monthlyCode
+                                    )}
+                                    variant={plan.highlight ? "primary" : "glass"}
+                                >
+                                    {t("choose", { plan: plan.name })}
+                                </LiquidButton>
+                            ) : (
+                                <SoonCta planName={plan.name} locale={siteLocale} />
+                            )}
                         </article>
                     );
                 })}
