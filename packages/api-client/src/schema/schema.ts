@@ -775,23 +775,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/auth/member/check": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Check if user exists (for Member registration) */
-        post: operations["MemberRegistration_checkUserExists"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/lk/auth/member/register": {
         parameters: {
             query?: never;
@@ -3077,30 +3060,6 @@ export interface components {
             refreshToken: string;
             user: components["schemas"]["MemberUserInfoDto"];
         };
-        CheckUserExistsDto: {
-            /** @example user@example.com */
-            email: string;
-        };
-        CheckUserExistsResponseDto: {
-            /** @example true */
-            exists: boolean;
-            /**
-             * @description false для pending_claim аккаунтов (пароль ещё не установлен)
-             * @example true
-             */
-            hasPassword: boolean;
-            /**
-             * @description Количество membership-мостов (порталов, где user является member)
-             * @example 1
-             */
-            memberships: number;
-            /**
-             * @description Количество порталов, где user является employee
-             * @example 0
-             */
-            employments: number;
-            message?: string;
-        };
         DynamicMemberRegistrationDto: {
             /** @example user@example.com */
             email: string;
@@ -5320,8 +5279,6 @@ export type SchemaMemberLogoutResponseDto = components['schemas']['MemberLogoutR
 export type SchemaMemberMembershipDto = components['schemas']['MemberMembershipDto'];
 export type SchemaMemberMeResponseDto = components['schemas']['MemberMeResponseDto'];
 export type SchemaMemberAuthResponseDto = components['schemas']['MemberAuthResponseDto'];
-export type SchemaCheckUserExistsDto = components['schemas']['CheckUserExistsDto'];
-export type SchemaCheckUserExistsResponseDto = components['schemas']['CheckUserExistsResponseDto'];
 export type SchemaDynamicMemberRegistrationDto = components['schemas']['DynamicMemberRegistrationDto'];
 export type SchemaRegisteredUserInfoDto = components['schemas']['RegisteredUserInfoDto'];
 export type SchemaRegisterMemberResponseDto = components['schemas']['RegisterMemberResponseDto'];
@@ -7202,30 +7159,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": Record<string, never>;
-                };
-            };
-        };
-    };
-    MemberRegistration_checkUserExists: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CheckUserExistsDto"];
-            };
-        };
-        responses: {
-            /** @description User existence check result */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CheckUserExistsResponseDto"];
                 };
             };
         };

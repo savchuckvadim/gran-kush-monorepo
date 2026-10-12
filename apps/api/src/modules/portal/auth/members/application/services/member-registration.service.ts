@@ -96,13 +96,6 @@ export class MemberRegistrationService {
     }
 
     /**
-     * Проверка существования пользователя
-     */
-    async checkUserExists(email: string) {
-        return this.membersService.checkUserExists(email);
-    }
-
-    /**
      * Подтверждение email
      */
     async confirmEmail(token: string): Promise<MemberConfirmEmailResponseDto> {

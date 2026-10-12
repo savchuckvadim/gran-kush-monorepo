@@ -17,8 +17,6 @@ import { ApiErrorResponse } from "@common/decorators/response/api-error-response
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { type ContentLocale, RequestLocale } from "@common/i18n";
 import { AllowUnconfirmed } from "@modules/portal/auth/members/api/decorators/allow-unconfirmed.decorator";
-import { CheckUserExistsDto } from "@modules/portal/auth/members/api/dto/check-user-exists.dto";
-import { CheckUserExistsResponseDto } from "@modules/portal/auth/members/api/dto/check-user-exists-response.dto";
 import { RegisterMemberResponseDto } from "@modules/portal/auth/members/api/dto/register-member-response.dto";
 import { MemberRegistrationService } from "@modules/portal/auth/members/application/services/member-registration.service";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
@@ -60,16 +58,6 @@ export class MemberRegistrationController {
             FormPurpose.public_registration,
             locale
         );
-    }
-
-    @Post("check")
-    @Public()
-    @ApiOperation({ summary: "Check if user exists (for Member registration)" })
-    @ApiSuccessResponse(CheckUserExistsResponseDto, {
-        description: "User existence check result",
-    })
-    async checkUserExists(@Body() dto: CheckUserExistsDto): Promise<CheckUserExistsResponseDto> {
-        return this.memberRegistrationService.checkUserExists(dto.email);
     }
 
     @Post("register")

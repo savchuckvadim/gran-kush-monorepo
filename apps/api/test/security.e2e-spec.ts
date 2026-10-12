@@ -163,7 +163,7 @@ describe("Security (e2e)", () => {
     });
 
     describe("known holes (it.failing until fixed)", () => {
-        it.failing(
+        it(
             "TASK-662: accepting an invitation for an existing account does not log it in",
             async () => {
                 const invitation = await as(clubA)
@@ -214,14 +214,14 @@ describe("Security (e2e)", () => {
             }
         );
 
-        it.failing("TASK-665: POST /lk/auth/member/check is gone", async () => {
+        it("TASK-665: POST /lk/auth/member/check is gone", async () => {
             const res = await request(app.getHttpServer())
                 .post("/lk/auth/member/check")
                 .send({ email: clubB.ownerEmail });
             expect(res.status).toBe(404);
         });
 
-        it.failing(
+        it(
             "TASK-666 M1: a stage of another club cannot be edited through my funnel",
             async () => {
                 const funnel = (code: string) => ({

@@ -136,10 +136,16 @@ export class OrderStagesService {
                         isTerminalFailure: stage.isTerminalFailure ?? false,
                     };
                     if (stage.id) {
-                        await tx.stage.update({
-                            where: { id: stage.id },
+                        // только стадии этой воронки: id чужого клуба не должен ничего менять
+                        const { count } = await tx.stage.updateMany({
+                            where: { id: stage.id, stageCategoryId: category.id },
                             data,
                         });
+                        if (count === 0) {
+                            throw new NotFoundException(
+                                `Stage "${stage.id}" is not in this funnel`
+                            );
+                        }
                     } else {
                         await tx.stage.create({
                             data: { ...data, stageCategoryId: category.id },

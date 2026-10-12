@@ -70,26 +70,27 @@ export function InviteAcceptPage({ token }: { token: string }) {
                 </p>
 
                 <div className="mt-4 space-y-3">
-                    {!info.accountExists ? (
-                        <>
-                            <FieldInput
-                                label="Имя"
-                                value={firstName}
-                                onChange={(e) => setFirstName(e.target.value)}
-                            />
-                            <FieldInput
-                                label="Пароль"
-                                type="password"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                        </>
-                    ) : (
+                    {!info.accountExists && (
+                        <FieldInput
+                            label="Имя"
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                        />
+                    )}
+                    {/* the admin holds the link too: an existing account proves itself with its password */}
+                    {info.accountExists && (
                         <p className="text-sm text-muted-foreground">
-                            У вас уже есть аккаунт — просто подтвердите присоединение.
+                            У вас уже есть аккаунт — введите его пароль, чтобы присоединиться.
                         </p>
                     )}
+                    <FieldInput
+                        label={info.accountExists ? "Пароль вашего аккаунта" : "Пароль"}
+                        type="password"
+                        required
+                        autoComplete={info.accountExists ? "current-password" : "new-password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
 
                     {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
@@ -99,10 +100,7 @@ export function InviteAcceptPage({ token }: { token: string }) {
                             setError(null);
                             acceptMutation.mutate();
                         }}
-                        disabled={
-                            acceptMutation.isPending ||
-                            (!info.accountExists && password.length === 0)
-                        }
+                        disabled={acceptMutation.isPending || password.length === 0}
                     >
                         {acceptMutation.isPending ? "Принятие…" : "Принять приглашение"}
                     </Button>

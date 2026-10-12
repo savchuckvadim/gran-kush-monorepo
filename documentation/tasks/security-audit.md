@@ -354,7 +354,7 @@ emailConfirmed: false` (`portal-registration.service.ts:83-84`) — без по�
 тест переводится в обычный). Сканеры — `.github/workflows/security.yml` (pnpm audit, gitleaks,
 Semgrep, Trivy, ZAP по OpenAPI).
 
-### TASK-662: приглашение сотрудника перехватывает чужой аккаунт `[ ]` P0 — critical
+### TASK-662: приглашение сотрудника перехватывает чужой аккаунт `[~]` P0 — critical
 
 - `invitations.service.ts:115-158`: `accept()` зовёт `ensureUserWithPassword`; для аккаунта с
   паролем тот возвращает пользователя **без проверки пароля**
@@ -364,13 +364,13 @@ Semgrep, Trivy, ZAP по OpenAPI).
   CRM копирует ссылку в буфер) — комментарий «владение адресом доказано» неверен.
 - JWT глобальные: с `X-Portal-Slug` клуба жертвы `MembershipGuard` даёт роль жертвы там,
   включая владельца.
-- [ ] Существующий аккаунт — только через логин: `accept` для `passwordHash !== null` отвечает
-      401/409 и не выдаёт токенов; приглашение принимается залогиненным пользователем
-      (`POST …/accept` под member/employee JWT) или после ввода пароля с проверкой
+- [x] Существующий аккаунт доказывает, что он его: `accept` для `passwordHash !== null`
+      сверяет `dto.password` с хешем (bcrypt) и без совпадения отвечает 401, токенов не выдаёт
+      (`fix/security-662-666`, 2026-10-12); страница принятия в CRM требует пароль аккаунта
 - [ ] Приглашение уходит письмом (шаблон в `modules/mail`), токен показывается один раз при
       создании и не возвращается в списке
 - [ ] `CreateInvitationDto.role` не принимает `portal_owner`
-- [ ] e2e `invite-accept-existing-account` (есть как `it.failing`)
+- [x] e2e `invite-accept-existing-account` — обычный тест в `security.e2e-spec.ts`
 
 ### TASK-663: клуб присоединяет любой аккаунт по email и читает его документы `[ ]` P0 — critical
 
@@ -409,7 +409,7 @@ Semgrep, Trivy, ZAP по OpenAPI).
 - [ ] e2e `pending-claim-register`, `pre-hijack` — после фикса dynamic import в тестах
       (сейчас `/lk/auth/member/register` в jest отвечает 500, см. память `gran-kush-dev-infra`)
 
-### TASK-665: перебор email `[ ]` P1 — high
+### TASK-665: перебор email `[~]` P1 — high
 
 - `POST /lk/auth/member/check` (`member-registration.controller.ts:65-73`,
   `user-prisma.repository.ts:46-64`) отдаёт `exists`, `hasPassword`, число членств и работ по
@@ -418,14 +418,17 @@ Semgrep, Trivy, ZAP по OpenAPI).
 - Такие же утечки: флаги `claimed`/`accountCreated`/`isNewUser` в ответах, 409 на регистрации,
   «Email not confirmed» до проверки пароля (`member-auth.service.ts:29`,
   `employee-auth.service.ts:30`).
-- [ ] Удалить `/lk/auth/member/check` (e2e `member-check-removed` есть как `it.failing`)
+- [x] `/lk/auth/member/check` удалён вместе с `checkUserExists` и
+      `UserRepository.findMembershipCountsByEmail` (`fix/security-662-666`, 2026-10-12; e2e
+      `member-check-removed` — обычный тест)
 - [ ] Один ответ на все случаи регистрации и входа; «не подтверждён» — только после верного пароля
 
-### TASK-666: тенант-скоуп и валидация — средние `[ ]` P1
+### TASK-666: тенант-скоуп и валидация — средние `[~]` P1
 
-- [ ] **M1** `order-stages.service.ts:139-140`: `stage.update({ where: { id } })` без проверки
-      категории — правка стадии чужого клуба. `updateMany({ id, stageCategoryId })` + count = 1.
-      e2e `foreign-stage-id` (есть как `it.failing`)
+- [x] **M1** `order-stages.service.ts`: `stage.update({ where: { id } })` без проверки категории
+      позволял править стадию чужого клуба — теперь `updateMany({ id, stageCategoryId })`, при
+      count = 0 — 404 и откат транзакции (`fix/security-662-666`, 2026-10-12; e2e
+      `foreign-stage-id` — обычный тест)
 - [ ] **M2** перевыпуск QR не гасит старый: проверка не сравнивает `encryptedCode`
       (`qr-codes.service.ts:185-217`), id тот же — старый код живёт 90 дней вопреки описанию
       `lk-qr-codes.controller.ts:51`. Сравнивать код или версию

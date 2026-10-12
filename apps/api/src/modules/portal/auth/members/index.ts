@@ -16,8 +16,6 @@ export { MemberAuthService } from "./application/services/member-auth.service";
 export { MemberRegistrationService } from "./application/services/member-registration.service";
 
 // DTOs
-export { CheckUserExistsDto } from "./api/dto/check-user-exists.dto";
-export { CheckUserExistsResponseDto } from "./api/dto/check-user-exists-response.dto";
 export { MemberAuthResponseDto } from "./api/dto/member-auth-response.dto";
 export { MemberLoginDto } from "./api/dto/member-login.dto";
 export { MemberLogoutResponseDto } from "./api/dto/member-logout-response.dto";

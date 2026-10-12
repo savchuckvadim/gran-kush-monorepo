@@ -150,33 +150,6 @@ export class MembersService {
         };
     }
 
-    async checkUserExists(email: string): Promise<{
-        exists: boolean;
-        hasPassword: boolean;
-        memberships: number;
-        employments: number;
-        message?: string;
-    }> {
-        const counts = await this.userRepository.findMembershipCountsByEmail(email);
-
-        if (!counts) {
-            return {
-                exists: false,
-                hasPassword: false,
-                memberships: 0,
-                employments: 0,
-            };
-        }
-
-        return {
-            exists: true,
-            ...counts,
-            message: counts.hasPassword
-                ? undefined
-                : "Account was created by a club and awaits claiming",
-        };
-    }
-
     /**
      * CRM: сотрудник добавляет member по email.
      * Если User с таким email нет — создаётся аккаунт со статусом pending_claim

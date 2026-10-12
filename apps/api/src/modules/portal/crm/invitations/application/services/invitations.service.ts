@@ -3,10 +3,13 @@ import {
     ConflictException,
     Injectable,
     NotFoundException,
+    UnauthorizedException,
 } from "@nestjs/common";
 
 import { EmployeeInvitation, InvitationStatus } from "@prisma/client";
 import { AccountProvisioningService } from "@users/application/services/account-provisioning.service";
+import { UserRepository } from "@users/domain/repositories/user-repository.interface";
+import * as bcrypt from "bcrypt";
 import { randomBytes, randomUUID } from "crypto";
 
 import { PrismaService } from "@common/prisma/prisma.service";
@@ -28,7 +31,8 @@ export class InvitationsService {
         private readonly prisma: PrismaService,
         private readonly accountProvisioning: AccountProvisioningService,
         private readonly employeesService: EmployeesService,
-        private readonly employeeAuthService: EmployeeAuthService
+        private readonly employeeAuthService: EmployeeAuthService,
+        private readonly userRepository: UserRepository
     ) {}
 
     async create(
@@ -117,6 +121,19 @@ export class InvitationsService {
         dto: { password?: string; fields?: Record<string, unknown> }
     ): Promise<AcceptInvitationResponseDto> {
         const invitation = await this.getActiveByToken(token);
+
+        // Токен знает и админ, который выдал приглашение, поэтому для аккаунта с паролем
+        // принимающий доказывает, что аккаунт его, самим паролем — иначе приглашение на чужой email
+        // выдавало бы токены этого аккаунта (security-audit, TASK-662)
+        const existing = await this.userRepository.findByEmail(invitation.email);
+        if (existing?.passwordHash) {
+            const matches = dto.password
+                ? await bcrypt.compare(dto.password, existing.passwordHash)
+                : false;
+            if (!matches) {
+                throw new UnauthorizedException("Invalid password for this account");
+            }
+        }
 
         // Ссылка-приглашение пришла на email → владение адресом подтверждено
         const { user } = await this.accountProvisioning.ensureUserWithPassword(
