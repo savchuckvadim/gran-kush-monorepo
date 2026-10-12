@@ -38,10 +38,10 @@ export default function proxy(request: NextRequest) {
     const second = segments[1]; // portal slug or "auth"
     const third = segments[2]; // "crm", "auth", "scan", "member", ...
 
-    // Access-cookie живёт столько же, сколько access-токен; живой refresh-cookie означает,
-    // что клиент восстановит сессию через /crm/auth/refresh
-    const hasAccessCookie = request.cookies.has(CRM_ACCESS_COOKIE);
-    const hasAuthCookie = hasAccessCookie || request.cookies.has(CRM_REFRESH_COOKIE);
+    // Any auth cookie lets the request through to the CRM: a stale access cookie is refreshed by
+    // the client, and a dead session gets a 401 there and is sent to the login page.
+    const hasAuthCookie =
+        request.cookies.has(CRM_ACCESS_COOKIE) || request.cookies.has(CRM_REFRESH_COOKIE);
 
     // [locale]/[portal]/crm/* and [locale]/[portal]/scan — protected
     if (
@@ -56,12 +56,11 @@ export default function proxy(request: NextRequest) {
         }
     }
 
-    // [locale]/[portal]/auth/* — redirect to CRM only with a live access cookie. A refresh cookie
-    // alone may be dead (revoked by a password reset), and bouncing on it looped /auth ↔ /crm.
-    // The login page itself finds a session that refresh can restore and leaves for the club.
-    if (second && second !== "auth" && third === "auth" && hasAccessCookie) {
-        return NextResponse.redirect(new URL(`/${locale}/${second}/crm`, request.url));
-    }
+    // [locale]/[portal]/auth/* is never bounced back to the CRM here. A cookie says nothing about the
+    // session behind it: a deactivated employee keeps a valid-looking access cookie for up to a day,
+    // the CRM answers 401 and sends them to login, and a redirect back on that cookie looped
+    // /auth ↔ /crm hundreds of times a second until the rate limiter stopped it. The login page
+    // asks the API itself (my-portals) and leaves for the club only when the session is alive.
 
     return intlMiddleware(request);
 }
