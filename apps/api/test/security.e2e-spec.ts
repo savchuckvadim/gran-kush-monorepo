@@ -163,23 +163,20 @@ describe("Security (e2e)", () => {
     });
 
     describe("known holes (it.failing until fixed)", () => {
-        it(
-            "TASK-662: accepting an invitation for an existing account does not log it in",
-            async () => {
-                const invitation = await as(clubA)
-                    .post("/crm/settings/invitations")
-                    .send({ email: clubB.ownerEmail, role: "admin" });
-                expect(invitation.status).toBe(201);
+        it("TASK-662: accepting an invitation for an existing account does not log it in", async () => {
+            const invitation = await as(clubA)
+                .post("/crm/settings/invitations")
+                .send({ email: clubB.ownerEmail, role: "admin" });
+            expect(invitation.status).toBe(201);
 
-                const accepted = await request(app.getHttpServer())
-                    .post(`/public/invitations/${invitation.body.token as string}/accept`)
-                    .send({ password: "Attacker123" });
+            const accepted = await request(app.getHttpServer())
+                .post(`/public/invitations/${invitation.body.token as string}/accept`)
+                .send({ password: "Attacker123" });
 
-                expect([401, 403, 409]).toContain(accepted.status);
-                expect(accepted.body).not.toHaveProperty("accessToken");
-                expect(accepted.body).not.toHaveProperty("refreshToken");
-            }
-        );
+            expect([401, 403, 409]).toContain(accepted.status);
+            expect(accepted.body).not.toHaveProperty("accessToken");
+            expect(accepted.body).not.toHaveProperty("refreshToken");
+        });
 
         it.failing(
             "TASK-663: adding an existing account by email does not expose its documents",
@@ -221,47 +218,44 @@ describe("Security (e2e)", () => {
             expect(res.status).toBe(404);
         });
 
-        it(
-            "TASK-666 M1: a stage of another club cannot be edited through my funnel",
-            async () => {
-                const funnel = (code: string) => ({
-                    code,
-                    name: code,
-                    stages: [{ name: `${code} first`, sortOrder: 0, semantic: "NEW" }],
-                });
-                expect(
-                    (
-                        await as(clubA)
-                            .post("/crm/settings/entities/order/stage-categories")
-                            .send(funnel("sec_a"))
-                    ).status
-                ).toBe(201);
-                expect(
-                    (
-                        await as(clubB)
-                            .post("/crm/settings/entities/order/stage-categories")
-                            .send(funnel("sec_b"))
-                    ).status
-                ).toBe(201);
+        it("TASK-666 M1: a stage of another club cannot be edited through my funnel", async () => {
+            const funnel = (code: string) => ({
+                code,
+                name: code,
+                stages: [{ name: `${code} first`, sortOrder: 0, semantic: "NEW" }],
+            });
+            expect(
+                (
+                    await as(clubA)
+                        .post("/crm/settings/entities/order/stage-categories")
+                        .send(funnel("sec_a"))
+                ).status
+            ).toBe(201);
+            expect(
+                (
+                    await as(clubB)
+                        .post("/crm/settings/entities/order/stage-categories")
+                        .send(funnel("sec_b"))
+                ).status
+            ).toBe(201);
 
-                const stageA = await prisma.stage.findFirst({
-                    where: { stageCategory: { portalId: await portalId(clubA), code: "sec_a" } },
-                });
-                const categoryB = await prisma.stageCategory.findFirst({
-                    where: { portalId: await portalId(clubB), code: "sec_b" },
-                });
-                if (!stageA || !categoryB) throw new Error("funnels missing");
+            const stageA = await prisma.stage.findFirst({
+                where: { stageCategory: { portalId: await portalId(clubA), code: "sec_a" } },
+            });
+            const categoryB = await prisma.stageCategory.findFirst({
+                where: { portalId: await portalId(clubB), code: "sec_b" },
+            });
+            if (!stageA || !categoryB) throw new Error("funnels missing");
 
-                const res = await as(clubB)
-                    .patch(`/crm/settings/entities/order/stage-categories/${categoryB.id}`)
-                    .send({
-                        stages: [{ id: stageA.id, name: "pwned", sortOrder: 0, semantic: "NEW" }],
-                    });
+            const res = await as(clubB)
+                .patch(`/crm/settings/entities/order/stage-categories/${categoryB.id}`)
+                .send({
+                    stages: [{ id: stageA.id, name: "pwned", sortOrder: 0, semantic: "NEW" }],
+                });
 
-                expect([400, 404]).toContain(res.status);
-                const after = await prisma.stage.findUnique({ where: { id: stageA.id } });
-                expect(after?.name).toBe(stageA.name);
-            }
-        );
+            expect([400, 404]).toContain(res.status);
+            const after = await prisma.stage.findUnique({ where: { id: stageA.id } });
+            expect(after?.name).toBe(stageA.name);
+        });
     });
 });
