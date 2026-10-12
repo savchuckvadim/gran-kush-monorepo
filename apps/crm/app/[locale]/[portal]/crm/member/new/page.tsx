@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import { CreateMemberForm } from "@/modules/features";
+import { MemberCreate } from "@/modules/widgets/member";
 
 export default async function CrmMemberNewPage() {
     const t = await getTranslations("crm.members.create");
@@ -12,7 +12,7 @@ export default async function CrmMemberNewPage() {
                 <p className="mt-1 mb-6 max-w-2xl text-sm text-muted-foreground">
                     {t("description")}
                 </p>
-                <CreateMemberForm />
+                <MemberCreate />
             </div>
         </div>
     );

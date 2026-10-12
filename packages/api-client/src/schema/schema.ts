@@ -2205,7 +2205,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Список ссылок-форм портала (admin) */
+        /** Ссылки-формы портала постранично, со статусом и онлайном (admin) */
         get: operations["CrmRegistrationLinks_list"];
         put?: never;
         /** Создать ссылку-форму регистрации member (admin) */
@@ -2231,6 +2231,23 @@ export interface paths {
         head?: never;
         /** Обновить/деактивировать ссылку-форму (admin) */
         patch: operations["CrmRegistrationLinks_update"];
+        trace?: never;
+    };
+    "/crm/settings/registration-links/{id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Отозвать ссылку-форму навсегда (admin) */
+        post: operations["CrmRegistrationLinks_revoke"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/public/reg-links/{token}": {
@@ -2261,6 +2278,40 @@ export interface paths {
         put?: never;
         /** Регистрация member по ссылке-форме (создаёт/клеймит аккаунт + вступление) */
         post: operations["PublicRegistrationLinks_register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/reg-links/{token}/ping": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Heartbeat зрителя анкеты: публичная страница шлёт раз в ~30 с, пока открыта */
+        post: operations["PublicRegistrationLinks_ping"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/reg-links/{token}/leave": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Зритель закрыл анкету (beacon при уходе со страницы) */
+        post: operations["PublicRegistrationLinks_leave"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4906,6 +4957,14 @@ export interface components {
             /** @example eyJhbGciOi... */
             refreshToken: string;
         };
+        RegistrationLinkPrefillDto: {
+            /** @example socio@example.com */
+            email?: string;
+            /** @description Значения полей анкеты по fieldKey */
+            fields?: {
+                [key: string]: unknown;
+            };
+        };
         CreateRegistrationLinkDto: {
             /** @example Стойка на входе */
             name: string;
@@ -4913,26 +4972,45 @@ export interface components {
              * @default public_link
              * @enum {string}
              */
-            kind: "public_link" | "kiosk";
+            kind: "public_link" | "kiosk" | "personal";
             /** @example 2026-12-31T23:59:59.000Z */
             expiresAt?: string;
             /** @example 100 */
             maxUses?: number;
+            /** @description Предзаполнение анкеты. Хранится в ссылке, а не в её адресе: персональные данные не попадают в URL и логи */
+            prefill?: components["schemas"]["RegistrationLinkPrefillDto"];
+        };
+        RegistrationLinkCreatedByDto: {
+            employeeId: string;
+            /** @description Email сотрудника, выдавшего ссылку */
+            email: string;
         };
         RegistrationLinkDto: {
             id: string;
             name: string;
             /** @enum {string} */
-            kind: "public_link" | "kiosk";
+            kind: "public_link" | "kiosk" | "personal";
             token: string;
             isActive: boolean;
+            /** @enum {string} */
+            status: "ready" | "revoked" | "disabled" | "expired" | "exhausted";
             expiresAt?: string | null;
             maxUses?: number | null;
             usesCount: number;
+            /** @description Сколько человек сейчас смотрят анкету по ссылке */
+            online: number;
+            /** @description Анкета открывается с предзаполненными полями */
+            hasPrefill: boolean;
+            createdBy?: components["schemas"]["RegistrationLinkCreatedByDto"] | null;
+            revokedAt?: string | null;
             createdAt: string;
         };
         RegistrationLinkListResponseDto: {
             links: components["schemas"]["RegistrationLinkDto"][];
+            total: number;
+            page: number;
+            limit: number;
+            totalPages: number;
         };
         UpdateRegistrationLinkDto: {
             name?: string;
@@ -4949,6 +5027,8 @@ export interface components {
             portalDisplayName: string;
             /** @description Схема формы public_registration портала */
             schema: Record<string, never>;
+            /** @description Значения, с которыми открывается анкета (личная ссылка) */
+            prefill?: components["schemas"]["RegistrationLinkPrefillDto"] | null;
         };
         RegisterViaLinkDto: {
             /** @example user@example.com */
@@ -4968,6 +5048,17 @@ export interface components {
             portalSlug: string;
             /** @description true если аккаунт создан/заклеймлен этим запросом */
             accountCreated: boolean;
+        };
+        RegistrationLinkPresenceDto: {
+            /**
+             * @description Случайный id вкладки зрителя, живёт в sessionStorage публичной страницы
+             * @example 7f3c2a9e-5b1d-4c8e-9a2f-1d3e5b7c9a0b
+             */
+            viewerId: string;
+        };
+        RegistrationLinkPresenceResponseDto: {
+            /** @description Сколько человек сейчас смотрят анкету */
+            online: number;
         };
         EntityRecordStageDto: {
             id: string;
@@ -5326,13 +5417,17 @@ export type SchemaRevokeInvitationResponseDto = components['schemas']['RevokeInv
 export type SchemaPublicInvitationInfoDto = components['schemas']['PublicInvitationInfoDto'];
 export type SchemaAcceptInvitationDto = components['schemas']['AcceptInvitationDto'];
 export type SchemaAcceptInvitationResponseDto = components['schemas']['AcceptInvitationResponseDto'];
+export type SchemaRegistrationLinkPrefillDto = components['schemas']['RegistrationLinkPrefillDto'];
 export type SchemaCreateRegistrationLinkDto = components['schemas']['CreateRegistrationLinkDto'];
+export type SchemaRegistrationLinkCreatedByDto = components['schemas']['RegistrationLinkCreatedByDto'];
 export type SchemaRegistrationLinkDto = components['schemas']['RegistrationLinkDto'];
 export type SchemaRegistrationLinkListResponseDto = components['schemas']['RegistrationLinkListResponseDto'];
 export type SchemaUpdateRegistrationLinkDto = components['schemas']['UpdateRegistrationLinkDto'];
 export type SchemaPublicRegistrationLinkInfoDto = components['schemas']['PublicRegistrationLinkInfoDto'];
 export type SchemaRegisterViaLinkDto = components['schemas']['RegisterViaLinkDto'];
 export type SchemaRegisterViaLinkResponseDto = components['schemas']['RegisterViaLinkResponseDto'];
+export type SchemaRegistrationLinkPresenceDto = components['schemas']['RegistrationLinkPresenceDto'];
+export type SchemaRegistrationLinkPresenceResponseDto = components['schemas']['RegistrationLinkPresenceResponseDto'];
 export type SchemaEntityRecordStageDto = components['schemas']['EntityRecordStageDto'];
 export type SchemaEntityRecordStatusDto = components['schemas']['EntityRecordStatusDto'];
 export type SchemaEntityRecordFieldDto = components['schemas']['EntityRecordFieldDto'];
@@ -12262,7 +12357,14 @@ export interface operations {
     };
     CrmRegistrationLinks_list: {
         parameters: {
-            query?: never;
+            query?: {
+                page?: number;
+                limit?: number;
+                sortBy?: string;
+                sortOrder?: "asc" | "desc";
+                /** @description Только ссылки в этом статусе */
+                status?: "ready" | "revoked" | "disabled" | "expired" | "exhausted";
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -12276,6 +12378,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RegistrationLinkListResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
             /** @description Unauthorized */
@@ -12411,6 +12522,55 @@ export interface operations {
             };
         };
     };
+    CrmRegistrationLinks_revoke: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegistrationLinkDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
     PublicRegistrationLinks_info: {
         parameters: {
             query?: never;
@@ -12486,6 +12646,85 @@ export interface operations {
             };
             /** @description Conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    PublicRegistrationLinks_ping: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegistrationLinkPresenceDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegistrationLinkPresenceResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    PublicRegistrationLinks_leave: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegistrationLinkPresenceDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegistrationLinkPresenceResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -774,6 +774,90 @@
                     "description": "Abrir la galería de temas sin salir de la página."
                 }
             }
+        },
+        "registrationLinks": {
+            "title": "Enlaces de alta",
+            "button": "Enlace de alta",
+            "manage": "Todos los enlaces emitidos",
+            "tabs": {
+                "issue": "Emitir",
+                "issued": "Emitidos"
+            },
+            "shared": {
+                "title": "Enlace general del club",
+                "hint": "La persona rellena el formulario del club por su cuenta. Sirve para un chat, la web o un QR en la entrada.",
+                "none": "Todavía no hay enlace general.",
+                "create": "Crear enlace general",
+                "defaultName": "Enlace general"
+            },
+            "url": {
+                "copy": "Copiar",
+                "copied": "Enlace copiado",
+                "open": "Abrir en otra pestaña",
+                "qr": "Código QR",
+                "hideQr": "Ocultar QR"
+            },
+            "create": {
+                "title": "Nuevo enlace",
+                "name": "Nombre",
+                "namePlaceholder": "Recepción",
+                "kind": "Tipo",
+                "maxUses": "Límite de usos",
+                "maxUsesPlaceholder": "sin límite",
+                "submit": "Crear enlace",
+                "submitting": "Creando…",
+                "created": "Enlace creado"
+            },
+            "kinds": {
+                "public_link": "Público",
+                "kiosk": "Tablet en recepción",
+                "personal": "Personal"
+            },
+            "filters": {
+                "all": "Todos",
+                "ready": "Listos",
+                "exhausted": "Agotados",
+                "expired": "Caducados",
+                "disabled": "Desactivados",
+                "revoked": "Revocados"
+            },
+            "statuses": {
+                "ready": "listo",
+                "exhausted": "agotado",
+                "expired": "caducado",
+                "disabled": "desactivado",
+                "revoked": "revocado"
+            },
+            "row": {
+                "uses": "Usado: {used} de {max}",
+                "usesUnlimited": "Usado: {used}, sin límite",
+                "online": "Viéndolo ahora: {count}",
+                "prefill": "con el formulario prellenado",
+                "createdBy": "Emitido por {email}",
+                "createdAt": "{date}",
+                "expiresAt": "hasta {date}"
+            },
+            "actions": {
+                "revoke": "Revocar",
+                "revokeConfirm": "¿Revocar seguro?",
+                "revoked": "Enlace revocado",
+                "disable": "Desactivar",
+                "enable": "Activar"
+            },
+            "empty": "No hay enlaces",
+            "pager": {
+                "prev": "Atrás",
+                "next": "Siguiente",
+                "page": "{page} de {total}"
+            },
+            "personal": {
+                "open": "Abrir como enlace en otra pestaña",
+                "hint": "Crea un enlace personal de un solo uso con lo ya introducido y abre el formulario",
+                "name": "Para {who}",
+                "fallbackWho": "un nuevo socio",
+                "created": "Enlace personal creado: el formulario está abierto en otra pestaña",
+                "popupBlocked": "El navegador bloqueó la pestaña: el enlace está copiado, pégalo tú"
+            }
         }
     }
 }

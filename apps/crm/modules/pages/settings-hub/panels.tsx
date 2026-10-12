@@ -58,10 +58,11 @@ export function MembersPanel() {
     const link = useLocalizedLink();
     const fields = useEntityFields(MEMBER);
     const statuses = useMemberStatusItems(true);
-    const links = useRegistrationLinks();
+    // ready links for the tile's list, the whole set only for its size
+    const readyLinks = useRegistrationLinks({ status: "ready", limit: 5 });
+    const allLinks = useRegistrationLinks({ limit: 1 });
 
     const activeFields = (fields.data ?? []).filter((field) => field.isActive && !field.hidden);
-    const activeLinks = (links.data ?? []).filter((item) => item.isActive);
     const entityPage = `${ROUTES.CRM_SETTINGS_ENTITIES}/${MEMBER}`;
 
     return (
@@ -99,10 +100,10 @@ export function MembersPanel() {
                 icon={Link2}
                 title={t("registrationLinks.title")}
                 description={t("registrationLinks.description")}
-                metric={activeLinks.length}
-                metricLabel={t("registrationLinks.metric", { total: links.data?.length ?? 0 })}
-                items={activeLinks.map((item) => item.name)}
-                loading={links.isLoading}
+                metric={readyLinks.data?.total ?? 0}
+                metricLabel={t("registrationLinks.metric", { total: allLinks.data?.total ?? 0 })}
+                items={(readyLinks.data?.links ?? []).map((item) => item.name)}
+                loading={readyLinks.isLoading}
                 href={link(ROUTES.CRM_SETTINGS_REGISTRATION_LINKS)}
             />
             <SettingsTile

@@ -774,6 +774,90 @@
                     "description": "Open the theme gallery without leaving the page."
                 }
             }
+        },
+        "registrationLinks": {
+            "title": "Sign-up links",
+            "button": "Sign-up link",
+            "manage": "All issued links",
+            "tabs": {
+                "issue": "Issue",
+                "issued": "Issued"
+            },
+            "shared": {
+                "title": "Club's shared link",
+                "hint": "People fill in the club's form themselves. Good for a chat, a website or a QR at the door.",
+                "none": "There is no shared link yet.",
+                "create": "Create a shared link",
+                "defaultName": "Shared link"
+            },
+            "url": {
+                "copy": "Copy",
+                "copied": "Link copied",
+                "open": "Open in a new tab",
+                "qr": "QR code",
+                "hideQr": "Hide QR"
+            },
+            "create": {
+                "title": "New link",
+                "name": "Name",
+                "namePlaceholder": "Front desk",
+                "kind": "Type",
+                "maxUses": "Usage limit",
+                "maxUsesPlaceholder": "no limit",
+                "submit": "Create link",
+                "submitting": "Creating…",
+                "created": "Link created"
+            },
+            "kinds": {
+                "public_link": "Public",
+                "kiosk": "Front desk tablet",
+                "personal": "Personal"
+            },
+            "filters": {
+                "all": "All",
+                "ready": "Ready",
+                "exhausted": "Used up",
+                "expired": "Expired",
+                "disabled": "Disabled",
+                "revoked": "Revoked"
+            },
+            "statuses": {
+                "ready": "ready",
+                "exhausted": "used up",
+                "expired": "expired",
+                "disabled": "disabled",
+                "revoked": "revoked"
+            },
+            "row": {
+                "uses": "Used: {used} of {max}",
+                "usesUnlimited": "Used: {used}, no limit",
+                "online": "Viewing now: {count}",
+                "prefill": "with a pre-filled form",
+                "createdBy": "Issued by {email}",
+                "createdAt": "{date}",
+                "expiresAt": "until {date}"
+            },
+            "actions": {
+                "revoke": "Revoke",
+                "revokeConfirm": "Revoke for sure?",
+                "revoked": "Link revoked",
+                "disable": "Disable",
+                "enable": "Enable"
+            },
+            "empty": "No links",
+            "pager": {
+                "prev": "Back",
+                "next": "Next",
+                "page": "{page} of {total}"
+            },
+            "personal": {
+                "open": "Open as a link in a new tab",
+                "hint": "Creates a personal one-time link with what is already entered and opens the form",
+                "name": "For {who}",
+                "fallbackWho": "a new member",
+                "created": "Personal link created — the form is open in a new tab",
+                "popupBlocked": "The browser blocked the tab — the link is copied, paste it yourself"
+            }
         }
     }
 }

@@ -16,7 +16,11 @@ import {
 } from "@workspace/dynamic-forms";
 import { Button, Card, FieldInput } from "@workspace/ui";
 
-import { getPublicRegistrationLink, registerViaLink } from "@/modules/entities/registration-links";
+import {
+    getPublicRegistrationLink,
+    registerViaLink,
+    useRegistrationLinkPresence,
+} from "@/modules/entities/registration-links";
 
 // Documents and the signature are attached to an existing member later, so the public form
 // asks only for data fields — the same rule as the CRM's own "new member" form.
@@ -34,9 +38,9 @@ const PASSWORD_KEY = "__password";
 export function JoinByLinkPage({ token }: { token: string }) {
     const t = useTranslations("join");
 
-    const [email, setEmail] = useState("");
+    const [typedEmail, setTypedEmail] = useState<string | null>(null);
     const [password, setPassword] = useState("");
-    const [values, setValues] = useState<Record<string, unknown>>({});
+    const [edited, setEdited] = useState<Record<string, unknown>>({});
     const [errors, setErrors] = useState<FieldErrors>({});
     const [serverError, setServerError] = useState<string | null>(null);
 
@@ -51,6 +55,15 @@ export function JoinByLinkPage({ token }: { token: string }) {
         [info.data]
     );
 
+    // A personal link opens with what the club already typed; what the person types wins.
+    const prefill = info.data?.prefill;
+    const email = typedEmail ?? prefill?.email ?? "";
+    const values = useMemo(() => ({ ...prefill?.fields, ...edited }), [prefill, edited]);
+
+    // The club sees how many people have the form open; stops once the form is sent.
+    const [sent, setSent] = useState(false);
+    useRegistrationLinkPresence(token, Boolean(info.data) && !sent);
+
     const register = useMutation({
         mutationFn: () =>
             registerViaLink(token, {
@@ -58,6 +71,7 @@ export function JoinByLinkPage({ token }: { token: string }) {
                 password: password || undefined,
                 fields: toSubmitPayload(values),
             }),
+        onSuccess: () => setSent(true),
         onError: (error) => setServerError(getApiErrorMessage(error)),
     });
 
@@ -126,7 +140,7 @@ export function JoinByLinkPage({ token }: { token: string }) {
                             required
                             autoComplete="email"
                             value={email}
-                            onChange={(event) => setEmail(event.target.value)}
+                            onChange={(event) => setTypedEmail(event.target.value)}
                             error={errors[EMAIL_KEY]}
                         />
                         <FieldInput
@@ -145,7 +159,7 @@ export function JoinByLinkPage({ token }: { token: string }) {
                         values={values}
                         errors={errors}
                         onChange={(fieldKey, value) =>
-                            setValues((prev) => ({ ...prev, [fieldKey]: value }))
+                            setEdited((prev) => ({ ...prev, [fieldKey]: value }))
                         }
                         disabled={register.isPending}
                     />

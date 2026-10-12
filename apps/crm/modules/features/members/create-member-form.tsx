@@ -27,11 +27,23 @@ const FILE_TYPES = new Set(["file", "signature", "document"]);
 
 const emailSchema = z.string().trim().email();
 
+/** What is typed so far — for actions composed next to the form (a personal sign-up link). */
+export interface CreateMemberDraft {
+    email: string;
+    fields: Record<string, unknown>;
+    who: string;
+}
+
 /**
  * Новый участник из CRM. Поля и обязательность — из формы «Добавление в CRM» этого клуба
  * (purpose crm_create, у каждого портала своя); API проверяет данные по той же форме.
  */
-export function CreateMemberForm() {
+export function CreateMemberForm({
+    renderDraftAction,
+}: {
+    /** Slot next to the email field, fed with what is typed so far. */
+    renderDraftAction?: (draft: CreateMemberDraft) => React.ReactNode;
+} = {}) {
     const t = useTranslations("crm.members.create");
     const router = useRouter();
     const localizedLink = useLocalizedLink();
@@ -107,6 +119,17 @@ export function CreateMemberForm() {
                     error={emailError}
                     helperText={t("emailHelp")}
                 />
+                {renderDraftAction && (
+                    <div className="flex items-start pt-6 md:justify-end">
+                        {renderDraftAction({
+                            email,
+                            fields: toSubmitPayload(values),
+                            who: [values.first_name, values.last_name]
+                                .filter((part) => typeof part === "string" && part.trim())
+                                .join(" "),
+                        })}
+                    </div>
+                )}
             </div>
 
             <DynamicFormFields

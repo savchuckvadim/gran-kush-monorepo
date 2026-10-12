@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import { NewMemberButton } from "@/modules/features";
+import { NewMemberButton, RegistrationLinkActions } from "@/modules/features";
 import { MemberList } from "@/modules/widgets/member";
 
 export default async function CrmMembersPage() {
@@ -13,7 +13,10 @@ export default async function CrmMembersPage() {
                     <h1 className="text-2xl font-semibold">{t("title")}</h1>
                     <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
                 </div>
-                <NewMemberButton />
+                <div className="flex items-center gap-2">
+                    <RegistrationLinkActions />
+                    <NewMemberButton />
+                </div>
             </div>
 
             <MemberList />
