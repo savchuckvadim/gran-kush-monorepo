@@ -210,14 +210,13 @@ export class MembersService {
         return this.memberRepository.findByIdForPortal(id, portalId);
     }
 
-    /** Без tenant-скоупа — только для внутренних сервисов (QR и т.п.) */
-    async findAllByPortal(
+    async findPageByPortal(
         portalId: string,
-        limit?: number,
-        skip?: number,
-        filters?: MemberListFilters
-    ) {
-        return this.memberRepository.findAllByPortal(portalId, limit, skip, filters);
+        filters: MemberListFilters,
+        take: number,
+        skip: number
+    ): Promise<{ items: MemberWithRelations[]; total: number }> {
+        return this.memberRepository.findPageByPortal(portalId, filters, take, skip);
     }
 
     async countByPortal(portalId: string): Promise<number> {

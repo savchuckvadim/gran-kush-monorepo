@@ -1,20 +1,20 @@
 import { MemberJoinSource } from "@prisma/client";
 
+import type { EntityListFilter } from "@modules/portal/crm/entity-fields/domain/entity-filter";
 import { MemberWithRelations } from "@modules/portal/crm/members/domain/entity/member.entity";
 
-export type MemberListFilters = {
+/** `q` ищет ещё по email и номеру участника, не только по полям анкеты. */
+export type MemberListFilters = EntityListFilter & {
     statusItemId?: string;
-    filterFieldKey?: string;
-    filterValue?: string;
 };
 
 export abstract class MemberRepository {
-    abstract findAllByPortal(
+    abstract findPageByPortal(
         portalId: string,
-        limit?: number,
-        skip?: number,
-        filters?: MemberListFilters
-    ): Promise<MemberWithRelations[]>;
+        filters: MemberListFilters,
+        take: number,
+        skip: number
+    ): Promise<{ items: MemberWithRelations[]; total: number }>;
     abstract findByIdForPortal(id: string, portalId: string): Promise<MemberWithRelations | null>;
     /** Без tenant-скоупа — только для внутренних сервисов (QR и т.п.) */
     abstract findByUserAndPortal(

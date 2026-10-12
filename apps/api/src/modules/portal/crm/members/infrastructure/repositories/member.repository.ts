@@ -5,6 +5,12 @@ import { MemberJoinSource, Prisma } from "@prisma/client";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 import {
+    EntityRecordFilterBuilder,
+    escapeLike,
+    recordTextContains,
+    searchWords,
+} from "@modules/portal/crm/entity-fields/infrastructure/entity-record-filter.builder";
+import {
     MemberWithRelations,
     memberWithRelationsInclude,
 } from "@modules/portal/crm/members/domain/entity/member.entity";
@@ -13,88 +19,57 @@ import {
     MemberRepository,
 } from "@modules/portal/crm/members/domain/repositories/member-repository.interface";
 
-function parseFilterJsonValue(raw: string): Prisma.InputJsonValue {
-    const trimmed = raw.trim();
-    if (trimmed === "true") {
-        return true;
-    }
-    if (trimmed === "false") {
-        return false;
-    }
-    const num = Number(trimmed);
-    if (trimmed !== "" && !Number.isNaN(num) && String(num) === trimmed) {
-        return num;
-    }
-    try {
-        return JSON.parse(trimmed) as Prisma.InputJsonValue;
-    } catch {
-        return trimmed;
-    }
-}
-
 @Injectable()
 export class MemberPrismaRepository implements MemberRepository {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly recordFilter: EntityRecordFilterBuilder
+    ) {}
 
-    async findAllByPortal(
+    async findPageByPortal(
         portalId: string,
-        limit: number = 100,
-        skip?: number,
-        filters?: MemberListFilters
-    ): Promise<MemberWithRelations[]> {
-        const where: Prisma.MemberWhereInput = { portalId };
+        filters: MemberListFilters,
+        take: number,
+        skip: number
+    ): Promise<{ items: MemberWithRelations[]; total: number }> {
+        const where = await this.listWhere(portalId, filters);
+        const [items, total] = await Promise.all([
+            this.prisma.member.findMany({
+                where,
+                take,
+                skip,
+                orderBy: { createdAt: "desc" },
+                include: memberWithRelationsInclude,
+            }),
+            this.prisma.member.count({ where }),
+        ]);
+        return { items, total };
+    }
 
-        const profileFilter: Prisma.EntityRecordWhereInput = {};
-        if (filters?.statusItemId) {
-            profileFilter.statusItemId = filters.statusItemId;
+    private async listWhere(
+        portalId: string,
+        filters: MemberListFilters
+    ): Promise<Prisma.MemberWhereInput> {
+        const profile = await this.recordFilter.conditions(
+            portalId,
+            ENTITY_DEFINITION_CODES.MEMBER,
+            filters.conditions
+        );
+        if (filters.statusItemId) {
+            profile.push({ statusItemId: filters.statusItemId });
         }
 
-        if (
-            filters?.filterFieldKey &&
-            filters.filterValue !== undefined &&
-            filters.filterValue !== ""
-        ) {
-            const memberDef = await this.prisma.entityDefinition.findUnique({
-                where: {
-                    portalId_code: {
-                        portalId,
-                        code: ENTITY_DEFINITION_CODES.MEMBER,
-                    },
-                },
-                select: { id: true },
-            });
-            if (memberDef) {
-                const def = await this.prisma.fieldDefinition.findFirst({
-                    where: {
-                        entityDefinitionId: memberDef.id,
-                        fieldKey: filters.filterFieldKey,
-                        showInFilters: true,
-                        isActive: true,
-                    },
-                    select: { id: true },
-                });
-                if (def) {
-                    profileFilter.fieldValues = {
-                        some: {
-                            fieldDefinitionId: def.id,
-                            valueJson: { equals: parseFilterJsonValue(filters.filterValue) },
-                        },
-                    };
-                }
-            }
+        const and: Prisma.MemberWhereInput[] = searchWords(filters.q).map((word) => ({
+            OR: [
+                { membershipNumber: { contains: escapeLike(word), mode: "insensitive" } },
+                { user: { email: { contains: escapeLike(word), mode: "insensitive" } } },
+                { profile: recordTextContains(word) },
+            ],
+        }));
+        if (profile.length > 0) {
+            and.push({ profile: { AND: profile } });
         }
-
-        if (Object.keys(profileFilter).length > 0) {
-            where.profile = profileFilter;
-        }
-
-        return this.prisma.member.findMany({
-            where,
-            take: limit,
-            skip,
-            orderBy: { createdAt: "desc" },
-            include: memberWithRelationsInclude,
-        });
+        return and.length > 0 ? { portalId, AND: and } : { portalId };
     }
 
     async countByPortal(portalId: string): Promise<number> {

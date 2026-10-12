@@ -13,6 +13,7 @@ import { PortalFieldSettingsService } from "@modules/portal/crm/entity-fields/ap
 import { ProvisionPortalFromTemplatesService } from "@modules/portal/crm/entity-fields/application/services/provision-portal-from-templates.service";
 import { StatusSetsService } from "@modules/portal/crm/entity-fields/application/services/status-sets.service";
 import { SystemLabelTranslationsBootstrap } from "@modules/portal/crm/entity-fields/application/services/system-label-translations.bootstrap";
+import { EntityRecordFilterBuilder } from "@modules/portal/crm/entity-fields/infrastructure/entity-record-filter.builder";
 
 @Module({
     imports: [PrismaModule],
@@ -28,6 +29,7 @@ import { SystemLabelTranslationsBootstrap } from "@modules/portal/crm/entity-fie
         OrderStagesService,
         StatusSetsService,
         SystemLabelTranslationsBootstrap,
+        EntityRecordFilterBuilder,
     ],
     exports: [
         ProvisionPortalFromTemplatesService,
@@ -39,6 +41,7 @@ import { SystemLabelTranslationsBootstrap } from "@modules/portal/crm/entity-fie
         FieldValuesService,
         OrderStagesService,
         StatusSetsService,
+        EntityRecordFilterBuilder,
     ],
 })
 export class EntityFieldsModule {}

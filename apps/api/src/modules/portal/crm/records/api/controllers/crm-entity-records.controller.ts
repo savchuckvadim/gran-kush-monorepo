@@ -1,8 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
-import { Req } from "@nestjs/common";
-import { ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
-
-import type { Request } from "express";
+import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { CurrentPrincipal } from "@common/decorators/auth/current-principal.decorator";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
@@ -21,6 +18,7 @@ import {
     CreateEntityRecordDto,
     DeleteRecordResponseDto,
     EntityRecordDto,
+    EntityRecordListQueryDto,
     EntityRecordListResponseDto,
     SetRecordStageDto,
     SetRecordStatusDto,
@@ -30,7 +28,7 @@ import {
 /**
  * Универсальный CRUD записей произвольных сущностей (смарт-процессы).
  * Системные сущности (member/employee/order/product) здесь read-only.
- * Фильтры по полям: ?fields[field_key]=value
+ * Фильтры: `q` (текст) и `filter` (JSON-массив условий по полям).
  */
 @ApiTags("CRM Entity Records (smart processes)")
 @Controller("crm/entities/:code/records")
@@ -39,42 +37,22 @@ export class CrmEntityRecordsController {
     constructor(private readonly recordsService: EntityRecordsService) {}
 
     @Get()
-    @ApiOperation({ summary: "Список записей сущности (пагинация, фильтры по FieldValue)" })
-    @ApiQuery({ name: "limit", required: false, type: Number })
-    @ApiQuery({ name: "skip", required: false, type: Number })
-    @ApiQuery({ name: "stageId", required: false, type: String })
-    @ApiQuery({ name: "statusItemId", required: false, type: String })
+    @ApiOperation({ summary: "Список записей сущности (пагинация, поиск, условия по полям)" })
     @ApiSuccessResponse(EntityRecordListResponseDto)
-    @ApiErrorResponse([401, 403, 404])
+    @ApiErrorResponse([400, 401, 403, 404])
     async list(
         @PortalId() portalId: string,
         @Param("code") code: string,
-        @Req() request: Request,
         @RequestLocale() locale: ContentLocale,
-        @Query("limit") limitRaw?: string,
-        @Query("skip") skipRaw?: string,
-        @Query("stageId") stageId?: string,
-        @Query("statusItemId") statusItemId?: string
+        @Query() query: EntityRecordListQueryDto
     ): Promise<EntityRecordListResponseDto> {
-        const limit = Math.min(Number.parseInt(limitRaw ?? "50", 10) || 50, 200);
-        const skip = Number.parseInt(skipRaw ?? "0", 10) || 0;
-
-        const rawFields = (request.query as Record<string, unknown>)["fields"];
-        const fields: Record<string, string> = {};
-        if (rawFields && typeof rawFields === "object" && !Array.isArray(rawFields)) {
-            for (const [key, value] of Object.entries(rawFields as Record<string, unknown>)) {
-                if (typeof value === "string") {
-                    fields[key] = value;
-                }
-            }
-        }
-
+        const { limit = 50, skip = 0, stageId, statusItemId, q, filter } = query;
         return this.recordsService.list(
             portalId,
             code,
             limit,
             skip,
-            { stageId, statusItemId, fields },
+            { stageId, statusItemId, q, conditions: filter },
             locale
         );
     }

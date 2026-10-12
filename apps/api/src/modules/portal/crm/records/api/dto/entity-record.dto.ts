@@ -1,6 +1,51 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional, IntersectionType } from "@nestjs/swagger";
 
-import { IsBoolean, IsObject, IsOptional, IsString } from "class-validator";
+import { Type } from "class-transformer";
+import {
+    IsBoolean,
+    IsInt,
+    IsObject,
+    IsOptional,
+    IsString,
+    IsUUID,
+    Max,
+    Min,
+} from "class-validator";
+
+import { EntityFilterDto } from "@modules/portal/crm/entity-fields/api/dto/entity-filter.dto";
+
+export class EntityRecordListPageDto {
+    @ApiPropertyOptional({ type: Number, default: 50, minimum: 1, maximum: 200 })
+    @IsOptional()
+    @Type(() => Number)
+    @IsInt()
+    @Min(1)
+    @Max(200)
+    limit?: number = 50;
+
+    @ApiPropertyOptional({ type: Number, default: 0, minimum: 0 })
+    @IsOptional()
+    @Type(() => Number)
+    @IsInt()
+    @Min(0)
+    skip?: number = 0;
+
+    @ApiPropertyOptional({ type: String, format: "uuid" })
+    @IsOptional()
+    @IsUUID()
+    stageId?: string;
+
+    @ApiPropertyOptional({ type: String, format: "uuid" })
+    @IsOptional()
+    @IsUUID()
+    statusItemId?: string;
+}
+
+/** GET /crm/entities/:code/records: limit/skip, стадия, статус, поиск `q` и условия `filter`. */
+export class EntityRecordListQueryDto extends IntersectionType(
+    EntityRecordListPageDto,
+    EntityFilterDto
+) {}
 
 export class EntityRecordFieldDto {
     @ApiProperty({ type: String, example: "title" })

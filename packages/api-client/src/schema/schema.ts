@@ -1200,7 +1200,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List members for CRM (Employee access required) */
+        /** List members for CRM: page, text search `q`, field conditions `filter`, status */
         get: operations["CrmMembers_list"];
         put?: never;
         /** Create member from CRM (email + dynamic fields, account claimed later) */
@@ -2325,7 +2325,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Список записей сущности (пагинация, фильтры по FieldValue) */
+        /** Список записей сущности (пагинация, поиск, условия по полям) */
         get: operations["CrmEntityRecords_list"];
         put?: never;
         /** Создать запись (валидация по форме crm_create). Роль: manager+ */
@@ -3343,6 +3343,8 @@ export interface components {
                 [key: string]: unknown;
             } | null;
             options: components["schemas"]["FormFieldOptionSchemaDto"][];
+            /** @description Only in filter fields: the field is in the list filter from the start */
+            showInFilters?: boolean;
         };
         MemberFormSchemaResponseDto: {
             /** @enum {string} */
@@ -3680,6 +3682,30 @@ export interface components {
             emailConfirmed: boolean;
             /** @example 2024-01-01T00:00:00.000Z */
             createdAt: string;
+        };
+        PaginatedResponse_CrmMemberDto: {
+            /** @description Array of items */
+            items: components["schemas"]["CrmMemberDto"][];
+            /**
+             * @description Total number of items
+             * @example 100
+             */
+            total: number;
+            /**
+             * @description Current page number
+             * @example 1
+             */
+            page: number;
+            /**
+             * @description Items per page
+             * @example 10
+             */
+            limit: number;
+            /**
+             * @description Total number of pages
+             * @example 10
+             */
+            totalPages: number;
         };
         CrmMemberDynamicFieldDto: {
             fieldKey: string;
@@ -5339,6 +5365,7 @@ export type SchemaCrmCreateMemberDto = components['schemas']['CrmCreateMemberDto
 export type SchemaCrmCreateMemberResponseDto = components['schemas']['CrmCreateMemberResponseDto'];
 export type SchemaCrmMemberStatusDto = components['schemas']['CrmMemberStatusDto'];
 export type SchemaCrmMemberDto = components['schemas']['CrmMemberDto'];
+export type SchemaPaginatedResponseCrmMemberDto = components['schemas']['PaginatedResponse_CrmMemberDto'];
 export type SchemaCrmMemberDynamicFieldDto = components['schemas']['CrmMemberDynamicFieldDto'];
 export type SchemaCrmMemberAccountDocumentDto = components['schemas']['CrmMemberAccountDocumentDto'];
 export type SchemaCrmMemberFullDto = components['schemas']['CrmMemberFullDto'];
@@ -8937,10 +8964,15 @@ export interface operations {
     CrmMembers_list: {
         parameters: {
             query?: {
+                page?: number;
                 limit?: number;
+                sortBy?: string;
+                sortOrder?: "asc" | "desc";
+                /** @description Поиск по тексту: каждое слово ищется в текстовых полях (без учёта регистра) */
+                q?: string;
+                /** @description Условия по полям — JSON-массив: [{"field":"city","op":"in","value":["madrid"]}]. Условия складываются через И */
+                filter?: string;
                 statusItemId?: string;
-                filterFieldKey?: string;
-                filterValue?: string;
             };
             header?: never;
             path?: never;
@@ -8948,13 +8980,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description List of members */
+            /** @description Page of members */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CrmMemberDto"][];
+                    "application/json": components["schemas"]["PaginatedResponse_CrmMemberDto"];
                 };
             };
             /** @description Bad Request */
@@ -12741,6 +12773,10 @@ export interface operations {
                 skip?: number;
                 stageId?: string;
                 statusItemId?: string;
+                /** @description Поиск по тексту: каждое слово ищется в текстовых полях (без учёта регистра) */
+                q?: string;
+                /** @description Условия по полям — JSON-массив: [{"field":"city","op":"in","value":["madrid"]}]. Условия складываются через И */
+                filter?: string;
             };
             header?: never;
             path: {
@@ -12757,6 +12793,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EntityRecordListResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
             /** @description Unauthorized */

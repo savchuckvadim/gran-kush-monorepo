@@ -77,6 +77,12 @@ export class MemberFormFieldSchemaItemDto {
     @ApiProperty({ type: [FormFieldOptionSchemaDto] })
     @Type(() => FormFieldOptionSchemaDto)
     options: FormFieldOptionSchemaDto[];
+
+    @ApiPropertyOptional({
+        type: Boolean,
+        description: "Only in filter fields: the field is in the list filter from the start",
+    })
+    showInFilters?: boolean;
 }
 
 /** Ответ `GET .../member/form-schema/:purpose`. */

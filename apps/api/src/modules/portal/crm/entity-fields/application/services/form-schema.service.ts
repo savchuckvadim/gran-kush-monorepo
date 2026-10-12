@@ -1,11 +1,18 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 
-import { FormPurpose, Prisma } from "@prisma/client";
+import { FormPurpose, PortalFieldType, Prisma } from "@prisma/client";
 
 import { ContentLocale, resolveLabel } from "@common/i18n";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { MemberLifecycleStatusItemDto } from "@modules/portal/crm/entity-fields/api/dto/entity-fields-settings-response.dto";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
+
+/** Файлы, подпись и документ по значению не отсеять. */
+const NOT_FILTERABLE: PortalFieldType[] = [
+    PortalFieldType.file,
+    PortalFieldType.signature,
+    PortalFieldType.document,
+];
 
 export type FormFieldSchemaItem = {
     fieldKey: string;
@@ -21,6 +28,8 @@ export type FormFieldSchemaItem = {
     validationJson: Prisma.JsonValue | null;
     defaultValueJson: Prisma.JsonValue | null;
     options: { valueKey: string; label: string; color: string | null; sortOrder: number }[];
+    /** Только у полей фильтра: показывать в фильтре списка сразу. */
+    showInFilters?: boolean;
 };
 
 @Injectable()
@@ -103,7 +112,10 @@ export class FormSchemaService {
         return { purpose, fields };
     }
 
-    /** Фильтруемые поля любой сущности портала. */
+    /**
+     * Поля, по которым можно отсеять список любой сущности портала. `showInFilters` — поле стоит
+     * в фильтре сразу, остальные сотрудник добавляет сам.
+     */
     async getFilterableFields(
         portalId: string,
         entityCode: string,
@@ -114,7 +126,7 @@ export class FormSchemaService {
             where: {
                 entityDefinitionId,
                 isActive: true,
-                showInFilters: true,
+                type: { notIn: NOT_FILTERABLE },
             },
             orderBy: { sortOrder: "asc" },
             include: {
@@ -141,6 +153,7 @@ export class FormSchemaService {
                 color: o.color,
                 sortOrder: o.sortOrder,
             })),
+            showInFilters: def.showInFilters,
         }));
     }
 

@@ -1,7 +1,10 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional, IntersectionType } from "@nestjs/swagger";
 
 import { UserDocumentSide } from "@prisma/client";
 import { IsBoolean, IsObject, IsOptional, IsString, IsUUID } from "class-validator";
+
+import { PaginationDto } from "@common/paginate/dto/pagination.dto";
+import { EntityFilterDto } from "@modules/portal/crm/entity-fields/api/dto/entity-filter.dto";
 
 export class CrmMemberStatusDto {
     @ApiProperty({ type: String })
@@ -85,6 +88,20 @@ export class CrmMemberFullDto extends CrmMemberDto {
     @ApiProperty({ example: "Notes", type: String, nullable: true })
     notes: string | null;
 }
+
+export class CrmMemberStatusFilterDto {
+    @ApiPropertyOptional({ type: String, format: "uuid" })
+    @IsOptional()
+    @IsUUID()
+    statusItemId?: string;
+}
+
+/** GET /crm/members: страница, поиск `q`, условия по полям анкеты и статус. */
+export class CrmMemberListQueryDto extends IntersectionType(
+    PaginationDto,
+    EntityFilterDto,
+    CrmMemberStatusFilterDto
+) {}
 
 /** PATCH /crm/members/:id/status — смена lifecycle-статуса. */
 export class CrmMemberStatusPatchDto {

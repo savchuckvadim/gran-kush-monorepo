@@ -27,8 +27,11 @@ import { UPLOAD_THROTTLE } from "@common/config/throttler/throttler.config";
 import { CurrentPrincipal } from "@common/decorators/auth/current-principal.decorator";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
+import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { type ContentLocale, RequestLocale } from "@common/i18n";
+import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
+import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import type { PortalPrincipal } from "@common/portal";
 import { mimeForStoragePath, UPLOAD_LIMITS } from "@common/upload";
 import { Admin, AdminGuard, RequireEmployeeJwt } from "@modules/portal/auth/employees";
@@ -44,6 +47,7 @@ import {
     CrmMemberDto,
     CrmMemberFieldsPatchDto,
     CrmMemberFullDto,
+    CrmMemberListQueryDto,
     CrmMemberStatusPatchDto,
 } from "../dto/crm-member.dto";
 import { CrmMemberFilesRequestDto } from "../dto/crm-member-documents.dto";
@@ -73,34 +77,30 @@ export class CrmMembersController {
     }
 
     @Get()
-    @ApiOperation({ summary: "List members for CRM (Employee access required)" })
-    @ApiQuery({ name: "limit", required: false, type: Number, example: 100 })
-    @ApiQuery({ name: "statusItemId", required: false, type: String })
-    @ApiQuery({ name: "filterFieldKey", required: false, type: String })
-    @ApiQuery({ name: "filterValue", required: false, type: String })
-    @ApiSuccessResponse(CrmMemberDto, {
-        description: "List of members",
-        isArray: true,
+    @ApiOperation({
+        summary: "List members for CRM: page, text search `q`, field conditions `filter`, status",
     })
+    @ApiPaginatedResponse(CrmMemberDto, { description: "Page of members" })
     @ApiErrorResponse([401, 403, 400])
     async list(
         @PortalId() portalId: string,
         @RequestLocale() locale: ContentLocale,
-        @Query("limit") limit?: string,
-        @Query("statusItemId") statusItemId?: string,
-        @Query("filterFieldKey") filterFieldKey?: string,
-        @Query("filterValue") filterValue?: string
-    ): Promise<CrmMemberDto[]> {
-        const parsedLimit = Number.parseInt(limit ?? "", 10);
-        const take = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 100;
-        const members = await this.membersService.findAllByPortal(portalId, take, undefined, {
-            ...(statusItemId && { statusItemId }),
-            ...(filterFieldKey &&
-                filterValue !== undefined &&
-                filterValue !== "" && { filterFieldKey, filterValue }),
-        });
+        @Query() query: CrmMemberListQueryDto
+    ): Promise<PaginatedResult<CrmMemberDto>> {
+        const { page = 1, limit = 10, q, filter, statusItemId } = query;
+        const { items, total } = await this.membersService.findPageByPortal(
+            portalId,
+            { q, conditions: filter, statusItemId },
+            limit,
+            PaginationUtil.getSkip(page, limit)
+        );
 
-        return members.map((m) => this.membersService.toCrmMemberListDto(m, locale));
+        return PaginationUtil.createPaginatedResult(
+            items.map((m) => this.membersService.toCrmMemberListDto(m, locale)),
+            total,
+            page,
+            limit
+        );
     }
 
     @Get("form-schema")

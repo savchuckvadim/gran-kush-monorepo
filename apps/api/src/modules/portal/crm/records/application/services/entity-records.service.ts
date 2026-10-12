@@ -11,17 +11,21 @@ import { ContentLocale, resolveLabel } from "@common/i18n";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { DynamicPayloadValidatorService } from "@modules/portal/crm/entity-fields/application/services/dynamic-payload-validator.service";
 import { FieldValuesService } from "@modules/portal/crm/entity-fields/application/services/field-values.service";
+import type { EntityListFilter } from "@modules/portal/crm/entity-fields/domain/entity-filter";
+import {
+    EntityRecordFilterBuilder,
+    recordTextContains,
+    searchWords,
+} from "@modules/portal/crm/entity-fields/infrastructure/entity-record-filter.builder";
 import {
     ENTITY_RECORD_INCLUDE,
     EntityRecordWithRelations,
 } from "@modules/portal/crm/records/infrastructure/prisma-includes/entity-record.include";
 
-export interface EntityRecordListFilters {
+export interface EntityRecordListFilters extends EntityListFilter {
     stageId?: string;
     statusItemId?: string;
     isActive?: boolean;
-    /** fieldKey → точное значение (JSON equals) */
-    fields?: Record<string, string>;
 }
 
 type RelationFieldsMap = Map<
@@ -51,7 +55,8 @@ export class EntityRecordsService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly validator: DynamicPayloadValidatorService,
-        private readonly fieldValues: FieldValuesService
+        private readonly fieldValues: FieldValuesService,
+        private readonly recordFilter: EntityRecordFilterBuilder
     ) {}
 
     private async getDefinition(portalId: string, code: string) {
@@ -90,33 +95,12 @@ export class EntityRecordsService {
         if (filters.statusItemId) where.statusItemId = filters.statusItemId;
         if (filters.isActive !== undefined) where.isActive = filters.isActive;
 
-        if (filters.fields && Object.keys(filters.fields).length > 0) {
-            const fieldDefs = await this.prisma.fieldDefinition.findMany({
-                where: {
-                    entityDefinitionId: def.id,
-                    fieldKey: { in: Object.keys(filters.fields) },
-                },
-                select: { id: true, fieldKey: true },
-            });
-            const defIdByKey = new Map(fieldDefs.map((d) => [d.fieldKey, d.id]));
-            const fieldFilters: Prisma.EntityRecordWhereInput[] = [];
-            for (const [fieldKey, rawValue] of Object.entries(filters.fields)) {
-                const fieldDefinitionId = defIdByKey.get(fieldKey);
-                if (!fieldDefinitionId) {
-                    continue;
-                }
-                fieldFilters.push({
-                    fieldValues: {
-                        some: {
-                            fieldDefinitionId,
-                            valueJson: { equals: this.parseFilterValue(rawValue) },
-                        },
-                    },
-                });
-            }
-            if (fieldFilters.length > 0) {
-                where.AND = fieldFilters;
-            }
+        const and = [
+            ...searchWords(filters.q).map(recordTextContains),
+            ...(await this.recordFilter.conditions(portalId, code, filters.conditions)),
+        ];
+        if (and.length > 0) {
+            where.AND = and;
         }
 
         const [rows, total] = await Promise.all([
@@ -490,16 +474,5 @@ export class EntityRecordsService {
             select: { id: true },
         });
         return stage?.id ?? null;
-    }
-
-    private parseFilterValue(raw: string): Prisma.InputJsonValue {
-        const trimmed = raw.trim();
-        if (trimmed === "true") return true;
-        if (trimmed === "false") return false;
-        const num = Number(trimmed);
-        if (trimmed !== "" && !Number.isNaN(num) && String(num) === trimmed) {
-            return num;
-        }
-        return trimmed;
     }
 }
