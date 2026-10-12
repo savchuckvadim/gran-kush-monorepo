@@ -57,7 +57,7 @@ export function PortalSwitcher({ className }: { className?: string }) {
                     className={cn("min-w-0 gap-2 pl-1.5 pr-2 font-semibold", className)}
                 >
                     <ClubBadge name={label} className="size-6 text-[0.625rem]" />
-                    <span className="max-w-44 truncate">{label}</span>
+                    <span className="max-w-16 truncate min-[400px]:max-w-24 sm:max-w-44">{label}</span>
                     <ChevronsUpDown className="text-muted-foreground" />
                 </Button>
             </DropdownMenuTrigger>

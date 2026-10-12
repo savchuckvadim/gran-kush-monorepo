@@ -11,8 +11,9 @@ import { PortalSwitcher } from "@/modules/widgets/portal-switcher";
 import { SubscriptionGate } from "@/modules/widgets/subscription-gate";
 
 import { AccountMenu } from "./account-menu";
+import { HeaderEcoToggle, HeaderSkinButton } from "./header-appearance";
+import { HeaderQuickActions } from "./header-quick-actions";
 import { HeaderThemeToggle } from "./header-theme-toggle";
-import { HeaderTray } from "./header-tray";
 import { SearchTrigger } from "./search-trigger";
 
 interface CrmShellProps {
@@ -49,10 +50,15 @@ function CrmHeader() {
                 </div>
             )}
 
-            <div className="ml-auto flex items-center gap-1 md:gap-2">
+            <div className="ml-auto flex items-center gap-0.5 md:gap-1.5">
                 <SearchTrigger />
-                <HeaderTray />
-                <HeaderThemeToggle />
+                <HeaderQuickActions />
+                {/* on a phone the header keeps only the door actions; appearance lives in the account card */}
+                <div className="hidden items-center sm:flex">
+                    <HeaderThemeToggle />
+                    <HeaderSkinButton />
+                    <HeaderEcoToggle />
+                </div>
                 <AccountMenu />
             </div>
         </header>

@@ -28,7 +28,8 @@
                     "employee": "Empleado"
                 },
                 "settings": "Ajustes",
-                "billing": "Plan y pago"
+                "billing": "Plan y pago",
+                "appearance": "Apariencia"
             },
             "club": {
                 "title": "Clubes",
@@ -46,7 +47,11 @@
                 "darkMode": "Modo oscuro"
             },
             "collapseMenu": "Contraer menú",
-            "pinMenu": "Fijar menú"
+            "pinMenu": "Fijar menú",
+            "quick": {
+                "invite": "Enlace para invitar a un socio",
+                "scanner": "Escáner de QR"
+            }
         },
         "subscription": {
             "pastDueTitle": "Suscripción vencida",

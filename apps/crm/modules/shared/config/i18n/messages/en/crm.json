@@ -28,7 +28,8 @@
                     "employee": "Employee"
                 },
                 "settings": "Settings",
-                "billing": "Plan and payment"
+                "billing": "Plan and payment",
+                "appearance": "Appearance"
             },
             "club": {
                 "title": "Clubs",
@@ -46,7 +47,11 @@
                 "darkMode": "Dark mode"
             },
             "collapseMenu": "Collapse menu",
-            "pinMenu": "Pin menu"
+            "pinMenu": "Pin menu",
+            "quick": {
+                "invite": "Member invitation link",
+                "scanner": "QR code scanner"
+            }
         },
         "subscription": {
             "pastDueTitle": "Subscription past due",

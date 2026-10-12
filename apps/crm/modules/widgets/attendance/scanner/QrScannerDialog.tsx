@@ -42,6 +42,9 @@ type ScanTab = "camera" | "manual";
 interface QrScannerDialogProps {
     /** Option B: если задан — диалог открывается автоматически с этим кодом */
     autoScanCode?: string;
+    /** Открыт сразу (кнопка сканера в шапке); после закрытия страница убирает свой параметр. */
+    autoOpen?: boolean;
+    onClosed?: () => void;
 }
 
 function normalizeScannedPayload(raw: string): string {
@@ -83,7 +86,7 @@ function normalizeScannedPayload(raw: string): string {
     return trimmed;
 }
 
-export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
+export function QrScannerDialog({ autoScanCode, autoOpen, onClosed }: QrScannerDialogProps = {}) {
     const router = useRouter();
     const getLocalizedPath = useLocalizedLink();
 
@@ -97,7 +100,7 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
     const qrPreview = useQrPreview();
     const qrScan = useQrScan();
 
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(Boolean(autoOpen));
     const [step, setStep] = useState<ScanStep>("scan");
     const [tab, setTab] = useState<ScanTab>("camera");
     // Перезапускаем QrCameraScanner, если декод пришел "кривой" (например, обрезанный строкой)
@@ -198,9 +201,10 @@ export function QrScannerDialog({ autoScanCode }: QrScannerDialogProps = {}) {
             setOpen(isOpen);
             if (!isOpen) {
                 handleReset();
+                onClosed?.();
             }
         },
-        [handleReset]
+        [handleReset, onClosed]
     );
 
     // Option B: автоматическое открытие с предзаполненным кодом

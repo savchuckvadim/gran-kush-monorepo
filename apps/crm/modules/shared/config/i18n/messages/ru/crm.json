@@ -28,7 +28,8 @@
                     "employee": "Сотрудник"
                 },
                 "settings": "Настройки",
-                "billing": "Тариф и оплата"
+                "billing": "Тариф и оплата",
+                "appearance": "Оформление"
             },
             "club": {
                 "title": "Клубы",
@@ -46,7 +47,11 @@
                 "darkMode": "Тёмный режим"
             },
             "collapseMenu": "Свернуть меню",
-            "pinMenu": "Закрепить меню"
+            "pinMenu": "Закрепить меню",
+            "quick": {
+                "invite": "Ссылка для приглашения участника",
+                "scanner": "Сканер QR-кода"
+            }
         },
         "subscription": {
             "pastDueTitle": "Подписка просрочена",
