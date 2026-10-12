@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Post, Query } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { RegistrationLink } from "@prisma/client";
@@ -11,24 +11,37 @@ import type { PortalPrincipal } from "@common/portal";
 import { Admin } from "@modules/portal/auth/employees";
 import { RequireEmployeeAdmin } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
 
-import { RegistrationLinksService } from "../../application/services/registration-links.service";
+import {
+    type RegistrationLinkListItem,
+    RegistrationLinksService,
+} from "../../application/services/registration-links.service";
 import {
     CreateRegistrationLinkDto,
     RegistrationLinkDto,
+    RegistrationLinkListQueryDto,
     RegistrationLinkListResponseDto,
     UpdateRegistrationLinkDto,
 } from "../dto/registration-link.dto";
 
-function toDto(link: RegistrationLink): RegistrationLinkDto {
+function toDto(
+    link: RegistrationLink & Partial<Pick<RegistrationLinkListItem, "online" | "createdByEmployee">>
+): RegistrationLinkDto {
     return {
         id: link.id,
         name: link.name,
         kind: link.kind,
         token: link.token,
         isActive: link.isActive,
+        status: RegistrationLinksService.statusOf(link),
         expiresAt: link.expiresAt?.toISOString() ?? null,
         maxUses: link.maxUses,
         usesCount: link.usesCount,
+        online: link.online ?? 0,
+        hasPrefill: link.prefillJson !== null && link.prefillJson !== undefined,
+        createdBy: link.createdByEmployee
+            ? { employeeId: link.createdByEmployee.id, email: link.createdByEmployee.user.email }
+            : null,
+        revokedAt: link.revokedAt?.toISOString() ?? null,
         createdAt: link.createdAt.toISOString(),
     };
 }
@@ -58,12 +71,16 @@ export class CrmRegistrationLinksController {
     }
 
     @Get()
-    @ApiOperation({ summary: "Список ссылок-форм портала (admin)" })
+    @ApiOperation({ summary: "Ссылки-формы портала постранично, со статусом и онлайном (admin)" })
     @ApiSuccessResponse(RegistrationLinkListResponseDto)
-    @ApiErrorResponse([401, 403])
-    async list(@PortalId() portalId: string): Promise<RegistrationLinkListResponseDto> {
-        const links = await this.registrationLinksService.listByPortal(portalId);
-        return { links: links.map(toDto) };
+    @ApiErrorResponse([400, 401, 403])
+    async list(
+        @PortalId() portalId: string,
+        @Query() query: RegistrationLinkListQueryDto
+    ): Promise<RegistrationLinkListResponseDto> {
+        const { page = 1, limit = 20, status } = query;
+        const result = await this.registrationLinksService.listPage(portalId, page, limit, status);
+        return { ...result, links: result.items.map(toDto) };
     }
 
     @Patch(":id")
@@ -76,6 +93,18 @@ export class CrmRegistrationLinksController {
         @PortalId() portalId: string
     ): Promise<RegistrationLinkDto> {
         const link = await this.registrationLinksService.update(id, portalId, dto);
+        return toDto(link);
+    }
+
+    @Post(":id/revoke")
+    @ApiOperation({ summary: "Отозвать ссылку-форму навсегда (admin)" })
+    @ApiSuccessResponse(RegistrationLinkDto)
+    @ApiErrorResponse([401, 403, 404])
+    async revoke(
+        @Param("id") id: string,
+        @PortalId() portalId: string
+    ): Promise<RegistrationLinkDto> {
+        const link = await this.registrationLinksService.revoke(id, portalId);
         return toDto(link);
     }
 }

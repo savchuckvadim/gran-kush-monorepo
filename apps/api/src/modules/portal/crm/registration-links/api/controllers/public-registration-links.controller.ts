@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Param, Post } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 
@@ -8,18 +8,24 @@ import { ApiErrorResponse } from "@common/decorators/response/api-error-response
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { type ContentLocale, RequestLocale } from "@common/i18n";
 
+import { RegistrationLinkPresenceService } from "../../application/services/registration-link-presence.service";
 import { RegistrationLinksService } from "../../application/services/registration-links.service";
 import {
     PublicRegistrationLinkInfoDto,
     RegisterViaLinkDto,
     RegisterViaLinkResponseDto,
+    RegistrationLinkPresenceDto,
+    RegistrationLinkPresenceResponseDto,
 } from "../dto/registration-link.dto";
 
 @ApiTags("Public Registration Links")
 @Controller("public/reg-links")
 @Public()
 export class PublicRegistrationLinksController {
-    constructor(private readonly registrationLinksService: RegistrationLinksService) {}
+    constructor(
+        private readonly registrationLinksService: RegistrationLinksService,
+        private readonly presence: RegistrationLinkPresenceService
+    ) {}
 
     @Get(":token")
     @Throttle(PUBLIC_TOKEN_THROTTLE)
@@ -45,5 +51,35 @@ export class PublicRegistrationLinksController {
         @Body() dto: RegisterViaLinkDto
     ): Promise<RegisterViaLinkResponseDto> {
         return this.registrationLinksService.registerViaLink(token, dto);
+    }
+
+    @Post(":token/ping")
+    @HttpCode(200)
+    @Throttle(PUBLIC_TOKEN_THROTTLE)
+    @ApiOperation({
+        summary: "Heartbeat зрителя анкеты: публичная страница шлёт раз в ~30 с, пока открыта",
+    })
+    @ApiSuccessResponse(RegistrationLinkPresenceResponseDto)
+    @ApiErrorResponse([400, 404])
+    async ping(
+        @Param("token") token: string,
+        @Body() dto: RegistrationLinkPresenceDto
+    ): Promise<RegistrationLinkPresenceResponseDto> {
+        // a dead link cannot have viewers; this also keeps the Redis keyspace to real tokens
+        await this.registrationLinksService.getActiveByToken(token);
+        return { online: await this.presence.heartbeat(token, dto.viewerId) };
+    }
+
+    @Post(":token/leave")
+    @HttpCode(200)
+    @Throttle(PUBLIC_TOKEN_THROTTLE)
+    @ApiOperation({ summary: "Зритель закрыл анкету (beacon при уходе со страницы)" })
+    @ApiSuccessResponse(RegistrationLinkPresenceResponseDto)
+    @ApiErrorResponse([400])
+    async leave(
+        @Param("token") token: string,
+        @Body() dto: RegistrationLinkPresenceDto
+    ): Promise<RegistrationLinkPresenceResponseDto> {
+        return { online: await this.presence.leave(token, dto.viewerId) };
     }
 }

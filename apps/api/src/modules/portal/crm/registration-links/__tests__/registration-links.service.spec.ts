@@ -40,12 +40,14 @@ describe("RegistrationLinksService — лимит использований", (
                 : jest.fn().mockResolvedValue({ id: "member-1" }),
         };
         const formSchemaService = { getFormSchema: jest.fn() };
+        const presence = { countOnlineMany: jest.fn().mockResolvedValue(new Map()) };
 
         const service = new RegistrationLinksService(
             prisma as unknown as PrismaService,
             accountProvisioning as never,
             joinPortalService as never,
-            formSchemaService as never
+            formSchemaService as never,
+            presence as never
         );
 
         return { service, prisma, joinPortalService };
@@ -103,5 +105,80 @@ describe("RegistrationLinksService — лимит использований", (
         expect(joinPortalService.joinPortal).toHaveBeenCalledWith(
             expect.objectContaining({ joinSource: MemberJoinSource.kiosk })
         );
+    });
+});
+
+describe("RegistrationLinksService.statusOf", () => {
+    const now = new Date("2026-10-12T12:00:00Z");
+    const base = { isActive: true, revokedAt: null, expiresAt: null, maxUses: null, usesCount: 0 };
+
+    it.each([
+        ["готова", {}, "ready"],
+        ["отозвана — важнее всего остального", { revokedAt: now, isActive: false }, "revoked"],
+        ["выключена", { isActive: false }, "disabled"],
+        ["истекла", { expiresAt: new Date("2026-10-11T00:00:00Z") }, "expired"],
+        ["исчерпана", { maxUses: 1, usesCount: 1 }, "exhausted"],
+        ["лимит ещё не выбран", { maxUses: 2, usesCount: 1 }, "ready"],
+    ])("%s", (_name, over, expected) => {
+        expect(RegistrationLinksService.statusOf({ ...base, ...over }, now)).toBe(expected);
+    });
+});
+
+describe("RegistrationLinksService.create — личная ссылка", () => {
+    const build = () => {
+        const prisma = {
+            entityDefinition: { findUnique: jest.fn().mockResolvedValue({ id: "def-1" }) },
+            registrationLink: {
+                create: jest
+                    .fn()
+                    .mockImplementation(({ data }) => Promise.resolve({ id: "l", ...data })),
+            },
+        };
+        const presence = { countOnlineMany: jest.fn() };
+        const service = new RegistrationLinksService(
+            prisma as unknown as PrismaService,
+            {} as never,
+            {} as never,
+            {} as never,
+            presence as never
+        );
+        return { service, prisma };
+    };
+
+    it("одноразовая, живёт неделю, хранит только email и непустые поля", async () => {
+        const { service, prisma } = build();
+        const before = Date.now();
+
+        await service.create(
+            {
+                name: "Для Ñandú",
+                kind: RegistrationLinkKind.personal,
+                prefill: {
+                    email: "  Socio@Example.com ",
+                    fields: { first_name: "Ñandú", last_name: "", phone: null, extra: undefined },
+                },
+            } as never,
+            PORTAL_ID,
+            "emp-1"
+        );
+
+        const { data } = prisma.registrationLink.create.mock.calls[0][0];
+        expect(data.maxUses).toBe(1);
+        expect(data.expiresAt.getTime()).toBeGreaterThanOrEqual(before + 6 * 24 * 60 * 60 * 1000);
+        expect(data.prefillJson).toEqual({
+            email: "socio@example.com",
+            fields: { first_name: "Ñandú" },
+        });
+    });
+
+    it("публичная ссылка без предзаполнения не пишет prefillJson", async () => {
+        const { service, prisma } = build();
+
+        await service.create({ name: "Стойка" } as never, PORTAL_ID, "emp-1");
+
+        const { data } = prisma.registrationLink.create.mock.calls[0][0];
+        expect(data.maxUses).toBeNull();
+        expect(data.expiresAt).toBeNull();
+        expect(data).not.toHaveProperty("prefillJson");
     });
 });

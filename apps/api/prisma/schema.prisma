@@ -95,6 +95,8 @@ enum StageSemantic {
 enum RegistrationLinkKind {
   public_link
   kiosk
+  /// Одноразовая ссылка для одного человека, с предзаполненной анкетой
+  personal
 }
 
 enum InvitationStatus {
@@ -933,6 +935,10 @@ model RegistrationLink {
   expiresAt           DateTime?            @map("expires_at")
   maxUses             Int?                 @map("max_uses")
   usesCount           Int                  @default(0) @map("uses_count")
+  /// Значения формы, с которыми открывается анкета (личная ссылка из CRM): {email?, fields?}
+  prefillJson         Json?                @map("prefill_json")
+  /// Отозвана сотрудником — в отличие от просто выключенной (is_active)
+  revokedAt           DateTime?            @map("revoked_at")
   createdByEmployeeId String?              @map("created_by_employee_id")
   createdAt           DateTime             @default(now()) @map("created_at")
   updatedAt           DateTime             @updatedAt @map("updated_at")
