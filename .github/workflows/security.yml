@@ -154,9 +154,13 @@ jobs:
       REDIS_URL: redis://localhost:6379
       JWT_SECRET: zap-access-secret
       JWT_REFRESH_SECRET: zap-refresh-secret
+      JWT_ACCESS_TOKEN_EXPIRES_IN: 15m
+      JWT_REFRESH_TOKEN_EXPIRES_IN: 7d
       COOKIE_SECRET: zap-cookie-secret
       ENCRYPTION_MASTER_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
       AUTH_COOKIE_SECURE: "false"
+      MEMBER_AUTH_COOKIE_DOMAIN: localhost
+      CRM_AUTH_COOKIE_DOMAIN: localhost
       MAIL_HOST: localhost
       MAIL_PORT: "1025"
       MAIL_LOGIN: zap
@@ -185,6 +189,8 @@ jobs:
             curl -fsS http://localhost:3000/health && break
             sleep 1
           done
+          curl -fsS http://localhost:3000/health || { echo "API did not start"; cat api.log; exit 1; }
+          curl -fsS http://localhost:3000/docs-json -o /dev/null || { echo "OpenAPI not served"; cat api.log; exit 1; }
       # the official action runs ZAP in its own network namespace, where localhost is not the
       # runner, so the image is started by hand on the host network; -I: warnings do not fail
       - name: ZAP API scan
