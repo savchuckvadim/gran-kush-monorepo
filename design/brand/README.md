@@ -11,3 +11,7 @@
 
 Перед использованием SVG из этой папки чистить (svgo), ставить `fill="currentColor"` и обрезать
 `viewBox` по контуру — исходник экспортирован из рисовалки с полями.
+
+Чистая копия леттеринга — `apps/crm/public/brand/lettering-blackmetal.svg`: без `transform`
+potrace, координаты в целых пикселях, `viewBox` по контуру (1519×855), 23 КБ вместо 37. В CRM
+она идёт CSS-маской (`shell.css`, слоты `brand-lettering` и `brand-initial`), цвет задаёт тема.

@@ -26,10 +26,16 @@ export function ShellBrand({ name, clubName, className }: ShellBrandProps) {
                     </span>
                 </>
             )}
-            <span data-slot="brand-name" className="relative min-w-0">
+            <span
+                data-slot="brand-name"
+                data-lettering={clubName ? undefined : ""}
+                className="relative min-w-0"
+            >
                 <span className="block truncate text-lg font-bold tracking-tight">{label}</span>
                 {/* Grind: a still drip band; Infierno: thorns (packages/ui/src/styles/shell.css) */}
                 <span data-slot="brand-blood" aria-hidden="true" />
+                {/* Infierno: the black-metal lettering instead of the name, a mask from /brand */}
+                {!clubName && <span data-slot="brand-lettering" role="img" aria-label={label} />}
             </span>
         </span>
     );

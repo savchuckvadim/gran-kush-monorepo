@@ -232,7 +232,14 @@ Enter — сразу, Backspace в пустом поиске снимает по
 
 ## D. Темы и лого — P1
 
-### TASK-630: лого «paf paf» для Infierno `[ ]`
+### TASK-630: лого «paf paf» для Infierno `[x]` — `feat/brand-lettering`
+
+**Сделано (2026-10-12).** Чистая копия — `apps/crm/public/brand/lettering-blackmetal.svg` (без
+transform potrace, целые пиксели, viewBox по контуру, 23 КБ). В Infierno вместо фрактурного
+«PafPaf» с шипами — леттеринг CSS-маской цвета кости со свечением; в узком сайдбаре — его левая
+«P». Отдельного компонента не понадобилось: `ShellBrand` выводит пустой слот `brand-lettering`
+(`role="img"` с названием), картинку грузит только тема Infierno. У клуба с премиум-брендом
+остаётся его название. Grind и светлые темы не тронуты.
 
 - Файлы `design/imgs/Untitled_Artwork_{PNG,SVG}` — переименовать в
   `design/brand/lettering-blackmetal.{png,svg}` и завести `design/brand/README.md` (что это, для
