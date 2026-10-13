@@ -16,6 +16,7 @@ import {
     Nunito,
     Onest,
     Pirata_One,
+    Playfair_Display,
     Rubik_Mono_One,
     Ruslan_Display,
     Unbounded,
@@ -129,7 +130,15 @@ const pirata = Pirata_One({
     display: "swap",
     preload: false,
 });
-// Latin only, like Pirata One: Infierno takes Cyrillic from Ruslan Display.
+// Coqueta headings: a fashion-magazine serif, the italic is the point
+const playfair = Playfair_Display({
+    subsets: ["latin", "cyrillic"],
+    style: ["normal", "italic"],
+    variable: "--font-playfair",
+    display: "swap",
+    preload: false,
+});
+// Latin only, like Pirata One: Black takes Cyrillic from Ruslan Display.
 const fraktur = UnifrakturMaguntia({
     subsets: ["latin"],
     weight: "400",
@@ -176,6 +185,7 @@ export const fontVariables = [
     ruslan,
     lora,
     manrope,
+    playfair,
 ]
     .map((font) => font.variable)
     .join(" ");

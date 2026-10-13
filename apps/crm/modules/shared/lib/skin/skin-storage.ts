@@ -1,4 +1,4 @@
-import { isSkinId, type SkinId } from "@/modules/shared/config/skins";
+import { normalizeSkinId, type SkinId } from "@/modules/shared/config/skins";
 
 /*
  * Where skin preferences live: for now this device only.
@@ -20,7 +20,7 @@ export const readSkinPreferences = (): SkinPreferences => {
     try {
         const skin = window.localStorage.getItem(SKIN_STORAGE_KEY);
         return {
-            skin: isSkinId(skin) ? skin : null,
+            skin: normalizeSkinId(skin),
             eco: window.localStorage.getItem(ECO_STORAGE_KEY) === "1",
         };
     } catch {

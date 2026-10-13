@@ -1,8 +1,17 @@
 # Темы CRM
 
 Авторские темы оформления CRM. Clásico — прежняя тема CRM, она же тема по умолчанию; её токены в
-`globals.css` не менялись. Ещё 15 тем: PafPaf, Nagual, Unicornio, Galaxia lejana, Asceta, Cristal,
-Vapor, Brasa, Trap, 90s, Grind, Mediterráneo, Sociopath, Infierno, Burberry.
+`globals.css` не менялись. Ещё 16 тем: PafPaf, Nagual, Unicornio, Galaxia lejana, Asceta, Cristal,
+Vapor, Brasa, Trap, 90s, Grind, Mediterráneo, Sociopath, Black, Burberry, Coqueta.
+
+- **Black** (до 2026-10-13 — Infierno): матовый чёрный без рамок на каркасе «float», как у Sociopath,
+  скругления, фрактура и блэк-метал-леттеринг; леттеринг же — призраком за контентом. Пасхалка: раз в
+  ~43 с с логотипа срывается капля крови. Сохранённый `crm.skin=infierno` читается как `black`
+  (`LEGACY_SKIN_IDS` в `skins.ts`, та же карта в boot-скрипте).
+- **Unicornio**: вместо знака PafPaf — единорог (`/skins/unicornio/unicorn.svg`); в свёрнутом
+  сайдбаре остаётся один рог (`horn.svg`). Каркас — «float».
+- **Coqueta**: розовая, два режима («Жвачка» / «Будуар»): глянцевые кнопки с бликом при наведении,
+  курсив Playfair в заголовке, сердечки на фоне (`[data-fx="hearts"]`), поцелуй на логотипе при наведении.
 
 ## Где выбрать
 
@@ -36,8 +45,8 @@ Vapor, Brasa, Trap, 90s, Grind, Mediterráneo, Sociopath, Infierno, Burberry.
     - Скрипт next-themes применяет сохранённый режим ещё до гидрации. Сразу после него
       `SkinModeScript` возвращает теме с одним режимом её режим.
     - После гидрации режим держит next-themes через `forcedTheme`.
-- **Темы с одним режимом.** Только тёмная: Asceta, Brasa, Trap, Grind. Только светлая: Unicornio,
-  Vapor, 90s. Для них переключатель в шапке и «Режим» в настройках выключены с подсказкой.
+- **Темы с одним режимом.** Только тёмная: Asceta, Brasa, Trap, Grind, Black. Только светлая:
+  Unicornio, Vapor, 90s. Для них переключатель в шапке и «Режим» в настройках выключены с подсказкой.
 - **Энергосбережение** — класс `eco` на `<html>`.
     - Выключает анимации (кроме спиннеров `animate-spin`), размытие, фоновый слой и canvas.
     - Стеклянные темы получают непрозрачные карточки.

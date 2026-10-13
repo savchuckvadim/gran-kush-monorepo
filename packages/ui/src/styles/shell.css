@@ -24,14 +24,13 @@
 
 :root:is(
         [data-skin="pafpaf"],
-        [data-skin="unicornio"],
         [data-skin="galaxia"],
         [data-skin="nagual"],
         [data-skin="brasa"],
         [data-skin="grind"],
         [data-skin="trap"],
         [data-skin="mediterraneo"],
-        [data-skin="infierno"]
+        [data-skin="coqueta"]
     )
     :is([data-slot="app-header"], [data-slot="sidebar"]) {
     background: var(--sidebar);
@@ -44,14 +43,13 @@
 @media (min-width: 768px) {
     :root:is(
             [data-skin="pafpaf"],
-            [data-skin="unicornio"],
             [data-skin="galaxia"],
             [data-skin="nagual"],
             [data-skin="brasa"],
             [data-skin="grind"],
             [data-skin="trap"],
             [data-skin="mediterraneo"],
-            [data-skin="infierno"]
+            [data-skin="coqueta"]
         )
         [data-slot="app-main"] {
         --shell-radius: calc(var(--radius) + 0.75rem);
@@ -63,14 +61,13 @@
     /* the frame colour outside the rounded corner, so header and sidebar read as one piece */
     :root:is(
             [data-skin="pafpaf"],
-            [data-skin="unicornio"],
             [data-skin="galaxia"],
             [data-skin="nagual"],
             [data-skin="brasa"],
             [data-skin="grind"],
             [data-skin="trap"],
             [data-skin="mediterraneo"],
-            [data-skin="infierno"]
+            [data-skin="coqueta"]
         )
         [data-slot="app-main"]::before {
         content: "";
@@ -96,13 +93,25 @@
 /* float */
 
 @media (min-width: 768px) {
-    :root:is([data-skin="cristal"], [data-skin="vapor"], [data-skin="sociopath"])
+    :root:is(
+            [data-skin="cristal"],
+            [data-skin="vapor"],
+            [data-skin="sociopath"],
+            [data-skin="black"],
+            [data-skin="unicornio"]
+        )
         [data-slot="app-shell"] {
         padding: 0.75rem;
         gap: 0.75rem;
     }
 
-    :root:is([data-skin="cristal"], [data-skin="vapor"], [data-skin="sociopath"])
+    :root:is(
+            [data-skin="cristal"],
+            [data-skin="vapor"],
+            [data-skin="sociopath"],
+            [data-skin="black"],
+            [data-skin="unicornio"]
+        )
         [data-slot="sidebar"] {
         top: 0.75rem;
         height: calc(100dvh - 1.5rem);
@@ -110,7 +119,13 @@
         border-radius: calc(var(--radius) + 0.5rem);
     }
 
-    :root:is([data-skin="cristal"], [data-skin="vapor"], [data-skin="sociopath"])
+    :root:is(
+            [data-skin="cristal"],
+            [data-skin="vapor"],
+            [data-skin="sociopath"],
+            [data-skin="black"],
+            [data-skin="unicornio"]
+        )
         [data-slot="app-header"] {
         top: 0.75rem;
         margin-bottom: 0.75rem;
@@ -118,7 +133,13 @@
         border-radius: calc(var(--radius) + 0.5rem);
     }
 
-    :root:is([data-skin="cristal"], [data-skin="vapor"], [data-skin="sociopath"])
+    :root:is(
+            [data-skin="cristal"],
+            [data-skin="vapor"],
+            [data-skin="sociopath"],
+            [data-skin="black"],
+            [data-skin="unicornio"]
+        )
         [data-slot="app-main"] {
         border: 1px solid var(--border);
         border-radius: calc(var(--radius) + 0.5rem);
@@ -198,6 +219,50 @@
     z-index: 0;
 }
 
+/* Black: the same float frame as Sociopath, matte and without lines; the black-metal lettering
+   sits faded behind the content and stays put while scrolling */
+
+:root[data-skin="black"] [data-slot="app-header"] {
+    background: var(--sidebar);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+:root[data-skin="black"] [data-slot="app-main"] {
+    background: transparent;
+}
+
+:root[data-skin="black"] [data-slot="app-main"]::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-color: var(--foreground);
+    opacity: 0.045;
+    -webkit-mask: url("/brand/lettering-blackmetal.svg") var(--black-ghost-x, 50%) 56% /
+        min(70vw, 120vh) auto no-repeat;
+    mask: url("/brand/lettering-blackmetal.svg") var(--black-ghost-x, 50%) 56% / min(70vw, 120vh)
+        auto no-repeat;
+    pointer-events: none;
+}
+
+@media (min-width: 768px) {
+    :root[data-skin="black"] {
+        --black-ghost-x: calc(50% + 2.5rem);
+    }
+}
+
+@media (min-width: 1024px) {
+    :root[data-skin="black"] {
+        --black-ghost-x: calc(50% + 7.5rem);
+    }
+}
+
+:root[data-skin="black"] [data-slot="app-main"] > * {
+    position: relative;
+    z-index: 1;
+}
+
 /* Peek: the folded rail slides the full menu over the content, on a solid backing */
 
 [data-slot="sidebar-panel"][data-peek] {
@@ -232,13 +297,9 @@
         0 0 0 1px color-mix(in oklab, var(--border) 70%, transparent);
 }
 
-/* skins without borders (Sociopath) or with square corners (Infierno) keep their character */
-:root[data-skin="sociopath"] [data-slot="account-capsule"] {
+/* skins without borders (Sociopath, Black) keep their character */
+:root:is([data-skin="sociopath"], [data-skin="black"]) [data-slot="account-capsule"] {
     border-color: transparent;
-}
-
-:root[data-skin="infierno"] :is([data-slot="account-capsule"], [data-slot="account-card"]) {
-    border-radius: var(--radius);
 }
 
 /* =================== auth pages =================== */
@@ -260,7 +321,7 @@
 
 /* The list filter: a search line with chips and a panel of fields under it (a sheet on a phone).
    Glass on the theme's own tokens by default; PafPaf rounds it into a pill, the flat skins
-   (Infierno, Grind) and Clásico keep it solid. */
+   (Grind) and Clásico keep it solid. */
 
 [data-slot="entity-filter"] {
     background: color-mix(in oklab, var(--card) 60%, transparent);
@@ -296,14 +357,14 @@
     padding-left: 1rem;
 }
 
-:root:is([data-skin="infierno"], [data-skin="grind"], [data-skin="clasico"])
+:root:is([data-skin="grind"], [data-skin="clasico"])
     :is([data-slot="entity-filter"], [data-slot="entity-filter-panel"]) {
     background: var(--card);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
 }
 
-:root:is([data-skin="infierno"], [data-skin="grind"])
+:root[data-skin="grind"]
     :is(
         [data-slot="entity-filter"],
         [data-slot="entity-filter-panel"][data-side],
@@ -313,7 +374,7 @@
     border-radius: var(--radius);
 }
 
-:root[data-skin="sociopath"] [data-slot="entity-filter"] {
+:root:is([data-skin="sociopath"], [data-skin="black"]) [data-slot="entity-filter"] {
     border-color: transparent;
 }
 
@@ -323,27 +384,27 @@
     display: none;
 }
 
-/* Grind and Infierno: no PafPaf mark; in a narrow sidebar the initial in the skin's lettering */
+/* Grind and Black: no PafPaf mark; in a narrow sidebar the initial in the skin's lettering */
 
-:root:is([data-skin="grind"], [data-skin="infierno"]) [data-slot="brand-mark"] {
+:root:is([data-skin="grind"], [data-skin="black"]) [data-slot="brand-mark"] {
     display: none;
 }
 
 @media (min-width: 768px) and (max-width: 1023.98px) {
-    :root:is([data-skin="grind"], [data-skin="infierno"])
+    :root:is([data-skin="grind"], [data-skin="black"])
         [data-slot="sidebar"]:not([data-peek])
         [data-slot="brand-initial"] {
         display: block;
     }
 }
 
-:root:is([data-skin="grind"], [data-skin="infierno"])
+:root:is([data-skin="grind"], [data-skin="black"])
     [data-slot="sidebar"][data-collapsed]
     [data-slot="brand-initial"] {
     display: block;
 }
 
-:root:is([data-skin="grind"], [data-skin="infierno"]) [data-slot="brand-initial"] {
+:root:is([data-skin="grind"], [data-skin="black"]) [data-slot="brand-initial"] {
     font-family: var(--font-display);
     font-size: 1.75rem;
     line-height: 1;
@@ -353,7 +414,7 @@
     color: #d0021b;
 }
 
-:root[data-skin="infierno"] [data-slot="brand-initial"] {
+:root[data-skin="black"] [data-slot="brand-initial"] {
     color: #f2eee6;
 }
 
@@ -378,9 +439,10 @@
     filter: drop-shadow(0 1px 0 rgb(0 0 0 / 0.6));
 }
 
-/* Infierno: the name in fraktur, a line of thorns under it */
+/* Black: the name in fraktur; now and then a drop of blood lets go of the letters (the easter
+   egg — hidden by energy saving and reduced motion, which stop the animation at opacity 0) */
 
-:root[data-skin="infierno"] [data-slot="brand-name"] > span:first-child {
+:root[data-skin="black"] [data-slot="brand-name"] > span:first-child {
     font-family: var(--font-display);
     font-weight: 400;
     font-size: 1.6rem;
@@ -394,20 +456,45 @@
         0 0 14px rgb(233 228 218 / 0.25);
 }
 
-:root[data-skin="infierno"] [data-slot="brand-blood"] {
+:root[data-skin="black"] [data-slot="brand-blood"],
+:root[data-skin="black"] [data-slot="brand-lettering"]::after {
+    content: "";
     display: block;
     position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
+    top: 72%;
+    left: 1.05rem;
+    width: 5px;
     height: 8px;
+    border-radius: 50% 50% 55% 55% / 35% 35% 65% 65%;
+    background: radial-gradient(circle at 35% 30%, #ff5a5a, #8a0010 70%);
+    opacity: 0;
     pointer-events: none;
-    opacity: 0.7;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'%3E%3Cg fill='none' stroke='%23e9e4da' stroke-width='1'%3E%3Cpath d='M0 4h24'/%3E%3Cpath d='M4 4l2-3.5L8 4M14 4l2 3.5 2-3.5'/%3E%3C/g%3E%3C/svg%3E")
-        0 0 / 24px 8px repeat-x;
+    animation: black-drip 43s ease-in infinite;
 }
 
-/* Infierno, PafPaf's own name (not a club's): the black-metal lettering from design/brand instead
+@keyframes black-drip {
+    0%,
+    90% {
+        opacity: 0;
+        scale: 0.5 0.6;
+        translate: 0 0;
+    }
+    92% {
+        opacity: 1;
+        scale: 1 1;
+        translate: 0 2px;
+    }
+    98.5% {
+        opacity: 1;
+        translate: 0 46px;
+    }
+    100% {
+        opacity: 0;
+        translate: 0 54px;
+    }
+}
+
+/* Black, PafPaf's own name (not a club's): the black-metal lettering from design/brand instead
    of the fraktur text. A mask over the skin's bone colour; the file loads only in this skin. In a
    narrow sidebar the left «P» of the same lettering stands for the initial. */
 
@@ -415,13 +502,13 @@
     display: none;
 }
 
-:root[data-skin="infierno"]
+:root[data-skin="black"]
     [data-slot="brand-name"][data-lettering]
     > :not([data-slot="brand-lettering"]) {
     display: none;
 }
 
-:root[data-skin="infierno"] [data-slot="brand-lettering"] {
+:root[data-skin="black"] [data-slot="brand-lettering"] {
     display: block;
     position: relative;
     width: 6.25rem;
@@ -429,21 +516,21 @@
     filter: drop-shadow(0 0 6px rgb(233 228 218 / 0.25));
 }
 
-:root[data-skin="infierno"] [data-slot="brand-lettering"]::before,
-:root[data-skin="infierno"] [data-slot="brand-initial"] {
+:root[data-skin="black"] [data-slot="brand-lettering"]::before,
+:root[data-skin="black"] [data-slot="brand-initial"] {
     background-color: #f2eee6;
     -webkit-mask: url("/brand/lettering-blackmetal.svg") left center / contain no-repeat;
     mask: url("/brand/lettering-blackmetal.svg") left center / contain no-repeat;
 }
 
-:root[data-skin="infierno"] [data-slot="brand-lettering"]::before {
+:root[data-skin="black"] [data-slot="brand-lettering"]::before {
     content: "";
     position: absolute;
     inset: 0;
 }
 
 /* the lettering is 1519×855 and its «P» takes the left 0.56 of the height */
-:root[data-skin="infierno"] [data-slot="brand-initial"] {
+:root[data-skin="black"] [data-slot="brand-initial"] {
     width: 1.15rem;
     height: 2rem;
     overflow: hidden;
@@ -490,4 +577,69 @@
 :root[data-skin="sociopath"] [data-slot="brand-name"] > span:first-child::after {
     content: ".";
     color: var(--primary);
+}
+
+/* Unicornio: a unicorn instead of the PafPaf mark; folded to a rail, only the horn stays up */
+
+:root[data-skin="unicornio"] [data-slot="brand-mark"] {
+    display: none;
+}
+
+:root[data-skin="unicornio"] [data-slot="brand"]::before {
+    content: "";
+    flex: none;
+    width: 2.25rem;
+    height: 2.25rem;
+    background: url("/skins/unicornio/unicorn.svg") center / contain no-repeat;
+    transition: width 0.3s ease-in-out;
+}
+
+@media (min-width: 768px) {
+    :root[data-skin="unicornio"] [data-slot="sidebar"][data-collapsed] [data-slot="brand"]::before {
+        width: 0.875rem;
+        background-image: url("/skins/unicornio/horn.svg");
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023.98px) {
+    :root[data-skin="unicornio"]
+        [data-slot="sidebar"]:not([data-peek])
+        [data-slot="brand"]::before {
+        width: 0.875rem;
+        background-image: url("/skins/unicornio/horn.svg");
+    }
+}
+
+:root[data-skin="unicornio"] [data-slot="brand-name"] > span:first-child {
+    background: linear-gradient(90deg, #ff5fb8, #a43df5, #3fa9f5);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+/* Coqueta: a kiss lands on the logo when the cursor does */
+
+:root[data-skin="coqueta"] [data-slot="brand"] {
+    position: relative;
+}
+
+:root[data-skin="coqueta"] [data-slot="brand"]::after {
+    content: "💋";
+    position: absolute;
+    top: -0.55rem;
+    right: -0.9rem;
+    font-size: 1rem;
+    line-height: 1;
+    rotate: -18deg;
+    opacity: 0;
+    scale: 0.2;
+    transition:
+        opacity 0.2s,
+        scale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+}
+
+:root[data-skin="coqueta"] [data-slot="brand"]:hover::after {
+    opacity: 1;
+    scale: 1;
 }

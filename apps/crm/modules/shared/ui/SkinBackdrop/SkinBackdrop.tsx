@@ -77,6 +77,12 @@ export function SkinBackdrop() {
                         <span key={index} style={style} />
                     ))}
                 </div>
+                {/* Coqueta: hearts drift up on the same seeded positions as the embers */}
+                <div data-fx="hearts">
+                    {EMBERS.map((style, index) => (
+                        <span key={index} style={style} />
+                    ))}
+                </div>
                 <svg
                     data-fx="geo"
                     viewBox="-100 -100 200 200"

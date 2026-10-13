@@ -18,9 +18,13 @@ export const SKIN_IDS = [
     "grind",
     "mediterraneo",
     "sociopath",
-    "infierno",
+    "black",
     "burberry",
+    "coqueta",
 ] as const;
+
+/** Ids a skin used to have: a stored choice under the old name still resolves. */
+export const LEGACY_SKIN_IDS: Record<string, SkinId> = { infierno: "black" };
 
 export type SkinId = (typeof SKIN_IDS)[number];
 export type SkinMode = "light" | "dark";
@@ -129,10 +133,10 @@ const SKIN_MAP: Record<SkinId, SkinDefinition> = {
         forcesEco: false,
         hasModeNames: false,
     },
-    infierno: {
-        id: "infierno",
+    black: {
+        id: "black",
         modes: DARK_ONLY,
-        tags: ["type"],
+        tags: ["bg", "type"],
         forcesEco: false,
         hasModeNames: false,
     },
@@ -143,6 +147,13 @@ const SKIN_MAP: Record<SkinId, SkinDefinition> = {
         forcesEco: false,
         hasModeNames: false,
     },
+    coqueta: {
+        id: "coqueta",
+        modes: BOTH,
+        tags: ["bg", "motion", "events"],
+        forcesEco: false,
+        hasModeNames: true,
+    },
 };
 
 export const SKINS: readonly SkinDefinition[] = SKIN_IDS.map((id) => SKIN_MAP[id]);
@@ -151,6 +162,12 @@ export const getSkin = (id: SkinId): SkinDefinition => SKIN_MAP[id];
 
 export const isSkinId = (value: unknown): value is SkinId =>
     typeof value === "string" && (SKIN_IDS as readonly string[]).includes(value);
+
+/** A stored id, current or legacy, to the skin it means today. */
+export const normalizeSkinId = (value: unknown): SkinId | null => {
+    if (isSkinId(value)) return value;
+    return typeof value === "string" ? (LEGACY_SKIN_IDS[value] ?? null) : null;
+};
 
 /** A skin with a single mode forces it; next-themes gets it as `forcedTheme`. */
 export const getForcedMode = (skin: SkinDefinition): SkinMode | undefined =>

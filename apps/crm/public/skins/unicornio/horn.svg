@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 64">
+  <defs>
+    <linearGradient id="horn" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#ffb347"/>
+      <stop offset=".5" stop-color="#ff7ac6"/>
+      <stop offset="1" stop-color="#b04cff"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="12" cy="60" rx="8.5" ry="3" fill="#ffb347"/>
+  <path d="M3.5 60 L12 2 L20.5 60 Z" fill="url(#horn)"/>
+  <path d="M6.6 46 L17.6 41.5 M7.6 36 L16.6 32 M8.6 26 L15.6 23 M9.7 16 L14.4 14" stroke="#fff" stroke-opacity=".75" stroke-width="1.7" stroke-linecap="round"/>
+  <path d="M10.2 6 L11.4 3.4" stroke="#fff" stroke-opacity=".8" stroke-width="1.2" stroke-linecap="round"/>
+</svg>

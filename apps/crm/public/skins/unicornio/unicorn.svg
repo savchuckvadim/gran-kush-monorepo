@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="horn" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#ffb347"/>
+      <stop offset=".5" stop-color="#ff7ac6"/>
+      <stop offset="1" stop-color="#b04cff"/>
+    </linearGradient>
+    <linearGradient id="mane" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff7ac6"/>
+      <stop offset=".5" stop-color="#b04cff"/>
+      <stop offset="1" stop-color="#5cc8ff"/>
+    </linearGradient>
+  </defs>
+  <path d="M28 24 L35 3 L42 24 Z" fill="url(#horn)"/>
+  <path d="M31.5 16.5 L39.6 14.3 M30.3 20.5 L41 18 M33.3 11 L38 9.8" stroke="#fff" stroke-opacity=".7" stroke-width="1.3" stroke-linecap="round"/>
+  <path d="M19 28 L23 17 L29 27 Z" fill="#fff7fb" stroke="#efd3e8" stroke-width="1"/>
+  <path d="M22 26 L23.5 20.5 L26.5 25.5 Z" fill="#ffc4e1"/>
+  <path d="M15 38 C13 27 22 21 34 22 C48 23 58 32 57 46 C56 56 46 61 35 59 C24 57 16 50 15 38 Z" fill="#fff7fb" stroke="#efd3e8" stroke-width="1"/>
+  <path d="M43 41 C53 39 59 45 57 52 C55 58 45 59 40 55 C35 51 36 43 43 41 Z" fill="#ffe9f4"/>
+  <path d="M33 22 C27 15 18 18 17 26 C12 25 9 32 13 37 C8 40 10 48 17 47 C15 52 20 56 24 53 C21 46 21 35 25 29 C28 24 31 22 33 22 Z" fill="url(#mane)"/>
+  <path d="M36 37 q4.5 -4.5 9 0" fill="none" stroke="#3a2a4a" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M35 35 l-2.2 -1.6 M46.2 35 l2.2 -1.6 M40.5 32.5 l0 -2.4" stroke="#3a2a4a" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="31" cy="45" r="3.4" fill="#ffb3d4" opacity=".85"/>
+  <circle cx="53" cy="49" r="1.1" fill="#d58db3"/>
+  <path d="M47.5 53.5 q3 2.2 6 0" fill="none" stroke="#d58db3" stroke-width="1.3" stroke-linecap="round"/>
+  <path d="M46 25 l1 -2.4 M49 24 l.6 -1.4" stroke="#ffd36e" stroke-width="1.4" stroke-linecap="round"/>
+</svg>

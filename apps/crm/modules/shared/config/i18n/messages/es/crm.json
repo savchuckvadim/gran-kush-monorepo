@@ -625,9 +625,17 @@
                     "name": "Sociópata",
                     "description": "Grafito y un solo rojo. Una sonrisa sangrante de fondo, sin bordes: solo esquinas redondeadas."
                 },
-                "infierno": {
-                    "name": "Infierno",
-                    "description": "Black metal: negro absoluto, blanco hueso y letra fraktur. El color, solo para las alertas."
+                "black": {
+                    "name": "Negro",
+                    "description": "Negro mate y grafito sin bordes, esquinas muy redondeadas, fraktur en los títulos. En algún sitio gotea sangre."
+                },
+                "coqueta": {
+                    "name": "Coqueta",
+                    "description": "Rosa jugoso: botones con brillo, polvos de día y neón de noche. Corazones flotan tras la página y un beso se esconde en el logo.",
+                    "modes": {
+                        "light": "Chicle",
+                        "dark": "Tocador"
+                    }
                 },
                 "burberry": {
                     "name": "Burberry",

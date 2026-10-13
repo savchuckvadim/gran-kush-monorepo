@@ -625,9 +625,17 @@
                     "name": "Sociopath",
                     "description": "Graphite and a single red. A bleeding smiley as wallpaper, no frames — only rounded corners."
                 },
-                "infierno": {
-                    "name": "Inferno",
-                    "description": "Black metal: pitch black, bone white and fraktur lettering. Colour only for warnings."
+                "black": {
+                    "name": "Black",
+                    "description": "Matte black and graphite, no frames, big rounded corners, fraktur headings. Somewhere, blood drips."
+                },
+                "coqueta": {
+                    "name": "Coquette",
+                    "description": "Juicy pink: glossy buttons, powder by day and neon by night. Hearts float behind the page, a kiss hides on the logo.",
+                    "modes": {
+                        "light": "Bubblegum",
+                        "dark": "Boudoir"
+                    }
                 },
                 "burberry": {
                     "name": "Burberry",
