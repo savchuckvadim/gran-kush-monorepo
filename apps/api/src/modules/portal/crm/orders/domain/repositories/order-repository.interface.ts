@@ -1,4 +1,12 @@
-import { Order } from "@modules/portal/crm/orders/domain/entity/order.entity";
+import {
+    Order,
+    OrderStatus,
+    PaymentStatus,
+} from "@modules/portal/crm/orders/domain/entity/order.entity";
+import {
+    OrderStage,
+    OrderStageSummary,
+} from "@modules/portal/crm/orders/domain/entity/order-stage.entity";
 
 // ─── Фильтры для выборки заказов ────────────────────────────────────────────
 
@@ -6,8 +14,11 @@ export interface OrderFilters {
     portalId?: string;
     memberId?: string;
     employeeId?: string;
-    status?: string;
-    paymentStatus?: string;
+    /** Старый статус (совместимость): закрытые — по семантике стадии, рабочие — по имени */
+    status?: OrderStatus;
+    /** Стадия воронки — колонка канбана, фильтр списка */
+    stageId?: string;
+    paymentStatus?: PaymentStatus;
     /** Начало периода (включительно) */
     startDate?: Date;
     /** Конец периода (включительно) */
@@ -31,24 +42,22 @@ export interface CreateOrderItemInput {
 export interface CreateOrderInput {
     memberId: string;
     orderNumber: string;
-    status: string;
-    paymentStatus: string;
+    paymentStatus: PaymentStatus;
     subtotal: number;
     discount: number;
     total: number;
     notes?: string;
     items: CreateOrderItemInput[];
-    /** Стадия воронки (портал) */
+    /** Стадия воронки; без неё — первая рабочая стадия воронки по умолчанию */
     stageId?: string | null;
 }
 
 // ─── Данные для обновления заказа ────────────────────────────────────────────
 
+/** Стадию здесь не меняют: только {@link OrderRepository.compareAndSetStage}. */
 export interface UpdateOrderInput {
     employeeId?: string | null;
-    status?: string;
-    stageId?: string | null;
-    paymentStatus?: string;
+    paymentStatus?: PaymentStatus;
     confirmedAt?: Date | null;
     preparedAt?: Date | null;
     readyAt?: Date | null;
@@ -83,7 +92,7 @@ export abstract class OrderRepository {
     /** Создать заказ с позициями (транзакционно) */
     abstract create(data: CreateOrderInput): Promise<Order>;
 
-    /** Обновить заказ (без позиций) */
+    /** Обновить заказ (без позиций и без стадии) */
     abstract update(id: string, data: UpdateOrderInput): Promise<Order>;
 
     /**
@@ -94,10 +103,39 @@ export abstract class OrderRepository {
     abstract compareAndSetPaymentStatus(input: {
         orderId: string;
         portalId: string;
-        from: string;
-        to: string;
+        from: PaymentStatus;
+        to: PaymentStatus;
         employeeId?: string;
     }): Promise<boolean>;
+
+    /**
+     * Перевести заказ в стадию, только если он всё ещё стоит в `fromStageId` (compare-and-set).
+     * `false` — стадию успел сменить параллельный запрос: двойная отмена не вернёт товар дважды.
+     */
+    abstract compareAndSetStage(input: {
+        orderId: string;
+        portalId: string;
+        fromStageId: string | null;
+        toStageId: string;
+    }): Promise<boolean>;
+
+    /** Стадия из воронок заказов этого портала; чужая или не заказная — null */
+    abstract findStageInPortal(portalId: string, stageId: string): Promise<OrderStage | null>;
+
+    /**
+     * Стадии воронки заказов портала по порядку. Без `stageCategoryId` — воронка по умолчанию;
+     * воронка чужого портала или другой сущности — пустой список.
+     */
+    abstract findFunnelStages(
+        portalId: string,
+        stageCategoryId?: string | null
+    ): Promise<OrderStage[]>;
+
+    /** Число и сумма заказов в каждой из стадий при тех же фильтрах, что у списка */
+    abstract summarizeByStage(
+        filters: OrderFilters,
+        stageIds: readonly string[]
+    ): Promise<OrderStageSummary[]>;
 
     /**
      * Наибольший номер заказа с данным префиксом в пределах портала.

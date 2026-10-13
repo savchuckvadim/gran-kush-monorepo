@@ -20,7 +20,7 @@ import {
 } from "@workspace/ui";
 import { cn } from "@workspace/ui/lib/utils";
 
-import { usePortalInfo } from "@/modules/entities/portal";
+import { usePortalInfo, usePortalRole } from "@/modules/entities/portal";
 import { SkinPickerSheet, useChangeLocale } from "@/modules/features";
 import { useAuth } from "@/modules/processes";
 import { localeNames, locales } from "@/modules/shared/config/i18n";
@@ -29,8 +29,6 @@ import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 import { useCrmLogout } from "@/modules/shared/ui/NavButtons";
 
 import { HeaderClock } from "./header-clock";
-
-const MANAGING_ROLES = new Set(["portal_owner", "admin"]);
 
 function Avatar({ email, className }: { email?: string; className?: string }) {
     return (
@@ -69,17 +67,14 @@ export function AccountMenu() {
     const t = useTranslations("crm.shell.account");
     const localizedLink = useLocalizedLink();
     const { currentUser } = useAuth();
-    const { data: info } = usePortalInfo();
     const { locale, changeLocale } = useChangeLocale();
     const logout = useCrmLogout();
     // the sheet lives next to the menu, not inside it: picking the tile closes the menu
     const [isSkinsOpen, setIsSkinsOpen] = useState(false);
 
+    const { data: info } = usePortalInfo();
+    const { role, isAdmin: canManage } = usePortalRole();
     const email = currentUser?.email;
-    const role = currentUser?.employments.find(
-        (employment) => employment.portalId === info?.portalId
-    )?.role;
-    const canManage = role !== undefined && MANAGING_ROLES.has(role);
 
     return (
         <>

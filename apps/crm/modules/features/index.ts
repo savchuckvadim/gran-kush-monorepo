@@ -3,6 +3,7 @@ export * from "./command-palette";
 export * from "./employees";
 export * from "./lang-switcher";
 export * from "./members";
+export * from "./order-stage";
 export * from "./products";
-export * from "./skin-picker";
 export * from "./registration-links";
+export * from "./skin-picker";

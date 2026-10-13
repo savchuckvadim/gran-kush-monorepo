@@ -58,6 +58,7 @@ export { Switch } from "./components/switch";
 export { ThemeToggle } from "./components/theme-toggle";
 export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./components/tooltip";
 export { Card, type CardProps } from "./shared/card/card";
+export { ConfirmDialog, type ConfirmDialogProps } from "./shared/confirm-dialog";
 export { Field, FieldInput, type FieldInputProps, type FieldProps } from "./shared/field/field";
 export {
     FieldSelect,
@@ -65,8 +66,24 @@ export {
     type FieldSelectProps,
 } from "./shared/field/field-select";
 export { FileUpload, type FileUploadProps } from "./shared/file-upload/file-upload";
+export { InitialsAvatar, type InitialsAvatarProps } from "./shared/initials-avatar";
+export {
+    KanbanBoard,
+    type KanbanBoardProps,
+    KanbanColumn,
+    KanbanColumnHeader,
+    type KanbanColumnHeaderProps,
+    type KanbanColumnProps,
+    KanbanDropZone,
+    type KanbanDropZoneSpec,
+    type KanbanDropZoneTone,
+    KanbanItem,
+    type KanbanItemProps,
+} from "./shared/kanban";
+export { LoadMoreTrigger, type LoadMoreTriggerProps } from "./shared/load-more";
 export { QrCodeDisplay, type QrCodeDisplayProps } from "./shared/qr-code-display";
 export {
     SignatureCanvasField,
     type SignatureCanvasProps,
 } from "./shared/signature-canvas/signature-canvas";
+export { StageStep, type StageStepProps, StageSteps } from "./shared/stage-steps";

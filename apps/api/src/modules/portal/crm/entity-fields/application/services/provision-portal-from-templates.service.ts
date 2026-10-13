@@ -207,6 +207,7 @@ export class ProvisionPortalFromTemplatesService {
                     stages: {
                         create: sct.stages.map((s) => ({
                             name: s.name,
+                            nameI18n: s.nameI18n ?? Prisma.DbNull,
                             sortOrder: s.sortOrder,
                             color: s.color,
                             semantic: s.semantic,

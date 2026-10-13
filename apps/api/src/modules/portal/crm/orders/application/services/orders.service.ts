@@ -7,16 +7,25 @@ import {
     NotFoundException,
 } from "@nestjs/common";
 
-import { Prisma } from "@prisma/client";
+import { Prisma, StageSemantic } from "@prisma/client";
 
 import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
-import { OrderStagesService } from "@modules/portal/crm/entity-fields/application/services/order-stages.service";
 import { CreateOrderDto, CreateOrderItemDto } from "@modules/portal/crm/orders/api/dto/order.dto";
 import {
     Order,
     OrderStatus,
     PaymentStatus,
 } from "@modules/portal/crm/orders/domain/entity/order.entity";
+import {
+    OrderStage,
+    OrderStageSummary,
+} from "@modules/portal/crm/orders/domain/entity/order-stage.entity";
+import {
+    isClosedStage,
+    isFailureStage,
+    lifecycleFieldFor,
+    stageForLegacyStatus,
+} from "@modules/portal/crm/orders/domain/order-stage.rules";
 import {
     CreateOrderInput,
     OrderFilters,
@@ -58,21 +67,8 @@ export class OrdersService {
 
     constructor(
         private readonly orderRepository: OrderRepository,
-        private readonly productsService: ProductsService,
-        private readonly orderStages: OrderStagesService
+        private readonly productsService: ProductsService
     ) {}
-
-    private async resolveStageIdForMemberOrder(
-        memberId: string,
-        status: OrderStatus
-    ): Promise<string | undefined> {
-        const portalId = await this.orderStages.resolvePortalIdForMember(memberId);
-        if (!portalId) {
-            return undefined;
-        }
-        const id = await this.orderStages.getStageIdForOrderStatus(portalId, status);
-        return id ?? undefined;
-    }
 
     // ═══════════════════════════════════════════════════════════════════════════
     // Queries
@@ -143,19 +139,16 @@ export class OrdersService {
         const discount = 0; // Скидки пока не реализованы
         const total = subtotal - discount;
 
-        // 3. Создать заказ в БД с номером, уникальным в пределах портала
-        const stageId = await this.resolveStageIdForMemberOrder(memberId, OrderStatus.PENDING);
-
+        // 3. Создать заказ в БД с номером, уникальным в пределах портала; стадия — первая
+        //    рабочая стадия воронки по умолчанию (её подставляет репозиторий)
         const order = await this.createWithGeneratedOrderNumber(portalId, {
             memberId,
-            status: OrderStatus.PENDING,
             paymentStatus: PaymentStatus.PENDING,
             subtotal,
             discount,
             total,
             notes: dto.notes,
             items: resolvedItems,
-            stageId,
         });
 
         // 4. Списать количество товаров со склада
@@ -176,12 +169,30 @@ export class OrdersService {
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
-    // Update Order Status (CRM)
+    // Stages (CRM): полоса стадий в карточке и канбан
     // ═══════════════════════════════════════════════════════════════════════════
 
     /**
-     * Обновить статус заказа (сотрудник CRM).
-     * Проверяет допустимость перехода.
+     * Перевести заказ в стадию воронки (сотрудник CRM, manager+). Между рабочими стадиями —
+     * в любую сторону; закрытый заказ не двигается; отмена возвращает товар на склад.
+     */
+    async moveToStage(
+        orderId: string,
+        stageId: string,
+        employeeId: string,
+        portalId: string
+    ): Promise<Order> {
+        const order = await this.findByIdForPortalOrFail(orderId, portalId);
+        const target = await this.orderRepository.findStageInPortal(portalId, stageId);
+        if (!target) {
+            throw new BadRequestException("Стадия не из воронки заказов этого клуба");
+        }
+        return this.applyStage(order, target, portalId, { employeeId });
+    }
+
+    /**
+     * Обновить статус заказа старым способом (совместимость): статус переводится в стадию
+     * воронки заказа, дальше — те же правила, что у {@link moveToStage}.
      */
     async updateStatus(
         orderId: string,
@@ -191,47 +202,81 @@ export class OrdersService {
         adminNotes?: string
     ): Promise<Order> {
         const order = await this.findByIdForPortalOrFail(orderId, portalId);
+        const stages = await this.orderRepository.findFunnelStages(
+            portalId,
+            order.stage?.stageCategoryId
+        );
+        const target = stageForLegacyStatus(stages, newStatus);
+        if (!target) {
+            throw new BadRequestException(`В воронке заказа нет стадии для статуса "${newStatus}"`);
+        }
+        return this.applyStage(order, target, portalId, { employeeId, adminNotes });
+    }
 
-        // Проверка допустимости перехода
-        this.validateStatusTransition(order.status, newStatus);
+    /** Число и сумма заказов в стадиях воронки — шапки колонок канбана. */
+    async summarizeFunnel(
+        portalId: string,
+        stageCategoryId: string,
+        filters: Omit<OrderFilters, "portalId" | "stageId" | "status">
+    ): Promise<OrderStageSummary[]> {
+        const stages = await this.orderRepository.findFunnelStages(portalId, stageCategoryId);
+        if (stages.length === 0) {
+            throw new NotFoundException("Воронка заказов не найдена");
+        }
+        return this.orderRepository.summarizeByStage(
+            { ...filters, portalId },
+            stages.map((stage) => stage.id)
+        );
+    }
 
-        // Временные метки жизненного цикла
-        const now = new Date();
-        const nextStageId = await this.resolveStageIdForMemberOrder(order.memberId, newStatus);
-        const updateData: Record<string, any> = {
-            status: newStatus,
-            employeeId,
-            stageId: nextStageId ?? null,
-        };
-
-        if (adminNotes !== undefined) {
-            updateData.adminNotes = adminNotes;
+    /**
+     * Общий переход стадии: compare-and-set по текущей стадии, затем склад и метки жизненного
+     * цикла. Проигравший параллельный запрос получает 409, а не тихий успех.
+     */
+    private async applyStage(
+        order: Order,
+        target: OrderStage,
+        portalId: string,
+        extra: { employeeId?: string; adminNotes?: string }
+    ): Promise<Order> {
+        const current = order.stage ?? null;
+        if (current?.id === target.id) {
+            // Повтор того же перехода — запрос уже применён
+            return order;
+        }
+        if (current && isClosedStage(current)) {
+            throw new BadRequestException("Заказ закрыт: его стадию больше нельзя менять");
         }
 
-        switch (newStatus) {
-            case OrderStatus.CONFIRMED:
-                updateData.confirmedAt = now;
-                break;
-            case OrderStatus.PREPARING:
-                updateData.preparedAt = now;
-                break;
-            case OrderStatus.READY:
-                updateData.readyAt = now;
-                break;
-            case OrderStatus.COMPLETED:
-                updateData.completedAt = now;
-                break;
-            case OrderStatus.CANCELLED:
-                updateData.cancelledAt = now;
-                // Вернуть товары на склад при отмене сотрудником
-                await this.restoreProductQuantities(order, portalId);
-                break;
+        const won = await this.orderRepository.compareAndSetStage({
+            orderId: order.id,
+            portalId,
+            fromStageId: current?.id ?? null,
+            toStageId: target.id,
+        });
+        if (!won) {
+            throw new ConflictException(
+                "Стадию заказа изменил параллельный запрос — обновите заказ"
+            );
         }
 
-        const updated = await this.orderRepository.update(orderId, updateData as UpdateOrderInput);
+        if (isFailureStage(target)) {
+            await this.restoreProductQuantities(order, portalId);
+        }
+
+        const update: UpdateOrderInput = {};
+        const lifecycleField = lifecycleFieldFor(target);
+        if (lifecycleField && !order[lifecycleField]) {
+            update[lifecycleField] = new Date();
+        }
+        if (extra.employeeId) update.employeeId = extra.employeeId;
+        if (extra.adminNotes !== undefined) update.adminNotes = extra.adminNotes;
+
+        const updated = await this.orderRepository.update(order.id, update);
 
         this.logger.log(
-            `📋 Заказ ${order.orderNumber}: ${order.status} → ${newStatus} (сотрудник: ${employeeId})`
+            `📋 Заказ ${order.orderNumber}: стадия ${current?.name ?? "—"} → ${target.name}` +
+                (extra.employeeId ? ` (сотрудник: ${extra.employeeId})` : "")
         );
 
         return updated;
@@ -299,8 +344,8 @@ export class OrdersService {
     // ═══════════════════════════════════════════════════════════════════════════
 
     /**
-     * Отменить заказ (инициировано членом клуба).
-     * Возможно только в статусе PENDING.
+     * Отменить заказ (инициировано членом клуба). Только пока заказ в стадии «новый»:
+     * дальше клуб уже взял его в работу.
      */
     async cancelOrderByMember(
         orderId: string,
@@ -308,35 +353,31 @@ export class OrdersService {
         portalId: string,
         reason?: string
     ): Promise<Order> {
-        const order = await this.findByIdOrFail(orderId);
+        const order = await this.findByIdForPortalOrFail(orderId, portalId);
 
         // Проверить, что заказ принадлежит этому члену
         if (order.memberId !== memberId) {
             throw new ForbiddenException("Нет доступа к этому заказу");
         }
 
-        // Отмена возможна только в статусе PENDING
-        if (order.status !== OrderStatus.PENDING) {
+        if (order.stage && order.stage.semantic !== StageSemantic.NEW) {
             throw new BadRequestException(
-                `Отмена невозможна: заказ уже в статусе "${order.status}". ` +
-                    `Отмена возможна только для заказов в статусе "${OrderStatus.PENDING}"`
+                "Отмена невозможна: клуб уже взял заказ в работу. Отменить можно только новый заказ"
             );
         }
 
-        // Вернуть товары на склад
-        await this.restoreProductQuantities(order, portalId);
-
-        const cancelStageId = await this.resolveStageIdForMemberOrder(
-            memberId,
-            OrderStatus.CANCELLED
+        const stages = await this.orderRepository.findFunnelStages(
+            portalId,
+            order.stage?.stageCategoryId
         );
+        const cancelStage = stages.find(isFailureStage);
+        if (!cancelStage) {
+            throw new BadRequestException("В воронке заказа нет стадии отмены");
+        }
 
-        const updated = await this.orderRepository.update(orderId, {
-            status: OrderStatus.CANCELLED,
-            stageId: cancelStageId ?? null,
-            cancelledAt: new Date(),
+        const updated = await this.applyStage(order, cancelStage, portalId, {
             adminNotes: reason ? `Отменено участником: ${reason}` : "Отменено участником",
-        } as UpdateOrderInput);
+        });
 
         this.logger.log(`❌ Заказ ${order.orderNumber} отменён участником ${memberId}`);
 
@@ -478,30 +519,5 @@ export class OrdersService {
         }
 
         return `${prefix}${sequence.toString().padStart(4, "0")}`;
-    }
-
-    /**
-     * Допустимые переходы статусов.
-     */
-    private static readonly STATUS_TRANSITIONS: Record<string, string[]> = {
-        [OrderStatus.PENDING]: [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
-        [OrderStatus.CONFIRMED]: [OrderStatus.PREPARING, OrderStatus.CANCELLED],
-        [OrderStatus.PREPARING]: [OrderStatus.READY, OrderStatus.CANCELLED],
-        [OrderStatus.READY]: [OrderStatus.COMPLETED, OrderStatus.CANCELLED],
-        [OrderStatus.COMPLETED]: [], // Терминальный
-        [OrderStatus.CANCELLED]: [], // Терминальный
-    };
-
-    /**
-     * Проверить допустимость перехода статуса.
-     */
-    private validateStatusTransition(current: OrderStatus, next: OrderStatus): void {
-        const allowed = OrdersService.STATUS_TRANSITIONS[current] ?? [];
-        if (!allowed.includes(next)) {
-            throw new BadRequestException(
-                `Недопустимый переход статуса: "${current}" → "${next}". ` +
-                    `Допустимые: ${allowed.length > 0 ? allowed.join(", ") : "нет (терминальный статус)"}`
-            );
-        }
     }
 }

@@ -5,6 +5,7 @@ import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { type ContentLocale, RequestLocale } from "@common/i18n";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
@@ -12,9 +13,12 @@ import { CurrentEmployee } from "@modules/portal/auth/employees/api/decorators/c
 import { RequireManager } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import {
+    MoveOrderStageDto,
     OrderDetailDto,
     OrderListDto,
     OrderListQueryDto,
+    OrderStageSummaryDto,
+    OrderStageSummaryQueryDto,
     UpdateOrderStatusDto,
     UpdatePaymentStatusDto,
 } from "@modules/portal/crm/orders/api/dto/order.dto";
@@ -35,14 +39,17 @@ export class CrmOrdersController {
     // ─── Список заказов ──────────────────────────────────────────────────────
 
     @Get()
-    @ApiOperation({ summary: "Список заказов (с фильтрами и пагинацией)" })
+    @ApiOperation({
+        summary: "Список заказов (с фильтрами и пагинацией; `stageId` — колонка канбана)",
+    })
     @ApiPaginatedResponse(OrderListDto, {
         description: "Paginated list of orders",
     })
     @ApiErrorResponse([401, 403])
     async listOrders(
         @Query() query: OrderListQueryDto,
-        @PortalId() portalId: string
+        @PortalId() portalId: string,
+        @RequestLocale() locale: ContentLocale
     ): Promise<PaginatedResult<OrderListDto>> {
         const { page = 1, limit = 10, sortBy, sortOrder, ...filters } = query;
         const skip = PaginationUtil.getSkip(page, limit);
@@ -54,8 +61,23 @@ export class CrmOrdersController {
             this.ordersService.count(scopedFilters),
         ]);
 
-        const items = orders.map(mapOrderToListDto);
+        const items = orders.map((order) => mapOrderToListDto(order, locale));
         return PaginationUtil.createPaginatedResult(items, total, page, limit);
+    }
+
+    // ─── Сводка по стадиям воронки (шапки колонок канбана) ───────────────────
+
+    @Get("stages/summary")
+    @ApiOperation({ summary: "Число и сумма заказов в каждой стадии воронки (канбан)" })
+    @ApiSuccessResponse(OrderStageSummaryDto)
+    @ApiErrorResponse([400, 401, 403, 404])
+    async stageSummary(
+        @Query() query: OrderStageSummaryQueryDto,
+        @PortalId() portalId: string
+    ): Promise<OrderStageSummaryDto> {
+        const { categoryId, ...filters } = query;
+        const stages = await this.ordersService.summarizeFunnel(portalId, categoryId, filters);
+        return { stages };
     }
 
     // ─── Детали заказа ───────────────────────────────────────────────────────
@@ -64,26 +86,54 @@ export class CrmOrdersController {
     @ApiOperation({ summary: "Детали заказа" })
     @ApiSuccessResponse(OrderDetailDto)
     @ApiErrorResponse([401, 403, 404])
-    async getOrder(@Param("id") id: string, @PortalId() portalId: string): Promise<OrderDetailDto> {
+    async getOrder(
+        @Param("id") id: string,
+        @PortalId() portalId: string,
+        @RequestLocale() locale: ContentLocale
+    ): Promise<OrderDetailDto> {
         const order = await this.ordersService.findByIdForPortal(id, portalId);
         if (!order) {
             throw new NotFoundException("Заказ не найден");
         }
-        return mapOrderToDetailDto(order);
+        return mapOrderToDetailDto(order, locale);
     }
 
-    // ─── Обновить статус заказа ──────────────────────────────────────────────
+    // ─── Перевести заказ в стадию ────────────────────────────────────────────
+
+    @Patch(":id/stage")
+    @RequireManager()
+    @ApiOperation({
+        summary:
+            "Перевести заказ в стадию воронки. Роль: manager+. 400 — чужая стадия или заказ закрыт, 409 — гонка",
+    })
+    @ApiSuccessResponse(OrderDetailDto)
+    @ApiErrorResponse([400, 401, 403, 404, 409])
+    async moveToStage(
+        @Param("id") id: string,
+        @Body() dto: MoveOrderStageDto,
+        @CurrentEmployee() employee: Employee,
+        @PortalId() portalId: string,
+        @RequestLocale() locale: ContentLocale
+    ): Promise<OrderDetailDto> {
+        const order = await this.ordersService.moveToStage(id, dto.stageId, employee.id, portalId);
+        return mapOrderToDetailDto(order, locale);
+    }
+
+    // ─── Обновить статус заказа (совместимость) ──────────────────────────────
 
     @Patch(":id/status")
     @RequireManager()
-    @ApiOperation({ summary: "Обновить статус заказа. Роль: manager+" })
+    @ApiOperation({
+        summary: "Обновить статус заказа (устарело: используйте PATCH :id/stage). Роль: manager+",
+    })
     @ApiSuccessResponse(OrderDetailDto)
-    @ApiErrorResponse([400, 401, 403, 404])
+    @ApiErrorResponse([400, 401, 403, 404, 409])
     async updateStatus(
         @Param("id") id: string,
         @Body() dto: UpdateOrderStatusDto,
         @CurrentEmployee() employee: Employee,
-        @PortalId() portalId: string
+        @PortalId() portalId: string,
+        @RequestLocale() locale: ContentLocale
     ): Promise<OrderDetailDto> {
         const order = await this.ordersService.updateStatus(
             id,
@@ -92,7 +142,7 @@ export class CrmOrdersController {
             portalId,
             dto.adminNotes
         );
-        return mapOrderToDetailDto(order);
+        return mapOrderToDetailDto(order, locale);
     }
 
     // ─── Обновить статус оплаты ──────────────────────────────────────────────
@@ -106,7 +156,8 @@ export class CrmOrdersController {
         @Param("id") id: string,
         @Body() dto: UpdatePaymentStatusDto,
         @CurrentEmployee() employee: Employee,
-        @PortalId() portalId: string
+        @PortalId() portalId: string,
+        @RequestLocale() locale: ContentLocale
     ): Promise<OrderDetailDto> {
         const order = await this.ordersService.updatePaymentStatus(
             id,
@@ -114,6 +165,6 @@ export class CrmOrdersController {
             employee.id,
             portalId
         );
-        return mapOrderToDetailDto(order);
+        return mapOrderToDetailDto(order, locale);
     }
 }

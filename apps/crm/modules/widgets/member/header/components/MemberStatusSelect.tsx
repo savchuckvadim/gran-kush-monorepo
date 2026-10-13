@@ -4,15 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { SchemaMemberLifecycleStatusItemDto } from "@workspace/api-client/core";
-import {
-    Button,
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@workspace/ui";
+import { ConfirmDialog } from "@workspace/ui";
 import {
     Select,
     SelectContent,
@@ -26,7 +18,7 @@ import {
     useMemberStatusItems,
     useUpdateCrmMemberStatus,
 } from "@/modules/entities/member";
-import { notifyApiError } from "@/modules/shared";
+import { notifyApiError, personName } from "@/modules/shared";
 
 const FALLBACK_COLOR = "#9ca3af";
 
@@ -91,38 +83,21 @@ export function MemberStatusSelect({ member }: MemberStatusSelectProps) {
                 </SelectContent>
             </Select>
 
-            <Dialog
+            <ConfirmDialog
                 open={pendingItem !== null}
                 onOpenChange={(open) => {
-                    if (!open) {
-                        setPendingItem(null);
-                    }
+                    if (!open) setPendingItem(null);
                 }}
-            >
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>{t("confirmTitle")}</DialogTitle>
-                        <DialogDescription>
-                            {t("confirmDescription", {
-                                name: `${member.name} ${member.surname ?? ""}`.trim(),
-                                status: pendingItem?.label ?? "",
-                            })}
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                        <Button
-                            variant="outline"
-                            onClick={() => setPendingItem(null)}
-                            disabled={updateStatus.isPending}
-                        >
-                            {t("cancel")}
-                        </Button>
-                        <Button onClick={handleConfirm} disabled={updateStatus.isPending}>
-                            {updateStatus.isPending ? t("saving") : t("confirm")}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                title={t("confirmTitle")}
+                description={t("confirmDescription", {
+                    name: personName(member, ""),
+                    status: pendingItem?.label ?? "",
+                })}
+                confirmLabel={updateStatus.isPending ? t("saving") : t("confirm")}
+                cancelLabel={t("cancel")}
+                onConfirm={() => void handleConfirm()}
+                pending={updateStatus.isPending}
+            />
         </>
     );
 }

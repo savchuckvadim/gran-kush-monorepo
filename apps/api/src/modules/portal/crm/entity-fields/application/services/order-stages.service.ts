@@ -1,91 +1,100 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 
-import { Prisma } from "@prisma/client";
+import { Prisma, StageSemantic } from "@prisma/client";
 
+import { type ContentLocale, resolveLabel } from "@common/i18n";
 import { PrismaService } from "@common/prisma/prisma.service";
-import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 
-export type OrderStageCategoryWithStages = Prisma.StageCategoryGetPayload<{
-    include: {
-        stages: { orderBy: { sortOrder: "asc" } };
-    };
-}>;
+const STAGES_IN_ORDER = { stages: { orderBy: { sortOrder: "asc" } } } as const;
 
-const ORDER_STATUS_TO_STAGE_NAME: Record<string, string> = {
-    pending: "Pending",
-    confirmed: "Confirmed",
-    preparing: "Preparing",
-    ready: "Ready",
-    completed: "Completed",
-    cancelled: "Cancelled",
+type StageCategoryRow = Prisma.StageCategoryGetPayload<{ include: typeof STAGES_IN_ORDER }>;
+type StageRow = StageCategoryRow["stages"][number];
+
+/** Стадия для ответа: название уже на языке запроса, сырые переводы наружу не уходят. */
+export type StageView = Omit<StageRow, "nameI18n">;
+export type StageCategoryView = Omit<StageCategoryRow, "stages"> & { stages: StageView[] };
+
+export interface StageInput {
+    name: string;
+    sortOrder: number;
+    color?: string | null;
+    semantic: StageSemantic;
+    isTerminalSuccess?: boolean;
+    isTerminalFailure?: boolean;
+}
+
+const toStageView = (stage: StageRow, locale: ContentLocale): StageView => ({
+    id: stage.id,
+    stageCategoryId: stage.stageCategoryId,
+    name: resolveLabel({ label: stage.name, labelI18n: stage.nameI18n }, locale),
+    sortOrder: stage.sortOrder,
+    color: stage.color,
+    semantic: stage.semantic,
+    isTerminalSuccess: stage.isTerminalSuccess,
+    isTerminalFailure: stage.isTerminalFailure,
+    createdAt: stage.createdAt,
+    updatedAt: stage.updatedAt,
+});
+
+const toCategoryView = (row: StageCategoryRow, locale: ContentLocale): StageCategoryView => ({
+    id: row.id,
+    portalId: row.portalId,
+    entityDefinitionId: row.entityDefinitionId,
+    code: row.code,
+    name: row.name,
+    isDefault: row.isDefault,
+    isSystem: row.isSystem,
+    hiddenInUi: row.hiddenInUi,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    stages: row.stages.map((stage) => toStageView(stage, locale)),
+});
+
+/**
+ * Редактор показывает название на языке запроса. Пришло то же слово (базовое или один из
+ * переводов) — стадию не переименовывали, переводы остаются; иначе это слово клуба.
+ */
+const isRenamed = (stored: Pick<StageRow, "name" | "nameI18n">, name: string): boolean => {
+    if (name === stored.name) return false;
+    const translations =
+        stored.nameI18n && typeof stored.nameI18n === "object" && !Array.isArray(stored.nameI18n)
+            ? Object.values(stored.nameI18n)
+            : [];
+    return !translations.includes(name);
 };
 
+const stageData = (stage: StageInput) => ({
+    sortOrder: stage.sortOrder,
+    color: stage.color ?? null,
+    semantic: stage.semantic,
+    isTerminalSuccess: stage.isTerminalSuccess ?? false,
+    isTerminalFailure: stage.isTerminalFailure ?? false,
+});
+
+/** Воронки (stage categories) любой сущности портала: конструктор в настройках и канбан. */
 @Injectable()
 export class OrderStagesService {
     constructor(private readonly prisma: PrismaService) {}
 
-    async getStageIdForOrderStatus(
-        portalId: string,
-        orderStatusLower: string
-    ): Promise<string | null> {
-        const orderDef = await this.prisma.entityDefinition.findUnique({
-            where: {
-                portalId_code: { portalId, code: ENTITY_DEFINITION_CODES.ORDER },
-            },
-            select: { id: true },
-        });
-        if (!orderDef) {
-            return null;
-        }
-
-        const stageName = ORDER_STATUS_TO_STAGE_NAME[orderStatusLower.toLowerCase()] ?? "Pending";
-        const stage = await this.prisma.stage.findFirst({
-            where: {
-                name: { equals: stageName, mode: "insensitive" },
-                stageCategory: {
-                    portalId,
-                    entityDefinitionId: orderDef.id,
-                    code: "default",
-                },
-            },
-            select: { id: true },
-        });
-        return stage?.id ?? null;
-    }
-
-    async resolvePortalIdForMember(memberId: string): Promise<string | null> {
-        const m = await this.prisma.member.findUnique({
-            where: { id: memberId },
-            select: { portalId: true },
-        });
-        return m?.portalId ?? null;
-    }
-
-    async listOrderStageCategories(portalId: string): Promise<OrderStageCategoryWithStages[]> {
-        return this.listStageCategories(portalId, ENTITY_DEFINITION_CODES.ORDER);
-    }
-
-    /** Воронки любой сущности портала (для конструктора и kanban). */
+    /** Воронки сущности со стадиями по порядку; названия — на языке запроса. */
     async listStageCategories(
         portalId: string,
-        entityCode: string
-    ): Promise<OrderStageCategoryWithStages[]> {
+        entityCode: string,
+        locale: ContentLocale
+    ): Promise<StageCategoryView[]> {
         const entityDef = await this.prisma.entityDefinition.findUnique({
-            where: {
-                portalId_code: { portalId, code: entityCode },
-            },
+            where: { portalId_code: { portalId, code: entityCode } },
             select: { id: true },
         });
         if (!entityDef) {
             return [];
         }
-        return this.prisma.stageCategory.findMany({
+        const rows = await this.prisma.stageCategory.findMany({
             where: { portalId, entityDefinitionId: entityDef.id },
             orderBy: [{ isDefault: "desc" }, { name: "asc" }],
-            include: {
-                stages: { orderBy: { sortOrder: "asc" } },
-            },
+            include: STAGES_IN_ORDER,
         });
+        return rows.map((row) => toCategoryView(row, locale));
     }
 
     /** Обновить воронку: имя + upsert стадий (стадии без id создаются, отсутствующие удаляются). */
@@ -93,22 +102,12 @@ export class OrderStagesService {
         portalId: string,
         entityCode: string,
         categoryId: string,
-        input: {
-            name?: string;
-            stages?: {
-                id?: string;
-                name: string;
-                sortOrder: number;
-                color?: string | null;
-                semantic: "NEW" | "IN_PROGRESS" | "SUCCESS" | "FAILURE";
-                isTerminalSuccess?: boolean;
-                isTerminalFailure?: boolean;
-            }[];
-        }
-    ): Promise<OrderStageCategoryWithStages> {
+        input: { name?: string; stages?: (StageInput & { id?: string })[] },
+        locale: ContentLocale
+    ): Promise<StageCategoryView> {
         const category = await this.findCategoryInPortal(portalId, entityCode, categoryId);
 
-        return this.prisma.$transaction(async (tx) => {
+        const row = await this.prisma.$transaction(async (tx) => {
             if (input.name !== undefined) {
                 await tx.stageCategory.update({
                     where: { id: category.id },
@@ -126,39 +125,51 @@ export class OrderStagesService {
                     where: { stageCategoryId: category.id, id: { notIn: keptIds } },
                 });
 
+                const stored = new Map(
+                    (
+                        await tx.stage.findMany({
+                            where: { stageCategoryId: category.id },
+                            select: { id: true, name: true, nameI18n: true },
+                        })
+                    ).map((stage) => [stage.id, stage])
+                );
+
                 for (const stage of input.stages) {
-                    const data = {
-                        name: stage.name,
-                        sortOrder: stage.sortOrder,
-                        color: stage.color ?? null,
-                        semantic: stage.semantic,
-                        isTerminalSuccess: stage.isTerminalSuccess ?? false,
-                        isTerminalFailure: stage.isTerminalFailure ?? false,
-                    };
-                    if (stage.id) {
-                        // только стадии этой воронки: id чужого клуба не должен ничего менять
-                        const { count } = await tx.stage.updateMany({
-                            where: { id: stage.id, stageCategoryId: category.id },
-                            data,
-                        });
-                        if (count === 0) {
-                            throw new NotFoundException(
-                                `Stage "${stage.id}" is not in this funnel`
-                            );
-                        }
-                    } else {
+                    if (!stage.id) {
                         await tx.stage.create({
-                            data: { ...data, stageCategoryId: category.id },
+                            data: {
+                                ...stageData(stage),
+                                name: stage.name,
+                                stageCategoryId: category.id,
+                            },
                         });
+                        continue;
                     }
+
+                    // только стадии этой воронки: id чужого клуба не должен ничего менять
+                    const current = stored.get(stage.id);
+                    if (!current) {
+                        throw new NotFoundException(`Stage "${stage.id}" is not in this funnel`);
+                    }
+                    // Переименованная клубом стадия показывается его словом на всех языках
+                    const renamed = isRenamed(current, stage.name);
+                    await tx.stage.update({
+                        where: { id: stage.id },
+                        data: {
+                            ...stageData(stage),
+                            ...(renamed ? { name: stage.name, nameI18n: Prisma.DbNull } : {}),
+                        },
+                    });
                 }
             }
 
             return tx.stageCategory.findUniqueOrThrow({
                 where: { id: category.id },
-                include: { stages: { orderBy: { sortOrder: "asc" } } },
+                include: STAGES_IN_ORDER,
             });
         });
+
+        return toCategoryView(row, locale);
     }
 
     /** Удалить не-системную и не-дефолтную воронку. */
@@ -177,6 +188,34 @@ export class OrderStagesService {
         await this.prisma.stageCategory.delete({ where: { id: categoryId } });
     }
 
+    /** Создать воронку со стадиями для сущности (конструктор). */
+    async createStageCategory(
+        portalId: string,
+        entityCode: string,
+        input: { code: string; name: string; stages: StageInput[] },
+        locale: ContentLocale
+    ): Promise<StageCategoryView> {
+        const entityDef = await this.prisma.entityDefinition.findUniqueOrThrow({
+            where: { portalId_code: { portalId, code: entityCode } },
+            select: { id: true },
+        });
+        const row = await this.prisma.stageCategory.create({
+            data: {
+                portalId,
+                entityDefinitionId: entityDef.id,
+                code: input.code,
+                name: input.name,
+                isDefault: false,
+                isSystem: false,
+                stages: {
+                    create: input.stages.map((s) => ({ ...stageData(s), name: s.name })),
+                },
+            },
+            include: STAGES_IN_ORDER,
+        });
+        return toCategoryView(row, locale);
+    }
+
     private async findCategoryInPortal(portalId: string, entityCode: string, categoryId: string) {
         const entityDef = await this.prisma.entityDefinition.findUnique({
             where: { portalId_code: { portalId, code: entityCode } },
@@ -193,53 +232,5 @@ export class OrderStagesService {
             throw new NotFoundException("Funnel not found");
         }
         return category;
-    }
-
-    /** Создать воронку со стадиями для сущности (конструктор). */
-    async createStageCategory(
-        portalId: string,
-        entityCode: string,
-        input: {
-            code: string;
-            name: string;
-            stages: {
-                name: string;
-                sortOrder: number;
-                color?: string | null;
-                semantic: "NEW" | "IN_PROGRESS" | "SUCCESS" | "FAILURE";
-                isTerminalSuccess?: boolean;
-                isTerminalFailure?: boolean;
-            }[];
-        }
-    ): Promise<OrderStageCategoryWithStages> {
-        const entityDef = await this.prisma.entityDefinition.findUniqueOrThrow({
-            where: {
-                portalId_code: { portalId, code: entityCode },
-            },
-            select: { id: true },
-        });
-        return this.prisma.stageCategory.create({
-            data: {
-                portalId,
-                entityDefinitionId: entityDef.id,
-                code: input.code,
-                name: input.name,
-                isDefault: false,
-                isSystem: false,
-                stages: {
-                    create: input.stages.map((s) => ({
-                        name: s.name,
-                        sortOrder: s.sortOrder,
-                        color: s.color ?? null,
-                        semantic: s.semantic,
-                        isTerminalSuccess: s.isTerminalSuccess ?? false,
-                        isTerminalFailure: s.isTerminalFailure ?? false,
-                    })),
-                },
-            },
-            include: {
-                stages: { orderBy: { sortOrder: "asc" } },
-            },
-        });
     }
 }

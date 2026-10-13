@@ -1,14 +1,35 @@
-import { OrderDetailDto, OrderListDto } from "@modules/portal/crm/orders/api/dto/order.dto";
+import { type ContentLocale, resolveLabel } from "@common/i18n";
+import {
+    OrderDetailDto,
+    OrderListDto,
+    OrderStageDto,
+} from "@modules/portal/crm/orders/api/dto/order.dto";
 import { Order } from "@modules/portal/crm/orders/domain/entity/order.entity";
+import { OrderStage } from "@modules/portal/crm/orders/domain/entity/order-stage.entity";
+
+/** Стадия с названием на языке запроса: перевод системного названия или слово клуба. */
+export function mapOrderStageToDto(stage: OrderStage, locale: ContentLocale): OrderStageDto {
+    return {
+        id: stage.id,
+        stageCategoryId: stage.stageCategoryId,
+        name: resolveLabel({ label: stage.name, labelI18n: stage.nameI18n }, locale),
+        color: stage.color,
+        semantic: stage.semantic,
+        sortOrder: stage.sortOrder,
+        isTerminalSuccess: stage.isTerminalSuccess,
+        isTerminalFailure: stage.isTerminalFailure,
+    };
+}
 
 /**
  * Маппинг Order entity → OrderListDto (для списка заказов)
  */
-export function mapOrderToListDto(o: Order): OrderListDto {
+export function mapOrderToListDto(o: Order, locale: ContentLocale): OrderListDto {
     return {
         id: o.id,
         orderNumber: o.orderNumber,
         status: o.status,
+        stage: o.stage ? mapOrderStageToDto(o.stage, locale) : null,
         paymentStatus: o.paymentStatus,
         subtotal: Number(o.subtotal),
         discount: Number(o.discount),
@@ -24,9 +45,9 @@ export function mapOrderToListDto(o: Order): OrderListDto {
 /**
  * Маппинг Order entity → OrderDetailDto (для деталки заказа)
  */
-export function mapOrderToDetailDto(o: Order): OrderDetailDto {
+export function mapOrderToDetailDto(o: Order, locale: ContentLocale): OrderDetailDto {
     return {
-        ...mapOrderToListDto(o),
+        ...mapOrderToListDto(o, locale),
         notes: o.notes,
         adminNotes: o.adminNotes,
         confirmedAt: o.confirmedAt?.toISOString() ?? null,

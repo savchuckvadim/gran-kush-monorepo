@@ -1076,7 +1076,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Entity funnel categories and stages */
+        /** Entity funnel categories and stages; stage names in the request language */
         get: operations["CrmEntityFieldsSettings_stageCategories"];
         put?: never;
         /** Create a funnel with stages (Admin) */
@@ -1957,8 +1957,25 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Список заказов (с фильтрами и пагинацией) */
+        /** Список заказов (с фильтрами и пагинацией; `stageId` — колонка канбана) */
         get: operations["CrmOrders_listOrders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/orders/stages/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Число и сумма заказов в каждой стадии воронки (канбан) */
+        get: operations["CrmOrders_stageSummary"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1984,6 +2001,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/crm/orders/{id}/stage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Перевести заказ в стадию воронки. Роль: manager+. 400 — чужая стадия или заказ закрыт, 409 — гонка */
+        patch: operations["CrmOrders_moveToStage"];
+        trace?: never;
+    };
     "/crm/orders/{id}/status": {
         parameters: {
             query?: never;
@@ -1997,7 +2031,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Обновить статус заказа. Роль: manager+ */
+        /** Обновить статус заказа (устарело: используйте PATCH :id/stage). Роль: manager+ */
         patch: operations["CrmOrders_updateStatus"];
         trace?: never;
     };
@@ -2077,7 +2111,7 @@ export interface paths {
         head?: never;
         /**
          * Отменить заказ
-         * @description Отмена возможна только в статусе 'pending'. Товары возвращаются на склад.
+         * @description Отмена возможна, пока заказ в стадии «новый». Товары возвращаются на склад.
          */
         patch: operations["LkOrders_cancelMyOrder"];
         trace?: never;
@@ -4552,6 +4586,30 @@ export interface components {
              */
             avgDurationMinutes?: number | null;
         };
+        OrderStageDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            stageCategoryId: string;
+            /**
+             * @description На языке запроса
+             * @example Готовится
+             */
+            name: string;
+            /** @example #7c3aed */
+            color: string | null;
+            /**
+             * @example IN_PROGRESS
+             * @enum {string}
+             */
+            semantic: "NEW" | "IN_PROGRESS" | "SUCCESS" | "FAILURE";
+            /** @example 2 */
+            sortOrder: number;
+            /** @example false */
+            isTerminalSuccess: boolean;
+            /** @example false */
+            isTerminalFailure: boolean;
+        };
         OrderMemberDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
             id: string;
@@ -4576,10 +4634,12 @@ export interface components {
             /** @example ORD-20260316-0001 */
             orderNumber: string;
             /**
+             * @description Для старых клиентов: выводится из стадии; новым клиентам — `stage`
              * @example pending
              * @enum {string}
              */
             status: "pending" | "confirmed" | "preparing" | "ready" | "completed" | "cancelled";
+            stage: components["schemas"]["OrderStageDto"] | null;
             /**
              * @example pending
              * @enum {string}
@@ -4626,6 +4686,20 @@ export interface components {
              * @example 10
              */
             totalPages: number;
+        };
+        OrderStageSummaryItemDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            stageId: string;
+            /** @example 12 */
+            count: number;
+            /**
+             * @description Сумма заказов стадии, €
+             * @example 373.5
+             */
+            total: number;
+        };
+        OrderStageSummaryDto: {
+            stages: components["schemas"]["OrderStageSummaryItemDto"][];
         };
         OrderItemMeasurementUnitDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
@@ -4676,10 +4750,12 @@ export interface components {
             /** @example ORD-20260316-0001 */
             orderNumber: string;
             /**
+             * @description Для старых клиентов: выводится из стадии; новым клиентам — `stage`
              * @example pending
              * @enum {string}
              */
             status: "pending" | "confirmed" | "preparing" | "ready" | "completed" | "cancelled";
+            stage: components["schemas"]["OrderStageDto"] | null;
             /**
              * @example pending
              * @enum {string}
@@ -4719,6 +4795,13 @@ export interface components {
             items: components["schemas"]["OrderItemDto"][];
             /** @example 2026-03-16T14:30:00.000Z */
             updatedAt: string;
+        };
+        MoveOrderStageDto: {
+            /**
+             * @description Стадия из воронки заказов клуба
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            stageId: string;
         };
         UpdateOrderStatusDto: {
             /**
@@ -5486,14 +5569,18 @@ export type SchemaManualCheckInDto = components['schemas']['ManualCheckInDto'];
 export type SchemaManualCheckOutDto = components['schemas']['ManualCheckOutDto'];
 export type SchemaPaginatedResponsePresenceSessionDto = components['schemas']['PaginatedResponse_PresenceSessionDto'];
 export type SchemaPresenceStatsDto = components['schemas']['PresenceStatsDto'];
+export type SchemaOrderStageDto = components['schemas']['OrderStageDto'];
 export type SchemaOrderMemberDto = components['schemas']['OrderMemberDto'];
 export type SchemaOrderEmployeeDto = components['schemas']['OrderEmployeeDto'];
 export type SchemaOrderListDto = components['schemas']['OrderListDto'];
 export type SchemaPaginatedResponseOrderListDto = components['schemas']['PaginatedResponse_OrderListDto'];
+export type SchemaOrderStageSummaryItemDto = components['schemas']['OrderStageSummaryItemDto'];
+export type SchemaOrderStageSummaryDto = components['schemas']['OrderStageSummaryDto'];
 export type SchemaOrderItemMeasurementUnitDto = components['schemas']['OrderItemMeasurementUnitDto'];
 export type SchemaOrderItemProductDto = components['schemas']['OrderItemProductDto'];
 export type SchemaOrderItemDto = components['schemas']['OrderItemDto'];
 export type SchemaOrderDetailDto = components['schemas']['OrderDetailDto'];
+export type SchemaMoveOrderStageDto = components['schemas']['MoveOrderStageDto'];
 export type SchemaUpdateOrderStatusDto = components['schemas']['UpdateOrderStatusDto'];
 export type SchemaUpdatePaymentStatusDto = components['schemas']['UpdatePaymentStatusDto'];
 export type SchemaCreateOrderItemDto = components['schemas']['CreateOrderItemDto'];
@@ -11609,6 +11696,8 @@ export interface operations {
                 sortBy?: string;
                 sortOrder?: "asc" | "desc";
                 status?: "pending" | "confirmed" | "preparing" | "ready" | "completed" | "cancelled";
+                /** @description Стадия воронки (колонка канбана) */
+                stageId?: string;
                 paymentStatus?: "pending" | "paid" | "refunded";
                 memberId?: string;
                 /** @description Поиск по номеру заказа */
@@ -11644,6 +11733,73 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmOrders_stageSummary: {
+        parameters: {
+            query: {
+                /** @description Воронка заказов (stage category) */
+                categoryId: string;
+                paymentStatus?: "pending" | "paid" | "refunded";
+                memberId?: string;
+                /** @description Поиск по номеру заказа */
+                search?: string;
+                /** @description Начало периода */
+                startDate?: string;
+                /** @description Конец периода */
+                endDate?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderStageSummaryDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -11693,6 +11849,77 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmOrders_moveToStage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MoveOrderStageDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetailDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -11755,6 +11982,15 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -11834,6 +12070,8 @@ export interface operations {
                 sortBy?: string;
                 sortOrder?: "asc" | "desc";
                 status?: "pending" | "confirmed" | "preparing" | "ready" | "completed" | "cancelled";
+                /** @description Стадия воронки (колонка канбана) */
+                stageId?: string;
                 paymentStatus?: "pending" | "paid" | "refunded";
                 memberId?: string;
                 /** @description Поиск по номеру заказа */

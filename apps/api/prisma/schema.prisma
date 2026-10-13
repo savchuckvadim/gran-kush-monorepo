@@ -649,6 +649,8 @@ model GlobalStageTemplate {
   id                            String        @id @default(uuid())
   globalStageCategoryTemplateId String        @map("global_stage_category_template_id")
   name                          String        @db.VarChar(255)
+  /// переводы названия { es, ru, en }; дописывает стартовый синк подписей
+  nameI18n                      Json?         @map("name_i18n")
   sortOrder                     Int           @default(0) @map("sort_order")
   color                         String?       @db.VarChar(32)
   semantic                      StageSemantic
@@ -934,6 +936,8 @@ model Stage {
   id                String        @id @default(uuid())
   stageCategoryId   String        @map("stage_category_id")
   name              String        @db.VarChar(255)
+  /// переводы системного названия; клуб переименовал стадию — сбрасывается в null
+  nameI18n          Json?         @map("name_i18n")
   sortOrder         Int           @default(0) @map("sort_order")
   color             String?       @db.VarChar(32)
   semantic          StageSemantic

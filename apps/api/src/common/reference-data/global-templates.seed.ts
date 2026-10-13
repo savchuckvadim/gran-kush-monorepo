@@ -37,17 +37,20 @@ export interface GlobalStatusSetSeed {
     items: GlobalStatusItemSeed[];
 }
 
+export interface GlobalStageSeed {
+    /** Базовое название в БД — `nameI18n.en`. */
+    nameI18n: LabelTranslations;
+    sortOrder: number;
+    color: string | null;
+    semantic: StageSemantic;
+    isTerminalSuccess: boolean;
+    isTerminalFailure: boolean;
+}
+
 export interface GlobalStageCategorySeed {
     code: string;
     name: string;
-    stages: {
-        name: string;
-        sortOrder: number;
-        color: string | null;
-        semantic: StageSemantic;
-        isTerminalSuccess: boolean;
-        isTerminalFailure: boolean;
-    }[];
+    stages: GlobalStageSeed[];
 }
 
 export interface GlobalEntityTemplateSeed {
@@ -212,7 +215,7 @@ const ORDER_TEMPLATE: GlobalEntityTemplateSeed = {
             name: "Default funnel",
             stages: [
                 {
-                    name: "Pending",
+                    nameI18n: { es: "Pendiente", ru: "Ожидает", en: "Pending" },
                     sortOrder: 0,
                     color: "#64748b",
                     semantic: StageSemantic.NEW,
@@ -220,7 +223,7 @@ const ORDER_TEMPLATE: GlobalEntityTemplateSeed = {
                     isTerminalFailure: false,
                 },
                 {
-                    name: "Confirmed",
+                    nameI18n: { es: "Confirmado", ru: "Подтверждён", en: "Confirmed" },
                     sortOrder: 1,
                     color: "#2563eb",
                     semantic: StageSemantic.IN_PROGRESS,
@@ -228,7 +231,7 @@ const ORDER_TEMPLATE: GlobalEntityTemplateSeed = {
                     isTerminalFailure: false,
                 },
                 {
-                    name: "Preparing",
+                    nameI18n: { es: "Preparando", ru: "Готовится", en: "Preparing" },
                     sortOrder: 2,
                     color: "#7c3aed",
                     semantic: StageSemantic.IN_PROGRESS,
@@ -236,7 +239,7 @@ const ORDER_TEMPLATE: GlobalEntityTemplateSeed = {
                     isTerminalFailure: false,
                 },
                 {
-                    name: "Ready",
+                    nameI18n: { es: "Listo", ru: "Готов", en: "Ready" },
                     sortOrder: 3,
                     color: "#ca8a04",
                     semantic: StageSemantic.IN_PROGRESS,
@@ -244,7 +247,7 @@ const ORDER_TEMPLATE: GlobalEntityTemplateSeed = {
                     isTerminalFailure: false,
                 },
                 {
-                    name: "Completed",
+                    nameI18n: { es: "Completado", ru: "Завершён", en: "Completed" },
                     sortOrder: 4,
                     color: "#16a34a",
                     semantic: StageSemantic.SUCCESS,
@@ -252,7 +255,7 @@ const ORDER_TEMPLATE: GlobalEntityTemplateSeed = {
                     isTerminalFailure: false,
                 },
                 {
-                    name: "Cancelled",
+                    nameI18n: { es: "Cancelado", ru: "Отменён", en: "Cancelled" },
                     sortOrder: 5,
                     color: "#dc2626",
                     semantic: StageSemantic.FAILURE,
@@ -367,7 +370,8 @@ export async function ensureGlobalEntityTemplates(db: Db): Promise<void> {
                         hiddenInUi: false,
                         stages: {
                             create: c.stages.map((s) => ({
-                                name: s.name,
+                                name: s.nameI18n.en,
+                                nameI18n: s.nameI18n,
                                 sortOrder: s.sortOrder,
                                 color: s.color,
                                 semantic: s.semantic,

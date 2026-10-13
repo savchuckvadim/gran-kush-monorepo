@@ -8,13 +8,10 @@ import { ScanQrCode, UserPlus } from "lucide-react";
 
 import { Button } from "@workspace/ui";
 
-import { usePortalInfo } from "@/modules/entities/portal";
+import { usePortalRole } from "@/modules/entities/portal";
 import { RegistrationLinksDialog, type RegistrationLinksTab } from "@/modules/features";
-import { useAuth } from "@/modules/processes";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
-
-const MANAGING_ROLES = new Set(["portal_owner", "admin"]);
 
 /**
  * The two things done at the door: hand someone a sign-up link (owners and admins — the API
@@ -24,15 +21,11 @@ export function HeaderQuickActions() {
     const t = useTranslations("crm.shell.quick");
     const router = useRouter();
     const localizedLink = useLocalizedLink();
-    const { currentUser } = useAuth();
-    const { data: info } = usePortalInfo();
     const [linksOpen, setLinksOpen] = useState(false);
     const [linksTab, setLinksTab] = useState<RegistrationLinksTab>("issue");
 
-    const role = currentUser?.employments.find(
-        (employment) => employment.portalId === info?.portalId
-    )?.role;
-    const canIssueLinks = role !== undefined && MANAGING_ROLES.has(role);
+    // the API lets only owners and admins issue sign-up links
+    const { isAdmin: canIssueLinks } = usePortalRole();
 
     // a fresh value every time: the attendance page keys the scanner on it and opens it again
     const openScanner = () =>

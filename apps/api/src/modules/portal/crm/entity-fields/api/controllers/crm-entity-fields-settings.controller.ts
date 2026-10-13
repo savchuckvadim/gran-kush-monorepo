@@ -202,14 +202,17 @@ export class CrmEntityFieldsSettingsController {
     }
 
     @Get(":code/stage-categories")
-    @ApiOperation({ summary: "Entity funnel categories and stages" })
+    @ApiOperation({
+        summary: "Entity funnel categories and stages; stage names in the request language",
+    })
     @ApiSuccessResponse(OrderStageCategoryResponseDto, { isArray: true })
     @ApiErrorResponse([401, 403])
     async stageCategories(
         @PortalId() portalId: string,
-        @Param("code") code: string
+        @Param("code") code: string,
+        @RequestLocale() locale: ContentLocale
     ): Promise<OrderStageCategoryResponseDto[]> {
-        return this.stages.listStageCategories(portalId, code);
+        return this.stages.listStageCategories(portalId, code, locale);
     }
 
     @Post(":code/stage-categories")
@@ -221,9 +224,10 @@ export class CrmEntityFieldsSettingsController {
     async createStageCategory(
         @PortalId() portalId: string,
         @Param("code") code: string,
-        @Body() dto: CreateStageCategoryDto
+        @Body() dto: CreateStageCategoryDto,
+        @RequestLocale() locale: ContentLocale
     ): Promise<OrderStageCategoryResponseDto> {
-        return this.stages.createStageCategory(portalId, code, dto);
+        return this.stages.createStageCategory(portalId, code, dto, locale);
     }
 
     @Patch(":code/stage-categories/:categoryId")
@@ -239,9 +243,10 @@ export class CrmEntityFieldsSettingsController {
         @PortalId() portalId: string,
         @Param("code") code: string,
         @Param("categoryId") categoryId: string,
-        @Body() dto: UpdateStageCategoryDto
+        @Body() dto: UpdateStageCategoryDto,
+        @RequestLocale() locale: ContentLocale
     ): Promise<OrderStageCategoryResponseDto> {
-        return this.stages.updateStageCategory(portalId, code, categoryId, dto);
+        return this.stages.updateStageCategory(portalId, code, categoryId, dto, locale);
     }
 
     @Delete(":code/stage-categories/:categoryId")

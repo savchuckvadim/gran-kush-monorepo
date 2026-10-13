@@ -1,0 +1,63 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
+import { Loader2 } from "lucide-react";
+
+import { Card } from "@workspace/ui";
+
+import { funnelOfOrder, useOrderDetail, useOrderFunnels } from "@/modules/entities/order";
+import { usePortalRole } from "@/modules/entities/portal";
+import { OrderStageBar } from "@/modules/features/order-stage";
+
+import { OrderDetailHeader } from "./OrderDetailHeader";
+import { OrderItemsCard } from "./OrderItemsCard";
+import { OrderPaymentCard } from "./OrderPaymentCard";
+import { OrderSummaryCard } from "./OrderSummaryCard";
+
+interface OrderDetailProps {
+    orderId: string;
+}
+
+/** The order card: the stage bar across the top, details and payment on the left, items on the right. */
+export function OrderDetail({ orderId }: OrderDetailProps) {
+    const t = useTranslations("crm.orders.detail");
+    const { data: order, isLoading, error } = useOrderDetail(orderId);
+    const { data: funnels = [] } = useOrderFunnels();
+    const { isManager } = usePortalRole();
+
+    if (isLoading) {
+        return (
+            <Card className="p-6">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                    <span>{t("loading")}</span>
+                </div>
+            </Card>
+        );
+    }
+
+    if (error || !order) {
+        return (
+            <Card className="p-6">
+                <p className="text-destructive">{t("error")}</p>
+            </Card>
+        );
+    }
+
+    const funnel = funnelOfOrder(funnels, order.stage);
+
+    return (
+        <div className="space-y-4">
+            <OrderDetailHeader order={order} />
+            {funnel ? <OrderStageBar order={order} funnel={funnel} canMove={isManager} /> : null}
+            <div className="grid gap-4 lg:grid-cols-5">
+                <div className="space-y-4 lg:col-span-2">
+                    <OrderSummaryCard order={order} />
+                    <OrderPaymentCard order={order} canEdit={isManager} />
+                </div>
+                <OrderItemsCard items={order.items} className="lg:col-span-3" />
+            </div>
+        </div>
+    );
+}

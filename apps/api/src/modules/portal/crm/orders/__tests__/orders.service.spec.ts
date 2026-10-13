@@ -3,7 +3,6 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { Prisma } from "@prisma/client";
 
 import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
-import { OrderStagesService } from "@modules/portal/crm/entity-fields/application/services/order-stages.service";
 import { CreateOrderDto } from "@modules/portal/crm/orders/api/dto/order.dto";
 import { OrdersService } from "@modules/portal/crm/orders/application/services/orders.service";
 import {
@@ -28,17 +27,16 @@ const mockOrderRepository = {
     create: jest.fn(),
     update: jest.fn(),
     compareAndSetPaymentStatus: jest.fn(),
+    compareAndSetStage: jest.fn(),
+    findStageInPortal: jest.fn(),
+    findFunnelStages: jest.fn(),
+    summarizeByStage: jest.fn(),
     getLastOrderNumberWithPrefix: jest.fn(),
 };
 
 const mockProductsService = {
     findById: jest.fn(),
     adjustQuantity: jest.fn(),
-};
-
-const mockOrderStages = {
-    resolvePortalIdForMember: jest.fn(),
-    getStageIdForOrderStatus: jest.fn(),
 };
 
 const orderNumberConflict = (): Prisma.PrismaClientKnownRequestError =>
@@ -68,9 +66,6 @@ describe("OrdersService — номер заказа", () => {
         });
         mockProductsService.adjustQuantity.mockResolvedValue(undefined);
 
-        mockOrderStages.resolvePortalIdForMember.mockResolvedValue(PORTAL_A);
-        mockOrderStages.getStageIdForOrderStatus.mockResolvedValue("stage-1");
-
         mockOrderRepository.create.mockImplementation(
             (input: CreateOrderInput) =>
                 ({ id: "order-1", orderNumber: input.orderNumber }) as Order
@@ -81,7 +76,6 @@ describe("OrdersService — номер заказа", () => {
                 OrdersService,
                 { provide: OrderRepository, useValue: mockOrderRepository },
                 { provide: ProductsService, useValue: mockProductsService },
-                { provide: OrderStagesService, useValue: mockOrderStages },
             ],
         }).compile();
 
@@ -180,7 +174,6 @@ describe("OrdersService — переход статуса оплаты", () => {
                 OrdersService,
                 { provide: OrderRepository, useValue: mockOrderRepository },
                 { provide: ProductsService, useValue: mockProductsService },
-                { provide: OrderStagesService, useValue: mockOrderStages },
             ],
         }).compile();
 

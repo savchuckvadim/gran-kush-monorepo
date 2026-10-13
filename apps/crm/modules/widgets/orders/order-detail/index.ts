@@ -1,1 +1,1 @@
-export * from "./OrderDetailCard";
+export { OrderDetail } from "./OrderDetail";

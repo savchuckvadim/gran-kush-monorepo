@@ -1,5 +1,7 @@
 import { Prisma } from "@prisma/client";
 
+import type { OrderStage } from "./order-stage.entity";
+
 type Decimal = Prisma.Decimal;
 
 /**
@@ -96,6 +98,8 @@ export class Order {
     updatedAt: Date;
 
     // Relations (опционально загружаемые)
+    /** Стадия воронки; null — стадию удалили из воронки */
+    stage?: OrderStage | null;
     items?: OrderItem[];
     member?: {
         id: string;

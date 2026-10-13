@@ -1,12 +1,6 @@
-"use client";
+import { OrderDetailPage } from "@/modules/pages/orders";
 
-import { useParams } from "next/navigation";
-
-import { OrderDetailCard } from "@/modules/widgets/orders";
-
-export default function CrmOrderDetailPage() {
-    const params = useParams();
-    const id = params.id as string;
-
-    return <OrderDetailCard orderId={id} />;
+export default async function CrmOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    return <OrderDetailPage orderId={id} />;
 }

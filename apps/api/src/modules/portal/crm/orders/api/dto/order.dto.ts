@@ -1,5 +1,6 @@
-import { ApiProperty, ApiPropertyOptional, IntersectionType } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional, IntersectionType, PickType } from "@nestjs/swagger";
 
+import { StageSemantic } from "@prisma/client";
 import { Type } from "class-transformer";
 import {
     ArrayMinSize,
@@ -79,6 +80,33 @@ export class OrderEmployeeDto {
     surname?: string | null;
 }
 
+/** Стадия воронки, в которой стоит заказ (вложенная) */
+export class OrderStageDto {
+    @ApiProperty({ example: "550e8400-e29b-41d4-a716-446655440000", type: String })
+    id: string;
+
+    @ApiProperty({ example: "550e8400-e29b-41d4-a716-446655440000", type: String })
+    stageCategoryId: string;
+
+    @ApiProperty({ example: "Готовится", type: String, description: "На языке запроса" })
+    name: string;
+
+    @ApiProperty({ example: "#7c3aed", type: String, nullable: true })
+    color: string | null;
+
+    @ApiProperty({ enum: StageSemantic, example: StageSemantic.IN_PROGRESS })
+    semantic: StageSemantic;
+
+    @ApiProperty({ example: 2, type: Number })
+    sortOrder: number;
+
+    @ApiProperty({ example: false, type: Boolean })
+    isTerminalSuccess: boolean;
+
+    @ApiProperty({ example: false, type: Boolean })
+    isTerminalFailure: boolean;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // OrderItem Response DTO
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -117,11 +145,18 @@ export class OrderListDto {
     @ApiProperty({ example: "ORD-20260316-0001", type: String })
     orderNumber: string;
 
-    @ApiProperty({ enum: OrderStatus, example: OrderStatus.PENDING })
-    status: string;
+    @ApiProperty({
+        enum: OrderStatus,
+        example: OrderStatus.PENDING,
+        description: "Для старых клиентов: выводится из стадии; новым клиентам — `stage`",
+    })
+    status: OrderStatus;
+
+    @ApiProperty({ type: () => OrderStageDto, nullable: true })
+    stage: OrderStageDto | null;
 
     @ApiProperty({ enum: PaymentStatus, example: PaymentStatus.PENDING })
-    paymentStatus: string;
+    paymentStatus: PaymentStatus;
 
     @ApiProperty({ example: 38.75, type: Number })
     subtotal: number;
@@ -254,6 +289,20 @@ export class UpdateOrderStatusDto {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// Move Order To Stage (CRM)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export class MoveOrderStageDto {
+    @ApiProperty({
+        example: "550e8400-e29b-41d4-a716-446655440000",
+        type: String,
+        description: "Стадия из воронки заказов клуба",
+    })
+    @IsUUID()
+    stageId: string;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // Update Payment Status (CRM)
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -291,6 +340,15 @@ export class OrderFilterDto {
     @IsOptional()
     @IsEnum(OrderStatus)
     status?: OrderStatus;
+
+    @ApiPropertyOptional({
+        example: "550e8400-e29b-41d4-a716-446655440000",
+        type: String,
+        description: "Стадия воронки (колонка канбана)",
+    })
+    @IsOptional()
+    @IsUUID()
+    stageId?: string;
 
     @ApiPropertyOptional({
         enum: PaymentStatus,
@@ -335,6 +393,48 @@ export class OrderFilterDto {
 
 /** Один `@Query()` DTO на хендлер: два DTO на одном query несовместимы с forbidNonWhitelisted */
 export class OrderListQueryDto extends IntersectionType(PaginationDto, OrderFilterDto) {}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Stage Summary (CRM kanban)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class OrderFunnelRefDto {
+    @ApiProperty({
+        example: "550e8400-e29b-41d4-a716-446655440000",
+        type: String,
+        description: "Воронка заказов (stage category)",
+    })
+    @IsUUID()
+    categoryId: string;
+}
+
+/** Фильтры списка без стадии и статуса: колонки канбана и есть стадии */
+export class OrderStageSummaryQueryDto extends IntersectionType(
+    OrderFunnelRefDto,
+    PickType(OrderFilterDto, [
+        "paymentStatus",
+        "memberId",
+        "search",
+        "startDate",
+        "endDate",
+    ] as const)
+) {}
+
+export class OrderStageSummaryItemDto {
+    @ApiProperty({ example: "550e8400-e29b-41d4-a716-446655440000", type: String })
+    stageId: string;
+
+    @ApiProperty({ example: 12, type: Number })
+    count: number;
+
+    @ApiProperty({ example: 373.5, type: Number, description: "Сумма заказов стадии, €" })
+    total: number;
+}
+
+export class OrderStageSummaryDto {
+    @ApiProperty({ type: () => [OrderStageSummaryItemDto] })
+    stages: OrderStageSummaryItemDto[];
+}
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Cancel Order (Member)

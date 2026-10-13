@@ -8,14 +8,13 @@ import type { SchemaPresenceSessionDto } from "@workspace/api-client/core";
 import { Button, Card } from "@workspace/ui";
 
 import { useCurrentlyPresent, useManualCheckOut } from "@/modules/entities/presence";
+import { personName } from "@/modules/shared";
 
 function PresenceRow({ session }: { session: SchemaPresenceSessionDto }) {
     const t = useTranslations("crm.attendance.present");
     const checkOut = useManualCheckOut();
 
-    const memberName = session.member
-        ? `${session.member.name} ${session.member.surname ?? ""}`.trim()
-        : t("unknownMember");
+    const memberName = session.member ? personName(session.member, "") : t("unknownMember");
 
     const enteredAt = new Date(session.enteredAt);
     const durationMinutes = session.durationMinutes ?? 0;

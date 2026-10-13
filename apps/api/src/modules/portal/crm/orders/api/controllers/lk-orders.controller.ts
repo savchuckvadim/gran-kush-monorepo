@@ -13,6 +13,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { type ContentLocale, RequestLocale } from "@common/i18n";
 import { IdempotencyScope, Idempotent } from "@common/idempotency";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
@@ -54,10 +55,11 @@ export class LkOrdersController {
     @ApiErrorResponse([400, 401, 403, 404])
     async createOrder(
         @Body() dto: CreateOrderDto,
-        @CurrentMember() member: Member
+        @CurrentMember() member: Member,
+        @RequestLocale() locale: ContentLocale
     ): Promise<OrderDetailDto> {
         const order = await this.ordersService.createOrder(member.id, dto, member.portalId);
-        return mapOrderToDetailDto(order);
+        return mapOrderToDetailDto(order, locale);
     }
 
     // ─── Мои заказы ──────────────────────────────────────────────────────────
@@ -73,7 +75,8 @@ export class LkOrdersController {
     @ApiErrorResponse([401, 403])
     async listMyOrders(
         @Query() query: OrderListQueryDto,
-        @CurrentMember() member: Member
+        @CurrentMember() member: Member,
+        @RequestLocale() locale: ContentLocale
     ): Promise<PaginatedResult<OrderListDto>> {
         const { page = 1, limit = 10, sortBy, sortOrder, ...filters } = query;
         const skip = PaginationUtil.getSkip(page, limit);
@@ -86,7 +89,7 @@ export class LkOrdersController {
             this.ordersService.count(memberFilters),
         ]);
 
-        const items = orders.map(mapOrderToListDto);
+        const items = orders.map((order) => mapOrderToListDto(order, locale));
         return PaginationUtil.createPaginatedResult(items, total, page, limit);
     }
 
@@ -101,13 +104,14 @@ export class LkOrdersController {
     @ApiErrorResponse([401, 403, 404])
     async getMyOrder(
         @Param("id") id: string,
-        @CurrentMember() member: Member
+        @CurrentMember() member: Member,
+        @RequestLocale() locale: ContentLocale
     ): Promise<OrderDetailDto> {
         const order = await this.ordersService.findById(id);
         if (!order || order.memberId !== member.id) {
             throw new NotFoundException("Заказ не найден");
         }
-        return mapOrderToDetailDto(order);
+        return mapOrderToDetailDto(order, locale);
     }
 
     // ─── Отменить заказ ──────────────────────────────────────────────────────
@@ -115,14 +119,15 @@ export class LkOrdersController {
     @Patch(":id/cancel")
     @ApiOperation({
         summary: "Отменить заказ",
-        description: "Отмена возможна только в статусе 'pending'. Товары возвращаются на склад.",
+        description: "Отмена возможна, пока заказ в стадии «новый». Товары возвращаются на склад.",
     })
     @ApiSuccessResponse(OrderDetailDto)
     @ApiErrorResponse([400, 401, 403, 404])
     async cancelMyOrder(
         @Param("id") id: string,
         @Body() dto: CancelOrderDto,
-        @CurrentMember() member: Member
+        @CurrentMember() member: Member,
+        @RequestLocale() locale: ContentLocale
     ): Promise<OrderDetailDto> {
         const order = await this.ordersService.cancelOrderByMember(
             id,
@@ -130,6 +135,6 @@ export class LkOrdersController {
             member.portalId,
             dto.reason
         );
-        return mapOrderToDetailDto(order);
+        return mapOrderToDetailDto(order, locale);
     }
 }

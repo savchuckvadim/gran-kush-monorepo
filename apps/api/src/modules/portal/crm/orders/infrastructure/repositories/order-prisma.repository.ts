@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 
-import { Prisma } from "@prisma/client";
+import { Prisma, StageSemantic } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
@@ -16,26 +16,47 @@ import {
     PaymentStatus,
 } from "@modules/portal/crm/orders/domain/entity/order.entity";
 import {
+    OrderStage,
+    OrderStageSummary,
+} from "@modules/portal/crm/orders/domain/entity/order-stage.entity";
+import { legacyStatusOf } from "@modules/portal/crm/orders/domain/order-stage.rules";
+import {
     CreateOrderInput,
     OrderFilters,
     OrderRepository,
     UpdateOrderInput,
 } from "@modules/portal/crm/orders/domain/repositories/order-repository.interface";
-import { ORDER_INCLUDE } from "@modules/portal/crm/orders/infrastructure/prisma-includes";
+import {
+    ORDER_INCLUDE,
+    ORDER_STAGE_SELECT,
+    toOrderStage,
+} from "@modules/portal/crm/orders/infrastructure/prisma-includes";
 
 type OrderWithRelations = Prisma.OrderGetPayload<{ include: typeof ORDER_INCLUDE }>;
 
-const ORDER_STATUS_VALUES = new Set<string>(Object.values(OrderStatus));
-const PAYMENT_STATUS_VALUES = new Set<string>(Object.values(PaymentStatus));
+const PAYMENT_STATUS_VALUES: ReadonlySet<string> = new Set(Object.values(PaymentStatus));
 
-function coerceOrderStatus(raw: string): OrderStatus {
-    const v = raw.toLowerCase();
-    return ORDER_STATUS_VALUES.has(v) ? (v as OrderStatus) : OrderStatus.PENDING;
-}
+const isPaymentStatus = (raw: string): raw is PaymentStatus => PAYMENT_STATUS_VALUES.has(raw);
 
-function coercePaymentStatus(raw: string): PaymentStatus {
-    return PAYMENT_STATUS_VALUES.has(raw) ? (raw as PaymentStatus) : PaymentStatus.PENDING;
-}
+const coercePaymentStatus = (raw: string): PaymentStatus =>
+    isPaymentStatus(raw) ? raw : PaymentStatus.PENDING;
+
+/** Стадии воронок заказов портала: воронка принадлежит порталу и сущности `order`. */
+const orderFunnelWhere = (portalId: string): Prisma.StageCategoryWhereInput => ({
+    portalId,
+    entityDefinition: { code: ENTITY_DEFINITION_CODES.ORDER },
+});
+
+/** Старый статус → условие на стадию: закрытие — по семантике, рабочие — по имени. */
+const legacyStatusStageWhere = (status: OrderStatus): Prisma.StageWhereInput => {
+    if (status === OrderStatus.CANCELLED) {
+        return { OR: [{ semantic: StageSemantic.FAILURE }, { isTerminalFailure: true }] };
+    }
+    if (status === OrderStatus.COMPLETED) {
+        return { OR: [{ semantic: StageSemantic.SUCCESS }, { isTerminalSuccess: true }] };
+    }
+    return { name: { equals: status, mode: "insensitive" } };
+};
 
 @Injectable()
 export class OrderPrismaRepository extends OrderRepository {
@@ -162,8 +183,8 @@ export class OrderPrismaRepository extends OrderRepository {
     async compareAndSetPaymentStatus(input: {
         orderId: string;
         portalId: string;
-        from: string;
-        to: string;
+        from: PaymentStatus;
+        to: PaymentStatus;
         employeeId?: string;
     }): Promise<boolean> {
         const result = await this.prisma.order.updateMany({
@@ -180,17 +201,89 @@ export class OrderPrismaRepository extends OrderRepository {
         return result.count === 1;
     }
 
+    // ─── Перевод стадии (compare-and-set) ────────────────────────────────────
+
+    /**
+     * Стадия живёт на EntityRecord заказа. Один `UPDATE ... WHERE stage_id = from`: две
+     * параллельные отмены не пройдут обе, и товар не вернётся на склад дважды.
+     */
+    async compareAndSetStage(input: {
+        orderId: string;
+        portalId: string;
+        fromStageId: string | null;
+        toStageId: string;
+    }): Promise<boolean> {
+        const order = await this.prisma.order.findFirst({
+            where: { id: input.orderId, portalId: input.portalId },
+            select: { entityRecordId: true },
+        });
+        if (!order) return false;
+
+        const { count } = await this.prisma.entityRecord.updateMany({
+            where: { id: order.entityRecordId, stageId: input.fromStageId },
+            data: { stageId: input.toStageId },
+        });
+        return count === 1;
+    }
+
+    // ─── Стадии воронок заказов ──────────────────────────────────────────────
+
+    async findStageInPortal(portalId: string, stageId: string): Promise<OrderStage | null> {
+        const row = await this.prisma.stage.findFirst({
+            where: { id: stageId, stageCategory: orderFunnelWhere(portalId) },
+            select: ORDER_STAGE_SELECT,
+        });
+        return row ? toOrderStage(row) : null;
+    }
+
+    async findFunnelStages(
+        portalId: string,
+        stageCategoryId?: string | null
+    ): Promise<OrderStage[]> {
+        const rows = await this.prisma.stage.findMany({
+            where: {
+                stageCategory: {
+                    ...orderFunnelWhere(portalId),
+                    ...(stageCategoryId ? { id: stageCategoryId } : { isDefault: true }),
+                },
+            },
+            orderBy: { sortOrder: "asc" },
+            select: ORDER_STAGE_SELECT,
+        });
+        return rows.map(toOrderStage);
+    }
+
+    async summarizeByStage(
+        filters: OrderFilters,
+        stageIds: readonly string[]
+    ): Promise<OrderStageSummary[]> {
+        const base = this.buildWhere({ ...filters, stageId: undefined, status: undefined });
+        return Promise.all(
+            stageIds.map(async (stageId) => {
+                const aggregate = await this.prisma.order.aggregate({
+                    where: { ...base, entityRecord: { stageId } },
+                    _count: { _all: true },
+                    _sum: { total: true },
+                });
+                return {
+                    stageId,
+                    count: aggregate._count._all,
+                    total: Number(aggregate._sum.total ?? 0),
+                };
+            })
+        );
+    }
+
     // ─── Обновление заказа ───────────────────────────────────────────────────
 
     async update(id: string, data: UpdateOrderInput): Promise<Order> {
         const updateData: Prisma.OrderUpdateInput = {};
 
         if (data.employeeId !== undefined) {
-            if (data.employeeId === null) {
-                updateData.employee = { disconnect: true };
-            } else {
-                updateData.employee = { connect: { id: data.employeeId } };
-            }
+            updateData.employee =
+                data.employeeId === null
+                    ? { disconnect: true }
+                    : { connect: { id: data.employeeId } };
         }
         if (data.paymentStatus !== undefined) updateData.paymentStatus = data.paymentStatus;
         if (data.confirmedAt !== undefined) updateData.confirmedAt = data.confirmedAt;
@@ -202,25 +295,11 @@ export class OrderPrismaRepository extends OrderRepository {
         if (data.discount !== undefined) updateData.discount = new Prisma.Decimal(data.discount);
         if (data.total !== undefined) updateData.total = new Prisma.Decimal(data.total);
 
-        const row = await this.prisma.$transaction(async (tx) => {
-            // Стадия — единственный источник правды статуса, живёт на EntityRecord
-            if (data.stageId !== undefined) {
-                const order = await tx.order.findUniqueOrThrow({
-                    where: { id },
-                    select: { entityRecordId: true },
-                });
-                await tx.entityRecord.update({
-                    where: { id: order.entityRecordId },
-                    data: { stageId: data.stageId },
-                });
-            }
-            return tx.order.update({
-                where: { id },
-                data: updateData,
-                include: ORDER_INCLUDE,
-            });
+        const row = await this.prisma.order.update({
+            where: { id },
+            data: updateData,
+            include: ORDER_INCLUDE,
         });
-
         return this.mapToEntity(row);
     }
 
@@ -240,6 +319,7 @@ export class OrderPrismaRepository extends OrderRepository {
     // Private helpers
     // ═══════════════════════════════════════════════════════════════════════════
 
+    /** Новый заказ встаёт в первую рабочую стадию воронки по умолчанию. */
     private async resolveDefaultStageId(
         tx: Prisma.TransactionClient,
         portalId: string,
@@ -247,6 +327,7 @@ export class OrderPrismaRepository extends OrderRepository {
     ): Promise<string | null> {
         const stage = await tx.stage.findFirst({
             where: {
+                semantic: { in: [StageSemantic.NEW, StageSemantic.IN_PROGRESS] },
                 stageCategory: {
                     portalId,
                     entityDefinitionId,
@@ -267,11 +348,12 @@ export class OrderPrismaRepository extends OrderRepository {
         if (filters.portalId) where.portalId = filters.portalId;
         if (filters.memberId) where.memberId = filters.memberId;
         if (filters.employeeId) where.employeeId = filters.employeeId;
-        if (filters.status) {
-            where.entityRecord = {
-                stage: { name: { equals: filters.status, mode: "insensitive" } },
-            };
-        }
+
+        const record: Prisma.EntityRecordWhereInput = {};
+        if (filters.stageId) record.stageId = filters.stageId;
+        if (filters.status) record.stage = legacyStatusStageWhere(filters.status);
+        if (filters.stageId || filters.status) where.entityRecord = record;
+
         if (filters.paymentStatus) where.paymentStatus = filters.paymentStatus;
 
         // Поиск по номеру заказа
@@ -310,16 +392,15 @@ export class OrderPrismaRepository extends OrderRepository {
     // ─── Маппинг Prisma → Domain Entity ─────────────────────────────────────
 
     private mapToEntity(row: OrderWithRelations): Order {
-        const statusFromStage = row.entityRecord?.stage?.name
-            ? String(row.entityRecord.stage.name).toLowerCase()
-            : OrderStatus.PENDING;
+        const stage = row.entityRecord.stage ? toOrderStage(row.entityRecord.stage) : null;
 
         const order = new Order({
             id: row.id,
             memberId: row.memberId,
             employeeId: row.employeeId,
             orderNumber: row.orderNumber,
-            status: coerceOrderStatus(statusFromStage),
+            stage,
+            status: legacyStatusOf(stage),
             paymentStatus: coercePaymentStatus(row.paymentStatus),
             subtotal: row.subtotal,
             discount: row.discount,

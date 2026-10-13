@@ -2,6 +2,8 @@ import { Prisma } from "@prisma/client";
 
 import { PROFILE_NAME_FIELD_VALUES } from "@modules/portal/crm/entity-fields/lib/profile-name.select";
 
+import { ORDER_STAGE_SELECT } from "./order-stage.select";
+
 /**
  * Стандартный include: заказ, позиции, EntityRecord со стадией (источник правды статуса),
  * member-мост с профильными полями, employee с профильными полями.
@@ -26,9 +28,7 @@ export const ORDER_INCLUDE = {
     entityRecord: {
         select: {
             id: true,
-            stage: {
-                select: { id: true, name: true, color: true, semantic: true },
-            },
+            stage: { select: ORDER_STAGE_SELECT },
         },
     },
     member: {

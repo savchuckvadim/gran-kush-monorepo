@@ -52,6 +52,11 @@ describe("Content i18n: system labels follow Accept-Language (e2e)", () => {
             where: { key, statusSet: { portalId, code: "member_lifecycle" } },
         });
 
+    const orderStage = (name: string) =>
+        prisma.stage.findFirstOrThrow({
+            where: { name, stageCategory: { portalId, entityDefinition: { code: "order" } } },
+        });
+
     beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [AppModule],
@@ -181,10 +186,21 @@ describe("Content i18n: system labels follow Accept-Language (e2e)", () => {
             where: { id: pending.id },
             data: { labelI18n: Prisma.DbNull },
         });
+        const preparing = await orderStage("Preparing");
+        await prisma.stage.update({
+            where: { id: preparing.id },
+            data: { nameI18n: Prisma.DbNull },
+        });
 
         const first = await syncSystemLabelTranslations(prisma);
         expect(first.fieldDefinitions).toBeGreaterThanOrEqual(1);
         expect(first.statusItems).toBeGreaterThanOrEqual(1);
+        expect(first.stages).toBeGreaterThanOrEqual(1);
+        expect((await orderStage("Preparing")).nameI18n).toEqual({
+            es: "Preparando",
+            ru: "Готовится",
+            en: "Preparing",
+        });
 
         expect((await memberFirstName()).labelI18n).toEqual({
             es: "Nombre",
@@ -203,8 +219,10 @@ describe("Content i18n: system labels follow Accept-Language (e2e)", () => {
         expect(second).toEqual({
             templateFields: 0,
             templateStatusItems: 0,
+            templateStages: 0,
             fieldDefinitions: 0,
             statusItems: 0,
+            stages: 0,
         });
     });
 });

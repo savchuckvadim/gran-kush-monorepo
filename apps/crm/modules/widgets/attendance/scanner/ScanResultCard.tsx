@@ -7,6 +7,8 @@ import { LogIn, LogOut, RotateCcw } from "lucide-react";
 import type { SchemaCheckInResultDto } from "@workspace/api-client/core";
 import { Button } from "@workspace/ui";
 
+import { personName } from "@/modules/shared";
+
 interface ScanResultCardProps {
     result: SchemaCheckInResultDto;
     onReset: () => void;
@@ -22,9 +24,7 @@ export function ScanResultCard({ result, onReset }: ScanResultCardProps) {
 
     const isEntry = result.action === "entry";
     const session = result.session;
-    const memberName = session?.member
-        ? `${session.member.name} ${session.member.surname ?? ""}`.trim()
-        : t("unknownMember");
+    const memberName = session?.member ? personName(session.member, "") : t("unknownMember");
 
     return (
         <div className="space-y-4">

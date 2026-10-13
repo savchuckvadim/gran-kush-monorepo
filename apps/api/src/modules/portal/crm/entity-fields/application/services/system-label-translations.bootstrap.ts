@@ -18,8 +18,8 @@ export class SystemLabelTranslationsBootstrap implements OnApplicationBootstrap 
             const filled = await syncSystemLabelTranslations(this.prisma);
             this.logger.log(
                 `Label translations filled: ${filled.fieldDefinitions} fields, ` +
-                    `${filled.statusItems} statuses, ` +
-                    `${filled.templateFields + filled.templateStatusItems} template rows`
+                    `${filled.statusItems} statuses, ${filled.stages} stages, ` +
+                    `${filled.templateFields + filled.templateStatusItems + filled.templateStages} template rows`
             );
         } catch (error) {
             // Без переводов API работает на базовых подписях — старт из-за них не роняем

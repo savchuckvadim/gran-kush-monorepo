@@ -373,7 +373,8 @@
                     "paid": "Pagado",
                     "refunded": "Reembolsado"
                 },
-                "searchPlaceholder": "Número de pedido…"
+                "searchPlaceholder": "Número de pedido…",
+                "colStage": "Etapa"
             },
             "detail": {
                 "loading": "Cargando...",
@@ -412,7 +413,44 @@
                     "cash": "Efectivo",
                     "card": "Tarjeta",
                     "crypto": "Cripto"
-                }
+                },
+                "back": "A pedidos",
+                "employee": "Empleado"
+            },
+            "views": {
+                "label": "Vista",
+                "list": "Lista",
+                "kanban": "Kanban"
+            },
+            "funnel": "Embudo",
+            "stage": {
+                "label": "Etapa",
+                "noStage": "Sin etapa",
+                "barLabel": "Etapas del pedido",
+                "finish": "Cerrar",
+                "finishTitle": "¿Cómo terminó el pedido?",
+                "success": "Con éxito",
+                "failure": "No se realizó",
+                "readOnly": "Solo un gerente o un administrador puede cambiar la etapa",
+                "closed": "El pedido está cerrado: su etapa ya no se puede cambiar",
+                "conflict": "Alguien acaba de cambiar la etapa: mostramos la actual",
+                "forbidden": "Solo un gerente o un administrador puede cambiar la etapa",
+                "error": "No se pudo cambiar la etapa",
+                "closedToast": "Pedido {number}: «{stage}»",
+                "confirmSuccessTitle": "¿Cerrar el pedido {number}?",
+                "confirmSuccess": "El pedido pasará a «{stage}» y se cerrará: su etapa ya no se podrá cambiar.",
+                "confirmFailureTitle": "¿Cancelar el pedido {number}?",
+                "confirmFailure": "El pedido pasará a «{stage}» y se cerrará. El producto vuelve al stock.",
+                "confirm": "Mover",
+                "cancel": "Ahora no"
+            },
+            "kanban": {
+                "label": "Kanban de pedidos",
+                "empty": "Sin pedidos",
+                "loadMore": "Mostrar más",
+                "loadError": "No se pudieron cargar los pedidos",
+                "items": "{count, plural, one {# artículo} other {# artículos}}",
+                "noFunnel": "Los pedidos no tienen embudo. Configura las etapas en Ajustes → Entidades → Pedido."
             }
         },
         "finance": {

@@ -7,24 +7,28 @@ type Db = Prisma.TransactionClient;
 export interface SystemLabelSyncResult {
     templateFields: number;
     templateStatusItems: number;
+    templateStages: number;
     fieldDefinitions: number;
     statusItems: number;
+    stages: number;
 }
 
 /**
  * Дописывает переводы подписей из {@link GLOBAL_ENTITY_TEMPLATE_SEEDS} в уже созданные
- * шаблоны и в системные поля/статусы клубов, заведённых до появления переводов.
+ * шаблоны и в системные поля, статусы и стадии клубов, заведённых до появления переводов.
  *
- * Трогает только строки без перевода (`label_i18n IS NULL`) и с нетронутой базовой
- * подписью шаблона: если клуб переименовал статус, его слово остаётся на всех языках.
+ * Трогает только строки без перевода (`label_i18n` / `name_i18n IS NULL`) и с нетронутой базовой
+ * подписью шаблона: если клуб переименовал статус или стадию, его слово остаётся на всех языках.
  * Поэтому безопасно гонять на каждом старте.
  */
 export async function syncSystemLabelTranslations(db: Db): Promise<SystemLabelSyncResult> {
     const result: SystemLabelSyncResult = {
         templateFields: 0,
         templateStatusItems: 0,
+        templateStages: 0,
         fieldDefinitions: 0,
         statusItems: 0,
+        stages: 0,
     };
     const missing = { equals: Prisma.AnyNull };
 
@@ -76,6 +80,35 @@ export async function syncSystemLabelTranslations(db: Db): Promise<SystemLabelSy
                 });
                 result.templateStatusItems += templates.count;
                 result.statusItems += items.count;
+            }
+        }
+
+        for (const category of seed.stageCategories) {
+            for (const stage of category.stages) {
+                const untranslated = { name: stage.nameI18n.en, nameI18n: missing };
+                const data = { nameI18n: stage.nameI18n };
+                const templates = await db.globalStageTemplate.updateMany({
+                    where: {
+                        ...untranslated,
+                        globalStageCategoryTemplate: {
+                            code: category.code,
+                            globalEntityTemplate: { code: seed.code },
+                        },
+                    },
+                    data,
+                });
+                const stages = await db.stage.updateMany({
+                    where: {
+                        ...untranslated,
+                        stageCategory: {
+                            code: category.code,
+                            entityDefinition: { code: seed.code },
+                        },
+                    },
+                    data,
+                });
+                result.templateStages += templates.count;
+                result.stages += stages.count;
             }
         }
     }

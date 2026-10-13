@@ -373,7 +373,8 @@
                     "paid": "Paid",
                     "refunded": "Refunded"
                 },
-                "searchPlaceholder": "Order number…"
+                "searchPlaceholder": "Order number…",
+                "colStage": "Stage"
             },
             "detail": {
                 "loading": "Loading...",
@@ -412,7 +413,44 @@
                     "cash": "Cash",
                     "card": "Card",
                     "crypto": "Crypto"
-                }
+                },
+                "back": "Back to orders",
+                "employee": "Employee"
+            },
+            "views": {
+                "label": "View",
+                "list": "List",
+                "kanban": "Kanban"
+            },
+            "funnel": "Funnel",
+            "stage": {
+                "label": "Stage",
+                "noStage": "No stage",
+                "barLabel": "Order stages",
+                "finish": "Finish",
+                "finishTitle": "How did the order end?",
+                "success": "Done",
+                "failure": "Fell through",
+                "readOnly": "Only a manager or an admin can change the stage",
+                "closed": "The order is closed: its stage can no longer change",
+                "conflict": "Someone has just changed the stage — showing the current one",
+                "forbidden": "Only a manager or an admin can change the stage",
+                "error": "Could not change the stage",
+                "closedToast": "Order {number} — “{stage}”",
+                "confirmSuccessTitle": "Finish order {number}?",
+                "confirmSuccess": "The order moves to “{stage}” and closes: its stage can no longer change.",
+                "confirmFailureTitle": "Cancel order {number}?",
+                "confirmFailure": "The order moves to “{stage}” and closes. The goods go back to stock.",
+                "confirm": "Move",
+                "cancel": "Not now"
+            },
+            "kanban": {
+                "label": "Orders kanban",
+                "empty": "No orders",
+                "loadMore": "Show more",
+                "loadError": "Could not load the orders",
+                "items": "{count, plural, one {# item} other {# items}}",
+                "noFunnel": "Orders have no funnel. Set up the stages in Settings → Entities → Order."
             }
         },
         "finance": {

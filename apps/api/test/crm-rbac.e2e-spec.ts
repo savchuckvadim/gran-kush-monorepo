@@ -313,6 +313,17 @@ describe("CRM role-based access (e2e)", () => {
             expect(res.status).toBe(403);
         });
 
+        it("rejects order stage change by employee role", async () => {
+            const stage = await prisma.stage.findFirstOrThrow({
+                where: { stageCategory: { portalId, entityDefinition: { code: "order" } } },
+                select: { id: true },
+            });
+            const res = await as(employeeCookies)
+                .patch(`/crm/orders/${orderId}/stage`)
+                .send({ stageId: stage.id });
+            expect(res.status).toBe(403);
+        });
+
         it("rejects payment status change by employee role", async () => {
             const res = await as(employeeCookies)
                 .patch(`/crm/orders/${orderId}/payment`)

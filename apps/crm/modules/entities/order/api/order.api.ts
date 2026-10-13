@@ -1,113 +1,85 @@
-import type {
-    SchemaOrderDetailDto,
-    SchemaPaginatedResponseOrderListDto,
-} from "@workspace/api-client/core";
+import { assertOpenApiOk } from "@workspace/api-client/core";
 
 import { $api } from "@/modules/shared";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+import type {
+    OrderDetail,
+    OrderFunnel,
+    OrderPage,
+    OrdersFilter,
+    OrdersListParams,
+    OrderStageSummary,
+    PaymentStatus,
+} from "../model/order.types";
 
-export type OrderStatus =
-    | "pending"
-    | "confirmed"
-    | "preparing"
-    | "ready"
-    | "completed"
-    | "cancelled";
-export type PaymentStatus = "pending" | "paid" | "refunded";
+/** Code of the order entity in the funnel settings API. */
+const ORDER_ENTITY_CODE = "order";
 
-export interface OrdersFilter {
-    status?: OrderStatus;
-    paymentStatus?: PaymentStatus;
-    memberId?: string;
-    /** Part of the order number. */
-    search?: string;
-    /** ISO date-time bounds of `orderedAt`. */
-    startDate?: string;
-    endDate?: string;
-    page?: number;
-    limit?: number;
-}
+const DEFAULT_PAGE_SIZE = 20;
 
-// ─── API ─────────────────────────────────────────────────────────────────────
+const filterQuery = (filter: OrdersFilter) => ({
+    search: filter.search?.trim() || undefined,
+    paymentStatus: filter.paymentStatus,
+    memberId: filter.memberId,
+    startDate: filter.startDate,
+    endDate: filter.endDate,
+});
 
-/**
- * Список заказов (CRM)
- */
-export async function getOrders(
-    filters?: OrdersFilter
-): Promise<SchemaPaginatedResponseOrderListDto> {
+/** A page of orders; with `stageId` — one kanban column. */
+export async function getOrders(params: OrdersListParams = {}): Promise<OrderPage> {
     const response = await $api.GET("/crm/orders", {
         params: {
             query: {
-                status: filters?.status,
-                paymentStatus: filters?.paymentStatus,
-                memberId: filters?.memberId,
-                search: filters?.search?.trim() || undefined,
-                startDate: filters?.startDate,
-                endDate: filters?.endDate,
-                page: filters?.page ?? 1,
-                limit: filters?.limit ?? 20,
+                ...filterQuery(params),
+                stageId: params.stageId,
+                page: params.page ?? 1,
+                limit: params.limit ?? DEFAULT_PAGE_SIZE,
             },
         },
     });
-
-    if (!response.response.ok) {
-        throw new Error(`Failed to fetch orders: ${response.response.status}`);
-    }
-
-    return response.data as SchemaPaginatedResponseOrderListDto;
+    return assertOpenApiOk(response);
 }
 
-/**
- * Детали заказа
- */
-export async function getOrderById(id: string): Promise<SchemaOrderDetailDto> {
-    const response = await $api.GET("/crm/orders/{id}", {
+export async function getOrderById(id: string): Promise<OrderDetail> {
+    const response = await $api.GET("/crm/orders/{id}", { params: { path: { id } } });
+    return assertOpenApiOk(response);
+}
+
+/** Moves an order to a funnel stage (manager and up). */
+export async function moveOrderToStage(id: string, stageId: string): Promise<OrderDetail> {
+    const response = await $api.PATCH("/crm/orders/{id}/stage", {
         params: { path: { id } },
+        body: { stageId },
     });
-
-    if (!response.response.ok) {
-        throw new Error(`Failed to fetch order: ${response.response.status}`);
-    }
-
-    return response.data as SchemaOrderDetailDto;
+    return assertOpenApiOk(response);
 }
 
-/**
- * Обновить статус заказа
- */
-export async function updateOrderStatus(
-    id: string,
-    data: { status: OrderStatus }
-): Promise<SchemaOrderDetailDto> {
-    const response = await $api.PATCH("/crm/orders/{id}/status", {
-        params: { path: { id } },
-        body: data,
-    });
-
-    if (!response.response.ok) {
-        throw new Error(`Failed to update order status: ${response.response.status}`);
-    }
-
-    return response.data as SchemaOrderDetailDto;
-}
-
-/**
- * Обновить статус оплаты
- */
 export async function updatePaymentStatus(
     id: string,
-    data: { paymentStatus: PaymentStatus; paymentMethod?: string }
-): Promise<SchemaOrderDetailDto> {
+    body: { paymentStatus: PaymentStatus; paymentMethod?: string }
+): Promise<OrderDetail> {
     const response = await $api.PATCH("/crm/orders/{id}/payment", {
         params: { path: { id } },
-        body: data,
+        body,
     });
+    return assertOpenApiOk(response);
+}
 
-    if (!response.response.ok) {
-        throw new Error(`Failed to update payment: ${response.response.status}`);
-    }
+/** Count and total of orders per stage of a funnel — the kanban column headers. */
+export async function getOrderStageSummary(
+    funnelId: string,
+    filter: OrdersFilter
+): Promise<OrderStageSummary> {
+    const response = await $api.GET("/crm/orders/stages/summary", {
+        params: { query: { categoryId: funnelId, ...filterQuery(filter) } },
+    });
+    return assertOpenApiOk(response);
+}
 
-    return response.data as SchemaOrderDetailDto;
+/** Order funnels with their stages; stage names in the interface language. */
+export async function getOrderFunnels(): Promise<OrderFunnel[]> {
+    const response = await $api.GET("/crm/settings/entities/{code}/stage-categories", {
+        params: { path: { code: ORDER_ENTITY_CODE } },
+    });
+    return assertOpenApiOk(response);
 }
