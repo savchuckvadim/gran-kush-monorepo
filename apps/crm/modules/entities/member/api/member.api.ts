@@ -8,7 +8,7 @@ import {
     SchemaMemberLifecycleStatusItemDto,
 } from "@workspace/api-client/core";
 
-import { $api } from "@/modules/shared";
+import { $api, isApiErrorWithStatus } from "@/modules/shared";
 
 import { CrmMemberDetails, CrmMemberListPage, CrmMemberListParams } from "../type/member.type";
 
@@ -29,19 +29,23 @@ export async function getCrmMembers(params: CrmMemberListParams): Promise<CrmMem
 }
 
 export async function getCrmMemberById(memberId: string): Promise<CrmMemberDetails | null> {
-    const response = await $api.GET("/crm/members/{id}", {
-        params: {
-            path: { id: memberId },
-        },
-    });
-    if (!response.response.ok) {
-        if (response.response.status === 404) {
+    try {
+        const response = await $api.GET("/crm/members/{id}", {
+            params: {
+                path: { id: memberId },
+            },
+        });
+        if (!response.response.ok) {
+            throw new Error(`Failed to fetch member: ${response.response.status}`);
+        }
+
+        return response.data as CrmMemberDetails;
+    } catch (error) {
+        if (isApiErrorWithStatus(error, 404)) {
             return null;
         }
-        throw new Error(`Failed to fetch member: ${response.response.status}`);
+        throw error;
     }
-
-    return response.data as CrmMemberDetails;
 }
 
 export async function updateCrmMember(

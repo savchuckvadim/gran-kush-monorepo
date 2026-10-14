@@ -31,6 +31,8 @@ interface MemberDocumentEditModalProps {
     payloadKey?: "documentFirst" | "documentSecond";
     initialDocumentType?: string;
     currentPreviewUrl: string;
+    /** Подпись кнопки-триггера; без неё — общий «Редактировать». */
+    triggerLabel?: string;
 }
 
 export function MemberDocumentEditModal({
@@ -40,6 +42,7 @@ export function MemberDocumentEditModal({
     payloadKey,
     initialDocumentType = "passport",
     currentPreviewUrl,
+    triggerLabel,
 }: MemberDocumentEditModalProps) {
     const t = useTranslations("crm.members");
     const tEditor = useTranslations("crm.members.editor");
@@ -57,11 +60,9 @@ export function MemberDocumentEditModal({
 
     const identityDocumentIdFromPreviewUrl = (() => {
         // currentPreviewUrl example:
-        //   /crm/members/{memberId}/identity-documents/{documentId}/preview
+        //   /crm/members/{memberId}/documents/{documentId}/preview
         // allow full URL + optional query/hash
-        const match = currentPreviewUrl.match(
-            /identity-documents\/([^/?#]+)\/preview(?:[?#].*)?$/u
-        );
+        const match = currentPreviewUrl.match(/documents\/([^/?#]+)\/preview(?:[?#].*)?$/u);
         return match?.[1] ?? "";
     })();
 
@@ -131,6 +132,7 @@ export function MemberDocumentEditModal({
     return (
         <>
             <EditMemberDocumentButton
+                label={triggerLabel}
                 handleClick={() => {
                     setError(null);
                     setIsOpen(true);

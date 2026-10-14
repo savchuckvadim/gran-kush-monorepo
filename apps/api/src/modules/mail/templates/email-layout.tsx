@@ -29,8 +29,8 @@ const COLORS = {
     accent: "#ff5fa2",
     border: "#e6e6eb",
 } as const;
-/** Фирменный градиент сайта (--flow-stops) для тонкой полосы сверху карточки. */
-const FLOW_GRADIENT = "linear-gradient(90deg, #6c4dff, #ff4f9a, #ffb03b, #39c8ff)";
+/** Тонкая полоса сверху карточки: розовый → фиолетовый, без пёстрых стопов сайта. */
+const FLOW_GRADIENT = "linear-gradient(90deg, #ff5fa2, #6c4dff)";
 const FONT = "Geist, Inter, Arial, sans-serif";
 
 export interface EmailLayoutProps {

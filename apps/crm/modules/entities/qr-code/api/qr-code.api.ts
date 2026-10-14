@@ -5,26 +5,31 @@ import type {
     SchemaScanQrCodeDto,
 } from "@workspace/api-client/core";
 
-import { $api } from "@/modules/shared";
+import { $api, isApiErrorWithStatus } from "@/modules/shared";
 
 /**
- * Получить QR-код участника
+ * Получить QR-код участника. 404 — кода ещё нет, это не ошибка:
+ * карточка показывает кнопку «Сгенерировать».
  */
 export async function getQrCodeByMemberId(memberId: string): Promise<SchemaQrCodeDto | null> {
-    const response = await $api.GET("/crm/qr-codes/member/{memberId}", {
-        params: {
-            path: { memberId },
-        },
-    });
+    try {
+        const response = await $api.GET("/crm/qr-codes/member/{memberId}", {
+            params: {
+                path: { memberId },
+            },
+        });
 
-    if (!response.response.ok) {
-        if (response.response.status === 404) {
+        if (!response.response.ok) {
+            throw new Error(`Failed to fetch QR code: ${response.response.status}`);
+        }
+
+        return response.data as SchemaQrCodeDto;
+    } catch (error) {
+        if (isApiErrorWithStatus(error, 404)) {
             return null;
         }
-        throw new Error(`Failed to fetch QR code: ${response.response.status}`);
+        throw error;
     }
-
-    return response.data as SchemaQrCodeDto;
 }
 
 /**

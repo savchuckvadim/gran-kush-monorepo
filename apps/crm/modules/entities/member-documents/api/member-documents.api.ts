@@ -1,7 +1,10 @@
-import { SchemaCrmMemberAccountDocumentDto, SchemaCrmMemberFullDto } from "@workspace/api-client/core";
+import {
+    SchemaCrmMemberAccountDocumentDto,
+    SchemaCrmMemberFullDto,
+} from "@workspace/api-client/core";
 
 import type { CrmMemberDetails } from "@/modules/entities/member";
-import { $api } from "@/modules/shared";
+import { $api, isApiErrorWithStatus } from "@/modules/shared";
 
 /** Документ аккаунта (паспорт/ID) — совпадает с OpenAPI `CrmMemberAccountDocumentDto`. */
 export type IdentityDocument = SchemaCrmMemberAccountDocumentDto;
@@ -11,42 +14,59 @@ export interface Signature {
     createdAt: string;
 }
 
+/** 404 — файла ещё нет: в формах загрузки показываем плейсхолдер, не ошибку. */
 export async function getIdentityDocumentPreview(
     memberId: string,
     documentId: string
-): Promise<Blob> {
-    const response = await $api.GET("/crm/members/{id}/documents/{documentId}/preview", {
-        params: {
-            path: {
-                id: memberId,
-                documentId: documentId,
+): Promise<Blob | null> {
+    try {
+        const response = await $api.GET("/crm/members/{id}/documents/{documentId}/preview", {
+            params: {
+                path: {
+                    id: memberId,
+                    documentId: documentId,
+                },
             },
-        },
-        parseAs: "blob",
-    });
+            parseAs: "blob",
+        });
 
-    if (!response.response.ok) {
-        throw new Error(`Failed to fetch identity document preview: ${response.response.status}`);
+        if (!response.response.ok) {
+            throw new Error(
+                `Failed to fetch identity document preview: ${response.response.status}`
+            );
+        }
+
+        return response.data as Blob;
+    } catch (error) {
+        if (isApiErrorWithStatus(error, 404)) {
+            return null;
+        }
+        throw error;
     }
-
-    return response.data as Blob;
 }
 
-export async function getSignaturePreview(memberId: string): Promise<Blob> {
-    const response = await $api.GET("/crm/members/{id}/signature/preview", {
-        params: {
-            path: {
-                id: memberId,
+export async function getSignaturePreview(memberId: string): Promise<Blob | null> {
+    try {
+        const response = await $api.GET("/crm/members/{id}/signature/preview", {
+            params: {
+                path: {
+                    id: memberId,
+                },
             },
-        },
-        parseAs: "blob",
-    });
+            parseAs: "blob",
+        });
 
-    if (!response.response.ok) {
-        throw new Error(`Failed to fetch signature preview: ${response.response.status}`);
+        if (!response.response.ok) {
+            throw new Error(`Failed to fetch signature preview: ${response.response.status}`);
+        }
+
+        return response.data as Blob;
+    } catch (error) {
+        if (isApiErrorWithStatus(error, 404)) {
+            return null;
+        }
+        throw error;
     }
-
-    return response.data as Blob;
 }
 
 // Legacy functions for backward compatibility (return URL strings)
