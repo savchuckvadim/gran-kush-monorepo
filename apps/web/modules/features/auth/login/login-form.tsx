@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,6 +14,8 @@ import { useLogin } from "@/modules/entities/auth";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
+import { GoogleLoginButton } from "./google-login-button";
+
 const loginSchema = z.object({
     email: z.string().email("Invalid email"),
     password: z.string().min(8, "Password must be at least 8 characters"),
@@ -23,6 +26,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export function LoginForm() {
     const t = useTranslations("auth.login");
     const localizedLink = useLocalizedLink();
+    const urlError = useSearchParams().get("error");
     const {
         register,
         handleSubmit,
@@ -42,6 +46,11 @@ export function LoginForm() {
             {mutation.isError && (
                 <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
                     {mutation.error instanceof Error ? mutation.error.message : t("error")}
+                </div>
+            )}
+            {!mutation.isError && (urlError === "google_auth" || urlError === "google_off") && (
+                <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
+                    {urlError === "google_off" ? t("googleOff") : t("googleError")}
                 </div>
             )}
 
@@ -74,6 +83,8 @@ export function LoginForm() {
             <Button type="submit" className="w-full" disabled={isSubmitting || mutation.isPending}>
                 {isSubmitting || mutation.isPending ? t("submitting") : t("submit")}
             </Button>
+
+            <GoogleLoginButton />
 
             <div className="text-center text-sm text-muted-foreground">
                 {t("noAccount")}{" "}

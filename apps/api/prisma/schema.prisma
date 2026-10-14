@@ -33,6 +33,25 @@ enum UserAccountStatus {
   blocked
 }
 
+/// Внешний вход (Google и т.п.): провайдер подтвердил владение адресом,
+/// providerUserId — стабильный id у провайдера (Google `sub`).
+model UserIdentity {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  provider       String   @db.VarChar(50)
+  providerUserId String   @map("provider_user_id") @db.VarChar(255)
+  email          String?  @db.VarChar(255)
+  displayName    String?  @map("display_name") @db.VarChar(255)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+  @@map("user_identities")
+}
+
 enum PrincipalType {
   member
   employee
@@ -205,6 +224,7 @@ model User {
   refreshTokens        RefreshToken[]
   documents            UserDocument[]
   signature            UserSignature?
+  identities           UserIdentity[]
   portalReviews        PortalReview[]
   productReviews       ProductReview[]
   termsAcceptedPortals Portal[]        @relation("PortalTermsAcceptedBy")

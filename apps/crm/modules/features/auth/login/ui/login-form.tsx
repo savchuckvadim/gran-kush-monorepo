@@ -17,13 +17,16 @@ import { InvalidCredentialsError, useSubmitLoginForm } from "../hooks/useSubmitL
 import { resolveClubTarget } from "../lib/club-target";
 
 import { ClubPicker } from "./club-picker";
+import { GoogleLoginButton } from "./google-login-button";
 
 export function LoginForm() {
     const { t, register, handleSubmit, errors, isSubmitting } = useLoginForm();
     const locale = useLocale();
     const localizedLink = useLocalizedLink();
     const { portalSlug } = usePortal();
-    const from = useSearchParams().get("from");
+    const searchParams = useSearchParams();
+    const from = searchParams.get("from");
+    const urlError = searchParams.get("error");
 
     const session = useLoginSession();
     const login = useSubmitLoginForm(session.refetch);
@@ -68,6 +71,11 @@ export function LoginForm() {
                         : t("genericError")}
                 </div>
             )}
+            {!login.error && (urlError === "google_auth" || urlError === "google_off") && (
+                <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
+                    {urlError === "google_off" ? t("googleOff") : t("googleError")}
+                </div>
+            )}
 
             <FieldInput
                 label={t("email")}
@@ -100,6 +108,8 @@ export function LoginForm() {
             <Button type="submit" className="w-full" disabled={isPending}>
                 {isPending ? t("submitting") : t("submit")}
             </Button>
+
+            <GoogleLoginButton />
 
             <div className="text-center text-sm text-muted-foreground">
                 {t("noAccount")}{" "}

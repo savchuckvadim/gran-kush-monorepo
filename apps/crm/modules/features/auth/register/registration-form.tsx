@@ -85,6 +85,12 @@ const usePlanFromUrl = () => {
         : undefined;
 };
 
+/** Google-вход без клуба возвращает сюда с предзаполненным адресом. */
+const useEmailFromUrl = () => {
+    const email = useSearchParams().get("email");
+    return email && z.string().email().safeParse(email).success ? email : undefined;
+};
+
 const usePlanName = (planCode: string | undefined) =>
     useQuery({
         queryKey: ["billing-plans"],
@@ -100,6 +106,7 @@ export function RegistrationForm() {
     const router = useRouter();
     const localizedLink = useLocalizedLink();
     const planCode = usePlanFromUrl();
+    const prefilledEmail = useEmailFromUrl();
     const { data: planName } = usePlanName(planCode);
     const [slugEdited, setSlugEdited] = useState(false);
 
@@ -111,7 +118,7 @@ export function RegistrationForm() {
         formState: { errors, isSubmitting, isSubmitted },
     } = useForm<RegistrationFormData>({
         resolver: zodResolver(createRegistrationSchema(t)),
-        defaultValues: { slug: "", acceptTerms: false },
+        defaultValues: { slug: "", acceptTerms: false, email: prefilledEmail },
     });
 
     const slug = useWatch({ control, name: "slug" });

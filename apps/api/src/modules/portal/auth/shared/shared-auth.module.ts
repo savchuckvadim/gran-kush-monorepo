@@ -36,6 +36,7 @@ import { RefreshTokenPrismaRepository } from "@modules/portal/auth/shared/infras
         TokenIssuerService,
         MembershipGuard,
         RefreshTokenRepository,
+        ClaimedMembershipRepository,
         CookieModule,
     ],
 })

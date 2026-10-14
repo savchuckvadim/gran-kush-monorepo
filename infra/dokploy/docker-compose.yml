@@ -80,6 +80,10 @@ services:
       CORS_ORIGIN: https://crm.${DOMAIN:?set DOMAIN in Dokploy → Environment},https://club.${DOMAIN},https://admin.${DOMAIN}
       CRM_FRONTEND_URL: https://crm.${DOMAIN}
       MEMBER_FRONTEND_URL: https://club.${DOMAIN}
+      # Google OAuth redirect URIs are built from this base (README.md → «Вход через Google»)
+      API_PUBLIC_URL: https://api.${DOMAIN}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       CRM_AUTH_COOKIE_DOMAIN: .${DOMAIN}
       MEMBER_AUTH_COOKIE_DOMAIN: .${DOMAIN}
       MEMBER_ACCESS_COOKIE_NAME: member_access_token

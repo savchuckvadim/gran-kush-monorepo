@@ -18,7 +18,7 @@ export abstract class UserRepository {
     abstract update(
         id: string,
         data: Partial<{
-            passwordHash: string;
+            passwordHash: string | null;
             status: UserAccountStatus;
             displayName: string | null;
             isActive: boolean;

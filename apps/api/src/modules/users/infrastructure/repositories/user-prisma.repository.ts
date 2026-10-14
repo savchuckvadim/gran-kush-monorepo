@@ -84,7 +84,7 @@ export class UserPrismaRepository implements UserRepository {
     async update(
         id: string,
         data: Partial<{
-            passwordHash: string;
+            passwordHash: string | null;
             status: UserAccountStatus;
             displayName: string | null;
             isActive: boolean;
