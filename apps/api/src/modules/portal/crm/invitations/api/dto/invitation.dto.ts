@@ -119,15 +119,10 @@ export class AcceptInvitationResponseDto {
     @ApiProperty({
         type: Boolean,
         description:
-            "Новый аккаунт: сессии нет, на почту ушло подтверждение; вход — после него. Для существующего аккаунта false и токены ниже",
+            "Новый аккаунт: сессии нет, на почту ушло подтверждение; вход — после него. " +
+            "Для существующего аккаунта false, сессия выдана HttpOnly-куками CRM",
     })
     awaitingEmailConfirmation: boolean;
-
-    @ApiPropertyOptional({ example: "eyJhbGciOi...", type: String })
-    accessToken?: string;
-
-    @ApiPropertyOptional({ example: "eyJhbGciOi...", type: String })
-    refreshToken?: string;
 }
 
 export class RevokeInvitationResponseDto {

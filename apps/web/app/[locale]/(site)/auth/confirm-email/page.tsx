@@ -3,17 +3,22 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { Mail } from "lucide-react";
 
 import { Button, Card, FieldInput } from "@workspace/ui";
 
+import { resendConfirmationEmail } from "@/modules/entities/auth/api/auth.api";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
+const SUPPORTED_MAIL_LOCALES = ["ru", "es", "en"] as const;
+type MailLocale = (typeof SUPPORTED_MAIL_LOCALES)[number];
+
 export default function ConfirmEmailPage() {
     const t = useTranslations("auth.confirmEmail");
+    const locale = useLocale();
     const localizedLink = useLocalizedLink();
     const searchParams = useSearchParams();
     const [email, setEmail] = useState(searchParams.get("email") ?? "");
@@ -25,12 +30,14 @@ export default function ConfirmEmailPage() {
         setLoading(true);
 
         try {
-            // TODO: Implement API call to resend confirmation
-            console.log("Resend confirmation to:", email);
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            const mailLocale = SUPPORTED_MAIL_LOCALES.includes(locale as MailLocale)
+                ? (locale as MailLocale)
+                : undefined;
+            await resendConfirmationEmail({ email, locale: mailLocale });
             setSent(true);
         } catch {
-            // Handle error
+            // Ответ сервера одинаков для любого адреса; сетевую ошибку показываем той же карточкой
+            setSent(true);
         } finally {
             setLoading(false);
         }

@@ -68,6 +68,7 @@ export class EmployeeMobileAuthController {
     }
 
     @Post("logout")
+    @Throttle(AUTH_THROTTLE)
     @Public()
     @ApiOperation({ summary: "Logout (native)" })
     @ApiSuccessResponse(EmployeeLogoutResponseDto, {

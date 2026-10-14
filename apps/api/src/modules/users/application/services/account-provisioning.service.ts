@@ -65,6 +65,10 @@ export class AccountProvisioningService {
             return { user, created: true, claimed: false, claimByEmail: false };
         }
 
+        if (existing.status === UserAccountStatus.blocked) {
+            throw new UnauthorizedException("Account is blocked");
+        }
+
         if (existing.passwordHash === null) {
             if (!options.emailVerified) {
                 return { user: existing, created: false, claimed: false, claimByEmail: true };

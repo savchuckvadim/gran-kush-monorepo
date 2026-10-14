@@ -23,11 +23,11 @@ import { CurrentAuthUser } from "@common/decorators/auth/current-auth-user.decor
 import { Public } from "@common/decorators/auth/public.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { WebRefreshResponseDto } from "@modules/portal/auth/api/dto/web-refresh-response.dto";
 import { RequireUserJwt } from "@modules/portal/auth/members/api/decorators/require-member-jwt.decorator";
 import { MemberLoginDto } from "@modules/portal/auth/members/api/dto/member-login.dto";
 import { MemberLogoutResponseDto } from "@modules/portal/auth/members/api/dto/member-logout-response.dto";
 import { MemberMeResponseDto } from "@modules/portal/auth/members/api/dto/member-me-response.dto";
-import { MemberRefreshTokenResponseDto } from "@modules/portal/auth/members/api/dto/member-refresh-token-response.dto";
 import { MemberWebLoginResponseDto } from "@modules/portal/auth/members/api/dto/member-web-login-response.dto";
 import { MemberAuthService } from "@modules/portal/auth/members/application/services/member-auth.service";
 import { PasswordResetResponseDto } from "@modules/portal/auth/shared/api/dto/password-reset-response.dto";
@@ -76,14 +76,14 @@ export class MemberAuthController {
     @Throttle(AUTH_THROTTLE)
     @Public()
     @ApiOperation({ summary: "Refresh tokens (cookie refresh only, empty body)" })
-    @ApiSuccessResponse(MemberRefreshTokenResponseDto, {
-        description: "Token refreshed successfully",
+    @ApiSuccessResponse(WebRefreshResponseDto, {
+        description: "Token refreshed successfully (new pair in HttpOnly cookies only)",
     })
     @ApiErrorResponse([400, 401])
     async refresh(
         @Req() request: Request,
         @Res({ passthrough: true }) response: Response
-    ): Promise<MemberRefreshTokenResponseDto> {
+    ): Promise<WebRefreshResponseDto> {
         const tokenFromCookie = this.cookieService.getRefreshTokenFromRequestCookies(
             request.cookies as Record<string, unknown>,
             AUTH_GLOBAL_SCOPE.SITE
@@ -98,10 +98,12 @@ export class MemberAuthController {
             refreshToken: refreshed.refreshToken,
         });
 
-        return refreshed;
+        // Токены в тело не попадают: страница с XSS не должна уметь их читать
+        return { refreshed: true };
     }
 
     @Post("logout")
+    @Throttle(AUTH_THROTTLE)
     @Public()
     @ApiOperation({ summary: "Logout Member (site web)" })
     @ApiSuccessResponse(MemberLogoutResponseDto, {

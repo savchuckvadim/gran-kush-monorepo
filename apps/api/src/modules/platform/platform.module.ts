@@ -23,7 +23,7 @@ import { PlatformJwtStrategy } from "./auth/infrastructure/strategies/platform-j
             useFactory: (configService: ConfigService): JwtModuleOptions => {
                 const secret =
                     configService.get<string>(JWT_ENV_KEYS.PLATFORM_SECRET) ||
-                    `${configService.get<string>(JWT_ENV_KEYS.SECRET) || JWT_DEFAULTS.SECRET}:platform`;
+                    `${configService.getOrThrow<string>(JWT_ENV_KEYS.SECRET)}:platform`;
                 const expiresIn =
                     configService.get<string>(JWT_ENV_KEYS.PLATFORM_ACCESS_EXPIRES_IN) ||
                     JWT_DEFAULTS.PLATFORM_ACCESS_EXPIRES_IN;

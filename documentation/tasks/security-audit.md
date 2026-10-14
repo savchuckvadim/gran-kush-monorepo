@@ -537,19 +537,22 @@ Semgrep, Trivy, ZAP по OpenAPI).
 - [ ] Dokploy: `TRUST_PROXY_HOPS=2`, Cloudflare в режиме Full (не strict), allowlist IP Cloudflare
       нет — если сервер достижим напрямую, `X-Forwarded-For` подделывается (не подтверждено,
       проверить с Вадимом в панели)
-- [ ] CRM, кабинет и админка не ставят `frame-ancestors`/`X-Frame-Options`, CSP, HSTS, nosniff
-      (`next.config.mjs` всех трёх) — заголовки в `next.config` + `helmet` в API
+- [~] CRM, кабинет и админка: добавлен `Referrer-Policy: strict-origin-when-cross-origin`
+      (`next.config.mjs` всех трёх, `audit/auth-flow`, 2026-10-14) — токены сброса из URL не утекают
+      в Referer. Остальное открыто: `frame-ancestors`/`X-Frame-Options`, CSP, HSTS, nosniff +
+      `helmet` в API
 
-### TASK-668: сессионные токены `[ ]` P1
+### TASK-668: сессионные токены `[~]` P1
 
-- [ ] Refresh, reset и verification хранятся открытым текстом (`refresh-token.repository.ts:24`,
-      `email-verification.service.ts:59,139`) — хранить хеш
-- [ ] Повторное использование refresh не детектируется (`token-issuer.service.ts:69-106`) —
+- [x] Refresh хранится как SHA-256 (`refresh-token.repository.ts`, `audit/auth-flow`, 2026-10-14):
+      дамп таблицы не даёт готовых сессий; e2e `refresh tokens are stored hashed`. Reset и
+      verification — всё ещё открытым текстом (`email-verification.service.ts`) — хешировать
+- [x] Веб-refresh (`/crm/auth/refresh`, `/lk/auth/refresh`) больше не дублирует токены в JSON —
+      только HttpOnly-куки (`WebRefreshResponseDto`); мобильные `/mobile/` оставлены с JSON
+- [ ] Повторное использование refresh не детектируется (`token-issuer.service.ts`) —
       при реплее гасить семейство/устройство. e2e `refresh-reuse`
 - [ ] Refresh-cookie `Path=/`, `Domain=.paf-paf.app` — уходит на все поддомены, включая сайт
       Payload (`config-cookie.service.ts:70-74`): `Path` на маршрут refresh, домен точечно
-- [ ] Refresh-эндпоинты дублируют токены в JSON (`employee-auth.controller.ts:104`,
-      `member-auth.controller.ts:101`) — только cookie для web
 
 ### TASK-669: рантайм, зависимости, CI `[ ]` P1
 
@@ -573,9 +576,10 @@ Semgrep, Trivy, ZAP по OpenAPI).
       CLI-цепочки Prisma/Payload/drizzle и `braces` под sass (без фикса) — закрывать при
       обновлении Prisma и Payload; Trivy misconfig по Dockerfile (root, Node 20) — пункт выше
 - [ ] `ci.yml` без `permissions:`, actions не прибиты к SHA, SSH `StrictHostKeyChecking=accept-new`
-- [ ] Слабые дефолты вместо падения на старте: `ENCRYPTION_MASTER_KEY` → случайный ключ
-      (`encryption.service.ts:33`), `JWT_DEFAULTS.SECRET = "default-secret"`
-      (`jwt.constants.ts:17`), `PAYLOAD_SECRET || ""`, секрет платформенного JWT из `JWT_SECRET`
+- [~] Слабые дефолты вместо падения на старте: `JWT_DEFAULTS.SECRET = "default-secret"` удалён —
+      без `JWT_SECRET` приложение не стартует (`audit/auth-flow`, 2026-10-14). Остались:
+      `ENCRYPTION_MASTER_KEY` → случайный ключ (`encryption.service.ts:33`), `PAYLOAD_SECRET || ""`;
+      секрет платформенного JWT по-прежнему производный от `JWT_SECRET` (`:platform`)
 - [ ] Redis без пароля; dev-compose публикует Postgres и Redis на 0.0.0.0; лишний пакет `add` в
       зависимостях API
 
@@ -590,8 +594,9 @@ Semgrep, Trivy, ZAP по OpenAPI).
 - [ ] Лимиты длины: `publicDescription`, `coverImageUrl` (не проверяется как URL),
       `membershipNumber`; `items` заказа без максимума
 - [ ] Любой сотрудник создаёт участников и выпускает/отзывает QR — решить с Вадимом
-- [ ] CRM: слаг в URL без кодирования (`[portal]/layout.tsx:20`); `/crm/portals/resolve` без
-      слага — 500
+- [~] CRM: слаг в URL без кодирования (`[portal]/layout.tsx:20`) — открыто; `/crm/portals/resolve`
+      без слага — теперь 400, неизвестный слаг — 404, добавлены `@Public` и троттл
+      (`audit/auth-flow`, 2026-10-14; e2e `resolve endpoint answers 400/404`)
 
 ### Проверено 2026-10-12 и в порядке
 
@@ -603,6 +608,64 @@ Swagger выключен в проде; `.env` нет ни в истории git
 следующим запросом; токены сброса одноразовые, живут час; токены — 24–32 случайных байта.
 
 ---
+
+## Аудит auth-флоу 2026-10-14 (TASK-678, ветка `audit/auth-flow`)
+
+Третий проход: только аутентификация, от контроллеров и гвардов до фронтов и api-client.
+Матрица всех 47 контроллеров против гвардов — чисто, кроме пунктов ниже. Исправлено сразу
+(unit 292, e2e 241 зелёные, новые тесты в `security.e2e-spec.ts` → `auth audit 2026-10-14`):
+
+- **Refresh-токены** — SHA-256 в БД, веб-refresh без токенов в JSON (см. TASK-668 `[~]`);
+  `X-Device-Id` теперь шлёт api-client (uuid в localStorage) — одна строка на устройство
+  вместо строки на каждый вход; добавлен `AuthCronService`: ежедневная уборка протухших
+  и давно отозванных строк (раньше таблица росла бесконечно)
+- **Принятие приглашения существующим аккаунтом** выдавало access/refresh в JSON-теле
+  публичного ответа — теперь HttpOnly-куки CRM, в теле только `awaitingEmailConfirmation`
+- **`status = blocked` нигде не проверялся**: login, validate JWT, rotate, verifyEmail,
+  resetPassword и письма молча оживляли бы заблокированный аккаунт. Теперь блокировка
+  держится по всем путям (unit `email-verification.service.spec.ts`, e2e `a blocked account`)
+- **TTL refresh в БД** парсился только в днях: `JWT_REFRESH_TOKEN_EXPIRES_IN=24h` жил бы в БД
+  24 дня (подпись при ротации не перепроверяется — срок БД и был настоящим). Общий
+  `parseDurationToMs` для кук и токенов
+- **`JWT_DEFAULTS.SECRET`** удалён (см. TASK-669)
+- **Гонка регистрации** (двойной сабмит одного email/слага) давала 500 — теперь 409
+  (`member-registration.service.ts`, `portal-registration.service.ts`)
+- **Повторная отправка подтверждения**: участнику и приглашённому сотруднику некуда было
+  нажать «вышлите ещё раз» — вход уже запрещён, а resend требовал сессию. Добавлены публичные
+  `POST /lk/auth/member/confirm-email/resend` и `POST /crm/auth/confirm-email/resend-public`
+  (ответ не раскрывает существование адреса; e2e `the public resend endpoint`), страница
+  в кабинете подключена (была заглушка с TODO)
+- **api-client**: ретрай после 401 пересобирал Request из body-стрима без `duplex` —
+  TypeError, и POST после успешного refresh возвращал исходный 401. Теперь ретраится
+  сохранённый клон; не-401 ошибки ретрая идут как `ApiClientError`; на `/auth/login|refresh`
+  и `/public/*` refresh не дёргается; `console.log` убран
+- **Кабинет**: `/lk/auth/me` читал тело ответа дважды → ошибка без `status`, редирект на
+  логин по 401 не срабатывал; logout чистил кэш только при успехе и дёргал два redirect;
+  `?from=` на логине игнорировался (теперь только внутренние пути); язык письма сброса
+  не передавался
+- **CRM**: переключение клуба не чистило TanStack-кэш — ключи без слага секунду показывали
+  данные прошлого клуба; `/crm/portals/resolve` — 400/404 вместо 500 (TASK-670)
+- **Троттлинг**: все четыре `POST .../logout` были только под общим лимитом — добавлен AUTH
+- **Referrer-Policy** на всех трёх фронтах (TASK-667 `[~]`)
+
+Открыто (решить с Вадимом, без кода):
+
+- [ ] **Регистрация с чужим pending_claim email + контекст клуба** создаёт членство в клубе без
+      доказательства владения адресом (`member-registration.service.ts`, `registerViaLink`):
+      документы не открываются (TASK-664 держится), но членство и поля от «самозванца»
+      появляются, владельцу уходит account-setup. Вариант: членство из такого клейма держать
+      consent-pending до клейма аккаунта. Трогает киоск — нужно решение
+- [ ] **Существующий аккаунт не может зарегистрировать клуб**: `POST /platform/portals/register`
+      отвечает 409 на любой занятый email (плюс перебор email — часть TASK-665)
+- [ ] **Плоский employee** читает финансы (`/crm/finance/*`), превью документов и подписи
+      участников, список сотрудников; создаёт участников, QR, check-in (→ TASK-670 «решить
+      с Вадимом», теперь с полным списком)
+- [ ] **Админка**: refresh в api-client для admin бьёт в несуществующий `/api/crm/auth/refresh`;
+      мёртвые `AuthProvider`/`CrmLogout`/register-редирект в никуда — вычистить при рефакторинге
+- [ ] `@AllowUnconfirmed()` больше нигде не используется — убрать декоратор и ветку в гвардах
+      при рефакторинге auth
+- [ ] `TRUST_PROXY_HOPS=2` на проде за Cloudflare (повтор из TASK-667): иначе лимиты считают
+      всех клиентов одним IP Cloudflare
 
 ## Что проверено и оказалось в порядке
 

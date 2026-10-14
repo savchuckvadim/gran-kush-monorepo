@@ -526,4 +526,148 @@ describe("Security (e2e)", () => {
             expect((await memberLogin(email, "Squatter123")).status).toBe(201);
         });
     });
+
+    describe("auth audit 2026-10-14", () => {
+        /** Подтверждённый аккаунт участника с паролем — через ссылку-форму клуба A. */
+        const confirmedMember = async (label: string) => {
+            const email = `${label}-${suffix}@test.local`;
+            const link = await as(clubA)
+                .post("/crm/settings/registration-links")
+                .send({ name: `audit-${label}`, kind: "public_link" });
+            expect(link.status).toBe(201);
+            const signUp = await request(app.getHttpServer())
+                .post(`/public/reg-links/${link.body.token as string}/register`)
+                .send({ email, password: PASSWORD, fields: { first_name: label } });
+            expect(signUp.status).toBe(201);
+            const { emailVerificationToken, id } = await prisma.user.findUniqueOrThrow({
+                where: { email },
+            });
+            const confirmed = await request(app.getHttpServer())
+                .post("/lk/auth/member/confirm-email")
+                .send({ token: emailVerificationToken });
+            expect([200, 201]).toContain(confirmed.status);
+            return { email, userId: id };
+        };
+
+        it("accepting an invitation with the account password signs in through cookies only", async () => {
+            const user = await confirmedMember("invitee");
+            const invitation = await as(clubB)
+                .post("/crm/settings/invitations")
+                .send({ email: user.email, role: "employee" });
+            expect(invitation.status).toBe(201);
+
+            const accepted = await request(app.getHttpServer())
+                .post(`/public/invitations/${invitation.body.token as string}/accept`)
+                .send({ password: PASSWORD });
+            expect(accepted.status).toBe(201);
+            expect(accepted.body.awaitingEmailConfirmation).toBe(false);
+            expect(accepted.body).not.toHaveProperty("accessToken");
+            expect(accepted.body).not.toHaveProperty("refreshToken");
+
+            const cookies = cookieHeader(accepted);
+            expect(cookies).toContain("crm_access_token=");
+            const me = await request(app.getHttpServer())
+                .get("/crm/auth/me")
+                .set("Cookie", cookies);
+            expect(me.status).toBe(200);
+            expect(me.body.email).toBe(user.email);
+        });
+
+        it("refresh tokens are stored hashed and one device keeps one row", async () => {
+            const user = await confirmedMember("hashed");
+            const login = () =>
+                request(app.getHttpServer())
+                    .post("/lk/auth/login")
+                    .set("X-Device-Id", `audit-device-${suffix}`)
+                    .send({ email: user.email, password: PASSWORD });
+
+            const first = await login();
+            expect(first.status).toBe(201);
+            const rawRefresh = cookieHeader(first)
+                .split("; ")
+                .find((c) => c.startsWith("member_refresh_token="))
+                ?.split("=")[1];
+            expect(rawRefresh).toBeTruthy();
+
+            // Сырой токен в БД не лежит (TASK-668) — только его хеш
+            expect(
+                await prisma.refreshToken.findFirst({
+                    where: { token: decodeURIComponent(rawRefresh as string) },
+                })
+            ).toBeNull();
+            expect(await prisma.refreshToken.count({ where: { userId: user.userId } })).toBe(1);
+
+            // Повторный вход с того же устройства не плодит строк
+            expect((await login()).status).toBe(201);
+            expect(await prisma.refreshToken.count({ where: { userId: user.userId } })).toBe(1);
+
+            // Кука при этом рабочая
+            const refreshed = await request(app.getHttpServer())
+                .post("/lk/auth/refresh")
+                .set("Cookie", cookieHeader(await login()));
+            expect(refreshed.status).toBe(201);
+        });
+
+        it("a blocked account cannot sign in or recover through old links", async () => {
+            const user = await confirmedMember("blocked");
+            await prisma.user.update({
+                where: { id: user.userId },
+                data: { status: "blocked" },
+            });
+
+            const login = await request(app.getHttpServer())
+                .post("/lk/auth/login")
+                .send({ email: user.email, password: PASSWORD });
+            expect(login.status).toBe(401);
+            expect(login.body.message).toBe("Account is blocked");
+
+            // Сброс пароля отвечает как обычно, но токен не выписывает
+            const reset = await request(app.getHttpServer())
+                .post("/lk/auth/password/reset")
+                .send({ email: user.email });
+            expect(reset.status).toBe(201);
+            const after = await prisma.user.findUniqueOrThrow({ where: { id: user.userId } });
+            expect(after.resetPasswordToken).toBeNull();
+        });
+
+        it("the public resend endpoint answers the same for known and unknown emails", async () => {
+            const email = `resend-${suffix}@test.local`;
+            const link = await as(clubA)
+                .post("/crm/settings/registration-links")
+                .send({ name: "audit-resend", kind: "public_link" });
+            const signUp = await request(app.getHttpServer())
+                .post(`/public/reg-links/${link.body.token as string}/register`)
+                .send({ email, password: PASSWORD, fields: { first_name: "Resend" } });
+            expect(signUp.status).toBe(201);
+            await prisma.user.update({
+                where: { email },
+                data: { emailVerificationToken: null, emailVerificationExpiresAt: null },
+            });
+
+            const resend = (target: string) =>
+                request(app.getHttpServer())
+                    .post("/lk/auth/member/confirm-email/resend")
+                    .send({ email: target });
+
+            const known = await resend(email);
+            const unknown = await resend(`ghost-${suffix}@test.local`);
+            expect(known.status).toBe(201);
+            expect(unknown.status).toBe(201);
+            expect(known.body).toEqual(unknown.body);
+
+            const { emailVerificationToken } = await prisma.user.findUniqueOrThrow({
+                where: { email },
+            });
+            expect(emailVerificationToken).toBeTruthy();
+        });
+
+        it("resolve endpoint answers 400/404 instead of 500", async () => {
+            const missingSlug = await request(app.getHttpServer()).get("/crm/portals/resolve");
+            expect(missingSlug.status).toBe(400);
+            const unknown = await request(app.getHttpServer()).get(
+                `/crm/portals/resolve?slug=ghost-${suffix}`
+            );
+            expect(unknown.status).toBe(404);
+        });
+    });
 });

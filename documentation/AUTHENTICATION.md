@@ -1,6 +1,13 @@
 # Документация по аутентификации и авторизации
 
-> **Актуальная схема транспорта и API (2025):** веб-CRM и LK используют **HttpOnly cookies** и `credentials: "include"`; мобильные контроллеры — **`/crm/mobile/auth`**, **`/lk/mobile/auth`** с Bearer. Мультитенантность: заголовки **`X-Portal-Id` / `X-Portal-Slug`**, формат ошибок JSON — см. [HTTP API Contract](./backend/HTTP_API_CONTRACT.md). Ниже — развёрнутое описание потоков; при расхождении с кодом приоритет у репозитория и контракта.
+> **Документ устарел** (описывает схему до мульти-портального рефакторинга 2026-07) и будет
+> переписан при рефакторинге auth. Актуальные факты на 2026-10-14:
+> глобальный `User` без портала (`MULTI_PORTAL_ACCOUNTS_REFACTOR.md`), мосты `Member`/`Employee`
+> резолвит `MembershipGuard` по `X-Portal-Id`/`X-Portal-Slug`; refresh хранится в БД как SHA-256
+> и **ротируется** при каждом `/refresh` (одна строка на `X-Device-Id`); веб-refresh отдаёт новую
+> пару только в HttpOnly-куки, JSON-токены — только у `/crm/mobile/auth/*` и `/lk/mobile/auth/*`;
+> письма подтверждения/клейма — `documentation/backend/MAIL.md`; состояние дыр и фиксов —
+> `documentation/tasks/security-audit.md`. При расхождении с текстом ниже приоритет у кода.
 
 ## Обзор архитектуры
 

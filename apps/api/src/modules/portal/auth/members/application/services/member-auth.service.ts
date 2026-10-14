@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 
+import { UserAccountStatus } from "@prisma/client";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import * as bcrypt from "bcrypt";
 
@@ -32,6 +33,9 @@ export class MemberAuthService {
             throw new UnauthorizedException("Invalid credentials");
         }
         // После проверки пароля: иначе ответ выдавал бы, что адрес зарегистрирован (TASK-665).
+        if (user.status === UserAccountStatus.blocked) {
+            throw new UnauthorizedException("Account is blocked");
+        }
         // Пароль неподтверждённого аккаунта мог задать не владелец адреса (TASK-664)
         if (!user.isActive || !user.emailConfirmed) {
             throw new UnauthorizedException("Email not confirmed");
@@ -61,7 +65,7 @@ export class MemberAuthService {
         }
         try {
             const user = await this.userRepository.findById(payload.sub);
-            if (!user) {
+            if (!user || user.status === UserAccountStatus.blocked) {
                 return null;
             }
             if (!allowUnconfirmed && !user.isActive) {

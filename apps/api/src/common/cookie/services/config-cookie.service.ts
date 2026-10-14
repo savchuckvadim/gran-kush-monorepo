@@ -4,6 +4,7 @@ import { ConfigService } from "@nestjs/config";
 import { CookieOptions } from "express";
 
 import { AUTH_GLOBAL_SCOPE } from "@common/auth";
+import { parseDurationToMs } from "@common/time/duration.util";
 
 const MEMBER_AUTH_COOKIE_DOMAIN_ENV_KEY = "MEMBER_AUTH_COOKIE_DOMAIN";
 const CRM_AUTH_COOKIE_DOMAIN_ENV_KEY = "CRM_AUTH_COOKIE_DOMAIN";
@@ -29,16 +30,6 @@ const COOKIE_PATH_ROOT = "/";
 const BOOLEAN_TRUE_STRING = "true";
 const BOOLEAN_FALSE_STRING = "false";
 const NODE_ENV_PRODUCTION = "production";
-
-const DURATION_REGEX = /^(\d+)([smhd])$/;
-const DURATION_UNIT_SECONDS = "s";
-const DURATION_UNIT_MINUTES = "m";
-const DURATION_UNIT_HOURS = "h";
-
-const SECOND_IN_MS = 1000;
-const MINUTE_IN_MS = 60_000;
-const HOUR_IN_MS = 3_600_000;
-const DAY_IN_MS = 86_400_000;
 
 @Injectable()
 export class ConfigCookieService {
@@ -109,16 +100,18 @@ export class ConfigCookieService {
     }
 
     private accessTokenMaxAgeMs(): number {
-        return this.parseDurationToMs(
+        return parseDurationToMs(
             this.configService.get<string>(JWT_ACCESS_TOKEN_EXPIRES_IN_ENV_KEY) ||
-                DEFAULT_ACCESS_TOKEN_EXPIRES_IN
+                DEFAULT_ACCESS_TOKEN_EXPIRES_IN,
+            DEFAULT_DURATION_FALLBACK_MS
         );
     }
 
     private refreshTokenMaxAgeMs(): number {
-        return this.parseDurationToMs(
+        return parseDurationToMs(
             this.configService.get<string>(JWT_REFRESH_TOKEN_EXPIRES_IN_ENV_KEY) ||
-                DEFAULT_REFRESH_TOKEN_EXPIRES_IN
+                DEFAULT_REFRESH_TOKEN_EXPIRES_IN,
+            DEFAULT_DURATION_FALLBACK_MS
         );
     }
     private isSecureCookies(): boolean {
@@ -126,24 +119,5 @@ export class ConfigCookieService {
         if (explicit === BOOLEAN_TRUE_STRING) return true;
         if (explicit === BOOLEAN_FALSE_STRING) return false;
         return this.configService.get<string>(NODE_ENV_ENV_KEY) === NODE_ENV_PRODUCTION;
-    }
-
-    private parseDurationToMs(value: string): number {
-        const parsed = DURATION_REGEX.exec(value.trim());
-        if (!parsed) {
-            return DEFAULT_DURATION_FALLBACK_MS;
-        }
-
-        const amount = Number(parsed[1]);
-        const unit = parsed[2];
-        const multiplier =
-            unit === DURATION_UNIT_SECONDS
-                ? SECOND_IN_MS
-                : unit === DURATION_UNIT_MINUTES
-                  ? MINUTE_IN_MS
-                  : unit === DURATION_UNIT_HOURS
-                    ? HOUR_IN_MS
-                    : DAY_IN_MS;
-        return amount * multiplier;
     }
 }

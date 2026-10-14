@@ -30,6 +30,8 @@ export interface RegisterRequest {
 
 export interface PasswordResetRequest {
     email: string;
+    /** Язык письма и страницы по ссылке */
+    locale?: "ru" | "es" | "en";
 }
 
 export interface PasswordResetConfirm {
@@ -98,6 +100,24 @@ export async function confirmEmail(token: string): Promise<SchemaMemberConfirmEm
     }
 
     return response.data as SchemaMemberConfirmEmailResponseDto;
+}
+
+/**
+ * Повторная отправка письма подтверждения (публично, по email).
+ * Ответ всегда одинаковый — существование адреса не раскрывается.
+ */
+export async function resendConfirmationEmail(data: {
+    email: string;
+    locale?: "ru" | "es" | "en";
+}): Promise<void> {
+    const response = await $api.POST("/lk/auth/member/confirm-email/resend", {
+        body: data,
+    });
+
+    if (!response.response.ok) {
+        const err = (response as { error?: { message?: string } }).error;
+        throw new Error(err?.message ?? "Resend failed");
+    }
 }
 
 /**

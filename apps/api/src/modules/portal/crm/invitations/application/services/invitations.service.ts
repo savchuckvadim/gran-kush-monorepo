@@ -13,7 +13,7 @@ import { EmployeeInvitation, InvitationStatus } from "@prisma/client";
 import { AccountProvisioningService } from "@users/application/services/account-provisioning.service";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import * as bcrypt from "bcrypt";
-import { randomBytes, randomUUID } from "crypto";
+import { randomBytes } from "crypto";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
@@ -24,6 +24,12 @@ import { PORTAL_SUMMARY_SELECT } from "@modules/portal/crm/portals/infrastructur
 import { AcceptInvitationResponseDto, CreateInvitationDto } from "../../api/dto/invitation.dto";
 
 const INVITATION_TTL_DAYS = 7;
+
+/** Токены не попадают в тело ответа: контроллер кладёт их в HttpOnly-куки CRM. */
+export interface AcceptInvitationResult {
+    response: AcceptInvitationResponseDto;
+    tokens?: { accessToken: string; refreshToken: string };
+}
 
 type InvitationWithPortal = EmployeeInvitation & {
     portal: { id: string; name: string; displayName: string };
@@ -146,8 +152,9 @@ export class InvitationsService {
     async accept(
         token: string,
         dto: { password?: string; fields?: Record<string, unknown> },
-        language: SupportedLanguage
-    ): Promise<AcceptInvitationResponseDto> {
+        language: SupportedLanguage,
+        deviceId: string
+    ): Promise<AcceptInvitationResult> {
         const invitation = await this.getActiveByToken(token);
 
         // Токен знает и админ, который выдал приглашение, поэтому для аккаунта с паролем
@@ -221,19 +228,17 @@ export class InvitationsService {
                     error instanceof Error ? error.stack : String(error)
                 );
             }
-            return { ...base, awaitingEmailConfirmation: true };
+            return { response: { ...base, awaitingEmailConfirmation: true } };
         }
 
         const tokens = await this.employeeAuthService.generateTokens(
             { id: user.id, email: user.email },
-            randomUUID()
+            deviceId
         );
 
         return {
-            ...base,
-            awaitingEmailConfirmation: false,
-            accessToken: tokens.accessToken,
-            refreshToken: tokens.refreshToken,
+            response: { ...base, awaitingEmailConfirmation: false },
+            tokens,
         };
     }
 }

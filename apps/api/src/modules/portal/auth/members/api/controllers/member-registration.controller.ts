@@ -18,6 +18,9 @@ import { ApiSuccessResponse } from "@common/decorators/response/api-success-resp
 import { type ContentLocale, RequestLocale } from "@common/i18n";
 import { RegisterMemberResponseDto } from "@modules/portal/auth/members/api/dto/register-member-response.dto";
 import { MemberRegistrationService } from "@modules/portal/auth/members/application/services/member-registration.service";
+import { ResendEmailConfirmationPublicDto } from "@modules/portal/auth/shared/api/dto/resend-email-confirmation.dto";
+import { ResendEmailConfirmationResponseDto } from "@modules/portal/auth/shared/api/dto/resend-email-confirmation-response.dto";
+import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 import { FormSchemaService } from "@modules/portal/crm/entity-fields/application/services/form-schema.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
@@ -40,7 +43,8 @@ export class MemberRegistrationController {
         private readonly memberRegistrationUseCase: MemberRegistrationUseCase,
         private readonly memberRegistrationService: MemberRegistrationService,
         private readonly memberFilesService: MemberFilesService,
-        private readonly formSchemaService: FormSchemaService
+        private readonly formSchemaService: FormSchemaService,
+        private readonly emailVerificationService: EmailVerificationService
     ) {}
 
     @Get("registration-schema")
@@ -100,6 +104,26 @@ export class MemberRegistrationController {
             documentSecond: dto.documentSecond,
             signature: dto.signature,
         });
+    }
+
+    @Post("confirm-email/resend")
+    @Throttle(EMAIL_THROTTLE)
+    @Public()
+    @ApiOperation({
+        summary:
+            "Resend the confirmation email (public, by email). " +
+            "The response never says whether the address is registered",
+    })
+    @ApiSuccessResponse(ResendEmailConfirmationResponseDto, { status: 201 })
+    @ApiErrorResponse([400])
+    async resendConfirmEmail(
+        @Body() dto: ResendEmailConfirmationPublicDto
+    ): Promise<ResendEmailConfirmationResponseDto> {
+        await this.emailVerificationService.resendConfirmationByEmail(dto.email, {
+            app: "member",
+            language: dto.locale,
+        });
+        return { success: true, message: "Confirmation email sent" };
     }
 
     @Post("confirm-email")

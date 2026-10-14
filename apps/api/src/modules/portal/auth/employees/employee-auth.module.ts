@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+﻿import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtModule, JwtModuleOptions } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
@@ -41,7 +41,7 @@ import { EmployeeRegistrationUseCase } from "./application/use-cases/employee-re
                     configService.get<string>(JWT_ENV_KEYS.ACCESS_TOKEN_EXPIRES_IN) ||
                     JWT_DEFAULTS.ACCESS_TOKEN_EXPIRES_IN;
                 return {
-                    secret: configService.get<string>(JWT_ENV_KEYS.SECRET) || JWT_DEFAULTS.SECRET,
+                    secret: configService.getOrThrow<string>(JWT_ENV_KEYS.SECRET),
                     signOptions: {
                         expiresIn: expiresIn as unknown as number | undefined,
                     },

@@ -5,6 +5,7 @@ import { MemberJoinSource, UserAccountStatus } from "@prisma/client";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import * as bcrypt from "bcrypt";
 
+import { isUniqueViolationOn } from "@common/prisma/unique-violation";
 import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
 import { UploadMemberFilesDto } from "@modules/portal/crm/members/api/dto/upload-member-files.dto";
 import { JoinPortalService } from "@modules/portal/crm/members/application/services/join-portal.service";
@@ -57,17 +58,7 @@ export class MemberRegistrationService {
         }
 
         const claimByEmail = existing !== null;
-        const userId = existing
-            ? existing.id
-            : (
-                  await this.userRepository.create({
-                      email: dto.email,
-                      passwordHash: await bcrypt.hash(dto.password, 10),
-                      status: UserAccountStatus.active,
-                      isActive: false,
-                      emailConfirmed: false,
-                  })
-              ).id;
+        const userId = existing ? existing.id : (await this.createUser(dto)).id;
 
         let memberId: string | undefined;
         if (dto.portalId) {
@@ -102,6 +93,24 @@ export class MemberRegistrationService {
         }
 
         return { userId, email: dto.email.toLowerCase(), memberId };
+    }
+
+    /** Два одновременных запроса с одним email: гонка на unique-индексе — это 409, а не 500. */
+    private async createUser(dto: { email: string; password: string }): Promise<{ id: string }> {
+        try {
+            return await this.userRepository.create({
+                email: dto.email,
+                passwordHash: await bcrypt.hash(dto.password, 10),
+                status: UserAccountStatus.active,
+                isActive: false,
+                emailConfirmed: false,
+            });
+        } catch (error: unknown) {
+            if (isUniqueViolationOn(error, "email")) {
+                throw new ConflictException("User with this email already exists");
+            }
+            throw error;
+        }
     }
 
     /**

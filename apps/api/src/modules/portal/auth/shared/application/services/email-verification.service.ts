@@ -52,7 +52,7 @@ export class EmailVerificationService {
         options: AuthMailOptions = MEMBER_MAIL
     ): Promise<void> {
         const user = await this.userRepository.findById(userId);
-        if (!user || user.emailConfirmed) {
+        if (!user || user.emailConfirmed || user.status === UserAccountStatus.blocked) {
             return;
         }
 
@@ -85,6 +85,27 @@ export class EmailVerificationService {
     }
 
     /**
+     * Публичная повторная отправка письма подтверждения по email. Молчит про то,
+     * существует ли адрес: ответ один и тот же. Нужна тем, кто ещё не может войти
+     * (неподтверждённый участник или приглашённый сотрудник потерял письмо).
+     */
+    async resendConfirmationByEmail(email: string, options: AuthMailOptions): Promise<void> {
+        const user = await this.userRepository.findByEmail(email);
+        if (!user) {
+            return;
+        }
+        try {
+            await this.sendVerificationEmailToUserId(user.id, options);
+        } catch (error: unknown) {
+            // Ответ одинаков для любого адреса; сбой почты не должен его менять
+            this.logger.error(
+                `Resend confirmation for user ${user.id} was not queued`,
+                error instanceof Error ? error.stack : String(error)
+            );
+        }
+    }
+
+    /**
      * Подтверждение email по токену
      */
     async verifyEmail(token: string): Promise<{ success: boolean; message: string }> {
@@ -96,6 +117,11 @@ export class EmailVerificationService {
 
         if (!user.emailVerificationExpiresAt || user.emailVerificationExpiresAt < new Date()) {
             throw new UnauthorizedException("Verification token has expired");
+        }
+
+        // Заблокированный аккаунт ссылка из старого письма не реанимирует
+        if (user.status === UserAccountStatus.blocked) {
+            throw new UnauthorizedException("Account is blocked");
         }
 
         if (user.emailConfirmed) {
@@ -130,7 +156,7 @@ export class EmailVerificationService {
         options: AuthMailOptions & { portalName?: string }
     ): Promise<void> {
         const user = await this.userRepository.findByEmail(email);
-        if (!user || user.passwordHash !== null) {
+        if (!user || user.passwordHash !== null || user.status === UserAccountStatus.blocked) {
             return;
         }
 
@@ -167,8 +193,8 @@ export class EmailVerificationService {
     ): Promise<{ success: boolean; message: string }> {
         const user = await this.userRepository.findByEmail(email);
 
-        if (!user) {
-            // Не раскрываем, существует ли пользователь
+        // Не раскрываем, существует ли пользователь; блокировку сброс не снимает
+        if (!user || user.status === UserAccountStatus.blocked) {
             return {
                 success: true,
                 message: "If the email exists, a password reset link has been sent",
@@ -213,6 +239,10 @@ export class EmailVerificationService {
 
         if (!user.resetPasswordExpiresAt || user.resetPasswordExpiresAt < new Date()) {
             throw new UnauthorizedException("Reset token has expired");
+        }
+
+        if (user.status === UserAccountStatus.blocked) {
+            throw new UnauthorizedException("Account is blocked");
         }
 
         const passwordHash = await hash(newPassword, 10);

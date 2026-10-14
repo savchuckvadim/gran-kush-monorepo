@@ -558,7 +558,9 @@ describe("Cross-portal isolation (e2e)", () => {
             expect(byA.body.products).toEqual([]);
             // the multi-portal test above made the same user a member of A too: A finds its own member, never B's
             const memberByA = await search(portalA, `member-b-${suffix}`);
-            expect(memberByA.body.members.map((m: { id: string }) => m.id)).not.toContain(memberBId);
+            expect(memberByA.body.members.map((m: { id: string }) => m.id)).not.toContain(
+                memberBId
+            );
 
             const byB = await search(portalB, `Isolation Product ${suffix}`);
             expect(byB.body.products.map((p: { id: string }) => p.id)).toEqual([productBId]);

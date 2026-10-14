@@ -31,8 +31,8 @@ import {
     CreateEmployeeDto,
     CreateEmployeeResponseDto,
 } from "@modules/portal/crm/employees/api/dto/create-employee.dto";
-import { EmployeeListQueryDto } from "@modules/portal/crm/employees/api/dto/employee-list-query.dto";
 import { EmployeeListItemDto } from "@modules/portal/crm/employees/api/dto/employee-list.dto";
+import { EmployeeListQueryDto } from "@modules/portal/crm/employees/api/dto/employee-list-query.dto";
 import { UpdateEmployeeDto } from "@modules/portal/crm/employees/api/dto/update-employee.dto";
 import { mapEmployeeToListDto } from "@modules/portal/crm/employees/api/mappers";
 import { EmployeesService } from "@modules/portal/crm/employees/application/services/employees.service";

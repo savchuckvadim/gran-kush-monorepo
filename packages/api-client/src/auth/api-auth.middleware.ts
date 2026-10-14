@@ -3,9 +3,14 @@ import { Middleware } from "openapi-fetch";
 import type { ApiAuthStrategy } from "../client/client";
 import { parseApiErrorFromResponse } from "../errors/api-error";
 
+import { getOrCreateDeviceId } from "./api-auth.device-id";
 import { ApiRefreshHelper } from "./api-auth.refresh-helper";
 import { ApiTokensStorage } from "./api-auth.storage";
 import { ApiAuthType } from "./api-auth.type";
+
+/** 401 с этих маршрутов — ответ по существу (неверный пароль, протухший refresh), не повод рефрешить. */
+const isAuthEndpoint = (url: string): boolean =>
+    /\/auth\/(login|refresh|logout)(\?|$)/.test(url) || url.includes("/public/");
 
 export const getAuthMiddleware = (
     type: ApiAuthType,
@@ -21,6 +26,10 @@ export const getAuthMiddleware = (
             const slug = getPortalSlug?.();
             if (slug) {
                 request.headers.set("X-Portal-Slug", slug);
+            }
+            const deviceId = getOrCreateDeviceId();
+            if (deviceId) {
+                request.headers.set("X-Device-Id", deviceId);
             }
 
             if (authStrategy === "cookie") {
@@ -67,27 +76,40 @@ export const getAuthMiddleware = (
                 throw await parseApiErrorFromResponse(response);
             }
 
+            if (isAuthEndpoint(request.url)) {
+                return response;
+            }
+
             try {
                 await refreshHelper.makeToken();
+                // Ретраим сохранённый клон: его тело не прочитано. Сборка нового Request
+                // из body-стрима падала TypeError (нет duplex) — POST после refresh
+                // возвращал исходный 401, хотя refresh прошёл.
                 // @ts-expect-error - _retryRequest is not a property of Request
-                const originalRequest: Request = request._retryRequest;
-                const retryRequest = new Request(originalRequest.url, {
-                    method: originalRequest.method,
-                    headers: new Headers(originalRequest.headers),
-                    body: originalRequest.body,
-                });
-                if (authStrategy === "cookie") {
-                    return fetch(retryRequest, { credentials: "include" });
+                const retryRequest: Request = request._retryRequest;
+                const retried =
+                    authStrategy === "cookie"
+                        ? await fetch(retryRequest, { credentials: "include" })
+                        : await (async () => {
+                              retryRequest.headers.set(
+                                  "Authorization",
+                                  `Bearer ${storage.getAccessToken()}`
+                              );
+                              return fetch(retryRequest);
+                          })();
+                // Тот же контракт, что и у первого ответа: не-401 ошибки — ApiClientError
+                if (retried.ok || retried.status === 401) {
+                    return retried;
                 }
-                const accessToken = storage.getAccessToken();
-                retryRequest.headers.set("Authorization", `Bearer ${accessToken}`);
-                return fetch(retryRequest);
-            } catch {
-                // Refresh failed (e.g. refresh token missing). Clear stored tokens so client can redirect properly.
+                throw await parseApiErrorFromResponse(retried);
+            } catch (error) {
+                if (error && typeof error === "object" && "status" in error) {
+                    throw error;
+                }
+                // Refresh не прошёл (нет refresh-токена и т.п.): отдаём исходный 401
                 if (authStrategy === "token") {
                     storage.clearTokens();
                 }
-                console.log(`Failed to refresh access token: catch`);
                 return response;
             }
         },

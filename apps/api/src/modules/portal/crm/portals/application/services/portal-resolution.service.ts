@@ -71,12 +71,17 @@ export class PortalResolutionService {
             return this.ensureActive(portal);
         }
         if (slug) {
-            const portal = await this.prisma.portal.findUnique({
-                where: { name: slug.trim().toLowerCase() },
-            });
-            return this.ensureActive(portal);
+            return this.findActiveBySlug(slug);
         }
         return null;
+    }
+
+    /** 404 и для несуществующего, и для неактивного клуба — наружу разницу не показываем. */
+    async findActiveBySlug(slug: string) {
+        const portal = await this.prisma.portal.findUnique({
+            where: { name: slug.trim().toLowerCase() },
+        });
+        return this.ensureActive(portal);
     }
 
     private ensureActive<T extends { status: PortalStatus }>(portal: T | null): T {

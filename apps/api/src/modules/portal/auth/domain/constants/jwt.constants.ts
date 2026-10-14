@@ -11,10 +11,10 @@ export const JWT_ENV_KEYS = {
 } as const;
 
 /**
- * Значения по умолчанию для JWT
+ * Значения по умолчанию для JWT. Секрета среди них нет сознательно:
+ * JWT_SECRET обязан приходить из окружения, иначе приложение не стартует.
  */
 export const JWT_DEFAULTS = {
-    SECRET: "default-secret",
     ACCESS_TOKEN_EXPIRES_IN: "15m",
     REFRESH_TOKEN_EXPIRES_IN: "7d",
     PLATFORM_ACCESS_EXPIRES_IN: "8h",

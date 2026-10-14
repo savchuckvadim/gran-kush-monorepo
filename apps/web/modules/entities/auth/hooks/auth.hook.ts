@@ -24,6 +24,14 @@ export const authKeys = {
 /**
  * Login mutation
  */
+/** `?from=` уважается только как внутренний относительный путь — внешний open redirect не пройдёт. */
+const safeInternalPath = (from: string | null): string | null => {
+    if (!from || !from.startsWith("/") || from.startsWith("//") || from.includes("..")) {
+        return null;
+    }
+    return from;
+};
+
 export function useLogin() {
     const router = useRouter();
     const localizedLink = useLocalizedLink();
@@ -31,10 +39,12 @@ export function useLogin() {
 
     return useMutation({
         mutationFn: loginMember,
-        onSuccess: (data) => {
-            // Tokens are stored automatically by the API client middleware
+        onSuccess: () => {
+            // Сессия в HttpOnly-куках, клиент токенов не хранит.
+            // window, а не useSearchParams: без Suspense-границы тот ломает статическую сборку
             queryClient.invalidateQueries({ queryKey: authKeys.current() });
-            router.push(localizedLink(ROUTES.PROFILE));
+            const from = safeInternalPath(new URLSearchParams(window.location.search).get("from"));
+            router.push(from ?? localizedLink(ROUTES.PROFILE));
         },
     });
 }
@@ -47,8 +57,7 @@ export function useRegister() {
     const localizedLink = useLocalizedLink();
 
     return useMutation({
-        mutationFn: ({ data }: { data: RegisterRequest; force?: boolean }) =>
-            registerMember(data),
+        mutationFn: ({ data }: { data: RegisterRequest; force?: boolean }) => registerMember(data),
         onSuccess: (data, variables) => {
             // Redirect to email confirmation page
             router.push(
@@ -95,14 +104,15 @@ export function useLogout() {
 
     const logoutMutation = useMutation({
         mutationFn: logoutMember,
-        onSuccess: () => {
+        // Кэш чистим и при упавшем logout: куки на клиенте всё равно не наши,
+        // а показывать чужие данные после «выхода» нельзя
+        onSettled: () => {
             queryClient.clear();
-            router.push(localizedLink(ROUTES.LOGIN));
+            router.push(localizedLink(ROUTES.HOME));
         },
     });
     const logout = () => {
         logoutMutation.mutate();
-        router.push(localizedLink(ROUTES.HOME));
     };
     return { logout };
 }

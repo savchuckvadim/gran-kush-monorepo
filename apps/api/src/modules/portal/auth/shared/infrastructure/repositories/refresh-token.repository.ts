@@ -1,12 +1,19 @@
 import { Injectable } from "@nestjs/common";
 
 import { PrincipalType, RefreshToken } from "@prisma/client";
+import { createHash } from "crypto";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 import {
     RefreshTokenRepository,
     RefreshTokenWithUser,
 } from "@modules/portal/auth/shared/domain/repositories/refresh-token-repository.interface";
+
+/**
+ * В БД лежит только SHA-256 от refresh-токена (TASK-668): дамп таблицы не даёт
+ * готовых сессий. Сам токен живёт лишь в HttpOnly-куке или у нативного клиента.
+ */
+const hashToken = (token: string): string => createHash("sha256").update(token).digest("hex");
 
 @Injectable()
 export class RefreshTokenPrismaRepository implements RefreshTokenRepository {
@@ -19,11 +26,12 @@ export class RefreshTokenPrismaRepository implements RefreshTokenRepository {
         deviceId: string;
         expiresAt: Date;
     }): Promise<RefreshToken> {
-        const { principalType, userId, deviceId } = data;
+        const { principalType, userId, deviceId, expiresAt } = data;
+        const token = hashToken(data.token);
         return this.prisma.refreshToken.upsert({
             where: { principalType_userId_deviceId: { principalType, userId, deviceId } },
-            create: data,
-            update: { token: data.token, expiresAt: data.expiresAt, revoked: false },
+            create: { token, principalType, userId, deviceId, expiresAt },
+            update: { token, expiresAt, revoked: false },
         });
     }
 
@@ -33,7 +41,7 @@ export class RefreshTokenPrismaRepository implements RefreshTokenRepository {
     ): Promise<RefreshTokenWithUser | null> {
         return this.prisma.refreshToken.findFirst({
             where: {
-                token,
+                token: hashToken(token),
                 principalType,
                 revoked: false,
                 expiresAt: { gt: new Date() },
@@ -48,8 +56,13 @@ export class RefreshTokenPrismaRepository implements RefreshTokenRepository {
         next: { token: string; expiresAt: Date }
     ): Promise<boolean> {
         const { count } = await this.prisma.refreshToken.updateMany({
-            where: { id, token: currentToken, revoked: false, expiresAt: { gt: new Date() } },
-            data: { token: next.token, expiresAt: next.expiresAt },
+            where: {
+                id,
+                token: hashToken(currentToken),
+                revoked: false,
+                expiresAt: { gt: new Date() },
+            },
+            data: { token: hashToken(next.token), expiresAt: next.expiresAt },
         });
         return count === 1;
     }
@@ -80,7 +93,7 @@ export class RefreshTokenPrismaRepository implements RefreshTokenRepository {
     }
 
     async deleteByToken(token: string): Promise<{ count: number }> {
-        return this.prisma.refreshToken.deleteMany({ where: { token } });
+        return this.prisma.refreshToken.deleteMany({ where: { token: hashToken(token) } });
     }
 
     async deleteByUser(principalType: PrincipalType, userId: string): Promise<{ count: number }> {

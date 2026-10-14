@@ -1,12 +1,13 @@
 import { InjectQueue } from "@nestjs/bullmq";
 import { ConflictException, Injectable, Logger } from "@nestjs/common";
 
-import { EmployeeRole } from "@prisma/client";
+import { EmployeeRole, Prisma } from "@prisma/client";
 import { hash } from "bcrypt";
 import { Queue } from "bullmq";
 
 import { LEGAL_TERMS_VERSION } from "@common/legal/legal-terms";
 import { PrismaService } from "@common/prisma/prisma.service";
+import { isUniqueViolationOn } from "@common/prisma/unique-violation";
 import { buildJobId } from "@common/queue/job-options";
 import { BillingSettings } from "@modules/billing/application/billing-settings";
 import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
@@ -75,7 +76,8 @@ export class PortalRegistrationService {
 
         const passwordHash = await hash(dto.password, 10);
 
-        const created = await this.prisma.$transaction(async (tx) => {
+        // Гонка двух одинаковых регистраций: unique-индекс отвечает 409, а не 500
+        const created = await this.createPortalWithOwner(async (tx) => {
             const user = await tx.user.create({
                 data: {
                     email: normalizedEmail,
@@ -220,5 +222,22 @@ export class PortalRegistrationService {
             },
             tokens,
         };
+    }
+
+    /** Транзакция создания клуба с переводом гонки на unique-индексах в 409. */
+    private async createPortalWithOwner<T>(
+        run: (tx: Prisma.TransactionClient) => Promise<T>
+    ): Promise<T> {
+        try {
+            return await this.prisma.$transaction(run);
+        } catch (error: unknown) {
+            if (isUniqueViolationOn(error, "email")) {
+                throw new ConflictException("User with this email already exists");
+            }
+            if (isUniqueViolationOn(error, "name")) {
+                throw new ConflictException("Portal with this name already exists");
+            }
+            throw error;
+        }
     }
 }

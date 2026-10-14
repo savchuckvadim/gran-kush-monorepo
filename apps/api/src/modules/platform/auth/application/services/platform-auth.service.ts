@@ -5,7 +5,11 @@ import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
 
 import { PrismaService } from "@common/prisma/prisma.service";
-import { JWT_DEFAULTS, JWT_ENV_KEYS } from "@modules/portal/auth/domain/constants/jwt.constants";
+import {
+    JWT_DEFAULTS,
+    JWT_ENV_KEYS,
+    JWT_ERROR_MESSAGES,
+} from "@modules/portal/auth/domain/constants/jwt.constants";
 
 export type PlatformAdminJwtPayload = {
     sub: string;
@@ -50,9 +54,13 @@ export class PlatformAuthService {
             userId: user.id,
         };
 
+        const baseSecret = this.configService.get<string>(JWT_ENV_KEYS.SECRET);
         const secret =
             this.configService.get<string>(JWT_ENV_KEYS.PLATFORM_SECRET) ||
-            `${this.configService.get<string>(JWT_ENV_KEYS.SECRET) || JWT_DEFAULTS.SECRET}:platform`;
+            (baseSecret ? `${baseSecret}:platform` : undefined);
+        if (!secret) {
+            throw new Error(JWT_ERROR_MESSAGES.SECRET_NOT_CONFIGURED);
+        }
 
         const expiresIn =
             this.configService.get<string>(JWT_ENV_KEYS.PLATFORM_ACCESS_EXPIRES_IN) ||

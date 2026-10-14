@@ -486,6 +486,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/crm/auth/confirm-email/resend-public": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resend the confirmation email without a session (public, by email): an invited employee cannot sign in before confirming. The response never says whether the address is registered */
+        post: operations["EmployeeAuth_resendEmailConfirmationPublic"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/crm/auth/confirm-email/resend": {
         parameters: {
             query?: never;
@@ -803,6 +820,23 @@ export interface paths {
         put?: never;
         /** Queue account documents/signature upload (Site) */
         post: operations["MemberRegistration_uploadFiles"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/auth/member/confirm-email/resend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resend the confirmation email (public, by email). The response never says whether the address is registered */
+        post: operations["MemberRegistration_resendConfirmEmail"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2275,7 +2309,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Принять приглашение: новый аккаунт или существующий с его паролем + Employee. Аккаунт без пароля — 409 и письмо, чтобы задать пароль */
+        /** Принять приглашение: новый аккаунт или существующий с его паролем + Employee. Аккаунт без пароля — 409 и письмо, чтобы задать пароль. Сессия существующего аккаунта выдаётся HttpOnly-куками, токенов в теле нет */
         post: operations["PublicInvitations_accept"];
         delete?: never;
         options?: never;
@@ -2962,17 +2996,9 @@ export interface components {
              */
             deviceId: string;
         };
-        EmployeeRefreshTokenResponseDto: {
-            /**
-             * @description New access token
-             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-             */
-            accessToken: string;
-            /**
-             * @description New refresh token
-             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-             */
-            refreshToken: string;
+        WebRefreshResponseDto: {
+            /** @example true */
+            refreshed: boolean;
         };
         EmployeeLogoutResponseDto: {
             /**
@@ -3044,6 +3070,22 @@ export interface components {
             /** @example Email confirmed successfully */
             message: string;
         };
+        ResendEmailConfirmationPublicDto: {
+            /**
+             * @description Language of the email and of the page the link opens
+             * @example es
+             * @enum {string}
+             */
+            locale?: "ru" | "es" | "en";
+            /** @example user@example.com */
+            email: string;
+        };
+        ResendEmailConfirmationResponseDto: {
+            /** @example true */
+            success: boolean;
+            /** @example Confirmation email sent */
+            message: string;
+        };
         ResendEmailConfirmationDto: {
             /**
              * @description Language of the email and of the page the link opens
@@ -3051,12 +3093,6 @@ export interface components {
              * @enum {string}
              */
             locale?: "ru" | "es" | "en";
-        };
-        ResendEmailConfirmationResponseDto: {
-            /** @example true */
-            success: boolean;
-            /** @example Confirmation email sent */
-            message: string;
         };
         EmployeeAuthResponseDto: {
             /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
@@ -3071,6 +3107,18 @@ export interface components {
              * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
              */
             refreshToken?: string;
+        };
+        EmployeeRefreshTokenResponseDto: {
+            /**
+             * @description New access token
+             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
+            accessToken: string;
+            /**
+             * @description New refresh token
+             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
+            refreshToken: string;
         };
         RegisterEmployeeDto: {
             /** @example employee@example.com */
@@ -3117,18 +3165,6 @@ export interface components {
              */
             deviceId: string;
         };
-        MemberRefreshTokenResponseDto: {
-            /**
-             * @description New access token
-             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-             */
-            accessToken: string;
-            /**
-             * @description New refresh token (rotation)
-             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-             */
-            refreshToken: string;
-        };
         MemberLogoutResponseDto: {
             /**
              * @description Logout message
@@ -3161,6 +3197,18 @@ export interface components {
             /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
             refreshToken: string;
             user: components["schemas"]["MemberUserInfoDto"];
+        };
+        MemberRefreshTokenResponseDto: {
+            /**
+             * @description New access token
+             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
+            accessToken: string;
+            /**
+             * @description New refresh token (rotation)
+             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
+            refreshToken: string;
         };
         UploadMemberFilesDto: {
             /**
@@ -5143,12 +5191,8 @@ export interface components {
             employeeId: string;
             userId: string;
             portalSlug: string;
-            /** @description Новый аккаунт: сессии нет, на почту ушло подтверждение; вход — после него. Для существующего аккаунта false и токены ниже */
+            /** @description Новый аккаунт: сессии нет, на почту ушло подтверждение; вход — после него. Для существующего аккаунта false, сессия выдана HttpOnly-куками CRM */
             awaitingEmailConfirmation: boolean;
-            /** @example eyJhbGciOi... */
-            accessToken?: string;
-            /** @example eyJhbGciOi... */
-            refreshToken?: string;
         };
         RegistrationLinkPrefillDto: {
             /** @example socio@example.com */
@@ -5464,7 +5508,7 @@ export type SchemaEmployeeLoginDto = components['schemas']['EmployeeLoginDto'];
 export type SchemaEmployeePortalRoleDto = components['schemas']['EmployeePortalRoleDto'];
 export type SchemaEmployeeInfoDto = components['schemas']['EmployeeInfoDto'];
 export type SchemaEmployeeWebLoginResponseDto = components['schemas']['EmployeeWebLoginResponseDto'];
-export type SchemaEmployeeRefreshTokenResponseDto = components['schemas']['EmployeeRefreshTokenResponseDto'];
+export type SchemaWebRefreshResponseDto = components['schemas']['WebRefreshResponseDto'];
 export type SchemaEmployeeLogoutResponseDto = components['schemas']['EmployeeLogoutResponseDto'];
 export type SchemaEmployeeEmploymentDto = components['schemas']['EmployeeEmploymentDto'];
 export type SchemaEmployeeMeResponseDto = components['schemas']['EmployeeMeResponseDto'];
@@ -5473,20 +5517,22 @@ export type SchemaPasswordResetResponseDto = components['schemas']['PasswordRese
 export type SchemaResetPasswordDto = components['schemas']['ResetPasswordDto'];
 export type SchemaVerifyEmailDto = components['schemas']['VerifyEmailDto'];
 export type SchemaVerifyEmailResponseDto = components['schemas']['VerifyEmailResponseDto'];
-export type SchemaResendEmailConfirmationDto = components['schemas']['ResendEmailConfirmationDto'];
+export type SchemaResendEmailConfirmationPublicDto = components['schemas']['ResendEmailConfirmationPublicDto'];
 export type SchemaResendEmailConfirmationResponseDto = components['schemas']['ResendEmailConfirmationResponseDto'];
+export type SchemaResendEmailConfirmationDto = components['schemas']['ResendEmailConfirmationDto'];
 export type SchemaEmployeeAuthResponseDto = components['schemas']['EmployeeAuthResponseDto'];
 export type SchemaRefreshTokenDto = components['schemas']['RefreshTokenDto'];
+export type SchemaEmployeeRefreshTokenResponseDto = components['schemas']['EmployeeRefreshTokenResponseDto'];
 export type SchemaRegisterEmployeeDto = components['schemas']['RegisterEmployeeDto'];
 export type SchemaRegisterEmployeeResponseDto = components['schemas']['RegisterEmployeeResponseDto'];
 export type SchemaMemberLoginDto = components['schemas']['MemberLoginDto'];
 export type SchemaMemberUserInfoDto = components['schemas']['MemberUserInfoDto'];
 export type SchemaMemberWebLoginResponseDto = components['schemas']['MemberWebLoginResponseDto'];
-export type SchemaMemberRefreshTokenResponseDto = components['schemas']['MemberRefreshTokenResponseDto'];
 export type SchemaMemberLogoutResponseDto = components['schemas']['MemberLogoutResponseDto'];
 export type SchemaMemberMembershipDto = components['schemas']['MemberMembershipDto'];
 export type SchemaMemberMeResponseDto = components['schemas']['MemberMeResponseDto'];
 export type SchemaMemberAuthResponseDto = components['schemas']['MemberAuthResponseDto'];
+export type SchemaMemberRefreshTokenResponseDto = components['schemas']['MemberRefreshTokenResponseDto'];
 export type SchemaUploadMemberFilesDto = components['schemas']['UploadMemberFilesDto'];
 export type SchemaDynamicMemberRegistrationDto = components['schemas']['DynamicMemberRegistrationDto'];
 export type SchemaRegisteredUserInfoDto = components['schemas']['RegisteredUserInfoDto'];
@@ -6559,13 +6605,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Token refreshed successfully */
+            /** @description Token refreshed successfully (new pair in HttpOnly cookies only) */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["EmployeeRefreshTokenResponseDto"];
+                    "application/json": components["schemas"]["WebRefreshResponseDto"];
                 };
             };
             /** @description Bad Request */
@@ -6763,6 +6809,39 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmployeeAuth_resendEmailConfirmationPublic: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResendEmailConfirmationPublicDto"];
+            };
+        };
+        responses: {
+            /** @description Letter queued when the address matches an unconfirmed account */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResendEmailConfirmationResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7062,13 +7141,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Token refreshed successfully */
+            /** @description Token refreshed successfully (new pair in HttpOnly cookies only) */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MemberRefreshTokenResponseDto"];
+                    "application/json": components["schemas"]["WebRefreshResponseDto"];
                 };
             };
             /** @description Bad Request */
@@ -7456,6 +7535,39 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberRegistration_resendConfirmEmail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResendEmailConfirmationPublicDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResendEmailConfirmationResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -9861,10 +9973,7 @@ export interface operations {
     };
     PortalResolve_resolve: {
         parameters: {
-            query: {
-                /** @description Portal slug (name) */
-                slug: string;
-            };
+            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
@@ -9878,6 +9987,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PortalResolveResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
             /** @description Not Found */

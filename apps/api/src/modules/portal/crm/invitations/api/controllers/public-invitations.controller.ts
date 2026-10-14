@@ -1,10 +1,13 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, Headers, Param, Post, Res } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
+import type { Response } from "express";
 
+import { AUTH_GLOBAL_SCOPE, resolveDeviceIdFromHeaders } from "@common/auth";
 import { PUBLIC_TOKEN_THROTTLE } from "@common/config/throttler/throttler.config";
+import { AuthCookieService } from "@common/cookie/services/auth-cookie.service";
 import { Public } from "@common/decorators/auth/public.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
@@ -23,7 +26,8 @@ import {
 export class PublicInvitationsController {
     constructor(
         private readonly invitationsService: InvitationsService,
-        private readonly userRepository: UserRepository
+        private readonly userRepository: UserRepository,
+        private readonly cookieService: AuthCookieService
     ) {}
 
     @Get(":token")
@@ -47,15 +51,24 @@ export class PublicInvitationsController {
     @Throttle(PUBLIC_TOKEN_THROTTLE)
     @ApiOperation({
         summary:
-            "Принять приглашение: новый аккаунт или существующий с его паролем + Employee. Аккаунт без пароля — 409 и письмо, чтобы задать пароль",
+            "Принять приглашение: новый аккаунт или существующий с его паролем + Employee. " +
+            "Аккаунт без пароля — 409 и письмо, чтобы задать пароль. " +
+            "Сессия существующего аккаунта выдаётся HttpOnly-куками, токенов в теле нет",
     })
     @ApiSuccessResponse(AcceptInvitationResponseDto, { status: 201 })
     @ApiErrorResponse([400, 401, 404, 409])
     async accept(
         @Param("token") token: string,
         @Body() dto: AcceptInvitationDto,
-        @RequestLocale() locale: ContentLocale
+        @RequestLocale() locale: ContentLocale,
+        @Headers() headers: Record<string, string | string[] | undefined>,
+        @Res({ passthrough: true }) response: Response
     ): Promise<AcceptInvitationResponseDto> {
-        return this.invitationsService.accept(token, dto, locale);
+        const deviceId = resolveDeviceIdFromHeaders(headers);
+        const result = await this.invitationsService.accept(token, dto, locale, deviceId);
+        if (result.tokens) {
+            this.cookieService.setAuthCookies(response, AUTH_GLOBAL_SCOPE.CRM, result.tokens);
+        }
+        return result.response;
     }
 }

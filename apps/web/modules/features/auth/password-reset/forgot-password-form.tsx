@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -21,6 +21,7 @@ type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
 export function ForgotPasswordForm() {
     const t = useTranslations("auth.forgotPassword");
+    const locale = useLocale();
     const localizedLink = useLocalizedLink();
     const {
         register,
@@ -33,7 +34,11 @@ export function ForgotPasswordForm() {
     const mutation = usePasswordResetRequest();
 
     const onSubmit = (data: ForgotPasswordFormData) => {
-        mutation.mutate(data);
+        // Язык письма: иначе бэкенд шлёт на языке по умолчанию
+        const mailLocale = ["ru", "es", "en"].includes(locale)
+            ? (locale as "ru" | "es" | "en")
+            : undefined;
+        mutation.mutate({ ...data, locale: mailLocale });
     };
 
     if (mutation.isSuccess) {

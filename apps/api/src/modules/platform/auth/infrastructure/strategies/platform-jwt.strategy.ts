@@ -8,7 +8,7 @@ import {
     PlatformAdminJwtPayload,
     PlatformAuthService,
 } from "@modules/platform/auth/application/services/platform-auth.service";
-import { JWT_DEFAULTS, JWT_ENV_KEYS } from "@modules/portal/auth/domain/constants/jwt.constants";
+import { JWT_ENV_KEYS } from "@modules/portal/auth/domain/constants/jwt.constants";
 
 @Injectable()
 export class PlatformJwtStrategy extends PassportStrategy(Strategy, "platform-jwt") {
@@ -23,7 +23,7 @@ export class PlatformJwtStrategy extends PassportStrategy(Strategy, "platform-jw
             ignoreExpiration: false,
             secretOrKey:
                 configService.get<string>(JWT_ENV_KEYS.PLATFORM_SECRET) ||
-                `${configService.get<string>(JWT_ENV_KEYS.SECRET) || JWT_DEFAULTS.SECRET}:platform`,
+                `${configService.getOrThrow<string>(JWT_ENV_KEYS.SECRET)}:platform`,
         });
         /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
     }

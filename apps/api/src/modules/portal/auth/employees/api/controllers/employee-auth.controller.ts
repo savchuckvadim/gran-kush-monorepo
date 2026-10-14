@@ -22,16 +22,19 @@ import { CurrentAuthUser } from "@common/decorators/auth/current-auth-user.decor
 import { Public } from "@common/decorators/auth/public.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { WebRefreshResponseDto } from "@modules/portal/auth/api/dto/web-refresh-response.dto";
 import { RequireEmployeeUserJwt } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
 import { EmployeeLoginDto } from "@modules/portal/auth/employees/api/dto/employee-login.dto";
 import { EmployeeLogoutResponseDto } from "@modules/portal/auth/employees/api/dto/employee-logout-response.dto";
 import { EmployeeMeResponseDto } from "@modules/portal/auth/employees/api/dto/employee-me-response.dto";
-import { EmployeeRefreshTokenResponseDto } from "@modules/portal/auth/employees/api/dto/employee-refresh-token-response.dto";
 import { EmployeeWebLoginResponseDto } from "@modules/portal/auth/employees/api/dto/employee-web-login-response.dto";
 import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
 import { PasswordResetResponseDto } from "@modules/portal/auth/shared/api/dto/password-reset-response.dto";
 import { RequestPasswordResetDto } from "@modules/portal/auth/shared/api/dto/request-password-reset.dto";
-import { ResendEmailConfirmationDto } from "@modules/portal/auth/shared/api/dto/resend-email-confirmation.dto";
+import {
+    ResendEmailConfirmationDto,
+    ResendEmailConfirmationPublicDto,
+} from "@modules/portal/auth/shared/api/dto/resend-email-confirmation.dto";
 import { ResendEmailConfirmationResponseDto } from "@modules/portal/auth/shared/api/dto/resend-email-confirmation-response.dto";
 import { ResetPasswordDto } from "@modules/portal/auth/shared/api/dto/reset-password.dto";
 import { VerifyEmailDto } from "@modules/portal/auth/shared/api/dto/verify-email.dto";
@@ -79,14 +82,14 @@ export class EmployeeAuthController {
     @Throttle(AUTH_THROTTLE)
     @Public()
     @ApiOperation({ summary: "Refresh tokens (cookie refresh only, empty body)" })
-    @ApiSuccessResponse(EmployeeRefreshTokenResponseDto, {
-        description: "Token refreshed successfully",
+    @ApiSuccessResponse(WebRefreshResponseDto, {
+        description: "Token refreshed successfully (new pair in HttpOnly cookies only)",
     })
     @ApiErrorResponse([400, 401])
     async refresh(
         @Req() request: Request,
         @Res({ passthrough: true }) response: Response
-    ): Promise<EmployeeRefreshTokenResponseDto> {
+    ): Promise<WebRefreshResponseDto> {
         const tokenFromCookie = this.cookieService.getRefreshTokenFromRequestCookies(
             request.cookies as Record<string, unknown>,
             AUTH_GLOBAL_SCOPE.CRM
@@ -101,10 +104,12 @@ export class EmployeeAuthController {
             refreshToken: refreshed.refreshToken,
         });
 
-        return refreshed;
+        // Токены в тело не попадают: страница с XSS не должна уметь их читать
+        return { refreshed: true };
     }
 
     @Post("logout")
+    @Throttle(AUTH_THROTTLE)
     @Public()
     @ApiOperation({ summary: "Logout employee (CRM web)" })
     @ApiSuccessResponse(EmployeeLogoutResponseDto, {
@@ -189,6 +194,29 @@ export class EmployeeAuthController {
     @ApiErrorResponse([400, 404, 401])
     async confirmEmail(@Body() dto: VerifyEmailDto): Promise<VerifyEmailResponseDto> {
         return this.emailVerificationService.verifyEmail(dto.token);
+    }
+
+    @Post("confirm-email/resend-public")
+    @Throttle(EMAIL_THROTTLE)
+    @Public()
+    @ApiOperation({
+        summary:
+            "Resend the confirmation email without a session (public, by email): " +
+            "an invited employee cannot sign in before confirming. " +
+            "The response never says whether the address is registered",
+    })
+    @ApiSuccessResponse(ResendEmailConfirmationResponseDto, {
+        description: "Letter queued when the address matches an unconfirmed account",
+    })
+    @ApiErrorResponse([400])
+    async resendEmailConfirmationPublic(
+        @Body() dto: ResendEmailConfirmationPublicDto
+    ): Promise<ResendEmailConfirmationResponseDto> {
+        await this.emailVerificationService.resendConfirmationByEmail(dto.email, {
+            app: "crm",
+            language: dto.locale,
+        });
+        return { success: true, message: "Confirmation email sent" };
     }
 
     @Post("confirm-email/resend")

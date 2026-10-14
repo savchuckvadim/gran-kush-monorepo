@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronsUpDown } from "lucide-react";
 
 import type { SchemaMyPortalDto } from "@workspace/api-client/core";
@@ -37,6 +37,7 @@ export function PortalSwitcher({ className }: { className?: string }) {
     const t = useTranslations("crm.shell.club");
     const router = useRouter();
     const locale = useLocale();
+    const queryClient = useQueryClient();
     const { portalSlug } = usePortal();
     const [isOpen, setIsOpen] = useState(false);
     const { data: info } = usePortalInfo();
@@ -46,6 +47,9 @@ export function PortalSwitcher({ className }: { className?: string }) {
 
     function selectPortal(slug: string) {
         if (slug === portalSlug) return;
+        // Многие query-ключи не содержат slug (members, orders, products):
+        // без очистки новый клуб секунду показывает данные предыдущего
+        queryClient.clear();
         router.push(`/${locale}/${slug}/crm`);
     }
 
@@ -57,7 +61,9 @@ export function PortalSwitcher({ className }: { className?: string }) {
                     className={cn("min-w-0 gap-2 pl-1.5 pr-2 font-semibold", className)}
                 >
                     <ClubBadge name={label} className="size-6 text-[0.625rem]" />
-                    <span className="max-w-16 truncate min-[400px]:max-w-24 sm:max-w-44">{label}</span>
+                    <span className="max-w-16 truncate min-[400px]:max-w-24 sm:max-w-44">
+                        {label}
+                    </span>
                     <ChevronsUpDown className="text-muted-foreground" />
                 </Button>
             </DropdownMenuTrigger>
