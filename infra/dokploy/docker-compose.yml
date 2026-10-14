@@ -217,6 +217,39 @@ services:
         limits:
           memory: 768M
 
+  # Disk janitor for the whole server: nightly Docker cleanup and disk alerts in
+  # Telegram. Code: apps/api/src/modules/disk-janitor; README.md here, «Уборка диска».
+  # Same image as the API, its own process. The Docker socket is root on the host,
+  # so only this container gets it: no ports, no domain, not on dokploy-network,
+  # no database or JWT secrets, read-only filesystem, no capabilities.
+  pafpaf-janitor:
+    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/api:${TAG:-latest}
+    restart: unless-stopped
+    pull_policy: always
+    command: ["node", "dist/janitor.main"]
+    # the socket belongs to root:docker on the host
+    user: "0:0"
+    environment:
+      NODE_ENV: production
+      # the API entrypoint would run migrations by default
+      RUN_MIGRATIONS: "false"
+      RUN_SEED: "false"
+      TG_BOT_API_KEY: ${TG_BOT_API_KEY:-}
+      TG_BOT_CHAT_ID: ${TG_BOT_CHAT_ID:-}
+      JANITOR_DISK_ALERT_PERCENT: ${JANITOR_DISK_ALERT_PERCENT:-85}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    deploy:
+      resources:
+        limits:
+          memory: 160M
+
 networks:
   dokploy-network:
     external: true

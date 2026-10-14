@@ -531,7 +531,8 @@ Semgrep, Trivy, ZAP по OpenAPI).
 - [ ] Контейнер API работает от root; образ API — 4,1 ГБ (runner копирует весь `/app` с
       `node_modules` монорепы) — при каждом Deploy диск сервера забивается старыми версиями
       (инцидент 12.10.2026: диск 100 %, все Postgres в Restarting). Ужать образ (`pnpm deploy
-      --prod` или `--filter api... --prod`), cron `docker image prune -f` на сервере
+      --prod` или `--filter api... --prod`). Уборка диска сделана отдельно — TASK-674
+      (`pafpaf-janitor`)
 - [ ] `apps/site`: `next-intl@4.8.3` (помечен в TASK-306), `next@16.3.3`
 - [x] `next` 16.3.8 во всех приложениях (SSRF в `next/image`), `sharp` 0.35.5, `source-map-js`,
       и pnpm overrides по пропатченным версиям внутри мажоров: `proxy-addr` >= 2.0.8 (critical —
