@@ -50,12 +50,14 @@ const buildService = (row: UserRow | null) => {
         sendAccountSetup: jest.fn(),
     };
     const refreshTokens = { revokeAllForUser: jest.fn().mockResolvedValue(0) };
+    const claimedMemberships = { confirmPendingSelfJoins: jest.fn().mockResolvedValue(0) };
     const service = new EmailVerificationService(
         userRepository as never,
         mailService as never,
-        refreshTokens as never
+        refreshTokens as never,
+        claimedMemberships as never
     );
-    return { service, userRepository, mailService, refreshTokens };
+    return { service, userRepository, mailService, refreshTokens, claimedMemberships };
 };
 
 describe("EmailVerificationService — заблокированный аккаунт", () => {
@@ -135,5 +137,21 @@ describe("EmailVerificationService — resetPassword клеймит аккаун
             })
         );
         expect(refreshTokens.revokeAllForUser).toHaveBeenCalledWith("u1");
+    });
+
+    it("подтверждает членства, ждавшие клейма аккаунта", async () => {
+        const row = user({ passwordHash: null, status: UserAccountStatus.pending_claim });
+        const { service, claimedMemberships } = buildService(row);
+        await service.resetPassword("reset-token", "NewPassword1");
+        expect(claimedMemberships.confirmPendingSelfJoins).toHaveBeenCalledWith("u1");
+    });
+
+    it("blocked не доезжает до подтверждения членств", async () => {
+        const row = user({ status: UserAccountStatus.blocked });
+        const { service, claimedMemberships } = buildService(row);
+        await expect(service.resetPassword("reset-token", "NewPassword1")).rejects.toThrow(
+            UnauthorizedException
+        );
+        expect(claimedMemberships.confirmPendingSelfJoins).not.toHaveBeenCalled();
     });
 });

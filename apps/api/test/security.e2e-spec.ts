@@ -314,6 +314,60 @@ describe("Security (e2e)", () => {
             expect(res.status).toBe(401);
         });
 
+        it("TASK-678: членство из клейм-регистрации ждёт, пока владелец задаст пароль", async () => {
+            const email = `claim-reg-${suffix}@test.local`;
+            // Клуб A заводит pending_claim аккаунт (без пароля)
+            const created = await as(clubA)
+                .post("/crm/members")
+                .send({ email, fields: { first_name: "Novice" } });
+            expect(created.status).toBe(201);
+
+            // «Самозванец» регистрируется этим email в клубе B: членство не активируется
+            const reg = await request(app.getHttpServer())
+                .post("/lk/auth/member/register")
+                .set("X-Portal-Slug", clubB.slug)
+                .send({ email, password: "Attacker123", fields: { first_name: "Impostor" } });
+            expect(reg.status).toBe(201);
+            const memberId = reg.body.memberId as string;
+            const pending = await prisma.member.findUnique({
+                where: { id: memberId },
+                select: { consentStatus: true, consentToken: true },
+            });
+            expect(pending?.consentStatus).toBe("pending");
+            expect(pending?.consentToken).toBeTruthy();
+
+            // Пароль «самозванца» не установлен — войти им нельзя
+            const login = await request(app.getHttpServer())
+                .post("/lk/auth/login")
+                .send({ email, password: "Attacker123" });
+            expect(login.status).toBe(401);
+
+            // Владелец задаёт пароль по ссылке из письма — это клейм и подтверждение членства
+            const userRow = await prisma.user.findUnique({
+                where: { email },
+                select: { resetPasswordToken: true },
+            });
+            const confirm = await request(app.getHttpServer())
+                .post("/lk/auth/password/reset/confirm")
+                .send({
+                    token: userRow?.resetPasswordToken as string,
+                    newPassword: "OwnerPass123",
+                });
+            expect(confirm.status).toBe(201);
+
+            const after = await prisma.member.findUnique({
+                where: { id: memberId },
+                select: { consentStatus: true },
+            });
+            expect(after?.consentStatus).toBe("confirmed");
+
+            // Документы при этом клубу B не расшариваются
+            const shares = await prisma.memberDocumentShare.findMany({
+                where: { memberId },
+            });
+            expect(shares).toEqual([]);
+        });
+
         it("TASK-665: POST /lk/auth/member/check is gone", async () => {
             const res = await request(app.getHttpServer())
                 .post("/lk/auth/member/check")

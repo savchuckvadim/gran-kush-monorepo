@@ -121,7 +121,7 @@ describe("RegistrationLinksService — лимит использований", (
         await service.registerViaLink("tok", dto as never, "es");
 
         expect(joinPortalService.joinPortal).toHaveBeenCalledWith(
-            expect.objectContaining({ shareDocuments: true })
+            expect.objectContaining({ shareDocuments: true, consent: undefined })
         );
         expect(emailVerification.sendVerificationEmailToUserId).toHaveBeenCalledWith("u-1", {
             app: "member",
@@ -135,8 +135,15 @@ describe("RegistrationLinksService — лимит использований", (
 
         const result = await service.registerViaLink("tok", dto as never, "es");
 
+        // Членство ждёт клейма аккаунта: consent=pending до установки пароля по письму
         expect(joinPortalService.joinPortal).toHaveBeenCalledWith(
-            expect.objectContaining({ shareDocuments: false })
+            expect.objectContaining({
+                shareDocuments: false,
+                consent: expect.objectContaining({
+                    token: expect.stringMatching(/^[0-9a-f]{64}$/) as string,
+                    requestedAt: expect.any(Date) as Date,
+                }),
+            })
         );
         expect(emailVerification.sendAccountSetup).toHaveBeenCalledWith("a@b.c", {
             app: "member",

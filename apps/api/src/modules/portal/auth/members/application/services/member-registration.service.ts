@@ -5,6 +5,8 @@ import { MemberJoinSource, UserAccountStatus } from "@prisma/client";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import * as bcrypt from "bcrypt";
 
+import { randomBytes } from "crypto";
+
 import { isUniqueViolationOn } from "@common/prisma/unique-violation";
 import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
 import { UploadMemberFilesDto } from "@modules/portal/crm/members/api/dto/upload-member-files.dto";
@@ -61,6 +63,7 @@ export class MemberRegistrationService {
         const userId = existing ? existing.id : (await this.createUser(dto)).id;
 
         let memberId: string | undefined;
+        let portalName: string | undefined;
         if (dto.portalId) {
             const alreadyMember = await this.membersService.findByUserAndPortal(
                 userId,
@@ -75,8 +78,14 @@ export class MemberRegistrationService {
                     fields: dto.fields ?? {},
                     joinSource: MemberJoinSource.self,
                     shareDocuments: !claimByEmail,
+                    // Владение адресом не доказано: членство ждёт клейма аккаунта
+                    // (подтвердится в resetPassword, когда владелец задаст пароль)
+                    consent: claimByEmail
+                        ? { token: randomBytes(32).toString("hex"), requestedAt: new Date() }
+                        : undefined,
                 });
                 memberId = member.id;
+                portalName = member.portal.displayName;
             }
         }
 
@@ -84,7 +93,10 @@ export class MemberRegistrationService {
         if (claimByEmail) {
             // Пароль из формы не используется: его задаст тот, кто откроет письмо. Файлы в чужой
             // аккаунт тоже не попадают — их увидели бы клубы, где этот аккаунт уже состоит
-            await this.emailVerificationService.sendAccountSetup(dto.email, mail);
+            await this.emailVerificationService.sendAccountSetup(dto.email, {
+                ...mail,
+                portalName,
+            });
         } else {
             if (dto.files) {
                 await this.memberFilesService.queueUpload({ userId, ...dto.files });

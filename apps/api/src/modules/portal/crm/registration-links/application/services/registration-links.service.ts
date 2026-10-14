@@ -269,6 +269,11 @@ export class RegistrationLinksService {
                 // Пароль к аккаунту без пароля по ссылке не ставится, и его владелец ещё не
                 // доказан — клуб не получает документы, которые туда загрузил другой клуб
                 shareDocuments: !claimByEmail,
+                // Членство из клейма ждёт, пока владелец адреса задаст пароль по ссылке
+                // из письма (подтверждается в resetPassword); в CRM — бейдж «ждёт согласия»
+                consent: claimByEmail
+                    ? { token: randomBytes(32).toString("hex"), requestedAt: new Date() }
+                    : undefined,
             });
             memberId = member.id;
         } catch (error) {

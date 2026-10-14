@@ -7,6 +7,7 @@ import { UserRepository } from "@users/domain/repositories/user-repository.inter
 import { hash } from "bcrypt";
 import { randomBytes } from "crypto";
 
+import { ClaimedMembershipRepository } from "@modules/portal/auth/shared/domain/repositories/claimed-membership-repository.interface";
 import { RefreshTokenRepository } from "@modules/portal/auth/shared/domain/repositories/refresh-token-repository.interface";
 
 /** Which frontend the link in the email opens: CRM for employees, member portal for members. */
@@ -27,7 +28,8 @@ export class EmailVerificationService {
     constructor(
         private readonly userRepository: UserRepository,
         private readonly mailService: MailService,
-        private readonly refreshTokenRepository: RefreshTokenRepository
+        private readonly refreshTokenRepository: RefreshTokenRepository,
+        private readonly claimedMemberships: ClaimedMembershipRepository
     ) {}
 
     /**
@@ -262,6 +264,10 @@ export class EmailVerificationService {
         // смена пароля без этого ничего не даёт — refresh-токен злоумышленника живёт
         // ещё 7 дней и молча выписывает новые access-токены.
         await this.refreshTokenRepository.revokeAllForUser(user.id);
+
+        // Клейм доказан этой же ссылкой: членства, созданные саморегистрацией
+        // с этим email до клейма, перестают ждать подтверждения
+        await this.claimedMemberships.confirmPendingSelfJoins(user.id);
 
         return {
             success: true,
