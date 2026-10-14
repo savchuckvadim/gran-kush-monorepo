@@ -1,43 +1,36 @@
 import { Injectable } from "@nestjs/common";
 
-import { randomUUID } from "crypto";
+import type { SupportedLanguage } from "@mail/consts/mail.constants";
 
 import { RegisterMemberResponseDto } from "@modules/portal/auth/members/api/dto/register-member-response.dto";
-import { MemberAuthService } from "@modules/portal/auth/members/application/services/member-auth.service";
 import { MemberRegistrationService } from "@modules/portal/auth/members/application/services/member-registration.service";
 import { DynamicMemberRegistrationDto } from "@modules/portal/crm/members/api/dto/dynamic-member.dto";
 
 @Injectable()
 export class MemberRegistrationUseCase {
-    constructor(
-        private readonly memberRegistrationService: MemberRegistrationService,
-        private readonly memberAuthService: MemberAuthService
-    ) {}
+    constructor(private readonly memberRegistrationService: MemberRegistrationService) {}
 
+    /** Сессии нет до подтверждения почты: вход — после ссылки из письма (TASK-664). */
     async execute(
         dto: DynamicMemberRegistrationDto,
-        portalId: string | undefined
+        portalId: string | undefined,
+        language: SupportedLanguage
     ): Promise<RegisterMemberResponseDto> {
         const result = await this.memberRegistrationService.register({
             email: dto.email,
             password: dto.password,
             fields: dto.fields,
+            files: dto.files,
             portalId,
+            language,
         });
 
-        const deviceId = randomUUID();
-        const tokens = await this.memberAuthService.generateTokens(
-            { id: result.userId, email: result.email },
-            deviceId
-        );
-
         return {
-            ...tokens,
             user: {
                 id: result.userId,
                 email: result.email,
             },
-            claimed: result.claimed,
+            awaitingEmailConfirmation: true,
             memberId: result.memberId,
         };
     }

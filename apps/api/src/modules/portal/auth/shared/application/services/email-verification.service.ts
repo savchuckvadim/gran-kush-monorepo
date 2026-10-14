@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException, UnauthorizedException } from "@nestjs/common";
 
 import { MailService } from "@mail/application/services/mail.service";
 import { DEFAULT_LANGUAGE, type SupportedLanguage } from "@mail/consts/mail.constants";
+import { UserAccountStatus } from "@prisma/client";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import { hash } from "bcrypt";
 import { randomBytes } from "crypto";
@@ -17,9 +18,12 @@ export interface AuthMailOptions {
 }
 
 const MEMBER_MAIL: AuthMailOptions = { app: "member" };
+const ACCOUNT_SETUP_TTL_DAYS = 7;
 
 @Injectable()
 export class EmailVerificationService {
+    private readonly logger = new Logger(EmailVerificationService.name);
+
     constructor(
         private readonly userRepository: UserRepository,
         private readonly mailService: MailService,
@@ -71,7 +75,7 @@ export class EmailVerificationService {
                 language
             );
         } else {
-            await this.mailService.sendMamberEmailVerification(
+            await this.mailService.sendMemberEmailVerification(
                 recipient,
                 { id: user.id, email: user.email },
                 token,
@@ -113,6 +117,45 @@ export class EmailVerificationService {
             success: true,
             message: "Email confirmed successfully",
         };
+    }
+
+    /**
+     * Аккаунт без пароля (его завёл клуб): письмо со ссылкой задать пароль. Механика та же, что у
+     * сброса, но свой текст и 7 дней на ответ. Так аккаунт и клеймится: пароль ставит только тот,
+     * кто открыл письмо (TASK-664). Аккаунт с паролем это письмо не получает — для него есть сброс.
+     * Сбой отправки не роняет вызывающий сценарий: аккаунт или членство уже созданы.
+     */
+    async sendAccountSetup(
+        email: string,
+        options: AuthMailOptions & { portalName?: string }
+    ): Promise<void> {
+        const user = await this.userRepository.findByEmail(email);
+        if (!user || user.passwordHash !== null) {
+            return;
+        }
+
+        const token = this.generateResetToken();
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + ACCOUNT_SETUP_TTL_DAYS);
+        await this.userRepository.update(user.id, {
+            resetPasswordToken: token,
+            resetPasswordExpiresAt: expiresAt,
+        });
+
+        try {
+            await this.mailService.sendAccountSetup({
+                to: user.email,
+                token,
+                app: options.app,
+                portalName: options.portalName,
+                language: options.language ?? DEFAULT_LANGUAGE,
+            });
+        } catch (error: unknown) {
+            this.logger.error(
+                `Account setup email for user ${user.id} was not queued`,
+                error instanceof Error ? error.stack : String(error)
+            );
+        }
     }
 
     /**
@@ -174,10 +217,13 @@ export class EmailVerificationService {
 
         const passwordHash = await hash(newPassword, 10);
 
-        // Ссылка из письма доказывает владение адресом, поэтому email заодно подтверждается
+        // Ссылка из письма доказывает владение адресом, поэтому email заодно подтверждается,
+        // а аккаунт без пароля, заведённый клубом, так и клеймится (TASK-664)
         await this.userRepository.update(user.id, {
             passwordHash,
+            status: UserAccountStatus.active,
             emailConfirmed: true,
+            isActive: true,
             resetPasswordToken: null,
             resetPasswordExpiresAt: null,
         });

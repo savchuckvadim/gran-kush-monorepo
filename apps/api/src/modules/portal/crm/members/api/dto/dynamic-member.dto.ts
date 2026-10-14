@@ -1,8 +1,18 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
-import { IsObject, IsOptional, IsString, Matches, MinLength } from "class-validator";
+import { Type } from "class-transformer";
+import {
+    IsObject,
+    IsOptional,
+    IsString,
+    Matches,
+    MinLength,
+    ValidateNested,
+} from "class-validator";
 
 import { IsEmailWithLowerCase } from "@common/decorators/dto/is-email-with-lower-case.decorator";
+
+import { UploadMemberFilesDto } from "./upload-member-files.dto";
 
 /** Учётные данные глобального аккаунта. */
 export class DynamicMemberCredentialsDto {
@@ -34,6 +44,16 @@ export class DynamicMemberRegistrationDto extends DynamicMemberCredentialsDto {
     @IsOptional()
     @IsObject()
     fields?: Record<string, unknown>;
+
+    @ApiPropertyOptional({
+        type: () => UploadMemberFilesDto,
+        description:
+            "Документы и подпись нового аккаунта. До подтверждения почты сессии нет, поэтому файлы едут с анкетой",
+    })
+    @IsOptional()
+    @ValidateNested()
+    @Type(() => UploadMemberFilesDto)
+    files?: UploadMemberFilesDto;
 }
 
 /**

@@ -2224,7 +2224,7 @@ export interface paths {
         /** Список приглашений портала (admin) */
         get: operations["CrmInvitations_list"];
         put?: never;
-        /** Пригласить сотрудника по email (admin) */
+        /** Пригласить сотрудника по email (admin): ссылка уходит письмом */
         post: operations["CrmInvitations_create"];
         delete?: never;
         options?: never;
@@ -2275,7 +2275,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Принять приглашение: создаёт/клеймит аккаунт (password обязателен для новых) и Employee */
+        /** Принять приглашение: новый аккаунт или существующий с его паролем + Employee. Аккаунт без пароля — 409 и письмо, чтобы задать пароль */
         post: operations["PublicInvitations_accept"];
         delete?: never;
         options?: never;
@@ -3162,48 +3162,6 @@ export interface components {
             refreshToken: string;
             user: components["schemas"]["MemberUserInfoDto"];
         };
-        DynamicMemberRegistrationDto: {
-            /** @example user@example.com */
-            email: string;
-            /**
-             * @description Password must contain uppercase, lowercase and number
-             * @example Password123
-             */
-            password: string;
-            /**
-             * @description Field values keyed by fieldKey (see registration-schema). Обязательны только при регистрации в контексте портала
-             * @example {
-             *       "first_name": "John",
-             *       "last_name": "Doe"
-             *     }
-             */
-            fields?: {
-                [key: string]: unknown;
-            };
-        };
-        RegisteredUserInfoDto: {
-            /** @example 123e4567-e89b-12d3-a456-426614174000 */
-            id: string;
-            /** @example user@example.com */
-            email: string;
-        };
-        RegisterMemberResponseDto: {
-            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
-            accessToken: string;
-            /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
-            refreshToken: string;
-            user: components["schemas"]["RegisteredUserInfoDto"];
-            /**
-             * @description true если pending_claim аккаунт был заклеймлен этим запросом
-             * @example false
-             */
-            claimed: boolean;
-            /**
-             * @description Мост member, если регистрация шла в контексте портала
-             * @example 123e4567-e89b-12d3-a456-426614174999
-             */
-            memberId?: string;
-        };
         UploadMemberFilesDto: {
             /**
              * @description Document type. Required when any identity document side is provided.
@@ -3225,6 +3183,46 @@ export interface components {
              * @example data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
              */
             signature?: string;
+        };
+        DynamicMemberRegistrationDto: {
+            /** @example user@example.com */
+            email: string;
+            /**
+             * @description Password must contain uppercase, lowercase and number
+             * @example Password123
+             */
+            password: string;
+            /**
+             * @description Field values keyed by fieldKey (see registration-schema). Обязательны только при регистрации в контексте портала
+             * @example {
+             *       "first_name": "John",
+             *       "last_name": "Doe"
+             *     }
+             */
+            fields?: {
+                [key: string]: unknown;
+            };
+            /** @description Документы и подпись нового аккаунта. До подтверждения почты сессии нет, поэтому файлы едут с анкетой */
+            files?: components["schemas"]["UploadMemberFilesDto"];
+        };
+        RegisteredUserInfoDto: {
+            /** @example 123e4567-e89b-12d3-a456-426614174000 */
+            id: string;
+            /** @example user@example.com */
+            email: string;
+        };
+        RegisterMemberResponseDto: {
+            user: components["schemas"]["RegisteredUserInfoDto"];
+            /**
+             * @description Сессии нет: войти можно после подтверждения почты по ссылке из письма
+             * @example true
+             */
+            awaitingEmailConfirmation: boolean;
+            /**
+             * @description Мост member, если регистрация шла в контексте портала
+             * @example 123e4567-e89b-12d3-a456-426614174999
+             */
+            memberId?: string;
         };
         UploadMemberFilesResponseDto: {
             /** @example true */
@@ -5073,7 +5071,24 @@ export interface components {
              * @example employee
              * @enum {string}
              */
+            role: "admin" | "manager" | "employee";
+        };
+        CreatedInvitationDto: {
+            id: string;
+            /** @example new-employee@example.com */
+            email: string;
+            /** @enum {string} */
             role: "portal_owner" | "admin" | "manager" | "employee";
+            /** @enum {string} */
+            status: "pending" | "accepted" | "revoked" | "expired";
+            /** @example 2026-01-08T00:00:00.000Z */
+            expiresAt: string;
+            /** @example 2026-01-02T00:00:00.000Z */
+            acceptedAt?: string;
+            /** @example 2026-01-01T00:00:00.000Z */
+            createdAt: string;
+            /** @description Одноразовый токен ссылки-приглашения. Ссылка уходит и письмом; в списке токена нет */
+            token: string;
         };
         InvitationDto: {
             id: string;
@@ -5083,8 +5098,6 @@ export interface components {
             role: "portal_owner" | "admin" | "manager" | "employee";
             /** @enum {string} */
             status: "pending" | "accepted" | "revoked" | "expired";
-            /** @description Одноразовый токен для ссылки-приглашения */
-            token: string;
             /** @example 2026-01-08T00:00:00.000Z */
             expiresAt: string;
             /** @example 2026-01-02T00:00:00.000Z */
@@ -5130,10 +5143,12 @@ export interface components {
             employeeId: string;
             userId: string;
             portalSlug: string;
+            /** @description Новый аккаунт: сессии нет, на почту ушло подтверждение; вход — после него. Для существующего аккаунта false и токены ниже */
+            awaitingEmailConfirmation: boolean;
             /** @example eyJhbGciOi... */
-            accessToken: string;
+            accessToken?: string;
             /** @example eyJhbGciOi... */
-            refreshToken: string;
+            refreshToken?: string;
         };
         RegistrationLinkPrefillDto: {
             /** @example socio@example.com */
@@ -5472,10 +5487,10 @@ export type SchemaMemberLogoutResponseDto = components['schemas']['MemberLogoutR
 export type SchemaMemberMembershipDto = components['schemas']['MemberMembershipDto'];
 export type SchemaMemberMeResponseDto = components['schemas']['MemberMeResponseDto'];
 export type SchemaMemberAuthResponseDto = components['schemas']['MemberAuthResponseDto'];
+export type SchemaUploadMemberFilesDto = components['schemas']['UploadMemberFilesDto'];
 export type SchemaDynamicMemberRegistrationDto = components['schemas']['DynamicMemberRegistrationDto'];
 export type SchemaRegisteredUserInfoDto = components['schemas']['RegisteredUserInfoDto'];
 export type SchemaRegisterMemberResponseDto = components['schemas']['RegisterMemberResponseDto'];
-export type SchemaUploadMemberFilesDto = components['schemas']['UploadMemberFilesDto'];
 export type SchemaUploadMemberFilesResponseDto = components['schemas']['UploadMemberFilesResponseDto'];
 export type SchemaMemberConfirmEmailDto = components['schemas']['MemberConfirmEmailDto'];
 export type SchemaMemberConfirmEmailResponseDto = components['schemas']['MemberConfirmEmailResponseDto'];
@@ -5597,6 +5612,7 @@ export type SchemaTransactionSummaryDto = components['schemas']['TransactionSumm
 export type SchemaTransactionGroupedByTypeDto = components['schemas']['TransactionGroupedByTypeDto'];
 export type SchemaTransactionGroupedByDateDto = components['schemas']['TransactionGroupedByDateDto'];
 export type SchemaCreateInvitationDto = components['schemas']['CreateInvitationDto'];
+export type SchemaCreatedInvitationDto = components['schemas']['CreatedInvitationDto'];
 export type SchemaInvitationDto = components['schemas']['InvitationDto'];
 export type SchemaInvitationListResponseDto = components['schemas']['InvitationListResponseDto'];
 export type SchemaRevokeInvitationResponseDto = components['schemas']['RevokeInvitationResponseDto'];
@@ -12667,7 +12683,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["InvitationDto"];
+                    "application/json": components["schemas"]["CreatedInvitationDto"];
                 };
             };
             /** @description Bad Request */
@@ -12823,6 +12839,15 @@ export interface operations {
             };
             /** @description Bad Request */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

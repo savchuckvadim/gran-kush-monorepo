@@ -1,23 +1,26 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { Card } from "@workspace/ui";
 
 import { ResetPasswordForm } from "@/modules/features/auth";
 
+/** `?setup=1` — ссылка из письма «задайте пароль» для аккаунта, который завёл клуб. */
 export default function ResetPasswordPage() {
     const t = useTranslations("auth.resetPassword");
+    const setup = useSearchParams().get("setup") === "1";
 
     return (
         <div className="container flex min-h-[calc(100vh-8rem)] items-center justify-center py-12">
             <Card
                 className="w-full max-w-md"
-                title={t("title")}
-                description={t("subtitle")}
+                title={setup ? t("setupTitle") : t("title")}
+                description={setup ? t("setupSubtitle") : t("subtitle")}
                 headerClassName="text-center"
             >
-                <ResetPasswordForm />
+                <ResetPasswordForm setup={setup} />
             </Card>
         </div>
     );

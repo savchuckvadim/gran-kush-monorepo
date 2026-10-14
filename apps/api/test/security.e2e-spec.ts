@@ -361,4 +361,169 @@ describe("Security (e2e)", () => {
             expect(after?.name).toBe(stageA.name);
         });
     });
+
+    describe("TASK-662/664: invitations and claiming accounts", () => {
+        /** Аккаунт без пароля, который завёл клуб A, с документом, загруженным клубом A. */
+        const pendingAccountOfClubA = async (label: string) => {
+            const email = `${label}-${suffix}@test.local`;
+            const created = await as(clubA)
+                .post("/crm/members")
+                .send({ email, fields: { first_name: label } });
+            expect(created.status).toBe(201);
+            const user = await prisma.user.findUniqueOrThrow({ where: { email } });
+            expect(user.passwordHash).toBeNull();
+            const document = await prisma.userDocument.create({
+                data: {
+                    userId: user.id,
+                    type: "passport",
+                    side: "single",
+                    number: `X-${label}`,
+                    storagePath: `private/test/${suffix}/${label}.jpg`,
+                },
+            });
+            await prisma.memberDocumentShare.create({
+                data: { memberId: created.body.memberId as string, userDocumentId: document.id },
+            });
+            return { email, userId: user.id, documentId: document.id };
+        };
+
+        const memberLogin = (email: string, password: string) =>
+            request(app.getHttpServer()).post("/lk/auth/login").send({ email, password });
+
+        it("an invitation cannot hand out the owner role", async () => {
+            const res = await as(clubA)
+                .post("/crm/settings/invitations")
+                .send({ email: `owner-wannabe-${suffix}@test.local`, role: "portal_owner" });
+            expect(res.status).toBe(400);
+        });
+
+        it("the invitation token is shown once on creation and never in the list", async () => {
+            const created = await as(clubA)
+                .post("/crm/settings/invitations")
+                .send({ email: `listed-${suffix}@test.local`, role: "employee" });
+            expect(created.status).toBe(201);
+            expect(typeof created.body.token).toBe("string");
+
+            const list = await as(clubA).get("/crm/settings/invitations");
+            expect(list.status).toBe(200);
+            expect(list.body.invitations.length).toBeGreaterThan(0);
+            for (const invitation of list.body.invitations) {
+                expect(invitation).not.toHaveProperty("token");
+            }
+        });
+
+        it("an invitation does not claim a passwordless account of another club", async () => {
+            const victim = await pendingAccountOfClubA("invite-claim");
+
+            const invitation = await as(clubB)
+                .post("/crm/settings/invitations")
+                .send({ email: victim.email, role: "admin" });
+            expect(invitation.status).toBe(201);
+
+            const accepted = await request(app.getHttpServer())
+                .post(`/public/invitations/${invitation.body.token as string}/accept`)
+                .send({ password: "Attacker123" });
+            expect(accepted.status).toBe(409);
+            expect(accepted.body).not.toHaveProperty("accessToken");
+
+            const after = await prisma.user.findUniqueOrThrow({ where: { id: victim.userId } });
+            expect(after.passwordHash).toBeNull();
+            expect(
+                await prisma.employee.count({
+                    where: { userId: victim.userId, portalId: await portalId(clubB) },
+                })
+            ).toBe(0);
+        });
+
+        it("a registration link does not claim a passwordless account nor show its documents", async () => {
+            const victim = await pendingAccountOfClubA("link-claim");
+            const link = await as(clubB)
+                .post("/crm/settings/registration-links")
+                .send({ name: "sec-664", kind: "public_link" });
+            expect(link.status).toBe(201);
+
+            const res = await request(app.getHttpServer())
+                .post(`/public/reg-links/${link.body.token as string}/register`)
+                .send({
+                    email: victim.email,
+                    password: "Attacker123",
+                    fields: { first_name: "Impostor" },
+                });
+            expect(res.status).toBe(201);
+            expect(res.body.accountCreated).toBe(true);
+
+            const after = await prisma.user.findUniqueOrThrow({ where: { id: victim.userId } });
+            expect(after.passwordHash).toBeNull();
+            // Вместо пароля из формы — письмо «задайте пароль»
+            expect(after.resetPasswordToken).toBeTruthy();
+            expect((await memberLogin(victim.email, "Attacker123")).status).toBe(401);
+
+            const memberB = await as(clubB).get(`/crm/members/${res.body.memberId as string}`);
+            expect(memberB.status).toBe(200);
+            expect(memberB.body.documents).toEqual([]);
+        });
+
+        it("a new account from an invitation signs in only after confirming the email", async () => {
+            const email = `invited-${suffix}@test.local`;
+            const invitation = await as(clubA)
+                .post("/crm/settings/invitations")
+                .send({ email, role: "employee" });
+            expect(invitation.status).toBe(201);
+
+            const accepted = await request(app.getHttpServer())
+                .post(`/public/invitations/${invitation.body.token as string}/accept`)
+                .send({ password: PASSWORD, fields: { first_name: "Invited" } });
+            expect(accepted.status).toBe(201);
+            expect(accepted.body.awaitingEmailConfirmation).toBe(true);
+            expect(accepted.body).not.toHaveProperty("accessToken");
+
+            const login = (password: string) =>
+                request(app.getHttpServer())
+                    .post("/crm/auth/login")
+                    .set("X-Portal-Slug", clubA.slug)
+                    .send({ email, password });
+            expect((await login("Wrong12345")).body.message).toBe("Invalid credentials");
+            expect((await login(PASSWORD)).body.message).toBe("Email not confirmed");
+
+            // Токен выписывается до отправки письма, которое в jest не рендерится
+            const { emailVerificationToken } = await prisma.user.findUniqueOrThrow({
+                where: { email },
+            });
+            expect(emailVerificationToken).toBeTruthy();
+            const confirmed = await request(app.getHttpServer())
+                .post("/crm/auth/confirm-email")
+                .send({ token: emailVerificationToken });
+            expect([200, 201]).toContain(confirmed.status);
+            expect([200, 201]).toContain((await login(PASSWORD)).status);
+        });
+
+        it("a member signs in only after confirming the email", async () => {
+            const email = `self-${suffix}@test.local`;
+            const link = await as(clubA)
+                .post("/crm/settings/registration-links")
+                .send({ name: "sec-664-self", kind: "public_link" });
+            const signUp = await request(app.getHttpServer())
+                .post(`/public/reg-links/${link.body.token as string}/register`)
+                .send({ email, password: "Squatter123", fields: { first_name: "Self" } });
+            expect(signUp.status).toBe(201);
+
+            // Неверный пароль не узнаёт, что адрес есть; верный — что он не подтверждён
+            expect((await memberLogin(email, "Wrong12345")).body.message).toBe(
+                "Invalid credentials"
+            );
+            const unconfirmed = await memberLogin(email, "Squatter123");
+            expect(unconfirmed.status).toBe(401);
+            expect(unconfirmed.body.message).toBe("Email not confirmed");
+
+            const { emailVerificationToken } = await prisma.user.findUniqueOrThrow({
+                where: { email },
+            });
+            expect(emailVerificationToken).toBeTruthy();
+            const confirmed = await request(app.getHttpServer())
+                .post("/lk/auth/member/confirm-email")
+                .send({ token: emailVerificationToken });
+            expect(confirmed.status).toBe(201);
+            expect((await memberLogin(email, "Squatter123")).status).toBe(201);
+        });
+    });
 });

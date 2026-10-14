@@ -28,6 +28,21 @@ export class MemberFilesService {
     async queueUpload(
         payload: QueueMemberFilesPayload
     ): Promise<{ queued: boolean; jobId: string }> {
+        this.assertValid(payload);
+
+        // Повторы и срок хранения — в defaultJobOptions очереди (@common/queue/job-options).
+        // Без jobId: участник может осознанно перезалить документы, и вторая загрузка
+        // не должна молча потеряться в дедупликации.
+        const job = await this.queue.add(MEMBER_FILES_QUEUE_JOB_NAMES.SAVE_MEMBER_FILES, payload);
+
+        return {
+            queued: true,
+            jobId: String(job.id),
+        };
+    }
+
+    /** Отдельно от постановки в очередь: регистрация проверяет файлы до создания аккаунта. */
+    assertValid(payload: Omit<QueueMemberFilesPayload, "userId">): void {
         if (!payload.documentFirst && !payload.documentSecond && !payload.signature) {
             throw new BadRequestException(
                 "At least one file (document or signature) must be provided."
@@ -45,15 +60,5 @@ export class MemberFilesService {
         if (payload.documentFirst) validateDataUrl(payload.documentFirst, "document");
         if (payload.documentSecond) validateDataUrl(payload.documentSecond, "document");
         if (payload.signature) validateDataUrl(payload.signature, "signature");
-
-        // Повторы и срок хранения — в defaultJobOptions очереди (@common/queue/job-options).
-        // Без jobId: участник может осознанно перезалить документы, и вторая загрузка
-        // не должна молча потеряться в дедупликации.
-        const job = await this.queue.add(MEMBER_FILES_QUEUE_JOB_NAMES.SAVE_MEMBER_FILES, payload);
-
-        return {
-            queued: true,
-            jobId: String(job.id),
-        };
     }
 }

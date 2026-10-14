@@ -22,6 +22,7 @@ import { AccountFilesService } from "@modules/account/application/services/accou
 import { MemberDocumentShareRepository } from "@modules/account/domain/repositories/member-document-share-repository.interface";
 import { UserDocumentRepository } from "@modules/account/domain/repositories/user-document-repository.interface";
 import { UserSignatureRepository } from "@modules/account/domain/repositories/user-signature-repository.interface";
+import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
 import { DynamicPayloadValidatorService } from "@modules/portal/crm/entity-fields/application/services/dynamic-payload-validator.service";
 import { FieldValuesService } from "@modules/portal/crm/entity-fields/application/services/field-values.service";
 import { MEMBER_FIELD_KEYS } from "@modules/portal/crm/entity-fields/constants/member-field-keys";
@@ -62,7 +63,8 @@ export class MembersService {
         private readonly dynamicValidator: DynamicPayloadValidatorService,
         private readonly fieldValues: FieldValuesService,
         private readonly shares: MemberDocumentShareRepository,
-        private readonly consent: MemberConsentService
+        private readonly consent: MemberConsentService,
+        private readonly emailVerification: EmailVerificationService
     ) {}
 
     private fieldRows(member: MemberWithRelations) {
@@ -202,6 +204,13 @@ export class MembersService {
 
         if (awaitingConsent) {
             await this.consent.sendRequest(member, locale);
+        } else if (isNewUser) {
+            // Новому аккаунту — письмо «задайте пароль»: так участник попадает в кабинет
+            await this.emailVerification.sendAccountSetup(user.email, {
+                app: "member",
+                language: locale,
+                portalName: member.portal.displayName,
+            });
         }
 
         return { userId: user.id, memberId: member.id, isNewUser, awaitingConsent };

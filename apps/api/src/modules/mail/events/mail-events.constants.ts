@@ -31,6 +31,8 @@ export enum EmailType {
     PASSWORD_RESET = "password-reset",
     PORTAL_REGISTRATION = "portal-registration",
     MEMBERSHIP_CONSENT = "membership-consent",
+    EMPLOYEE_INVITATION = "employee-invitation",
+    ACCOUNT_SETUP = "account-setup",
     OTHER = "other",
 }
 
@@ -42,5 +44,7 @@ export const EMAIL_TYPE_LABELS: Record<EmailType, string> = {
     [EmailType.PASSWORD_RESET]: "Password Reset",
     [EmailType.PORTAL_REGISTRATION]: "Portal Registration",
     [EmailType.MEMBERSHIP_CONSENT]: "Membership Consent",
+    [EmailType.EMPLOYEE_INVITATION]: "Employee Invitation",
+    [EmailType.ACCOUNT_SETUP]: "Account Setup",
     [EmailType.OTHER]: "Other",
 } as const;

@@ -5,7 +5,6 @@ import {
     SchemaDynamicMemberRegistrationDto,
     SchemaRegisterMemberResponseDto,
     SchemaUploadMemberFilesDto,
-    SchemaUploadMemberFilesResponseDto,
 } from "@workspace/api-client/core";
 
 import { $api } from "@/modules/shared/api";
@@ -38,14 +37,17 @@ function toBase64(file: File): Promise<string> {
 }
 
 /**
- * Глобальная регистрация аккаунта: { email, password, fields }.
+ * Глобальная регистрация аккаунта: { email, password, fields, files }.
  * fields валидируются схемой public_registration портала (заголовок X-Portal-Slug);
- * документы/подпись уходят отдельным запросом в аккаунт (переиспользуются между клубами).
+ * документы/подпись едут в том же запросе: сессии до подтверждения почты нет (TASK-664).
  */
-function mapToRegisterMemberDto(data: RegisterFormSubmitData): SchemaDynamicMemberRegistrationDto {
+async function mapToRegisterMemberDto(
+    data: RegisterFormSubmitData
+): Promise<SchemaDynamicMemberRegistrationDto> {
     return {
         email: data.email,
         password: data.password,
+        files: await mapToUploadMemberFilesDto(data),
         fields: {
             first_name: data.name,
             last_name: data.surname,
@@ -78,7 +80,7 @@ export const useSubmitRegister = () => {
         RegisterFormSubmitData
     >({
         mutationFn: async (data) => {
-            const registerPayload = mapToRegisterMemberDto(data);
+            const registerPayload = await mapToRegisterMemberDto(data);
             const response = await $api.POST("/lk/auth/member/register", {
                 body: registerPayload,
             });
@@ -86,22 +88,5 @@ export const useSubmitRegister = () => {
         },
     });
 
-    const uploadMutation = useMutation<
-        SchemaUploadMemberFilesResponseDto,
-        Error,
-        RegisterFormSubmitData
-    >({
-        mutationFn: async (data) => {
-            const filesPayload = await mapToUploadMemberFilesDto(data);
-            const response = await $api.POST("/lk/auth/member/files", {
-                body: filesPayload,
-            });
-            return response.data as SchemaUploadMemberFilesResponseDto;
-        },
-    });
-
-    return {
-        registerMutation,
-        uploadMutation,
-    };
+    return { registerMutation };
 };

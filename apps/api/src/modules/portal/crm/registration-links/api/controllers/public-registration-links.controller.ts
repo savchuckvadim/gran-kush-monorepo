@@ -48,9 +48,10 @@ export class PublicRegistrationLinksController {
     @ApiErrorResponse([400, 404, 409])
     async register(
         @Param("token") token: string,
-        @Body() dto: RegisterViaLinkDto
+        @Body() dto: RegisterViaLinkDto,
+        @RequestLocale() locale: ContentLocale
     ): Promise<RegisterViaLinkResponseDto> {
-        return this.registrationLinksService.registerViaLink(token, dto);
+        return this.registrationLinksService.registerViaLink(token, dto, locale);
     }
 
     @Post(":token/ping")

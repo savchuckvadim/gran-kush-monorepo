@@ -7,12 +7,14 @@ import { CurrentPrincipal } from "@common/decorators/auth/current-principal.deco
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { type ContentLocale, RequestLocale } from "@common/i18n";
 import type { PortalPrincipal } from "@common/portal";
 import { Admin } from "@modules/portal/auth/employees";
 import { RequireEmployeeAdmin } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
 
 import { InvitationsService } from "../../application/services/invitations.service";
 import {
+    CreatedInvitationDto,
     CreateInvitationDto,
     InvitationDto,
     InvitationListResponseDto,
@@ -25,7 +27,6 @@ function toDto(i: EmployeeInvitation): InvitationDto {
         email: i.email,
         role: i.role,
         status: i.status,
-        token: i.token,
         expiresAt: i.expiresAt.toISOString(),
         acceptedAt: i.acceptedAt?.toISOString(),
         createdAt: i.createdAt.toISOString(),
@@ -40,20 +41,22 @@ export class CrmInvitationsController {
     constructor(private readonly invitationsService: InvitationsService) {}
 
     @Post()
-    @ApiOperation({ summary: "Пригласить сотрудника по email (admin)" })
-    @ApiSuccessResponse(InvitationDto, { status: 201 })
+    @ApiOperation({ summary: "Пригласить сотрудника по email (admin): ссылка уходит письмом" })
+    @ApiSuccessResponse(CreatedInvitationDto, { status: 201 })
     @ApiErrorResponse([400, 401, 403, 409])
     async create(
         @Body() dto: CreateInvitationDto,
         @PortalId() portalId: string,
-        @CurrentPrincipal() principal: PortalPrincipal
-    ): Promise<InvitationDto> {
+        @CurrentPrincipal() principal: PortalPrincipal,
+        @RequestLocale() locale: ContentLocale
+    ): Promise<CreatedInvitationDto> {
         const invitation = await this.invitationsService.create(
             dto,
             portalId,
-            principal.membershipId
+            principal.membershipId,
+            locale
         );
-        return toDto(invitation);
+        return { ...toDto(invitation), token: invitation.token };
     }
 
     @Get()

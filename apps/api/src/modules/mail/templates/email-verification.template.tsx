@@ -1,21 +1,8 @@
-import {
-    Body,
-    Button,
-    Container,
-    Font,
-    Head,
-    Heading,
-    Html,
-    Preview,
-    Section,
-    Tailwind,
-    Text,
-} from "@react-email/components";
 import React from "react";
 
-import { MAIL_BRAND_NAME } from "../consts/mail.constants";
 import { Language } from "../consts/verifiaction-email";
 import { getVerificationEmailTexts } from "../lib/utils/template.util";
+import { EmailLayout } from "./email-layout";
 
 interface EmailVerificationTemplateProps {
     name: string;
@@ -25,87 +12,28 @@ interface EmailVerificationTemplateProps {
     baseUrl: string;
 }
 
+/** Подтверждение почты: ссылка на `/auth/confirm/{token}` кабинета или CRM. */
 export function EmailVerificationTemplate({
     name,
-    surname = "",
+    surname,
     token,
     language = "en",
     baseUrl,
 }: EmailVerificationTemplateProps) {
-    // Both the CRM and the member portal serve this page at /{locale}/auth/confirm/{token}
-    const verfiyLink = `${baseUrl}/${language}/auth/confirm/${token}`;
     const texts = getVerificationEmailTexts(language);
-    const currentYear = new Date().getFullYear();
 
     return (
-        <Tailwind>
-            <Html>
-                <Head>
-                    <Font
-                        fontFamily="Geist"
-                        fallbackFontFamily="Arial"
-                        webFont={{
-                            url: "https://fonts.googleapis.com/css2?family=Geist:wght@300;500;700&display=swap",
-                            format: "woff2",
-                        }}
-                    />
-                </Head>
-
-                <Body
-                    style={{ backgroundColor: "#f8f9fa", fontFamily: "Inter, Arial, sans-serif" }}
-                >
-                    <Preview>{texts.preview}</Preview>
-                    <Container className="mx-auto my-10 max-w-[500px] rounded-lg bg-white p-8 shadow-lg">
-                        <Section className="text-center">
-                            <Text
-                                className="mb-4 text-xl font-bold text-gray-900"
-                                style={{ fontFamily: "Geist, Arial" }}
-                            >
-                                {MAIL_BRAND_NAME}
-                            </Text>
-                            <Heading
-                                className="text-2xl font-bold text-blue-600"
-                                style={{ fontFamily: "Geist, Arial" }}
-                            >
-                                {texts.heading}
-                            </Heading>
-                            <Text
-                                className="mb-6 text-gray-500"
-                                style={{ fontFamily: "Geist, Arial" }}
-                            >
-                                {texts.greeting(name, surname)}
-                            </Text>
-                            <Section className="mb-8 rounded-lg border border-blue-100 bg-blue-50 p-6">
-                                <Text
-                                    className="mb-4 text-gray-800"
-                                    style={{ fontFamily: "Geist, Arial" }}
-                                >
-                                    {texts.instruction}
-                                </Text>
-                                <Button
-                                    href={verfiyLink}
-                                    className="inline-flex items-center justify-center rounded-full bg-blue-600 px-8 py-3 text-sm font-medium text-white hover:bg-blue-600/90 leading-none"
-                                    style={{ fontFamily: "Geist, Arial" }}
-                                >
-                                    {texts.buttonText}
-                                </Button>
-                            </Section>
-                            <Text
-                                className="text-sm text-gray-500"
-                                style={{ fontFamily: "Geist, Arial" }}
-                            >
-                                {texts.ignoreText}
-                            </Text>
-                            <Text
-                                className="mt-6 text-sm text-gray-400"
-                                style={{ fontFamily: "Geist, Arial" }}
-                            >
-                                {texts.copyright(currentYear)}
-                            </Text>
-                        </Section>
-                    </Container>
-                </Body>
-            </Html>
-        </Tailwind>
+        <EmailLayout
+            preview={texts.preview}
+            heading={texts.heading}
+            intro={[texts.greeting(name, surname)]}
+            instruction={texts.instruction}
+            button={{
+                href: `${baseUrl}/${language}/auth/confirm/${token}`,
+                label: texts.buttonText,
+            }}
+            footnote={texts.ignoreText}
+            footer={texts.copyright(new Date().getFullYear())}
+        />
     );
 }

@@ -2,10 +2,13 @@ import {
     BadRequestException,
     ConflictException,
     Injectable,
+    Logger,
     NotFoundException,
     UnauthorizedException,
 } from "@nestjs/common";
 
+import { MailService } from "@mail/application/services/mail.service";
+import type { SupportedLanguage } from "@mail/consts/mail.constants";
 import { EmployeeInvitation, InvitationStatus } from "@prisma/client";
 import { AccountProvisioningService } from "@users/application/services/account-provisioning.service";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
@@ -14,6 +17,7 @@ import { randomBytes, randomUUID } from "crypto";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
+import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
 import { EmployeesService } from "@modules/portal/crm/employees/application/services/employees.service";
 import { PORTAL_SUMMARY_SELECT } from "@modules/portal/crm/portals/infrastructure/prisma-includes/portal-summary.select";
 
@@ -27,18 +31,23 @@ type InvitationWithPortal = EmployeeInvitation & {
 
 @Injectable()
 export class InvitationsService {
+    private readonly logger = new Logger(InvitationsService.name);
+
     constructor(
         private readonly prisma: PrismaService,
         private readonly accountProvisioning: AccountProvisioningService,
         private readonly employeesService: EmployeesService,
         private readonly employeeAuthService: EmployeeAuthService,
-        private readonly userRepository: UserRepository
+        private readonly userRepository: UserRepository,
+        private readonly mailService: MailService,
+        private readonly emailVerification: EmailVerificationService
     ) {}
 
     async create(
         dto: CreateInvitationDto,
         portalId: string,
-        invitedByEmployeeId: string
+        invitedByEmployeeId: string,
+        language: SupportedLanguage
     ): Promise<EmployeeInvitation> {
         const existingEmployee = await this.prisma.employee.findFirst({
             where: { portalId, user: { email: dto.email.toLowerCase() } },
@@ -63,7 +72,7 @@ export class InvitationsService {
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + INVITATION_TTL_DAYS);
 
-        return this.prisma.employeeInvitation.create({
+        const invitation = await this.prisma.employeeInvitation.create({
             data: {
                 portalId,
                 email: dto.email.toLowerCase(),
@@ -72,7 +81,25 @@ export class InvitationsService {
                 invitedByEmployeeId,
                 expiresAt,
             },
+            include: { portal: { select: PORTAL_SUMMARY_SELECT } },
         });
+
+        // Приглашение уже создано, ссылку админ видит в ответе: сбой очереди писем его не отменяет
+        try {
+            await this.mailService.sendEmployeeInvitation({
+                to: invitation.email,
+                token: invitation.token,
+                portalName: invitation.portal.displayName,
+                language,
+            });
+        } catch (error: unknown) {
+            this.logger.error(
+                `Invitation email ${invitation.id} was not queued`,
+                error instanceof Error ? error.stack : String(error)
+            );
+        }
+
+        return invitation;
     }
 
     async listByPortal(portalId: string): Promise<EmployeeInvitation[]> {
@@ -118,7 +145,8 @@ export class InvitationsService {
 
     async accept(
         token: string,
-        dto: { password?: string; fields?: Record<string, unknown> }
+        dto: { password?: string; fields?: Record<string, unknown> },
+        language: SupportedLanguage
     ): Promise<AcceptInvitationResponseDto> {
         const invitation = await this.getActiveByToken(token);
 
@@ -133,13 +161,26 @@ export class InvitationsService {
             if (!matches) {
                 throw new UnauthorizedException("Invalid password for this account");
             }
+        } else if (existing) {
+            // Аккаунт без пароля завёл другой клуб, в нём могут лежать документы. Токен видел
+            // админ, поэтому пароль здесь не ставится: владелец задаёт его по ссылке из письма
+            // и принимает приглашение уже с паролем (TASK-664)
+            await this.emailVerification.sendAccountSetup(invitation.email, {
+                app: "crm",
+                language,
+                portalName: invitation.portal.displayName,
+            });
+            throw new ConflictException(
+                "This email already has an account without a password. We sent a link to set it; then open the invitation again"
+            );
         }
 
-        // Ссылка-приглашение пришла на email → владение адресом подтверждено
-        const { user } = await this.accountProvisioning.ensureUserWithPassword(
+        // Новый аккаунт: ссылку видел и админ, поэтому владение адресом доказывает только
+        // подтверждение почты — до него сессии нет (TASK-664)
+        const { user, created } = await this.accountProvisioning.ensureUserWithPassword(
             invitation.email,
             dto.password,
-            { emailVerified: true }
+            { emailVerified: false }
         );
 
         const { employee } = await this.employeesService.create(
@@ -161,15 +202,36 @@ export class InvitationsService {
             },
         });
 
+        const base = {
+            employeeId: employee.employee.id,
+            userId: user.id,
+            portalSlug: invitation.portal.name,
+        };
+
+        if (created) {
+            try {
+                await this.emailVerification.sendVerificationEmailToUserId(user.id, {
+                    app: "crm",
+                    language,
+                });
+            } catch (error: unknown) {
+                // Сотрудник уже создан; письмо можно запросить повторно с экрана входа
+                this.logger.error(
+                    `Verification email for invited user ${user.id} was not queued`,
+                    error instanceof Error ? error.stack : String(error)
+                );
+            }
+            return { ...base, awaitingEmailConfirmation: true };
+        }
+
         const tokens = await this.employeeAuthService.generateTokens(
             { id: user.id, email: user.email },
             randomUUID()
         );
 
         return {
-            employeeId: employee.employee.id,
-            userId: user.id,
-            portalSlug: invitation.portal.name,
+            ...base,
+            awaitingEmailConfirmation: false,
             accessToken: tokens.accessToken,
             refreshToken: tokens.refreshToken,
         };

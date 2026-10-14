@@ -1,3 +1,11 @@
+import {
+    ACCOUNT_SETUP_EMAIL_TEXTS,
+    type AccountSetupEmailTexts,
+} from "../../consts/account-setup-email";
+import {
+    EMPLOYEE_INVITATION_EMAIL_TEXTS,
+    type EmployeeInvitationEmailTexts,
+} from "../../consts/employee-invitation-email";
 import { DEFAULT_LANGUAGE } from "../../consts/mail.constants";
 import {
     MEMBERSHIP_CONSENT_EMAIL_TEXTS,
@@ -37,6 +45,21 @@ export const getMembershipConsentEmailTexts = (
 ): MembershipConsentEmailTexts => {
     return (
         MEMBERSHIP_CONSENT_EMAIL_TEXTS[language] || MEMBERSHIP_CONSENT_EMAIL_TEXTS[DEFAULT_LANGUAGE]
+    );
+};
+
+export const getAccountSetupEmailTexts = (
+    language: Language = DEFAULT_LANGUAGE
+): AccountSetupEmailTexts => {
+    return ACCOUNT_SETUP_EMAIL_TEXTS[language] || ACCOUNT_SETUP_EMAIL_TEXTS[DEFAULT_LANGUAGE];
+};
+
+export const getEmployeeInvitationEmailTexts = (
+    language: Language = DEFAULT_LANGUAGE
+): EmployeeInvitationEmailTexts => {
+    return (
+        EMPLOYEE_INVITATION_EMAIL_TEXTS[language] ||
+        EMPLOYEE_INVITATION_EMAIL_TEXTS[DEFAULT_LANGUAGE]
     );
 };
 

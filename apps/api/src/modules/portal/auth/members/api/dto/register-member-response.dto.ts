@@ -9,21 +9,15 @@ export class RegisteredUserInfoDto {
 }
 
 export class RegisterMemberResponseDto {
-    @ApiProperty({ example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...", type: String })
-    accessToken: string;
-
-    @ApiProperty({ example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...", type: String })
-    refreshToken: string;
-
     @ApiProperty({ type: () => RegisteredUserInfoDto })
     user: RegisteredUserInfoDto;
 
     @ApiProperty({
-        example: false,
+        example: true,
         type: Boolean,
-        description: "true если pending_claim аккаунт был заклеймлен этим запросом",
+        description: "Сессии нет: войти можно после подтверждения почты по ссылке из письма",
     })
-    claimed: boolean;
+    awaitingEmailConfirmation: boolean;
 
     @ApiPropertyOptional({
         example: "123e4567-e89b-12d3-a456-426614174999",

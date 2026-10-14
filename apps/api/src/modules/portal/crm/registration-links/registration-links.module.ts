@@ -4,6 +4,7 @@ import { UsersModule } from "@users/users.module";
 
 import { PrismaModule } from "@common/prisma/prisma.module";
 import { RedisModule } from "@common/redis/redis.module";
+import { SharedAuthModule } from "@modules/portal/auth/shared/shared-auth.module";
 import { EntityFieldsModule } from "@modules/portal/crm/entity-fields/entity-fields.module";
 import { MembersModule } from "@modules/portal/crm/members/members.module";
 
@@ -13,7 +14,14 @@ import { RegistrationLinkPresenceService } from "./application/services/registra
 import { RegistrationLinksService } from "./application/services/registration-links.service";
 
 @Module({
-    imports: [PrismaModule, RedisModule, UsersModule, EntityFieldsModule, MembersModule],
+    imports: [
+        PrismaModule,
+        RedisModule,
+        UsersModule,
+        EntityFieldsModule,
+        MembersModule,
+        SharedAuthModule,
+    ],
     controllers: [CrmRegistrationLinksController, PublicRegistrationLinksController],
     providers: [RegistrationLinksService, RegistrationLinkPresenceService],
     exports: [RegistrationLinksService],

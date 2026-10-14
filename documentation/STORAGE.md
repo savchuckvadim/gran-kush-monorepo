@@ -37,8 +37,10 @@ storage/
 
 Актуальный поток регистрации члена клуба:
 
-1. `POST /lk/auth/member/register` создаёт `User + Member` и возвращает токены + `memberId`
-2. `POST /lk/auth/member/files` принимает base64 data URL документов/подписи
+1. `POST /lk/auth/member/register` создаёт `User + Member` и возвращает `memberId` без токенов: сессия
+   появляется после подтверждения почты (TASK-664). Документы и подпись едут в том же запросе (`files`,
+   base64 data URL) и принимаются только для нового аккаунта
+2. `POST /lk/auth/member/files` — та же загрузка для вошедшего участника с подтверждённой почтой
 3. API не сохраняет файлы синхронно: задача ставится в BullMQ очередь `member-files`
 4. `MemberFilesProcessor` сохраняет файлы в `private` storage и пишет в БД только `storagePath`
 

@@ -23,7 +23,7 @@ const resetPasswordSchema = z
 
 type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
-export function ResetPasswordForm() {
+export function ResetPasswordForm({ setup = false }: { setup?: boolean }) {
     const t = useTranslations("auth.resetPassword");
     const searchParams = useSearchParams();
     const token = searchParams.get("token");
@@ -74,7 +74,9 @@ export function ResetPasswordForm() {
                 </div>
             )}
 
-            <p className="text-sm text-muted-foreground">{t("description")}</p>
+            <p className="text-sm text-muted-foreground">
+                {setup ? t("setupDescription") : t("description")}
+            </p>
 
             <FieldInput
                 label={t("newPassword")}

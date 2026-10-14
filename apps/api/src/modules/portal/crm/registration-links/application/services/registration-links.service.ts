@@ -2,6 +2,7 @@ import {
     BadRequestException,
     ConflictException,
     Injectable,
+    Logger,
     NotFoundException,
 } from "@nestjs/common";
 
@@ -19,6 +20,7 @@ import { ContentLocale } from "@common/i18n";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import { PrismaService } from "@common/prisma/prisma.service";
+import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
 import { FormSchemaService } from "@modules/portal/crm/entity-fields/application/services/form-schema.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 import { JoinPortalService } from "@modules/portal/crm/members/application/services/join-portal.service";
@@ -52,12 +54,15 @@ const PERSONAL_LINK_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 @Injectable()
 export class RegistrationLinksService {
+    private readonly logger = new Logger(RegistrationLinksService.name);
+
     constructor(
         private readonly prisma: PrismaService,
         private readonly accountProvisioning: AccountProvisioningService,
         private readonly joinPortalService: JoinPortalService,
         private readonly formSchemaService: FormSchemaService,
-        private readonly presence: RegistrationLinkPresenceService
+        private readonly presence: RegistrationLinkPresenceService,
+        private readonly emailVerification: EmailVerificationService
     ) {}
 
     /** Status is derived, not stored: the same fields decide whether the public page opens. */
@@ -223,7 +228,8 @@ export class RegistrationLinksService {
 
     async registerViaLink(
         token: string,
-        dto: RegisterViaLinkDto
+        dto: RegisterViaLinkDto,
+        locale: ContentLocale
     ): Promise<RegisterViaLinkResponseDto> {
         const link = await this.getActiveByToken(token);
 
@@ -233,13 +239,15 @@ export class RegistrationLinksService {
         // и оба заводили участника.
         await this.consumeUse(link.id);
 
+        let account: Awaited<ReturnType<AccountProvisioningService["ensureUserWithPassword"]>>;
+        let memberId: string;
         try {
-            const { user, created, claimed } =
-                await this.accountProvisioning.ensureUserWithPassword(dto.email, dto.password, {
-                    emailVerified: false,
-                    verifyPassword: true,
-                });
-            const accountCreated = created || claimed;
+            account = await this.accountProvisioning.ensureUserWithPassword(
+                dto.email,
+                dto.password,
+                { emailVerified: false, verifyPassword: true }
+            );
+            const { user, claimByEmail } = account;
 
             const existing = await this.prisma.member.findUnique({
                 where: { userId_portalId: { userId: user.id, portalId: link.portalId } },
@@ -258,18 +266,41 @@ export class RegistrationLinksService {
                         ? MemberJoinSource.kiosk
                         : MemberJoinSource.registration_link,
                 registrationLinkId: link.id,
+                // Пароль к аккаунту без пароля по ссылке не ставится, и его владелец ещё не
+                // доказан — клуб не получает документы, которые туда загрузил другой клуб
+                shareDocuments: !claimByEmail,
             });
-
-            return {
-                userId: user.id,
-                memberId: member.id,
-                portalSlug: link.portal.name,
-                accountCreated,
-            };
+            memberId = member.id;
         } catch (error) {
             await this.releaseUse(link.id);
             throw error;
         }
+
+        // Участник уже в клубе: сбой очереди писем не должен откатывать регистрацию
+        const { user, created, claimed, claimByEmail } = account;
+        const mail = { app: "member" as const, language: locale };
+        try {
+            if (claimByEmail) {
+                await this.emailVerification.sendAccountSetup(user.email, {
+                    ...mail,
+                    portalName: link.portal.displayName,
+                });
+            } else if (created) {
+                await this.emailVerification.sendVerificationEmailToUserId(user.id, mail);
+            }
+        } catch (error: unknown) {
+            this.logger.error(
+                `Registration email for member ${memberId} was not queued`,
+                error instanceof Error ? error.stack : String(error)
+            );
+        }
+
+        return {
+            userId: user.id,
+            memberId,
+            portalSlug: link.portal.name,
+            accountCreated: created || claimed || claimByEmail,
+        };
     }
 
     /** Only the two prefill keys survive: nothing else from a request body reaches the stored JSON. */

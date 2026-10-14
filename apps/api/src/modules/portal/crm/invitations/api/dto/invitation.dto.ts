@@ -1,18 +1,26 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 import { EmployeeRole, InvitationStatus } from "@prisma/client";
-import { IsEnum, IsObject, IsOptional, IsString, Matches, MinLength } from "class-validator";
+import { IsIn, IsObject, IsOptional, IsString, Matches, MinLength } from "class-validator";
 
 import { IsEmailWithLowerCase } from "@common/decorators/dto/is-email-with-lower-case.decorator";
+
+/** Владелец у клуба один и появляется при регистрации — приглашением его не выдать (TASK-662). */
+export const INVITABLE_ROLES = [
+    EmployeeRole.admin,
+    EmployeeRole.manager,
+    EmployeeRole.employee,
+] as const;
+export type InvitableRole = (typeof INVITABLE_ROLES)[number];
 
 export class CreateInvitationDto {
     @ApiProperty({ type: String, example: "new-employee@example.com" })
     @IsEmailWithLowerCase()
     email: string;
 
-    @ApiProperty({ enum: EmployeeRole, example: EmployeeRole.employee })
-    @IsEnum(EmployeeRole)
-    role: EmployeeRole;
+    @ApiProperty({ enum: INVITABLE_ROLES, example: EmployeeRole.employee })
+    @IsIn(INVITABLE_ROLES)
+    role: InvitableRole;
 }
 
 export class InvitationDto {
@@ -28,9 +36,6 @@ export class InvitationDto {
     @ApiProperty({ enum: InvitationStatus })
     status: InvitationStatus;
 
-    @ApiProperty({ type: String, description: "Одноразовый токен для ссылки-приглашения" })
-    token: string;
-
     @ApiProperty({ example: "2026-01-08T00:00:00.000Z", type: String })
     expiresAt: string;
 
@@ -39,6 +44,16 @@ export class InvitationDto {
 
     @ApiProperty({ example: "2026-01-01T00:00:00.000Z", type: String })
     createdAt: string;
+}
+
+/** Ответ на создание — единственное место, где админ видит токен (TASK-662). */
+export class CreatedInvitationDto extends InvitationDto {
+    @ApiProperty({
+        type: String,
+        description:
+            "Одноразовый токен ссылки-приглашения. Ссылка уходит и письмом; в списке токена нет",
+    })
+    token: string;
 }
 
 export class InvitationListResponseDto {
@@ -101,11 +116,18 @@ export class AcceptInvitationResponseDto {
     @ApiProperty({ type: String })
     portalSlug: string;
 
-    @ApiProperty({ example: "eyJhbGciOi...", type: String })
-    accessToken: string;
+    @ApiProperty({
+        type: Boolean,
+        description:
+            "Новый аккаунт: сессии нет, на почту ушло подтверждение; вход — после него. Для существующего аккаунта false и токены ниже",
+    })
+    awaitingEmailConfirmation: boolean;
 
-    @ApiProperty({ example: "eyJhbGciOi...", type: String })
-    refreshToken: string;
+    @ApiPropertyOptional({ example: "eyJhbGciOi...", type: String })
+    accessToken?: string;
+
+    @ApiPropertyOptional({ example: "eyJhbGciOi...", type: String })
+    refreshToken?: string;
 }
 
 export class RevokeInvitationResponseDto {

@@ -6,6 +6,7 @@ import { MailModule } from "@mail/mail.module";
 import { PrismaModule } from "@common/prisma/prisma.module";
 import { MEMBER_FILES_JOB_OPTIONS } from "@common/queue/job-options";
 import { AccountModule } from "@modules/account/account.module";
+import { SharedAuthModule } from "@modules/portal/auth/shared/shared-auth.module";
 import { EntityFieldsModule } from "@modules/portal/crm/entity-fields/entity-fields.module";
 import { CrmMembersController } from "@modules/portal/crm/members/api/controllers/crm-members.controller";
 import { LkMembersController } from "@modules/portal/crm/members/api/controllers/lk-members.controller";
@@ -29,6 +30,7 @@ import { UsersModule } from "@modules/users";
         StorageModule,
         AccountModule,
         MailModule,
+        SharedAuthModule,
         BullModule.registerQueue({
             name: MEMBER_FILES_QUEUE_NAME,
             defaultJobOptions: MEMBER_FILES_JOB_OPTIONS,

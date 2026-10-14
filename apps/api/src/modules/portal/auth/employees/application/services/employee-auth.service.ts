@@ -27,16 +27,18 @@ export class EmployeeAuthService {
         if (!user || !user.passwordHash) {
             throw new UnauthorizedException("Invalid credentials");
         }
+
+        const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
+        if (!isPasswordValid) {
+            throw new UnauthorizedException("Invalid credentials");
+        }
+        // После проверки пароля, чтобы ответ не выдавал, что адрес зарегистрирован (TASK-665).
+        // Владелец клуба активен с регистрации и входит до подтверждения почты (решение 2026-10-14)
         if (!user.isActive) {
             throw new UnauthorizedException("Email not confirmed");
         }
         const activeEmployments = user.employees.filter((e) => e.isActive);
         if (activeEmployments.length === 0) {
-            throw new UnauthorizedException("Invalid credentials");
-        }
-
-        const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
-        if (!isPasswordValid) {
             throw new UnauthorizedException("Invalid credentials");
         }
 

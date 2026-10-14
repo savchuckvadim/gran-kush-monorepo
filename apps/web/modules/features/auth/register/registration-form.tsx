@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { FieldErrors, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -64,11 +64,7 @@ export function RegistrationForm() {
         id: number;
         target: keyof RegistrationFormData | "serverError";
     } | null>(null);
-    const [step, setStep] = useState<"form" | "registering" | "uploading" | "uploadError">("form");
-    const [pendingUpload, setPendingUpload] = useState<{
-        data: RegisterFormSubmitData;
-        email: string;
-    } | null>(null);
+    const [step, setStep] = useState<"form" | "registering">("form");
 
     const {
         register,
@@ -85,7 +81,7 @@ export function RegistrationForm() {
         },
     });
 
-    const { registerMutation, uploadMutation } = useSubmitRegister();
+    const { registerMutation } = useSubmitRegister();
     const formRef = useRef<HTMLFormElement | null>(null);
     const serverErrorRef = useRef<HTMLDivElement | null>(null);
     const signatureFieldRef = useRef<HTMLDivElement | null>(null);
@@ -185,19 +181,6 @@ export function RegistrationForm() {
             return;
         }
 
-        setPendingUpload({
-            data: payload,
-            email: payload.email,
-        });
-
-        try {
-            setStep("uploading");
-            await uploadMutation.mutateAsync(payload);
-        } catch {
-            setStep("uploadError");
-            return;
-        }
-
         router.push(
             localizedLink(`${ROUTES.CONFIRM_EMAIL}?email=${encodeURIComponent(payload.email)}`)
         );
@@ -211,63 +194,14 @@ export function RegistrationForm() {
         showToast(t("validationError") || "Please correct highlighted fields.");
     };
 
-    const retryUpload = async () => {
-        if (!pendingUpload) {
-            return;
-        }
-
-        try {
-            setStep("uploading");
-            await uploadMutation.mutateAsync(pendingUpload.data);
-            router.push(
-                localizedLink(
-                    `${ROUTES.CONFIRM_EMAIL}?email=${encodeURIComponent(pendingUpload.email)}`
-                )
-            );
-        } catch {
-            setStep("uploadError");
-        }
-    };
-
-    if (step === "registering" || step === "uploading") {
+    if (step === "registering") {
         return (
             <div className="flex min-h-[320px] flex-col items-center justify-center gap-4 text-center">
                 <Loader2 className="size-8 animate-spin text-primary" />
-                <h3 className="text-lg font-semibold">
-                    {step === "registering"
-                        ? t("status.creatingAccountTitle")
-                        : t("status.uploadingDocumentsTitle")}
-                </h3>
+                <h3 className="text-lg font-semibold">{t("status.creatingAccountTitle")}</h3>
                 <p className="max-w-md text-sm text-muted-foreground">
-                    {step === "registering"
-                        ? t("status.creatingAccountDescription")
-                        : t("status.uploadingDocumentsDescription")}
+                    {t("status.creatingAccountDescription")}
                 </p>
-            </div>
-        );
-    }
-
-    if (step === "uploadError") {
-        return (
-            <div className="flex min-h-[320px] flex-col items-center justify-center gap-4 text-center">
-                <AlertCircle className="size-8 text-destructive" />
-                <h3 className="text-lg font-semibold">{t("status.uploadErrorTitle")}</h3>
-                <p className="max-w-md text-sm text-muted-foreground">
-                    {t("status.uploadErrorDescription")}
-                </p>
-                <div className="flex w-full max-w-sm flex-col gap-2">
-                    <Button type="button" onClick={retryUpload} disabled={uploadMutation.isPending}>
-                        {uploadMutation.isPending ? t("status.retrying") : t("status.retryUpload")}
-                    </Button>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setStep("form")}
-                        disabled={uploadMutation.isPending}
-                    >
-                        {t("status.backToForm")}
-                    </Button>
-                </div>
             </div>
         );
     }
@@ -458,9 +392,7 @@ export function RegistrationForm() {
                 <Button
                     type="submit"
                     className="w-full"
-                    disabled={
-                        isSubmitting || registerMutation.isPending || uploadMutation.isPending
-                    }
+                    disabled={isSubmitting || registerMutation.isPending}
                 >
                     {isSubmitting || registerMutation.isPending ? t("submitting") : t("submit")}
                 </Button>

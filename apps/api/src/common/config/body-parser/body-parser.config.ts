@@ -9,6 +9,7 @@ const UPLOAD_JSON_ROUTES = [
     { path: "lk/account/documents", method: RequestMethod.POST },
     { path: "lk/account/signature", method: RequestMethod.PUT },
     { path: "lk/auth/member/files", method: RequestMethod.POST },
+    { path: "lk/auth/member/register", method: RequestMethod.POST },
 ];
 
 /** Вебхуки провайдеров оплаты: подпись считается по байтам тела, разбирать его в JSON нельзя. */

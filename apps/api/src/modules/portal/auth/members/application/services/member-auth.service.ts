@@ -26,13 +26,15 @@ export class MemberAuthService {
         if (!user || !user.passwordHash) {
             throw new UnauthorizedException("Invalid credentials");
         }
-        if (!user.isActive) {
-            throw new UnauthorizedException("Email not confirmed");
-        }
 
         const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
         if (!isPasswordValid) {
             throw new UnauthorizedException("Invalid credentials");
+        }
+        // После проверки пароля: иначе ответ выдавал бы, что адрес зарегистрирован (TASK-665).
+        // Пароль неподтверждённого аккаунта мог задать не владелец адреса (TASK-664)
+        if (!user.isActive || !user.emailConfirmed) {
+            throw new UnauthorizedException("Email not confirmed");
         }
 
         const tokens = await this.tokenIssuer.issueForUser(

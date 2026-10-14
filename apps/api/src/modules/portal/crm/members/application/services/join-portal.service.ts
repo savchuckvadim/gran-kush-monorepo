@@ -20,6 +20,11 @@ export interface JoinPortalInput {
     registrationLinkId?: string;
     /** CRM завёл чужой аккаунт по email: членство ждёт согласия владельца (TASK-663). */
     consent?: { token: string; requestedAt: Date };
+    /**
+     * Показать клубу документы аккаунта. По умолчанию — при самостоятельном вступлении.
+     * `false`, когда вступает аккаунт, владение которым не доказано (TASK-664).
+     */
+    shareDocuments?: boolean;
 }
 
 /**
@@ -76,7 +81,7 @@ export class JoinPortalService {
         });
 
         await this.fieldValues.upsertMemberFieldValues(input.portalId, member.id, validatedFields);
-        if (input.joinSource !== MemberJoinSource.crm) {
+        if (input.shareDocuments ?? input.joinSource !== MemberJoinSource.crm) {
             await this.shares.shareAllOfUser(member.id, input.userId);
         }
 

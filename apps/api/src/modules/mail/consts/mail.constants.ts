@@ -4,19 +4,17 @@
  */
 
 /**
- * Default email sender
+ * Default sender when SMTP_FROM / SMTP_FROM_NAME are not set
  */
-export const DEFAULT_EMAIL_FROM = "manager@april-app.ru";
+export const DEFAULT_EMAIL_FROM = "noreply@paf-paf.app";
+export const DEFAULT_EMAIL_FROM_NAME = "PafPaf";
 
 /**
- * Default email sender name
- */
-export const DEFAULT_EMAIL_FROM_NAME = "App";
-
-/**
- * Product name in email texts — until the shared brand package (TASK-531) exists
+ * Brand in email texts and layout — until the shared brand package (TASK-531) exists
  */
 export const MAIL_BRAND_NAME = "PafPaf";
+export const MAIL_BRAND_WORDMARK = "paf paf";
+export const MAIL_BRAND_SITE_URL = "https://paf-paf.app";
 
 /**
  * Email subjects by language and type
@@ -41,6 +39,16 @@ export const EMAIL_SUBJECTS = {
         ru: "Подтвердите вступление в клуб",
         es: "Confirma tu ingreso en el club",
         en: "Confirm joining the club",
+    },
+    EMPLOYEE_INVITATION: {
+        ru: "Приглашение в команду клуба",
+        es: "Invitación al equipo del club",
+        en: "Invitation to the club team",
+    },
+    ACCOUNT_SETUP: {
+        ru: "Задайте пароль для входа",
+        es: "Crea una contraseña para entrar",
+        en: "Set a password to sign in",
     },
 } as const;
 

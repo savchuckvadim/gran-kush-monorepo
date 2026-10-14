@@ -42,7 +42,7 @@
 | Мои клубы / вступление | `GET /lk/portals`, `POST /lk/portals/:slug/join` |
 | Мои порталы (CRM) | `GET /crm/my-portals` |
 | Глобальный аккаунт | `GET /lk/auth/me` (memberships), `GET /crm/auth/me` (employments) |
-| Регистрация | `POST /lk/auth/member/register` `{email,password,fields?}` — глобальная + join если есть X-Portal-*; клейм `pending_claim` |
+| Регистрация | `POST /lk/auth/member/register` `{email,password,fields?,files?}` — глобальная + join если есть X-Portal-*; без токенов до подтверждения почты; `pending_claim` клеймится только по ссылке из письма (TASK-664) |
 | Инвайты сотрудников | `POST/GET/DELETE /crm/settings/invitations`, `GET/POST /public/invitations/:token[/accept]` |
 | Ссылки-формы регистрации | CRUD `/crm/settings/registration-links`, `GET/POST /public/reg-links/:token[/register]` |
 | Универсальный CRUD записей | `/crm/entities/:code/records` (+ `/:id/stage`, `/:id/status`), фильтры `?fields[key]=val` |

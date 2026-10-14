@@ -350,14 +350,15 @@
 
 ## D. Бренд — P0 для того, что видит клиент, P1 для остального
 
-### TASK-530: письма без «April» `[ ]` P0
+### TASK-530: письма без «April» `[x]` P0 — `fix/security-662-664`, 2026-10-14
 
-- Где встречается:
-  - `common/config/mail/mailer.config.ts:20` — `"April Team"`;
-  - `modules/mail/consts/mail.constants.ts:9` — `manager@april-app.ru`;
-  - `consts/portal-registration-email.ts`, `consts/verifiaction-email.ts`;
-  - шаблоны `modules/mail/templates/*.tsx`.
-- Имя отправителя и подписи брать из TASK-531, адрес — из env (`SMTP_FROM`).
+- Было: `manager@april-app.ru` как отправитель по умолчанию и как подстановка получателя в
+  `MailService`, шаблон `test.template.tsx` с «April», мёртвый `restriction-lifted.template.tsx`.
+- Сделано: дефолты `noreply@paf-paf.app` / `PafPaf` (на проде задаются `SMTP_FROM`, `SMTP_FROM_NAME` —
+  TASK-552), мёртвые шаблоны удалены, все письма собраны на общем `EmailLayout` в стиле сайта
+  (чёрная шапка со знаком «paf paf», розовая кнопка `#ff5fa2`, подвал со ссылкой на paf-paf.app);
+  тексты — только через константы по языкам. Устройство — [backend/MAIL.md](../backend/MAIL.md).
+- Бренд в константах `MAIL_BRAND_*` до пакета бренда (TASK-531).
 
 ### TASK-531: единый источник бренда `[ ]` P0
 

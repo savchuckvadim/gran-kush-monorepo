@@ -23,16 +23,23 @@ const link = (over: Record<string, unknown> = {}) => ({
 });
 
 describe("RegistrationLinksService — лимит использований", () => {
-    const build = (opts: { consumed?: number; joinFails?: Error } = {}) => {
+    const build = (opts: { consumed?: number; joinFails?: Error; claimByEmail?: boolean } = {}) => {
         const prisma = {
             registrationLink: { findUnique: jest.fn().mockResolvedValue(link()) },
             member: { findUnique: jest.fn().mockResolvedValue(null) },
             $executeRaw: jest.fn().mockResolvedValue(opts.consumed ?? 1),
         };
         const accountProvisioning = {
-            ensureUserWithPassword: jest
-                .fn()
-                .mockResolvedValue({ user: { id: "u-1" }, created: true, claimed: false }),
+            ensureUserWithPassword: jest.fn().mockResolvedValue({
+                user: { id: "u-1", email: "a@b.c" },
+                created: !opts.claimByEmail,
+                claimed: false,
+                claimByEmail: opts.claimByEmail ?? false,
+            }),
+        };
+        const emailVerification = {
+            sendAccountSetup: jest.fn().mockResolvedValue(undefined),
+            sendVerificationEmailToUserId: jest.fn().mockResolvedValue(undefined),
         };
         const joinPortalService = {
             joinPortal: opts.joinFails
@@ -47,10 +54,11 @@ describe("RegistrationLinksService — лимит использований", (
             accountProvisioning as never,
             joinPortalService as never,
             formSchemaService as never,
-            presence as never
+            presence as never,
+            emailVerification as never
         );
 
-        return { service, prisma, joinPortalService };
+        return { service, prisma, joinPortalService, emailVerification };
     };
 
     const dto = { email: "a@b.c", password: "secret", fields: {} };
@@ -58,7 +66,7 @@ describe("RegistrationLinksService — лимит использований", (
     it("занимает слот до регистрации, а не после", async () => {
         const { service, prisma, joinPortalService } = build();
 
-        await service.registerViaLink("tok", dto as never);
+        await service.registerViaLink("tok", dto as never, "es");
 
         const consumeOrder = prisma.$executeRaw.mock.invocationCallOrder[0];
         const joinOrder = joinPortalService.joinPortal.mock.invocationCallOrder[0];
@@ -68,7 +76,7 @@ describe("RegistrationLinksService — лимит использований", (
     it("исчерпанный лимит: UPDATE не задел строк — регистрация не начинается", async () => {
         const { service, joinPortalService } = build({ consumed: 0 });
 
-        await expect(service.registerViaLink("tok", dto as never)).rejects.toBeInstanceOf(
+        await expect(service.registerViaLink("tok", dto as never, "es")).rejects.toBeInstanceOf(
             NotFoundException
         );
         expect(joinPortalService.joinPortal).not.toHaveBeenCalled();
@@ -77,7 +85,7 @@ describe("RegistrationLinksService — лимит использований", (
     it("возвращает слот, если регистрация упала", async () => {
         const { service, prisma } = build({ joinFails: new ConflictException("boom") });
 
-        await expect(service.registerViaLink("tok", dto as never)).rejects.toBeInstanceOf(
+        await expect(service.registerViaLink("tok", dto as never, "es")).rejects.toBeInstanceOf(
             ConflictException
         );
 
@@ -88,7 +96,7 @@ describe("RegistrationLinksService — лимит использований", (
     it("успешная регистрация слот не возвращает", async () => {
         const { service, prisma } = build();
 
-        const result = await service.registerViaLink("tok", dto as never);
+        const result = await service.registerViaLink("tok", dto as never, "es");
 
         expect(result.memberId).toBe("member-1");
         expect(prisma.$executeRaw).toHaveBeenCalledTimes(1);
@@ -100,11 +108,42 @@ describe("RegistrationLinksService — лимит использований", (
             link({ kind: RegistrationLinkKind.kiosk })
         );
 
-        await service.registerViaLink("tok", dto as never);
+        await service.registerViaLink("tok", dto as never, "es");
 
         expect(joinPortalService.joinPortal).toHaveBeenCalledWith(
             expect.objectContaining({ joinSource: MemberJoinSource.kiosk })
         );
+    });
+
+    it("новый аккаунт: документы клубу видны, письмо подтверждения", async () => {
+        const { service, joinPortalService, emailVerification } = build();
+
+        await service.registerViaLink("tok", dto as never, "es");
+
+        expect(joinPortalService.joinPortal).toHaveBeenCalledWith(
+            expect.objectContaining({ shareDocuments: true })
+        );
+        expect(emailVerification.sendVerificationEmailToUserId).toHaveBeenCalledWith("u-1", {
+            app: "member",
+            language: "es",
+        });
+        expect(emailVerification.sendAccountSetup).not.toHaveBeenCalled();
+    });
+
+    it("аккаунт без пароля чужого клуба: документы не открываются, пароль — по письму", async () => {
+        const { service, joinPortalService, emailVerification } = build({ claimByEmail: true });
+
+        const result = await service.registerViaLink("tok", dto as never, "es");
+
+        expect(joinPortalService.joinPortal).toHaveBeenCalledWith(
+            expect.objectContaining({ shareDocuments: false })
+        );
+        expect(emailVerification.sendAccountSetup).toHaveBeenCalledWith("a@b.c", {
+            app: "member",
+            language: "es",
+            portalName: "Club",
+        });
+        expect(result.accountCreated).toBe(true);
     });
 });
 
@@ -140,7 +179,8 @@ describe("RegistrationLinksService.create — личная ссылка", () => 
             {} as never,
             {} as never,
             {} as never,
-            presence as never
+            presence as never,
+            {} as never
         );
         return { service, prisma };
     };

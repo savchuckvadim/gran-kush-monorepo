@@ -26,20 +26,37 @@ import {
     MAIL_QUEUE_JOB_NAMES,
     MAIL_QUEUE_NAME,
 } from "../../events/mail-events.constants";
+import { AccountSetupTemplate } from "../../templates/account-setup.template";
 import { EmailVerificationTemplate } from "../../templates/email-verification.template";
+import { EmployeeInvitationTemplate } from "../../templates/employee-invitation.template";
 import { MembershipConsentTemplate } from "../../templates/membership-consent.template";
 import { PortalRegistrationTemplate } from "../../templates/portal-registration.template";
 import { ResetPasswordTemplate } from "../../templates/reset-password.template";
 
+type AuthApp = "crm" | "member";
+
+interface QueuedMail {
+    to: string;
+    subject: string;
+    html: string;
+    emailType: EmailType;
+    context?: Record<string, unknown>;
+    /** Фиксированный id — когда письмо должно уйти ровно один раз (см. `buildJobId`) */
+    jobId?: string;
+}
+
+/**
+ * Собирает письма из шаблонов и ставит их в очередь `mail`; отправляет `MailProcessor`
+ * через `sendEmail`. Куда ведут ссылки — зависит от приложения: CRM для сотрудников,
+ * кабинет участника для участников.
+ */
 @Injectable()
 export class MailService {
     private readonly logger = new Logger(MailService.name);
     private readonly smtpFrom: string;
     private readonly smtpFromName: string;
-    // private readonly authCookieSpaDomain: string;
-    // private readonly siteUrl: string;
     private readonly crmFrontendUrl: string;
-    private readonly siteFrontendUrl: string;
+    private readonly memberFrontendUrl: string;
 
     constructor(
         @Inject(MAIL_TRANSPORT) private readonly transport: MailTransport,
@@ -49,48 +66,36 @@ export class MailService {
         this.smtpFrom = this.configService.get<string>("SMTP_FROM") || DEFAULT_EMAIL_FROM;
         this.smtpFromName =
             this.configService.get<string>("SMTP_FROM_NAME") || DEFAULT_EMAIL_FROM_NAME;
-        // this.authCookieSpaDomain = this.configService.get<string>("AUTH_COOKIE_SPA_DOMAIN") || "";
-        // this.siteUrl = this.configService.get<string>("SITE_URL") || "";
         this.crmFrontendUrl = this.configService.get<string>("CRM_FRONTEND_URL") || "";
-        this.siteFrontendUrl = this.configService.get<string>("MEMBER_FRONTEND_URL") || "";
+        this.memberFrontendUrl = this.configService.get<string>("MEMBER_FRONTEND_URL") || "";
     }
 
-    public async sendMamberEmailVerification(
+    private frontendUrl(app: AuthApp): string {
+        return app === "crm" ? this.crmFrontendUrl : this.memberFrontendUrl;
+    }
+
+    /**
+     * Без jobId письмо может уйти повторно по кнопке «выслать ещё раз» — так и задумано:
+     * дедупликация глушила бы повторную отправку, которую запросил сам пользователь.
+     */
+    private async enqueue(mail: QueuedMail): Promise<boolean> {
+        const { to, jobId, ...rest } = mail;
+        await this.queue.add(
+            MAIL_QUEUE_JOB_NAMES.SEND_EMAIL,
+            { to: [to], ...rest },
+            jobId ? { jobId } : undefined
+        );
+        this.logger.log(`📬 ${mail.emailType} email queued for ${to}`);
+        return true;
+    }
+
+    public async sendMemberEmailVerification(
         member: { name: string; surname: string | null },
         user: Pick<User, "id" | "email">,
         token: string,
         language: SupportedLanguage = DEFAULT_LANGUAGE
-    ) {
-        const baseUrl = this.siteFrontendUrl;
-
-        const html = await render(
-            EmailVerificationTemplate({
-                name: member.name,
-                surname: member.surname,
-                token,
-                language: language,
-                baseUrl,
-            })
-        );
-
-        // Add email to queue for async processing
-        await this.queue.add(
-            MAIL_QUEUE_JOB_NAMES.SEND_EMAIL,
-            {
-                to: [user.email ?? DEFAULT_EMAIL_FROM],
-                subject: EMAIL_SUBJECTS.VERIFICATION[language],
-                html,
-                context: {
-                    name: member.name,
-                },
-                emailType: EmailType.VERIFICATION,
-            }
-            // Без jobId: письмо запрашивает сам пользователь, и повторная отправка
-            // по кнопке «выслать ещё раз» должна доходить, а не глохнуть в дедупликации.
-        );
-
-        this.logger.log(`📬 Email verification queued for ${user.email}`);
-        return true;
+    ): Promise<boolean> {
+        return this.sendEmailVerification("member", member, user, token, language);
     }
 
     public async sendEmployeeEmailVerification(
@@ -98,37 +103,33 @@ export class MailService {
         user: Pick<User, "id" | "email">,
         token: string,
         language: SupportedLanguage = DEFAULT_LANGUAGE
-    ) {
-        const baseUrl = this.crmFrontendUrl;
+    ): Promise<boolean> {
+        return this.sendEmailVerification("crm", employee, user, token, language);
+    }
 
+    private async sendEmailVerification(
+        app: AuthApp,
+        recipient: { name: string; surname?: string | null },
+        user: Pick<User, "id" | "email">,
+        token: string,
+        language: SupportedLanguage
+    ): Promise<boolean> {
         const html = await render(
             EmailVerificationTemplate({
-                name: employee.name,
-                surname: employee.surname,
+                name: recipient.name,
+                surname: recipient.surname,
                 token,
-                language: language,
-                baseUrl,
+                language,
+                baseUrl: this.frontendUrl(app),
             })
         );
-
-        // Add email to queue for async processing
-        await this.queue.add(
-            MAIL_QUEUE_JOB_NAMES.SEND_EMAIL,
-            {
-                to: [user.email ?? DEFAULT_EMAIL_FROM],
-                subject: EMAIL_SUBJECTS.VERIFICATION[language],
-                html,
-                context: {
-                    name: employee.name,
-                },
-                emailType: EmailType.VERIFICATION,
-            }
-            // Без jobId: письмо запрашивает сам пользователь, и повторная отправка
-            // по кнопке «выслать ещё раз» должна доходить, а не глохнуть в дедупликации.
-        );
-
-        this.logger.log(`📬 Employee email verification queued for ${user.email}`);
-        return true;
+        return this.enqueue({
+            to: user.email,
+            subject: EMAIL_SUBJECTS.VERIFICATION[language],
+            html,
+            context: { name: recipient.name },
+            emailType: EmailType.VERIFICATION,
+        });
     }
 
     public async sendPasswordReset(
@@ -137,36 +138,22 @@ export class MailService {
         token: string,
         language: SupportedLanguage = DEFAULT_LANGUAGE,
         type: "crm" | "site" = "site"
-    ) {
-        const baseUrl = type === "crm" ? this.crmFrontendUrl : this.siteFrontendUrl;
-
+    ): Promise<boolean> {
         const html = await render(
             ResetPasswordTemplate({
                 name,
                 token,
                 language,
-                baseUrl,
+                baseUrl: this.frontendUrl(type === "crm" ? "crm" : "member"),
             })
         );
-
-        // Add email to queue for async processing
-        await this.queue.add(
-            MAIL_QUEUE_JOB_NAMES.SEND_EMAIL,
-            {
-                to: [user.email ?? DEFAULT_EMAIL_FROM],
-                subject: EMAIL_SUBJECTS.PASSWORD_RESET[language],
-                html,
-                context: {
-                    name: user.email,
-                },
-                emailType: EmailType.PASSWORD_RESET,
-            }
-            // Без jobId: письмо запрашивает сам пользователь, и повторная отправка
-            // по кнопке «выслать ещё раз» должна доходить, а не глохнуть в дедупликации.
-        );
-
-        this.logger.log(`📬 Password reset email queued for ${user.email}`);
-        return true;
+        return this.enqueue({
+            to: user.email,
+            subject: EMAIL_SUBJECTS.PASSWORD_RESET[language],
+            html,
+            context: { name: user.email },
+            emailType: EmailType.PASSWORD_RESET,
+        });
     }
 
     public async sendPortalRegistrationEmail(params: {
@@ -175,49 +162,36 @@ export class MailService {
         language?: SupportedLanguage;
     }): Promise<boolean> {
         const language = params.language || DEFAULT_LANGUAGE;
-        const baseUrl = this.crmFrontendUrl;
-        const loginLink = `${baseUrl}/${language}/${params.portal.name}/auth/login`;
         const html = await render(
             PortalRegistrationTemplate({
                 ownerName: params.owner.name,
                 portalDisplayName: params.portal.displayName,
-                loginLink,
+                loginLink: `${this.crmFrontendUrl}/${language}/${params.portal.name}/auth/login`,
                 language,
-                baseUrl,
             })
         );
-
-        await this.queue.add(
-            MAIL_QUEUE_JOB_NAMES.SEND_EMAIL,
-            {
-                to: [params.owner.email ?? DEFAULT_EMAIL_FROM],
-                subject: EMAIL_SUBJECTS.PORTAL_REGISTRATION[language],
-                html,
-                context: {
-                    portalId: params.portal.id,
-                    portalSlug: params.portal.name,
-                    portalDisplayName: params.portal.displayName,
-                    ownerEmail: params.owner.email,
-                    ownerName: params.owner.name,
-                    ownerId: params.owner.id,
-                    language,
-                },
-                emailType: EmailType.PORTAL_REGISTRATION,
+        return this.enqueue({
+            to: params.owner.email,
+            subject: EMAIL_SUBJECTS.PORTAL_REGISTRATION[language],
+            html,
+            context: {
+                portalId: params.portal.id,
+                portalSlug: params.portal.name,
+                portalDisplayName: params.portal.displayName,
+                ownerEmail: params.owner.email,
+                ownerName: params.owner.name,
+                ownerId: params.owner.id,
+                language,
             },
-            {
-                // Приветственное письмо у портала одно. Обработчик события портала теперь
-                // повторяется (TASK-111), и без фиксированного jobId каждый повтор слал бы
-                // владельцу ещё одну копию.
-                jobId: buildJobId(
-                    MAIL_QUEUE_JOB_NAMES.SEND_EMAIL,
-                    "portal-registration",
-                    params.portal.id
-                ),
-            }
-        );
-
-        this.logger.log(`📬 Portal registration email queued for ${params.owner.email}`);
-        return true;
+            emailType: EmailType.PORTAL_REGISTRATION,
+            // Приветственное письмо у портала одно: обработчик события портала повторяется
+            // (TASK-111), и без фиксированного jobId каждый повтор слал бы ещё одну копию
+            jobId: buildJobId(
+                MAIL_QUEUE_JOB_NAMES.SEND_EMAIL,
+                "portal-registration",
+                params.portal.id
+            ),
+        });
     }
 
     /** Клуб добавил существующий аккаунт по email: владелец подтверждает членство (TASK-663). */
@@ -236,23 +210,75 @@ export class MailService {
                 baseUrl: this.crmFrontendUrl,
             })
         );
-
-        await this.queue.add(
-            MAIL_QUEUE_JOB_NAMES.SEND_EMAIL,
-            {
-                to: [params.to],
-                subject: EMAIL_SUBJECTS.MEMBERSHIP_CONSENT[language],
-                html,
-                context: { portalName: params.portalName },
-                emailType: EmailType.MEMBERSHIP_CONSENT,
-            }
-            // Без jobId: кнопка «отправить ещё раз» в CRM должна доходить до адресата
-        );
-
-        this.logger.log(`📬 Membership consent email queued for ${params.to}`);
-        return true;
+        return this.enqueue({
+            to: params.to,
+            subject: EMAIL_SUBJECTS.MEMBERSHIP_CONSENT[language],
+            html,
+            context: { portalName: params.portalName },
+            emailType: EmailType.MEMBERSHIP_CONSENT,
+        });
     }
 
+    /** Аккаунт без пароля: ссылка задать пароль на странице «новый пароль» (TASK-664). */
+    public async sendAccountSetup(params: {
+        to: string;
+        token: string;
+        app: AuthApp;
+        portalName?: string;
+        language?: SupportedLanguage;
+    }): Promise<boolean> {
+        const language = params.language || DEFAULT_LANGUAGE;
+        const baseUrl = this.frontendUrl(params.app);
+        if (!baseUrl) {
+            // Кабинет участника на проде может быть не поднят: ссылка в никуда хуже, чем без письма
+            this.logger.warn(
+                `Account setup email for ${params.to} skipped: frontend URL for "${params.app}" is not configured`
+            );
+            return false;
+        }
+        const html = await render(
+            AccountSetupTemplate({
+                token: params.token,
+                portalName: params.portalName,
+                language,
+                baseUrl,
+            })
+        );
+        return this.enqueue({
+            to: params.to,
+            subject: EMAIL_SUBJECTS.ACCOUNT_SETUP[language],
+            html,
+            context: { portalName: params.portalName },
+            emailType: EmailType.ACCOUNT_SETUP,
+        });
+    }
+
+    /** Ссылка-приглашение сотрудника (TASK-662). */
+    public async sendEmployeeInvitation(params: {
+        to: string;
+        token: string;
+        portalName: string;
+        language?: SupportedLanguage;
+    }): Promise<boolean> {
+        const language = params.language || DEFAULT_LANGUAGE;
+        const html = await render(
+            EmployeeInvitationTemplate({
+                portalName: params.portalName,
+                token: params.token,
+                language,
+                baseUrl: this.crmFrontendUrl,
+            })
+        );
+        return this.enqueue({
+            to: params.to,
+            subject: EMAIL_SUBJECTS.EMPLOYEE_INVITATION[language],
+            html,
+            context: { portalName: params.portalName },
+            emailType: EmailType.EMPLOYEE_INVITATION,
+        });
+    }
+
+    /** Отправка из воркера очереди. */
     async sendEmail(params: {
         subject: string;
         html: string;

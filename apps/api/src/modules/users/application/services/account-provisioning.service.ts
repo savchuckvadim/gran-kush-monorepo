@@ -37,12 +37,16 @@ export class AccountProvisioningService {
      * тогда аккаунт сразу активируется с подтверждённым email.
      * `verifyPassword: true` — у существующего аккаунта пароль должен совпасть: иначе любой,
      * кто знает чужой email, вступал бы в клуб от его имени и открывал клубу его документы.
+     *
+     * Аккаунт без пароля (`pending_claim`, его завёл клуб) без доказанного email не клеймится:
+     * пароль не ставится, вызывающий получает `claimByEmail` и шлёт ссылку на почту. Иначе
+     * кто угодно задавал бы пароль чужому аккаунту и забирал документы, загруженные клубом (TASK-664).
      */
     async ensureUserWithPassword(
         email: string,
         password: string | undefined,
         options: { emailVerified: boolean; verifyPassword?: boolean }
-    ): Promise<{ user: User; created: boolean; claimed: boolean }> {
+    ): Promise<{ user: User; created: boolean; claimed: boolean; claimByEmail: boolean }> {
         const verifiedFlags = options.emailVerified ? { isActive: true, emailConfirmed: true } : {};
 
         const existing = await this.userRepository.findByEmail(email);
@@ -58,10 +62,13 @@ export class AccountProvisioningService {
                 isActive: options.emailVerified,
                 emailConfirmed: options.emailVerified,
             });
-            return { user, created: true, claimed: false };
+            return { user, created: true, claimed: false, claimByEmail: false };
         }
 
         if (existing.passwordHash === null) {
+            if (!options.emailVerified) {
+                return { user: existing, created: false, claimed: false, claimByEmail: true };
+            }
             if (!password) {
                 throw new BadRequestException("Password is required to claim this account");
             }
@@ -71,7 +78,7 @@ export class AccountProvisioningService {
                 status: UserAccountStatus.active,
                 ...verifiedFlags,
             });
-            return { user, created: false, claimed: true };
+            return { user, created: false, claimed: true, claimByEmail: false };
         }
 
         if (options.verifyPassword) {
@@ -83,6 +90,6 @@ export class AccountProvisioningService {
             }
         }
 
-        return { user: existing, created: false, claimed: false };
+        return { user: existing, created: false, claimed: false, claimByEmail: false };
     }
 }

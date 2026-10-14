@@ -8,6 +8,7 @@ import { PUBLIC_TOKEN_THROTTLE } from "@common/config/throttler/throttler.config
 import { Public } from "@common/decorators/auth/public.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { type ContentLocale, RequestLocale } from "@common/i18n";
 
 import { InvitationsService } from "../../application/services/invitations.service";
 import {
@@ -46,14 +47,15 @@ export class PublicInvitationsController {
     @Throttle(PUBLIC_TOKEN_THROTTLE)
     @ApiOperation({
         summary:
-            "Принять приглашение: создаёт/клеймит аккаунт (password обязателен для новых) и Employee",
+            "Принять приглашение: новый аккаунт или существующий с его паролем + Employee. Аккаунт без пароля — 409 и письмо, чтобы задать пароль",
     })
     @ApiSuccessResponse(AcceptInvitationResponseDto, { status: 201 })
-    @ApiErrorResponse([400, 404, 409])
+    @ApiErrorResponse([400, 401, 404, 409])
     async accept(
         @Param("token") token: string,
-        @Body() dto: AcceptInvitationDto
+        @Body() dto: AcceptInvitationDto,
+        @RequestLocale() locale: ContentLocale
     ): Promise<AcceptInvitationResponseDto> {
-        return this.invitationsService.accept(token, dto);
+        return this.invitationsService.accept(token, dto, locale);
     }
 }

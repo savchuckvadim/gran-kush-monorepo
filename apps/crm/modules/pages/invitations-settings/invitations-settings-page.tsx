@@ -15,7 +15,7 @@ import {
 } from "@/modules/entities/invitations";
 import { getApiErrorMessage } from "@/modules/shared";
 
-type EmployeeRole = "portal_owner" | "admin" | "manager" | "employee";
+type EmployeeRole = "admin" | "manager" | "employee";
 
 const ROLES: EmployeeRole[] = ["admin", "manager", "employee"];
 
@@ -37,6 +37,8 @@ export function InvitationsSettingsPage() {
     const [email, setEmail] = useState("");
     const [role, setRole] = useState<EmployeeRole>("employee");
     const [error, setError] = useState<string | null>(null);
+    // Ссылка видна только сразу после создания: в списке токена нет (TASK-662)
+    const [created, setCreated] = useState<{ email: string; url: string } | null>(null);
 
     function inviteUrl(token: string): string {
         const origin = typeof window !== "undefined" ? window.location.origin : "";
@@ -46,16 +48,17 @@ export function InvitationsSettingsPage() {
     async function handleCreate() {
         setError(null);
         try {
-            await createMutation.mutateAsync({ email: email.trim(), role });
+            const invitation = await createMutation.mutateAsync({ email: email.trim(), role });
+            setCreated({ email: invitation.email, url: inviteUrl(invitation.token) });
             setEmail("");
-            toast.success("Приглашение создано");
+            toast.success("Приглашение отправлено на почту");
         } catch (e) {
             setError(getApiErrorMessage(e));
         }
     }
 
-    function handleCopy(token: string) {
-        void navigator.clipboard.writeText(inviteUrl(token));
+    function handleCopy(url: string) {
+        void navigator.clipboard.writeText(url);
         toast.success("Ссылка скопирована");
     }
 
@@ -72,7 +75,7 @@ export function InvitationsSettingsPage() {
             <div>
                 <h1 className="text-2xl font-semibold">Приглашения сотрудников</h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                    Отправьте ссылку-приглашение, чтобы сотрудник присоединился к порталу.
+                    Сотрудник получит ссылку-приглашение на почту и присоединится к порталу.
                 </p>
             </div>
 
@@ -103,6 +106,29 @@ export function InvitationsSettingsPage() {
                     </div>
                 </div>
                 {error ? <p className="mt-2 text-sm text-destructive">{error}</p> : null}
+                {created ? (
+                    <div className="mt-4 rounded-md border bg-muted/40 p-3 text-sm">
+                        <p>
+                            Письмо со ссылкой отправлено на <b>{created.email}</b>. Если письмо не
+                            дошло, передайте ссылку сами — она показывается только сейчас.
+                        </p>
+                        <div className="mt-2 flex items-center gap-2">
+                            <code className="min-w-0 flex-1 truncate rounded bg-background px-2 py-1 text-xs">
+                                {created.url}
+                            </code>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 text-xs"
+                                onClick={() => handleCopy(created.url)}
+                            >
+                                <span className="inline-flex items-center gap-1">
+                                    <Copy className="h-3 w-3" /> Скопировать
+                                </span>
+                            </Button>
+                        </div>
+                    </div>
+                ) : null}
             </Card>
 
             <Card className="p-0">
@@ -128,7 +154,9 @@ export function InvitationsSettingsPage() {
                             <tbody>
                                 {invitations.map((invitation) => (
                                     <tr key={invitation.id} className="border-b last:border-b-0">
-                                        <td className="px-3 py-2 font-medium">{invitation.email}</td>
+                                        <td className="px-3 py-2 font-medium">
+                                            {invitation.email}
+                                        </td>
                                         <td className="px-3 py-2">{invitation.role}</td>
                                         <td className="px-3 py-2">
                                             <span
@@ -144,30 +172,14 @@ export function InvitationsSettingsPage() {
                                         <td className="px-3 py-2">
                                             <div className="flex justify-end gap-1">
                                                 {invitation.status === "pending" ? (
-                                                    <>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-7 text-xs"
-                                                            onClick={() =>
-                                                                handleCopy(invitation.token)
-                                                            }
-                                                        >
-                                                            <span className="inline-flex items-center gap-1">
-                                                                <Copy className="h-3 w-3" /> Ссылка
-                                                            </span>
-                                                        </Button>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-7 w-7 text-destructive"
-                                                            onClick={() =>
-                                                                handleRevoke(invitation.id)
-                                                            }
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
-                                                    </>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-7 w-7 text-destructive"
+                                                        onClick={() => handleRevoke(invitation.id)}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
                                                 ) : null}
                                             </div>
                                         </td>

@@ -16,7 +16,6 @@ import { Public } from "@common/decorators/auth/public.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { type ContentLocale, RequestLocale } from "@common/i18n";
-import { AllowUnconfirmed } from "@modules/portal/auth/members/api/decorators/allow-unconfirmed.decorator";
 import { RegisterMemberResponseDto } from "@modules/portal/auth/members/api/dto/register-member-response.dto";
 import { MemberRegistrationService } from "@modules/portal/auth/members/application/services/member-registration.service";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
@@ -74,14 +73,14 @@ export class MemberRegistrationController {
     @ApiErrorResponse([400, 409])
     async register(
         @Body() dto: DynamicMemberRegistrationDto,
-        @Req() request: Request
+        @Req() request: Request,
+        @RequestLocale() locale: ContentLocale
     ): Promise<RegisterMemberResponseDto> {
         const portalId = request.portalContext?.portalId;
-        return this.memberRegistrationUseCase.execute(dto, portalId);
+        return this.memberRegistrationUseCase.execute(dto, portalId, locale);
     }
 
     @Post("files")
-    @AllowUnconfirmed()
     @RequireUserJwt()
     @Throttle(UPLOAD_THROTTLE)
     @ApiOperation({ summary: "Queue account documents/signature upload (Site)" })

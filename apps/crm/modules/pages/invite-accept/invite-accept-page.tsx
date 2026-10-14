@@ -32,7 +32,9 @@ export function InviteAcceptPage({ token }: { token: string }) {
                 password: password || undefined,
                 fields: firstName.trim() ? { first_name: firstName.trim() } : undefined,
             }),
-        onSuccess: (_data, _vars) => {
+        onSuccess: (data) => {
+            // Новый аккаунт входит после подтверждения почты: сессии в ответе нет
+            if (data.awaitingEmailConfirmation) return;
             const slug = infoQuery.data?.portalSlug;
             router.push(slug ? `/${locale}/${slug}/crm` : `/${locale}${ROUTES.LOGIN}`);
         },
@@ -60,6 +62,20 @@ export function InviteAcceptPage({ token }: { token: string }) {
     }
 
     const info = infoQuery.data;
+
+    if (acceptMutation.data?.awaitingEmailConfirmation) {
+        return (
+            <div className="flex min-h-[50vh] items-center justify-center p-4">
+                <Card className="w-full max-w-md p-6 text-center">
+                    <h1 className="text-xl font-semibold">Осталось подтвердить почту</h1>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                        Мы отправили письмо на {info.email}. Перейдите по ссылке из него, после
+                        этого можно войти в {info.portalDisplayName}.
+                    </p>
+                </Card>
+            </div>
+        );
+    }
 
     return (
         <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center p-4">
