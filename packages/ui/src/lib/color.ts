@@ -37,3 +37,10 @@ export function readableTextColor(background: string): string {
     const onDark = (fill + 0.05) / (DARK_LUMINANCE + 0.05);
     return onWhite >= onDark ? LIGHT_TEXT : DARK_TEXT;
 }
+
+/** A stable hue (0–359) for a text: the same person keeps the same colour across the app. */
+export const hueOf = (text: string): number => {
+    let hash = 0;
+    for (const char of text) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+    return hash % 360;
+};

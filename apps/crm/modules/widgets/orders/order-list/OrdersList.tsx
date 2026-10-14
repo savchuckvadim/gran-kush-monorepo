@@ -1,14 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { Card } from "@workspace/ui";
 
 import { type OrderListItem, useOrders } from "@/modules/entities/order";
 import { EntityList } from "@/modules/shared";
-import { ROUTES } from "@/modules/shared/config/routes";
-import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
+import { useOpenEntity } from "@/modules/shared/lib/entity-slider";
 
 import { OrdersFilterBar } from "../order-filters/OrdersFilterBar";
 import type { OrderFilters } from "../order-filters/use-order-filters";
@@ -24,8 +22,7 @@ interface OrdersListProps {
 /** All orders, closed ones too: a table on a computer, cards on a phone. */
 export function OrdersList({ filters }: OrdersListProps) {
     const t = useTranslations("crm.orders.list");
-    const router = useRouter();
-    const toAppPath = useLocalizedLink();
+    const openEntity = useOpenEntity();
     const columns = useOrderTableColumns();
 
     const { data, isLoading, isFetching, error } = useOrders({
@@ -35,8 +32,7 @@ export function OrdersList({ filters }: OrdersListProps) {
         limit: PAGE_SIZE,
     });
 
-    const openOrder = (order: OrderListItem) =>
-        router.push(toAppPath(`${ROUTES.CRM_ORDER_DETAILS}/${order.id}`));
+    const openOrder = (order: OrderListItem) => openEntity({ kind: "order", id: order.id });
 
     return (
         <Card className="p-4">

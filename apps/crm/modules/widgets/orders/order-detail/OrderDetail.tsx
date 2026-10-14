@@ -17,10 +17,12 @@ import { OrderSummaryCard } from "./OrderSummaryCard";
 
 interface OrderDetailProps {
     orderId: string;
+    /** In a slider the panel closes instead of a back button */
+    layout?: "page" | "slider";
 }
 
 /** The order card: the stage bar across the top, details and payment on the left, items on the right. */
-export function OrderDetail({ orderId }: OrderDetailProps) {
+export function OrderDetail({ orderId, layout = "page" }: OrderDetailProps) {
     const t = useTranslations("crm.orders.detail");
     const { data: order, isLoading, error } = useOrderDetail(orderId);
     const { data: funnels = [] } = useOrderFunnels();
@@ -49,7 +51,7 @@ export function OrderDetail({ orderId }: OrderDetailProps) {
 
     return (
         <div className="space-y-4">
-            <OrderDetailHeader order={order} />
+            <OrderDetailHeader order={order} showBack={layout === "page"} />
             {funnel ? <OrderStageBar order={order} funnel={funnel} canMove={isManager} /> : null}
             <div className="grid gap-4 lg:grid-cols-5">
                 <div className="space-y-4 lg:col-span-2">

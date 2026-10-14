@@ -1,8 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@workspace/ui";
@@ -17,8 +15,8 @@ import {
     toFieldConditions,
     useEntityFilterParams,
 } from "@/modules/shared";
-import { ROUTES } from "@/modules/shared/config/routes";
-import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
+import { useOpenEntity } from "@/modules/shared/lib/entity-slider";
+import { EntityLink } from "@/modules/shared/ui/EntityLink";
 
 const PAGE_SIZE = 20;
 /** The status is a column of the member's record, not a field: it goes as `statusItemId`. */
@@ -26,10 +24,7 @@ const STATUS_KEY = "status";
 
 export function MemberList() {
     const t = useTranslations("crm.members");
-    const router = useRouter();
-    const toAppPath = useLocalizedLink();
-    const makeMemberPath = (memberId: string) =>
-        toAppPath(`${ROUTES.CRM_MEMBER_DETAILS}/${memberId}`);
+    const openEntity = useOpenEntity();
 
     const { statuses, filterFields } = useMembersListMeta(true);
     const fields = useMemo<EntityFilterField[]>(
@@ -125,7 +120,9 @@ export function MemberList() {
             header: t("columns.action"),
             cell: (member: CrmMemberListItem) => (
                 <Button variant="outline" size="sm" asChild>
-                    <Link href={makeMemberPath(member.id)}>{t("openProfile")}</Link>
+                    <EntityLink kind="member" id={member.id}>
+                        {t("openProfile")}
+                    </EntityLink>
                 </Button>
             ),
         },
@@ -153,9 +150,7 @@ export function MemberList() {
             getRowKey={(member) => member.id}
             tableColumns={tableColumns}
             isRowClickable={true}
-            onRowClick={(member) => {
-                router.push(makeMemberPath(member.id));
-            }}
+            onRowClick={(member) => openEntity({ kind: "member", id: member.id })}
             // a card opens by itself: no «Open profile» row in it
             cardTitle={(member) =>
                 withConsentBadge(
@@ -165,7 +160,7 @@ export function MemberList() {
             }
             defaultVisibleCardFieldKeys={["email", "phone", "status"]}
             isCardClickable
-            onCardClick={(member) => router.push(makeMemberPath(member.id))}
+            onCardClick={(member) => openEntity({ kind: "member", id: member.id })}
             pagination={{
                 page,
                 totalPages: data?.totalPages ?? 1,

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 import { InitialsAvatar } from "@workspace/ui";
@@ -12,8 +11,7 @@ import {
     stageColor,
 } from "@/modules/entities/order";
 import { personName, useCompactDateFormat, useMoneyFormat } from "@/modules/shared";
-import { ROUTES } from "@/modules/shared/config/routes";
-import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
+import { EntityLink } from "@/modules/shared/ui/EntityLink";
 
 interface OrderKanbanCardProps {
     order: OrderListItem;
@@ -24,7 +22,6 @@ export function OrderKanbanCard({ order }: OrderKanbanCardProps) {
     const t = useTranslations("crm.orders.kanban");
     const money = useMoneyFormat();
     const date = useCompactDateFormat();
-    const toAppPath = useLocalizedLink();
     const employee = order.employee ? personName(order.employee, "") : "";
 
     return (
@@ -34,13 +31,14 @@ export function OrderKanbanCard({ order }: OrderKanbanCardProps) {
             style={{ borderLeftColor: order.stage ? stageColor(order.stage) : undefined }}
         >
             <div className="flex items-start justify-between gap-2">
-                <Link
-                    href={toAppPath(`${ROUTES.CRM_ORDER_DETAILS}/${order.id}`)}
+                <EntityLink
+                    kind="order"
+                    id={order.id}
                     draggable={false}
                     className="font-mono text-xs font-semibold hover:underline"
                 >
                     {order.orderNumber}
-                </Link>
+                </EntityLink>
                 <PaymentStatusBadge status={order.paymentStatus} />
             </div>
             <p className="mt-1 text-base font-semibold tabular-nums">{money(order.total)}</p>

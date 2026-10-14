@@ -1,5 +1,6 @@
 export * from "./EntityCard";
 export * from "./EntityFilter";
+export * from "./EntityLink";
 export * from "./EntityList";
 export * from "./Loading";
 export * from "./NavButtons";

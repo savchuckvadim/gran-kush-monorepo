@@ -1,5 +1,6 @@
 export * from "./api-error";
 export * from "./auth";
+export * from "./entity-slider";
 export * from "./notify-api-error";
 export * from "./person-name";
 export * from "./routes";
@@ -9,3 +10,4 @@ export * from "./use-hydrated";
 export * from "./use-is-mobile";
 export * from "./use-localized-link";
 export * from "./use-money-format";
+export * from "./use-span-format";

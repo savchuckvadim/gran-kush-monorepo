@@ -20,6 +20,7 @@ import {
 import { useCrmNavigation, usePortal } from "@/modules/processes";
 import { $api } from "@/modules/shared";
 import { ROUTES } from "@/modules/shared/config/routes";
+import { type EntityRef, useOpenEntity } from "@/modules/shared/lib/entity-slider";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
 const MIN_QUERY = 2;
@@ -107,9 +108,15 @@ function CommandPalette({ onClose }: { onClose: () => void }) {
         },
     ].filter((page) => !query.trim() || matches(page.title, query));
 
+    const openEntity = useOpenEntity();
     const go = (url: string) => {
         onClose();
         router.push(url);
+    };
+    /** Members and orders open in a slider over the page the search was called on. */
+    const openFound = (ref: EntityRef) => {
+        onClose();
+        openEntity(ref);
     };
 
     const data = searchable ? results.data : undefined;
@@ -137,9 +144,7 @@ function CommandPalette({ onClose }: { onClose: () => void }) {
                             <CommandItem
                                 key={member.id}
                                 value={`member-${member.id}`}
-                                onSelect={() =>
-                                    go(localizedLink(`${ROUTES.CRM_MEMBER_DETAILS}/${member.id}`))
-                                }
+                                onSelect={() => openFound({ kind: "member", id: member.id })}
                             >
                                 <UserRound />
                                 <span className="min-w-0 flex-1 truncate">{member.name}</span>
@@ -181,9 +186,7 @@ function CommandPalette({ onClose }: { onClose: () => void }) {
                             <CommandItem
                                 key={order.id}
                                 value={`order-${order.id}`}
-                                onSelect={() =>
-                                    go(localizedLink(`${ROUTES.CRM_ORDER_DETAILS}/${order.id}`))
-                                }
+                                onSelect={() => openFound({ kind: "order", id: order.id })}
                             >
                                 <ShoppingBag />
                                 <span className="min-w-0 flex-1 truncate">{order.orderNumber}</span>

@@ -7,6 +7,7 @@ import { CrmSidebar, useCrmNavigation } from "@/modules/processes";
 import { BurgerButton } from "@/modules/shared/ui/Burger";
 import { useSidebar } from "@/modules/shared/ui/Sidebar";
 import { SkinBackdrop } from "@/modules/shared/ui/SkinBackdrop";
+import { EntitySliderStack } from "@/modules/widgets/entity-slider";
 import { PortalSwitcher } from "@/modules/widgets/portal-switcher";
 import { SubscriptionGate } from "@/modules/widgets/subscription-gate";
 
@@ -81,6 +82,7 @@ export function CrmShell({ children }: CrmShellProps) {
                     </main>
                 </div>
             </div>
+            <EntitySliderStack />
         </CommandPaletteProvider>
     );
 }

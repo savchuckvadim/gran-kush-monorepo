@@ -202,7 +202,79 @@
             },
             "searchPlaceholder": "Имя, телефон, email или номер…",
             "empty": "Никого не нашли",
-            "loadError": "Не удалось загрузить участников"
+            "loadError": "Не удалось загрузить участников",
+            "card": {
+                "loadError": "Не удалось загрузить участника",
+                "retry": "Повторить",
+                "notFound": "Участник не найден",
+                "back": "Участники",
+                "number": "№ {number}",
+                "noNumber": "Без номера",
+                "inClubNow": "В клубе сейчас",
+                "qr": "QR-код",
+                "edit": "Редактировать",
+                "stats": {
+                    "visits": "Визиты",
+                    "lastVisit": "Последний: {date}",
+                    "noVisits": "Визитов ещё не было",
+                    "orders": "Заказы",
+                    "inProgress": "В работе: {count}",
+                    "noOrders": "Заказов ещё не было",
+                    "spent": "Потрачено",
+                    "spentHint": "Выдано заказов: {count}",
+                    "since": "В клубе",
+                    "sinceHint": "С {date}"
+                },
+                "tabs": {
+                    "overview": "Обзор",
+                    "orders": "Заказы",
+                    "visits": "Визиты",
+                    "documents": "Документы"
+                },
+                "profile": {
+                    "title": "Профиль",
+                    "contacts": "Контакты",
+                    "personal": "Личное",
+                    "club": "Клуб",
+                    "email": "Email",
+                    "phone": "Телефон",
+                    "birthday": "Дата рождения",
+                    "address": "Адрес",
+                    "number": "Номер членства",
+                    "joined": "В клубе с",
+                    "status": "Статус",
+                    "consent": "Согласие на членство",
+                    "consentConfirmed": "Дано",
+                    "consentPending": "Ждём ответа",
+                    "extra": "Дополнительно",
+                    "notes": "Заметки",
+                    "empty": "Не указано"
+                },
+                "feed": {
+                    "title": "Лента",
+                    "empty": "Пока ничего не произошло",
+                    "today": "Сегодня",
+                    "yesterday": "Вчера",
+                    "joined": "Вступление в клуб",
+                    "consentPending": "Ждём согласия владельца аккаунта",
+                    "order": "Заказ {number}",
+                    "visitOpen": "Вход в клуб",
+                    "visitClosed": "Визит, {duration}",
+                    "note": "Заметка"
+                },
+                "orders": {
+                    "empty": "Заказов пока нет"
+                },
+                "visits": {
+                    "empty": "Визитов пока нет",
+                    "now": "Сейчас в клубе",
+                    "method": {
+                        "qr": "QR",
+                        "manual_employee": "Вручную",
+                        "auto_cron": "Ночью автоматически"
+                    }
+                }
+            }
         },
         "attendance": {
             "title": "Посещаемость",
@@ -962,6 +1034,14 @@
             "fieldsButton": "Настройка полей",
             "fieldsTitle": "Поля",
             "fieldsDescription": "Выберите, что показывать в карточках и в таблице."
+        },
+        "slider": {
+            "member": "Участник",
+            "order": "Заказ",
+            "close": "Закрыть",
+            "openPage": "Открыть страницей",
+            "copyLink": "Скопировать ссылку",
+            "copied": "Ссылка скопирована"
         }
     }
 }

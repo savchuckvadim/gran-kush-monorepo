@@ -37,3 +37,21 @@ export function useCompactDateFormat(): DateFormat {
         };
     }, [locale]);
 }
+
+/** A calendar date in the interface language: «12 мар. 2026 г.». */
+export function useDateFormat(): (iso: string) => string {
+    const locale = useLocale();
+    return useMemo(() => {
+        const formatter = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
+        return (iso: string) => formatter.format(new Date(iso));
+    }, [locale]);
+}
+
+/** A time of day: «18:05». */
+export function useTimeFormat(): (iso: string) => string {
+    const locale = useLocale();
+    return useMemo(() => {
+        const formatter = new Intl.DateTimeFormat(locale, { timeStyle: "short" });
+        return (iso: string) => formatter.format(new Date(iso));
+    }, [locale]);
+}

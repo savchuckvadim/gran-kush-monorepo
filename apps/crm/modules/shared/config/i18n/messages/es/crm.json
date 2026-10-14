@@ -202,7 +202,79 @@
             },
             "searchPlaceholder": "Nombre, teléfono, email o número…",
             "empty": "No se encontró a nadie",
-            "loadError": "No se pudieron cargar los socios"
+            "loadError": "No se pudieron cargar los socios",
+            "card": {
+                "loadError": "No se pudo cargar el socio",
+                "retry": "Reintentar",
+                "notFound": "Socio no encontrado",
+                "back": "Socios",
+                "number": "N.º {number}",
+                "noNumber": "Sin número",
+                "inClubNow": "En el club ahora",
+                "qr": "Código QR",
+                "edit": "Editar",
+                "stats": {
+                    "visits": "Visitas",
+                    "lastVisit": "Última: {date}",
+                    "noVisits": "Aún sin visitas",
+                    "orders": "Pedidos",
+                    "inProgress": "En curso: {count}",
+                    "noOrders": "Aún sin pedidos",
+                    "spent": "Gastado",
+                    "spentHint": "Pedidos entregados: {count}",
+                    "since": "Socio desde hace",
+                    "sinceHint": "Desde {date}"
+                },
+                "tabs": {
+                    "overview": "Resumen",
+                    "orders": "Pedidos",
+                    "visits": "Visitas",
+                    "documents": "Documentos"
+                },
+                "profile": {
+                    "title": "Perfil",
+                    "contacts": "Contacto",
+                    "personal": "Datos personales",
+                    "club": "Club",
+                    "email": "Email",
+                    "phone": "Teléfono",
+                    "birthday": "Fecha de nacimiento",
+                    "address": "Dirección",
+                    "number": "Número de socio",
+                    "joined": "Socio desde",
+                    "status": "Estado",
+                    "consent": "Consentimiento de membresía",
+                    "consentConfirmed": "Dado",
+                    "consentPending": "Pendiente",
+                    "extra": "Más",
+                    "notes": "Notas",
+                    "empty": "Sin indicar"
+                },
+                "feed": {
+                    "title": "Actividad",
+                    "empty": "Todavía no ha pasado nada",
+                    "today": "Hoy",
+                    "yesterday": "Ayer",
+                    "joined": "Alta en el club",
+                    "consentPending": "Esperando el consentimiento del titular de la cuenta",
+                    "order": "Pedido {number}",
+                    "visitOpen": "Entrada al club",
+                    "visitClosed": "Visita, {duration}",
+                    "note": "Nota"
+                },
+                "orders": {
+                    "empty": "Aún no hay pedidos"
+                },
+                "visits": {
+                    "empty": "Aún no hay visitas",
+                    "now": "En el club ahora",
+                    "method": {
+                        "qr": "QR",
+                        "manual_employee": "Manual",
+                        "auto_cron": "Automática por la noche"
+                    }
+                }
+            }
         },
         "attendance": {
             "title": "Asistencia",
@@ -962,6 +1034,14 @@
             "fieldsButton": "Campos",
             "fieldsTitle": "Campos",
             "fieldsDescription": "Elige qué mostrar en las tarjetas y en la tabla."
+        },
+        "slider": {
+            "member": "Socio",
+            "order": "Pedido",
+            "close": "Cerrar",
+            "openPage": "Abrir como página",
+            "copyLink": "Copiar enlace",
+            "copied": "Enlace copiado"
         }
     }
 }

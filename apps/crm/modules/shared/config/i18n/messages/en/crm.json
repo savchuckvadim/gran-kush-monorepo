@@ -202,7 +202,79 @@
             },
             "searchPlaceholder": "Name, phone, email or number…",
             "empty": "No members found",
-            "loadError": "Couldn't load the members"
+            "loadError": "Couldn't load the members",
+            "card": {
+                "loadError": "Could not load the member",
+                "retry": "Retry",
+                "notFound": "Member not found",
+                "back": "Members",
+                "number": "No. {number}",
+                "noNumber": "No number",
+                "inClubNow": "In the club now",
+                "qr": "QR code",
+                "edit": "Edit",
+                "stats": {
+                    "visits": "Visits",
+                    "lastVisit": "Last: {date}",
+                    "noVisits": "No visits yet",
+                    "orders": "Orders",
+                    "inProgress": "In progress: {count}",
+                    "noOrders": "No orders yet",
+                    "spent": "Spent",
+                    "spentHint": "Orders handed over: {count}",
+                    "since": "Member for",
+                    "sinceHint": "Since {date}"
+                },
+                "tabs": {
+                    "overview": "Overview",
+                    "orders": "Orders",
+                    "visits": "Visits",
+                    "documents": "Documents"
+                },
+                "profile": {
+                    "title": "Profile",
+                    "contacts": "Contacts",
+                    "personal": "Personal",
+                    "club": "Club",
+                    "email": "Email",
+                    "phone": "Phone",
+                    "birthday": "Date of birth",
+                    "address": "Address",
+                    "number": "Membership number",
+                    "joined": "Member since",
+                    "status": "Status",
+                    "consent": "Membership consent",
+                    "consentConfirmed": "Given",
+                    "consentPending": "Awaiting reply",
+                    "extra": "More",
+                    "notes": "Notes",
+                    "empty": "Not set"
+                },
+                "feed": {
+                    "title": "Activity",
+                    "empty": "Nothing has happened yet",
+                    "today": "Today",
+                    "yesterday": "Yesterday",
+                    "joined": "Joined the club",
+                    "consentPending": "Waiting for the account owner's consent",
+                    "order": "Order {number}",
+                    "visitOpen": "Came in",
+                    "visitClosed": "Visit, {duration}",
+                    "note": "Note"
+                },
+                "orders": {
+                    "empty": "No orders yet"
+                },
+                "visits": {
+                    "empty": "No visits yet",
+                    "now": "In the club now",
+                    "method": {
+                        "qr": "QR",
+                        "manual_employee": "Manually",
+                        "auto_cron": "Automatically at night"
+                    }
+                }
+            }
         },
         "attendance": {
             "title": "Attendance",
@@ -962,6 +1034,14 @@
             "fieldsButton": "Fields",
             "fieldsTitle": "Fields",
             "fieldsDescription": "Choose what to show in the cards and in the table."
+        },
+        "slider": {
+            "member": "Member",
+            "order": "Order",
+            "close": "Close",
+            "openPage": "Open as a page",
+            "copyLink": "Copy link",
+            "copied": "Link copied"
         }
     }
 }
