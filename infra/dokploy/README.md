@@ -93,7 +93,20 @@
 - **Amazon SES, регион `eu-north-1`.** AWS у нас уже субобработчик, файлы лежат в том же регионе. Хост `email-smtp.eu-north-1.amazonaws.com`. SMTP-логин и пароль создаются в консоли SES, ключи IAM для этого не подходят. Домен `paf-paf.app` подтвердить записями DKIM в Cloudflare и запросить production access: в sandbox SES шлёт только на подтверждённые адреса.
 - **Brevo** (Франция) — запасной вариант: `smtp-relay.brevo.com`.
 
-В Environment: `MAIL_HOST`, `MAIL_PORT=587` (Hetzner закрывает 25 и 465), `MAIL_LOGIN`, `MAIL_PASSWORD`, `SMTP_FROM`, например `PafPaf <no-reply@paf-paf.app>`. В DNS — SPF и DMARC для домена отправителя.
+### Amazon SES по шагам
+
+1. AWS → SES, регион **Europe (Stockholm) `eu-north-1`** → Identities → Create identity → Domain `paf-paf.app`, Easy DKIM (RSA 2048). Включить **Custom MAIL FROM domain** `mail.paf-paf.app`.
+2. Cloudflare → DNS зоны `paf-paf.app`. Все записи — **DNS only** (серое облако): через прокси Cloudflare почтовые записи не работают.
+   - три CNAME от SES: `<токен>._domainkey` → `<токен>.dkim.amazonses.com`;
+   - для `mail`: MX `feedback-smtp.eu-north-1.amazonses.com` с приоритетом 10 и TXT `v=spf1 include:amazonses.com ~all`;
+   - TXT `_dmarc`: `v=DMARC1; p=none; rua=mailto:<свой адрес>`. Через пару недель без проблем — `p=quarantine`.
+3. SES → SMTP settings → Create SMTP credentials. Это отдельный логин и пароль, ключи IAM не подходят.
+4. SES → Account dashboard → **Request production access**: транзакционные письма (подтверждение почты, сброс пароля, приглашения), объём на старте маленький. Пока доступа нет, SES шлёт только на подтверждённые в SES адреса.
+5. Dokploy → Environment и Deploy:
+   - `MAIL_HOST=email-smtp.eu-north-1.amazonaws.com`;
+   - `MAIL_PORT=587`: Hetzner закрывает 25 и 465, на 587 соединение шифруется через STARTTLS;
+   - `MAIL_LOGIN`, `MAIL_PASSWORD` — из шага 3;
+   - `SMTP_FROM=no-reply@paf-paf.app` — **только адрес**: API сам собирает отправителя как `"<SMTP_FROM_NAME>" <SMTP_FROM>`, имя по умолчанию PafPaf.
 
 Если `MAIL_HOST` пустой, API пытается слать через localhost: письма не уходят, а в логах `pafpaf-api` появляется `Error sending email`. Проверить после настройки три письма: регистрация клуба, сброс пароля в CRM, приглашение сотрудника. В логах должно быть `Email successfully sent`.
 
