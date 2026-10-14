@@ -1,14 +1,6 @@
-import {
-    BadRequestException,
-    ConflictException,
-    Injectable,
-    Logger,
-    NotFoundException,
-} from "@nestjs/common";
+import { ConflictException, Injectable, Logger, NotFoundException } from "@nestjs/common";
 
 import { Prisma } from "@prisma/client";
-
-type Decimal = Prisma.Decimal;
 
 import { Product } from "@modules/portal/crm/catalog/domain/entity/product.entity";
 import { MeasurementUnitRepository } from "@modules/portal/crm/catalog/domain/repositories/measurement-unit-repository.interface";
@@ -188,42 +180,5 @@ export class ProductsService {
             throw new NotFoundException("Product not found");
         }
         return this.productRepository.delete(id);
-    }
-
-    /**
-     * Обновить количество товара (при заказе или возврате).
-     * @param delta — отрицательный = списание, положительный = возврат
-     */
-    async adjustQuantity(productId: string, portalId: string, delta: Decimal): Promise<Product> {
-        const product = await this.productRepository.findById(productId, portalId);
-        if (!product) {
-            throw new NotFoundException("Product not found");
-        }
-
-        const newQuantity = product.currentQuantity.plus(delta);
-        if (newQuantity.isNegative()) {
-            throw new BadRequestException(
-                `Insufficient quantity for product "${product.name}". ` +
-                    `Available: ${product.currentQuantity.toString()}, requested: ${delta.abs().toString()}`
-            );
-        }
-
-        const updated = await this.productRepository.update(productId, {
-            currentQuantity: newQuantity,
-            isAvailable: newQuantity.greaterThan(0),
-        });
-
-        if (
-            product.minQuantity &&
-            newQuantity.lessThanOrEqualTo(product.minQuantity) &&
-            product.currentQuantity.greaterThan(product.minQuantity)
-        ) {
-            this.logger.warn(
-                `Low stock alert: Product "${product.name}" (${product.id}) quantity ` +
-                    `${newQuantity.toString()} ≤ min ${product.minQuantity.toString()}`
-            );
-        }
-
-        return updated;
     }
 }

@@ -72,7 +72,7 @@ const repository = {
     getLastOrderNumberWithPrefix: jest.fn(),
 };
 
-const products = { findById: jest.fn(), adjustQuantity: jest.fn() };
+const products = { findById: jest.fn() };
 
 describe("OrdersService — стадии заказа", () => {
     let service: OrdersService;
@@ -85,7 +85,6 @@ describe("OrdersService — стадии заказа", () => {
         repository.update.mockImplementation((_id: string, data: Partial<Order>) =>
             Promise.resolve(order(data))
         );
-        products.adjustQuantity.mockResolvedValue(undefined);
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
@@ -108,12 +107,12 @@ describe("OrdersService — стадии заказа", () => {
             portalId: PORTAL,
             fromStageId: PENDING.id,
             toStageId: PREPARING.id,
+            restock: undefined,
         });
         expect(repository.update).toHaveBeenCalledWith(
             "order-1",
             expect.objectContaining({ employeeId: "emp-1", preparedAt: expect.any(Date) })
         );
-        expect(products.adjustQuantity).not.toHaveBeenCalled();
     });
 
     it("двигает назад между рабочими стадиями", async () => {
@@ -163,11 +162,13 @@ describe("OrdersService — стадии заказа", () => {
 
         await service.moveToStage("order-1", CANCELLED.id, "emp-1", PORTAL);
 
-        expect(products.adjustQuantity).toHaveBeenCalledTimes(1);
-        expect(products.adjustQuantity).toHaveBeenCalledWith(
-            "product-1",
-            PORTAL,
-            new Prisma.Decimal(2)
+        // возврат на склад уходит в ту же транзакцию, что и смена стадии
+        expect(repository.compareAndSetStage).toHaveBeenCalledTimes(1);
+        expect(repository.compareAndSetStage).toHaveBeenCalledWith(
+            expect.objectContaining({
+                toStageId: CANCELLED.id,
+                restock: [{ productId: "product-1", quantity: 2 }],
+            })
         );
         expect(repository.update).toHaveBeenCalledWith(
             "order-1",
@@ -184,7 +185,6 @@ describe("OrdersService — стадии заказа", () => {
         ).rejects.toMatchObject({
             status: 409,
         });
-        expect(products.adjustQuantity).not.toHaveBeenCalled();
         expect(repository.update).not.toHaveBeenCalled();
     });
 
@@ -218,9 +218,11 @@ describe("OrdersService — стадии заказа", () => {
 
         expect(repository.findFunnelStages).toHaveBeenCalledWith(PORTAL, FUNNEL);
         expect(repository.compareAndSetStage).toHaveBeenCalledWith(
-            expect.objectContaining({ toStageId: CANCELLED.id })
+            expect.objectContaining({
+                toStageId: CANCELLED.id,
+                restock: [{ productId: "product-1", quantity: 2 }],
+            })
         );
-        expect(products.adjustQuantity).toHaveBeenCalledTimes(1);
     });
 
     it("участник не отменяет заказ, который клуб уже взял в работу", async () => {

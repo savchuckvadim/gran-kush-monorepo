@@ -1,3 +1,4 @@
+import { BadRequestException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 
 import { Prisma } from "@prisma/client";
@@ -10,6 +11,7 @@ import {
     OrderStatus,
     PaymentStatus,
 } from "@modules/portal/crm/orders/domain/entity/order.entity";
+import { InsufficientStockError } from "@modules/portal/crm/orders/domain/errors/insufficient-stock.error";
 import {
     CreateOrderInput,
     OrderRepository,
@@ -36,7 +38,6 @@ const mockOrderRepository = {
 
 const mockProductsService = {
     findById: jest.fn(),
-    adjustQuantity: jest.fn(),
 };
 
 const orderNumberConflict = (): Prisma.PrismaClientKnownRequestError =>
@@ -64,7 +65,6 @@ describe("OrdersService — номер заказа", () => {
             currentQuantity: new Prisma.Decimal(10),
             price: new Prisma.Decimal(5),
         });
-        mockProductsService.adjustQuantity.mockResolvedValue(undefined);
 
         mockOrderRepository.create.mockImplementation(
             (input: CreateOrderInput) =>
@@ -124,13 +124,15 @@ describe("OrdersService — номер заказа", () => {
         expect(order.orderNumber).toBe(`${prefix}0009`);
     });
 
-    it("не списывает товар со склада дважды при конфликте номера", async () => {
+    it("товар кончился, пока оформляли заказ, — 400 с названием товара", async () => {
         mockOrderRepository.getLastOrderNumberWithPrefix.mockResolvedValue(null);
-        mockOrderRepository.create.mockRejectedValueOnce(orderNumberConflict());
+        mockOrderRepository.create.mockRejectedValue(new InsufficientStockError(PRODUCT_ID));
 
-        await service.createOrder(MEMBER_ID, dto, PORTAL_A);
+        const attempt = service.createOrder(MEMBER_ID, dto, PORTAL_A);
 
-        expect(mockProductsService.adjustQuantity).toHaveBeenCalledTimes(1);
+        await expect(attempt).rejects.toBeInstanceOf(BadRequestException);
+        await expect(attempt).rejects.toThrow('Недостаточно товара "Товар"');
+        expect(mockOrderRepository.create).toHaveBeenCalledTimes(1);
     });
 
     it("пробрасывает ошибки, не связанные с номером заказа", async () => {

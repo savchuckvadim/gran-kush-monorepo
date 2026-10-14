@@ -76,12 +76,12 @@
 
 ### Автодеплой из GitHub Actions
 
-Переключатель Autodeploy в Dokploy не подходит. С провайдером Git он срабатывает только от webhook в настройках репозитория, а если сработает — начнёт деплой сразу после push, пока образы ещё собираются, и выкатит старые. Поэтому он выключен, а деплой запускает сам workflow после сборки.
+Переключатель Autodeploy в Dokploy не подходит. С провайдером Git он срабатывает только от webhook в настройках репозитория, а если сработает — начнёт деплой сразу после push, пока образы ещё собираются, и выкатит старые. Поэтому он выключен, а деплой запускает сам workflow после сборки. До 14.10.2026 он на деле был включён (GitHub App шлёт push в Dokploy): каждый push сразу выкатывал старые образы, а свежие — только ручной Deploy. Выключен 14.10.2026.
 
 1. Dokploy → Settings → Profile → API Keys: создать ключ.
 2. ID compose-сервиса — последняя часть адреса страницы сервиса в Dokploy: `…/services/compose/<composeId>`.
 3. GitHub → Settings → Secrets and variables → Actions → New repository secret:
-   - `DOKPLOY_URL` — адрес панели, например `https://dokploy.example.com`;
+   - `DOKPLOY_URL` — адрес панели: `https://panel.divan.group`;
    - `DOKPLOY_API_KEY` — ключ из шага 1;
    - `DOKPLOY_COMPOSE_ID` — из шага 2.
 4. Проверка: после следующего push в `main` в Actions → Deploy зелёная задача «Deploy on Dokploy», а в Dokploy → Deployments появился новый деплой.

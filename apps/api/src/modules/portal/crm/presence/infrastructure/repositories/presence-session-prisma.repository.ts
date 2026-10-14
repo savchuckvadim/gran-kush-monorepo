@@ -3,6 +3,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { isUniqueViolationOn } from "@common/prisma/unique-violation";
 import {
     buildMemberFieldMap,
     getMemberDisplayNameParts,
@@ -141,16 +142,7 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
 
     /** Нарушение уникальности маркера открытой сессии. */
     private isOpenSessionConflict(error: unknown): boolean {
-        if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
-            return false;
-        }
-        const target = error.meta?.target;
-        const fields: string[] = Array.isArray(target)
-            ? target.filter((f): f is string => typeof f === "string")
-            : typeof target === "string"
-              ? [target]
-              : [];
-        return fields.some((f) => f.includes("active_entity_record_id"));
+        return isUniqueViolationOn(error, "active_entity_record_id");
     }
 
     async closeAllActive(exitMethod: string): Promise<number> {

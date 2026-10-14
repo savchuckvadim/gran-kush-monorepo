@@ -24,6 +24,7 @@ import {
     CreateOrderInput,
     OrderFilters,
     OrderRepository,
+    StockLine,
     UpdateOrderInput,
 } from "@modules/portal/crm/orders/domain/repositories/order-repository.interface";
 import {
@@ -31,6 +32,8 @@ import {
     ORDER_STAGE_SELECT,
     toOrderStage,
 } from "@modules/portal/crm/orders/infrastructure/prisma-includes";
+
+import { reserveStock, returnStock } from "./order-stock.prisma";
 
 type OrderWithRelations = Prisma.OrderGetPayload<{ include: typeof ORDER_INCLUDE }>;
 
@@ -112,7 +115,7 @@ export class OrderPrismaRepository extends OrderRepository {
         return this.prisma.order.count({ where });
     }
 
-    // ─── Создание заказа (транзакционно: EntityRecord + Order) ───────────────
+    // ─── Создание заказа (транзакционно: склад + EntityRecord + Order) ───────
 
     async create(data: CreateOrderInput): Promise<Order> {
         const member = await this.prisma.member.findUnique({
@@ -124,6 +127,8 @@ export class OrderPrismaRepository extends OrderRepository {
         }
 
         const row = await this.prisma.$transaction(async (tx) => {
+            await reserveStock(tx, member.portalId, data.items);
+
             const orderDef = await tx.entityDefinition.findUniqueOrThrow({
                 where: {
                     portalId_code: {
@@ -205,13 +210,15 @@ export class OrderPrismaRepository extends OrderRepository {
 
     /**
      * Стадия живёт на EntityRecord заказа. Один `UPDATE ... WHERE stage_id = from`: две
-     * параллельные отмены не пройдут обе, и товар не вернётся на склад дважды.
+     * параллельные отмены не пройдут обе, и товар не вернётся на склад дважды. Возврат на склад —
+     * в той же транзакции: смена стадии без возврата (или наоборот) не случится.
      */
     async compareAndSetStage(input: {
         orderId: string;
         portalId: string;
         fromStageId: string | null;
         toStageId: string;
+        restock?: readonly StockLine[];
     }): Promise<boolean> {
         const order = await this.prisma.order.findFirst({
             where: { id: input.orderId, portalId: input.portalId },
@@ -219,11 +226,15 @@ export class OrderPrismaRepository extends OrderRepository {
         });
         if (!order) return false;
 
-        const { count } = await this.prisma.entityRecord.updateMany({
-            where: { id: order.entityRecordId, stageId: input.fromStageId },
-            data: { stageId: input.toStageId },
+        return this.prisma.$transaction(async (tx) => {
+            const { count } = await tx.entityRecord.updateMany({
+                where: { id: order.entityRecordId, stageId: input.fromStageId },
+                data: { stageId: input.toStageId },
+            });
+            if (count !== 1) return false;
+            if (input.restock?.length) await returnStock(tx, input.portalId, input.restock);
+            return true;
         });
-        return count === 1;
     }
 
     // ─── Стадии воронок заказов ──────────────────────────────────────────────

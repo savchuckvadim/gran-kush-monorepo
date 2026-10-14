@@ -52,6 +52,12 @@ export interface CreateOrderInput {
     stageId?: string | null;
 }
 
+/** Сколько товара вернуть на склад */
+export interface StockLine {
+    productId: string;
+    quantity: number;
+}
+
 // ─── Данные для обновления заказа ────────────────────────────────────────────
 
 /** Стадию здесь не меняют: только {@link OrderRepository.compareAndSetStage}. */
@@ -89,7 +95,11 @@ export abstract class OrderRepository {
     /** Подсчитать заказы по фильтрам */
     abstract count(filters?: OrderFilters): Promise<number>;
 
-    /** Создать заказ с позициями (транзакционно) */
+    /**
+     * Создать заказ с позициями и списать товар со склада в одной транзакции. Остаток
+     * проверяет само списание, поэтому параллельные заказы не продадут больше, чем есть.
+     * Не хватило товара — {@link InsufficientStockError}, и не записано ничего.
+     */
     abstract create(data: CreateOrderInput): Promise<Order>;
 
     /** Обновить заказ (без позиций и без стадии) */
@@ -111,12 +121,14 @@ export abstract class OrderRepository {
     /**
      * Перевести заказ в стадию, только если он всё ещё стоит в `fromStageId` (compare-and-set).
      * `false` — стадию успел сменить параллельный запрос: двойная отмена не вернёт товар дважды.
+     * `restock` возвращается на склад в той же транзакции и только если переход выигран.
      */
     abstract compareAndSetStage(input: {
         orderId: string;
         portalId: string;
         fromStageId: string | null;
         toStageId: string;
+        restock?: readonly StockLine[];
     }): Promise<boolean>;
 
     /** Стадия из воронок заказов этого портала; чужая или не заказная — null */

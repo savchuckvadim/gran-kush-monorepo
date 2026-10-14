@@ -9,6 +9,7 @@ import {
 
 import { Prisma, StageSemantic } from "@prisma/client";
 
+import { isUniqueViolationOn } from "@common/prisma/unique-violation";
 import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
 import { CreateOrderDto, CreateOrderItemDto } from "@modules/portal/crm/orders/api/dto/order.dto";
 import {
@@ -20,6 +21,7 @@ import {
     OrderStage,
     OrderStageSummary,
 } from "@modules/portal/crm/orders/domain/entity/order-stage.entity";
+import { InsufficientStockError } from "@modules/portal/crm/orders/domain/errors/insufficient-stock.error";
 import {
     isClosedStage,
     isFailureStage,
@@ -28,8 +30,10 @@ import {
 } from "@modules/portal/crm/orders/domain/order-stage.rules";
 import {
     CreateOrderInput,
+    CreateOrderItemInput,
     OrderFilters,
     OrderRepository,
+    StockLine,
     UpdateOrderInput,
 } from "@modules/portal/crm/orders/domain/repositories/order-repository.interface";
 
@@ -50,16 +54,21 @@ const PAYMENT_STATUS_TRANSITIONS: Record<PaymentStatus, PaymentStatus[]> = {
 const buildOrderNumberPrefix = (date: Date): string =>
     `ORD-${date.toISOString().slice(0, 10).replace(/-/g, "")}-`;
 
-/** Конфликт по уникальному индексу `(portal_id, order_number)` */
-const isOrderNumberConflict = (error: unknown): boolean => {
-    if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
-        return false;
-    }
+/** Позиция, проверенная по каталогу; имя — для понятной ошибки, если товар кончится */
+interface ResolvedOrderItem extends CreateOrderItemInput {
+    name: string;
+}
 
-    const target = error.meta?.target;
-    const fields = Array.isArray(target) ? target : [target];
-    return fields.some((field) => String(field).includes("order_number"));
-};
+/** Что вернуть на склад при отмене заказа */
+const stockLinesOf = (order: Order): StockLine[] =>
+    (order.items ?? []).map((item) => ({
+        productId: item.productId,
+        quantity: Number(item.quantity),
+    }));
+
+/** Конфликт по уникальному индексу `(portal_id, order_number)` */
+const isOrderNumberConflict = (error: unknown): boolean =>
+    isUniqueViolationOn(error, "order_number");
 
 @Injectable()
 export class OrdersService {
@@ -139,24 +148,27 @@ export class OrdersService {
         const discount = 0; // Скидки пока не реализованы
         const total = subtotal - discount;
 
-        // 3. Создать заказ в БД с номером, уникальным в пределах портала; стадия — первая
-        //    рабочая стадия воронки по умолчанию (её подставляет репозиторий)
-        const order = await this.createWithGeneratedOrderNumber(portalId, {
-            memberId,
-            paymentStatus: PaymentStatus.PENDING,
-            subtotal,
-            discount,
-            total,
-            notes: dto.notes,
-            items: resolvedItems,
-        });
-
-        // 4. Списать количество товаров со склада
-        for (const item of resolvedItems) {
-            await this.productsService.adjustQuantity(
-                item.productId,
-                portalId,
-                new Prisma.Decimal(-item.quantity)
+        // 3. Создать заказ с номером, уникальным в пределах портала, и списать товар — одной
+        //    транзакцией; стадия — первая рабочая стадия воронки по умолчанию (её подставляет
+        //    репозиторий)
+        let order: Order;
+        try {
+            order = await this.createWithGeneratedOrderNumber(portalId, {
+                memberId,
+                paymentStatus: PaymentStatus.PENDING,
+                subtotal,
+                discount,
+                total,
+                notes: dto.notes,
+                items: resolvedItems,
+            });
+        } catch (error) {
+            if (!(error instanceof InsufficientStockError)) throw error;
+            // проверка выше прошла, но товар успели заказать параллельно
+            const name = resolvedItems.find((item) => item.productId === error.productId)?.name;
+            throw new BadRequestException(
+                `Недостаточно товара "${name ?? error.productId}": его только что заказали. ` +
+                    "Обновите каталог"
             );
         }
 
@@ -248,20 +260,18 @@ export class OrdersService {
             throw new BadRequestException("Заказ закрыт: его стадию больше нельзя менять");
         }
 
+        // отмена возвращает товар на склад в одной транзакции со сменой стадии
         const won = await this.orderRepository.compareAndSetStage({
             orderId: order.id,
             portalId,
             fromStageId: current?.id ?? null,
             toStageId: target.id,
+            restock: isFailureStage(target) ? stockLinesOf(order) : undefined,
         });
         if (!won) {
             throw new ConflictException(
                 "Стадию заказа изменил параллельный запрос — обновите заказ"
             );
-        }
-
-        if (isFailureStage(target)) {
-            await this.restoreProductQuantities(order, portalId);
         }
 
         const update: UpdateOrderInput = {};
@@ -394,22 +404,8 @@ export class OrdersService {
     private async resolveOrderItems(
         items: CreateOrderItemDto[],
         portalId: string
-    ): Promise<
-        Array<{
-            productId: string;
-            quantity: number;
-            unitPrice: number;
-            totalPrice: number;
-            notes?: string;
-        }>
-    > {
-        const resolved: Array<{
-            productId: string;
-            quantity: number;
-            unitPrice: number;
-            totalPrice: number;
-            notes?: string;
-        }> = [];
+    ): Promise<ResolvedOrderItem[]> {
+        const resolved: ResolvedOrderItem[] = [];
 
         for (const item of items) {
             const product = await this.productsService.findById(item.productId, portalId);
@@ -435,6 +431,7 @@ export class OrdersService {
 
             resolved.push({
                 productId: item.productId,
+                name: product.name,
                 quantity: item.quantity,
                 unitPrice,
                 totalPrice,
@@ -443,29 +440,6 @@ export class OrdersService {
         }
 
         return resolved;
-    }
-
-    /**
-     * Вернуть товары на склад при отмене заказа.
-     */
-    private async restoreProductQuantities(order: Order, portalId: string): Promise<void> {
-        if (!order.items || order.items.length === 0) return;
-
-        for (const item of order.items) {
-            try {
-                await this.productsService.adjustQuantity(
-                    item.productId,
-                    portalId,
-                    new Prisma.Decimal(Number(item.quantity))
-                );
-            } catch (error: unknown) {
-                const message = error instanceof Error ? error.message : String(error);
-                this.logger.error(
-                    `Не удалось вернуть товар ${item.productId} на склад: ${message}`
-                );
-                // Продолжаем, даже если один товар не удалось вернуть
-            }
-        }
     }
 
     /**
