@@ -413,7 +413,9 @@ describe("CRM role-based access (e2e)", () => {
         });
 
         it("rejects a value that is not a list of strings", async () => {
-            const res = await as(employeeCookies).put(KEY).send({ value: [{ nope: 1 }] });
+            const res = await as(employeeCookies)
+                .put(KEY)
+                .send({ value: [{ nope: 1 }] });
             expect(res.status).toBe(400);
         });
     });

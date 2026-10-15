@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { type ChevronSize, chevronClipPath, chevronHeight } from "@workspace/ui/lib/chevron";
+import { chevronClipPath, chevronHeight, type ChevronSize } from "@workspace/ui/lib/chevron";
 
 export interface KanbanColumnHeaderProps {
     title: string;

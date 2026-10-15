@@ -1,10 +1,10 @@
 import type { ComponentProps, ReactNode } from "react";
 
 import {
-    type ChevronSize,
     chevronClipPath,
     chevronHeight,
     chevronPadding,
+    type ChevronSize,
 } from "@workspace/ui/lib/chevron";
 import { readableTextColor } from "@workspace/ui/lib/color";
 import { cn } from "@workspace/ui/lib/utils";

@@ -1,9 +1,8 @@
-import { randomUUID } from "node:crypto";
-
 import { BadRequestException, INestApplication } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 
 import cookieParser from "cookie-parser";
+import { randomUUID } from "node:crypto";
 import request from "supertest";
 
 import { AppModule } from "../src/app.module";
