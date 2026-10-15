@@ -2563,6 +2563,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/crm/settings/ui/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Настройка интерфейса: клубная и личная. Любой сотрудник клуба */
+        get: operations["CrmUiSettings_getSetting"];
+        /** Сохранить настройку: личную — любой сотрудник, клубную (`forPortal`) — manager+. `value: null` сбрасывает её */
+        put: operations["CrmUiSettings_saveSetting"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/public/portals/map": {
         parameters: {
             query?: never;
@@ -5470,6 +5488,38 @@ export interface components {
             products: components["schemas"]["CrmSearchProductDto"][];
             orders: components["schemas"]["CrmSearchOrderDto"][];
         };
+        UiSettingDto: {
+            /**
+             * @description Настройка клуба; `null` — клуб её не задавал
+             * @example [
+             *       "total",
+             *       "member",
+             *       "payment"
+             *     ]
+             */
+            portal: string[] | null;
+            /**
+             * @description Личная настройка сотрудника поверх клубной; `null` — своей нет
+             * @example null
+             */
+            employee: string[] | null;
+        };
+        SaveUiSettingDto: {
+            /**
+             * @description Значение настройки; `null` — сбросить (личная вернётся к клубной)
+             * @example [
+             *       "total",
+             *       "member",
+             *       "payment"
+             *     ]
+             */
+            value?: string[] | null;
+            /**
+             * @description true — настройка всего клуба (manager+); иначе личная настройка
+             * @example false
+             */
+            forPortal?: boolean;
+        };
         PublicPortalMapItemDto: {
             id: string;
             /** @example green-club */
@@ -5773,6 +5823,8 @@ export type SchemaCrmSearchMemberDto = components['schemas']['CrmSearchMemberDto
 export type SchemaCrmSearchProductDto = components['schemas']['CrmSearchProductDto'];
 export type SchemaCrmSearchOrderDto = components['schemas']['CrmSearchOrderDto'];
 export type SchemaCrmSearchResponseDto = components['schemas']['CrmSearchResponseDto'];
+export type SchemaUiSettingDto = components['schemas']['UiSettingDto'];
+export type SchemaSaveUiSettingDto = components['schemas']['SaveUiSettingDto'];
 export type SchemaPublicPortalMapItemDto = components['schemas']['PublicPortalMapItemDto'];
 export type SchemaPublicPortalsMapResponseDto = components['schemas']['PublicPortalsMapResponseDto'];
 export type SchemaCreateReviewDto = components['schemas']['CreateReviewDto'];
@@ -14008,6 +14060,108 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CrmSearchResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmUiSettings_getSetting: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UiSettingDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmUiSettings_saveSetting: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveUiSettingDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UiSettingDto"];
                 };
             };
             /** @description Bad Request */

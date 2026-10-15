@@ -53,6 +53,8 @@ describe("CRM role-based access (e2e)", () => {
                 .patch(url)
                 .set("Cookie", cookies)
                 .set("X-Portal-Slug", slug),
+        put: (url: string) =>
+            request(app.getHttpServer()).put(url).set("Cookie", cookies).set("X-Portal-Slug", slug),
         delete: (url: string) =>
             request(app.getHttpServer())
                 .delete(url)
@@ -357,6 +359,62 @@ describe("CRM role-based access (e2e)", () => {
                 .patch(`/crm/orders/${orderId}/status`)
                 .send({ status: "confirmed" });
             expect(res.status).toBe(200);
+        });
+    });
+
+    describe("настройки интерфейса — личные всем, клубные от manager", () => {
+        const KEY = "/crm/settings/ui/kanban.order.card-fields";
+
+        it("rejects an unknown setting key", async () => {
+            const res = await as(employeeCookies).get("/crm/settings/ui/what.is.this");
+            expect(res.status).toBe(400);
+        });
+
+        it("returns both settings empty before anything is saved", async () => {
+            const res = await as(employeeCookies).get(KEY);
+            expect(res.status).toBe(200);
+            expect(res.body).toEqual({ portal: null, employee: null });
+        });
+
+        it("rejects a club-wide setting from employee role", async () => {
+            const res = await as(employeeCookies)
+                .put(KEY)
+                .send({ value: ["total"], forPortal: true });
+            expect(res.status).toBe(403);
+        });
+
+        it("lets an employee save their own setting", async () => {
+            const res = await as(employeeCookies)
+                .put(KEY)
+                .send({ value: ["total", "member"] });
+            expect(res.status).toBe(200);
+            expect(res.body).toEqual({ portal: null, employee: ["total", "member"] });
+        });
+
+        it("a club setting by manager does not touch a personal one", async () => {
+            const saved = await as(managerCookies)
+                .put(KEY)
+                .send({ value: ["payment"], forPortal: true });
+            expect(saved.status).toBe(200);
+            // менеджер своей настройки не заводил — видит только клубную
+            expect(saved.body).toEqual({ portal: ["payment"], employee: null });
+
+            const employeeView = await as(employeeCookies).get(KEY);
+            expect(employeeView.body).toEqual({
+                portal: ["payment"],
+                employee: ["total", "member"],
+            });
+        });
+
+        it("a personal setting resets to the club one", async () => {
+            const res = await as(employeeCookies).put(KEY).send({ value: null });
+            expect(res.status).toBe(200);
+            expect(res.body).toEqual({ portal: ["payment"], employee: null });
+        });
+
+        it("rejects a value that is not a list of strings", async () => {
+            const res = await as(employeeCookies).put(KEY).send({ value: [{ nope: 1 }] });
+            expect(res.status).toBe(400);
         });
     });
 });

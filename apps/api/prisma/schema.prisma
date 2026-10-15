@@ -192,6 +192,7 @@ model Portal {
   employeeInvitations   EmployeeInvitation[]
   portalReviews         PortalReview[]
   productReviews        ProductReview[]
+  uiSettings            UiSetting[]
 
   @@index([name])
   @@index([status])
@@ -388,6 +389,7 @@ model Employee {
   financialTransactions FinancialTransaction[] @relation("TransactionCreatedBy")
   registrationLinks     RegistrationLink[]     @relation("RegistrationLinkCreatedBy")
   sentInvitations       EmployeeInvitation[]   @relation("InvitationInvitedBy")
+  uiSettings            UiSetting[]
 
   @@unique([userId, portalId])
   @@index([portalId])
@@ -1029,6 +1031,30 @@ model EmployeeInvitation {
   @@index([portalId, email])
   @@index([token])
   @@map("employee_invitations")
+}
+
+// ========================
+// UI settings (portal defaults + per-employee overrides)
+// ========================
+
+/// Настройка интерфейса по ключу: клубная (employee_id = null) или личная, поверх клубной.
+model UiSetting {
+  id         String   @id @default(uuid())
+  portalId   String   @map("portal_id")
+  /// null — настройка клуба; иначе личная настройка этого сотрудника
+  employeeId String?  @map("employee_id")
+  /// Что настраивается, например `kanban.order.card-fields`
+  key        String   @db.VarChar(120)
+  value      Json
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  portal   Portal    @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  employee Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([portalId, employeeId, key])
+  @@index([portalId, key])
+  @@map("ui_settings")
 }
 
 // ========================

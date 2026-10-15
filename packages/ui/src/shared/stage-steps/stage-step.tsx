@@ -1,6 +1,11 @@
 import type { ComponentProps, ReactNode } from "react";
 
-import { chevronClipPath } from "@workspace/ui/lib/chevron";
+import {
+    type ChevronSize,
+    chevronClipPath,
+    chevronHeight,
+    chevronPadding,
+} from "@workspace/ui/lib/chevron";
 import { readableTextColor } from "@workspace/ui/lib/color";
 import { cn } from "@workspace/ui/lib/utils";
 
@@ -10,21 +15,47 @@ export interface StageStepProps extends Omit<ComponentProps<"button">, "color"> 
     color: string;
     /** Passed and current steps are filled; future ones stay muted */
     filled: boolean;
+    /** Только текущий шаг заливается цветом целиком; пройденные — тоном того же цвета */
+    current?: boolean;
     /** The first step has no notch on the left */
     first?: boolean;
+    /** Высота ленты; `sm` — тонкая, по умолчанию */
+    size?: ChevronSize;
     children: ReactNode;
 }
 
-/** One chevron of a stage bar (Bitrix24 style). The text colour follows the fill. */
+/** Размер текста по высоте ленты: тонкая лента не должна нести крупный шрифт. */
+const FONT: Readonly<Record<ChevronSize, string>> = {
+    sm: "text-[11px]",
+    md: "text-xs",
+    lg: "text-[13px]",
+};
+
+/**
+ * One chevron of a stage bar. The current step is filled with the stage colour; passed steps
+ * take a tint of it, so the bar reads as a path rather than one solid block. The text colour
+ * follows the fill.
+ */
 export function StageStep({
     color,
     filled,
+    current = false,
     first = false,
+    size = "sm",
     className,
     style,
     children,
     ...props
 }: StageStepProps) {
+    const fill = current
+        ? { backgroundColor: color, color: readableTextColor(color) }
+        : filled
+          ? {
+                backgroundColor: `color-mix(in oklab, ${color} 18%, var(--card))`,
+                color: `color-mix(in oklab, ${color} 75%, var(--foreground))`,
+            }
+          : {};
+
     return (
         <button
             type="button"
@@ -32,16 +63,20 @@ export function StageStep({
             // after the spread: a Radix trigger (`asChild`) passes its own data-slot
             data-slot="stage-step"
             data-filled={filled || undefined}
+            data-current={current || undefined}
             className={cn(
-                "flex h-9 min-w-24 flex-1 items-center justify-center px-5 text-xs font-semibold transition-[filter,background-color]",
+                "flex min-w-24 flex-1 items-center justify-center gap-1.5 font-semibold transition-[filter,background-color]",
+                FONT[size],
                 "enabled:cursor-pointer enabled:hover:brightness-95 disabled:cursor-default",
                 "focus-visible:underline focus-visible:outline-none focus-visible:brightness-90",
                 !filled && "bg-muted text-muted-foreground",
                 className
             )}
             style={{
-                clipPath: chevronClipPath(first),
-                ...(filled ? { backgroundColor: color, color: readableTextColor(color) } : {}),
+                height: chevronHeight(size),
+                padding: chevronPadding(first, size),
+                clipPath: chevronClipPath(first, size),
+                ...fill,
                 ...style,
             }}
         >

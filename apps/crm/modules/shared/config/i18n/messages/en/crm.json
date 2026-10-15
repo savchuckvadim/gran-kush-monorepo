@@ -516,7 +516,8 @@
                 "confirmFailureTitle": "Cancel order {number}?",
                 "confirmFailure": "The order moves to “{stage}” and closes. The goods go back to stock.",
                 "confirm": "Move",
-                "cancel": "Not now"
+                "cancel": "Not now",
+                "next": "Next: {stage}"
             },
             "kanban": {
                 "label": "Orders kanban",
@@ -524,7 +525,21 @@
                 "loadMore": "Show more",
                 "loadError": "Could not load the orders",
                 "items": "{count, plural, one {# item} other {# items}}",
-                "noFunnel": "Orders have no funnel. Set up the stages in Settings → Entities → Order."
+                "noFunnel": "Orders have no funnel. Set up the stages in Settings → Entities → Order.",
+                "cardFields": {
+                    "label": "Card settings",
+                    "hint": "What to show on a card. The order number is always there.",
+                    "reset": "Use the club's",
+                    "fields": {
+                        "total": "Total",
+                        "member": "Member",
+                        "payment": "Payment",
+                        "items": "Items",
+                        "date": "Date",
+                        "employee": "Employee",
+                        "nextStage": "Next-stage button"
+                    }
+                }
             },
             "create": {
                 "button": "New order",

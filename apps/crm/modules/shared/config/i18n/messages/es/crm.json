@@ -516,7 +516,8 @@
                 "confirmFailureTitle": "¿Cancelar el pedido {number}?",
                 "confirmFailure": "El pedido pasará a «{stage}» y se cerrará. El producto vuelve al stock.",
                 "confirm": "Mover",
-                "cancel": "Ahora no"
+                "cancel": "Ahora no",
+                "next": "Siguiente: {stage}"
             },
             "kanban": {
                 "label": "Kanban de pedidos",
@@ -524,7 +525,21 @@
                 "loadMore": "Mostrar más",
                 "loadError": "No se pudieron cargar los pedidos",
                 "items": "{count, plural, one {# artículo} other {# artículos}}",
-                "noFunnel": "Los pedidos no tienen embudo. Configura las etapas en Ajustes → Entidades → Pedido."
+                "noFunnel": "Los pedidos no tienen embudo. Configura las etapas en Ajustes → Entidades → Pedido.",
+                "cardFields": {
+                    "label": "Ajustes de la tarjeta",
+                    "hint": "Qué mostrar en la tarjeta. El número de pedido siempre está.",
+                    "reset": "Como el club",
+                    "fields": {
+                        "total": "Importe",
+                        "member": "Socio",
+                        "payment": "Pago",
+                        "items": "Líneas",
+                        "date": "Fecha",
+                        "employee": "Empleado",
+                        "nextStage": "Botón «siguiente»"
+                    }
+                }
             },
             "create": {
                 "button": "Nuevo pedido",

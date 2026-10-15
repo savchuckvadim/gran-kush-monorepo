@@ -5,6 +5,7 @@ import { useCallback, useMemo } from "react";
 import { KanbanColumn, KanbanColumnHeader, KanbanItem } from "@workspace/ui";
 
 import {
+    type MovableOrder,
     type OrderFunnelStage,
     type OrdersFilter,
     type OrderStageSummaryItem,
@@ -13,6 +14,7 @@ import {
 } from "@/modules/entities/order";
 import { useMoneyFormat } from "@/modules/shared";
 
+import type { OrderCardField } from "./card-fields";
 import { OrderKanbanCard } from "./OrderKanbanCard";
 import { OrderKanbanColumnFooter } from "./OrderKanbanColumnFooter";
 
@@ -21,10 +23,23 @@ interface OrderKanbanColumnProps {
     filter: OrdersFilter;
     summary: OrderStageSummaryItem | undefined;
     canMove: boolean;
+    /** Поля карточки из шестерёнки над доской */
+    fields: readonly OrderCardField[];
+    /** Куда ведёт кнопка «дальше» с карточек этой колонки */
+    next?: OrderFunnelStage;
+    onMoveNext: (order: MovableOrder, target: OrderFunnelStage) => void;
 }
 
-/** One stage: the chevron with the count, the total under it, the cards loaded as you scroll. */
-export function OrderKanbanColumn({ stage, filter, summary, canMove }: OrderKanbanColumnProps) {
+/** One stage: a thin chevron with the count, the total under it, the cards loaded as you scroll. */
+export function OrderKanbanColumn({
+    stage,
+    filter,
+    summary,
+    canMove,
+    fields,
+    next,
+    onMoveNext,
+}: OrderKanbanColumnProps) {
     const money = useMoneyFormat();
     const { data, isLoading, isError, hasNextPage, isFetchingNextPage, fetchNextPage } =
         useOrderStageColumn(stage.id, filter);
@@ -40,7 +55,7 @@ export function OrderKanbanColumn({ stage, filter, summary, canMove }: OrderKanb
                     color={stageColor(stage)}
                     count={summary?.count}
                     aside={
-                        <p className="text-center text-sm font-semibold tabular-nums">
+                        <p className="px-1 text-sm font-bold tabular-nums">
                             {money(summary?.total ?? 0)}
                         </p>
                     }
@@ -59,7 +74,12 @@ export function OrderKanbanColumn({ stage, filter, summary, canMove }: OrderKanb
         >
             {orders.map((order) => (
                 <KanbanItem key={order.id} id={order.id} columnId={stage.id} disabled={!canMove}>
-                    <OrderKanbanCard order={order} />
+                    <OrderKanbanCard
+                        order={order}
+                        fields={fields}
+                        next={canMove ? next : undefined}
+                        onMoveNext={onMoveNext}
+                    />
                 </KanbanItem>
             ))}
         </KanbanColumn>

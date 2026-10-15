@@ -9,18 +9,22 @@ import { KanbanBoard } from "@workspace/ui";
 
 import {
     findOrderInColumns,
+    type MovableOrder,
     type OrderFunnel,
+    type OrderFunnelStage,
     splitFunnelStages,
     useOrderStageSummary,
 } from "@/modules/entities/order";
-import { CloseOrderDialog, useOrderStageMove } from "@/modules/features/order-stage";
+import { CloseOrderDialog, nextStageOf, useOrderStageMove } from "@/modules/features/order-stage";
 
 import { OrdersFilterBar } from "../order-filters/OrdersFilterBar";
 import type { OrderFilters } from "../order-filters/use-order-filters";
 
+import { KanbanCardFieldsMenu } from "./KanbanCardFieldsMenu";
 import { OrderKanbanCard } from "./OrderKanbanCard";
 import { OrderKanbanColumn } from "./OrderKanbanColumn";
 import { useClosingDropZones } from "./use-closing-drop-zones";
+import { useOrderCardFields } from "./use-order-card-fields";
 
 interface OrdersKanbanProps {
     funnel: OrderFunnel;
@@ -30,8 +34,9 @@ interface OrdersKanbanProps {
 }
 
 /**
- * Orders by stage, as Bitrix24 deals: a column per working stage; completed and cancelled appear
- * as drop zones at the bottom while a card is dragged.
+ * Orders by stage: a column per working stage; completed and cancelled appear as drop zones at
+ * the bottom while a card is dragged. A card also carries a button to the next stage, which is
+ * the move almost every order makes.
  */
 export function OrdersKanban({ funnel, filters, canMove }: OrdersKanbanProps) {
     const t = useTranslations("crm.orders.kanban");
@@ -42,6 +47,7 @@ export function OrdersKanban({ funnel, filters, canMove }: OrdersKanbanProps) {
         [funnel.stages]
     );
     const dropZones = useClosingDropZones(stages);
+    const cardFields = useOrderCardFields();
 
     const { data: summary, isFetching } = useOrderStageSummary(funnel.id, filters.filter);
     const totals = useMemo(
@@ -64,12 +70,17 @@ export function OrdersKanban({ funnel, filters, canMove }: OrdersKanbanProps) {
         [queryClient, requestMove, stagesById]
     );
 
+    const moveNext = useCallback(
+        (order: MovableOrder, target: OrderFunnelStage) => requestMove({ order, target }),
+        [requestMove]
+    );
+
     const renderOverlay = useCallback(
         (orderId: string) => {
             const order = findOrderInColumns(queryClient, orderId);
-            return order ? <OrderKanbanCard order={order} /> : null;
+            return order ? <OrderKanbanCard order={order} fields={cardFields.fields} /> : null;
         },
-        [queryClient]
+        [queryClient, cardFields.fields]
     );
 
     if (stages.working.length === 0) {
@@ -78,7 +89,20 @@ export function OrdersKanban({ funnel, filters, canMove }: OrdersKanbanProps) {
 
     return (
         <div className="space-y-3">
-            <OrdersFilterBar filters={filters} total={workingCount} isFetching={isFetching} />
+            <div className="flex flex-wrap items-center gap-2">
+                <KanbanCardFieldsMenu
+                    value={cardFields.fields}
+                    onChange={cardFields.setFields}
+                    onReset={cardFields.reset}
+                    disabled={cardFields.isSaving}
+                />
+                <OrdersFilterBar
+                    filters={filters}
+                    total={workingCount}
+                    isFetching={isFetching}
+                    className="min-w-0 flex-1"
+                />
+            </div>
             <KanbanBoard
                 aria-label={t("label")}
                 onMove={handleMove}
@@ -93,6 +117,9 @@ export function OrdersKanban({ funnel, filters, canMove }: OrdersKanbanProps) {
                         filter={filters.filter}
                         summary={totals.get(stage.id)}
                         canMove={canMove && !isMoving}
+                        fields={cardFields.fields}
+                        next={nextStageOf(funnel, stage)}
+                        onMoveNext={moveNext}
                     />
                 ))}
             </KanbanBoard>

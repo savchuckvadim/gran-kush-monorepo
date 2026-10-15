@@ -5,24 +5,37 @@ import { useTranslations } from "next-intl";
 import { InitialsAvatar } from "@workspace/ui";
 
 import {
+    type MovableOrder,
+    type OrderFunnelStage,
     type OrderListItem,
     OrderMemberLink,
     PaymentStatusBadge,
     stageColor,
 } from "@/modules/entities/order";
+import { NextStageButton } from "@/modules/features/order-stage";
 import { personName, useCompactDateFormat, useMoneyFormat } from "@/modules/shared";
 import { EntityLink } from "@/modules/shared/ui/EntityLink";
 
+import type { OrderCardField } from "./card-fields";
+
 interface OrderKanbanCardProps {
     order: OrderListItem;
+    /** Что показывать: набор из шестерёнки над доской */
+    fields: readonly OrderCardField[];
+    /** Следующая стадия воронки; без неё кнопка «дальше» не показывается */
+    next?: OrderFunnelStage;
+    onMoveNext?: (order: MovableOrder, target: OrderFunnelStage) => void;
 }
 
-/** A kanban card: number, total, member, items and time; a stripe in the stage colour on the left. */
-export function OrderKanbanCard({ order }: OrderKanbanCardProps) {
+/** A kanban card: the number always, the rest by the board's field settings. */
+export function OrderKanbanCard({ order, fields, next, onMoveNext }: OrderKanbanCardProps) {
     const t = useTranslations("crm.orders.kanban");
     const money = useMoneyFormat();
     const date = useCompactDateFormat();
+    const show = (field: OrderCardField) => fields.includes(field);
     const employee = order.employee ? personName(order.employee, "") : "";
+    const footer = show("items") || show("date") || (show("employee") && employee);
+    const showNext = show("nextStage") && next && onMoveNext;
 
     return (
         <article
@@ -39,20 +52,37 @@ export function OrderKanbanCard({ order }: OrderKanbanCardProps) {
                 >
                     {order.orderNumber}
                 </EntityLink>
-                <PaymentStatusBadge status={order.paymentStatus} />
+                {show("payment") && <PaymentStatusBadge status={order.paymentStatus} />}
             </div>
-            <p className="mt-1 text-base font-semibold tabular-nums">{money(order.total)}</p>
-            <OrderMemberLink
-                member={order.member}
-                className="mt-0.5 block truncate text-primary hover:underline"
-            />
-            <div className="mt-2 flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                <span>{t("items", { count: order.itemsCount })}</span>
-                <span className="flex items-center gap-2">
-                    <time dateTime={order.orderedAt}>{date(order.orderedAt)}</time>
-                    {employee ? <InitialsAvatar name={employee} /> : null}
-                </span>
-            </div>
+            {show("total") && (
+                <p className="mt-1 text-lg font-bold tracking-tight tabular-nums">
+                    {money(order.total)}
+                </p>
+            )}
+            {show("member") && (
+                <OrderMemberLink
+                    member={order.member}
+                    className="mt-0.5 block truncate font-medium hover:underline"
+                />
+            )}
+            {footer && (
+                <div className="mt-2 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                    <span className="truncate">
+                        {[
+                            show("items") ? t("items", { count: order.itemsCount }) : null,
+                            show("date") ? date(order.orderedAt) : null,
+                        ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                    </span>
+                    {show("employee") && employee ? <InitialsAvatar name={employee} /> : null}
+                </div>
+            )}
+            {showNext && (
+                <div className="mt-2 flex justify-end">
+                    <NextStageButton order={order} next={next} onMove={onMoveNext} variant="chip" />
+                </div>
+            )}
         </article>
     );
 }

@@ -35,6 +35,7 @@ export function OrderStageFinishStep({
             <StageStep
                 first={first}
                 filled
+                current
                 color={stageColor(closedStage)}
                 disabled
                 aria-current="step"

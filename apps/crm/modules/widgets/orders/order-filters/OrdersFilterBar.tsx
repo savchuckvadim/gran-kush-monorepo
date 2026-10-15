@@ -10,10 +10,11 @@ interface OrdersFilterBarProps {
     filters: OrderFilters;
     total?: number;
     isFetching?: boolean;
+    className?: string;
 }
 
 /** Search by number, payment and dates (and the stage in the list) — the same bar in both views. */
-export function OrdersFilterBar({ filters, total, isFetching }: OrdersFilterBarProps) {
+export function OrdersFilterBar({ filters, total, isFetching, className }: OrdersFilterBarProps) {
     const t = useTranslations("crm.orders.list");
 
     return (
@@ -25,6 +26,7 @@ export function OrdersFilterBar({ filters, total, isFetching }: OrdersFilterBarP
             isFetching={isFetching}
             storageKey="crm-orders"
             searchPlaceholder={t("searchPlaceholder")}
+            className={className}
         />
     );
 }

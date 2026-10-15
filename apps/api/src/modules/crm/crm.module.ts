@@ -14,6 +14,7 @@ import { QrCodesModule } from "@modules/portal/crm/qr-codes/qr-codes.module";
 import { RecordsModule } from "@modules/portal/crm/records/records.module";
 import { RegistrationLinksModule } from "@modules/portal/crm/registration-links/registration-links.module";
 import { SearchModule } from "@modules/portal/crm/search/search.module";
+import { UiSettingsModule } from "@modules/portal/crm/ui-settings/ui-settings.module";
 import { PublicPortalModule } from "@modules/portal/public/public-portal.module";
 
 /** CRM и портальный контекст поверх общего ядра. */
@@ -33,6 +34,7 @@ import { PublicPortalModule } from "@modules/portal/public/public-portal.module"
         RegistrationLinksModule,
         RecordsModule,
         SearchModule,
+        UiSettingsModule,
         PublicPortalModule,
     ],
 })
