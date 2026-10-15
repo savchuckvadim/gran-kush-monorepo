@@ -58,6 +58,11 @@ export function OrdersKanban({ funnel, filters, canMove }: OrdersKanbanProps) {
         (sum, stage) => sum + (totals.get(stage.id)?.count ?? 0),
         0
     );
+    // полоска доли в шапке колонки меряется от самой «тяжёлой» колонки доски
+    const maxTotal = stages.working.reduce(
+        (max, stage) => Math.max(max, totals.get(stage.id)?.total ?? 0),
+        0
+    );
 
     const { requestMove, confirming, confirm, dismiss, isMoving } = useOrderStageMove();
 
@@ -120,6 +125,7 @@ export function OrdersKanban({ funnel, filters, canMove }: OrdersKanbanProps) {
                         fields={cardFields.fields}
                         next={nextStageOf(funnel, stage)}
                         onMoveNext={moveNext}
+                        maxTotal={maxTotal}
                     />
                 ))}
             </KanbanBoard>

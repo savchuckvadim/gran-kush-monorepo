@@ -14,7 +14,11 @@ export interface KanbanColumnProps {
     className?: string;
 }
 
-/** A drop target with its own vertical scroll, so a long column does not stretch the board. */
+/**
+ * A drop target with its own vertical scroll, so a long column does not stretch the board.
+ * The column sits on a quiet well: the cards float above it, and a wall of columns reads as
+ * columns rather than as one field of cards.
+ */
 export function KanbanColumn({ id, header, children, footer, className }: KanbanColumnProps) {
     const { setNodeRef, isOver } = useDroppable({ id });
 
@@ -23,7 +27,7 @@ export function KanbanColumn({ id, header, children, footer, className }: Kanban
             data-slot="kanban-column"
             data-over={isOver || undefined}
             className={cn(
-                "flex min-h-0 w-[min(17.5rem,85vw)] shrink-0 snap-start flex-col",
+                "bg-muted/55 flex min-h-0 w-[min(17.5rem,85vw)] shrink-0 snap-start flex-col gap-2.5 rounded-2xl p-2.5",
                 className
             )}
         >
@@ -31,7 +35,7 @@ export function KanbanColumn({ id, header, children, footer, className }: Kanban
             <div
                 ref={setNodeRef}
                 className={cn(
-                    "mt-2 flex min-h-24 flex-1 flex-col gap-2 overflow-y-auto rounded-xl p-1 transition-colors",
+                    "flex min-h-24 flex-1 flex-col gap-2.5 overflow-y-auto rounded-xl transition-colors",
                     isOver && "bg-accent/60"
                 )}
             >

@@ -28,6 +28,8 @@ interface OrderKanbanColumnProps {
     /** Куда ведёт кнопка «дальше» с карточек этой колонки */
     next?: OrderFunnelStage;
     onMoveNext: (order: MovableOrder, target: OrderFunnelStage) => void;
+    /** Наибольшая сумма среди колонок: от неё считается длина полоски */
+    maxTotal: number;
 }
 
 /** One stage: a thin chevron with the count, the total under it, the cards loaded as you scroll. */
@@ -39,6 +41,7 @@ export function OrderKanbanColumn({
     fields,
     next,
     onMoveNext,
+    maxTotal,
 }: OrderKanbanColumnProps) {
     const money = useMoneyFormat();
     const { data, isLoading, isError, hasNextPage, isFetchingNextPage, fetchNextPage } =
@@ -54,8 +57,9 @@ export function OrderKanbanColumn({
                     title={stage.name}
                     color={stageColor(stage)}
                     count={summary?.count}
+                    share={maxTotal > 0 ? (summary?.total ?? 0) / maxTotal : 0}
                     aside={
-                        <p className="px-1 text-sm font-bold tabular-nums">
+                        <p className="text-muted-foreground text-xs font-bold tabular-nums">
                             {money(summary?.total ?? 0)}
                         </p>
                     }

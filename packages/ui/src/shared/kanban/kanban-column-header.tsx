@@ -1,56 +1,57 @@
 import type { ReactNode } from "react";
 
-import { chevronClipPath, chevronHeight, type ChevronSize } from "@workspace/ui/lib/chevron";
-
 export interface KanbanColumnHeaderProps {
     title: string;
     color: string;
     count?: number;
-    /** Высота шеврона; `sm` — тонкая лента, как в полосе стадий */
-    size?: ChevronSize;
-    /** Under the chevron: the column total */
+    /** Под названием: сумма колонки */
     aside?: ReactNode;
+    /** Доля колонки в доске, 0–1: полоска под шапкой. Без неё полоски нет */
+    share?: number;
 }
 
 /**
- * The chevron on top of a column, tinted with the stage colour, with the number of cards in a
- * badge of the full colour. Tint instead of a solid fill keeps a wall of columns calm.
+ * Шапка колонки: крупный счётчик шрифтом скина, название со стадийной точкой, сумма и полоска
+ * доли. Цвет держат цифра и полоска, а не заливка, поэтому стена колонок не пестрит.
  */
-export function KanbanColumnHeader({
-    title,
-    color,
-    count,
-    size = "sm",
-    aside,
-}: KanbanColumnHeaderProps) {
+export function KanbanColumnHeader({ title, color, count, aside, share }: KanbanColumnHeaderProps) {
     return (
-        <header data-slot="kanban-column-header" className="space-y-1.5">
-            <div
-                className="flex items-center gap-2 pr-2 pl-3 text-xs font-semibold"
-                style={{
-                    height: chevronHeight(size),
-                    backgroundColor: `color-mix(in oklab, ${color} 18%, var(--card))`,
-                    clipPath: chevronClipPath(true, size),
-                }}
-            >
-                <span
-                    className="size-2 shrink-0 rounded-full"
-                    style={{ backgroundColor: color }}
-                    aria-hidden="true"
-                />
-                <span className="min-w-0 flex-1 truncate">{title}</span>
+        <header data-slot="kanban-column-header" className="flex flex-col gap-2 px-1 pt-0.5">
+            <div className="flex items-end gap-3">
                 {count !== undefined && (
                     <span
-                        className="inline-flex h-4.5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold tabular-nums"
-                        style={{
-                            backgroundColor: `color-mix(in oklab, ${color} 30%, var(--card))`,
-                        }}
+                        className="text-[2.25rem] leading-[0.85] font-extrabold tracking-tight tabular-nums"
+                        style={{ color, fontFamily: "var(--font-display)" }}
                     >
                         {count}
                     </span>
                 )}
+                <div className="flex min-w-0 flex-1 flex-col gap-0.5 pb-0.5">
+                    <span className="flex min-w-0 items-center gap-1.5 text-sm font-bold">
+                        <span
+                            aria-hidden="true"
+                            className="size-2 shrink-0 rounded-full"
+                            style={{ backgroundColor: color }}
+                        />
+                        <span className="truncate">{title}</span>
+                    </span>
+                    {aside}
+                </div>
             </div>
-            {aside}
+            {share !== undefined && (
+                <span
+                    aria-hidden="true"
+                    className="bg-foreground/10 block h-1.5 overflow-hidden rounded-full"
+                >
+                    <span
+                        className="block h-full rounded-full"
+                        style={{
+                            width: `${share > 0 ? Math.max(Math.round(share * 100), 6) : 0}%`,
+                            backgroundColor: color,
+                        }}
+                    />
+                </span>
+            )}
         </header>
     );
 }
