@@ -147,6 +147,7 @@ export class OrderPrismaRepository extends OrderRepository {
                     portalId: member.portalId,
                     entityDefinitionId: orderDef.id,
                     stageId: stageId ?? null,
+                    createdByEmployeeId: data.employeeId ?? null,
                 },
             });
 
@@ -155,6 +156,7 @@ export class OrderPrismaRepository extends OrderRepository {
                     portalId: member.portalId,
                     entityRecordId: record.id,
                     memberId: member.id,
+                    employeeId: data.employeeId ?? null,
                     orderNumber: data.orderNumber,
                     paymentStatus: data.paymentStatus,
                     subtotal: new Prisma.Decimal(data.subtotal),
@@ -167,6 +169,7 @@ export class OrderPrismaRepository extends OrderRepository {
                             quantity: new Prisma.Decimal(item.quantity),
                             unitPrice: new Prisma.Decimal(item.unitPrice),
                             totalPrice: new Prisma.Decimal(item.totalPrice),
+                            isGift: item.isGift ?? false,
                             notes: item.notes,
                         })),
                     },
@@ -475,6 +478,7 @@ export class OrderPrismaRepository extends OrderRepository {
                         quantity: item.quantity,
                         unitPrice: item.unitPrice,
                         totalPrice: item.totalPrice,
+                        isGift: item.isGift,
                         notes: item.notes,
                         createdAt: item.createdAt,
                         updatedAt: item.updatedAt,

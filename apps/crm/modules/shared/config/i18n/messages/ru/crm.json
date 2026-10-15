@@ -488,7 +488,8 @@
                     "crypto": "Крипто"
                 },
                 "back": "К заказам",
-                "employee": "Сотрудник"
+                "employee": "Сотрудник",
+                "gift": "Подарок"
             },
             "views": {
                 "label": "Вид",
@@ -524,6 +525,50 @@
                 "loadError": "Не удалось загрузить заказы",
                 "items": "{count, plural, one {# позиция} few {# позиции} many {# позиций} other {# позиции}}",
                 "noFunnel": "У заказов нет воронки. Настройте стадии в «Настройки → Сущности → Заказ»."
+            },
+            "create": {
+                "button": "Новый заказ",
+                "title": "Новый заказ",
+                "description": "Заказ за участника клуба: товары из каталога, своя цена и подарки по позициям. Товар списывается со склада сразу.",
+                "member": "Участник",
+                "memberPlaceholder": "Выберите участника",
+                "memberSearch": "Имя, email или номер…",
+                "memberEmpty": "Никого не нашли",
+                "memberInactive": "неактивен",
+                "memberRequired": "Выберите участника",
+                "memberInactiveError": "Участник не активен — заказ на него не оформить",
+                "searching": "Ищем…",
+                "items": "Позиции",
+                "addProduct": "Добавить товар",
+                "productSearch": "Название, артикул или сорт…",
+                "productEmpty": "Товаров не нашли",
+                "inStock": "в наличии: {quantity} {unit}",
+                "outOfStock": "нет в наличии",
+                "noItems": "Добавьте товары из каталога",
+                "itemsRequired": "Добавьте хотя бы один товар",
+                "quantity": "Кол-во",
+                "quantityIn": "Кол-во, {unit}",
+                "unitPrice": "Цена, €",
+                "catalogPrice": "В каталоге: {price}",
+                "gift": "Подарок",
+                "giftFree": "Бесплатно",
+                "removeLine": "Убрать «{product}»",
+                "lineError": {
+                    "quantity": "Больше нуля, до 3 знаков после запятой",
+                    "price": "Не меньше нуля, до 2 знаков после запятой",
+                    "stock": "На складе только {quantity} {unit}"
+                },
+                "giftsValue": "Подарки на {value} — в сумму не входят",
+                "total": "Итого",
+                "stage": "Стадия",
+                "stageHelp": "Продали на месте — выберите «успешную» стадию",
+                "stageDefault": "Первая стадия воронки",
+                "stageDefaultNamed": "«{stage}» — по умолчанию",
+                "notes": "Примечание",
+                "submit": "Создать заказ",
+                "submitting": "Создаём…",
+                "cancel": "Отмена",
+                "created": "Заказ {number} создан"
             }
         },
         "finance": {

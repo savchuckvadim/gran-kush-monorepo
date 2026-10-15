@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { BadRequestException, INestApplication } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 
@@ -6,6 +8,7 @@ import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
+import { MemberAuthService } from "../src/modules/portal/auth/members/application/services/member-auth.service";
 import { OrdersService } from "../src/modules/portal/crm/orders/application/services/orders.service";
 
 jest.setTimeout(120_000);
@@ -35,6 +38,7 @@ describe("Order stock (e2e)", () => {
     const slug = `stock-${suffix}`;
     let portalId: string;
     let cookies: string;
+    let memberCookies: string;
     let memberId: string;
     let unitId: string;
     let categoryId: string;
@@ -134,6 +138,10 @@ describe("Order stock (e2e)", () => {
                 },
             })
         ).id;
+        const memberTokens = await app
+            .get(MemberAuthService)
+            .generateTokens({ id: user.id, email: user.email }, `device-stock-${suffix}`);
+        memberCookies = `member_access_token=${memberTokens.accessToken}`;
     });
 
     afterAll(async () => {
@@ -210,5 +218,62 @@ describe("Order stock (e2e)", () => {
 
         expect(res.status).toBe(200);
         expect(await stockOf(productId)).toEqual({ quantity: 1, isAvailable: true });
+    });
+
+    it("an employee order: own price and a gift line, both written off the stock", async () => {
+        const productId = await createProduct(randomUUID(), `Crm ${suffix}`, 5);
+
+        const res = await request(app.getHttpServer())
+            .post("/crm/orders")
+            .set("Cookie", cookies)
+            .set("X-Portal-Slug", slug)
+            .send({
+                memberId,
+                items: [
+                    { productId, quantity: 2, unitPrice: 7.5 },
+                    { productId, quantity: 1, isGift: true },
+                ],
+                notes: "walk-in",
+            });
+
+        expect(res.status).toBe(201);
+        expect(res.body).toMatchObject({ subtotal: 15, total: 15, notes: "walk-in" });
+        expect(res.body.employee).not.toBeNull();
+        expect(res.body.items).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({ unitPrice: 7.5, totalPrice: 15, isGift: false }),
+                expect.objectContaining({ unitPrice: 10, totalPrice: 0, isGift: true }),
+            ])
+        );
+        expect(await stockOf(productId)).toEqual({ quantity: 2, isAvailable: true });
+    });
+
+    it("an employee order for a member of no club is refused", async () => {
+        const productId = await createProduct(randomUUID(), `Ghost ${suffix}`, 5);
+
+        const res = await request(app.getHttpServer())
+            .post("/crm/orders")
+            .set("Cookie", cookies)
+            .set("X-Portal-Slug", slug)
+            .send({
+                memberId: "00000000-0000-4000-8000-000000000000",
+                items: [{ productId, quantity: 1 }],
+            });
+
+        expect(res.status).toBe(404);
+        expect(await stockOf(productId)).toEqual({ quantity: 5, isAvailable: true });
+    });
+
+    it("a member cannot set their own price or a gift from the cabinet", async () => {
+        const productId = await createProduct(randomUUID(), `Lk ${suffix}`, 5);
+
+        const res = await request(app.getHttpServer())
+            .post("/lk/orders")
+            .set("Cookie", memberCookies)
+            .set("X-Portal-Slug", slug)
+            .send({ items: [{ productId, quantity: 1, unitPrice: 0, isGift: true }] });
+
+        expect(res.status).toBe(400);
+        expect(await stockOf(productId)).toEqual({ quantity: 5, isAvailable: true });
     });
 });

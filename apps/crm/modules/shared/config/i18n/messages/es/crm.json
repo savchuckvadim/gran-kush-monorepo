@@ -488,7 +488,8 @@
                     "crypto": "Cripto"
                 },
                 "back": "A pedidos",
-                "employee": "Empleado"
+                "employee": "Empleado",
+                "gift": "Regalo"
             },
             "views": {
                 "label": "Vista",
@@ -524,6 +525,50 @@
                 "loadError": "No se pudieron cargar los pedidos",
                 "items": "{count, plural, one {# artículo} other {# artículos}}",
                 "noFunnel": "Los pedidos no tienen embudo. Configura las etapas en Ajustes → Entidades → Pedido."
+            },
+            "create": {
+                "button": "Nuevo pedido",
+                "title": "Nuevo pedido",
+                "description": "Un pedido para un socio del club: productos del catálogo, precio propio y regalos por línea. El stock se descuenta al momento.",
+                "member": "Socio",
+                "memberPlaceholder": "Elige un socio",
+                "memberSearch": "Nombre, email o número…",
+                "memberEmpty": "No se encontró a nadie",
+                "memberInactive": "inactivo",
+                "memberRequired": "Elige un socio",
+                "memberInactiveError": "El socio está inactivo: no se le puede hacer un pedido",
+                "searching": "Buscando…",
+                "items": "Líneas",
+                "addProduct": "Añadir producto",
+                "productSearch": "Nombre, SKU o variedad…",
+                "productEmpty": "No se encontraron productos",
+                "inStock": "en stock: {quantity} {unit}",
+                "outOfStock": "sin stock",
+                "noItems": "Añade productos del catálogo",
+                "itemsRequired": "Añade al menos un producto",
+                "quantity": "Cant.",
+                "quantityIn": "Cant., {unit}",
+                "unitPrice": "Precio, €",
+                "catalogPrice": "En catálogo: {price}",
+                "gift": "Regalo",
+                "giftFree": "Gratis",
+                "removeLine": "Quitar «{product}»",
+                "lineError": {
+                    "quantity": "Mayor que cero, hasta 3 decimales",
+                    "price": "Cero o más, hasta 2 decimales",
+                    "stock": "Solo hay {quantity} {unit} en stock"
+                },
+                "giftsValue": "Regalos por {value} — no suman al total",
+                "total": "Total",
+                "stage": "Etapa",
+                "stageHelp": "¿Vendido en el momento? Elige una etapa de éxito",
+                "stageDefault": "Primera etapa del embudo",
+                "stageDefaultNamed": "«{stage}» — por defecto",
+                "notes": "Nota",
+                "submit": "Crear pedido",
+                "submitting": "Creando…",
+                "cancel": "Cancelar",
+                "created": "Pedido {number} creado"
             }
         },
         "finance": {

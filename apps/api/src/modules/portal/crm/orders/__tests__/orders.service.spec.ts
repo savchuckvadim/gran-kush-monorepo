@@ -1,16 +1,18 @@
 import { BadRequestException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 
-import { Prisma } from "@prisma/client";
+import { Prisma, StageSemantic } from "@prisma/client";
 
 import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
-import { CreateOrderDto } from "@modules/portal/crm/orders/api/dto/order.dto";
+import { MembersService } from "@modules/portal/crm/members/application/services/members.service";
+import { CreateOrderDto, CrmCreateOrderDto } from "@modules/portal/crm/orders/api/dto/order.dto";
 import { OrdersService } from "@modules/portal/crm/orders/application/services/orders.service";
 import {
     Order,
     OrderStatus,
     PaymentStatus,
 } from "@modules/portal/crm/orders/domain/entity/order.entity";
+import { OrderStage } from "@modules/portal/crm/orders/domain/entity/order-stage.entity";
 import { InsufficientStockError } from "@modules/portal/crm/orders/domain/errors/insufficient-stock.error";
 import {
     CreateOrderInput,
@@ -38,6 +40,10 @@ const mockOrderRepository = {
 
 const mockProductsService = {
     findById: jest.fn(),
+};
+
+const mockMembersService = {
+    findByIdForPortal: jest.fn(),
 };
 
 const orderNumberConflict = (): Prisma.PrismaClientKnownRequestError =>
@@ -76,6 +82,7 @@ describe("OrdersService — номер заказа", () => {
                 OrdersService,
                 { provide: OrderRepository, useValue: mockOrderRepository },
                 { provide: ProductsService, useValue: mockProductsService },
+                { provide: MembersService, useValue: mockMembersService },
             ],
         }).compile();
 
@@ -176,6 +183,7 @@ describe("OrdersService — переход статуса оплаты", () => {
                 OrdersService,
                 { provide: OrderRepository, useValue: mockOrderRepository },
                 { provide: ProductsService, useValue: mockProductsService },
+                { provide: MembersService, useValue: mockMembersService },
             ],
         }).compile();
 
@@ -241,5 +249,161 @@ describe("OrdersService — переход статуса оплаты", () => {
             service.updatePaymentStatus("order-1", PaymentStatus.PAID, "emp-1", PORTAL_A)
         ).rejects.toMatchObject({ status: 400 });
         expect(mockOrderRepository.compareAndSetPaymentStatus).not.toHaveBeenCalled();
+    });
+});
+
+describe("OrdersService — заказ из CRM", () => {
+    let service: OrdersService;
+
+    const stage = (id: string, semantic: StageSemantic): OrderStage => ({
+        id,
+        stageCategoryId: "funnel-1",
+        name: id,
+        nameI18n: null,
+        color: null,
+        semantic,
+        sortOrder: 0,
+        isTerminalSuccess: semantic === StageSemantic.SUCCESS,
+        isTerminalFailure: semantic === StageSemantic.FAILURE,
+    });
+
+    const crmDto = (over: Partial<CrmCreateOrderDto> = {}): CrmCreateOrderDto => ({
+        memberId: MEMBER_ID,
+        items: [{ productId: PRODUCT_ID, quantity: 2 }],
+        ...over,
+    });
+
+    const createdInput = (): CreateOrderInput =>
+        (mockOrderRepository.create.mock.calls[0] as [CreateOrderInput])[0];
+
+    beforeEach(async () => {
+        jest.clearAllMocks();
+
+        mockMembersService.findByIdForPortal.mockResolvedValue({ id: MEMBER_ID, isActive: true });
+        mockProductsService.findById.mockResolvedValue({
+            id: PRODUCT_ID,
+            name: "Товар",
+            isActive: true,
+            isAvailable: true,
+            currentQuantity: new Prisma.Decimal(10),
+            price: new Prisma.Decimal(5),
+        });
+        mockOrderRepository.getLastOrderNumberWithPrefix.mockResolvedValue(null);
+        mockOrderRepository.create.mockImplementation(
+            (input: CreateOrderInput) =>
+                ({ id: "order-1", orderNumber: input.orderNumber }) as Order
+        );
+        mockOrderRepository.update.mockImplementation(
+            (id: string, data: Partial<Order>) => ({ id, ...data }) as Order
+        );
+
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [
+                OrdersService,
+                { provide: OrderRepository, useValue: mockOrderRepository },
+                { provide: ProductsService, useValue: mockProductsService },
+                { provide: MembersService, useValue: mockMembersService },
+            ],
+        }).compile();
+
+        service = module.get<OrdersService>(OrdersService);
+    });
+
+    it("ищет участника в своём портале и отмечает сотрудника", async () => {
+        await service.createOrderByEmployee(crmDto(), "emp-1", PORTAL_A);
+
+        expect(mockMembersService.findByIdForPortal).toHaveBeenCalledWith(MEMBER_ID, PORTAL_A);
+        expect(createdInput()).toMatchObject({ memberId: MEMBER_ID, employeeId: "emp-1" });
+    });
+
+    it("участник чужого клуба — 404, заказ не создаётся", async () => {
+        mockMembersService.findByIdForPortal.mockResolvedValue(null);
+
+        await expect(
+            service.createOrderByEmployee(crmDto(), "emp-1", PORTAL_A)
+        ).rejects.toMatchObject({ status: 404 });
+        expect(mockOrderRepository.create).not.toHaveBeenCalled();
+    });
+
+    it("неактивному участнику заказ не оформить", async () => {
+        mockMembersService.findByIdForPortal.mockResolvedValue({ id: MEMBER_ID, isActive: false });
+
+        await expect(
+            service.createOrderByEmployee(crmDto(), "emp-1", PORTAL_A)
+        ).rejects.toMatchObject({ status: 400 });
+    });
+
+    it("без своей цены берёт цену каталога", async () => {
+        await service.createOrderByEmployee(crmDto(), "emp-1", PORTAL_A);
+
+        expect(createdInput().items[0]).toMatchObject({
+            unitPrice: 5,
+            totalPrice: 10,
+            isGift: false,
+        });
+        expect(createdInput()).toMatchObject({ subtotal: 10, total: 10 });
+    });
+
+    it("своя цена сотрудника заменяет цену каталога", async () => {
+        await service.createOrderByEmployee(
+            crmDto({ items: [{ productId: PRODUCT_ID, quantity: 3, unitPrice: 4.5 }] }),
+            "emp-1",
+            PORTAL_A
+        );
+
+        expect(createdInput().items[0]).toMatchObject({ unitPrice: 4.5, totalPrice: 13.5 });
+        expect(createdInput().total).toBe(13.5);
+    });
+
+    it("подарок списывается со склада, но не входит в сумму", async () => {
+        await service.createOrderByEmployee(
+            crmDto({
+                items: [
+                    { productId: PRODUCT_ID, quantity: 2 },
+                    { productId: PRODUCT_ID, quantity: 1, isGift: true },
+                ],
+            }),
+            "emp-1",
+            PORTAL_A
+        );
+
+        const [paid, gift] = createdInput().items;
+        expect(paid).toMatchObject({ totalPrice: 10, isGift: false });
+        expect(gift).toMatchObject({ quantity: 1, unitPrice: 5, totalPrice: 0, isGift: true });
+        expect(createdInput().total).toBe(10);
+    });
+
+    it("создаёт заказ в выбранной стадии и ставит её метку времени", async () => {
+        const done = stage("Completed", StageSemantic.SUCCESS);
+        mockOrderRepository.findStageInPortal.mockResolvedValue(done);
+
+        const order = await service.createOrderByEmployee(
+            crmDto({ stageId: done.id }),
+            "emp-1",
+            PORTAL_A
+        );
+
+        expect(mockOrderRepository.findStageInPortal).toHaveBeenCalledWith(PORTAL_A, done.id);
+        expect(createdInput().stageId).toBe(done.id);
+        expect(order.completedAt).toBeInstanceOf(Date);
+    });
+
+    it("стадия не из воронки клуба — 400", async () => {
+        mockOrderRepository.findStageInPortal.mockResolvedValue(null);
+
+        await expect(
+            service.createOrderByEmployee(crmDto({ stageId: "foreign" }), "emp-1", PORTAL_A)
+        ).rejects.toMatchObject({ status: 400 });
+        expect(mockOrderRepository.create).not.toHaveBeenCalled();
+    });
+
+    it("сразу в стадию отмены заказ не создаётся", async () => {
+        const cancelled = stage("Cancelled", StageSemantic.FAILURE);
+        mockOrderRepository.findStageInPortal.mockResolvedValue(cancelled);
+
+        await expect(
+            service.createOrderByEmployee(crmDto({ stageId: cancelled.id }), "emp-1", PORTAL_A)
+        ).rejects.toMatchObject({ status: 400 });
+        expect(mockOrderRepository.create).not.toHaveBeenCalled();
     });
 });

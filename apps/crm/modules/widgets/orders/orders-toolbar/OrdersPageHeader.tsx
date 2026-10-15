@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { ShoppingCart } from "lucide-react";
 
 import type { OrderFunnel } from "@/modules/entities/order";
+import { NewOrderButton } from "@/modules/features";
 
 import { OrderFunnelSelect } from "./OrderFunnelSelect";
 import { OrdersViewSwitch } from "./OrdersViewSwitch";
@@ -45,6 +46,7 @@ export function OrdersPageHeader({
                     />
                 ) : null}
                 <OrdersViewSwitch value={view} onChange={onViewChange} />
+                <NewOrderButton />
             </div>
         </div>
     );

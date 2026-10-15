@@ -200,6 +200,8 @@ describe("CRM role-based access (e2e)", () => {
     });
 
     afterAll(async () => {
+        // order items hold products without cascade: orders first, then the portal
+        await prisma.order.deleteMany({ where: { portalId } });
         await prisma.portal.deleteMany({ where: { id: portalId } });
         await prisma.user.deleteMany({ where: { email: { endsWith: `${suffix}@test.local` } } });
         if (unitId) {
@@ -328,6 +330,25 @@ describe("CRM role-based access (e2e)", () => {
             const res = await as(employeeCookies)
                 .patch(`/crm/orders/${orderId}/payment`)
                 .send({ paymentStatus: "paid" });
+            expect(res.status).toBe(403);
+        });
+
+        it("allows employee role to create an order for a member", async () => {
+            const res = await as(employeeCookies)
+                .post("/crm/orders")
+                .send({ memberId, items: [{ productId, quantity: 1, isGift: true }] });
+            expect(res.status).toBe(201);
+            expect(res.body.employee).not.toBeNull();
+        });
+
+        it("rejects choosing the stage of a new order by employee role", async () => {
+            const stage = await prisma.stage.findFirstOrThrow({
+                where: { stageCategory: { portalId, entityDefinition: { code: "order" } } },
+                select: { id: true },
+            });
+            const res = await as(employeeCookies)
+                .post("/crm/orders")
+                .send({ memberId, items: [{ productId, quantity: 1 }], stageId: stage.id });
             expect(res.status).toBe(403);
         });
 

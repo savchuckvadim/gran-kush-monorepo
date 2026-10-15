@@ -6,6 +6,7 @@ export * from "./person-name";
 export * from "./routes";
 export * from "./skin";
 export * from "./use-date-format";
+export * from "./use-debounced-value";
 export * from "./use-hydrated";
 export * from "./use-is-mobile";
 export * from "./use-localized-link";

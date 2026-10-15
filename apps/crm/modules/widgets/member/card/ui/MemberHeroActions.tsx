@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@workspace/ui";
 
 import { type CrmMemberDetails, useResendMemberConsent } from "@/modules/entities/member";
-import { MemberProfileEditModal } from "@/modules/features";
+import { MemberProfileEditModal, NewOrderButton } from "@/modules/features";
 import { notifyApiError } from "@/modules/shared/lib/notify-api-error";
 
 import { MemberQrDialog } from "./MemberQrDialog";
@@ -35,6 +35,7 @@ export function MemberHeroActions({ member }: { member: CrmMemberDetails }) {
                     {resend.isPending ? t("consent.resending") : t("consent.resend")}
                 </Button>
             )}
+            {member.isActive && <NewOrderButton memberId={member.id} size="sm" variant="outline" />}
             <MemberQrDialog memberId={member.id} />
             <MemberProfileEditModal member={member} />
         </div>

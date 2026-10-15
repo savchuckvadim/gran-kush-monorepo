@@ -488,7 +488,8 @@
                     "crypto": "Crypto"
                 },
                 "back": "Back to orders",
-                "employee": "Employee"
+                "employee": "Employee",
+                "gift": "Gift"
             },
             "views": {
                 "label": "View",
@@ -524,6 +525,50 @@
                 "loadError": "Could not load the orders",
                 "items": "{count, plural, one {# item} other {# items}}",
                 "noFunnel": "Orders have no funnel. Set up the stages in Settings → Entities → Order."
+            },
+            "create": {
+                "button": "New order",
+                "title": "New order",
+                "description": "An order for a club member: catalog products, your own price and gifts per line. Stock is written off right away.",
+                "member": "Member",
+                "memberPlaceholder": "Choose a member",
+                "memberSearch": "Name, email or number…",
+                "memberEmpty": "No one found",
+                "memberInactive": "inactive",
+                "memberRequired": "Choose a member",
+                "memberInactiveError": "The member is inactive — an order cannot be placed for them",
+                "searching": "Searching…",
+                "items": "Items",
+                "addProduct": "Add product",
+                "productSearch": "Name, SKU or strain…",
+                "productEmpty": "No products found",
+                "inStock": "in stock: {quantity} {unit}",
+                "outOfStock": "out of stock",
+                "noItems": "Add products from the catalog",
+                "itemsRequired": "Add at least one product",
+                "quantity": "Qty",
+                "quantityIn": "Qty, {unit}",
+                "unitPrice": "Price, €",
+                "catalogPrice": "Catalog: {price}",
+                "gift": "Gift",
+                "giftFree": "Free",
+                "removeLine": "Remove “{product}”",
+                "lineError": {
+                    "quantity": "Above zero, up to 3 decimals",
+                    "price": "Zero or more, up to 2 decimals",
+                    "stock": "Only {quantity} {unit} in stock"
+                },
+                "giftsValue": "Gifts worth {value} — not included in the total",
+                "total": "Total",
+                "stage": "Stage",
+                "stageHelp": "Sold on the spot — pick a successful stage",
+                "stageDefault": "First stage of the funnel",
+                "stageDefaultNamed": "“{stage}” — default",
+                "notes": "Note",
+                "submit": "Create order",
+                "submitting": "Creating…",
+                "cancel": "Cancel",
+                "created": "Order {number} created"
             }
         },
         "finance": {

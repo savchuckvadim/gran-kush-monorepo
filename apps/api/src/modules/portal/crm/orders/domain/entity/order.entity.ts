@@ -37,6 +37,8 @@ export class OrderItem {
     quantity: Decimal;
     unitPrice: Decimal;
     totalPrice: Decimal;
+    /** Подарок: со склада списан, в сумму не входит */
+    isGift: boolean;
 
     // Примечания
     notes?: string | null;

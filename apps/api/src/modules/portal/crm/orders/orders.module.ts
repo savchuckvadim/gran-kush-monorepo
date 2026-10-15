@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 
 import { PrismaModule } from "@common/prisma/prisma.module";
 import { CatalogModule } from "@modules/portal/crm/catalog/catalog.module";
+import { MembersModule } from "@modules/portal/crm/members/members.module";
 
 import { CrmOrdersController } from "./api/controllers/crm-orders.controller";
 import { LkOrdersController } from "./api/controllers/lk-orders.controller";
@@ -10,7 +11,7 @@ import { OrderRepository } from "./domain/repositories/order-repository.interfac
 import { OrderPrismaRepository } from "./infrastructure/repositories/order-prisma.repository";
 
 @Module({
-    imports: [PrismaModule, CatalogModule],
+    imports: [PrismaModule, CatalogModule, MembersModule],
     providers: [
         OrdersService,
         {

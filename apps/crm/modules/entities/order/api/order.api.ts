@@ -3,6 +3,7 @@ import { assertOpenApiOk } from "@workspace/api-client/core";
 import { $api } from "@/modules/shared";
 
 import type {
+    CreateOrderBody,
     OrderDetail,
     OrderFunnel,
     OrderPage,
@@ -42,6 +43,12 @@ export async function getOrders(params: OrdersListParams = {}): Promise<OrderPag
 
 export async function getOrderById(id: string): Promise<OrderDetail> {
     const response = await $api.GET("/crm/orders/{id}", { params: { path: { id } } });
+    return assertOpenApiOk(response);
+}
+
+/** An order for a member; `stageId` is for managers and up, without it — the default stage. */
+export async function createOrder(body: CreateOrderBody): Promise<OrderDetail> {
+    const response = await $api.POST("/crm/orders", { body });
     return assertOpenApiOk(response);
 }
 

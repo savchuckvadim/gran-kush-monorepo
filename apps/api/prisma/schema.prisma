@@ -1287,6 +1287,8 @@ model OrderItem {
   quantity   Decimal  @db.Decimal(10, 3)
   unitPrice  Decimal  @map("unit_price") @db.Decimal(10, 2)
   totalPrice Decimal  @map("total_price") @db.Decimal(10, 2)
+  /// подарок: товар списан со склада, но в сумму заказа не входит (total_price = 0)
+  isGift     Boolean  @default(false) @map("is_gift")
   notes      String?  @db.Text
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")

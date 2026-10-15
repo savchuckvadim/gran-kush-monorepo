@@ -28,6 +28,8 @@ export const ROUTES = {
     /** Список заказов */
     CRM_ORDERS: "/crm/order/list",
     CRM_ORDER_DETAILS: "/crm/order/details",
+    /** Новый заказ; `?memberId=` подставляет участника */
+    CRM_ORDER_NEW: "/crm/order/new",
     CRM_ATTENDANCE: "/crm/attendance",
     CRM_FINANCE: "/crm/finance",
     CRM_EMPLOYEES: "/crm/employees",

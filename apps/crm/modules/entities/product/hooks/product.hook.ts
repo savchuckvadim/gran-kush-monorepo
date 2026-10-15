@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { SchemaCreateProductDto, SchemaUpdateProductDto } from "@workspace/api-client/core";
 
@@ -23,10 +23,16 @@ const PRODUCT_KEYS = {
 
 // ─── Products ────────────────────────────────────────────────────────────────
 
-export function useProducts(filters?: ProductsFilter) {
+/** `keepPrevious` holds the last results on screen while a new search loads — for pickers. */
+export function useProducts(
+    filters?: ProductsFilter,
+    { enabled = true, keepPrevious = false } = {}
+) {
     return useQuery({
         queryKey: PRODUCT_KEYS.list(filters),
         queryFn: () => getProducts(filters),
+        enabled,
+        placeholderData: keepPrevious ? keepPreviousData : undefined,
     });
 }
 

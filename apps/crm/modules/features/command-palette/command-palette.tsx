@@ -18,7 +18,7 @@ import {
 } from "@workspace/ui";
 
 import { useCrmNavigation, usePortal } from "@/modules/processes";
-import { $api } from "@/modules/shared";
+import { $api, useDebouncedValue } from "@/modules/shared";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { type EntityRef, useOpenEntity } from "@/modules/shared/lib/entity-slider";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
@@ -30,15 +30,6 @@ const CommandPaletteContext = createContext<{ open: () => void }>({ open: () => 
 
 /** Открыть палитру из любой кнопки (поиск в шапке). */
 export const useCommandPalette = () => useContext(CommandPaletteContext);
-
-const useDebounced = (value: string, delay: number) => {
-    const [debounced, setDebounced] = useState(value);
-    useEffect(() => {
-        const timer = setTimeout(() => setDebounced(value), delay);
-        return () => clearTimeout(timer);
-    }, [value, delay]);
-    return debounced;
-};
 
 const matches = (text: string, query: string) =>
     text.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase());
@@ -76,7 +67,7 @@ function CommandPalette({ onClose }: { onClose: () => void }) {
     const { portalSlug } = usePortal();
     const navigation = useCrmNavigation();
     const [query, setQuery] = useState("");
-    const debounced = useDebounced(query.trim(), DEBOUNCE_MS);
+    const debounced = useDebouncedValue(query.trim(), DEBOUNCE_MS);
     const searchable = debounced.length >= MIN_QUERY;
 
     const results = useQuery({

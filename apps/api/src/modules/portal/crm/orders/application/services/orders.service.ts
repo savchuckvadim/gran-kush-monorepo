@@ -11,7 +11,13 @@ import { Prisma, StageSemantic } from "@prisma/client";
 
 import { isUniqueViolationOn } from "@common/prisma/unique-violation";
 import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
-import { CreateOrderDto, CreateOrderItemDto } from "@modules/portal/crm/orders/api/dto/order.dto";
+import { MembersService } from "@modules/portal/crm/members/application/services/members.service";
+import {
+    CreateOrderDto,
+    CreateOrderItemDto,
+    CrmCreateOrderDto,
+    CrmCreateOrderItemDto,
+} from "@modules/portal/crm/orders/api/dto/order.dto";
 import {
     Order,
     OrderStatus,
@@ -54,6 +60,10 @@ const PAYMENT_STATUS_TRANSITIONS: Record<PaymentStatus, PaymentStatus[]> = {
 const buildOrderNumberPrefix = (date: Date): string =>
     `ORD-${date.toISOString().slice(0, 10).replace(/-/g, "")}-`;
 
+/** Позиция нового заказа. Цену и подарок задаёт только сотрудник CRM — в DTO кабинета их нет */
+type NewOrderItem = CreateOrderItemDto &
+    Partial<Pick<CrmCreateOrderItemDto, "unitPrice" | "isGift">>;
+
 /** Позиция, проверенная по каталогу; имя — для понятной ошибки, если товар кончится */
 interface ResolvedOrderItem extends CreateOrderItemInput {
     name: string;
@@ -76,7 +86,8 @@ export class OrdersService {
 
     constructor(
         private readonly orderRepository: OrderRepository,
-        private readonly productsService: ProductsService
+        private readonly productsService: ProductsService,
+        private readonly membersService: MembersService
     ) {}
 
     // ═══════════════════════════════════════════════════════════════════════════
@@ -140,27 +151,93 @@ export class OrdersService {
      * - Списывает товар со склада
      */
     async createOrder(memberId: string, dto: CreateOrderDto, portalId: string): Promise<Order> {
+        return this.placeOrder(portalId, { memberId, items: dto.items, notes: dto.notes });
+    }
+
+    /**
+     * Заказ, который сотрудник CRM оформляет за участника: цену позиции можно поправить,
+     * позицию — отметить подарком, стадию — выбрать (право на выбор стадии проверяет
+     * контроллер: manager+). Сразу в стадию отмены заказ не создаётся — склад бы не сошёлся.
+     */
+    async createOrderByEmployee(
+        dto: CrmCreateOrderDto,
+        employeeId: string,
+        portalId: string
+    ): Promise<Order> {
+        const member = await this.membersService.findByIdForPortal(dto.memberId, portalId);
+        if (!member) {
+            throw new NotFoundException("Участник не найден");
+        }
+        if (!member.isActive) {
+            throw new BadRequestException("Участник не активен");
+        }
+
+        let stage: OrderStage | null = null;
+        if (dto.stageId) {
+            stage = await this.orderRepository.findStageInPortal(portalId, dto.stageId);
+            if (!stage) {
+                throw new BadRequestException("Стадия не из воронки заказов этого клуба");
+            }
+            if (isFailureStage(stage)) {
+                throw new BadRequestException("Нельзя создать заказ сразу в стадии отмены");
+            }
+        }
+
+        const order = await this.placeOrder(portalId, {
+            memberId: dto.memberId,
+            items: dto.items,
+            notes: dto.notes,
+            employeeId,
+            stageId: stage?.id,
+        });
+
+        // заказ, созданный сразу в стадии «выполнен» или «готов», получает её метку времени
+        const lifecycleField = stage ? lifecycleFieldFor(stage) : undefined;
+        if (!lifecycleField) return order;
+        const update: UpdateOrderInput = {};
+        update[lifecycleField] = new Date();
+        return this.orderRepository.update(order.id, update);
+    }
+
+    /**
+     * Общая часть оформления: проверить товары, посчитать суммы, создать заказ с номером и
+     * списать товар. Без `stageId` стадию — первую рабочую воронки по умолчанию — подставляет
+     * репозиторий.
+     */
+    private async placeOrder(
+        portalId: string,
+        input: {
+            memberId: string;
+            items: NewOrderItem[];
+            notes?: string;
+            employeeId?: string;
+            stageId?: string;
+        }
+    ): Promise<Order> {
+        const { memberId, employeeId } = input;
+
         // 1. Проверить товары и собрать цены
-        const resolvedItems = await this.resolveOrderItems(dto.items, portalId);
+        const resolvedItems = await this.resolveOrderItems(input.items, portalId);
 
         // 2. Рассчитать суммы
-        const subtotal = resolvedItems.reduce((sum, item) => sum + item.totalPrice, 0);
+        const subtotal = +resolvedItems.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2);
         const discount = 0; // Скидки пока не реализованы
         const total = subtotal - discount;
 
         // 3. Создать заказ с номером, уникальным в пределах портала, и списать товар — одной
-        //    транзакцией; стадия — первая рабочая стадия воронки по умолчанию (её подставляет
-        //    репозиторий)
+        //    транзакцией
         let order: Order;
         try {
             order = await this.createWithGeneratedOrderNumber(portalId, {
                 memberId,
+                employeeId,
                 paymentStatus: PaymentStatus.PENDING,
                 subtotal,
                 discount,
                 total,
-                notes: dto.notes,
+                notes: input.notes,
                 items: resolvedItems,
+                stageId: input.stageId,
             });
         } catch (error) {
             if (!(error instanceof InsufficientStockError)) throw error;
@@ -174,7 +251,8 @@ export class OrdersService {
 
         this.logger.log(
             `✅ Заказ ${order.orderNumber} создан для члена ${memberId}, ` +
-                `позиций: ${resolvedItems.length}, сумма: ${total}`
+                `позиций: ${resolvedItems.length}, сумма: ${total}` +
+                (employeeId ? ` (сотрудник: ${employeeId})` : "")
         );
 
         return order;
@@ -402,7 +480,7 @@ export class OrdersService {
      * Проверить товары, доступность и рассчитать цены.
      */
     private async resolveOrderItems(
-        items: CreateOrderItemDto[],
+        items: NewOrderItem[],
         portalId: string
     ): Promise<ResolvedOrderItem[]> {
         const resolved: ResolvedOrderItem[] = [];
@@ -426,8 +504,9 @@ export class OrdersService {
                 );
             }
 
-            const unitPrice = Number(product.price);
-            const totalPrice = +(unitPrice * item.quantity).toFixed(2);
+            const unitPrice = item.unitPrice ?? Number(product.price);
+            const isGift = item.isGift ?? false;
+            const totalPrice = isGift ? 0 : +(unitPrice * item.quantity).toFixed(2);
 
             resolved.push({
                 productId: item.productId,
@@ -435,6 +514,7 @@ export class OrdersService {
                 quantity: item.quantity,
                 unitPrice,
                 totalPrice,
+                isGift,
                 notes: item.notes,
             });
         }

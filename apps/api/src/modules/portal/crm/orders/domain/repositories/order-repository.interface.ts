@@ -34,6 +34,7 @@ export interface CreateOrderItemInput {
     quantity: number;
     unitPrice: number;
     totalPrice: number;
+    isGift?: boolean;
     notes?: string;
 }
 
@@ -41,6 +42,8 @@ export interface CreateOrderItemInput {
 
 export interface CreateOrderInput {
     memberId: string;
+    /** Сотрудник CRM, оформивший заказ; заказ из кабинета — без него */
+    employeeId?: string | null;
     orderNumber: string;
     paymentStatus: PaymentStatus;
     subtotal: number;

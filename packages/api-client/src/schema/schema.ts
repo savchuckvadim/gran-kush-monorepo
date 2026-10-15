@@ -928,6 +928,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/lk/auth/google/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Начать вход через Google (редирект на Google) */
+        get: operations["MemberGoogleAuth_start"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/auth/google/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Начать вход через Google (редирект на Google) */
+        get: operations["EmployeeGoogleAuth_start"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/crm/employees": {
         parameters: {
             query?: never;
@@ -1994,7 +2028,8 @@ export interface paths {
         /** Список заказов (с фильтрами и пагинацией; `stageId` — колонка канбана) */
         get: operations["CrmOrders_listOrders"];
         put?: never;
-        post?: never;
+        /** Создать заказ за участника. Любой сотрудник; цена и подарок — по позициям, стадию выбирает manager+. 400 — товар недоступен или кончился, стадия отмены */
+        post: operations["CrmOrders_createOrder"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4786,6 +4821,11 @@ export interface components {
              * @example 38.75
              */
             totalPrice: number;
+            /**
+             * @description Подарок: в сумму заказа не входит (totalPrice = 0)
+             * @example false
+             */
+            isGift: boolean;
             /** @example Подарочная упаковка */
             notes?: string | null;
             product: components["schemas"]["OrderItemProductDto"];
@@ -4841,6 +4881,46 @@ export interface components {
             items: components["schemas"]["OrderItemDto"][];
             /** @example 2026-03-16T14:30:00.000Z */
             updatedAt: string;
+        };
+        CrmCreateOrderItemDto: {
+            /**
+             * @description ID товара
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            productId: string;
+            /**
+             * @description Количество
+             * @example 2.5
+             */
+            quantity: number;
+            /** @example Подарочная упаковка */
+            notes?: string;
+            /**
+             * @description Цена за единицу, €; без неё — цена из каталога
+             * @example 12.5
+             */
+            unitPrice?: number;
+            /**
+             * @description Подарок: товар списывается со склада, но в сумму заказа не входит
+             * @example false
+             */
+            isGift?: boolean;
+        };
+        CrmCreateOrderDto: {
+            /**
+             * @description Участник клуба, на которого оформляется заказ
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            memberId: string;
+            /** @description Список позиций заказа (минимум 1) */
+            items: components["schemas"]["CrmCreateOrderItemDto"][];
+            /** @example Забирает вечером */
+            notes?: string;
+            /**
+             * @description Стадия воронки заказов (manager+); без неё — первая рабочая стадия воронки по умолчанию
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            stageId?: string;
         };
         MoveOrderStageDto: {
             /**
@@ -5641,6 +5721,8 @@ export type SchemaOrderItemMeasurementUnitDto = components['schemas']['OrderItem
 export type SchemaOrderItemProductDto = components['schemas']['OrderItemProductDto'];
 export type SchemaOrderItemDto = components['schemas']['OrderItemDto'];
 export type SchemaOrderDetailDto = components['schemas']['OrderDetailDto'];
+export type SchemaCrmCreateOrderItemDto = components['schemas']['CrmCreateOrderItemDto'];
+export type SchemaCrmCreateOrderDto = components['schemas']['CrmCreateOrderDto'];
 export type SchemaMoveOrderStageDto = components['schemas']['MoveOrderStageDto'];
 export type SchemaUpdateOrderStatusDto = components['schemas']['UpdateOrderStatusDto'];
 export type SchemaUpdatePaymentStatusDto = components['schemas']['UpdatePaymentStatusDto'];
@@ -7809,6 +7891,40 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
+            };
+        };
+    };
+    MemberGoogleAuth_start: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EmployeeGoogleAuth_start: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -11867,6 +11983,87 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmOrders_createOrder: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Ключ идемпотентности. Повтор с тем же ключом и тем же телом возвращает сохранённый ответ вместо повторного выполнения. Тот же ключ с другим телом → 422, ключ ещё в работе → 409. */
+                "idempotency-key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CrmCreateOrderDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetailDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

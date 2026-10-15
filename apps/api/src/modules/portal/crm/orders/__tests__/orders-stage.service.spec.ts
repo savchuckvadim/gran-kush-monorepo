@@ -3,6 +3,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { Prisma, StageSemantic } from "@prisma/client";
 
 import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
+import { MembersService } from "@modules/portal/crm/members/application/services/members.service";
 import { OrdersService } from "@modules/portal/crm/orders/application/services/orders.service";
 import {
     Order,
@@ -91,6 +92,7 @@ describe("OrdersService — стадии заказа", () => {
                 OrdersService,
                 { provide: OrderRepository, useValue: repository },
                 { provide: ProductsService, useValue: products },
+                { provide: MembersService, useValue: {} },
             ],
         }).compile();
         service = module.get(OrdersService);

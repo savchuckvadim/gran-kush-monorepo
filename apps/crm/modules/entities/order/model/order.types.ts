@@ -1,4 +1,5 @@
 import type {
+    SchemaCrmCreateOrderDto,
     SchemaOrderDetailDto,
     SchemaOrderListDto,
     SchemaOrderStageCategoryResponseDto,
@@ -11,6 +12,9 @@ export type OrderListItem = SchemaOrderListDto;
 export type OrderDetail = SchemaOrderDetailDto;
 export type OrderItem = OrderDetail["items"][number];
 export type OrderPage = SchemaPaginatedResponseOrderListDto;
+
+/** An order placed by an employee for a member: own price and gifts per line. */
+export type CreateOrderBody = SchemaCrmCreateOrderDto;
 
 /** The stage an order stands in; its name is already in the interface language. */
 export type OrderStage = SchemaOrderStageDto;

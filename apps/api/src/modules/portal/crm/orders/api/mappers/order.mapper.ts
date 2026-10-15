@@ -62,6 +62,7 @@ export function mapOrderToDetailDto(o: Order, locale: ContentLocale): OrderDetai
                 quantity: Number(item.quantity),
                 unitPrice: Number(item.unitPrice),
                 totalPrice: Number(item.totalPrice),
+                isGift: item.isGift,
                 notes: item.notes,
                 product: item.product ?? {
                     id: item.productId,

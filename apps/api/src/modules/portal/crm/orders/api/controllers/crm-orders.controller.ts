@@ -1,4 +1,14 @@
-import { Body, Controller, Get, NotFoundException, Param, Patch, Query } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    ForbiddenException,
+    Get,
+    NotFoundException,
+    Param,
+    Patch,
+    Post,
+    Query,
+} from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
@@ -6,13 +16,15 @@ import { ApiErrorResponse } from "@common/decorators/response/api-error-response
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { type ContentLocale, RequestLocale } from "@common/i18n";
+import { IdempotencyScope, Idempotent } from "@common/idempotency";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
-import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
+import { MANAGER_ROLES, RequireEmployeeJwt } from "@modules/portal/auth/employees";
 import { CurrentEmployee } from "@modules/portal/auth/employees/api/decorators/current-employee.decorator";
 import { RequireManager } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import {
+    CrmCreateOrderDto,
     MoveOrderStageDto,
     OrderDetailDto,
     OrderListDto,
@@ -95,6 +107,31 @@ export class CrmOrdersController {
         if (!order) {
             throw new NotFoundException("Заказ не найден");
         }
+        return mapOrderToDetailDto(order, locale);
+    }
+
+    // ─── Создать заказ за участника ──────────────────────────────────────────
+
+    @Post()
+    @Idempotent(IdempotencyScope.CRM_ORDER_CREATE)
+    @ApiOperation({
+        summary:
+            "Создать заказ за участника. Любой сотрудник; цена и подарок — по позициям, " +
+            "стадию выбирает manager+. 400 — товар недоступен или кончился, стадия отмены",
+    })
+    @ApiSuccessResponse(OrderDetailDto, { status: 201 })
+    @ApiErrorResponse([400, 401, 403, 404])
+    async createOrder(
+        @Body() dto: CrmCreateOrderDto,
+        @CurrentEmployee() employee: Employee,
+        @PortalId() portalId: string,
+        @RequestLocale() locale: ContentLocale
+    ): Promise<OrderDetailDto> {
+        // выбор стадии — то же право, что перевод стадии (PATCH :id/stage)
+        if (dto.stageId && !MANAGER_ROLES.includes(employee.role)) {
+            throw new ForbiddenException("Выбрать стадию нового заказа может manager и выше");
+        }
+        const order = await this.ordersService.createOrderByEmployee(dto, employee.id, portalId);
         return mapOrderToDetailDto(order, locale);
     }
 
