@@ -125,6 +125,27 @@
 
 Для локальной разработки — отдельный OAuth client с redirect URI `http://localhost:3000/crm/auth/google/callback` и `http://localhost:3000/lk/auth/google/callback`, значения в `apps/api/.env` (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `API_PUBLIC_URL=http://localhost:3000`).
 
+## Telegram-боты
+
+Ботов два, и путать их не надо:
+
+| Бот | Переменные | Для чего |
+|-----|-----------|----------|
+| Служебный | `TG_BOT_API_KEY`, `TG_BOT_CHAT_ID` | пишет в чат команды: регистрации клубов, алерты диска от `pafpaf-janitor` |
+| Клиентский | `TG_CLIENT_BOT_API_KEY` | вход участника через Telegram и сообщения в личку; chat id не нужен — бот пишет каждому сам |
+
+Токен обоих — у [@BotFather](https://t.me/BotFather): `/newbot` → имя → username → в ответе `HTTP API token`.
+
+### Как узнать `TG_BOT_CHAT_ID`
+
+1. Создать группу для логов, добавить служебного бота и дать ему права админа — иначе он не видит сообщения.
+2. Написать в группе любое сообщение, например `/start@имя_бота`.
+3. Открыть в браузере `https://api.telegram.org/bot<TG_BOT_API_KEY>/getUpdates` и найти `"chat":{"id":-100…}` — это и есть chat id. У групп он отрицательный, у супергрупп начинается с `-100`.
+
+Грабли: пустой `result` — у бота включён Group Privacy (@BotFather → Bot Settings → Group Privacy → Turn off) либо после последнего `getUpdates` не было новых сообщений. Ошибка 409 — на боте висит webhook: снять `/deleteWebhook`, взять id, вернуть webhook. Если в группе включены темы, для конкретной темы понадобится ещё `message_thread_id` из того же ответа.
+
+Значения — в Dokploy → Environment → Deploy. Локально те же ключи лежат в `apps/api/.env`; с ними сообщения уходят в настоящий чат.
+
 ## Уборка диска
 
 Диск сервера общий с диванами. 12.10.2026 он заполнился до 100 %: каждый деплой скачивает свежие образы, а прежние остаются лежать без тега. Все Postgres на сервере ушли в перезапуски, API и панель перестали отвечать.

@@ -281,7 +281,9 @@ CD подключает оверлей автоматически, если на
 | Redis | `REDIS_URL` | да | очереди BullMQ (`mail`, `member-files`, `portal-events`), том `redis_data` |
 | AWS S3 | `AWS_REGION`, `AWS_BUCKET_NAME`, `AWS_ACCESS_KEY`, `AWS_SECRET_KEY` | да, если нужны файлы | все загрузки идут только в S3; без настройки API отвечает `502 S3 storage is not configured` |
 | SMTP | `MAIL_HOST`, `MAIL_PORT`, `MAIL_LOGIN`, `MAIL_PASSWORD` | да | письма подтверждения и приглашений, через очередь `mail` |
-| Telegram | `TG_BOT_API_KEY`, `TG_BOT_CHAT_ID` | нет | служебные уведомления |
+| Telegram (служебный) | `TG_BOT_API_KEY`, `TG_BOT_CHAT_ID` | нет | регистрации клубов и алерты диска в чат команды |
+| Telegram (клиентский) | `TG_CLIENT_BOT_API_KEY` | нет | вход участника через Telegram и сообщения в личку; chat id не нужен |
+| Google OAuth | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | нет | «Войти через Google» в CRM и кабинете; пусто = кнопка отвечает «не настроено» |
 | ghcr.io | PAT с `read:packages` на сервере | да при деплое образами | пуш из Actions выполняет `GITHUB_TOKEN` |
 
 Локального дискового хранилища у приложения нет — контейнеры остаются stateless,
