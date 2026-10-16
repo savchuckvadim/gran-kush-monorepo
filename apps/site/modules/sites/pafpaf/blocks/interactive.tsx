@@ -14,7 +14,7 @@ interface FlaskProps {
     maxDraw: number;
 }
 
-// Monthly limit as a flask: today's pick-up raises the liquid, going over turns it red.
+// Plan seats as a flask: new members raise the liquid, outgrowing the plan turns it red.
 export const LimitFlask = ({ used, limit, maxDraw }: FlaskProps) => {
     const t = useTranslations();
     const locale = useLocale();
@@ -50,7 +50,7 @@ export const LimitFlask = ({ used, limit, maxDraw }: FlaskProps) => {
                 <label htmlFor="limit-draw">
                     <span>{t("flask.today")}</span>
                     <output htmlFor="limit-draw">
-                        {number.format(draw)} {t("units.g")}
+                        {number.format(draw)} {t("flask.unit")}
                     </output>
                 </label>
                 <input
@@ -184,17 +184,17 @@ export const Metaballs = ({ clubs, merged }: MetaballsProps) => {
     );
 };
 
-type Role = "disp" | "manager" | "admin";
+type Role = "desk" | "manager" | "admin";
 
-const RANK: Record<Role, number> = { disp: 0, manager: 1, admin: 2 };
+const RANK: Record<Role, number> = { desk: 0, manager: 1, admin: 2 };
 
 // A member record behind frosted glass that melts according to the staff role.
 export const RolesRecord = () => {
     const t = useTranslations();
-    const [role, setRole] = useState<Role>("disp");
+    const [role, setRole] = useState<Role>("desk");
     const rows: { label: string; value: string; min: Role }[] = [
-        { label: t("record.number"), value: "0147", min: "disp" },
-        { label: t("record.limit"), value: `41 / 60 ${t("units.g")}`, min: "disp" },
+        { label: t("record.number"), value: "0147", min: "desk" },
+        { label: t("record.visits"), value: "12", min: "desk" },
         { label: t("record.fee"), value: t("record.feeValue"), min: "manager" },
         { label: t("record.sponsor"), value: t("record.sponsorNo", { n: "0098" }), min: "manager" },
         { label: t("record.phone"), value: "+34 612 48 90 17", min: "manager" },
@@ -205,7 +205,7 @@ export const RolesRecord = () => {
     return (
         <>
             <div className="roles glass" role="group" aria-label={t("a11y.roles")}>
-                {(["disp", "manager", "admin"] as const).map((r) => (
+                {(["desk", "manager", "admin"] as const).map((r) => (
                     <button
                         key={r}
                         type="button"

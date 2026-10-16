@@ -974,7 +974,7 @@ main,
     color: var(--fg-2);
 }
 
-/* ---------- liquid gauge (monthly limit) ---------- */
+/* ---------- liquid gauge (plan seats) ---------- */
 
 .gauge {
     position: relative;

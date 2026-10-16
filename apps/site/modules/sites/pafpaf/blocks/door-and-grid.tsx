@@ -33,7 +33,7 @@ export const QrDoor = async ({ block }: { block: QrDoorBlock }) => {
                                 <div className="chips">
                                     <span className="g">{t("fee")}</span>
                                     <span>{t("sponsor")}</span>
-                                    <span>{t("limit")}</span>
+                                    <span>{t("signed")}</span>
                                 </div>
                             </div>
                             <div className="scr scr--2">

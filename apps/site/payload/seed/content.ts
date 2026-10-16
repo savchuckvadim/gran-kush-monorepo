@@ -28,42 +28,54 @@ const FINAL = (locale: Locale): Block => ({
 
 const FEATURES: { id: string; icon: NonNullable<Extract<Block, { blockType: "featureGrid" }>["items"]>[number]["icon"]; title: L; text: L }[] = [
     {
-        id: "f-members",
+        id: "f-signature",
         icon: "users",
-        title: { es: "Socios con aval", ru: "Участники с поручителем", en: "Members with a sponsor" },
+        title: { es: "Firma electrónica", ru: "Электронная подпись", en: "Electronic signature" },
         text: {
-            es: "Alta en tres minutos, con firma en la pantalla.",
-            ru: "Регистрация за три минуты, с подписью на экране.",
-            en: "Sign-up in three minutes, signed on screen.",
+            es: "Alta y consentimiento firmados en la pantalla, en tres minutos.",
+            ru: "Анкета и согласие подписываются на экране за три минуты.",
+            en: "Sign-up and consent signed on screen in three minutes.",
+        },
+    },
+    {
+        id: "f-passport",
+        icon: "shield",
+        title: { es: "Pasaporte único", ru: "Единый паспорт", en: "One passport" },
+        text: {
+            es: "El socio sube sus documentos una vez y decide qué club los ve.",
+            ru: "Участник загружает документы один раз и сам решает, какой клуб их видит.",
+            en: "Members upload their documents once and choose which club sees them.",
         },
     },
     {
         id: "f-entry",
         icon: "scan",
         title: { es: "Entrada por QR", ru: "Вход по QR", en: "QR entry" },
-        text: { es: "Ves quién está dentro, en directo.", ru: "Видно, кто внутри, в реальном времени.", en: "See who is inside, live." },
-    },
-    {
-        id: "f-limit",
-        icon: "gauge",
-        title: { es: "Límite mensual", ru: "Месячный лимит", en: "Monthly limit" },
-        text: { es: "La CRM no deja pasarse.", ru: "CRM не даст его превысить.", en: "The CRM won't let anyone go over." },
-    },
-    {
-        id: "f-stock",
-        icon: "package",
-        title: { es: "Stock al gramo", ru: "Склад до грамма", en: "Stock by the gram" },
         text: {
-            es: "Cada retirada descuenta sola.",
-            ru: "Каждая выдача списывается сама.",
-            en: "Every pick-up is deducted on its own.",
+            es: "Un escaneo y la visita queda anotada.",
+            ru: "Один скан — и визит отмечен.",
+            en: "One scan and the visit is recorded.",
         },
     },
     {
-        id: "f-cash",
-        icon: "wallet",
-        title: { es: "Caja que cuadra", ru: "Касса сходится", en: "Cash that balances" },
-        text: { es: "El turno se cierra en un toque.", ru: "Смена закрывается в одно касание.", en: "Close the shift in one tap." },
+        id: "f-attendance",
+        icon: "gauge",
+        title: { es: "Asistencia", ru: "Посещаемость", en: "Attendance" },
+        text: {
+            es: "Quién está dentro, en directo; las visitas olvidadas se cierran solas.",
+            ru: "Кто в клубе — в реальном времени; забытые визиты закрываются сами.",
+            en: "Who is inside, live; forgotten visits close by themselves.",
+        },
+    },
+    {
+        id: "f-reports",
+        icon: "layers",
+        title: { es: "Informes", ru: "Отчётность", en: "Reports" },
+        text: {
+            es: "Socios, visitas y caja, por día y por mes.",
+            ru: "Участники, визиты и касса — по дням и месяцам.",
+            en: "Members, visits and cash, by day and by month.",
+        },
     },
     {
         id: "f-member-zone",
@@ -85,9 +97,9 @@ export const homeLayout = (locale: Locale): Block[] => [
         title: pick({ es: "Fluido\ncomo el humo.", ru: "Плавно,\nкак дым.", en: "Smooth\nas smoke." }, locale),
         text: pick(
             {
-                es: "Socios, entrada, stock y caja en una sola pantalla. Sin colas, sin carpetas, sin fricción.",
-                ru: "Участники, вход, склад и касса — на одном экране. Без очередей, папок и заминок.",
-                en: "Members, entry, stock and cash on one screen. No queues, no folders, no friction.",
+                es: "Socios, firmas, entrada e informes en una sola pantalla. Sin colas, sin carpetas, sin fricción.",
+                ru: "Участники, подписи, вход и отчёты — на одном экране. Без очередей, папок и заминок.",
+                en: "Members, signatures, entry and reports on one screen. No queues, no folders, no friction.",
             },
             locale,
         ),
@@ -107,9 +119,9 @@ export const homeLayout = (locale: Locale): Block[] => [
         title: pick({ es: "Un QR.\nUn segundo.", ru: "Один QR.\nОдна секунда.", en: "One QR.\nOne second." }, locale),
         text: pick(
             {
-                es: "El socio enseña su QR y la CRM comprueba cuota, aval y límite antes de que guarde el móvil.",
-                ru: "Участник показывает QR, и CRM проверяет взнос, поручителя и лимит быстрее, чем он уберёт телефон.",
-                en: "The member shows their QR and the CRM checks fee, sponsor and limit before the phone is back in the pocket.",
+                es: "El socio enseña su QR y la CRM comprueba cuota, aval y estado antes de que guarde el móvil.",
+                ru: "Участник показывает QR, и CRM проверяет взнос, поручителя и статус быстрее, чем он уберёт телефон.",
+                en: "The member shows their QR and the CRM checks fee, sponsor and status before the phone is back in the pocket.",
             },
             locale,
         ),
@@ -133,22 +145,22 @@ export const homeLayout = (locale: Locale): Block[] => [
     {
         id: "limit-flask",
         blockType: "limitFlask",
-        eyebrow: pick({ es: "Límite mensual", ru: "Месячный лимит", en: "Monthly limit" }, locale),
+        eyebrow: pick({ es: "Plazas del plan", ru: "Места в тарифе", en: "Plan seats" }, locale),
         title: pick(
-            { es: "Hasta donde\ndiga el club.", ru: "Ровно до лимита,\nкоторый задал клуб.", en: "Up to the limit\nyour club sets." },
+            { es: "Crece sin\ncambiar de CRM.", ru: "Растите,\nне меняя CRM.", en: "Grow without\nchanging CRM." },
             locale,
         ),
         text: pick(
             {
-                es: "Mueve el control: la CRM suma la retirada al mes del socio y la frena si se pasa del límite.",
-                ru: "Подвиньте ползунок: CRM прибавит выдачу к месяцу участника и остановит её, если лимит превышен.",
-                en: "Move the slider: the CRM adds the pick-up to the member's month and stops it if it goes over the limit.",
+                es: "Mueve el control: suma socios nuevos y mira cuándo toca el plan siguiente. Tus datos se quedan donde están.",
+                ru: "Подвиньте ползунок: добавьте новых участников и посмотрите, когда пора на следующий тариф. Данные остаются на месте.",
+                en: "Move the slider: add new members and see when the next plan is due. Your data stays where it is.",
             },
             locale,
         ),
-        used: 41,
-        limit: 60,
-        maxDraw: 30,
+        used: 262,
+        limit: 300,
+        maxDraw: 60,
     },
     {
         id: "clubs",
@@ -319,9 +331,9 @@ export const PAGES: { slug: string; title: L; seoTitle: L; seoDescription: L; la
             en: "PafPaf — the CRM for social clubs and associations",
         },
         seoDescription: {
-            es: "Socios con aval y firma digital, entrada por QR, límite mensual, stock al gramo y caja. Hecho en Torrevieja.",
-            ru: "Участники с поручителем и цифровой подписью, вход по QR, месячный лимит, склад до грамма и касса. Сделано в Торревьехе.",
-            en: "Members with a sponsor and digital signature, QR entry, monthly limit, stock by the gram and cash. Made in Torrevieja.",
+            es: "Socios con firma electrónica, pasaporte único, entrada por QR, asistencia e informes. Hecho en Torrevieja.",
+            ru: "Участники с электронной подписью, единый паспорт, вход по QR, посещаемость и отчётность. Сделано в Торревьехе.",
+            en: "Members with electronic signature, one passport, QR entry, attendance and reports. Made in Torrevieja.",
         },
         layout: homeLayout,
     },
