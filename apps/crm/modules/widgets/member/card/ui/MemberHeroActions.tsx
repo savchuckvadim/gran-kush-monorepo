@@ -11,9 +11,15 @@ import { type CrmMemberDetails, useResendMemberConsent } from "@/modules/entitie
 import { MemberProfileEditModal, NewOrderButton } from "@/modules/features";
 import { notifyApiError } from "@/modules/shared/lib/notify-api-error";
 
+import { MemberPresenceButton } from "./MemberPresenceButton";
 import { MemberQrDialog } from "./MemberQrDialog";
 
-export function MemberHeroActions({ member }: { member: CrmMemberDetails }) {
+interface MemberHeroActionsProps {
+    member: CrmMemberDetails;
+    inClubNow: boolean;
+}
+
+export function MemberHeroActions({ member, inClubNow }: MemberHeroActionsProps) {
     const t = useTranslations("crm.members");
     const resend = useResendMemberConsent(member.id);
 
@@ -35,6 +41,7 @@ export function MemberHeroActions({ member }: { member: CrmMemberDetails }) {
                     {resend.isPending ? t("consent.resending") : t("consent.resend")}
                 </Button>
             )}
+            {member.isActive && <MemberPresenceButton memberId={member.id} inClubNow={inClubNow} />}
             {member.isActive && <NewOrderButton memberId={member.id} size="sm" variant="outline" />}
             <MemberQrDialog memberId={member.id} />
             <MemberProfileEditModal member={member} />

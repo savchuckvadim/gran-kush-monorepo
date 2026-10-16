@@ -173,20 +173,23 @@
                 }
             },
             "qrCode": {
-                "title": "QR Code",
-                "loading": "Loading QR code...",
-                "error": "Error",
-                "notFound": "QR code not found. Generate a new QR code for the member.",
-                "generate": "Generate QR Code",
-                "generating": "Generating...",
-                "regenerate": "Regenerate",
-                "regenerating": "Regenerating...",
-                "status": "Status",
-                "active": "Active",
-                "expired": "Expired",
-                "expiresAt": "Expires at",
-                "createdAt": "Created at",
-                "note": "QR code is used for member entry to the club. When regenerated, the old QR code will stop working."
+                "title": "Entry QR code",
+                "loading": "Loading the QR code…",
+                "notFound": "No code yet. The member's cabinet issues it by itself; issue it here if it needs to be printed.",
+                "generate": "Issue a QR code",
+                "generating": "Issuing…",
+                "validUntil": "Valid until {date}",
+                "expired": "The code has expired — reissue it",
+                "print": "Print",
+                "reissue": "Reissue",
+                "reissueTitle": "Reissue the QR code?",
+                "reissueDescription": "The previous code — on the member's phone and on paper — stops being accepted right away.",
+                "reissued": "QR code reissued",
+                "revoke": "Revoke",
+                "revokeTitle": "Revoke the QR code?",
+                "revokeDescription": "The previous code stops being accepted. The cabinet issues a new one when the member opens it.",
+                "revoked": "QR code revoked",
+                "cancel": "Cancel"
             },
             "create": {
                 "button": "New member",
@@ -289,6 +292,13 @@
                     "personalPlaceholder": "Club default",
                     "save": "Save",
                     "useClubDefault": "Use club default"
+                },
+                "presence": {
+                    "checkIn": "Check in",
+                    "checkOut": "Check out",
+                    "checkedIn": "Checked in",
+                    "checkedOut": "Checked out",
+                    "error": "Could not record the visit"
                 }
             },
             "signatureClear": "Clear",
@@ -1215,6 +1225,13 @@
             },
             "save": "Save",
             "saved": "Presence rules saved"
+        },
+        "qrPrint": {
+            "number": "No. {number}",
+            "validUntil": "Valid until {date}",
+            "hint": "Show the code at the club entrance. Lost it? Ask for a reissue: the old one stops working.",
+            "noCode": "The member has no valid code. Issue one on the member's card.",
+            "print": "Print"
         }
     }
 }

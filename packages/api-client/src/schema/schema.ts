@@ -2072,13 +2072,16 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Получить QR-код участника */
+        /**
+         * Получить QR-код участника
+         * @description С кодом для изображения: сотрудник печатает его участнику без телефона. Отметить участника сотрудник может и вручную, поэтому код не даёт ему новых прав.
+         */
         get: operations["CrmQrCodes_getByMemberId"];
         put?: never;
         post?: never;
         /**
          * Отозвать QR-код участника
-         * @description Удаляет QR-код участника. После этого он не сможет входить по QR.
+         * @description Удаляет QR-код участника: прежний код (в телефоне, на распечатке) больше не принимается. Кабинет выдаст участнику новый, когда он его откроет.
          */
         delete: operations["CrmQrCodes_revokeQrCode"];
         options?: never;
@@ -5152,31 +5155,6 @@ export interface components {
              */
             qrCodeId?: string;
         };
-        QrCodeDto: {
-            /** @example 550e8400-e29b-41d4-a716-446655440000 */
-            id: string;
-            /** @example 550e8400-e29b-41d4-a716-446655440000 */
-            memberId: string;
-            /**
-             * @description Истёк ли QR-код
-             * @example false
-             */
-            isExpired: boolean;
-            /** @example 2026-06-16T00:00:00.000Z */
-            expiresAt: string;
-            /** @example 2026-03-16T14:30:00.000Z */
-            createdAt: string;
-            /** @example 2026-03-16T14:30:00.000Z */
-            updatedAt: string;
-            member?: components["schemas"]["QrCodeMemberDto"];
-        };
-        RegenerateQrCodeDto: {
-            /**
-             * @description ID члена клуба
-             * @example 550e8400-e29b-41d4-a716-446655440000
-             */
-            memberId: string;
-        };
         QrCodeWithPayloadDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
             id: string;
@@ -5199,6 +5177,13 @@ export interface components {
              * @example a1b2c3d4e5f6...
              */
             encryptedCode: string;
+        };
+        RegenerateQrCodeDto: {
+            /**
+             * @description ID члена клуба
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            memberId: string;
         };
         QrCheckInDto: {
             /**
@@ -6615,9 +6600,8 @@ export type SchemaCabinetProductDto = components['schemas']['CabinetProductDto']
 export type SchemaScanQrCodeDto = components['schemas']['ScanQrCodeDto'];
 export type SchemaQrCodeMemberDto = components['schemas']['QrCodeMemberDto'];
 export type SchemaQrCodeScanResultDto = components['schemas']['QrCodeScanResultDto'];
-export type SchemaQrCodeDto = components['schemas']['QrCodeDto'];
-export type SchemaRegenerateQrCodeDto = components['schemas']['RegenerateQrCodeDto'];
 export type SchemaQrCodeWithPayloadDto = components['schemas']['QrCodeWithPayloadDto'];
+export type SchemaRegenerateQrCodeDto = components['schemas']['RegenerateQrCodeDto'];
 export type SchemaQrCheckInDto = components['schemas']['QrCheckInDto'];
 export type SchemaPresenceMemberDto = components['schemas']['PresenceMemberDto'];
 export type SchemaPresenceEmployeeDto = components['schemas']['PresenceEmployeeDto'];
@@ -13190,7 +13174,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["QrCodeDto"];
+                    "application/json": components["schemas"]["QrCodeWithPayloadDto"];
                 };
             };
             /** @description Unauthorized */
@@ -13281,7 +13265,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["QrCodeDto"];
+                    "application/json": components["schemas"]["QrCodeWithPayloadDto"];
                 };
             };
             /** @description Bad Request */

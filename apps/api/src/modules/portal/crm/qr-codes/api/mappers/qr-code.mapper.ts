@@ -1,9 +1,7 @@
 import { QrCodeDto, QrCodeWithPayloadDto } from "@modules/portal/crm/qr-codes/api/dto/qr-code.dto";
 import { QrCode } from "@modules/portal/crm/qr-codes/domain/entity/qr-code.entity";
 
-/**
- * Маппинг QrCode entity → QrCodeDto (без encryptedCode — для CRM)
- */
+/** QrCode → QrCodeDto: сведения о коде без самого кода (ответы сканера и списков). */
 export function mapQrCodeToDto(qr: QrCode): QrCodeDto {
     return {
         id: qr.id,
@@ -24,9 +22,7 @@ export function mapQrCodeToDto(qr: QrCode): QrCodeDto {
     };
 }
 
-/**
- * Маппинг QrCode entity → QrCodeWithPayloadDto (с encryptedCode — для кабинета)
- */
+/** QrCode → QrCodeWithPayloadDto: с кодом для изображения (кабинет — свой, CRM — для печати). */
 export function mapQrCodeToPayloadDto(qr: QrCode): QrCodeWithPayloadDto {
     return {
         ...mapQrCodeToDto(qr),

@@ -20,6 +20,8 @@ export const ROUTES = {
     /** Префикс карточки клиента: `${ROUTES.CRM_MEMBER_DETAILS}/${id}` */
     CRM_MEMBER_DETAILS: "/crm/member/details",
     CRM_MEMBER_NEW: "/crm/member/new",
+    /** Лист с QR участника для печати, вне оболочки CRM: `${ROUTES.PRINT_MEMBER_QR}/${memberId}` */
+    PRINT_MEMBER_QR: "/print/member-qr",
     CRM_PRODUCT_BASE: "/crm/product",
     /** Список товаров */
     CRM_PRODUCTS: "/crm/product/list",

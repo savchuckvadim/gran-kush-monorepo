@@ -94,7 +94,7 @@ export function MemberHero({ member, inClubNow }: MemberHeroProps) {
                     </div>
                 </div>
 
-                <MemberHeroActions member={member} />
+                <MemberHeroActions member={member} inClubNow={inClubNow} />
             </div>
         </section>
     );

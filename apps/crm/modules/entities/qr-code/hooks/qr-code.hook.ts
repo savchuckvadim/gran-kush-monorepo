@@ -2,66 +2,30 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import type { SchemaQrCodeDto, SchemaQrCodeScanResultDto } from "@workspace/api-client/core";
+import { getMemberQrCode, reissueMemberQrCode, revokeMemberQrCode } from "../api/qr-code.api";
 
-import {
-    generateOrRegenerateQrCode,
-    getQrCodeByMemberId,
-    revokeQrCode,
-    scanQrCode,
-} from "../api/qr-code.api";
+const memberQrKey = (memberId: string) => ["qr-code", memberId] as const;
 
-/**
- * Получить QR-код участника
- */
-export function useQrCode(memberId: string | null) {
+export function useMemberQrCode(memberId: string) {
     return useQuery({
-        queryKey: ["qr-code", memberId],
-        queryFn: () => {
-            if (!memberId) {
-                throw new Error("Member ID is required");
-            }
-            return getQrCodeByMemberId(memberId);
-        },
-        enabled: !!memberId,
+        queryKey: memberQrKey(memberId),
+        queryFn: () => getMemberQrCode(memberId),
     });
 }
 
-/**
- * Перегенерировать QR-код участника
- */
-export function useRegenerateQrCode() {
+/** Ответ — уже новый код: кладём его в кеш, без повторного запроса. */
+export function useReissueMemberQrCode(memberId: string) {
     const queryClient = useQueryClient();
-
     return useMutation({
-        mutationFn: (memberId: string) => generateOrRegenerateQrCode(memberId),
-        onSuccess: (data, memberId) => {
-            // Инвалидируем кеш QR-кода
-            queryClient.invalidateQueries({ queryKey: ["qr-code", memberId] });
-        },
+        mutationFn: () => reissueMemberQrCode(memberId),
+        onSuccess: (qr) => queryClient.setQueryData(memberQrKey(memberId), qr),
     });
 }
 
-/**
- * Отозвать QR-код участника
- */
-export function useRevokeQrCode() {
+export function useRevokeMemberQrCode(memberId: string) {
     const queryClient = useQueryClient();
-
     return useMutation({
-        mutationFn: (memberId: string) => revokeQrCode(memberId),
-        onSuccess: (_, memberId) => {
-            // Инвалидируем кеш QR-кода
-            queryClient.invalidateQueries({ queryKey: ["qr-code", memberId] });
-        },
-    });
-}
-
-/**
- * Сканировать QR-код (валидация)
- */
-export function useScanQrCode() {
-    return useMutation({
-        mutationFn: (encryptedCode: string) => scanQrCode(encryptedCode),
+        mutationFn: () => revokeMemberQrCode(memberId),
+        onSuccess: () => queryClient.setQueryData(memberQrKey(memberId), null),
     });
 }

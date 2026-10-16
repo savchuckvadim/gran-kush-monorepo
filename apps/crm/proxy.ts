@@ -128,11 +128,11 @@ export default function proxy(request: NextRequest) {
     const hasAuthCookie =
         request.cookies.has(CRM_ACCESS_COOKIE) || request.cookies.has(CRM_REFRESH_COOKIE);
 
-    // [locale]/[portal]/crm/* and [locale]/[portal]/scan — protected
+    // [locale]/[portal]/crm/*, /scan and /print (sheets to print) — protected
     if (
         second &&
         second !== "auth" &&
-        (third === "crm" || third === "scan" || third === "member")
+        (third === "crm" || third === "scan" || third === "member" || third === "print")
     ) {
         if (!hasAuthCookie) {
             const loginUrl = new URL(`/${locale}/${second}/auth/login`, request.url);

@@ -1,136 +1,87 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
-import { AlertCircle, Loader2, QrCode, RefreshCw } from "lucide-react";
+import { AlertCircle, Loader2, QrCode } from "lucide-react";
 
-import { Alert, AlertDescription, Button, Card } from "@workspace/ui";
+import { getApiErrorMessage } from "@workspace/api-client/core";
+import { Alert, AlertDescription, Button, Card, ScannableQrCode } from "@workspace/ui";
 
-import { useQrCode, useRegenerateQrCode } from "@/modules/entities/qr-code";
+import { useMemberQrCode, useReissueMemberQrCode } from "@/modules/entities/qr-code";
+import { notifyApiError } from "@/modules/shared/lib/notify-api-error";
 
-interface MemberQrCodeCardProps {
-    memberId: string;
-}
+import { MemberQrActions } from "./MemberQrActions";
 
-export function MemberQrCodeCard({ memberId }: MemberQrCodeCardProps) {
+const formatDate = (iso: string, locale: string) =>
+    new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(iso));
+
+/**
+ * Код участника для входа: сам код (сотрудник может показать или распечатать его участнику без
+ * телефона), срок, печать, перевыпуск и отзыв. Кода нет — кабинет выдаст его сам, а здесь его можно
+ * выпустить для распечатки.
+ */
+export function MemberQrCodeCard({ memberId }: { memberId: string }) {
     const t = useTranslations("crm.members.qrCode");
-    const { data: qrCode, isLoading, error } = useQrCode(memberId);
-    const regenerateMutation = useRegenerateQrCode();
-
-    if (isLoading) {
-        return (
-            <Card className="p-4">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="text-sm">{t("loading")}</span>
-                </div>
-            </Card>
-        );
-    }
-
-    if (error) {
-        return (
-            <Card className="p-4">
-                <Alert variant="destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                        {t("error")}: {error.message}
-                    </AlertDescription>
-                </Alert>
-            </Card>
-        );
-    }
-
-    if (!qrCode) {
-        return (
-            <Card className="p-4 ">
-                <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                        <QrCode className="h-5 w-5 text-muted-foreground" />
-                        <h3 className="text-base font-medium">{t("title")}</h3>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{t("notFound")}</p>
-                    <Button
-                        onClick={() => regenerateMutation.mutate(memberId)}
-                        disabled={regenerateMutation.isPending}
-                        size="sm"
-                    >
-                        {regenerateMutation.isPending ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                {t("generating")}
-                            </>
-                        ) : (
-                            <>
-                                <QrCode className="mr-2 h-4 w-4" />
-                                {t("generate")}
-                            </>
-                        )}
-                    </Button>
-                </div>
-            </Card>
-        );
-    }
-
-    const isExpired = qrCode.isExpired;
-    const expiresAt = new Date(qrCode.expiresAt);
+    const locale = useLocale();
+    const qr = useMemberQrCode(memberId);
+    const issue = useReissueMemberQrCode(memberId);
 
     return (
-        <Card className="p-4 h-full">
-            <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <QrCode className="h-5 w-5 text-muted-foreground" />
-                        <h3 className="text-base font-medium">{t("title")}</h3>
-                    </div>
+        <Card className="h-full space-y-4 p-4">
+            <div className="flex items-center gap-2">
+                <QrCode className="size-5 text-muted-foreground" aria-hidden="true" />
+                <h3 className="text-base font-medium">{t("title")}</h3>
+            </div>
+
+            {qr.isLoading && (
+                <div className="flex justify-center py-8">
+                    <Loader2
+                        className="size-6 animate-spin text-muted-foreground"
+                        aria-hidden="true"
+                    />
+                </div>
+            )}
+
+            {qr.error && (
+                <Alert variant="destructive">
+                    <AlertCircle aria-hidden="true" />
+                    <AlertDescription>{getApiErrorMessage(qr.error)}</AlertDescription>
+                </Alert>
+            )}
+
+            {qr.data === null && (
+                <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">{t("notFound")}</p>
                     <Button
-                        variant="outline"
                         size="sm"
-                        onClick={() => regenerateMutation.mutate(memberId)}
-                        disabled={regenerateMutation.isPending}
+                        disabled={issue.isPending}
+                        onClick={() =>
+                            issue.mutate(undefined, { onError: (error) => notifyApiError(error) })
+                        }
                     >
-                        {regenerateMutation.isPending ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                {t("regenerating")}
-                            </>
-                        ) : (
-                            <>
-                                <RefreshCw className="mr-2 h-4 w-4" />
-                                {t("regenerate")}
-                            </>
-                        )}
+                        <QrCode aria-hidden="true" />
+                        {issue.isPending ? t("generating") : t("generate")}
                     </Button>
                 </div>
+            )}
 
-                {isExpired && (
-                    <Alert variant="destructive">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertDescription>{t("expired")}</AlertDescription>
-                    </Alert>
-                )}
-
-                <div className="space-y-2 text-sm">
-                    <div className="flex justify-between gap-4">
-                        <span className="text-muted-foreground">{t("status")}</span>
-                        <span className={isExpired ? "text-destructive" : "text-green-600"}>
-                            {isExpired ? t("expired") : t("active")}
-                        </span>
-                    </div>
-                    <div className="flex justify-between gap-4">
-                        <span className="text-muted-foreground">{t("expiresAt")}</span>
-                        <span>{expiresAt.toLocaleDateString()}</span>
-                    </div>
-                    <div className="flex justify-between gap-4">
-                        <span className="text-muted-foreground">{t("createdAt")}</span>
-                        <span>{new Date(qrCode.createdAt).toLocaleDateString()}</span>
-                    </div>
+            {qr.data && (
+                <div className="space-y-3">
+                    <ScannableQrCode value={qr.data.encryptedCode} size={200} />
+                    <p
+                        className={
+                            qr.data.isExpired
+                                ? "text-center text-sm text-destructive"
+                                : "text-center text-xs text-muted-foreground"
+                        }
+                    >
+                        {qr.data.isExpired
+                            ? t("expired")
+                            : t("validUntil", { date: formatDate(qr.data.expiresAt, locale) })}
+                    </p>
+                    <MemberQrActions memberId={memberId} />
                 </div>
-
-                <div className="rounded-md border bg-muted/30 p-4">
-                    <p className="text-xs text-muted-foreground">{t("note")}</p>
-                </div>
-            </div>
+            )}
         </Card>
     );
 }

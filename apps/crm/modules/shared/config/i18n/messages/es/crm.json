@@ -173,20 +173,23 @@
                 }
             },
             "qrCode": {
-                "title": "Código QR",
-                "loading": "Cargando código QR...",
-                "error": "Error",
-                "notFound": "Código QR no encontrado. Genere un nuevo código QR para el miembro.",
-                "generate": "Generar código QR",
-                "generating": "Generando...",
-                "regenerate": "Regenerar",
-                "regenerating": "Regenerando...",
-                "status": "Estado",
-                "active": "Activo",
-                "expired": "Expirado",
-                "expiresAt": "Expira en",
-                "createdAt": "Creado en",
-                "note": "El código QR se utiliza para la entrada del miembro al club. Cuando se regenera, el código QR antiguo dejará de funcionar."
+                "title": "Código QR de entrada",
+                "loading": "Cargando el código QR…",
+                "notFound": "Aún no hay código. El área del socio lo emite sola; emítelo aquí si hay que imprimirlo.",
+                "generate": "Emitir código QR",
+                "generating": "Emitiendo…",
+                "validUntil": "Válido hasta el {date}",
+                "expired": "El código ha caducado — vuelve a emitirlo",
+                "print": "Imprimir",
+                "reissue": "Volver a emitir",
+                "reissueTitle": "¿Volver a emitir el código QR?",
+                "reissueDescription": "El código anterior — en el móvil del socio y en papel — deja de aceptarse al instante.",
+                "reissued": "Código QR emitido de nuevo",
+                "revoke": "Revocar",
+                "revokeTitle": "¿Revocar el código QR?",
+                "revokeDescription": "El código anterior deja de aceptarse. El área del socio emitirá uno nuevo cuando la abra.",
+                "revoked": "Código QR revocado",
+                "cancel": "Cancelar"
             },
             "create": {
                 "button": "Nuevo socio",
@@ -289,6 +292,13 @@
                     "personalPlaceholder": "Como el club",
                     "save": "Guardar",
                     "useClubDefault": "Como el club"
+                },
+                "presence": {
+                    "checkIn": "Marcar entrada",
+                    "checkOut": "Marcar salida",
+                    "checkedIn": "Entrada marcada",
+                    "checkedOut": "Salida marcada",
+                    "error": "No se pudo marcar"
                 }
             },
             "signatureClear": "Borrar",
@@ -1215,6 +1225,13 @@
             },
             "save": "Guardar",
             "saved": "Reglas de presencia guardadas"
+        },
+        "qrPrint": {
+            "number": "N.º {number}",
+            "validUntil": "Válido hasta el {date}",
+            "hint": "Muestra el código en la entrada del club. ¿Lo perdiste? Pide otro: el anterior dejará de funcionar.",
+            "noCode": "El socio no tiene un código válido. Emítelo en la ficha del socio.",
+            "print": "Imprimir"
         }
     }
 }

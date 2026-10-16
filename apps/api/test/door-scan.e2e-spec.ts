@@ -29,9 +29,21 @@ describe("Door scan (e2e)", () => {
     let prisma: PrismaService;
     const clubs = [`door-a-${suffix}`, `door-b-${suffix}`];
     const owners = new Map<string, string>();
+    /** memberId участника в каждом клубе */
+    const memberIds = new Map<string, string>();
     let memberCookies: string;
 
     const crm = (slug: string) => ({
+        get: (url: string) =>
+            request(app.getHttpServer())
+                .get(url)
+                .set("Cookie", owners.get(slug) ?? "")
+                .set("X-Portal-Slug", slug),
+        delete: (url: string) =>
+            request(app.getHttpServer())
+                .delete(url)
+                .set("Cookie", owners.get(slug) ?? "")
+                .set("X-Portal-Slug", slug),
         post: (url: string, idempotencyKey?: string) => {
             const req = request(app.getHttpServer())
                 .post(url)
@@ -108,11 +120,12 @@ describe("Door scan (e2e)", () => {
             .generateTokens({ id: user.id, email }, `device-${suffix}`);
         memberCookies = `member_access_token=${tokens.accessToken}`;
         for (const slug of clubs) {
-            await request(app.getHttpServer())
+            const joined = await request(app.getHttpServer())
                 .post(`/cabinet/portals/${slug}/join`)
                 .set("Cookie", memberCookies)
                 .send({ fields: { first_name: "Door" } })
                 .expect(201);
+            memberIds.set(slug, joined.body.memberId as string);
         }
     });
 
@@ -180,6 +193,30 @@ describe("Door scan (e2e)", () => {
         const refused = await scan(club, old, "entry");
         expect(refused.status).toBe(400);
         expect(refused.body.errors).toEqual(["revoked"]);
+    });
+
+    it("staff sees the code to print it; revoking kills it and the cabinet issues a new one", async () => {
+        const [club] = clubs as [string, string];
+        const memberId = memberIds.get(club) ?? "";
+        const current = await qrOf(club);
+
+        const staffView = await crm(club).get(`/crm/qr-codes/member/${memberId}`);
+        expect(staffView.status).toBe(200);
+        expect(staffView.body.encryptedCode).toBe(current);
+
+        await crm(club).delete(`/crm/qr-codes/member/${memberId}`).expect(200);
+        const revoked = await crm(club)
+            .post("/crm/presence/qr-preview")
+            .send({ encryptedCode: current });
+        expect(revoked.body).toMatchObject({ valid: false, errorCode: "revoked" });
+        expect((await crm(club).get(`/crm/qr-codes/member/${memberId}`)).status).toBe(404);
+
+        const fresh = await qrOf(club);
+        expect(fresh).not.toBe(current);
+        const preview = await crm(club)
+            .post("/crm/presence/qr-preview")
+            .send({ encryptedCode: fresh });
+        expect(preview.body.valid).toBe(true);
     });
 
     it("the QR of one club does not open the door of another", async () => {

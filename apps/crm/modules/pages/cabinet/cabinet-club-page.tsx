@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Loader2, QrCode, RefreshCw } from "lucide-react";
 
 import { ApiClientError, getApiErrorMessage } from "@workspace/api-client/core";
-import { Button, Card, ConfirmDialog, QrCodeDisplay } from "@workspace/ui";
+import { Button, Card, ConfirmDialog, ScannableQrCode } from "@workspace/ui";
 
 import {
     useMyPresenceHistory,
@@ -70,16 +70,7 @@ export function CabinetClubPage({ slug }: { slug: string }) {
                         )}
                         {qr.data && (
                             <div className="space-y-3">
-                                <div className="mx-auto w-fit rounded-xl bg-white p-3">
-                                    <QrCodeDisplay
-                                        value={qr.data.encryptedCode}
-                                        size={256}
-                                        level="M"
-                                        bgColor="#ffffff"
-                                        fgColor="#000000"
-                                        includeMargin={false}
-                                    />
-                                </div>
+                                <ScannableQrCode value={qr.data.encryptedCode} />
                                 <p className="text-center text-xs text-muted-foreground">
                                     {t("validUntil", {
                                         date: formatDateTime(qr.data.expiresAt, locale),

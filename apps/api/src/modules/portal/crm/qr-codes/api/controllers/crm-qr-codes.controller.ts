@@ -6,12 +6,12 @@ import { ApiErrorResponse } from "@common/decorators/response/api-error-response
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
 import {
-    QrCodeDto,
     QrCodeScanResultDto,
+    QrCodeWithPayloadDto,
     RegenerateQrCodeDto,
     ScanQrCodeDto,
 } from "@modules/portal/crm/qr-codes/api/dto/qr-code.dto";
-import { mapQrCodeToDto } from "@modules/portal/crm/qr-codes/api/mappers";
+import { mapQrCodeToPayloadDto } from "@modules/portal/crm/qr-codes/api/mappers";
 import { QrCodesService } from "@modules/portal/crm/qr-codes/application/services/qr-codes.service";
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -46,18 +46,23 @@ export class CrmQrCodesController {
     // ─── Получить QR-код участника ───────────────────────────────────────────
 
     @Get("member/:memberId")
-    @ApiOperation({ summary: "Получить QR-код участника" })
-    @ApiSuccessResponse(QrCodeDto)
+    @ApiOperation({
+        summary: "Получить QR-код участника",
+        description:
+            "С кодом для изображения: сотрудник печатает его участнику без телефона. Отметить " +
+            "участника сотрудник может и вручную, поэтому код не даёт ему новых прав.",
+    })
+    @ApiSuccessResponse(QrCodeWithPayloadDto)
     @ApiErrorResponse([401, 403, 404])
     async getByMemberId(
         @Param("memberId") memberId: string,
         @PortalId() portalId: string
-    ): Promise<QrCodeDto> {
+    ): Promise<QrCodeWithPayloadDto> {
         const qr = await this.qrCodesService.findByMemberId(memberId, portalId);
         if (!qr) {
             throw new NotFoundException("QR-код для этого участника не найден");
         }
-        return mapQrCodeToDto(qr);
+        return mapQrCodeToPayloadDto(qr);
     }
 
     // ─── Сгенерировать / перегенерировать QR-код ─────────────────────────────
@@ -69,14 +74,14 @@ export class CrmQrCodesController {
             "Если у участника уже есть QR-код, он будет перегенерирован. " +
             "Если нет — создан новый.",
     })
-    @ApiSuccessResponse(QrCodeDto, { status: 201 })
+    @ApiSuccessResponse(QrCodeWithPayloadDto, { status: 201 })
     @ApiErrorResponse([400, 401, 403, 404])
     async generateQrCode(
         @Body() dto: RegenerateQrCodeDto,
         @PortalId() portalId: string
-    ): Promise<QrCodeDto> {
+    ): Promise<QrCodeWithPayloadDto> {
         const qr = await this.qrCodesService.generateOrRegenerate(dto.memberId, portalId);
-        return mapQrCodeToDto(qr);
+        return mapQrCodeToPayloadDto(qr);
     }
 
     // ─── Отозвать QR-код ─────────────────────────────────────────────────────
@@ -84,7 +89,9 @@ export class CrmQrCodesController {
     @Delete("member/:memberId")
     @ApiOperation({
         summary: "Отозвать QR-код участника",
-        description: "Удаляет QR-код участника. После этого он не сможет входить по QR.",
+        description:
+            "Удаляет QR-код участника: прежний код (в телефоне, на распечатке) больше не принимается. " +
+            "Кабинет выдаст участнику новый, когда он его откроет.",
     })
     @ApiErrorResponse([401, 403, 404])
     async revokeQrCode(
