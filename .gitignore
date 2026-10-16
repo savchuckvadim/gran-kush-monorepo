@@ -53,3 +53,7 @@ documentation/philosophy/
 # TLS certificates for the nginx container — never commit these
 infra/docker/nginx/certs/*
 !infra/docker/nginx/certs/.gitkeep
+
+# Claude Code: personal permissions and output style, the Chrome extension writes domains here
+.claude/settings.json
+.claude/settings.local.json
