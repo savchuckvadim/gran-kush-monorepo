@@ -14,11 +14,13 @@ export const cabinetKeys = {
     club: (slug: string) => ["cabinet", "club", slug] as const,
 } as const;
 
-export function useCabinetMe() {
+/** `enabled: false` — сессию не спрашивать вовсе (общий планшет-киоск не пользуется чужой сессией). */
+export function useCabinetMe(options: { enabled?: boolean } = {}) {
     return useQuery({
         queryKey: cabinetKeys.me,
         queryFn: getCabinetMe,
         retry: false,
         staleTime: 30_000,
+        enabled: options.enabled ?? true,
     });
 }

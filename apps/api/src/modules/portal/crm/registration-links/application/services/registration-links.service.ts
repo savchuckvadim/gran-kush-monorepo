@@ -1,46 +1,27 @@
-import {
-    BadRequestException,
-    ConflictException,
-    ForbiddenException,
-    Injectable,
-    Logger,
-    NotFoundException,
-} from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 
-import {
-    FormPurpose,
-    MemberJoinSource,
-    Prisma,
-    RegistrationLink,
-    RegistrationLinkKind,
-} from "@prisma/client";
-import { AccountProvisioningService } from "@users/application/services/account-provisioning.service";
+import { FormPurpose, Prisma, RegistrationLink, RegistrationLinkKind } from "@prisma/client";
 import { randomBytes } from "crypto";
 
 import { ContentLocale } from "@common/i18n";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import { PrismaService } from "@common/prisma/prisma.service";
-import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
 import { FormSchemaService } from "@modules/portal/crm/entity-fields/application/services/form-schema.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
-import { JoinPortalService } from "@modules/portal/crm/members/application/services/join-portal.service";
 import { PORTAL_SUMMARY_SELECT } from "@modules/portal/crm/portals/infrastructure/prisma-includes/portal-summary.select";
 
 import {
     CreateRegistrationLinkDto,
-    JoinViaLinkDto,
-    JoinViaLinkResponseDto,
-    RegisterViaLinkDto,
-    RegisterViaLinkResponseDto,
-    RegistrationLinkPrefillDto,
+    PublicRegistrationLinkInfoDto,
     RegistrationLinkStatus,
     UpdateRegistrationLinkDto,
 } from "../../api/dto/registration-link.dto";
+import { normalizeLinkPrefill } from "../../domain/registration-link-prefill";
 
 import { RegistrationLinkPresenceService } from "./registration-link-presence.service";
 
-type LinkWithPortal = RegistrationLink & {
+export type LinkWithPortal = RegistrationLink & {
     portal: { id: string; name: string; displayName: string };
 };
 
@@ -55,17 +36,13 @@ export type RegistrationLinkListItem = Prisma.RegistrationLinkGetPayload<{
 /** A personal link is for one person: it lives a week and works once. */
 const PERSONAL_LINK_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
+/** Ссылки-формы клуба: выдача, список, отключение и отзыв, чтение по токену. Вступление — `RegistrationLinkJoinService`. */
 @Injectable()
 export class RegistrationLinksService {
-    private readonly logger = new Logger(RegistrationLinksService.name);
-
     constructor(
         private readonly prisma: PrismaService,
-        private readonly accountProvisioning: AccountProvisioningService,
-        private readonly joinPortalService: JoinPortalService,
         private readonly formSchemaService: FormSchemaService,
-        private readonly presence: RegistrationLinkPresenceService,
-        private readonly emailVerification: EmailVerificationService
+        private readonly presence: RegistrationLinkPresenceService
     ) {}
 
     /** Status is derived, not stored: the same fields decide whether the public page opens. */
@@ -100,7 +77,7 @@ export class RegistrationLinksService {
 
         const kind = dto.kind ?? RegistrationLinkKind.public_link;
         const personal = kind === RegistrationLinkKind.personal;
-        const prefill = this.normalizePrefill(dto.prefill);
+        const prefill = normalizeLinkPrefill(dto.prefill);
 
         return this.prisma.registrationLink.create({
             data: {
@@ -208,12 +185,7 @@ export class RegistrationLinksService {
     async getPublicInfo(
         token: string,
         locale: ContentLocale
-    ): Promise<{
-        portalSlug: string;
-        portalDisplayName: string;
-        schema: unknown;
-        prefill: RegistrationLinkPrefillDto | null;
-    }> {
+    ): Promise<PublicRegistrationLinkInfoDto> {
         const link = await this.getActiveByToken(token);
         const schema = await this.formSchemaService.getFormSchema(
             link.portalId,
@@ -224,174 +196,10 @@ export class RegistrationLinksService {
         return {
             portalSlug: link.portal.name,
             portalDisplayName: link.portal.displayName,
+            kind: link.kind,
             schema,
-            prefill: this.normalizePrefill(link.prefillJson),
+            prefill: normalizeLinkPrefill(link.prefillJson),
         };
-    }
-
-    async registerViaLink(
-        token: string,
-        dto: RegisterViaLinkDto,
-        locale: ContentLocale
-    ): Promise<RegisterViaLinkResponseDto> {
-        const link = await this.getActiveByToken(token);
-
-        // Слот занимается ДО регистрации, одним атомарным UPDATE. Раньше лимит
-        // проверялся чтением в getActiveByToken, а инкремент шёл в самом конце:
-        // два параллельных запроса по ссылке с maxUses=1 оба проходили проверку
-        // и оба заводили участника.
-        await this.consumeUse(link.id);
-
-        let account: Awaited<ReturnType<AccountProvisioningService["ensureUserWithPassword"]>>;
-        let memberId: string;
-        try {
-            account = await this.accountProvisioning.ensureUserWithPassword(
-                dto.email,
-                dto.password,
-                { emailVerified: false, verifyPassword: true }
-            );
-            const { user, claimByEmail } = account;
-
-            const existing = await this.prisma.member.findUnique({
-                where: { userId_portalId: { userId: user.id, portalId: link.portalId } },
-                select: { id: true },
-            });
-            if (existing) {
-                throw new ConflictException("User is already a member of this portal");
-            }
-
-            const member = await this.joinPortalService.joinPortal({
-                userId: user.id,
-                portalId: link.portalId,
-                fields: dto.fields ?? {},
-                joinSource:
-                    link.kind === RegistrationLinkKind.kiosk
-                        ? MemberJoinSource.kiosk
-                        : MemberJoinSource.registration_link,
-                registrationLinkId: link.id,
-                // Пароль к аккаунту без пароля по ссылке не ставится, и его владелец ещё не
-                // доказан — клуб не получает документы, которые туда загрузил другой клуб
-                // Показ — только по явному выбору и только если владелец аккаунта доказан паролем;
-                // у аккаунта из клейма он не доказан
-                share: claimByEmail
-                    ? undefined
-                    : { documentIds: dto.shareDocumentIds, signature: dto.shareSignature },
-                // Членство из клейма ждёт, пока владелец адреса задаст пароль по ссылке
-                // из письма (подтверждается в resetPassword); в CRM — бейдж «ждёт согласия»
-                consent: claimByEmail
-                    ? { token: randomBytes(32).toString("hex"), requestedAt: new Date() }
-                    : undefined,
-            });
-            memberId = member.id;
-        } catch (error) {
-            await this.releaseUse(link.id);
-            throw error;
-        }
-
-        // Участник уже в клубе: сбой очереди писем не должен откатывать регистрацию
-        const { user, created, claimed, claimByEmail } = account;
-        const mail = { app: "member" as const, language: locale };
-        try {
-            if (claimByEmail) {
-                await this.emailVerification.sendAccountSetup(user.email, {
-                    ...mail,
-                    portalName: link.portal.displayName,
-                });
-            } else if (created) {
-                await this.emailVerification.sendVerificationEmailToUserId(user.id, mail);
-            }
-        } catch (error: unknown) {
-            this.logger.error(
-                `Registration email for member ${memberId} was not queued`,
-                error instanceof Error ? error.stack : String(error)
-            );
-        }
-
-        return {
-            userId: user.id,
-            memberId,
-            portalSlug: link.portal.name,
-            accountCreated: created || claimed || claimByEmail,
-        };
-    }
-
-    /**
-     * Вступление в клуб по ссылке из уже открытой сессии: аккаунт один, новый не заводится и
-     * пароль не нужен — владелец доказан самой сессией, поэтому документы можно показать клубу
-     * сразу, но только те, что он выбрал. Слот ссылки занимается так же, как при регистрации.
-     */
-    async joinViaLinkAsUser(
-        token: string,
-        userId: string,
-        dto: JoinViaLinkDto
-    ): Promise<JoinViaLinkResponseDto> {
-        const link = await this.getActiveByToken(token);
-
-        const user = await this.prisma.user.findUnique({
-            where: { id: userId },
-            select: { email: true },
-        });
-        if (!user) {
-            throw new NotFoundException("Account not found");
-        }
-
-        // Личная ссылка выписана на один адрес: чужой аккаунт не должен тратить её
-        const expectedEmail =
-            link.kind === RegistrationLinkKind.personal
-                ? this.normalizePrefill(link.prefillJson)?.email
-                : undefined;
-        if (expectedEmail && expectedEmail !== user.email.trim().toLowerCase()) {
-            throw new ForbiddenException("This link was issued for another email address");
-        }
-
-        // Уже участник — отказ до траты слота: иначе одноразовая ссылка сгорела бы зря
-        const existing = await this.prisma.member.findUnique({
-            where: { userId_portalId: { userId, portalId: link.portalId } },
-            select: { id: true },
-        });
-        if (existing) {
-            throw new ConflictException("User is already a member of this portal");
-        }
-
-        await this.consumeUse(link.id);
-        try {
-            const member = await this.joinPortalService.joinPortal({
-                userId,
-                portalId: link.portalId,
-                fields: dto.fields ?? {},
-                joinSource:
-                    link.kind === RegistrationLinkKind.kiosk
-                        ? MemberJoinSource.kiosk
-                        : MemberJoinSource.registration_link,
-                registrationLinkId: link.id,
-                share: { documentIds: dto.shareDocumentIds, signature: dto.shareSignature },
-            });
-            return { memberId: member.id, portalSlug: link.portal.name };
-        } catch (error) {
-            await this.releaseUse(link.id);
-            throw error;
-        }
-    }
-
-    /** Only the two prefill keys survive: nothing else from a request body reaches the stored JSON. */
-    private normalizePrefill(
-        raw: RegistrationLinkPrefillDto | Prisma.JsonValue | null | undefined
-    ): RegistrationLinkPrefillDto | null {
-        if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
-        const source = raw as { email?: unknown; fields?: unknown };
-        const prefill: RegistrationLinkPrefillDto = {};
-        if (typeof source.email === "string" && source.email.trim()) {
-            prefill.email = source.email.trim().toLowerCase();
-        }
-        if (source.fields && typeof source.fields === "object" && !Array.isArray(source.fields)) {
-            const fields = Object.fromEntries(
-                Object.entries(source.fields as Record<string, unknown>).filter(
-                    ([, value]) => value !== undefined && value !== null && value !== ""
-                )
-            );
-            if (Object.keys(fields).length > 0) prefill.fields = fields;
-        }
-        return prefill.email || prefill.fields ? prefill : null;
     }
 
     /**
@@ -436,42 +244,5 @@ export class RegistrationLinksService {
               AND "uses_count" >= "max_uses"
         `;
         return rows.map((row) => row.id);
-    }
-
-    /**
-     * Атомарно занять одно использование ссылки.
-     *
-     * Условия лимита, активности и срока проверяются внутри самого UPDATE,
-     * а `max_uses` сравнивается с колонкой, а не с прочитанным ранее значением,
-     * поэтому изменение лимита в параллель не создаёт окна для перерасхода.
-     */
-    private async consumeUse(linkId: string): Promise<void> {
-        const updated = await this.prisma.$executeRaw`
-            UPDATE "registration_links"
-            SET "uses_count" = "uses_count" + 1
-            WHERE "id" = ${linkId}
-              AND "is_active" = true
-              AND "revoked_at" IS NULL
-              AND ("expires_at" IS NULL OR "expires_at" > NOW())
-              AND ("max_uses" IS NULL OR "uses_count" < "max_uses")
-        `;
-
-        if (updated === 0) {
-            throw new NotFoundException("Registration link usage limit reached");
-        }
-    }
-
-    /** Вернуть слот, если регистрация не доехала до конца. */
-    private async releaseUse(linkId: string): Promise<void> {
-        try {
-            await this.prisma.$executeRaw`
-                UPDATE "registration_links"
-                SET "uses_count" = "uses_count" - 1
-                WHERE "id" = ${linkId} AND "uses_count" > 0
-            `;
-        } catch {
-            // Не маскируем исходную ошибку регистрации: в худшем случае слот
-            // останется занятым, что безопаснее перерасхода лимита.
-        }
     }
 }

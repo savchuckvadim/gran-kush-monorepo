@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 import { getApiErrorMessage, type SchemaMemberMeResponseDto } from "@workspace/api-client/core";
 import {
@@ -17,6 +17,7 @@ import { Button, Card, Switch } from "@workspace/ui";
 
 import { useAccountDocuments } from "@/modules/entities/membership";
 import { buildCabinetUrl, useJoinViaLinkAsMember } from "@/modules/entities/registration-links";
+import { StatusCard } from "@/modules/shared/ui/StatusCard";
 
 interface SignedInJoinProps {
     token: string;
@@ -77,18 +78,13 @@ export function SignedInJoin({
     if (join.isSuccess) {
         const cabinet = buildCabinetUrl(`/${locale}/${join.data.portalSlug}`);
         return (
-            <div className="flex min-h-[50vh] items-center justify-center p-4">
-                <Card className="w-full max-w-md p-6 text-center">
-                    <CheckCircle2 className="mx-auto size-10 text-success" aria-hidden="true" />
-                    <h1 className="mt-3 text-xl font-semibold">{t("done.title")}</h1>
-                    <p className="mt-2 text-sm text-muted-foreground">{t("done.text", { club })}</p>
-                    {cabinet && (
-                        <Button asChild className="mt-4 w-full">
-                            <a href={cabinet}>{t("done.open")}</a>
-                        </Button>
-                    )}
-                </Card>
-            </div>
+            <StatusCard tone="success" title={t("done.title")} text={t("done.text", { club })}>
+                {cabinet && (
+                    <Button asChild className="w-full">
+                        <a href={cabinet}>{t("done.open")}</a>
+                    </Button>
+                )}
+            </StatusCard>
         );
     }
 

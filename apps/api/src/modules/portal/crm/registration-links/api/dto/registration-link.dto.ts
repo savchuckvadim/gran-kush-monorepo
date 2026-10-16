@@ -203,6 +203,14 @@ export class PublicRegistrationLinkInfoDto {
     @ApiProperty({ type: String, example: "Green Club" })
     portalDisplayName: string;
 
+    @ApiProperty({
+        enum: RegistrationLinkKind,
+        enumName: "RegistrationLinkKind",
+        description:
+            "kiosk — общий планшет клуба: без входа сессией и Google, форма сбрасывается после «Готово»",
+    })
+    kind: RegistrationLinkKind;
+
     @ApiProperty({ type: Object, description: "Схема формы public_registration портала" })
     schema: unknown;
 

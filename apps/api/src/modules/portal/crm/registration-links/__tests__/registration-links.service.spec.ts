@@ -4,6 +4,7 @@ import { MemberJoinSource, RegistrationLinkKind } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 
+import { RegistrationLinkJoinService } from "../application/services/registration-link-join.service";
 import { RegistrationLinksService } from "../application/services/registration-links.service";
 
 const LINK_ID = "link-1";
@@ -22,10 +23,11 @@ const link = (over: Record<string, unknown> = {}) => ({
     ...over,
 });
 
-describe("RegistrationLinksService — лимит использований", () => {
+describe("RegistrationLinkJoinService.registerViaLink — лимит использований", () => {
     const build = (opts: { consumed?: number; joinFails?: Error; claimByEmail?: boolean } = {}) => {
         const prisma = {
             registrationLink: { findUnique: jest.fn().mockResolvedValue(link()) },
+            user: { findUnique: jest.fn().mockResolvedValue(null) },
             member: { findUnique: jest.fn().mockResolvedValue(null) },
             $executeRaw: jest.fn().mockResolvedValue(opts.consumed ?? 1),
         };
@@ -49,12 +51,16 @@ describe("RegistrationLinksService — лимит использований", (
         const formSchemaService = { getFormSchema: jest.fn() };
         const presence = { countOnlineMany: jest.fn().mockResolvedValue(new Map()) };
 
-        const service = new RegistrationLinksService(
+        const links = new RegistrationLinksService(
             prisma as unknown as PrismaService,
+            formSchemaService as never,
+            presence as never
+        );
+        const service = new RegistrationLinkJoinService(
+            prisma as unknown as PrismaService,
+            links,
             accountProvisioning as never,
             joinPortalService as never,
-            formSchemaService as never,
-            presence as never,
             emailVerification as never
         );
 
@@ -115,6 +121,20 @@ describe("RegistrationLinksService — лимит использований", (
         );
     });
 
+    it("киоск: существующий аккаунт не входит на общем планшете — 409, слот не тратится", async () => {
+        const { service, prisma, joinPortalService } = build();
+        prisma.registrationLink.findUnique.mockResolvedValue(
+            link({ kind: RegistrationLinkKind.kiosk })
+        );
+        prisma.user.findUnique.mockResolvedValue({ id: "u-0" });
+
+        await expect(service.registerViaLink("tok", dto as never, "es")).rejects.toBeInstanceOf(
+            ConflictException
+        );
+        expect(prisma.$executeRaw).not.toHaveBeenCalled();
+        expect(joinPortalService.joinPortal).not.toHaveBeenCalled();
+    });
+
     it("новый аккаунт: выбор документов передаётся как есть, письмо подтверждения", async () => {
         const { service, joinPortalService, emailVerification } = build();
 
@@ -157,7 +177,7 @@ describe("RegistrationLinksService — лимит использований", (
     });
 });
 
-describe("RegistrationLinksService.joinViaLinkAsUser — вступление под своей сессией", () => {
+describe("RegistrationLinkJoinService.joinViaLinkAsUser — вступление под своей сессией", () => {
     const build = (
         opts: {
             link?: Record<string, unknown>;
@@ -180,12 +200,16 @@ describe("RegistrationLinksService.joinViaLinkAsUser — вступление п
                 ? jest.fn().mockRejectedValue(opts.joinFails)
                 : jest.fn().mockResolvedValue({ id: "member-1" }),
         };
-        const service = new RegistrationLinksService(
+        const links = new RegistrationLinksService(
             prisma as unknown as PrismaService,
             {} as never,
+            {} as never
+        );
+        const service = new RegistrationLinkJoinService(
+            prisma as unknown as PrismaService,
+            links,
+            {} as never,
             joinPortalService as never,
-            {} as never,
-            {} as never,
             {} as never
         );
         return { service, prisma, joinPortalService };
@@ -213,16 +237,16 @@ describe("RegistrationLinksService.joinViaLinkAsUser — вступление п
         expect(joinPortalService.joinPortal.mock.calls[0][0]).not.toHaveProperty("consent");
     });
 
-    it("kiosk-ссылка размечает источник вступления", async () => {
-        const { service, joinPortalService } = build({
+    it("киоск не принимает открытую сессию — 403, слот не тратится", async () => {
+        const { service, prisma, joinPortalService } = build({
             link: { kind: RegistrationLinkKind.kiosk },
         });
 
-        await service.joinViaLinkAsUser("tok", "u-1", {});
-
-        expect(joinPortalService.joinPortal).toHaveBeenCalledWith(
-            expect.objectContaining({ joinSource: MemberJoinSource.kiosk })
+        await expect(service.joinViaLinkAsUser("tok", "u-1", {})).rejects.toBeInstanceOf(
+            ForbiddenException
         );
+        expect(prisma.$executeRaw).not.toHaveBeenCalled();
+        expect(joinPortalService.joinPortal).not.toHaveBeenCalled();
     });
 
     it("уже участник: отказ до траты слота", async () => {
@@ -313,10 +337,7 @@ describe("RegistrationLinksService.create — личная ссылка", () => 
         const service = new RegistrationLinksService(
             prisma as unknown as PrismaService,
             {} as never,
-            {} as never,
-            {} as never,
-            presence as never,
-            {} as never
+            presence as never
         );
         return { service, prisma };
     };

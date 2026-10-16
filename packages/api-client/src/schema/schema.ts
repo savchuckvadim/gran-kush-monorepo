@@ -5672,11 +5672,18 @@ export interface components {
             /** @example 100 */
             maxUses?: number | null;
         };
+        /**
+         * @description kiosk — общий планшет клуба: без входа сессией и Google, форма сбрасывается после «Готово»
+         * @enum {string}
+         */
+        RegistrationLinkKind: "public_link" | "kiosk" | "personal";
         PublicRegistrationLinkInfoDto: {
             /** @example green-club */
             portalSlug: string;
             /** @example Green Club */
             portalDisplayName: string;
+            /** @description kiosk — общий планшет клуба: без входа сессией и Google, форма сбрасывается после «Готово» */
+            kind: components["schemas"]["RegistrationLinkKind"];
             /** @description Схема формы public_registration портала */
             schema: Record<string, never>;
             /** @description Значения, с которыми открывается анкета (личная ссылка) */
@@ -6147,6 +6154,7 @@ export type SchemaRegistrationLinkCreatedByDto = components['schemas']['Registra
 export type SchemaRegistrationLinkDto = components['schemas']['RegistrationLinkDto'];
 export type SchemaRegistrationLinkListResponseDto = components['schemas']['RegistrationLinkListResponseDto'];
 export type SchemaUpdateRegistrationLinkDto = components['schemas']['UpdateRegistrationLinkDto'];
+export type SchemaRegistrationLinkKind = components['schemas']['RegistrationLinkKind'];
 export type SchemaPublicRegistrationLinkInfoDto = components['schemas']['PublicRegistrationLinkInfoDto'];
 export type SchemaRegisterViaLinkDto = components['schemas']['RegisterViaLinkDto'];
 export type SchemaRegisterViaLinkResponseDto = components['schemas']['RegisterViaLinkResponseDto'];

@@ -65,6 +65,7 @@ export async function revokeRegistrationLink(id: string): Promise<RegistrationLi
 export type PublicRegistrationLinkInfo = {
     portalSlug: string;
     portalDisplayName: string;
+    kind: SchemaPublicRegistrationLinkInfoDto["kind"];
     schema: { fields: FormSchemaField[] };
     prefill: RegistrationLinkPrefill | null;
 };

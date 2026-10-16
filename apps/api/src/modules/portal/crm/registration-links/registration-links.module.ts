@@ -11,6 +11,7 @@ import { MembersModule } from "@modules/portal/crm/members/members.module";
 import { CabinetRegistrationLinksController } from "./api/controllers/cabinet-registration-links.controller";
 import { CrmRegistrationLinksController } from "./api/controllers/crm-registration-links.controller";
 import { PublicRegistrationLinksController } from "./api/controllers/public-registration-links.controller";
+import { RegistrationLinkJoinService } from "./application/services/registration-link-join.service";
 import { RegistrationLinkPresenceService } from "./application/services/registration-link-presence.service";
 import { RegistrationLinksService } from "./application/services/registration-links.service";
 
@@ -28,7 +29,11 @@ import { RegistrationLinksService } from "./application/services/registration-li
         PublicRegistrationLinksController,
         CabinetRegistrationLinksController,
     ],
-    providers: [RegistrationLinksService, RegistrationLinkPresenceService],
+    providers: [
+        RegistrationLinksService,
+        RegistrationLinkJoinService,
+        RegistrationLinkPresenceService,
+    ],
     exports: [RegistrationLinksService],
 })
 export class RegistrationLinksModule {}

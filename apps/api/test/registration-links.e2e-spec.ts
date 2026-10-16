@@ -220,6 +220,33 @@ describe("Registration links (e2e)", () => {
             expect(await prisma.member.count({ where: { userId } })).toBe(1);
         });
 
+        it("a kiosk link does not accept a signed-in session", async () => {
+            const { userId, cookies: session } = await accountWithSession("join-kiosk");
+            const link = await createLink({ name: "Планшет у входа", kind: "kiosk" });
+
+            expect((await join(link.token, session)).status).toBe(403);
+            expect(await prisma.member.count({ where: { userId } })).toBe(0);
+        });
+
+        it("a kiosk refuses an existing account without spending the slot; the public info says kiosk", async () => {
+            await accountWithSession("kiosk-existing");
+            const link = await createLink({ name: "Планшет", kind: "kiosk", maxUses: 1 });
+
+            const info = await request(app.getHttpServer()).get(`/public/reg-links/${link.token}`);
+            expect(info.body.kind).toBe("kiosk");
+
+            const res = await request(app.getHttpServer())
+                .post(`/public/reg-links/${link.token}/register`)
+                .send({
+                    email: `kiosk-existing-${suffix}@test.local`,
+                    password: PASSWORD,
+                    fields: { first_name: "Kiosk" },
+                });
+            expect(res.status).toBe(409);
+            const row = await prisma.registrationLink.findUnique({ where: { id: link.id } });
+            expect(row?.usesCount).toBe(0);
+        });
+
         it("rejects documents that are not the account's own", async () => {
             const { userId, cookies: session } = await accountWithSession("join-d");
             const link = await createLink({ name: "Чужой документ", kind: "public_link" });

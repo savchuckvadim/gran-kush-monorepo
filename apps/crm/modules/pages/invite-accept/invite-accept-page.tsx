@@ -17,8 +17,8 @@ import {
 } from "@/modules/entities/invitations";
 import { googleSignInUrl } from "@/modules/shared/api/google-sign-in";
 import { GoogleButton } from "@/modules/shared/ui/GoogleButton";
+import { StatusCard } from "@/modules/shared/ui/StatusCard";
 
-import { InviteMessage } from "./invite-message";
 import { InvitePasswordForm } from "./invite-password-form";
 import { InviteSessionAccept } from "./invite-session-accept";
 
@@ -62,13 +62,13 @@ export function InviteAcceptPage({ token }: { token: string }) {
         );
     }
     if (info.isError || !info.data) {
-        return <InviteMessage tone="error" text={t("invalid")} />;
+        return <StatusCard tone="error" text={t("invalid")} />;
     }
 
     const invitation = info.data;
     if (outcome) {
         return (
-            <InviteMessage
+            <StatusCard
                 title={t(`outcomes.${outcome.outcome}.title`)}
                 text={t(`outcomes.${outcome.outcome}.text`, {
                     email: invitation.email,

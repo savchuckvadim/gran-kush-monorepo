@@ -8,6 +8,7 @@ import { ApiErrorResponse } from "@common/decorators/response/api-error-response
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { type ContentLocale, RequestLocale } from "@common/i18n";
 
+import { RegistrationLinkJoinService } from "../../application/services/registration-link-join.service";
 import { RegistrationLinkPresenceService } from "../../application/services/registration-link-presence.service";
 import { RegistrationLinksService } from "../../application/services/registration-links.service";
 import {
@@ -24,6 +25,7 @@ import {
 export class PublicRegistrationLinksController {
     constructor(
         private readonly registrationLinksService: RegistrationLinksService,
+        private readonly joinService: RegistrationLinkJoinService,
         private readonly presence: RegistrationLinkPresenceService
     ) {}
 
@@ -51,7 +53,7 @@ export class PublicRegistrationLinksController {
         @Body() dto: RegisterViaLinkDto,
         @RequestLocale() locale: ContentLocale
     ): Promise<RegisterViaLinkResponseDto> {
-        return this.registrationLinksService.registerViaLink(token, dto, locale);
+        return this.joinService.registerViaLink(token, dto, locale);
     }
 
     @Post(":token/ping")

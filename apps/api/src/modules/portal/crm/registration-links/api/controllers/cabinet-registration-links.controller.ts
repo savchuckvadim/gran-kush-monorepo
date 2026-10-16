@@ -9,7 +9,7 @@ import { ApiSuccessResponse } from "@common/decorators/response/api-success-resp
 import { RequireUserJwt } from "@modules/portal/auth/members/api/decorators/require-member-jwt.decorator";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 
-import { RegistrationLinksService } from "../../application/services/registration-links.service";
+import { RegistrationLinkJoinService } from "../../application/services/registration-link-join.service";
 import { JoinViaLinkDto, JoinViaLinkResponseDto } from "../dto/registration-link.dto";
 
 /**
@@ -20,7 +20,7 @@ import { JoinViaLinkDto, JoinViaLinkResponseDto } from "../dto/registration-link
 @Controller("cabinet/reg-links")
 @RequireUserJwt()
 export class CabinetRegistrationLinksController {
-    constructor(private readonly registrationLinksService: RegistrationLinksService) {}
+    constructor(private readonly joinService: RegistrationLinkJoinService) {}
 
     @Post(":token/join")
     @Throttle(PUBLIC_TOKEN_THROTTLE)
@@ -35,6 +35,6 @@ export class CabinetRegistrationLinksController {
         @Param("token") token: string,
         @Body() dto: JoinViaLinkDto
     ): Promise<JoinViaLinkResponseDto> {
-        return this.registrationLinksService.joinViaLinkAsUser(token, user.userId, dto);
+        return this.joinService.joinViaLinkAsUser(token, user.userId, dto);
     }
 }
