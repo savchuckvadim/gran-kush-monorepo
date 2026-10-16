@@ -28,6 +28,8 @@ describe("Door scan (e2e)", () => {
     let app: INestApplication;
     let prisma: PrismaService;
     const clubs = [`door-a-${suffix}`, `door-b-${suffix}`];
+    /** Клуб, в котором аккаунт не состоит */
+    const stranger = `door-c-${suffix}`;
     const owners = new Map<string, string>();
     /** memberId участника в каждом клубе */
     const memberIds = new Map<string, string>();
@@ -86,7 +88,7 @@ describe("Door scan (e2e)", () => {
         await app.init();
         prisma = app.get(PrismaService);
 
-        for (const slug of clubs) {
+        for (const slug of [...clubs, stranger]) {
             const res = await request(app.getHttpServer())
                 .post("/platform/portals/register")
                 .send({
@@ -132,7 +134,7 @@ describe("Door scan (e2e)", () => {
     });
 
     afterAll(async () => {
-        await prisma.portal.deleteMany({ where: { name: { in: clubs } } });
+        await prisma.portal.deleteMany({ where: { name: { in: [...clubs, stranger] } } });
         await prisma.user.deleteMany({ where: { email: { endsWith: `${suffix}@test.local` } } });
         await app.close();
     });
@@ -218,5 +220,28 @@ describe("Door scan (e2e)", () => {
         const codeOfB = await qrOf(clubB);
         const preview = await crm(clubA).post("/crm/presence/qr-preview").send({ code: codeOfB });
         expect(preview.body).toMatchObject({ valid: false, errorCode: "wrong_club" });
+    });
+
+    it("the cabinet needs a club: without one, or in a club the account is not in, there is no code", async () => {
+        const noClub = await request(app.getHttpServer())
+            .get("/cabinet/qr-code")
+            .set("Cookie", memberCookies);
+        expect(noClub.status).toBe(400);
+
+        const notMember = await cabinet(stranger).get("/cabinet/qr-code");
+        expect(notMember.status).toBe(403);
+    });
+
+    it("a member of two clubs has a code per club, and a visit in one is not a visit in the other", async () => {
+        const [clubA, clubB] = clubs as [string, string];
+        const codeA = await qrOf(clubA);
+        const codeB = await qrOf(clubB);
+        expect(codeA).not.toBe(codeB);
+
+        expect((await scan(clubB, codeB, "entry")).status).toBe(201);
+        expect((await cabinet(clubB).get("/cabinet/presence/status")).body.isPresent).toBe(true);
+        expect((await cabinet(clubA).get("/cabinet/presence/status")).body.isPresent).toBe(false);
+
+        expect((await scan(clubB, codeB, "exit")).status).toBe(201);
     });
 });
