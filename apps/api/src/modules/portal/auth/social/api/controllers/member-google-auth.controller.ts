@@ -11,6 +11,7 @@ import { CurrentAuthUser } from "@common/decorators/auth/current-auth-user.decor
 import { Public } from "@common/decorators/auth/public.decorator";
 import { RequireUserJwt } from "@modules/portal/auth/members/api/decorators/require-member-jwt.decorator";
 import { MemberAuthService } from "@modules/portal/auth/members/application/services/member-auth.service";
+import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 import { GoogleOAuthFlowService } from "@modules/portal/auth/social/application/services/google-oauth-flow.service";
 import {
     GOOGLE_LINK_RESULT_PARAM,
@@ -24,7 +25,6 @@ import {
     GoogleLinkError,
     LinkGoogleUseCase,
 } from "@modules/portal/auth/social/application/use-cases/link-google.use-case";
-import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 
 /**
  * Google-вход в кабинет участника. Браузерный редирект-флоу: /start уводит на Google и ставит

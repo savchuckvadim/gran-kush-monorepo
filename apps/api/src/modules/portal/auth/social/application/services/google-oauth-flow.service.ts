@@ -11,6 +11,7 @@ import { GoogleOAuthGateway } from "@modules/portal/auth/social/domain/google-oa
 import { GoogleProfile } from "@modules/portal/auth/social/domain/social-profile";
 
 import {
+    ACCOUNT_ID,
     CALLBACK_PATH,
     DEFAULT_LANDING,
     DEFAULT_LOCALE,
@@ -19,7 +20,6 @@ import {
     GoogleFlowError,
     type GoogleIntent,
     INVITATION_TOKEN,
-    ACCOUNT_ID,
     type OAuthBinding,
     type OAuthState,
     SOCIAL_LOCALES,
