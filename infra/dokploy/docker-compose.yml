@@ -12,8 +12,9 @@
 # - The pafpaf- prefix matters: dokploy-network is shared by every project on
 #   the server, and a bare "api" or "site" could resolve to another container.
 # - Memory limits and log rotation protect the other projects on the server.
-# - The server is small: the member cabinet (club.) starts only with
-#   COMPOSE_PROFILES=club, once clubs bring their members in.
+# - The member cabinet (club.) is part of the CRM app: club.${DOMAIN} is a second
+#   domain of pafpaf-crm (port 3000), the CRM proxy routes it by host. The old
+#   pafpaf-web service (profile club) stays off and is removed by TASK-721.
 # - No YAML anchors on purpose: Dokploy rewrites this file to add its domain
 #   labels, and every service must keep both networks however it is parsed.
 
@@ -159,7 +160,8 @@ services:
         limits:
           memory: 512M
 
-  # club.${DOMAIN}: member cabinet and club pages
+  # Legacy member cabinet, replaced by the cabinet inside pafpaf-crm (club.${DOMAIN}).
+  # Off by default; remove together with apps/web (TASK-721).
   pafpaf-web:
     image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/web:${TAG:-latest}
     profiles: [club]

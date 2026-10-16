@@ -1,0 +1,148 @@
+{
+    "cabinet": {
+        "shell": {
+            "brand": "PafPaf",
+            "home": "Home",
+            "clubs": "My clubs",
+            "openMenu": "Open menu",
+            "closeMenu": "Close menu",
+            "collapseMenu": "Collapse menu",
+            "pinMenu": "Pin menu",
+            "allClubs": "All clubs",
+            "yourClubs": "Your clubs",
+            "noClubs": "No clubs yet",
+            "manageClubs": "All memberships",
+            "account": "Account",
+            "language": "Language",
+            "logout": "Log out"
+        },
+        "auth": {
+            "login": {
+                "title": "Log in",
+                "subtitle": "Club member area",
+                "email": "Email",
+                "password": "Password",
+                "forgotPassword": "Forgot your password?",
+                "submit": "Log in",
+                "submitting": "Logging in…",
+                "noAccount": "No account yet?",
+                "register": "Sign up",
+                "or": "or",
+                "google": "Continue with Google",
+                "googleOff": "Google sign-in is unavailable right now.",
+                "googleError": "Google sign-in failed. Please try again.",
+                "invalidEmail": "Enter a valid email",
+                "passwordRequired": "Enter your password",
+                "invalidCredentials": "Wrong email or password",
+                "emailNotConfirmed": "Your email is not confirmed. Open the link in the email we sent when you signed up."
+            },
+            "register": {
+                "title": "Sign up",
+                "subtitle": "One account for all your clubs",
+                "email": "Email",
+                "password": "Password",
+                "confirm": "Repeat password",
+                "submit": "Create account",
+                "submitting": "Creating…",
+                "haveAccount": "Already have an account?",
+                "login": "Log in",
+                "invalidEmail": "Enter a valid email",
+                "passwordRule": "At least 8 characters with an uppercase letter, a lowercase letter and a digit",
+                "mismatch": "Passwords do not match",
+                "doneTitle": "Check your inbox",
+                "doneText": "We sent an email to {email}. Open the link in it to confirm your address and log in.",
+                "toLogin": "Go to log in"
+            },
+            "forgot": {
+                "title": "Password recovery",
+                "subtitle": "We will email you a link to set a new password",
+                "email": "Email",
+                "submit": "Send link",
+                "submitting": "Sending…",
+                "back": "Back to log in",
+                "done": "If this address is registered, an email with the link is on its way.",
+                "invalidEmail": "Enter a valid email"
+            },
+            "reset": {
+                "title": "New password",
+                "subtitle": "Choose a password to log in with",
+                "password": "New password",
+                "confirm": "Repeat password",
+                "submit": "Save password",
+                "submitting": "Saving…",
+                "passwordRule": "At least 8 characters with an uppercase letter, a lowercase letter and a digit",
+                "mismatch": "Passwords do not match",
+                "noToken": "The link is incomplete. Request a password recovery again.",
+                "done": "Password changed. You can log in now.",
+                "toLogin": "Go to log in"
+            },
+            "confirm": {
+                "title": "Email confirmation",
+                "subtitle": "Just a moment",
+                "working": "Confirming your address…",
+                "done": "Email confirmed. You can log in now.",
+                "failed": "The link did not work: it has expired or was already used. Request a new email on the log in page.",
+                "toLogin": "Go to log in"
+            }
+        },
+        "home": {
+            "title": "Your clubs",
+            "loadError": "Could not load your clubs. Refresh the page.",
+            "pendingTitle": "Waiting for your answer",
+            "pendingHint": "A club added you by email. Until you confirm, the club cannot see your documents and you cannot use its QR.",
+            "awaiting": "Waiting for confirmation",
+            "expired": "Request expired",
+            "review": "Respond",
+            "clubsTitle": "My clubs",
+            "emptyTitle": "You are not a member of any club yet",
+            "emptyText": "Ask a club to send you a join link or to add you by email, and the club will show up here."
+        },
+        "club": {
+            "notMemberTitle": "You are not a member of this club",
+            "notMemberText": "The club is not in your list or the membership is not confirmed yet. Check My clubs.",
+            "inClub": "In the club now",
+            "outsideClub": "Not in the club",
+            "qrTitle": "Your QR",
+            "qrHint": "Show the code to staff when you come in and when you leave. It works only in this club.",
+            "qrClosed": "The QR is unavailable until you confirm your membership.",
+            "validUntil": "Valid until {date}",
+            "reissue": "Issue a new one",
+            "reissueTitle": "Issue a new QR?",
+            "reissueText": "The old code stops working immediately. Do this if a screenshot of the code ended up in the wrong hands.",
+            "reissueConfirm": "Issue",
+            "cancel": "Cancel",
+            "visitsTitle": "Recent visits",
+            "noVisits": "No visits yet.",
+            "nowInClub": "in the club now"
+        },
+        "clubs": {
+            "title": "All memberships",
+            "loadError": "Could not load memberships. Refresh the page.",
+            "empty": "No memberships yet.",
+            "since": "Since {date}",
+            "state": {
+                "pending": "Waiting for confirmation",
+                "active": "Active",
+                "left": "Closed"
+            },
+            "review": "Respond",
+            "leave": "Leave",
+            "leaveTitle": "Leave “{club}”?",
+            "leaveText": "Your membership will be closed and the club will stop seeing your documents and signature. You can come back with a new link from the club.",
+            "leaveConfirm": "Leave",
+            "cancel": "Cancel"
+        },
+        "confirm": {
+            "title": "“{club}” added you",
+            "intro": "Confirm your membership and choose which documents to show the club. If nothing is selected, the club sees no documents; you can open access later.",
+            "expired": "The request from “{club}” has expired. Ask the club to send it again.",
+            "documents": "What to show the club",
+            "noDocuments": "Your account has no documents yet.",
+            "signature": "Signature",
+            "hint": "You can withdraw access at any time.",
+            "working": "Please wait…",
+            "decline": "Decline",
+            "confirm": "Confirm"
+        }
+    }
+}

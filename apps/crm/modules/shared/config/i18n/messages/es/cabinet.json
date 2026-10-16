@@ -1,0 +1,148 @@
+{
+    "cabinet": {
+        "shell": {
+            "brand": "PafPaf",
+            "home": "Inicio",
+            "clubs": "Mis clubes",
+            "openMenu": "Abrir menú",
+            "closeMenu": "Cerrar menú",
+            "collapseMenu": "Contraer menú",
+            "pinMenu": "Fijar menú",
+            "allClubs": "Todos los clubes",
+            "yourClubs": "Tus clubes",
+            "noClubs": "Aún no hay clubes",
+            "manageClubs": "Todas las membresías",
+            "account": "Cuenta",
+            "language": "Idioma",
+            "logout": "Cerrar sesión"
+        },
+        "auth": {
+            "login": {
+                "title": "Iniciar sesión",
+                "subtitle": "Área de socios del club",
+                "email": "Correo electrónico",
+                "password": "Contraseña",
+                "forgotPassword": "¿Olvidaste tu contraseña?",
+                "submit": "Entrar",
+                "submitting": "Entrando…",
+                "noAccount": "¿No tienes cuenta?",
+                "register": "Regístrate",
+                "or": "o",
+                "google": "Continuar con Google",
+                "googleOff": "El acceso con Google no está disponible ahora.",
+                "googleError": "No se pudo entrar con Google. Inténtalo de nuevo.",
+                "invalidEmail": "Introduce un correo válido",
+                "passwordRequired": "Introduce tu contraseña",
+                "invalidCredentials": "Correo o contraseña incorrectos",
+                "emailNotConfirmed": "Tu correo no está confirmado. Abre el enlace del mensaje que enviamos al registrarte."
+            },
+            "register": {
+                "title": "Registro",
+                "subtitle": "Una cuenta para todos tus clubes",
+                "email": "Correo electrónico",
+                "password": "Contraseña",
+                "confirm": "Repite la contraseña",
+                "submit": "Crear cuenta",
+                "submitting": "Creando…",
+                "haveAccount": "¿Ya tienes cuenta?",
+                "login": "Entrar",
+                "invalidEmail": "Introduce un correo válido",
+                "passwordRule": "Mínimo 8 caracteres con mayúscula, minúscula y un número",
+                "mismatch": "Las contraseñas no coinciden",
+                "doneTitle": "Revisa tu correo",
+                "doneText": "Hemos enviado un mensaje a {email}. Abre el enlace para confirmar tu dirección y entrar.",
+                "toLogin": "Ir a iniciar sesión"
+            },
+            "forgot": {
+                "title": "Recuperar contraseña",
+                "subtitle": "Te enviaremos un enlace para crear una nueva",
+                "email": "Correo electrónico",
+                "submit": "Enviar enlace",
+                "submitting": "Enviando…",
+                "back": "Volver a iniciar sesión",
+                "done": "Si esta dirección está registrada, el mensaje con el enlace ya está en camino.",
+                "invalidEmail": "Introduce un correo válido"
+            },
+            "reset": {
+                "title": "Nueva contraseña",
+                "subtitle": "Elige una contraseña para entrar",
+                "password": "Nueva contraseña",
+                "confirm": "Repite la contraseña",
+                "submit": "Guardar contraseña",
+                "submitting": "Guardando…",
+                "passwordRule": "Mínimo 8 caracteres con mayúscula, minúscula y un número",
+                "mismatch": "Las contraseñas no coinciden",
+                "noToken": "El enlace está incompleto. Solicita de nuevo la recuperación de la contraseña.",
+                "done": "Contraseña cambiada. Ya puedes entrar.",
+                "toLogin": "Ir a iniciar sesión"
+            },
+            "confirm": {
+                "title": "Confirmación del correo",
+                "subtitle": "Un momento",
+                "working": "Confirmando tu dirección…",
+                "done": "Correo confirmado. Ya puedes entrar.",
+                "failed": "El enlace no funcionó: ha caducado o ya se usó. Solicita un mensaje nuevo en la página de acceso.",
+                "toLogin": "Ir a iniciar sesión"
+            }
+        },
+        "home": {
+            "title": "Tus clubes",
+            "loadError": "No se pudieron cargar tus clubes. Actualiza la página.",
+            "pendingTitle": "Esperan tu respuesta",
+            "pendingHint": "Un club te añadió por correo. Hasta que confirmes, el club no ve tus documentos y tú no puedes usar su QR.",
+            "awaiting": "Pendiente de confirmar",
+            "expired": "Solicitud caducada",
+            "review": "Responder",
+            "clubsTitle": "Mis clubes",
+            "emptyTitle": "Todavía no eres socio de ningún club",
+            "emptyText": "Pide al club que te envíe un enlace de alta o que te añada por correo, y el club aparecerá aquí."
+        },
+        "club": {
+            "notMemberTitle": "No eres socio de este club",
+            "notMemberText": "El club no está en tu lista o la membresía aún no está confirmada. Revisa Mis clubes.",
+            "inClub": "Ahora en el club",
+            "outsideClub": "Fuera del club",
+            "qrTitle": "Tu QR",
+            "qrHint": "Muestra el código al personal al entrar y al salir. Solo funciona en este club.",
+            "qrClosed": "El QR no está disponible hasta que confirmes tu membresía.",
+            "validUntil": "Válido hasta {date}",
+            "reissue": "Emitir uno nuevo",
+            "reissueTitle": "¿Emitir un QR nuevo?",
+            "reissueText": "El código anterior dejará de funcionar de inmediato. Hazlo si una captura del código llegó a manos ajenas.",
+            "reissueConfirm": "Emitir",
+            "cancel": "Cancelar",
+            "visitsTitle": "Últimas visitas",
+            "noVisits": "Aún no hay visitas.",
+            "nowInClub": "ahora en el club"
+        },
+        "clubs": {
+            "title": "Todas las membresías",
+            "loadError": "No se pudieron cargar las membresías. Actualiza la página.",
+            "empty": "Aún no hay membresías.",
+            "since": "Desde {date}",
+            "state": {
+                "pending": "Pendiente de confirmar",
+                "active": "Activa",
+                "left": "Cerrada"
+            },
+            "review": "Responder",
+            "leave": "Salir",
+            "leaveTitle": "¿Salir de «{club}»?",
+            "leaveText": "Tu membresía se cerrará y el club dejará de ver tus documentos y tu firma. Puedes volver con un nuevo enlace del club.",
+            "leaveConfirm": "Salir",
+            "cancel": "Cancelar"
+        },
+        "confirm": {
+            "title": "«{club}» te ha añadido",
+            "intro": "Confirma tu membresía y elige qué documentos mostrar al club. Si no eliges nada, el club no verá ningún documento; puedes abrir el acceso más tarde.",
+            "expired": "La solicitud de «{club}» ha caducado. Pide al club que la envíe de nuevo.",
+            "documents": "Qué mostrar al club",
+            "noDocuments": "Tu cuenta aún no tiene documentos.",
+            "signature": "Firma",
+            "hint": "Puedes retirar el acceso en cualquier momento.",
+            "working": "Un momento…",
+            "decline": "Rechazar",
+            "confirm": "Confirmar"
+        }
+    }
+}

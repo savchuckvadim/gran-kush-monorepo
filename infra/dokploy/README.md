@@ -14,7 +14,7 @@
 |---|---|---|
 | `paf-paf.app` | `pafpaf-site` | сайт и админка контента на `/admin` |
 | `crm.paf-paf.app` | `pafpaf-crm` | CRM клуба |
-| `club.paf-paf.app` | `pafpaf-web` | кабинет участника и страницы клубов; по умолчанию выключен, включается `COMPOSE_PROFILES=club` |
+| `club.paf-paf.app` | `pafpaf-crm` | кабинет участника: второй домен того же сервиса, что и CRM (TASK-711). Proxy CRM по хосту `club.*` переписывает адреса в дерево кабинета, на `crm.` оно закрыто (404) |
 | `api.paf-paf.app` | `pafpaf-api` | API |
 | `admin.paf-paf.app` | `pafpaf-admin` | админка платформы |
 

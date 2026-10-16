@@ -3,14 +3,21 @@ import type { ApiAuthStrategy } from "../client/client";
 import { ApiTokensStorage } from "./api-auth.storage";
 import { ApiAuthType } from "./api-auth.type";
 
-let refreshPromise: Promise<void> | null = null;
+/**
+ * Обновление токенов идёт по одному запросу на тип клиента. Общий для всех клиентов промис не
+ * годится: кабинет участника и CRM живут в одном приложении, и 401 у одного ждал бы refresh другого
+ * (а то и получал его результат вместо своего).
+ */
+const refreshPromises = new Map<ApiAuthType, Promise<void>>();
 
 export class ApiRefreshHelper {
+    private readonly type: ApiAuthType;
     private readonly storage: ApiTokensStorage;
     private readonly baseurl: string;
     private readonly refreshUrl: string;
     private readonly authStrategy: ApiAuthStrategy;
     constructor(type: ApiAuthType, baseurl: string, authStrategy: ApiAuthStrategy = "token") {
+        this.type = type;
         this.baseurl = baseurl;
         this.storage = new ApiTokensStorage(type);
         this.refreshUrl = type === ApiAuthType.CRM ? "/crm/auth/refresh" : "/lk/auth/refresh";
@@ -20,6 +27,7 @@ export class ApiRefreshHelper {
     public async makeToken(): Promise<void> {
         // Important: callers rely on this method to *finish* refreshing tokens (or throw),
         // so we must return/await the shared `refreshPromise`.
+        let refreshPromise = refreshPromises.get(this.type);
         if (!refreshPromise) {
             // finally в той же цепочке: отдельный `refreshPromise.finally()` никто не ловил,
             // и неудачный refresh всплывал в консоли необработанным reject
@@ -49,8 +57,9 @@ export class ApiRefreshHelper {
                     this.storage.setRefreshToken(refreshToken);
                 }
             })().finally(() => {
-                refreshPromise = null;
+                refreshPromises.delete(this.type);
             });
+            refreshPromises.set(this.type, refreshPromise);
         }
 
         await refreshPromise;
