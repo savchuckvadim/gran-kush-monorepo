@@ -2,17 +2,18 @@ import { Injectable, Logger } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 
 import { PresenceService } from "@modules/portal/crm/presence/application/services/presence.service";
+import { PresenceSettingsService } from "@modules/portal/crm/presence/application/services/presence-settings.service";
 
 /**
  * Cron-задачи для модуля присутствия.
  *
- * 1. **Ежедневный auto-close**: В 03:00 ночи закрывает все «забытые» сессии присутствия.
- *    Участники, которые не отметили выход, автоматически «выходят» из клуба.
+ * 1. **Авто-выход**: закрывает «забытые» визиты по правилам клуба (`presence_settings`:
+ *    часовой пояс, время авто-выхода, потолок длительности; без настроек — 03:00 по Мадриду).
  *
  * 2. **Периодическая проверка**: Каждые 30 минут логирует текущее количество присутствующих
  *    для мониторинга.
  *
- * Обе задачи безопасны на нескольких репликах (TASK-105): auto-close закрывает сессии
+ * Обе задачи безопасны на нескольких репликах (TASK-105): авто-выход закрывает визиты
  * одним условным UPDATE, а status-log только читает. Дубль на второй реплике даёт
  * ноль закрытых строк и лишнюю строку в логе, но не переписывает чужие данные.
  */
@@ -20,32 +21,22 @@ import { PresenceService } from "@modules/portal/crm/presence/application/servic
 export class PresenceCronService {
     private readonly logger = new Logger(PresenceCronService.name);
 
-    constructor(private readonly presenceService: PresenceService) {}
+    constructor(
+        private readonly presenceService: PresenceService,
+        private readonly presenceSettings: PresenceSettingsService
+    ) {}
 
     /**
-     * Ежедневное авто-закрытие сессий в 03:00 по серверному времени.
-     * Закрывает все активные сессии с методом выхода AUTO_CRON.
+     * Авто-выход забытых визитов по правилам каждого клуба (часовой пояс, время, потолок —
+     * `presence_settings`). Запуск каждые 10 минут: клуб получает авто-выход не позже чем через
+     * 10 минут после своего времени, а время выхода записывается моментом правила.
      */
-    @Cron(CronExpression.EVERY_DAY_AT_3AM, {
-        name: "presence-auto-close",
-        timeZone: "Europe/Madrid", // Испания (Барселона)
-    })
-    async handleAutoClose(): Promise<void> {
-        this.logger.log("⏰ Запуск авто-закрытия сессий присутствия...");
-
+    @Cron(CronExpression.EVERY_10_MINUTES, { name: "presence-auto-exit" })
+    async handleAutoExit(): Promise<void> {
         try {
-            const closedCount = await this.presenceService.autoCloseAllSessions();
-
-            if (closedCount > 0) {
-                this.logger.warn(`⚠️ Auto-close: закрыто ${closedCount} «забытых» сессий`);
-            } else {
-                this.logger.log("✅ Auto-close: нет забытых сессий, всё в порядке");
-            }
+            await this.presenceSettings.closeDueSessions();
         } catch (error) {
-            this.logger.error(
-                `❌ Ошибка при авто-закрытии сессий: ${error}`,
-                (error as Error).stack
-            );
+            this.logger.error(`❌ Ошибка авто-выхода визитов: ${error}`, (error as Error).stack);
         }
     }
 

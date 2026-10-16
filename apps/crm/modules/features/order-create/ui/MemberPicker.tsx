@@ -20,10 +20,11 @@ import {
 
 import { useCrmMembers } from "@/modules/entities/member";
 import { personName, useDebouncedValue } from "@/modules/shared";
+import { PICKER_COMMAND_CLASS } from "@/modules/shared/ui/picker-command-class";
 
 import type { DraftMember } from "../model/order-draft";
 
-import { PICKER_COMMAND_CLASS, PICKER_DEBOUNCE_MS } from "./picker-command";
+import { PICKER_DEBOUNCE_MS } from "./picker-command";
 
 const RESULTS = 8;
 

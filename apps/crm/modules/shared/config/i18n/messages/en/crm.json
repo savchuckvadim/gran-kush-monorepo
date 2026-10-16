@@ -1025,6 +1025,13 @@
                 "clubPolicy": {
                     "title": "Club rules",
                     "description": "Joining without a link, catalog outside the club, approval for orders, ordering for oneself"
+                },
+                "presence": {
+                    "title": "Presence",
+                    "description": "Club time zone, auto check-out of forgotten visits, visit length cap",
+                    "metric": "auto check-out",
+                    "noCap": "No visit cap",
+                    "cap": "Visit cap {hours} h"
                 }
             }
         },
@@ -1185,6 +1192,29 @@
                 "defaultPlaceholder": "No limit",
                 "save": "Save"
             }
+        },
+        "presenceSettings": {
+            "title": "Presence",
+            "subtitle": "When visits that a member forgot to close on the way out get closed. Time follows the club's clock.",
+            "adminOnly": "Only a club administrator can change these rules.",
+            "timezone": {
+                "label": "Club time zone",
+                "description": "Auto check-out time follows it. It is {time} at the club now.",
+                "search": "City or time zone",
+                "empty": "Nothing found"
+            },
+            "autoExit": {
+                "label": "Daily auto check-out",
+                "description": "Whoever did not check out is checked out at this time. The visit history records this time, not the moment of the check."
+            },
+            "cap": {
+                "label": "Visit cap, hours",
+                "description": "A longer visit closes by itself without waiting for the auto check-out. Empty — no cap.",
+                "placeholder": "No cap",
+                "invalid": "A whole number of hours from 1 to 48."
+            },
+            "save": "Save",
+            "saved": "Presence rules saved"
         }
     }
 }

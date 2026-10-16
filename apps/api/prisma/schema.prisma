@@ -220,6 +220,7 @@ model Portal {
   productReviews        ProductReview[]
   uiSettings            UiSetting[]
   policy                ClubPolicy?
+  presenceSettings      PresenceSettings?
 
   @@index([name])
   @@index([status])
@@ -1230,6 +1231,23 @@ model QrCode {
   @@index([encryptedCode])
   @@index([expiresAt])
   @@map("qr_codes")
+}
+
+/// Присутствие в клубе по его правилам (TASK-714). Строки нет — значения по умолчанию из
+/// presence-settings.ts: Европа/Мадрид, авто-выход в 03:00, без потолка длительности
+model PresenceSettings {
+  portalId        String   @id @map("portal_id")
+  /// IANA, например Europe/Madrid: в нём считается время авто-выхода
+  timezone        String   @db.VarChar(64)
+  /// Ежедневный авто-выход забытых визитов, HH:MM по часовому поясу клуба
+  autoExitTime    String   @map("auto_exit_time") @db.VarChar(5)
+  /// Визит длиннее — закрывается сам; пусто — без потолка
+  maxSessionHours Int?     @map("max_session_hours")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  portal Portal @relation(fields: [portalId], references: [id], onDelete: Cascade)
+
+  @@map("presence_settings")
 }
 
 model PresenceSession {

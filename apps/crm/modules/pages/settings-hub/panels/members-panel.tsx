@@ -2,10 +2,11 @@
 
 import { useLocale, useTranslations } from "next-intl";
 
-import { CircleDot, FormInput, Link2, ListChecks, Scale, UserPlus } from "lucide-react";
+import { CircleDot, DoorOpen, FormInput, Link2, ListChecks, Scale, UserPlus } from "lucide-react";
 
 import { getFieldDisplayLabel, useEntityFields } from "@/modules/entities/entity-settings";
 import { useMemberStatusItems } from "@/modules/entities/member";
+import { usePresenceSettings } from "@/modules/entities/presence";
 import { useRegistrationLinks } from "@/modules/entities/registration-links";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
@@ -30,6 +31,8 @@ export function MembersPanel() {
     // ready links for the tile's list, the whole set only for its size
     const readyLinks = useRegistrationLinks({ status: "ready", limit: 5 });
     const allLinks = useRegistrationLinks({ limit: 1 });
+    const presence = usePresenceSettings();
+    const cap = presence.data?.maxSessionHours ?? null;
 
     const activeFields = (fields.data ?? []).filter((field) => field.isActive && !field.hidden);
     const entityPage = `${ROUTES.CRM_SETTINGS_ENTITIES}/${MEMBER}`;
@@ -80,6 +83,25 @@ export function MembersPanel() {
                 title={t("clubPolicy.title")}
                 description={t("clubPolicy.description")}
                 href={link(ROUTES.CRM_SETTINGS_CLUB_POLICY)}
+            />
+            <SettingsTile
+                icon={DoorOpen}
+                title={t("presence.title")}
+                description={t("presence.description")}
+                metric={presence.data?.autoExitTime}
+                metricLabel={t("presence.metric")}
+                items={
+                    presence.data
+                        ? [
+                              presence.data.timezone,
+                              cap === null
+                                  ? t("presence.noCap")
+                                  : t("presence.cap", { hours: cap }),
+                          ]
+                        : []
+                }
+                loading={presence.isLoading}
+                href={link(ROUTES.CRM_SETTINGS_PRESENCE)}
             />
             <SettingsTile
                 icon={UserPlus}

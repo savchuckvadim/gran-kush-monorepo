@@ -74,12 +74,6 @@ export abstract class PresenceSessionRepository {
         }
     ): Promise<PresenceSession | null>;
 
-    /**
-     * Закрыть все незакрытые сессии одним запросом (для auto_cron).
-     * Возвращает число реально закрытых строк.
-     */
-    abstract closeAllActive(exitMethod: string): Promise<number>;
-
     /** Текущее количество присутствующих (при указании portalId — только в рамках портала) */
     abstract countCurrentlyPresent(portalId?: string): Promise<number>;
 

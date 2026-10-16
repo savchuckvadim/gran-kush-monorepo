@@ -137,25 +137,4 @@ describe("PresenceSessionPrismaRepository — одна открытая сесс
         expect(await repo.closeOpenSession("s-1", { exitMethod: "qr" })).toBeNull();
         expect(prisma.presenceSession.findUniqueOrThrow).not.toHaveBeenCalled();
     });
-
-    it("массовое закрытие снимает маркер и не трогает уже закрытые", async () => {
-        const { prisma, repo } = build();
-        prisma.presenceSession.updateMany.mockResolvedValue({ count: 2 });
-
-        const count = await repo.closeAllActive("auto_cron");
-
-        expect(count).toBe(2);
-        expect(prisma.presenceSession.updateMany).toHaveBeenCalledWith(
-            expect.objectContaining({
-                // Отбор идёт самим UPDATE, без предварительного чтения id: иначе между
-                // чтением и записью участник успевает выйти сам, а вторая реплика крона
-                // переписала бы ему время выхода.
-                where: { exitedAt: null },
-                data: expect.objectContaining({
-                    exitMethod: "auto_cron",
-                    activeEntityRecordId: null,
-                }),
-            })
-        );
-    });
 });

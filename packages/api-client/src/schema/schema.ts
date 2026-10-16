@@ -2331,6 +2331,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/crm/settings/presence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Правила присутствия клуба (сохранённые или по умолчанию) */
+        get: operations["CrmPresenceSettings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Изменить правила присутствия; не названные поля остаются */
+        patch: operations["CrmPresenceSettings_update"];
+        trace?: never;
+    };
     "/crm/orders": {
         parameters: {
             query?: never;
@@ -5360,6 +5378,31 @@ export interface components {
             /** @description Открытая сессия присутствия; null, если участника нет в клубе */
             currentSession: components["schemas"]["PresenceSessionDto"] | null;
         };
+        PresenceSettingsDto: {
+            /**
+             * @description Часовой пояс клуба (IANA)
+             * @example Europe/Madrid
+             */
+            timezone: string;
+            /**
+             * @description Ежедневный авто-выход забытых визитов, HH:MM по часовому поясу клуба
+             * @example 03:00
+             */
+            autoExitTime: string;
+            /**
+             * @description Визит длиннее закрывается сам; null — без потолка
+             * @example 12
+             */
+            maxSessionHours: number | null;
+        };
+        UpdatePresenceSettingsDto: {
+            /** @example Europe/Madrid */
+            timezone?: string;
+            /** @example 03:00 */
+            autoExitTime?: string;
+            /** @example 12 */
+            maxSessionHours?: number | null;
+        };
         OrderStageDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
             id: string;
@@ -6587,6 +6630,8 @@ export type SchemaManualCheckOutDto = components['schemas']['ManualCheckOutDto']
 export type SchemaPaginatedResponsePresenceSessionDto = components['schemas']['PaginatedResponse_PresenceSessionDto'];
 export type SchemaPresenceStatsDto = components['schemas']['PresenceStatsDto'];
 export type SchemaMyPresenceStatusDto = components['schemas']['MyPresenceStatusDto'];
+export type SchemaPresenceSettingsDto = components['schemas']['PresenceSettingsDto'];
+export type SchemaUpdatePresenceSettingsDto = components['schemas']['UpdatePresenceSettingsDto'];
 export type SchemaOrderStageDto = components['schemas']['OrderStageDto'];
 export type SchemaOrderMemberDto = components['schemas']['OrderMemberDto'];
 export type SchemaOrderEmployeeDto = components['schemas']['OrderEmployeeDto'];
@@ -13846,6 +13891,95 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedResponse_PresenceSessionDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmPresenceSettings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresenceSettingsDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmPresenceSettings_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePresenceSettingsDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresenceSettingsDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
             /** @description Unauthorized */

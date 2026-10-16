@@ -45,6 +45,8 @@ export const ROUTES = {
     CRM_SETTINGS_BILLING: "/crm/settings/billing",
     /** Правила клуба для участников: вступление, каталог вне клуба, одобрение, заказ на себя */
     CRM_SETTINGS_CLUB_POLICY: "/crm/settings/club-policy",
+    /** Присутствие: часовой пояс клуба, авто-выход забытых визитов, потолок длительности */
+    CRM_SETTINGS_PRESENCE: "/crm/settings/presence",
     /** Оформление: темы, светлый/тёмный режим, энергосбережение */
     CRM_SETTINGS_APPEARANCE: "/crm/settings/appearance",
     /** Записи смарт-процессов: `${ROUTES.CRM_ENTITIES}/${code}` */

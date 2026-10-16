@@ -8,7 +8,10 @@ import {
     buildMemberFieldMap,
     getMemberDisplayNameParts,
 } from "@modules/portal/crm/entity-fields/lib/member-field-values";
-import { PresenceSession } from "@modules/portal/crm/presence/domain/entity/presence-session.entity";
+import {
+    ExitMethod,
+    PresenceSession,
+} from "@modules/portal/crm/presence/domain/entity/presence-session.entity";
 import {
     PresenceFilters,
     PresenceSessionRepository,
@@ -147,22 +150,6 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
         return isUniqueViolationOn(error, "active_entity_record_id");
     }
 
-    async closeAllActive(exitMethod: string): Promise<number> {
-        const result = await this.prisma.presenceSession.updateMany({
-            // Один UPDATE вместо «прочитать id → закрыть по списку»: между чтением и записью
-            // участник успевает выйти сам, а на второй реплике (TASK-105) крон видит тот же
-            // список. Условие exitedAt: null проверяется самим UPDATE, поэтому параллельный
-            // прогон закроет ноль строк и не перепишет чужое время выхода.
-            where: { exitedAt: null },
-            data: {
-                exitedAt: new Date(),
-                exitMethod,
-                activeEntityRecordId: null,
-            },
-        });
-        return result.count;
-    }
-
     async countCurrentlyPresent(portalId?: string): Promise<number> {
         return this.prisma.presenceSession.count({
             where: { exitedAt: null, ...(portalId && { entityRecord: { portalId } }) },
@@ -207,6 +194,7 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
                     AVG(EXTRACT(EPOCH FROM (exited_at - entered_at)) / 60) AS avg_duration
                 FROM presence_sessions
                 WHERE exited_at IS NOT NULL
+                    AND exit_method IS DISTINCT FROM ${ExitMethod.AUTO_CRON}
                 ${startDate ? Prisma.sql`AND entered_at >= ${startDate}` : Prisma.empty}
                 ${endDate ? Prisma.sql`AND entered_at <= ${endDate}` : Prisma.empty}
                 ${entityRecordFilter ? Prisma.sql`AND entity_record_id = ${entityRecordFilter}` : Prisma.empty}

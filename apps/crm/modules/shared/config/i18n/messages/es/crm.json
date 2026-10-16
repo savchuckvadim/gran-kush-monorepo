@@ -1025,6 +1025,13 @@
                 "clubPolicy": {
                     "title": "Normas del club",
                     "description": "Unirse sin enlace, catálogo fuera del club, aprobación para pedidos, pedidos para uno mismo"
+                },
+                "presence": {
+                    "title": "Presencia",
+                    "description": "Zona horaria del club, salida automática de visitas olvidadas, límite de duración",
+                    "metric": "salida automática",
+                    "noCap": "Sin límite de visita",
+                    "cap": "Límite de visita {hours} h"
                 }
             }
         },
@@ -1185,6 +1192,29 @@
                 "defaultPlaceholder": "Sin límite",
                 "save": "Guardar"
             }
+        },
+        "presenceSettings": {
+            "title": "Presencia",
+            "subtitle": "Cuándo se cierran las visitas que el socio olvidó cerrar al salir. La hora sigue el reloj del club.",
+            "adminOnly": "Solo un administrador del club puede cambiar estas reglas.",
+            "timezone": {
+                "label": "Zona horaria del club",
+                "description": "La salida automática sigue esta zona. Ahora en el club son las {time}.",
+                "search": "Ciudad o zona horaria",
+                "empty": "No se encontró nada"
+            },
+            "autoExit": {
+                "label": "Salida automática diaria",
+                "description": "Quien no marcó la salida sale a esta hora. En el historial de la visita queda esta hora, no el momento de la comprobación."
+            },
+            "cap": {
+                "label": "Límite de visita, horas",
+                "description": "Una visita más larga se cierra sola, sin esperar la salida automática. Vacío — sin límite.",
+                "placeholder": "Sin límite",
+                "invalid": "Un número entero de horas de 1 a 48."
+            },
+            "save": "Guardar",
+            "saved": "Reglas de presencia guardadas"
         }
     }
 }

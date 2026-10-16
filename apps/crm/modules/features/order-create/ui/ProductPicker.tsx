@@ -19,10 +19,11 @@ import {
 
 import { useProducts } from "@/modules/entities/product";
 import { useDebouncedValue, useMoneyFormat } from "@/modules/shared";
+import { PICKER_COMMAND_CLASS } from "@/modules/shared/ui/picker-command-class";
 
 import type { DraftProduct } from "../model/order-draft";
 
-import { PICKER_COMMAND_CLASS, PICKER_DEBOUNCE_MS } from "./picker-command";
+import { PICKER_DEBOUNCE_MS } from "./picker-command";
 
 const RESULTS = 10;
 
