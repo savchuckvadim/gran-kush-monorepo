@@ -276,6 +276,22 @@
             "cancelText": "The club has not started on it yet. Once cancelled, the products go back to the shop.",
             "cancelConfirm": "Cancel order",
             "keep": "Keep it"
+        },
+        "account": {
+            "title": "Account",
+            "subtitle": "Your details and how you sign in.",
+            "profile": {
+                "title": "Profile",
+                "hint": "These details pre-fill the forms of clubs you join. Forms of clubs you are already in do not change.",
+                "firstName": "First name",
+                "lastName": "Last name",
+                "birthday": "Date of birth",
+                "phone": "Phone",
+                "address": "Address",
+                "save": "Save",
+                "saving": "Saving…",
+                "saved": "Saved"
+            }
         }
     }
 }

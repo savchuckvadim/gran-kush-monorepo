@@ -13,6 +13,7 @@ export function useCabinetLinks() {
     return useMemo(
         () => ({
             home: `/${locale}`,
+            account: `/${locale}/me`,
             clubs: `/${locale}/me/clubs`,
             passport: `/${locale}/me/passport`,
             club: (slug: string) => `/${locale}/${slug}`,

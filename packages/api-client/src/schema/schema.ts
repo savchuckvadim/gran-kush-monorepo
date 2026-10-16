@@ -160,6 +160,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/cabinet/account/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Мой профиль; не заполненный — все поля null */
+        get: operations["AccountProfile_get"];
+        /**
+         * Сохранить профиль целиком
+         * @description Анкеты клубов, где человек уже состоит, не меняются: запись клуба — своя.
+         */
+        put: operations["AccountProfile_save"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/platform/auth/login": {
         parameters: {
             query?: never;
@@ -3084,6 +3105,33 @@ export interface components {
              * @example data:image/png;base64,....
              */
             file: string;
+        };
+        AccountProfileDto: {
+            /** @example Ana */
+            firstName: string | null;
+            /** @example García */
+            lastName: string | null;
+            /**
+             * @description YYYY-MM-DD
+             * @example 1990-05-10
+             */
+            birthday: string | null;
+            /** @example +34 600 000 000 */
+            phone: string | null;
+            /** @example Calle Mayor 1, Madrid */
+            address: string | null;
+            /** @description Профиль ключами полей анкеты клуба (first_name, …) — для предзаполнения */
+            memberFields: {
+                [key: string]: string;
+            };
+        };
+        SaveAccountProfileDto: {
+            firstName: string | null;
+            lastName: string | null;
+            /** @description YYYY-MM-DD */
+            birthday: string | null;
+            phone: string | null;
+            address: string | null;
         };
         PlatformLoginDto: {
             email: string;
@@ -6355,6 +6403,8 @@ export type SchemaDeleteAccountDocumentResponseDto = components['schemas']['Dele
 export type SchemaShareWithMembershipDto = components['schemas']['ShareWithMembershipDto'];
 export type SchemaAccountSignatureDto = components['schemas']['AccountSignatureDto'];
 export type SchemaUploadAccountSignatureDto = components['schemas']['UploadAccountSignatureDto'];
+export type SchemaAccountProfileDto = components['schemas']['AccountProfileDto'];
+export type SchemaSaveAccountProfileDto = components['schemas']['SaveAccountProfileDto'];
 export type SchemaPlatformLoginDto = components['schemas']['PlatformLoginDto'];
 export type SchemaBillingPlanCatalogItemDto = components['schemas']['BillingPlanCatalogItemDto'];
 export type SchemaBillingPlanCatalogResponseDto = components['schemas']['BillingPlanCatalogResponseDto'];
@@ -7069,6 +7119,77 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    AccountProfile_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountProfileDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    AccountProfile_save: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveAccountProfileDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountProfileDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

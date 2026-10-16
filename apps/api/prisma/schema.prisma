@@ -273,6 +273,7 @@ model User {
   refreshTokens        RefreshToken[]
   documents            UserDocument[]
   signature            UserSignature?
+  profile              AccountProfile?
   identities           UserIdentity[]
   documentAccessLogs   DocumentAccessLog[]
   portalReviews        PortalReview[]
@@ -364,6 +365,22 @@ model MemberDocumentShare {
   @@unique([memberId, userDocumentId])
   @@index([userDocumentId])
   @@map("member_document_shares")
+}
+
+/// Профиль аккаунта (решение 11): данные человека для предзаполнения анкет клубов. Запись клуба
+/// остаётся своей — изменения профиля в клубы сами не уходят
+model AccountProfile {
+  userId    String    @id @map("user_id")
+  firstName String?   @map("first_name") @db.VarChar(120)
+  lastName  String?   @map("last_name") @db.VarChar(120)
+  birthday  DateTime? @db.Date
+  phone     String?   @db.VarChar(40)
+  address   String?   @db.VarChar(500)
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account_profiles")
 }
 
 model UserSignature {

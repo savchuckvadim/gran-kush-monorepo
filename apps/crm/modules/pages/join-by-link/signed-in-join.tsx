@@ -15,6 +15,7 @@ import {
 } from "@workspace/dynamic-forms";
 import { Button, Card, Switch } from "@workspace/ui";
 
+import { useAccountProfile } from "@/modules/entities/cabinet-account";
 import { useAccountDocuments } from "@/modules/entities/membership";
 import { useJoinViaLinkAsMember } from "@/modules/entities/registration-links";
 import { cabinetAppUrl } from "@/modules/shared/config/app-urls";
@@ -31,7 +32,7 @@ interface SignedInJoinProps {
 
 /**
  * Ссылка клуба открыта под сессией участника: вступает его собственный аккаунт, без нового
- * пароля и письма. Документы клуб получает только те, что участник здесь же отметил, —
+ * пароля и письма; анкета предзаполнена профилем аккаунта. Документы клуб получает только те, что участник здесь же отметил, —
  * по умолчанию не показывается ничего (TASK-704).
  */
 export function SignedInJoin({
@@ -53,7 +54,12 @@ export function SignedInJoin({
     const [shared, setShared] = useState<ReadonlySet<string>>(new Set());
     const [shareSignature, setShareSignature] = useState(false);
 
-    const values = useMemo(() => ({ ...prefill, ...edited }), [prefill, edited]);
+    // профиль аккаунта (решение 11) — под данными ссылки клуба и правками человека
+    const profile = useAccountProfile();
+    const values = useMemo(
+        () => ({ ...profile.data?.memberFields, ...prefill, ...edited }),
+        [profile.data, prefill, edited]
+    );
     const docs = documents.data?.documents ?? [];
     const hasSignature = documents.data?.hasSignature === true;
 

@@ -3,13 +3,13 @@
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { Building2, Home, ShieldCheck } from "lucide-react";
+import { Building2, Home, ShieldCheck, UserRound } from "lucide-react";
 
 import { useCabinetLinks } from "@/modules/processes/member-auth";
 import { ShellBrand } from "@/modules/shared/ui/Brand";
 import { type ISidebarItem, Sidebar } from "@/modules/shared/ui/Sidebar";
 
-/** Меню кабинета: дом, мои клубы, паспорт. Разделы одного клуба — вкладки на его странице. */
+/** Меню кабинета: дом, мои клубы, паспорт, аккаунт. Разделы одного клуба — вкладки на его странице. */
 export function MemberSidebar() {
     const t = useTranslations("cabinet.shell");
     const links = useCabinetLinks();
@@ -39,6 +39,14 @@ export function MemberSidebar() {
             title: t("passport"),
             isActive: pathname === links.passport,
             icon: <ShieldCheck />,
+        },
+        {
+            id: 4,
+            code: "account",
+            url: links.account,
+            title: t("account"),
+            isActive: pathname === links.account,
+            icon: <UserRound />,
         },
     ];
 
