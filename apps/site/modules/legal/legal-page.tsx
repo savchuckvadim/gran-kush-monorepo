@@ -7,53 +7,39 @@ import { getSiteDoc } from "@/modules/entities/site/api";
 import type { Locale } from "@/modules/shared/config/locales";
 import { ROUTES } from "@/modules/shared/config/routes";
 
-import { en } from "./content/en";
-import { es } from "./content/es";
-import { ru } from "./content/ru";
-import { LEGAL_VERSION, PROVIDER } from "./provider";
+import { formatLegalVersion, LEGAL_CONTENT } from "./content";
+import { DocTools } from "./doc-tools";
+import { parseInline } from "./inline";
+import { LEGAL_VERSION } from "./provider";
 import { LEGAL_DOCS, type LegalBlock, type LegalContent, type LegalDocId } from "./types";
 
 import "./legal.css";
 
-export const LEGAL_CONTENT: Record<Locale, LegalContent> = { es, en, ru };
-
-const INLINE = /\[([^\]]+)\]\(([^)]+)\)|\{(name|nif|address|email)\}/g;
-
-const renderInline = (text: string, locale: Locale, content: LegalContent): ReactNode[] => {
-    const nodes: ReactNode[] = [];
-    let last = 0;
-    for (const match of text.matchAll(INLINE)) {
-        const [whole, label, href, field] = match;
-        if (match.index > last) nodes.push(text.slice(last, match.index));
-        const key = `${match.index}`;
-        if (label && href?.startsWith("doc:")) {
-            nodes.push(
-                <NextLink key={key} href={ROUTES.legal(locale, href.slice("doc:".length))}>
-                    {label}
-                </NextLink>
-            );
-        } else if (label && href) {
-            nodes.push(
-                <a key={key} href={href} target="_blank" rel="noopener noreferrer">
-                    {label}
-                </a>
-            );
-        } else if (field === "name") {
-            nodes.push(PROVIDER.name);
-        } else if (field === "nif" || field === "address" || field === "email") {
-            nodes.push(
-                PROVIDER[field] ?? (
-                    <mark key={key} className="legal__todo">
-                        {content.ui.pending[field]}
+const renderInline = (text: string, locale: Locale, content: LegalContent): ReactNode[] =>
+    parseInline(text, content.ui).map((part, index) => {
+        switch (part.kind) {
+            case "text":
+                return part.text;
+            case "doc":
+                return (
+                    <NextLink key={index} href={ROUTES.legal(locale, part.doc)}>
+                        {part.text}
+                    </NextLink>
+                );
+            case "link":
+                return (
+                    <a key={index} href={part.href} target="_blank" rel="noopener noreferrer">
+                        {part.text}
+                    </a>
+                );
+            case "pending":
+                return (
+                    <mark key={index} className="legal__todo">
+                        {part.text}
                     </mark>
-                )
-            );
+                );
         }
-        last = match.index + whole.length;
-    }
-    if (last < text.length) nodes.push(text.slice(last));
-    return nodes;
-};
+    });
 
 const Block = ({
     block,
@@ -103,9 +89,6 @@ export const LegalPage = async ({ doc, locale }: { doc: LegalDocId; locale: Loca
     const content = LEGAL_CONTENT[locale];
     const { ui } = content;
     const document = content.docs[doc];
-    const updated = new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(
-        new Date(`${LEGAL_VERSION}T12:00:00Z`)
-    );
 
     return (
         <SiteFrame locale={locale} site={site} current="legal">
@@ -113,9 +96,16 @@ export const LegalPage = async ({ doc, locale }: { doc: LegalDocId; locale: Loca
                 <header className="legal__head">
                     <p className="eyebrow">{ui.eyebrow}</p>
                     <h1 className="legal__title">{document.title}</h1>
-                    <p className="legal__meta">
-                        {ui.updated}: <time dateTime={LEGAL_VERSION}>{updated}</time>
-                    </p>
+                    <div className="legal__bar">
+                        <p className="legal__meta">
+                            {ui.updated}:{" "}
+                            <time dateTime={LEGAL_VERSION}>{formatLegalVersion(locale)}</time>
+                        </p>
+                        <DocTools
+                            ui={ui}
+                            href={(format) => ROUTES.legalFile(locale, doc, format)}
+                        />
+                    </div>
                     {ui.translationNote && <p className="legal__note">{ui.translationNote}</p>}
                 </header>
 

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 
-import { LEGAL_CONTENT, LegalPage } from "@/modules/legal/legal-page";
+import { LEGAL_CONTENT } from "@/modules/legal/content";
+import { LegalPage } from "@/modules/legal/legal-page";
 import { LEGAL_INDEXABLE } from "@/modules/legal/provider";
 import { isLegalDoc } from "@/modules/legal/types";
 import { DEFAULT_LOCALE, isLocale, LOCALES } from "@/modules/shared/config/locales";

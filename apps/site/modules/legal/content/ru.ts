@@ -7,6 +7,8 @@ export const ru: LegalContent = {
         translationNote:
             "Это перевод для удобства. При расхождении действует текст на испанском языке.",
         otherDocs: "Документы",
+        smoke: "Эффект дыма",
+        download: "Скачать",
         pending: {
             nif: "[NIF будет указан]",
             address: "[адрес будет указан]",

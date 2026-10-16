@@ -14,3 +14,4 @@ export const theme = {
 
 export { RenderBlocks } from "./blocks/render-blocks";
 export { SiteFrame } from "./frame";
+export { SmokeToggle } from "./ui/switches";

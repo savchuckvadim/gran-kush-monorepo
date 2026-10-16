@@ -1,13 +1,23 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useLocale } from "next-intl";
 
 import { type Locale, LOCALE_LABELS, LOCALES } from "@/modules/shared/config/locales";
 import { Link, usePathname } from "@/modules/shared/i18n/navigation";
 
-import { MoonIcon, SunIcon } from "./icons";
-import { type Mode, MODE_EVENT, MODE_KEY, readMode, subscribeMode } from "./mode";
+import { LeafIcon, MoonIcon, SunIcon } from "./icons";
+import {
+    isSmokeOff,
+    type Mode,
+    MODE_EVENT,
+    MODE_KEY,
+    readMode,
+    setSmokeOff,
+    SMOKE_KEY,
+    subscribeMode,
+    subscribeSmoke,
+} from "./mode";
 
 export const ModeSwitch = ({ label }: { label: string }) => {
     const mode = useSyncExternalStore<Mode>(subscribeMode, readMode, () => "dark");
@@ -39,6 +49,44 @@ export const ModeSwitch = ({ label }: { label: string }) => {
                 <MoonIcon className="ic-moon" />
                 <SunIcon className="ic-sun" />
             </span>
+        </button>
+    );
+};
+
+// Only pages that show this switch honour the saved choice; elsewhere the smoke is part of the design.
+export const SmokeToggle = ({ label, className }: { label: string; className?: string }) => {
+    const off = useSyncExternalStore(subscribeSmoke, isSmokeOff, () => false);
+
+    useEffect(() => {
+        try {
+            if (localStorage.getItem(SMOKE_KEY) === "off") setSmokeOff(true);
+        } catch {
+            // storage blocked: the smoke stays on
+        }
+        return () => setSmokeOff(false);
+    }, []);
+
+    const toggle = () => {
+        setSmokeOff(!off);
+        try {
+            if (off) localStorage.removeItem(SMOKE_KEY);
+            else localStorage.setItem(SMOKE_KEY, "off");
+        } catch {
+            // private mode: the choice simply is not remembered
+        }
+    };
+
+    return (
+        <button
+            type="button"
+            role="switch"
+            aria-checked={!off}
+            aria-label={label}
+            title={label}
+            className={className}
+            onClick={toggle}
+        >
+            <LeafIcon off={off} />
         </button>
     );
 };

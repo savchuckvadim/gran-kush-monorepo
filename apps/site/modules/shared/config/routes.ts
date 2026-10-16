@@ -8,6 +8,9 @@ export const ROUTES = {
     page: (locale: Locale, slug: string) =>
         slug === HOME_SLUG ? `/${locale}` : `/${locale}/${slug}`,
     legal: (locale: Locale, doc: string) => `/${locale}/legal/${doc}`,
+    legalFile: (locale: Locale, doc: string, format: string) => `/${locale}/legal/${doc}/${format}`,
+    partners: (locale: Locale) => `/${locale}/partners`,
+    partnersFile: (locale: Locale, format: string) => `/${locale}/partners/${format}`,
 };
 
 const CRM_PATHS = {

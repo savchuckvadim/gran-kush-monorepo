@@ -96,6 +96,15 @@ export const SunIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
+// Leaf; crossed out while the smoke is off.
+export const LeafIcon = ({ off }: { off: boolean }) => (
+    <svg {...stroke} strokeWidth={2}>
+        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+        <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+        {off && <path d="m3 3 18 18" />}
+    </svg>
+);
+
 export const CheckIcon = () => (
     <svg {...stroke} strokeWidth={2.4}>
         <path d="M20 6 9 17l-5-5" />

@@ -5,6 +5,8 @@ export const es: LegalContent = {
         eyebrow: "Legal",
         updated: "Última actualización",
         otherDocs: "Documentos legales",
+        smoke: "Efecto de humo",
+        download: "Descargar",
         pending: {
             nif: "[NIF pendiente]",
             address: "[domicilio pendiente]",

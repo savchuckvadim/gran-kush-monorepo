@@ -27,6 +27,62 @@
     font-size: 14px;
 }
 
+.legal__bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 16px;
+}
+
+.legal__tools {
+    display: flex;
+    gap: 6px;
+}
+
+.legal .legal__tool {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--fg-2);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.legal .legal__tool:hover {
+    color: var(--fg);
+    border-color: var(--fg-3);
+}
+
+.legal__tool svg {
+    width: 15px;
+    height: 15px;
+    flex: none;
+}
+
+.legal__tool--icon {
+    width: 34px;
+    padding: 0;
+    justify-content: center;
+}
+
+.legal__tool--icon svg {
+    width: 17px;
+    height: 17px;
+}
+
+.legal__tool[aria-checked="false"] {
+    color: var(--fg-3);
+}
+
 .legal__note {
     color: var(--fg-2);
     font-size: 14px;

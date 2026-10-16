@@ -22,3 +22,6 @@ export const theme = {
 
 export { SiteFrame } from "./frame";
 export { RenderBlocks } from "./render-blocks";
+
+// Nagual has no smoke layer, so there is nothing to switch off.
+export const SmokeToggle: (props: { label: string; className?: string }) => null = () => null;

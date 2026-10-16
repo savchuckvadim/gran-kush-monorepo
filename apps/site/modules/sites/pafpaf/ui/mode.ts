@@ -15,6 +15,22 @@ export const subscribeMode = (callback: () => void) => {
     return () => window.removeEventListener(MODE_EVENT, callback);
 };
 
+export const SMOKE_KEY = "pafpaf.smoke";
+export const SMOKE_EVENT = "pafpaf:smoke";
+
+export const isSmokeOff = () => document.documentElement.getAttribute("data-smoke") === "off";
+
+export const subscribeSmoke = (callback: () => void) => {
+    window.addEventListener(SMOKE_EVENT, callback);
+    return () => window.removeEventListener(SMOKE_EVENT, callback);
+};
+
+export const setSmokeOff = (off: boolean) => {
+    if (off) document.documentElement.setAttribute("data-smoke", "off");
+    else document.documentElement.removeAttribute("data-smoke");
+    window.dispatchEvent(new Event(SMOKE_EVENT));
+};
+
 export interface BurstDetail {
     x: number;
     y: number;

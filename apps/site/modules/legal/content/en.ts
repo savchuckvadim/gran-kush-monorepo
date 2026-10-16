@@ -7,6 +7,8 @@ export const en: LegalContent = {
         translationNote:
             "This is a translation for convenience. In case of any discrepancy, the Spanish version prevails.",
         otherDocs: "Legal documents",
+        smoke: "Smoke effect",
+        download: "Download",
         pending: {
             nif: "[tax ID pending]",
             address: "[address pending]",
