@@ -2,22 +2,28 @@ import { type ContentLocale, resolveLabel } from "@common/i18n";
 import {
     CabinetOrderDetailDto,
     CabinetOrderListDto,
+    CabinetOrderStageDto,
 } from "@modules/portal/crm/orders/api/dto/cabinet-order.dto";
 import { Order } from "@modules/portal/crm/orders/domain/entity/order.entity";
+import type { OrderStage } from "@modules/portal/crm/orders/domain/entity/order-stage.entity";
 import { memberMayCancel } from "@modules/portal/crm/orders/domain/order-stage.rules";
+
+/** Стадия глазами участника: как её назвал клуб, на языке запроса. */
+const toCabinetStage = (
+    stage: Pick<OrderStage, "id" | "name" | "nameI18n" | "color" | "semantic">,
+    locale: ContentLocale
+): CabinetOrderStageDto => ({
+    id: stage.id,
+    name: resolveLabel({ label: stage.name, labelI18n: stage.nameI18n }, locale),
+    color: stage.color,
+    semantic: stage.semantic,
+});
 
 export function mapOrderToCabinetListDto(o: Order, locale: ContentLocale): CabinetOrderListDto {
     return {
         id: o.id,
         orderNumber: o.orderNumber,
-        stage: o.stage
-            ? {
-                  id: o.stage.id,
-                  name: resolveLabel({ label: o.stage.name, labelI18n: o.stage.nameI18n }, locale),
-                  color: o.stage.color,
-                  semantic: o.stage.semantic,
-              }
-            : null,
+        stage: o.stage ? toCabinetStage(o.stage, locale) : null,
         paymentStatus: o.paymentStatus,
         total: Number(o.total),
         itemsCount: o.items?.length ?? 0,
@@ -26,9 +32,15 @@ export function mapOrderToCabinetListDto(o: Order, locale: ContentLocale): Cabin
     };
 }
 
-export function mapOrderToCabinetDetailDto(o: Order, locale: ContentLocale): CabinetOrderDetailDto {
+/** `funnel` — стадии воронки заказа по порядку: из них кабинет рисует полосу стадий. */
+export function mapOrderToCabinetDetailDto(
+    o: Order,
+    locale: ContentLocale,
+    funnel: readonly OrderStage[]
+): CabinetOrderDetailDto {
     return {
         ...mapOrderToCabinetListDto(o, locale),
+        funnel: funnel.map((stage) => toCabinetStage(stage, locale)),
         subtotal: Number(o.subtotal),
         discount: Number(o.discount),
         notes: o.notes ?? null,

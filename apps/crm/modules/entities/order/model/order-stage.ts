@@ -1,4 +1,4 @@
-import type { OrderFunnel, OrderFunnelStage, OrderStage, StageSemantic } from "./order.types";
+import type { OrderFunnel, OrderFunnelStage, OrderStage } from "./order.types";
 
 type StageKind = Pick<OrderStage, "semantic" | "isTerminalSuccess" | "isTerminalFailure">;
 
@@ -12,17 +12,8 @@ export const isSuccessStage = (stage: StageKind): boolean =>
 export const isClosedStage = (stage: StageKind): boolean =>
     isFailureStage(stage) || isSuccessStage(stage);
 
-/** For stages saved without a colour: grey for new, blue in work, green and red to close. */
-const FALLBACK_COLOR: Readonly<Record<StageSemantic, string>> = {
-    NEW: "#64748b",
-    IN_PROGRESS: "#2563eb",
-    SUCCESS: "#16a34a",
-    FAILURE: "#dc2626",
-};
-
-export const stageColor = (
-    stage: Pick<OrderStage, "semantic"> & { color?: string | null }
-): string => stage.color || FALLBACK_COLOR[stage.semantic];
+// the colour rule is shared with the member cabinet, which shows the same ribbon read-only
+export { stageColor } from "@/modules/shared/lib/stage-color";
 
 export interface FunnelStages {
     /** Columns of the kanban, chevrons of the stage bar */

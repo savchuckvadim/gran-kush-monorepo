@@ -5866,6 +5866,8 @@ export interface components {
             orderedAt: string;
             /** @description Участник ещё может отменить заказ сам */
             canCancel: boolean;
+            /** @description Стадии воронки заказа по порядку — полоса стадий: рабочие (NEW, IN_PROGRESS) и итоговые */
+            funnel: components["schemas"]["CabinetOrderStageDto"][];
             /** @example 38.75 */
             subtotal: number;
             /** @example 0 */

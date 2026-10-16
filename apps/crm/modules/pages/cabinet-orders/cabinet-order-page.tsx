@@ -16,8 +16,9 @@ import { useMoneyFormat } from "@/modules/shared/lib/use-money-format";
 
 import { OrderItemsList } from "./order-items-list";
 import { OrderStageBadge } from "./order-stage-badge";
+import { OrderStageStrip } from "./order-stage-strip";
 
-/** Один заказ участника: стадия, позиции, суммы и отмена, пока клуб не взял заказ в работу. */
+/** Один заказ участника: путь по стадиям, позиции, суммы и отмена, пока клуб не взял заказ в работу. */
 export function CabinetOrderPage({ slug, orderId }: { slug: string; orderId: string }) {
     const t = useTranslations("cabinet.orders");
     const links = useCabinetLinks();
@@ -70,6 +71,8 @@ export function CabinetOrderPage({ slug, orderId }: { slug: string; orderId: str
                         {t("orderedAt", { date: formatDate(data.orderedAt) })}
                         {closedAt && ` · ${t("closedAt", { date: formatDate(closedAt) })}`}
                     </p>
+
+                    <OrderStageStrip funnel={data.funnel} stage={data.stage} />
 
                     <OrderItemsList items={data.items} />
 

@@ -79,6 +79,13 @@ export class CabinetOrderListDto {
 }
 
 export class CabinetOrderDetailDto extends CabinetOrderListDto {
+    @ApiProperty({
+        type: () => [CabinetOrderStageDto],
+        description:
+            "Стадии воронки заказа по порядку — полоса стадий: рабочие (NEW, IN_PROGRESS) и итоговые",
+    })
+    funnel: CabinetOrderStageDto[];
+
     @ApiProperty({ example: 38.75, type: Number })
     subtotal: number;
 

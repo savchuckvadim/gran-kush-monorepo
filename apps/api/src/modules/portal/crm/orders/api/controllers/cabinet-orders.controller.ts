@@ -67,7 +67,11 @@ export class CabinetOrdersController {
         @RequestLocale() locale: ContentLocale
     ): Promise<CabinetOrderDetailDto> {
         const order = await this.placeOrder.execute(member.id, member.portalId, dto);
-        return mapOrderToCabinetDetailDto(order, locale);
+        return mapOrderToCabinetDetailDto(
+            order,
+            locale,
+            await this.stages.funnelOf(order, member.portalId)
+        );
     }
 
     @Get()
@@ -105,7 +109,11 @@ export class CabinetOrdersController {
         if (!order || order.memberId !== member.id) {
             throw new NotFoundException("Заказ не найден");
         }
-        return mapOrderToCabinetDetailDto(order, locale);
+        return mapOrderToCabinetDetailDto(
+            order,
+            locale,
+            await this.stages.funnelOf(order, member.portalId)
+        );
     }
 
     @Patch(":id/cancel")
@@ -128,6 +136,10 @@ export class CabinetOrdersController {
             member.portalId,
             dto.reason
         );
-        return mapOrderToCabinetDetailDto(order, locale);
+        return mapOrderToCabinetDetailDto(
+            order,
+            locale,
+            await this.stages.funnelOf(order, member.portalId)
+        );
     }
 }

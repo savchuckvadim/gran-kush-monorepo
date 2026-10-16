@@ -275,7 +275,8 @@
             "cancelTitle": "Cancel the order?",
             "cancelText": "The club has not started on it yet. Once cancelled, the products go back to the shop.",
             "cancelConfirm": "Cancel order",
-            "keep": "Keep it"
+            "keep": "Keep it",
+            "stagesLabel": "Order stages"
         },
         "account": {
             "title": "Account",

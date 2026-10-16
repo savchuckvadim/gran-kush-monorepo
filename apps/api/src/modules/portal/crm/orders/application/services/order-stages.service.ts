@@ -88,6 +88,11 @@ export class OrderStagesService {
         return this.applyStage(order, target, portalId, { employeeId, adminNotes });
     }
 
+    /** Стадии воронки, в которой стоит заказ (или воронки по умолчанию, если стадии нет), по порядку. */
+    async funnelOf(order: Order, portalId: string): Promise<OrderStage[]> {
+        return this.orderRepository.findFunnelStages(portalId, order.stage?.stageCategoryId);
+    }
+
     /** Число и сумма заказов в стадиях воронки — шапки колонок канбана. */
     async summarizeFunnel(
         portalId: string,

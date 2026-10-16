@@ -181,6 +181,16 @@ describe("Cabinet shop (e2e)", () => {
         expect((await cabinet(stranger, "get", "/cabinet/orders")).body.items).toEqual([]);
         expect((await cabinet(stranger, "get", `/cabinet/orders/${orderId}`)).status).toBe(404);
 
+        // the stage bar: the funnel of the order in order, its current stage among them
+        const detail = await cabinet(buyer, "get", `/cabinet/orders/${orderId}`);
+        const funnel = detail.body.funnel as { id: string; semantic: string; name: string }[];
+        expect(funnel.length).toBeGreaterThan(1);
+        expect(funnel[0]?.semantic).toBe("NEW");
+        expect(funnel.map((stage) => stage.id)).toContain(detail.body.stage.id);
+        expect(
+            funnel.every((stage) => typeof stage.name === "string" && stage.name.length > 0)
+        ).toBe(true);
+
         const cancelled = await cabinet(buyer, "patch", `/cabinet/orders/${orderId}/cancel`).send(
             {}
         );
