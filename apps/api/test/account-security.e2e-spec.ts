@@ -143,6 +143,7 @@ describe("Account security (e2e)", () => {
             email: ana.email,
             hasPassword: true,
             google: { linked: false, email: null },
+            telegram: { linked: false, username: null },
         });
 
         const missing = await security(ana.cookies).password({ newPassword: NEW_PASSWORD });
@@ -214,7 +215,7 @@ describe("Account security (e2e)", () => {
 
         const refused = await security(gia.cookies).unlink();
         expect(refused.status).toBe(409);
-        expect(refused.body.code).toBe("password_required");
+        expect(refused.body.code).toBe("last_sign_in_method");
 
         const set = await security(gia.cookies).password({ newPassword: NEW_PASSWORD });
         expect(set.status).toBe(200);

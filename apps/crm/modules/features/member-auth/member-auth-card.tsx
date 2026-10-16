@@ -9,7 +9,7 @@ export function MemberAuthCard({
     section,
     children,
 }: {
-    section: "login" | "register" | "forgot" | "reset" | "confirm";
+    section: "login" | "register" | "forgot" | "reset" | "confirm" | "telegram";
     children: React.ReactNode;
 }) {
     const t = useTranslations(`cabinet.auth.${section}`);

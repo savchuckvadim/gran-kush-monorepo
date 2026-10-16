@@ -1103,6 +1103,80 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/cabinet/auth/telegram/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Настроен ли вход через Telegram и имя бота для виджета */
+        get: operations["MemberTelegramAuth_config"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cabinet/auth/telegram": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Войти через Telegram
+         * @description Привязанный Telegram входит (куки сессии). Новый — `email_required` с билетом на шаг «укажите почту». Неверная подпись — 400 `telegram_signature`.
+         */
+        post: operations["MemberTelegramAuth_signIn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cabinet/auth/telegram/email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Шаг «укажите почту»: отправить ссылку подтверждения
+         * @description Ответ одинаковый для любого адреса. Устаревший билет — 400 `telegram_ticket`.
+         */
+        post: operations["MemberTelegramAuth_email"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cabinet/auth/telegram/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ссылка из письма: войти, заведя аккаунт или привязав Telegram к существующему */
+        post: operations["MemberTelegramAuth_confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cabinet/account/security": {
         parameters: {
             query?: never;
@@ -1110,7 +1184,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Способы входа: пароль задан ли, привязан ли Google */
+        /** Способы входа: задан ли пароль, привязаны ли Google и Telegram */
         get: operations["CabinetAccountSecurity_get"];
         put?: never;
         post?: never;
@@ -1152,9 +1226,33 @@ export interface paths {
         post?: never;
         /**
          * Отвязать Google
-         * @description Без пароля нельзя — 409 с code `password_required`.
+         * @description Последний способ входа не снимается — 409 с code `last_sign_in_method`.
          */
         delete: operations["CabinetAccountSecurity_unlink"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cabinet/account/security/telegram": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Привязать Telegram (подписанный профиль из виджета)
+         * @description Telegram другого аккаунта — 409 `telegram_taken`, неверная подпись — 400 `telegram_signature`.
+         */
+        post: operations["CabinetAccountSecurity_linkTelegramAccount"];
+        /**
+         * Отвязать Telegram
+         * @description Последний способ входа не снимается — 409 с code `last_sign_in_method`.
+         */
+        delete: operations["CabinetAccountSecurity_unlinkTelegramAccount"];
         options?: never;
         head?: never;
         patch?: never;
@@ -3851,10 +3949,61 @@ export interface components {
              */
             message: string;
         };
+        TelegramConfigDto: {
+            /** @description Бот настроен — показывать кнопку Telegram */
+            enabled: boolean;
+            /** @example pafpaf_bot */
+            botUsername: string | null;
+        };
+        TelegramAuthDto: {
+            /** @example 123456789 */
+            id: number;
+            /** @example Ana */
+            first_name: string;
+            /** @example López */
+            last_name?: string;
+            /** @example ana_lopez */
+            username?: string;
+            photo_url?: string;
+            /**
+             * @description Unix time входа в Telegram
+             * @example 1760000000
+             */
+            auth_date: number;
+            /** @description Подпись Telegram, hex */
+            hash: string;
+        };
+        TelegramSignInResultDto: {
+            /**
+             * @description email_required — Telegram ещё не привязан: нужен шаг «укажите почту»
+             * @enum {string}
+             */
+            status: "signed_in" | "email_required";
+            /** @description Билет шага «укажите почту», 30 минут */
+            ticket?: string;
+        };
+        TelegramEmailDto: {
+            ticket: string;
+            /** @example ana@example.com */
+            email: string;
+        };
+        TelegramStatusDto: {
+            /** @enum {string} */
+            status: "signed_in" | "email_sent";
+        };
+        TelegramConfirmDto: {
+            /** @description Токен из ссылки в письме */
+            token: string;
+        };
         GoogleSignInDto: {
             linked: boolean;
             /** @example ana@gmail.com */
             email: string | null;
+        };
+        TelegramSignInDto: {
+            linked: boolean;
+            /** @example ana_lopez */
+            username: string | null;
         };
         AccountSecurityDto: {
             /** @example ana@example.com */
@@ -3862,6 +4011,7 @@ export interface components {
             /** @description Пароль задан; Google-аккаунт может войти и без него */
             hasPassword: boolean;
             google: components["schemas"]["GoogleSignInDto"];
+            telegram: components["schemas"]["TelegramSignInDto"];
         };
         ChangeAccountPasswordDto: {
             /** @description Текущий пароль; не нужен, если пароля ещё нет (вход только через Google) */
@@ -6617,7 +6767,14 @@ export type SchemaRegisterMemberResponseDto = components['schemas']['RegisterMem
 export type SchemaUploadMemberFilesResponseDto = components['schemas']['UploadMemberFilesResponseDto'];
 export type SchemaMemberConfirmEmailDto = components['schemas']['MemberConfirmEmailDto'];
 export type SchemaMemberConfirmEmailResponseDto = components['schemas']['MemberConfirmEmailResponseDto'];
+export type SchemaTelegramConfigDto = components['schemas']['TelegramConfigDto'];
+export type SchemaTelegramAuthDto = components['schemas']['TelegramAuthDto'];
+export type SchemaTelegramSignInResultDto = components['schemas']['TelegramSignInResultDto'];
+export type SchemaTelegramEmailDto = components['schemas']['TelegramEmailDto'];
+export type SchemaTelegramStatusDto = components['schemas']['TelegramStatusDto'];
+export type SchemaTelegramConfirmDto = components['schemas']['TelegramConfirmDto'];
 export type SchemaGoogleSignInDto = components['schemas']['GoogleSignInDto'];
+export type SchemaTelegramSignInDto = components['schemas']['TelegramSignInDto'];
 export type SchemaAccountSecurityDto = components['schemas']['AccountSecurityDto'];
 export type SchemaChangeAccountPasswordDto = components['schemas']['ChangeAccountPasswordDto'];
 export type SchemaEmployeeProfileFieldDto = components['schemas']['EmployeeProfileFieldDto'];
@@ -9332,6 +9489,152 @@ export interface operations {
             };
         };
     };
+    MemberTelegramAuth_config: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramConfigDto"];
+                };
+            };
+        };
+    };
+    MemberTelegramAuth_signIn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TelegramAuthDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramSignInResultDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberTelegramAuth_email: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TelegramEmailDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramStatusDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MemberTelegramAuth_confirm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TelegramConfirmDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramStatusDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
     CabinetAccountSecurity_get: {
         parameters: {
             query?: never;
@@ -9404,6 +9707,104 @@ export interface operations {
         };
     };
     CabinetAccountSecurity_unlink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountSecurityDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CabinetAccountSecurity_linkTelegramAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TelegramAuthDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountSecurityDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CabinetAccountSecurity_unlinkTelegramAccount: {
         parameters: {
             query?: never;
             header?: never;

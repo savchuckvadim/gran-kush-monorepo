@@ -500,6 +500,14 @@ MEMBER_AUTH_COOKIE_DOMAIN=lvh.me node dist/main.js`; CRM: `NEXT_PUBLIC_API_URL=h
       state, Google другого аккаунта не перепривязывается). Пароль: при наличии — нужен текущий, после смены
       отзываются все сессии (и CRM), это устройство получает новую. Google без пароля не отвязывается. Язык —
       плитка в меню аккаунта. e2e account-security (4).
+- [x] Вход через Telegram (виджет Telegram Login, бот `TG_CLIENT_BOT_USERNAME`, 2026-10-16). Подпись
+      ответа проверяется ключом бота, ответ годен час. Привязанный Telegram входит сразу; новый получает
+      подписанный билет (30 мин) на шаг «укажите почту», на почту уходит ссылка (24 ч,
+      `/{язык}/auth/telegram/confirm`): по ней аккаунт заводится или Telegram привязывается к аккаунту с этой
+      почтой. API: `cabinet/auth/telegram` (`config`, вход, `email`, `confirm`), привязка и отвязка —
+      `POST|DELETE /cabinet/account/security/telegram`. Последний способ входа (пароль, Google, Telegram)
+      не снимается — код `last_sign_in_method`. Ошибки — 400/409/403/503 с кодом, не 401. e2e telegram-auth (6).
+      На проде нужны `TG_CLIENT_BOT_USERNAME` и `/setdomain` → `club.paf-paf.app` в @BotFather.
 
 ### 5. Каталог и заказ
 

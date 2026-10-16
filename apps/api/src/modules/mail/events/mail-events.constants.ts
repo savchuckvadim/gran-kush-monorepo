@@ -33,6 +33,7 @@ export enum EmailType {
     MEMBERSHIP_CONSENT = "membership-consent",
     EMPLOYEE_INVITATION = "employee-invitation",
     ACCOUNT_SETUP = "account-setup",
+    TELEGRAM_EMAIL = "telegram-email",
     OTHER = "other",
 }
 
@@ -46,5 +47,6 @@ export const EMAIL_TYPE_LABELS: Record<EmailType, string> = {
     [EmailType.MEMBERSHIP_CONSENT]: "Membership Consent",
     [EmailType.EMPLOYEE_INVITATION]: "Employee Invitation",
     [EmailType.ACCOUNT_SETUP]: "Account Setup",
+    [EmailType.TELEGRAM_EMAIL]: "Telegram Email Link",
     [EmailType.OTHER]: "Other",
 } as const;

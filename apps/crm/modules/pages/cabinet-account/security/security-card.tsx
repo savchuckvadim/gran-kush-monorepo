@@ -13,9 +13,10 @@ import { useAccountSecurity } from "@/modules/entities/cabinet-account";
 import { GoogleRow } from "./google-row";
 import { PasswordRow } from "./password-row";
 import { SignOutRow } from "./sign-out-row";
+import { TelegramRow } from "./telegram-row";
 import { useGoogleLinkResult } from "./use-google-link-result";
 
-/** «Вход и безопасность»: пароль, Google, выход со всех устройств (TASK-716). */
+/** «Вход и безопасность»: пароль, Google, Telegram, выход со всех устройств (TASK-716). */
 export function SecurityCard() {
     const t = useTranslations("cabinet.account.security");
     const security = useAccountSecurity();
@@ -40,6 +41,7 @@ export function SecurityCard() {
                 <ul className="divide-y">
                     <PasswordRow hasPassword={security.data.hasPassword} />
                     <GoogleRow security={security.data} />
+                    <TelegramRow security={security.data} />
                     <SignOutRow />
                 </ul>
             )}

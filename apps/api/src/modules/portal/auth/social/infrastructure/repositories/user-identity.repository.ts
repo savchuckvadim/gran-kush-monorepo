@@ -57,7 +57,7 @@ export class UserIdentityPrismaRepository extends UserIdentityRepository {
     async findForUser(userId: string, provider: IdentityProvider): Promise<LinkedIdentity | null> {
         return this.prisma.userIdentity.findFirst({
             where: { userId, provider },
-            select: { providerUserId: true, email: true },
+            select: { providerUserId: true, email: true, username: true },
             orderBy: { createdAt: "asc" },
         });
     }

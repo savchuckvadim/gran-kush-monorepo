@@ -87,6 +87,37 @@
                 "done": "Email confirmed. You can log in now.",
                 "failed": "The link did not work: it has expired or was already used. Request a new email on the log in page.",
                 "toLogin": "Go to log in"
+            },
+            "telegram": {
+                "title": "Sign in with Telegram",
+                "subtitle": "One moment",
+                "signingIn": "Signing in…",
+                "errors": {
+                    "telegram_off": "Telegram sign-in is unavailable right now",
+                    "telegram_signature": "Telegram did not confirm the sign-in. Please try again.",
+                    "telegram_ticket": "The sign-in timed out. Press the Telegram button again.",
+                    "telegram_link": "The link did not work: it has expired or was already used. Sign in with Telegram again.",
+                    "telegram_taken": "This Telegram is already linked to another account",
+                    "telegram_other_linked": "Another Telegram is already linked to this account — unlink it first",
+                    "account_blocked": "This account is blocked. Please contact support.",
+                    "last_sign_in_method": "This is your only way to sign in — set a password or link another one first."
+                },
+                "email": {
+                    "title": "Enter your email",
+                    "description": "Telegram does not share your email, and clubs send confirmations to it. We will send you a link — it signs you in.",
+                    "label": "Email",
+                    "required": "Enter your email",
+                    "invalid": "Check the email address",
+                    "send": "Send link",
+                    "sending": "Sending…",
+                    "sent": "We sent an email to {email}. Open the link in it within 24 hours.",
+                    "sentTitle": "Check your email",
+                    "close": "Got it"
+                },
+                "confirm": {
+                    "working": "Signing you in…",
+                    "toLogin": "Go to log in"
+                }
             }
         },
         "home": {
@@ -299,7 +330,7 @@
                 "password": {
                     "title": "Password",
                     "isSet": "A password is set.",
-                    "notSet": "No password — you sign in with Google.",
+                    "notSet": "No password — you sign in with Google or Telegram.",
                     "set": "Set a password",
                     "change": "Change password",
                     "setTitle": "Set a password",
@@ -320,11 +351,11 @@
                     "title": "Google",
                     "linkedAs": "Linked: {email}.",
                     "notLinked": "Not linked. Sign in with one click.",
-                    "onlyWay": "This is your only way to sign in — set a password first.",
+                    "onlyWay": "This is your only way to sign in — set a password or link Telegram first.",
                     "link": "Link Google",
                     "unlink": "Unlink",
                     "unlinkTitle": "Unlink Google?",
-                    "unlinkDescription": "You will no longer sign in with Google, only with your password.",
+                    "unlinkDescription": "You will no longer be able to sign in with Google.",
                     "unlinked": "Google unlinked",
                     "cancel": "Cancel",
                     "result": {
@@ -335,6 +366,19 @@
                         "google_off": "Google sign-in is not available right now",
                         "failed": "Could not link Google"
                     }
+                },
+                "telegram": {
+                    "title": "Telegram",
+                    "linkedAs": "Linked: {username}.",
+                    "noUsername": "account without a username",
+                    "notLinked": "Not linked. Sign in with one click.",
+                    "onlyWay": "This is your only way to sign in — set a password first.",
+                    "unlink": "Unlink",
+                    "unlinkTitle": "Unlink Telegram?",
+                    "unlinkDescription": "You will no longer be able to sign in with Telegram.",
+                    "unlinked": "Telegram unlinked",
+                    "linked": "Telegram linked",
+                    "cancel": "Cancel"
                 },
                 "signOut": {
                     "title": "Sign out everywhere",

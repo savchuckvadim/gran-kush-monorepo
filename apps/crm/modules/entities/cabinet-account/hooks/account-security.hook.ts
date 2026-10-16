@@ -11,7 +11,7 @@ import {
 
 import { cabinetKeys } from "./cabinet-account.hook";
 
-const securityKey = [...cabinetKeys.me, "security"] as const;
+export const securityKey = [...cabinetKeys.me, "security"] as const;
 
 export function useAccountSecurity() {
     return useQuery({ queryKey: securityKey, queryFn: getAccountSecurity, retry: false });

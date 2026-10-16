@@ -87,6 +87,17 @@ export class SocialLoginService {
     }
 
     private async activateAndLink(user: User, profile: GoogleProfile): Promise<User> {
+        const current = await this.claimAccount(user);
+        await this.linkIdentity(current.id, profile);
+        return current;
+    }
+
+    /**
+     * Владелец только что доказал адрес аккаунта (Google или ссылка из письма для Telegram):
+     * неподтверждённый или ожидающий аккаунт активируется. Пароль неподтверждённого аккаунта мог
+     * задать не владелец адреса (TASK-664) — он сбрасывается, сессии отзываются.
+     */
+    async claimAccount(user: User): Promise<User> {
         if (user.status === UserAccountStatus.blocked) {
             throw new UnauthorizedException("Account is blocked");
         }
@@ -97,8 +108,6 @@ export class SocialLoginService {
             !current.isActive ||
             current.status === UserAccountStatus.pending_claim;
         if (needsClaim) {
-            // Пароль неподтверждённого аккаунта мог задать не владелец адреса (TASK-664):
-            // владелец только что доказал адрес Google-ом — пароль сбрасываем, сессии отзываем.
             const dropPassword = !current.emailConfirmed && current.passwordHash !== null;
             current = await this.userRepository.update(current.id, {
                 status: UserAccountStatus.active,
@@ -110,8 +119,6 @@ export class SocialLoginService {
             });
             await this.refreshTokens.revokeAllForUser(current.id);
         }
-
-        await this.linkIdentity(current.id, profile);
         return current;
     }
 

@@ -17,6 +17,8 @@ import { safeReturnPath, useCabinetLinks } from "@/modules/processes/member-auth
 import { googleSignInUrl } from "@/modules/shared/api/google-sign-in";
 import { GoogleButton } from "@/modules/shared/ui/GoogleButton";
 
+import { TelegramSignIn } from "./telegram/telegram-sign-in";
+
 const EMAIL_NOT_CONFIRMED = "Email not confirmed";
 
 /** Вход участника. После успеха возвращает на страницу, с которой человека увели (`?from=`). */
@@ -114,6 +116,7 @@ export function MemberLoginForm() {
                 label={t("google")}
                 separator={t("or")}
             />
+            <TelegramSignIn returnTo={from} />
 
             <p className="text-center text-sm text-muted-foreground">
                 {t("noAccount")}{" "}

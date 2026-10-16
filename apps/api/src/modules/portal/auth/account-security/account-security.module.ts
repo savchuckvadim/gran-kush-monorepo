@@ -8,7 +8,7 @@ import { UsersModule } from "@modules/users/users.module";
 import { CabinetAccountSecurityController } from "./api/controllers/cabinet-account-security.controller";
 import { AccountSecurityService } from "./application/services/account-security.service";
 import { ChangeAccountPasswordUseCase } from "./application/use-cases/change-account-password.use-case";
-import { UnlinkGoogleUseCase } from "./application/use-cases/unlink-google.use-case";
+import { UnlinkProviderUseCase } from "./application/use-cases/unlink-provider.use-case";
 
 /**
  * Способы входа аккаунта (TASK-716). Отдельный модуль: настройки входа опираются на модули
@@ -17,6 +17,6 @@ import { UnlinkGoogleUseCase } from "./application/use-cases/unlink-google.use-c
 @Module({
     imports: [UsersModule, SharedAuthModule, MemberAuthModule, SocialAuthModule],
     controllers: [CabinetAccountSecurityController],
-    providers: [AccountSecurityService, ChangeAccountPasswordUseCase, UnlinkGoogleUseCase],
+    providers: [AccountSecurityService, ChangeAccountPasswordUseCase, UnlinkProviderUseCase],
 })
 export class AccountSecurityModule {}

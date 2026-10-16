@@ -1,32 +1,23 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
-import { useMutation } from "@tanstack/react-query";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 
 import { Button } from "@workspace/ui";
 
 import { confirmMemberEmail } from "@/modules/entities/cabinet-account";
 import { useCabinetLinks } from "@/modules/processes/member-auth";
+import { useMountAction } from "@/modules/shared/lib/use-mount-action";
 
 /** Ссылка из письма подтверждения: токен в адресе, подтверждение запускается один раз при открытии. */
 export function MemberConfirmEmail({ token }: { token: string }) {
     const t = useTranslations("cabinet.auth.confirm");
     const links = useCabinetLinks();
-    const confirm = useMutation({ mutationFn: confirmMemberEmail });
-    const started = useRef(false);
+    const confirm = useMountAction(() => confirmMemberEmail(token));
 
-    useEffect(() => {
-        // Строгий режим React вызывает эффект дважды, а токен одноразовый
-        if (started.current) return;
-        started.current = true;
-        confirm.mutate(token);
-    }, [confirm, token]);
-
-    if (confirm.isError) {
+    if (confirm.status === "error") {
         return (
             <div className="space-y-4 text-center" role="alert">
                 <XCircle className="mx-auto size-10 text-destructive" aria-hidden="true" />
@@ -38,7 +29,7 @@ export function MemberConfirmEmail({ token }: { token: string }) {
         );
     }
 
-    if (confirm.isSuccess) {
+    if (confirm.status === "success") {
         return (
             <div className="space-y-4 text-center" role="status">
                 <CheckCircle2 className="mx-auto size-10 text-success" aria-hidden="true" />

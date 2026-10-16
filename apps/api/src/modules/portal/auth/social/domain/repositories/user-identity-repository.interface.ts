@@ -16,6 +16,8 @@ export interface LinkIdentityInput {
 export interface LinkedIdentity {
     providerUserId: string;
     email: string | null;
+    /** @username в Telegram; у Google — null */
+    username: string | null;
 }
 
 export abstract class UserIdentityRepository {

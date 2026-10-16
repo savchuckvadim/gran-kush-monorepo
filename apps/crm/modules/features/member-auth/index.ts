@@ -4,3 +4,6 @@ export * from "./member-forgot-password-form";
 export * from "./member-login-form";
 export * from "./member-register-form";
 export * from "./member-reset-password-form";
+export * from "./telegram/member-confirm-telegram";
+export * from "./telegram/telegram-sign-in";
+export * from "./telegram/use-telegram-error-text";

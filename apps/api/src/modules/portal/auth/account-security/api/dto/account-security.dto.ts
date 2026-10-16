@@ -12,7 +12,15 @@ export class GoogleSignInDto {
     email: string | null;
 }
 
-/** Способы входа аккаунта: пароль, Google. */
+export class TelegramSignInDto {
+    @ApiProperty({ type: Boolean })
+    linked: boolean;
+
+    @ApiProperty({ type: String, nullable: true, example: "ana_lopez" })
+    username: string | null;
+}
+
+/** Способы входа аккаунта: пароль, Google, Telegram. */
 export class AccountSecurityDto {
     @ApiProperty({ type: String, example: "ana@example.com" })
     email: string;
@@ -25,6 +33,9 @@ export class AccountSecurityDto {
 
     @ApiProperty({ type: () => GoogleSignInDto })
     google: GoogleSignInDto;
+
+    @ApiProperty({ type: () => TelegramSignInDto })
+    telegram: TelegramSignInDto;
 }
 
 export class ChangeAccountPasswordDto {

@@ -87,6 +87,37 @@
                 "done": "Correo confirmado. Ya puedes entrar.",
                 "failed": "El enlace no funcionó: ha caducado o ya se usó. Solicita un mensaje nuevo en la página de acceso.",
                 "toLogin": "Ir a iniciar sesión"
+            },
+            "telegram": {
+                "title": "Entrar con Telegram",
+                "subtitle": "Un momento",
+                "signingIn": "Entrando…",
+                "errors": {
+                    "telegram_off": "El acceso con Telegram no está disponible ahora",
+                    "telegram_signature": "Telegram no confirmó el acceso. Inténtalo de nuevo.",
+                    "telegram_ticket": "Se agotó el tiempo. Pulsa de nuevo el botón de Telegram.",
+                    "telegram_link": "El enlace no funcionó: ha caducado o ya se usó. Entra de nuevo con Telegram.",
+                    "telegram_taken": "Este Telegram ya está vinculado a otra cuenta",
+                    "telegram_other_linked": "La cuenta ya tiene otro Telegram vinculado: desvincúlalo primero",
+                    "account_blocked": "La cuenta está bloqueada. Escribe a soporte.",
+                    "last_sign_in_method": "Es tu única forma de entrar: crea antes una contraseña o vincula otra."
+                },
+                "email": {
+                    "title": "Indica tu correo",
+                    "description": "Telegram no comparte tu correo y los clubes envían allí las confirmaciones. Te enviaremos un enlace para entrar.",
+                    "label": "Correo",
+                    "required": "Indica tu correo",
+                    "invalid": "Revisa la dirección de correo",
+                    "send": "Enviar enlace",
+                    "sending": "Enviando…",
+                    "sent": "Hemos enviado un correo a {email}. Abre el enlace en las próximas 24 horas.",
+                    "sentTitle": "Revisa tu correo",
+                    "close": "Entendido"
+                },
+                "confirm": {
+                    "working": "Entrando en tu cuenta…",
+                    "toLogin": "Ir a iniciar sesión"
+                }
             }
         },
         "home": {
@@ -299,7 +330,7 @@
                 "password": {
                     "title": "Contraseña",
                     "isSet": "Tienes contraseña.",
-                    "notSet": "Sin contraseña: entras con Google.",
+                    "notSet": "Sin contraseña: entras con Google o Telegram.",
                     "set": "Crear contraseña",
                     "change": "Cambiar contraseña",
                     "setTitle": "Crear contraseña",
@@ -320,11 +351,11 @@
                     "title": "Google",
                     "linkedAs": "Vinculado: {email}.",
                     "notLinked": "Sin vincular. Entra con un clic.",
-                    "onlyWay": "Es tu única forma de entrar: crea antes una contraseña.",
+                    "onlyWay": "Es tu única forma de entrar: crea antes una contraseña o vincula Telegram.",
                     "link": "Vincular Google",
                     "unlink": "Desvincular",
                     "unlinkTitle": "¿Desvincular Google?",
-                    "unlinkDescription": "Ya no podrás entrar con Google, solo con tu contraseña.",
+                    "unlinkDescription": "Ya no podrás entrar con Google.",
                     "unlinked": "Google desvinculado",
                     "cancel": "Cancelar",
                     "result": {
@@ -335,6 +366,19 @@
                         "google_off": "El acceso con Google no está disponible ahora",
                         "failed": "No se pudo vincular Google"
                     }
+                },
+                "telegram": {
+                    "title": "Telegram",
+                    "linkedAs": "Vinculado: {username}.",
+                    "noUsername": "cuenta sin nombre de usuario",
+                    "notLinked": "No vinculado. Entra con un clic.",
+                    "onlyWay": "Es tu única forma de entrar: crea antes una contraseña.",
+                    "unlink": "Desvincular",
+                    "unlinkTitle": "¿Desvincular Telegram?",
+                    "unlinkDescription": "Ya no podrás entrar con Telegram.",
+                    "unlinked": "Telegram desvinculado",
+                    "linked": "Telegram vinculado",
+                    "cancel": "Cancelar"
                 },
                 "signOut": {
                     "title": "Cerrar sesión en todos los dispositivos",

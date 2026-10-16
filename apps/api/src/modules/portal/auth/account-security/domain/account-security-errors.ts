@@ -2,8 +2,10 @@
 export const ACCOUNT_SECURITY_ERRORS = {
     /** Текущий пароль не назван или не совпал. */
     wrongPassword: "wrong_password",
-    /** Отвязать единственный способ входа нельзя: сначала задать пароль. */
-    passwordRequired: "password_required",
+    /** Последний способ входа не снимается: сначала задать пароль или привязать другой. */
+    lastSignInMethod: "last_sign_in_method",
     /** Google к аккаунту не привязан. */
     googleNotLinked: "google_not_linked",
+    /** Telegram к аккаунту не привязан. */
+    telegramNotLinked: "telegram_not_linked",
 } as const;

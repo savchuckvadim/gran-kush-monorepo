@@ -32,6 +32,7 @@ import { EmployeeInvitationTemplate } from "../../templates/employee-invitation.
 import { MembershipConsentTemplate } from "../../templates/membership-consent.template";
 import { PortalRegistrationTemplate } from "../../templates/portal-registration.template";
 import { ResetPasswordTemplate } from "../../templates/reset-password.template";
+import { TelegramEmailTemplate } from "../../templates/telegram-email.template";
 
 type AuthApp = "crm" | "member";
 
@@ -250,6 +251,31 @@ export class MailService {
             html,
             context: { portalName: params.portalName },
             emailType: EmailType.ACCOUNT_SETUP,
+        });
+    }
+
+    /** Первый вход через Telegram: ссылка подтверждает почту и входит в кабинет. */
+    public async sendTelegramEmailLink(params: {
+        to: string;
+        token: string;
+        language?: SupportedLanguage;
+    }): Promise<boolean> {
+        const language = params.language || DEFAULT_LANGUAGE;
+        const baseUrl = this.frontendUrl("member");
+        if (!baseUrl) {
+            this.logger.warn(
+                `Telegram email for ${params.to} skipped: cabinet URL is not configured`
+            );
+            return false;
+        }
+        const html = await render(
+            TelegramEmailTemplate({ token: params.token, language, baseUrl })
+        );
+        return this.enqueue({
+            to: params.to,
+            subject: EMAIL_SUBJECTS.TELEGRAM_EMAIL[language],
+            html,
+            emailType: EmailType.TELEGRAM_EMAIL,
         });
     }
 

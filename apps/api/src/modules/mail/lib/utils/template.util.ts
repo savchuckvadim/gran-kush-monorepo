@@ -19,6 +19,7 @@ import {
     RESET_PASSWORD_EMAIL_TEXTS,
     type ResetPasswordEmailTexts,
 } from "../../consts/reset-password-email";
+import { TELEGRAM_EMAIL_TEXTS, type TelegramEmailTexts } from "../../consts/telegram-email";
 import {
     Language,
     VERIFICATION_EMAIL_TEXTS,
@@ -68,3 +69,6 @@ export const getResetPasswordEmailTexts = (
 ): ResetPasswordEmailTexts => {
     return RESET_PASSWORD_EMAIL_TEXTS[language] || RESET_PASSWORD_EMAIL_TEXTS[DEFAULT_LANGUAGE];
 };
+
+export const getTelegramEmailTexts = (language: Language = DEFAULT_LANGUAGE): TelegramEmailTexts =>
+    TELEGRAM_EMAIL_TEXTS[language] || TELEGRAM_EMAIL_TEXTS[DEFAULT_LANGUAGE];

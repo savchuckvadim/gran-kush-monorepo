@@ -50,6 +50,11 @@ export const EMAIL_SUBJECTS = {
         es: "Crea una contraseña para entrar",
         en: "Set a password to sign in",
     },
+    TELEGRAM_EMAIL: {
+        ru: "Подтвердите почту для входа через Telegram",
+        es: "Confirma tu correo para entrar con Telegram",
+        en: "Confirm your email to sign in with Telegram",
+    },
 } as const;
 
 /**
