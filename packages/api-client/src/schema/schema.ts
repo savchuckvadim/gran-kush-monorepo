@@ -2885,6 +2885,8 @@ export interface components {
             updatedAt: string;
             /** @description Клубы, которым показан именно этот файл (пусто — не показан никому) */
             sharedWith: components["schemas"]["SharedClubDto"][];
+            /** @description Клубы, которые всё ещё видят прежнюю версию этого документа: показ нужно обновить */
+            staleSharedWith: components["schemas"]["SharedClubDto"][];
         };
         AccountDocumentsResponseDto: {
             documents: components["schemas"]["AccountDocumentDto"][];

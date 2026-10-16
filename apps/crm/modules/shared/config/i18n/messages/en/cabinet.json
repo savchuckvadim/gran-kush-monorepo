@@ -14,7 +14,8 @@
             "manageClubs": "All memberships",
             "account": "Account",
             "language": "Language",
-            "logout": "Log out"
+            "logout": "Log out",
+            "passport": "My passport"
         },
         "auth": {
             "login": {
@@ -143,6 +144,59 @@
             "working": "Please wait…",
             "decline": "Decline",
             "confirm": "Confirm"
+        },
+        "passport": {
+            "title": "My passport",
+            "subtitle": "Your account documents and signature. A club sees only what you have shown it.",
+            "loadError": "Could not load your documents. Refresh the page.",
+            "addDocument": "Add document",
+            "emptyTitle": "No documents yet",
+            "emptyText": "Upload a document and decide which clubs may see it. An uploaded file is not visible to clubs by itself.",
+            "types": {
+                "passport": "Passport",
+                "id_card": "ID card",
+                "residence_permit": "Residence permit",
+                "driving_license": "Driving licence",
+                "other": "Other document"
+            },
+            "sides": {
+                "single": "single side",
+                "front": "front side",
+                "back": "back side"
+            },
+            "open": "Open",
+            "delete": "Delete",
+            "deleteTitle": "Delete the document?",
+            "deleteText": "The document will disappear from your account with all its versions, and clubs it was shown to will stop seeing it.",
+            "deleteConfirm": "Delete",
+            "cancel": "Cancel",
+            "shownTo": "Shown to",
+            "noClubs": "There are no clubs yet that you could show a file to.",
+            "stale": "Sees an older version",
+            "showNew": "Show the new one",
+            "upload": {
+                "title": "New document",
+                "hint": "The file goes into your account. A club will see it only when you turn sharing on.",
+                "type": "Document type",
+                "side": "Side",
+                "number": "Number (optional)",
+                "file": "File",
+                "fileHint": "JPG, PNG, WebP or PDF, up to 8 MB.",
+                "noFile": "Choose a file.",
+                "tooBig": "The file is larger than 8 MB.",
+                "submit": "Upload",
+                "submitting": "Uploading…"
+            },
+            "signature": {
+                "title": "Signature",
+                "have": "Signature uploaded.",
+                "none": "No signature yet.",
+                "upload": "Upload",
+                "replace": "Replace",
+                "tooBig": "The file is larger than 2 MB.",
+                "deleteTitle": "Delete the signature?",
+                "deleteText": "The signature will disappear, and clubs it was shown to will stop seeing it."
+            }
         }
     }
 }

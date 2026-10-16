@@ -88,7 +88,7 @@ export class AccountController {
         @Body() dto: UploadAccountDocumentDto
     ): Promise<AccountDocumentDto> {
         const doc = await this.accountDocuments.uploadDocument(user.userId, dto);
-        return this.toDocumentDto({ document: doc, sharedWith: [] });
+        return this.toDocumentDto({ document: doc, sharedWith: [], staleSharedWith: [] });
     }
 
     @Get("documents/:id/preview")
@@ -230,6 +230,7 @@ export class AccountController {
             createdAt: doc.createdAt.toISOString(),
             updatedAt: doc.updatedAt.toISOString(),
             sharedWith: view.sharedWith,
+            staleSharedWith: view.staleSharedWith,
         };
     }
 

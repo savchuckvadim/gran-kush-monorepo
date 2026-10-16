@@ -52,10 +52,11 @@ export class MemberDocumentSharePrismaRepository implements MemberDocumentShareR
         });
     }
 
-    async revokeDocument(memberId: string, documentId: string): Promise<void> {
-        await this.prisma.memberDocumentShare.deleteMany({
+    async revokeDocument(memberId: string, documentId: string): Promise<boolean> {
+        const { count } = await this.prisma.memberDocumentShare.deleteMany({
             where: { memberId, userDocumentId: documentId },
         });
+        return count > 0;
     }
 
     async revokeAllForMember(memberId: string): Promise<void> {

@@ -65,10 +65,38 @@ export class MemberDocumentSharingService {
         await this.shares.shareDocuments(input.memberId, documentIds);
         for (const documentId of documentIds) {
             await this.record(input, "document", DocumentAccessAction.share, documentId);
+            await this.replaceOlderVersions(input, documentId);
         }
         if (input.selection.signature) {
             await this.shares.setSignatureShared(input.memberId, true);
             await this.record(input, "signature", DocumentAccessAction.share);
+        }
+    }
+
+    /**
+     * Клуб видит один файл на слот документа. Когда владелец показывает новую версию, прежняя у
+     * этого клуба снимается: иначе клуб держал бы у себя и старый, и новый паспорт. Снятые
+     * версии, которые больше никому не показаны, удаляются.
+     */
+    private async replaceOlderVersions(
+        input: { userId: string; memberId: string; portalId: string },
+        documentId: string
+    ): Promise<void> {
+        const shown = await this.documents.findById(documentId);
+        if (!shown) {
+            return;
+        }
+        const versions = await this.documents.findVersions(input.userId, shown.type, shown.side);
+        let replaced = false;
+        for (const version of versions) {
+            if (version.id === shown.id) continue;
+            if (await this.shares.revokeDocument(input.memberId, version.id)) {
+                replaced = true;
+                await this.record(input, "document", DocumentAccessAction.revoke, version.id);
+            }
+        }
+        if (replaced) {
+            await this.files.pruneSuperseded(input.userId);
         }
     }
 

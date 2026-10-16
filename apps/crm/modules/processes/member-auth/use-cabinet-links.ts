@@ -14,6 +14,7 @@ export function useCabinetLinks() {
         () => ({
             home: `/${locale}`,
             clubs: `/${locale}/me/clubs`,
+            passport: `/${locale}/me/passport`,
             club: (slug: string) => `/${locale}/${slug}`,
             login: `/${locale}/auth/login`,
             register: `/${locale}/auth/register`,

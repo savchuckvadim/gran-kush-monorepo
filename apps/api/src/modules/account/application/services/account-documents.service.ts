@@ -14,7 +14,10 @@ import { UserSignatureRepository } from "@modules/account/domain/repositories/us
 
 export interface AccountDocumentView {
     document: UserDocument;
+    /** Клубы, которым показана именно эта (текущая) версия. */
     sharedWith: SharedClub[];
+    /** Клубы, которые всё ещё видят прежнюю версию этого документа: владельцу надо обновить показ. */
+    staleSharedWith: SharedClub[];
 }
 
 /**
@@ -31,14 +34,32 @@ export class AccountDocumentsService {
         private readonly accountFiles: AccountFilesService
     ) {}
 
-    /** Текущие документы с клубами, которым показан каждый. */
+    /**
+     * Текущие документы с клубами, которым показан каждый. Клуб, который видит прежнюю версию
+     * (владелец загрузил новую, а показ не обновил), попадает в `staleSharedWith`.
+     */
     async listDocuments(userId: string): Promise<AccountDocumentView[]> {
         const documents = await this.userDocumentRepository.findAllByUser(userId);
-        const clubs = await this.shares.findClubsByDocumentIds(documents.map((d) => d.id));
-        return documents.map((document) => ({
-            document,
-            sharedWith: clubs.get(document.id) ?? [],
-        }));
+        const versions = await Promise.all(
+            documents.map((document) =>
+                this.userDocumentRepository.findVersions(userId, document.type, document.side)
+            )
+        );
+        const allIds = versions.flat().map((version) => version.id);
+        const clubs = await this.shares.findClubsByDocumentIds(allIds);
+
+        return documents.map((document, index) => {
+            const sharedWith = clubs.get(document.id) ?? [];
+            const seesCurrent = new Set(sharedWith.map((club) => club.memberId));
+            const stale = new Map<string, SharedClub>();
+            for (const version of versions[index] ?? []) {
+                if (version.id === document.id) continue;
+                for (const club of clubs.get(version.id) ?? []) {
+                    if (!seesCurrent.has(club.memberId)) stale.set(club.memberId, club);
+                }
+            }
+            return { document, sharedWith, staleSharedWith: [...stale.values()] };
+        });
     }
 
     /** Загрузка в аккаунт клубам ничего не открывает: показ — отдельное решение владельца. */

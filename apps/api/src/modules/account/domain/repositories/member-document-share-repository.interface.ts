@@ -18,8 +18,8 @@ export abstract class MemberDocumentShareRepository {
     abstract shareDocuments(memberId: string, documentIds: string[]): Promise<void>;
     abstract setSignatureShared(memberId: string, shared: boolean): Promise<void>;
 
-    /** Убрать показ одного документа этому членству. */
-    abstract revokeDocument(memberId: string, documentId: string): Promise<void>;
+    /** Убрать показ одного документа этому членству; возвращает, снят ли показ. */
+    abstract revokeDocument(memberId: string, documentId: string): Promise<boolean>;
     /** Участник вышел из клуба или отозвал всё: клуб больше не видит ни документы, ни подпись. */
     abstract revokeAllForMember(memberId: string): Promise<void>;
 

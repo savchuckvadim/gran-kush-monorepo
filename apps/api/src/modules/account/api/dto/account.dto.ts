@@ -49,6 +49,13 @@ export class AccountDocumentDto {
         description: "Клубы, которым показан именно этот файл (пусто — не показан никому)",
     })
     sharedWith: SharedClubDto[];
+
+    @ApiProperty({
+        type: [SharedClubDto],
+        description:
+            "Клубы, которые всё ещё видят прежнюю версию этого документа: показ нужно обновить",
+    })
+    staleSharedWith: SharedClubDto[];
 }
 
 export class UploadAccountDocumentDto {

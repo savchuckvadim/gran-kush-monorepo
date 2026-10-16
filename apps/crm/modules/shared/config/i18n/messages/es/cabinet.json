@@ -14,7 +14,8 @@
             "manageClubs": "Todas las membresías",
             "account": "Cuenta",
             "language": "Idioma",
-            "logout": "Cerrar sesión"
+            "logout": "Cerrar sesión",
+            "passport": "Mi pasaporte"
         },
         "auth": {
             "login": {
@@ -143,6 +144,59 @@
             "working": "Un momento…",
             "decline": "Rechazar",
             "confirm": "Confirmar"
+        },
+        "passport": {
+            "title": "Mi pasaporte",
+            "subtitle": "Documentos y firma de tu cuenta. El club solo ve lo que le has mostrado.",
+            "loadError": "No se pudieron cargar tus documentos. Actualiza la página.",
+            "addDocument": "Añadir documento",
+            "emptyTitle": "Aún no hay documentos",
+            "emptyText": "Sube un documento y decide a qué clubes mostrarlo. Un archivo subido no es visible para los clubes por sí solo.",
+            "types": {
+                "passport": "Pasaporte",
+                "id_card": "DNI / tarjeta de identidad",
+                "residence_permit": "Permiso de residencia",
+                "driving_license": "Carné de conducir",
+                "other": "Otro documento"
+            },
+            "sides": {
+                "single": "una cara",
+                "front": "anverso",
+                "back": "reverso"
+            },
+            "open": "Abrir",
+            "delete": "Eliminar",
+            "deleteTitle": "¿Eliminar el documento?",
+            "deleteText": "El documento desaparecerá de tu cuenta con todas sus versiones y los clubes a los que se mostró dejarán de verlo.",
+            "deleteConfirm": "Eliminar",
+            "cancel": "Cancelar",
+            "shownTo": "Mostrado a",
+            "noClubs": "Aún no hay clubes a los que puedas mostrar el archivo.",
+            "stale": "Ve una versión anterior",
+            "showNew": "Mostrar la nueva",
+            "upload": {
+                "title": "Nuevo documento",
+                "hint": "El archivo va a tu cuenta. El club solo lo verá cuando actives el acceso.",
+                "type": "Tipo de documento",
+                "side": "Cara",
+                "number": "Número (opcional)",
+                "file": "Archivo",
+                "fileHint": "JPG, PNG, WebP o PDF, hasta 8 MB.",
+                "noFile": "Elige un archivo.",
+                "tooBig": "El archivo supera los 8 MB.",
+                "submit": "Subir",
+                "submitting": "Subiendo…"
+            },
+            "signature": {
+                "title": "Firma",
+                "have": "Firma subida.",
+                "none": "Aún no hay firma.",
+                "upload": "Subir",
+                "replace": "Reemplazar",
+                "tooBig": "El archivo supera los 2 MB.",
+                "deleteTitle": "¿Eliminar la firma?",
+                "deleteText": "La firma desaparecerá y los clubes a los que se mostró dejarán de verla."
+            }
         }
     }
 }

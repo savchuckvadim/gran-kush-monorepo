@@ -7,6 +7,7 @@ import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
+import { MemberAuthService } from "../src/modules/portal/auth/members/application/services/member-auth.service";
 import { UserDocumentRepository } from "../src/modules/account/domain/repositories/user-document-repository.interface";
 
 jest.setTimeout(120_000);
@@ -629,11 +630,15 @@ describe("Security (e2e)", () => {
                     emailConfirmed: true,
                 },
             });
-            const login = await request(app.getHttpServer())
-                .post("/lk/auth/login")
-                .send({ email, password: PASSWORD });
-            expect(login.status).toBe(201);
-            return { email, userId: user.id, cookies: cookieHeader(login) };
+            // Токены выписываются напрямую: настоящий вход упирается в лимит логинов (AUTH) на сьют
+            const tokens = await app
+                .get(MemberAuthService)
+                .generateTokens({ id: user.id, email }, `device-${label}-${suffix}`);
+            return {
+                email,
+                userId: user.id,
+                cookies: `member_access_token=${tokens.accessToken}`,
+            };
         };
 
         const lk = (cookies: string) => ({
@@ -924,6 +929,49 @@ describe("Security (e2e)", () => {
             expect(revoked.status).toBe(204);
             expect(await prisma.userDocument.findUnique({ where: { id: v1.id } })).toBeNull();
             expect(await prisma.userDocument.findUnique({ where: { id: v2.id } })).not.toBeNull();
+        });
+
+        it("TASK-715: showing the new version replaces the old one for that club", async () => {
+            const owner = await memberWithSession("share-replace");
+            const v1 = await passportOf(owner.userId, "r1");
+            const added = await as(clubA)
+                .post("/crm/members")
+                .send({ email: owner.email, fields: { first_name: "Replace" } });
+            const memberId = added.body.memberId as string;
+            await lk(owner.cookies)
+                .post(`/lk/memberships/${memberId}/confirm`)
+                .send({ shareDocumentIds: [v1.id] });
+            const v2 = await passportOf(owner.userId, "r2", { version: 2 });
+
+            type Listed = {
+                id: string;
+                sharedWith: { slug: string }[];
+                staleSharedWith: { slug: string }[];
+            };
+            const listed = async () =>
+                (
+                    (await lk(owner.cookies).get("/lk/account/documents")).body as {
+                        documents: Listed[];
+                    }
+                ).documents.find((d) => d.id === v2.id);
+
+            // Клуб ещё видит прежний паспорт, и владелец об этом знает
+            const before = await listed();
+            expect(before?.sharedWith).toEqual([]);
+            expect(before?.staleSharedWith.map((club) => club.slug)).toEqual([clubA.slug]);
+
+            const shared = await lk(owner.cookies)
+                .post(`/lk/account/documents/${v2.id}/share`)
+                .send({ memberId });
+            expect(shared.status).toBe(204);
+
+            // Теперь клуб видит ровно новую версию, прежняя снята и удалена
+            const card = await as(clubA).get(`/crm/members/${memberId}`);
+            expect(card.body.documents.map((d: { id: string }) => d.id)).toEqual([v2.id]);
+            expect(await prisma.userDocument.findUnique({ where: { id: v1.id } })).toBeNull();
+            const after = await listed();
+            expect(after?.sharedWith.map((club) => club.slug)).toEqual([clubA.slug]);
+            expect(after?.staleSharedWith).toEqual([]);
         });
 
         it("TASK-704: the document number is stored encrypted and read back plain", async () => {

@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { Building2, Home } from "lucide-react";
+import { Building2, Home, ShieldCheck } from "lucide-react";
 
 import { useCabinetLinks } from "@/modules/processes/member-auth";
 import { BurgerButton } from "@/modules/shared/ui/Burger";
@@ -59,6 +59,14 @@ function MemberSidebar() {
             title: t("clubs"),
             isActive: pathname === links.clubs,
             icon: <Building2 />,
+        },
+        {
+            id: 3,
+            code: "passport",
+            url: links.passport,
+            title: t("passport"),
+            isActive: pathname === links.passport,
+            icon: <ShieldCheck />,
         },
     ];
 
