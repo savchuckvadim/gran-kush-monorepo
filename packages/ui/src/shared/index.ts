@@ -17,6 +17,7 @@ export {
     type KanbanItemProps,
 } from "./kanban";
 export { LoadMoreTrigger, type LoadMoreTriggerProps } from "./load-more";
+export { ModalDialog, type ModalDialogProps } from "./modal-dialog";
 export { QrCodeDisplay, type QrCodeDisplayProps } from "./qr-code-display";
 export {
     SignatureCanvasField,

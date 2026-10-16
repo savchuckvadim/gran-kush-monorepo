@@ -1,10 +1,16 @@
 "use client";
 
-import { Dialog } from "@workspace/ui";
+import { ModalDialog } from "@workspace/ui";
 
-import { SkinSheetContent } from "./skin-sheet-content";
+import { ClubSkinNotice } from "./club-skin-notice";
+import { SkinGallery } from "./skin-gallery";
+import { SkinOptions } from "./skin-options";
+import { useSkinText } from "./use-skin-text";
 
-/** The appearance sheet opened from elsewhere (the account menu, the header). */
+/**
+ * Шторка оформления справа (из шапки и меню аккаунта): светлый/тёмный режим, энергосбережение,
+ * тема клуба и галерея тем.
+ */
 export function SkinPickerSheet({
     open,
     onOpenChange,
@@ -12,9 +18,18 @@ export function SkinPickerSheet({
     open: boolean;
     onOpenChange: (open: boolean) => void;
 }) {
+    const text = useSkinText();
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <SkinSheetContent />
-        </Dialog>
+        <ModalDialog
+            open={open}
+            onOpenChange={onOpenChange}
+            variant="sheet"
+            title={text.t("sheetTitle")}
+            description={text.t("sheetDescription")}
+        >
+            <SkinOptions />
+            <ClubSkinNotice />
+            <SkinGallery />
+        </ModalDialog>
     );
 }

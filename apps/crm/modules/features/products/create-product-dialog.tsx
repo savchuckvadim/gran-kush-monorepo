@@ -6,16 +6,7 @@ import { useTranslations } from "next-intl";
 import { Loader2, Plus } from "lucide-react";
 
 import type { SchemaCreateProductDto } from "@workspace/api-client/core";
-import {
-    Button,
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-    FieldInput,
-    FieldSelect,
-} from "@workspace/ui";
+import { Button, FieldInput, FieldSelect, ModalDialog } from "@workspace/ui";
 
 import { useCategories } from "@/modules/entities/category";
 import { useMeasurementUnits } from "@/modules/entities/measurement-unit";
@@ -80,150 +71,144 @@ export function CreateProductDialog() {
     }, [createMutation, form]);
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
+        <ModalDialog
+            open={open}
+            onOpenChange={setOpen}
+            title={t("createTitle")}
+            scrollable
+            trigger={
                 <Button className="gap-2">
                     <Plus className="h-4 w-4" />
                     {t("createButton")}
                 </Button>
-            </DialogTrigger>
+            }
+        >
+            <div className="space-y-4">
+                <FieldInput
+                    label={t("name")}
+                    value={form.name}
+                    onChange={(e) => handleChange("name", e.target.value)}
+                    required
+                />
 
-            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
-                <DialogHeader>
-                    <DialogTitle>{t("createTitle")}</DialogTitle>
-                </DialogHeader>
+                <FieldInput
+                    label={t("description")}
+                    value={form.description ?? ""}
+                    onChange={(e) => handleChange("description", e.target.value)}
+                />
 
-                <div className="space-y-4">
+                <FieldInput
+                    label={t("sku")}
+                    value={form.sku ?? ""}
+                    onChange={(e) => handleChange("sku", e.target.value)}
+                />
+
+                <FieldSelect
+                    label={t("category")}
+                    placeholder={t("selectCategory")}
+                    options={(categories ?? []).map((cat) => ({
+                        value: cat.id,
+                        label: cat.name,
+                    }))}
+                    value={form.categoryId}
+                    onValueChange={(value) => handleChange("categoryId", value)}
+                    disabled={isCategoriesLoading || !canSelectCategory}
+                    helperText={
+                        !isCategoriesLoading && !canSelectCategory
+                            ? t("categoryRequiredHint")
+                            : undefined
+                    }
+                />
+
+                <FieldSelect
+                    label={t("measurementUnit")}
+                    placeholder={t("selectUnit")}
+                    options={(units ?? []).map((u) => ({
+                        value: u.id,
+                        label: `${u.name} (${u.code})`,
+                    }))}
+                    value={form.measurementUnitId}
+                    onValueChange={(value) => handleChange("measurementUnitId", value)}
+                    disabled={isUnitsLoading || !canSelectUnit}
+                    helperText={
+                        !isUnitsLoading && !canSelectUnit ? t("unitRequiredHint") : undefined
+                    }
+                />
+
+                <div className="grid grid-cols-2 gap-4">
                     <FieldInput
-                        label={t("name")}
-                        value={form.name}
-                        onChange={(e) => handleChange("name", e.target.value)}
+                        label={t("price")}
+                        type="number"
+                        value={String(form.price)}
+                        onChange={(e) => handleChange("price", Number(e.target.value))}
                         required
                     />
-
                     <FieldInput
-                        label={t("description")}
-                        value={form.description ?? ""}
-                        onChange={(e) => handleChange("description", e.target.value)}
-                    />
-
-                    <FieldInput
-                        label={t("sku")}
-                        value={form.sku ?? ""}
-                        onChange={(e) => handleChange("sku", e.target.value)}
-                    />
-
-                    <FieldSelect
-                        label={t("category")}
-                        placeholder={t("selectCategory")}
-                        options={(categories ?? []).map((cat) => ({
-                            value: cat.id,
-                            label: cat.name,
-                        }))}
-                        value={form.categoryId}
-                        onValueChange={(value) => handleChange("categoryId", value)}
-                        disabled={isCategoriesLoading || !canSelectCategory}
-                        helperText={
-                            !isCategoriesLoading && !canSelectCategory
-                                ? t("categoryRequiredHint")
-                                : undefined
-                        }
-                    />
-
-                    <FieldSelect
-                        label={t("measurementUnit")}
-                        placeholder={t("selectUnit")}
-                        options={(units ?? []).map((u) => ({
-                            value: u.id,
-                            label: `${u.name} (${u.code})`,
-                        }))}
-                        value={form.measurementUnitId}
-                        onValueChange={(value) => handleChange("measurementUnitId", value)}
-                        disabled={isUnitsLoading || !canSelectUnit}
-                        helperText={
-                            !isUnitsLoading && !canSelectUnit ? t("unitRequiredHint") : undefined
-                        }
-                    />
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <FieldInput
-                            label={t("price")}
-                            type="number"
-                            value={String(form.price)}
-                            onChange={(e) => handleChange("price", Number(e.target.value))}
-                            required
-                        />
-                        <FieldInput
-                            label={t("initialQuantity")}
-                            type="number"
-                            value={String(form.initialQuantity)}
-                            onChange={(e) =>
-                                handleChange("initialQuantity", Number(e.target.value))
-                            }
-                            required
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-4">
-                        <FieldInput
-                            label={t("thc")}
-                            type="number"
-                            value={String(form.thc ?? "")}
-                            onChange={(e) =>
-                                handleChange("thc", e.target.value ? Number(e.target.value) : 0)
-                            }
-                        />
-                        <FieldInput
-                            label={t("cbd")}
-                            type="number"
-                            value={String(form.cbd ?? "")}
-                            onChange={(e) =>
-                                handleChange("cbd", e.target.value ? Number(e.target.value) : 0)
-                            }
-                        />
-                        <FieldInput
-                            label={t("strain")}
-                            value={form.strain ?? ""}
-                            onChange={(e) => handleChange("strain", e.target.value)}
-                        />
-                    </div>
-
-                    <FieldInput
-                        label={t("limitGramsPerUnit")}
-                        helperText={t("limitGramsPerUnitHint")}
+                        label={t("initialQuantity")}
                         type="number"
-                        value={form.limitGramsPerUnit == null ? "" : String(form.limitGramsPerUnit)}
+                        value={String(form.initialQuantity)}
+                        onChange={(e) => handleChange("initialQuantity", Number(e.target.value))}
+                        required
+                    />
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                    <FieldInput
+                        label={t("thc")}
+                        type="number"
+                        value={String(form.thc ?? "")}
                         onChange={(e) =>
-                            setForm((prev) => ({
-                                ...prev,
-                                limitGramsPerUnit: e.target.value
-                                    ? Number(e.target.value)
-                                    : undefined,
-                            }))
+                            handleChange("thc", e.target.value ? Number(e.target.value) : 0)
                         }
                     />
-
-                    <AudiencePicker
-                        value={form.audiences ?? []}
-                        onChange={(audiences) => setForm((prev) => ({ ...prev, audiences }))}
+                    <FieldInput
+                        label={t("cbd")}
+                        type="number"
+                        value={String(form.cbd ?? "")}
+                        onChange={(e) =>
+                            handleChange("cbd", e.target.value ? Number(e.target.value) : 0)
+                        }
                     />
-
-                    {createMutation.isError && (
-                        <p className="text-sm text-destructive">{t("createError")}</p>
-                    )}
-
-                    <Button onClick={handleSubmit} disabled={isSubmitDisabled} className="w-full">
-                        {createMutation.isPending ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                {t("creating")}
-                            </>
-                        ) : (
-                            t("create")
-                        )}
-                    </Button>
+                    <FieldInput
+                        label={t("strain")}
+                        value={form.strain ?? ""}
+                        onChange={(e) => handleChange("strain", e.target.value)}
+                    />
                 </div>
-            </DialogContent>
-        </Dialog>
+
+                <FieldInput
+                    label={t("limitGramsPerUnit")}
+                    helperText={t("limitGramsPerUnitHint")}
+                    type="number"
+                    value={form.limitGramsPerUnit == null ? "" : String(form.limitGramsPerUnit)}
+                    onChange={(e) =>
+                        setForm((prev) => ({
+                            ...prev,
+                            limitGramsPerUnit: e.target.value ? Number(e.target.value) : undefined,
+                        }))
+                    }
+                />
+
+                <AudiencePicker
+                    value={form.audiences ?? []}
+                    onChange={(audiences) => setForm((prev) => ({ ...prev, audiences }))}
+                />
+
+                {createMutation.isError && (
+                    <p className="text-sm text-destructive">{t("createError")}</p>
+                )}
+
+                <Button onClick={handleSubmit} disabled={isSubmitDisabled} className="w-full">
+                    {createMutation.isPending ? (
+                        <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            {t("creating")}
+                        </>
+                    ) : (
+                        t("create")
+                    )}
+                </Button>
+            </div>
+        </ModalDialog>
     );
 }

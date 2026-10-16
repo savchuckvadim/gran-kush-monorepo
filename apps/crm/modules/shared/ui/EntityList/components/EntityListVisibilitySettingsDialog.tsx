@@ -3,15 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 
-import {
-    Button,
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@workspace/ui";
+import { Button, ModalDialog } from "@workspace/ui";
 
 export function EntityListVisibilitySettingsDialog({
     isOpen,
@@ -37,65 +29,62 @@ export function EntityListVisibilitySettingsDialog({
     const showTable = resolvedTableColumns.length > 0;
 
     return (
-        <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogTrigger asChild>
+        <ModalDialog
+            open={isOpen}
+            onOpenChange={onOpenChange}
+            title={t("fieldsTitle")}
+            description={t("fieldsDescription")}
+            trigger={
                 <Button variant="outline" size="sm">
                     {t("fieldsButton")}
                 </Button>
-            </DialogTrigger>
-
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>{t("fieldsTitle")}</DialogTitle>
-                    <DialogDescription>{t("fieldsDescription")}</DialogDescription>
-                </DialogHeader>
-
-                <div className="space-y-4">
-                    {showCards && (
-                        <div>
-                            <div className="mb-2 text-sm font-medium">{t("cards")}</div>
-                            <div className="flex flex-wrap gap-2">
-                                {resolvedCardFields.map((field) => {
-                                    const active = visibleCardFieldKeys.includes(field.key);
-                                    return (
-                                        <Button
-                                            key={field.key}
-                                            type="button"
-                                            variant={active ? "default" : "outline"}
-                                            size="sm"
-                                            onClick={() => onToggleCardFieldKey(field.key)}
-                                        >
-                                            {field.label}
-                                        </Button>
-                                    );
-                                })}
-                            </div>
+            }
+        >
+            <div className="space-y-4">
+                {showCards && (
+                    <div>
+                        <div className="mb-2 text-sm font-medium">{t("cards")}</div>
+                        <div className="flex flex-wrap gap-2">
+                            {resolvedCardFields.map((field) => {
+                                const active = visibleCardFieldKeys.includes(field.key);
+                                return (
+                                    <Button
+                                        key={field.key}
+                                        type="button"
+                                        variant={active ? "default" : "outline"}
+                                        size="sm"
+                                        onClick={() => onToggleCardFieldKey(field.key)}
+                                    >
+                                        {field.label}
+                                    </Button>
+                                );
+                            })}
                         </div>
-                    )}
+                    </div>
+                )}
 
-                    {showTable && (
-                        <div>
-                            <div className="mb-2 text-sm font-medium">{t("table")}</div>
-                            <div className="flex flex-wrap gap-2">
-                                {resolvedTableColumns.map((col) => {
-                                    const active = visibleTableColumnKeys.includes(col.key);
-                                    return (
-                                        <Button
-                                            key={col.key}
-                                            type="button"
-                                            variant={active ? "default" : "outline"}
-                                            size="sm"
-                                            onClick={() => onToggleTableColumnKey(col.key)}
-                                        >
-                                            {col.header}
-                                        </Button>
-                                    );
-                                })}
-                            </div>
+                {showTable && (
+                    <div>
+                        <div className="mb-2 text-sm font-medium">{t("table")}</div>
+                        <div className="flex flex-wrap gap-2">
+                            {resolvedTableColumns.map((col) => {
+                                const active = visibleTableColumnKeys.includes(col.key);
+                                return (
+                                    <Button
+                                        key={col.key}
+                                        type="button"
+                                        variant={active ? "default" : "outline"}
+                                        size="sm"
+                                        onClick={() => onToggleTableColumnKey(col.key)}
+                                    >
+                                        {col.header}
+                                    </Button>
+                                );
+                            })}
                         </div>
-                    )}
-                </div>
-            </DialogContent>
-        </Dialog>
+                    </div>
+                )}
+            </div>
+        </ModalDialog>
     );
 }

@@ -317,6 +317,10 @@ All routes are prefixed with `/{locale}`.
 ## Code Style
 
 - No comments unless the WHY is non-obvious. A comment explains intent, a contract or a constraint (what a class guarantees, why a check exists) in full sentences; it does not narrate the code, keep commented-out code or point at the chat. A class or exported function with non-trivial rules gets a doc comment (`/** … */`).
+- **Compose UI primitives once.** A set of shadcn primitives that two places repeat (Dialog + Header + Title +
+  Description + Footer, a dropdown of clubs, an account card) becomes one component: app-independent ones in
+  `packages/ui/src/shared` (`ModalDialog`, `ConfirmDialog`, `SlideOver`, `Field`), app-specific ones in the
+  app's `modules/shared/ui`. Features and pages use that component, not the raw `Dialog*` / `DropdownMenu*` set.
 - **One component per file.** A `.tsx` file holds exactly one React component (exported or private); a second component — even a tiny one — goes to its own file next to it. Plain helpers (pure functions, constants, types) may stay.
 - **300 lines max** for a file, a class or a component. Split by responsibility (SOLID: one reason to change), not by cutting a file in half; when you touch a file that is already over the limit, split the part you change.
 - **No hardcode and no temporary workarounds.** Hosts, URLs, limits, timeouts and feature switches come from env/config or named constants in a config module; magic strings and numbers in business code are not allowed. A workaround is acceptable only with a task number and a plan to remove it.

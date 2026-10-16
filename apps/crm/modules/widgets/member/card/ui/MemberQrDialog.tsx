@@ -4,14 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { QrCode } from "lucide-react";
 
-import {
-    Button,
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@workspace/ui";
+import { Button, ModalDialog } from "@workspace/ui";
 
 import { MemberQrCodeCard } from "../../qr-code/MemberQrCodeCard";
 
@@ -20,18 +13,16 @@ export function MemberQrDialog({ memberId }: { memberId: string }) {
     const t = useTranslations("crm.members.card");
 
     return (
-        <Dialog>
-            <DialogTrigger asChild>
+        <ModalDialog
+            size="md"
+            title={t("qr")}
+            trigger={
                 <Button variant="outline" size="icon" aria-label={t("qr")} title={t("qr")}>
                     <QrCode className="size-4" aria-hidden="true" />
                 </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                    <DialogTitle>{t("qr")}</DialogTitle>
-                </DialogHeader>
-                <MemberQrCodeCard memberId={memberId} />
-            </DialogContent>
-        </Dialog>
+            }
+        >
+            <MemberQrCodeCard memberId={memberId} />
+        </ModalDialog>
     );
 }
