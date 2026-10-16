@@ -12,8 +12,11 @@ import { Button, Card, FieldInput, FieldSelect } from "@workspace/ui";
 import { useCategories } from "@/modules/entities/category";
 import { useMeasurementUnits } from "@/modules/entities/measurement-unit";
 import { useProductDetail, useUpdateProduct } from "@/modules/entities/product";
+import { AudiencePicker } from "@/modules/features/products";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
+
+import { ProductInfo } from "./product-info";
 
 interface ProductDetailCardProps {
     productId: string;
@@ -46,6 +49,7 @@ export function ProductDetailCard({ productId }: ProductDetailCardProps) {
             thc: product.thc ?? undefined,
             cbd: product.cbd ?? undefined,
             strain: product.strain ?? undefined,
+            audiences: product.audiences,
         });
         setIsEditing(true);
     }, [product]);
@@ -215,6 +219,11 @@ export function ProductDetailCard({ productId }: ProductDetailCardProps) {
                             />
                         </div>
 
+                        <AudiencePicker
+                            value={form.audiences ?? []}
+                            onChange={(audiences) => setForm((prev) => ({ ...prev, audiences }))}
+                        />
+
                         <div className="flex items-center gap-4">
                             <label className="flex items-center gap-2 text-sm">
                                 <input
@@ -239,54 +248,9 @@ export function ProductDetailCard({ productId }: ProductDetailCardProps) {
                         )}
                     </div>
                 ) : (
-                    <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                            <InfoRow label={t("category")} value={product.category?.name ?? "—"} />
-                            <InfoRow
-                                label={t("measurementUnit")}
-                                value={product.measurementUnit?.name ?? "—"}
-                            />
-                            <InfoRow label={t("price")} value={`€${product.price}`} />
-                            <InfoRow
-                                label={t("stock")}
-                                value={`${product.currentQuantity} / ${product.initialQuantity} ${product.measurementUnit?.code ?? ""}`}
-                            />
-                            <InfoRow label={t("sku")} value={product.sku ?? "—"} />
-                            <InfoRow
-                                label={t("status")}
-                                value={product.isActive ? t("active") : t("inactive")}
-                            />
-                            {product.thc != null && (
-                                <InfoRow label={t("thc")} value={`${product.thc}%`} />
-                            )}
-                            {product.cbd != null && (
-                                <InfoRow label={t("cbd")} value={`${product.cbd}%`} />
-                            )}
-                            {product.strain && (
-                                <InfoRow label={t("strain")} value={product.strain} />
-                            )}
-                        </div>
-
-                        {product.description && (
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium text-muted-foreground">
-                                    {t("description")}
-                                </p>
-                                <p className="text-sm">{product.description}</p>
-                            </div>
-                        )}
-                    </div>
+                    <ProductInfo product={product} />
                 )}
             </Card>
-        </div>
-    );
-}
-
-function InfoRow({ label, value }: { label: string; value: string }) {
-    return (
-        <div className="flex justify-between gap-4">
-            <span className="text-muted-foreground">{label}</span>
-            <span className="font-medium">{value}</span>
         </div>
     );
 }

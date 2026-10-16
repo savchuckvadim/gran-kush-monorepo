@@ -7,6 +7,7 @@ import { MembersModule } from "@modules/portal/crm/members/members.module";
 
 import { CabinetOrdersController } from "./api/controllers/cabinet-orders.controller";
 import { CrmOrdersController } from "./api/controllers/crm-orders.controller";
+import { CabinetOrderPlacementService } from "./application/services/cabinet-order-placement.service";
 import { OrdersService } from "./application/services/orders.service";
 import { OrderRepository } from "./domain/repositories/order-repository.interface";
 import { OrderPrismaRepository } from "./infrastructure/repositories/order-prisma.repository";
@@ -15,6 +16,7 @@ import { OrderPrismaRepository } from "./infrastructure/repositories/order-prism
     imports: [PrismaModule, CatalogModule, MembersModule, ClubPolicyModule],
     providers: [
         OrdersService,
+        CabinetOrderPlacementService,
         {
             provide: OrderRepository,
             useClass: OrderPrismaRepository,

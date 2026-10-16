@@ -39,6 +39,7 @@ export function mapProductToListDto(p: Product): ProductListDto {
                   updatedAt: p.measurementUnit.updatedAt.toISOString(),
               }
             : undefined,
+        audiences: p.audiences,
         createdAt: p.createdAt.toISOString(),
     };
 }

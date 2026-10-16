@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, ProductAudience } from "@prisma/client";
 
 type Decimal = Prisma.Decimal;
 
@@ -37,6 +37,9 @@ export class Product {
     thc?: Decimal | null;
     cbd?: Decimal | null;
     strain?: string | null;
+
+    /** Кому товар виден в кабинете; пусто — всем (`product-audience.ts`) */
+    audiences: ProductAudience[];
 
     createdAt: Date;
     updatedAt: Date;

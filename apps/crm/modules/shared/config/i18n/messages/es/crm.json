@@ -428,6 +428,14 @@
                 "thc": "THC",
                 "cbd": "CBD",
                 "strain": "Variedad"
+            },
+            "audiences": {
+                "label": "Visible en el área de socio para",
+                "hint": "Sin marcar: todos los socios. Marcado: solo los socios a quienes el club puso esa marca en su ficha.",
+                "all": "Todos los socios",
+                "medical": "Medicinal",
+                "mj": "MJ",
+                "recreation": "Recreativo"
             }
         },
         "orders": {

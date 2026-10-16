@@ -1293,28 +1293,30 @@ model ProductCategory {
 }
 
 model Product {
-  id                String   @id @default(uuid())
-  portalId          String   @map("portal_id")
-  entityRecordId    String   @unique @map("entity_record_id")
-  categoryId        String   @map("category_id")
-  measurementUnitId String   @map("measurement_unit_id")
-  name              String   @db.VarChar(255)
-  description       String?  @db.Text
-  sku               String?  @db.VarChar(100)
-  price             Decimal  @db.Decimal(10, 2)
-  initialQuantity   Decimal  @map("initial_quantity") @db.Decimal(10, 3)
-  currentQuantity   Decimal  @map("current_quantity") @db.Decimal(10, 3)
-  minQuantity       Decimal? @map("min_quantity") @db.Decimal(10, 3)
-  imageUrl          String?  @map("image_url") @db.VarChar(500)
-  isActive          Boolean  @default(true) @map("is_active")
-  isAvailable       Boolean  @default(true) @map("is_available")
-  thc               Decimal? @db.Decimal(5, 2)
-  cbd               Decimal? @db.Decimal(5, 2)
-  strain            String?  @db.VarChar(100)
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @updatedAt @map("updated_at")
-  createdBy         String?  @map("created_by")
-  updatedBy         String?  @map("updated_by")
+  id                String            @id @default(uuid())
+  portalId          String            @map("portal_id")
+  entityRecordId    String            @unique @map("entity_record_id")
+  categoryId        String            @map("category_id")
+  measurementUnitId String            @map("measurement_unit_id")
+  name              String            @db.VarChar(255)
+  description       String?           @db.Text
+  sku               String?           @db.VarChar(100)
+  price             Decimal           @db.Decimal(10, 2)
+  initialQuantity   Decimal           @map("initial_quantity") @db.Decimal(10, 3)
+  currentQuantity   Decimal           @map("current_quantity") @db.Decimal(10, 3)
+  minQuantity       Decimal?          @map("min_quantity") @db.Decimal(10, 3)
+  imageUrl          String?           @map("image_url") @db.VarChar(500)
+  isActive          Boolean           @default(true) @map("is_active")
+  isAvailable       Boolean           @default(true) @map("is_available")
+  thc               Decimal?          @db.Decimal(5, 2)
+  cbd               Decimal?          @db.Decimal(5, 2)
+  strain            String?           @db.VarChar(100)
+  /// Кому товар виден в кабинете: пусто — всем участникам, иначе тем, у кого клуб отметил хотя бы одну
+  audiences         ProductAudience[] @default([])
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+  createdBy         String?           @map("created_by")
+  updatedBy         String?           @map("updated_by")
 
   portal            Portal          @relation(fields: [portalId], references: [id], onDelete: Cascade)
   entityRecord      EntityRecord    @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
@@ -1335,6 +1337,13 @@ model Product {
   @@index([isAvailable])
   @@index([name])
   @@map("products")
+}
+
+/// Аудитория товара; совпадает с флагами участника is_medical / is_mj / is_recreation, их ставит клуб
+enum ProductAudience {
+  medical
+  mj
+  recreation
 }
 
 model ProductImage {

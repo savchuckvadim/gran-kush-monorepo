@@ -32,6 +32,7 @@ describe("Cabinet shop (e2e)", () => {
     const slug = `shop-${suffix}`;
     let inStockId: string;
     let soldOutId: string;
+    let medicalId: string;
 
     const crm = (method: "get" | "post" | "patch", url: string) =>
         request(app.getHttpServer())
@@ -43,7 +44,10 @@ describe("Cabinet shop (e2e)", () => {
         request(app.getHttpServer())[method](url).set("Cookie", cookies).set("X-Portal-Slug", slug);
 
     /** A confirmed account that joined the club; tokens are issued directly (login limits). */
-    const shopper = async (label: string): Promise<string> => {
+    const shopper = async (
+        label: string,
+        fields: Record<string, unknown> = {}
+    ): Promise<string> => {
         const email = `${label}-${suffix}@test.local`;
         const user = await prisma.user.create({
             data: {
@@ -61,7 +65,7 @@ describe("Cabinet shop (e2e)", () => {
         const joined = await request(app.getHttpServer())
             .post(`/cabinet/portals/${slug}/join`)
             .set("Cookie", cookies)
-            .send({ fields: { first_name: label } });
+            .send({ fields: { first_name: label, ...fields } });
         expect(joined.status).toBe(201);
         return cookies;
     };
@@ -103,7 +107,7 @@ describe("Cabinet shop (e2e)", () => {
             code: `flores-${suffix}`,
             name: "Flores",
         });
-        const product = (name: string, initialQuantity: number) =>
+        const product = (name: string, initialQuantity: number, audiences?: string[]) =>
             crm("post", "/crm/catalog/products").send({
                 name,
                 sku: `SKU-${name}-${suffix}`,
@@ -112,9 +116,13 @@ describe("Cabinet shop (e2e)", () => {
                 minQuantity: 5,
                 categoryId: category.body.id,
                 measurementUnitId: unit.body.id,
+                audiences,
             });
         inStockId = (await product("in-stock", 100)).body.id as string;
         soldOutId = (await product("sold-out", 0)).body.id as string;
+        const medical = await product("medical-only", 10, ["medical"]);
+        expect(medical.body.audiences).toEqual(["medical"]);
+        medicalId = medical.body.id as string;
     });
 
     afterAll(async () => {
@@ -182,5 +190,45 @@ describe("Cabinet shop (e2e)", () => {
 
         const again = await cabinet(buyer, "patch", `/cabinet/orders/${orderId}/cancel`).send({});
         expect(again.status).toBe(400);
+    });
+
+    it("a product for an audience is shown and sold only to members the club ticked", async () => {
+        // the member declares the flag at join: the club confirms it, so it is not stored
+        const cookies = await shopper("patient", { is_medical: true });
+        const hidden = await cabinet(cookies, "get", "/cabinet/catalog/products");
+        expect(hidden.body.map((p: { id: string }) => p.id)).not.toContain(medicalId);
+        expect(
+            (await cabinet(cookies, "get", `/cabinet/catalog/products/${medicalId}`)).status
+        ).toBe(404);
+        const refused = await cabinet(cookies, "post", "/cabinet/orders").send({
+            items: [{ productId: medicalId, quantity: 1 }],
+        });
+        expect(refused.status).toBe(404);
+        expect(refused.body.code).toBe("product_unavailable");
+
+        const member = await prisma.member.findFirstOrThrow({
+            where: { portalId, user: { email: `patient-${suffix}@test.local` } },
+        });
+        const ticked = await crm("patch", `/crm/members/${member.id}`).send({
+            fields: { is_medical: true },
+        });
+        expect(ticked.status).toBe(200);
+
+        const shown = await cabinet(cookies, "get", "/cabinet/catalog/products");
+        expect(shown.body.map((p: { id: string }) => p.id)).toContain(medicalId);
+        const placed = await cabinet(cookies, "post", "/cabinet/orders").send({
+            items: [{ productId: medicalId, quantity: 1 }],
+        });
+        expect(placed.status).toBe(201);
+    });
+
+    it("not enough stock is refused without revealing the club's stock", async () => {
+        const cookies = await shopper("greedy");
+        const res = await cabinet(cookies, "post", "/cabinet/orders").send({
+            items: [{ productId: inStockId, quantity: 999 }],
+        });
+        expect(res.status).toBe(400);
+        expect(res.body.code).toBe("insufficient_stock");
+        expect(JSON.stringify(res.body)).not.toMatch(/\d{2,}/);
     });
 });

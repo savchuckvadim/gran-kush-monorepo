@@ -1,10 +1,12 @@
 import { Controller, Get, NotFoundException, Param } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
+import type { Member } from "@prisma/client";
+
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
-import { RequireMemberJwt } from "@modules/portal/auth/members";
+import { CurrentMember, RequireMemberJwt } from "@modules/portal/auth/members";
 import {
     CabinetProductCategoryDto,
     CabinetProductDto,
@@ -16,10 +18,11 @@ import {
 import { ProductCategoriesService } from "@modules/portal/crm/catalog/application/services/product-categories.service";
 import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
 import { RequireShopAccess } from "@modules/portal/crm/club-policy/api/guards/shop-access.guard";
+import { MemberAccessService } from "@modules/portal/crm/club-policy/application/services/member-access.service";
 
 /**
  * Витрина клуба для его участников: открыта по правилам клуба (`RequireShopAccess`). Отдаёт
- * только активные и доступные товары и без складских данных клуба.
+ * только активные и доступные товары, видимые аудиториям участника, и без складских данных клуба.
  */
 @ApiTags("Cabinet Catalog")
 @Controller("cabinet/catalog")
@@ -28,7 +31,8 @@ import { RequireShopAccess } from "@modules/portal/crm/club-policy/api/guards/sh
 export class CabinetCatalogController {
     constructor(
         private readonly productsService: ProductsService,
-        private readonly categoriesService: ProductCategoriesService
+        private readonly categoriesService: ProductCategoriesService,
+        private readonly access: MemberAccessService
     ) {}
 
     @Get("products")
@@ -36,8 +40,9 @@ export class CabinetCatalogController {
     @ApiOperation({ summary: "Витрина: активные и доступные товары" })
     @ApiSuccessResponse(CabinetProductDto, { isArray: true })
     @ApiErrorResponse([401, 403])
-    async getProducts(@PortalId() portalId: string): Promise<CabinetProductDto[]> {
-        const products = await this.productsService.findActive(portalId);
+    async getProducts(@CurrentMember() member: Member): Promise<CabinetProductDto[]> {
+        const audiences = await this.access.audiencesOf(member.id, member.portalId);
+        const products = await this.productsService.findActive(member.portalId, audiences);
         return products.map(mapProductToCabinetDto);
     }
 
@@ -48,10 +53,11 @@ export class CabinetCatalogController {
     @ApiErrorResponse([401, 403, 404])
     async getProduct(
         @Param("id") id: string,
-        @PortalId() portalId: string
+        @CurrentMember() member: Member
     ): Promise<CabinetProductDto> {
-        const product = await this.productsService.findById(id, portalId);
-        if (!product || !product.isActive || !product.isAvailable) {
+        const audiences = await this.access.audiencesOf(member.id, member.portalId);
+        const product = await this.productsService.findForShop(id, member.portalId, audiences);
+        if (!product) {
             throw new NotFoundException("Product not found or not available");
         }
         return mapProductToCabinetDto(product);

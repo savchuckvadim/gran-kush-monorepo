@@ -20,6 +20,13 @@ export abstract class ClubPolicyRepository {
 
     abstract loadShopContext(memberId: string, portalId: string): Promise<MemberShopContext | null>;
 
+    /** Which of `fieldKeys` are ticked (`true`) in the member's record. */
+    abstract findTickedMemberFlags(
+        memberId: string,
+        portalId: string,
+        fieldKeys: readonly string[]
+    ): Promise<string[]>;
+
     /** Whose member record it is (the account), or `null` when the club has no such member. */
     abstract findMemberUserId(memberId: string, portalId: string): Promise<string | null>;
 }

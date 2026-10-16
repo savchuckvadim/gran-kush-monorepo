@@ -6,6 +6,11 @@ import { ContentLocale, resolveLabel } from "@common/i18n";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { MemberLifecycleStatusItemDto } from "@modules/portal/crm/entity-fields/api/dto/entity-fields-settings-response.dto";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
+import { CLUB_CONFIRMED_MEMBER_FIELD_KEYS } from "@modules/portal/crm/entity-fields/constants/member-field-keys";
+
+/** Формы, которые заполняет сам участник, а не сотрудник клуба. */
+const isMemberSide = (purpose: FormPurpose): boolean =>
+    purpose === FormPurpose.public_registration || purpose === FormPurpose.member_cabinet;
 
 /** Файлы, подпись и документ по значению не отсеять. */
 const NOT_FILTERABLE: PortalFieldType[] = [
@@ -80,13 +85,19 @@ export class FormSchemaService {
             throw new NotFoundException(`Form not found for purpose ${purpose}`);
         }
 
+        const memberSide = entityCode === ENTITY_DEFINITION_CODES.MEMBER && isMemberSide(purpose);
         const fields: FormFieldSchemaItem[] = [];
         for (const item of form.items) {
             const def = item.fieldDefinition;
             if (!def.isActive) {
                 continue;
             }
-            const readOnly = def.readOnlyOverride || item.readOnly;
+            // флаги аудиторий ставит клуб: при вступлении их нет, в кабинете — только для чтения
+            const clubConfirmed = memberSide && CLUB_CONFIRMED_MEMBER_FIELD_KEYS.has(def.fieldKey);
+            if (clubConfirmed && purpose === FormPurpose.public_registration) {
+                continue;
+            }
+            const readOnly = clubConfirmed || def.readOnlyOverride || item.readOnly;
             fields.push({
                 fieldKey: def.fieldKey,
                 type: def.type,

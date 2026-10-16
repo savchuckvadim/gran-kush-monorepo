@@ -1,8 +1,9 @@
 import { ConflictException, Injectable, Logger, NotFoundException } from "@nestjs/common";
 
-import { Prisma } from "@prisma/client";
+import { Prisma, ProductAudience } from "@prisma/client";
 
 import { Product } from "@modules/portal/crm/catalog/domain/entity/product.entity";
+import { isVisibleTo } from "@modules/portal/crm/catalog/domain/product-audience";
 import { MeasurementUnitRepository } from "@modules/portal/crm/catalog/domain/repositories/measurement-unit-repository.interface";
 import { ProductCategoryRepository } from "@modules/portal/crm/catalog/domain/repositories/product-category-repository.interface";
 import {
@@ -35,8 +36,20 @@ export class ProductsService {
         return this.productRepository.findAll(portalId, filters, limit, skip, sortBy, sortOrder);
     }
 
-    async findActive(portalId: string): Promise<Product[]> {
-        return this.productRepository.findActive(portalId);
+    /** `audiences` — витрина участника: только товары, которые клуб показывает его аудиториям. */
+    async findActive(portalId: string, audiences?: ProductAudience[]): Promise<Product[]> {
+        return this.productRepository.findActive(portalId, audiences);
+    }
+
+    /** Товар витрины: активный, доступный и видимый аудиториям участника, иначе `null`. */
+    async findForShop(
+        id: string,
+        portalId: string,
+        audiences: ProductAudience[]
+    ): Promise<Product | null> {
+        const product = await this.productRepository.findById(id, portalId);
+        if (!product?.isActive || !product.isAvailable) return null;
+        return isVisibleTo(product.audiences, audiences) ? product : null;
     }
 
     async count(portalId: string, filters?: ProductFilters): Promise<number> {
@@ -57,6 +70,7 @@ export class ProductsService {
             thc?: number;
             cbd?: number;
             strain?: string;
+            audiences?: ProductAudience[];
         },
         portalId: string,
         employeeId: string
@@ -96,6 +110,7 @@ export class ProductsService {
             thc: dto.thc !== undefined ? new Prisma.Decimal(dto.thc) : undefined,
             cbd: dto.cbd !== undefined ? new Prisma.Decimal(dto.cbd) : undefined,
             strain: dto.strain,
+            audiences: dto.audiences,
             createdBy: employeeId,
         });
     }
@@ -118,6 +133,7 @@ export class ProductsService {
             thc: number | null;
             cbd: number | null;
             strain: string | null;
+            audiences: ProductAudience[];
         }>,
         portalId: string,
         employeeId: string
@@ -170,6 +186,7 @@ export class ProductsService {
         if (dto.thc !== undefined) data.thc = dto.thc !== null ? new Prisma.Decimal(dto.thc) : null;
         if (dto.cbd !== undefined) data.cbd = dto.cbd !== null ? new Prisma.Decimal(dto.cbd) : null;
         if (dto.strain !== undefined) data.strain = dto.strain;
+        if (dto.audiences !== undefined) data.audiences = dto.audiences;
 
         return this.productRepository.update(id, data);
     }

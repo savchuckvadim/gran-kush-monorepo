@@ -31,6 +31,7 @@ import {
     mapOrderToCabinetDetailDto,
     mapOrderToCabinetListDto,
 } from "@modules/portal/crm/orders/api/mappers";
+import { CabinetOrderPlacementService } from "@modules/portal/crm/orders/application/services/cabinet-order-placement.service";
 import { OrdersService } from "@modules/portal/crm/orders/application/services/orders.service";
 
 /**
@@ -42,7 +43,10 @@ import { OrdersService } from "@modules/portal/crm/orders/application/services/o
 @RequireMemberJwt()
 @ApiBearerAuth()
 export class CabinetOrdersController {
-    constructor(private readonly ordersService: OrdersService) {}
+    constructor(
+        private readonly ordersService: OrdersService,
+        private readonly placement: CabinetOrderPlacementService
+    ) {}
 
     @Post()
     @RequireShopAccess("order")
@@ -50,8 +54,8 @@ export class CabinetOrdersController {
     @ApiOperation({
         summary: "Оформить заказ",
         description:
-            "Товары проверяются на наличие, стоимость считается на сервере, номер заказа " +
-            "выдаётся автоматически.",
+            "Товары проверяются на наличие и видимость участнику (аудитории), стоимость " +
+            "считается на сервере. Отказы: 404 `product_unavailable`, 400 `insufficient_stock`.",
     })
     @ApiSuccessResponse(CabinetOrderDetailDto, { status: 201 })
     @ApiErrorResponse([400, 401, 403, 404])
@@ -60,7 +64,7 @@ export class CabinetOrdersController {
         @CurrentMember() member: Member,
         @RequestLocale() locale: ContentLocale
     ): Promise<CabinetOrderDetailDto> {
-        const order = await this.ordersService.createOrder(member.id, dto, member.portalId);
+        const order = await this.placement.place(member.id, member.portalId, dto);
         return mapOrderToCabinetDetailDto(order, locale);
     }
 

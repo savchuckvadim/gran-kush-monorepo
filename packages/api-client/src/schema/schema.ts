@@ -2411,7 +2411,7 @@ export interface paths {
         put?: never;
         /**
          * Оформить заказ
-         * @description Товары проверяются на наличие, стоимость считается на сервере, номер заказа выдаётся автоматически.
+         * @description Товары проверяются на наличие и видимость участнику (аудитории), стоимость считается на сервере. Отказы: 404 `product_unavailable`, 400 `insufficient_stock`.
          */
         post: operations["CabinetOrders_createOrder"];
         delete?: never;
@@ -4633,6 +4633,11 @@ export interface components {
             /** @example 2026-03-16T12:00:00.000Z */
             updatedAt: string;
         };
+        /**
+         * @description Кому товар виден в кабинете; пусто — всем участникам
+         * @enum {string}
+         */
+        ProductAudience: "medical" | "mj" | "recreation";
         ProductListDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
             id: string;
@@ -4652,6 +4657,8 @@ export interface components {
             imageUrl?: string | null;
             category?: components["schemas"]["ProductCategoryDto"];
             measurementUnit?: components["schemas"]["MeasurementUnitDto"];
+            /** @description Кому товар виден в кабинете; пусто — всем участникам */
+            audiences: components["schemas"]["ProductAudience"][];
             /** @example 2026-03-16T12:00:00.000Z */
             createdAt: string;
         };
@@ -4710,6 +4717,8 @@ export interface components {
             imageUrl?: string | null;
             category?: components["schemas"]["ProductCategoryDto"];
             measurementUnit?: components["schemas"]["MeasurementUnitDto"];
+            /** @description Кому товар виден в кабинете; пусто — всем участникам */
+            audiences: components["schemas"]["ProductAudience"][];
             /** @example 2026-03-16T12:00:00.000Z */
             createdAt: string;
             /** @example Descripción del producto */
@@ -4768,6 +4777,8 @@ export interface components {
             cbd?: number;
             /** @example Variante A */
             strain?: string;
+            /** @description Кому товар виден в кабинете; пусто — всем участникам */
+            audiences?: components["schemas"]["ProductAudience"][];
         };
         UpdateProductDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
@@ -4800,6 +4811,8 @@ export interface components {
             cbd?: number | null;
             /** @example Variante A */
             strain?: string | null;
+            /** @description Кому товар виден в кабинете; пусто — всем участникам */
+            audiences?: components["schemas"]["ProductAudience"][];
         };
         ProductCategoryTreeDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
@@ -6346,6 +6359,7 @@ export type SchemaPortalSubscriptionInfoDto = components['schemas']['PortalSubsc
 export type SchemaPortalInfoDto = components['schemas']['PortalInfoDto'];
 export type SchemaProductCategoryDto = components['schemas']['ProductCategoryDto'];
 export type SchemaMeasurementUnitDto = components['schemas']['MeasurementUnitDto'];
+export type SchemaProductAudience = components['schemas']['ProductAudience'];
 export type SchemaProductListDto = components['schemas']['ProductListDto'];
 export type SchemaPaginatedResponseProductListDto = components['schemas']['PaginatedResponse_ProductListDto'];
 export type SchemaProductImageDto = components['schemas']['ProductImageDto'];

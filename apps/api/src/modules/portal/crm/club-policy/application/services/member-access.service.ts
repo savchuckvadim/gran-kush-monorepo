@@ -1,9 +1,16 @@
 import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 
+import type { ProductAudience } from "@prisma/client";
+
 import {
     isSubscriptionOpen,
     subscriptionAccess,
 } from "@modules/billing/domain/subscription-access";
+
+import {
+    AUDIENCE_FIELD_KEYS,
+    audiencesFromFlags,
+} from "@modules/portal/crm/catalog/domain/product-audience";
 
 import { APPROVED_STATUS_KEY, ShopDenial } from "../../domain/club-policy";
 import {
@@ -76,6 +83,16 @@ export class MemberAccessService {
         const access = await this.evaluate(memberId, portalId);
         const [first] = access.reasons;
         if (first) throw this.denied(first);
+    }
+
+    /** Audiences the club ticked for the member: which products the cabinet shows them. */
+    async audiencesOf(memberId: string, portalId: string): Promise<ProductAudience[]> {
+        const ticked = await this.repository.findTickedMemberFlags(
+            memberId,
+            portalId,
+            Object.values(AUDIENCE_FIELD_KEYS)
+        );
+        return audiencesFromFlags(ticked);
     }
 
     /** An employee ordering for their own member record, unless the club allows it. */

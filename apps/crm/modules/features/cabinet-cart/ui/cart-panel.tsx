@@ -7,7 +7,6 @@ import { useTranslations } from "next-intl";
 import { Loader2, ShoppingBag } from "lucide-react";
 
 import {
-    getApiErrorMessage,
     newIdempotencyKey,
     type SchemaCabinetProductDto,
     type SchemaShopAccessDto,
@@ -18,7 +17,7 @@ import { usePlaceMyOrder } from "@/modules/entities/cabinet-order";
 import { useCabinetLinks } from "@/modules/processes/member-auth";
 import { useMoneyFormat } from "@/modules/shared/lib/use-money-format";
 
-import { shopDenialOf } from "../lib/shop-denial";
+import { usePlaceOrderErrorText } from "../lib/use-place-order-error";
 import { useCart } from "../model/use-cart";
 
 import { CartLineRow } from "./cart-line-row";
@@ -39,6 +38,7 @@ const NOTES_MAX = 1000;
 export function CartPanel({ slug, products, access }: CartPanelProps) {
     const t = useTranslations("cabinet.shop.cart");
     const tDenial = useTranslations("cabinet.shop.denial");
+    const placeErrorText = usePlaceOrderErrorText();
     const money = useMoneyFormat();
     const router = useRouter();
     const links = useCabinetLinks();
@@ -56,12 +56,7 @@ export function CartPanel({ slug, products, access }: CartPanelProps) {
     );
 
     const [denial] = access.reasons;
-    const placeDenial = shopDenialOf(place.error);
-    const placeError = placeDenial
-        ? tDenial(placeDenial)
-        : place.error
-          ? getApiErrorMessage(place.error)
-          : null;
+    const placeError = placeErrorText(place.error);
 
     const submit = () =>
         place.mutate(

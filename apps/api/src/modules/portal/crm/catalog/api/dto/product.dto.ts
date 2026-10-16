@@ -1,8 +1,11 @@
 import { ApiProperty, ApiPropertyOptional, IntersectionType } from "@nestjs/swagger";
 
+import { ProductAudience } from "@prisma/client";
 import { Type } from "class-transformer";
 import {
+    IsArray,
     IsBoolean,
+    IsEnum,
     IsNotEmpty,
     IsNumber,
     IsOptional,
@@ -69,6 +72,14 @@ export class ProductListDto {
 
     @ApiPropertyOptional({ type: () => MeasurementUnitDto })
     measurementUnit?: MeasurementUnitDto;
+
+    @ApiProperty({
+        enum: ProductAudience,
+        enumName: "ProductAudience",
+        isArray: true,
+        description: "Кому товар виден в кабинете; пусто — всем участникам",
+    })
+    audiences: ProductAudience[];
 
     @ApiProperty({ example: "2026-03-16T12:00:00.000Z", type: String })
     createdAt: string;
@@ -183,6 +194,17 @@ export class CreateProductDto {
     @IsString()
     @MaxLength(100)
     strain?: string;
+
+    @ApiPropertyOptional({
+        enum: ProductAudience,
+        enumName: "ProductAudience",
+        isArray: true,
+        description: "Кому товар виден в кабинете; пусто — всем участникам",
+    })
+    @IsOptional()
+    @IsArray()
+    @IsEnum(ProductAudience, { each: true })
+    audiences?: ProductAudience[];
 }
 
 // ─── Update DTO ──────────────────────────────────────────────────────────────
@@ -272,6 +294,17 @@ export class UpdateProductDto {
     @IsString()
     @MaxLength(100)
     strain?: string | null;
+
+    @ApiPropertyOptional({
+        enum: ProductAudience,
+        enumName: "ProductAudience",
+        isArray: true,
+        description: "Кому товар виден в кабинете; пусто — всем участникам",
+    })
+    @IsOptional()
+    @IsArray()
+    @IsEnum(ProductAudience, { each: true })
+    audiences?: ProductAudience[];
 }
 
 // ─── Filter DTO ──────────────────────────────────────────────────────────────

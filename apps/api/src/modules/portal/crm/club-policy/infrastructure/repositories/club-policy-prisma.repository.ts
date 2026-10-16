@@ -40,6 +40,23 @@ export class ClubPolicyPrismaRepository implements ClubPolicyRepository {
         return member?.userId ?? null;
     }
 
+    async findTickedMemberFlags(
+        memberId: string,
+        portalId: string,
+        fieldKeys: readonly string[]
+    ): Promise<string[]> {
+        const rows = await this.prisma.fieldValue.findMany({
+            where: {
+                portalId,
+                entityRecord: { member: { id: memberId } },
+                fieldDefinition: { fieldKey: { in: [...fieldKeys] } },
+                valueJson: { equals: true },
+            },
+            select: { fieldDefinition: { select: { fieldKey: true } } },
+        });
+        return rows.map((row) => row.fieldDefinition.fieldKey);
+    }
+
     /** The member, its status, an open visit, the club's rules and subscription — one query. */
     async loadShopContext(memberId: string, portalId: string): Promise<MemberShopContext | null> {
         const member = await this.prisma.member.findFirst({

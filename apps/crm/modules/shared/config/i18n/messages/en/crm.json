@@ -428,6 +428,14 @@
                 "thc": "THC",
                 "cbd": "CBD",
                 "strain": "Strain"
+            },
+            "audiences": {
+                "label": "Shown in the cabinet to",
+                "hint": "Nothing ticked — every member. Ticked — only members whose record the club flagged.",
+                "all": "Every member",
+                "medical": "Medical",
+                "mj": "MJ",
+                "recreation": "Recreational"
             }
         },
         "orders": {

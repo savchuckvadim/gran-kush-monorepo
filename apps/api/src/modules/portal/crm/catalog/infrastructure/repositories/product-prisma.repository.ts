@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 
-import { Prisma } from "@prisma/client";
+import { Prisma, ProductAudience } from "@prisma/client";
 
 type Decimal = Prisma.Decimal;
 
@@ -58,9 +58,13 @@ export class ProductPrismaRepository implements ProductRepository {
         return rows.map((r) => this.mapToEntity(r));
     }
 
-    async findActive(portalId: string): Promise<Product[]> {
+    async findActive(portalId: string, audiences?: ProductAudience[]): Promise<Product[]> {
+        const where: Prisma.ProductWhereInput = { portalId, isActive: true, isAvailable: true };
+        if (audiences) {
+            where.OR = [{ audiences: { isEmpty: true } }, { audiences: { hasSome: audiences } }];
+        }
         const rows = await this.prisma.product.findMany({
-            where: { portalId, isActive: true, isAvailable: true },
+            where,
             include: PRODUCT_INCLUDE,
             orderBy: { name: "asc" },
         });
@@ -87,6 +91,7 @@ export class ProductPrismaRepository implements ProductRepository {
         thc?: Decimal;
         cbd?: Decimal;
         strain?: string;
+        audiences?: ProductAudience[];
         createdBy?: string;
     }): Promise<Product> {
         const raw = await this.prisma.$transaction(async (tx) => {
@@ -130,6 +135,7 @@ export class ProductPrismaRepository implements ProductRepository {
             thc: Decimal | null;
             cbd: Decimal | null;
             strain: string | null;
+            audiences: ProductAudience[];
             updatedBy: string;
         }>
     ): Promise<Product> {
@@ -197,6 +203,7 @@ export class ProductPrismaRepository implements ProductRepository {
             thc: raw.thc,
             cbd: raw.cbd,
             strain: raw.strain,
+            audiences: raw.audiences,
             createdAt: raw.createdAt,
             updatedAt: raw.updatedAt,
             createdBy: raw.createdBy,

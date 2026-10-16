@@ -21,6 +21,8 @@ import { useCategories } from "@/modules/entities/category";
 import { useMeasurementUnits } from "@/modules/entities/measurement-unit";
 import { useCreateProduct } from "@/modules/entities/product";
 
+import { AudiencePicker } from "./audience-picker";
+
 const INITIAL_FORM: SchemaCreateProductDto = {
     name: "",
     categoryId: "",
@@ -185,6 +187,11 @@ export function CreateProductDialog() {
                             onChange={(e) => handleChange("strain", e.target.value)}
                         />
                     </div>
+
+                    <AudiencePicker
+                        value={form.audiences ?? []}
+                        onChange={(audiences) => setForm((prev) => ({ ...prev, audiences }))}
+                    />
 
                     {createMutation.isError && (
                         <p className="text-sm text-destructive">{t("createError")}</p>

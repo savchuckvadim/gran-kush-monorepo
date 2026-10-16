@@ -235,7 +235,11 @@
                 "decrease": "Less",
                 "increase": "More",
                 "outOfStock": "Sold out — not included in the order",
-                "unavailableProduct": "No longer in the shop"
+                "unavailableProduct": "No longer in the shop",
+                "errors": {
+                    "product_unavailable": "One of the products is no longer available. Refresh the shop.",
+                    "insufficient_stock": "There is not that much in stock right now. Lower the quantity."
+                }
             }
         },
         "orders": {

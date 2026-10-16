@@ -235,7 +235,11 @@
                 "decrease": "Меньше",
                 "increase": "Больше",
                 "outOfStock": "Закончился — в заказ не войдёт",
-                "unavailableProduct": "Товар снят с витрины"
+                "unavailableProduct": "Товар снят с витрины",
+                "errors": {
+                    "product_unavailable": "Один из товаров больше недоступен. Обновите витрину.",
+                    "insufficient_stock": "Столько товара сейчас нет. Уменьшите количество."
+                }
             }
         },
         "orders": {

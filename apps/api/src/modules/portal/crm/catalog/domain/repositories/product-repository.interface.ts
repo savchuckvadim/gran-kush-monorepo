@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, ProductAudience } from "@prisma/client";
 
 type Decimal = Prisma.Decimal;
 
@@ -24,7 +24,8 @@ export abstract class ProductRepository {
         sortBy?: string,
         sortOrder?: "asc" | "desc"
     ): Promise<Product[]>;
-    abstract findActive(portalId: string): Promise<Product[]>;
+    /** Активные и доступные; `audiences` — только товары, видимые участнику этих аудиторий. */
+    abstract findActive(portalId: string, audiences?: ProductAudience[]): Promise<Product[]>;
     abstract count(portalId: string, filters?: ProductFilters): Promise<number>;
     abstract create(data: {
         portalId: string;
@@ -41,6 +42,7 @@ export abstract class ProductRepository {
         thc?: Decimal;
         cbd?: Decimal;
         strain?: string;
+        audiences?: ProductAudience[];
         createdBy?: string;
     }): Promise<Product>;
     abstract update(
@@ -61,6 +63,7 @@ export abstract class ProductRepository {
             thc: Decimal | null;
             cbd: Decimal | null;
             strain: string | null;
+            audiences: ProductAudience[];
             updatedBy: string;
         }>
     ): Promise<Product>;

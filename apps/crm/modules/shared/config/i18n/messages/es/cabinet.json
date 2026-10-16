@@ -235,7 +235,11 @@
                 "decrease": "Menos",
                 "increase": "Más",
                 "outOfStock": "Agotado: no entra en el pedido",
-                "unavailableProduct": "Ya no está en la tienda"
+                "unavailableProduct": "Ya no está en la tienda",
+                "errors": {
+                    "product_unavailable": "Uno de los productos ya no está disponible. Actualiza la tienda.",
+                    "insufficient_stock": "Ahora no hay tanta cantidad. Reduce la cantidad."
+                }
             }
         },
         "orders": {
