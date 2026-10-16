@@ -4,6 +4,7 @@ import type { IdentityProvider } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 import {
+    LinkedIdentity,
     LinkIdentityInput,
     UserIdentityRepository,
 } from "@modules/portal/auth/social/domain/repositories/user-identity-repository.interface";
@@ -51,5 +52,20 @@ export class UserIdentityPrismaRepository extends UserIdentityRepository {
             },
             update: { userId: input.userId, ...profile },
         });
+    }
+
+    async findForUser(userId: string, provider: IdentityProvider): Promise<LinkedIdentity | null> {
+        return this.prisma.userIdentity.findFirst({
+            where: { userId, provider },
+            select: { providerUserId: true, email: true },
+            orderBy: { createdAt: "asc" },
+        });
+    }
+
+    async unlink(userId: string, provider: IdentityProvider): Promise<number> {
+        const { count } = await this.prisma.userIdentity.deleteMany({
+            where: { userId, provider },
+        });
+        return count;
     }
 }

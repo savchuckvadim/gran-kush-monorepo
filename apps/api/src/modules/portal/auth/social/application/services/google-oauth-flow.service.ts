@@ -19,6 +19,7 @@ import {
     GoogleFlowError,
     type GoogleIntent,
     INVITATION_TOKEN,
+    ACCOUNT_ID,
     type OAuthBinding,
     type OAuthState,
     SOCIAL_LOCALES,
@@ -214,6 +215,11 @@ export class GoogleOAuthFlowService {
     private sanitizeIntent(intent: GoogleIntent | undefined): GoogleIntent | undefined {
         if (!intent) return undefined;
         if (intent.kind === "club_signup") return { kind: "club_signup" };
+        if (intent.kind === "link") {
+            return ACCOUNT_ID.test(intent.userId)
+                ? { kind: "link", userId: intent.userId }
+                : undefined;
+        }
         if (intent.kind === "invitation" && INVITATION_TOKEN.test(intent.token)) {
             return { kind: "invitation", token: intent.token };
         }

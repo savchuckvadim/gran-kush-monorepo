@@ -1069,6 +1069,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/cabinet/auth/google/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Привязать Google к своему аккаунту (редирект на Google) */
+        get: operations["MemberGoogleAuth_link"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/crm/auth/google/start": {
         parameters: {
             query?: never;
@@ -1080,6 +1097,83 @@ export interface paths {
         get: operations["EmployeeGoogleAuth_start"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cabinet/account/security": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Способы входа: пароль задан ли, привязан ли Google */
+        get: operations["CabinetAccountSecurity_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cabinet/account/security/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Задать или сменить пароль
+         * @description Все сессии аккаунта (кабинет и CRM) отзываются, это устройство получает новую сессию. Неверный текущий пароль — 400 с code `wrong_password`.
+         */
+        put: operations["CabinetAccountSecurity_setPassword"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cabinet/account/security/google": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Отвязать Google
+         * @description Без пароля нельзя — 409 с code `password_required`.
+         */
+        delete: operations["CabinetAccountSecurity_unlink"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cabinet/account/security/sign-out-everywhere": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Выйти на всех устройствах
+         * @description Отзывает все сессии аккаунта — в кабинете и в CRM — и снимает куки здесь.
+         */
+        post: operations["CabinetAccountSecurity_signOutEverywhere"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3756,6 +3850,24 @@ export interface components {
              * @example Email confirmed successfully
              */
             message: string;
+        };
+        GoogleSignInDto: {
+            linked: boolean;
+            /** @example ana@gmail.com */
+            email: string | null;
+        };
+        AccountSecurityDto: {
+            /** @example ana@example.com */
+            email: string;
+            /** @description Пароль задан; Google-аккаунт может войти и без него */
+            hasPassword: boolean;
+            google: components["schemas"]["GoogleSignInDto"];
+        };
+        ChangeAccountPasswordDto: {
+            /** @description Текущий пароль; не нужен, если пароля ещё нет (вход только через Google) */
+            currentPassword?: string;
+            /** @example NewPassword123 */
+            newPassword: string;
         };
         EmployeeProfileFieldDto: {
             /** @example first_name */
@@ -6503,6 +6615,9 @@ export type SchemaRegisterMemberResponseDto = components['schemas']['RegisterMem
 export type SchemaUploadMemberFilesResponseDto = components['schemas']['UploadMemberFilesResponseDto'];
 export type SchemaMemberConfirmEmailDto = components['schemas']['MemberConfirmEmailDto'];
 export type SchemaMemberConfirmEmailResponseDto = components['schemas']['MemberConfirmEmailResponseDto'];
+export type SchemaGoogleSignInDto = components['schemas']['GoogleSignInDto'];
+export type SchemaAccountSecurityDto = components['schemas']['AccountSecurityDto'];
+export type SchemaChangeAccountPasswordDto = components['schemas']['ChangeAccountPasswordDto'];
 export type SchemaEmployeeProfileFieldDto = components['schemas']['EmployeeProfileFieldDto'];
 export type SchemaEmployeeListItemDto = components['schemas']['EmployeeListItemDto'];
 export type SchemaPaginatedResponseEmployeeListItemDto = components['schemas']['PaginatedResponse_EmployeeListItemDto'];
@@ -9174,6 +9289,23 @@ export interface operations {
             };
         };
     };
+    MemberGoogleAuth_link: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     EmployeeGoogleAuth_start: {
         parameters: {
             query?: {
@@ -9195,6 +9327,144 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    CabinetAccountSecurity_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountSecurityDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CabinetAccountSecurity_setPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeAccountPasswordDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountSecurityDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CabinetAccountSecurity_unlink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountSecurityDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CabinetAccountSecurity_signOutEverywhere: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
             };
         };
     };

@@ -22,3 +22,10 @@ export const googleSignInUrl = (
     }
     return `${API_BASE_URL}/${app}/auth/google/start?${query.toString()}`;
 };
+
+/**
+ * Привязать Google к аккаунту кабинета, который уже вошёл: API берёт аккаунт из сессии и
+ * возвращает на страницу аккаунта с `?google=linked` или причиной отказа.
+ */
+export const googleLinkUrl = (locale: string): string =>
+    `${API_BASE_URL}/cabinet/auth/google/link?${new URLSearchParams({ locale }).toString()}`;

@@ -13,6 +13,7 @@ import { EmployeeGoogleSignInService } from "@modules/portal/auth/social/applica
 import { GoogleOAuthFlowService } from "@modules/portal/auth/social/application/services/google-oauth-flow.service";
 import { SocialLoginService } from "@modules/portal/auth/social/application/services/social-login.service";
 import { GoogleOAuthGateway } from "@modules/portal/auth/social/domain/google-oauth.gateway";
+import { LinkGoogleUseCase } from "@modules/portal/auth/social/application/use-cases/link-google.use-case";
 import { UserIdentityRepository } from "@modules/portal/auth/social/domain/repositories/user-identity-repository.interface";
 import { GoogleOAuthClient } from "@modules/portal/auth/social/infrastructure/google/google-oauth.client";
 import { UserIdentityPrismaRepository } from "@modules/portal/auth/social/infrastructure/repositories/user-identity.repository";
@@ -30,6 +31,7 @@ import { InvitationsModule } from "@modules/portal/crm/invitations/invitations.m
     ],
     providers: [
         SocialLoginService,
+        LinkGoogleUseCase,
         GoogleOAuthFlowService,
         EmployeeGoogleSignInService,
         {
@@ -42,5 +44,6 @@ import { InvitationsModule } from "@modules/portal/crm/invitations/invitations.m
         },
     ],
     controllers: [MemberGoogleAuthController, EmployeeGoogleAuthController],
+    exports: [UserIdentityRepository],
 })
 export class SocialAuthModule {}

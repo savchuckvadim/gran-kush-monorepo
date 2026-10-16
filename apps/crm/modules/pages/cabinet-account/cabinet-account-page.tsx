@@ -10,8 +10,9 @@ import { Card } from "@workspace/ui";
 import { useAccountProfile } from "@/modules/entities/cabinet-account";
 
 import { ProfileForm } from "./profile-form";
+import { SecurityCard } from "./security/security-card";
 
-/** «Аккаунт»: данные человека для анкет клубов (а дальше — входы и безопасность, TASK-716). */
+/** «Аккаунт»: данные человека для анкет клубов, вход и безопасность (TASK-716). */
 export function CabinetAccountPage() {
     const t = useTranslations("cabinet.account");
     const profile = useAccountProfile();
@@ -40,6 +41,8 @@ export function CabinetAccountPage() {
                     {profile.data && <ProfileForm profile={profile.data} />}
                 </div>
             </Card>
+
+            <SecurityCard />
         </div>
     );
 }

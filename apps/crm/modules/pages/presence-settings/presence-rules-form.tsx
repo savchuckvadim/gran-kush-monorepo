@@ -6,9 +6,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { Button, Input } from "@workspace/ui";
 
 import type { PresenceSettings } from "@/modules/entities/presence";
+import { SettingRow } from "@/modules/shared/ui/SettingRow";
 import { TimezonePicker } from "@/modules/shared/ui/TimezonePicker";
-
-import { SettingRow } from "./setting-row";
 
 /** Совпадает с правилом API: целое число часов, от 1 до 48. */
 const MAX_HOURS = { min: 1, max: 48 } as const;

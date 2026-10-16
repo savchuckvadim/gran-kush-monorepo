@@ -13,6 +13,11 @@ export interface LinkIdentityInput {
     locale?: string | null;
 }
 
+export interface LinkedIdentity {
+    providerUserId: string;
+    email: string | null;
+}
+
 export abstract class UserIdentityRepository {
     abstract findUserIdByProvider(
         provider: IdentityProvider,
@@ -23,4 +28,13 @@ export abstract class UserIdentityRepository {
      * профиль и время последнего входа.
      */
     abstract link(input: LinkIdentityInput): Promise<void>;
+
+    /** Привязка провайдера к аккаунту (email у провайдера — для показа); `null` — не привязан. */
+    abstract findForUser(
+        userId: string,
+        provider: IdentityProvider
+    ): Promise<LinkedIdentity | null>;
+
+    /** Отвязать провайдера от аккаунта; число снятых привязок. */
+    abstract unlink(userId: string, provider: IdentityProvider): Promise<number>;
 }

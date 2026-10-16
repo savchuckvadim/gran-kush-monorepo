@@ -33,13 +33,26 @@ export const DEFAULT_LANDING: Record<SocialApp, (locale: string) => string> = {
 };
 
 /**
- * Зачем начат вход, кроме самого входа: принять приглашение сотрудника или завести клуб.
+ * Зачем начат вход, кроме самого входа: принять приглашение сотрудника, завести клуб или привязать
+ * Google к аккаунту, который уже вошёл (`userId` берётся из сессии на старте, не из запроса).
  * Проверяется при старте и едет в подписанном state, поэтому подменить его по пути нельзя.
  */
-export type GoogleIntent = { kind: "invitation"; token: string } | { kind: "club_signup" };
+export type GoogleIntent =
+    | { kind: "invitation"; token: string }
+    | { kind: "club_signup" }
+    | { kind: "link"; userId: string };
 
 /** Токен приглашения — hex из `randomBytes`; всё остальное отбрасывается до Google. */
 export const INVITATION_TOKEN = /^[a-f0-9]{16,128}$/;
+
+/** id аккаунта — UUID: в state для привязки Google ничего другого не попадает. */
+export const ACCOUNT_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Страница кабинета, с которой привязывают Google и куда возвращаются после привязки. */
+export const LINK_RETURN_PATH = "/me";
+
+/** Исход привязки — параметр `google` на странице возврата. */
+export const GOOGLE_LINK_RESULT_PARAM = "google";
 
 export interface OAuthState {
     purpose: string;

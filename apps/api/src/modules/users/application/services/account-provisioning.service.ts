@@ -2,12 +2,11 @@ import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/
 
 import { UserAccountStatus } from "@prisma/client";
 import { User } from "@users/domain/entity/user.entity";
+import { BCRYPT_ROUNDS } from "@users/domain/password-hashing";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import * as bcrypt from "bcrypt";
 
 import { AccountOwnershipService } from "./account-ownership.service";
-
-const BCRYPT_ROUNDS = 10;
 
 /**
  * Единая точка жизненного цикла аккаунта: создание pending_claim клубом
