@@ -4,8 +4,8 @@ import createIntlMiddleware from "next-intl/middleware";
 import { defaultLocale, locales } from "./i18n";
 import {
     CABINET_TREE,
-    isClubHost,
     isCabinetProtectedPath,
+    isClubHost,
     MEMBER_ACCESS_COOKIE,
     MEMBER_REFRESH_COOKIE,
     resolveClubRoute,
@@ -163,8 +163,9 @@ export const config = {
          * - _next/static (static files)
          * - _next/image (image optimization files)
          * - favicon.ico (favicon file)
+         * - apple-icon (generated icon, served without an extension)
          * - files with extensions (e.g. .png, .jpg, .svg)
          */
-        "/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)",
+        "/((?!api|_next/static|_next/image|favicon.ico|apple-icon|.*\\..*).*)",
     ],
 };
