@@ -19,6 +19,7 @@ import {
     OrderStage,
     OrderStageSummary,
 } from "@modules/portal/crm/orders/domain/entity/order-stage.entity";
+import { limitWindowStart, roundGrams } from "@modules/portal/crm/orders/domain/monthly-limit";
 import { legacyStatusOf } from "@modules/portal/crm/orders/domain/order-stage.rules";
 import {
     CreateOrderInput,
@@ -33,6 +34,7 @@ import {
     toOrderStage,
 } from "@modules/portal/crm/orders/infrastructure/prisma-includes";
 
+import { enforceMonthlyLimit, sumLimitUsage } from "./order-limit.prisma";
 import { reserveStock, returnStock } from "./order-stock.prisma";
 
 type OrderWithRelations = Prisma.OrderGetPayload<{ include: typeof ORDER_INCLUDE }>;
@@ -127,6 +129,16 @@ export class OrderPrismaRepository extends OrderRepository {
         }
 
         const row = await this.prisma.$transaction(async (tx) => {
+            if (data.monthlyLimitGrams != null) {
+                await enforceMonthlyLimit(tx, {
+                    memberId: member.id,
+                    limitGrams: data.monthlyLimitGrams,
+                    addingGrams: roundGrams(
+                        data.items.reduce((sum, item) => sum + item.limitGrams, 0)
+                    ),
+                    since: limitWindowStart(new Date()),
+                });
+            }
             await reserveStock(tx, member.portalId, data.items);
 
             const orderDef = await tx.entityDefinition.findUniqueOrThrow({
@@ -171,6 +183,7 @@ export class OrderPrismaRepository extends OrderRepository {
                             totalPrice: new Prisma.Decimal(item.totalPrice),
                             isGift: item.isGift ?? false,
                             notes: item.notes,
+                            limitGrams: new Prisma.Decimal(item.limitGrams),
                         })),
                     },
                 },
@@ -179,6 +192,10 @@ export class OrderPrismaRepository extends OrderRepository {
         });
 
         return this.mapToEntity(row);
+    }
+
+    async sumLimitUsage(memberId: string, since: Date): Promise<number> {
+        return sumLimitUsage(this.prisma, memberId, since);
     }
 
     // ─── Перевод статуса оплаты (compare-and-set) ────────────────────────────

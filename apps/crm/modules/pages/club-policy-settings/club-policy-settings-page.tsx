@@ -10,11 +10,13 @@ import { Card } from "@workspace/ui";
 import { useClubPolicy, useUpdateClubPolicy } from "@/modules/entities/club-policy";
 import { usePortalRole } from "@/modules/entities/portal";
 
+import { LimitDefaultRow } from "./limit-default-row";
 import { PolicyRow } from "./policy-row";
 
 /**
  * Правила клуба для участников: как вступают без ссылки, открыт ли каталог вне клуба, нужно ли
- * одобрение для заказа, может ли сотрудник заказать на себя. Меняет администратор; остальные видят.
+ * одобрение для заказа, может ли сотрудник заказать на себя, лимит отпуска за 30 дней. Меняет
+ * администратор; остальные видят.
  */
 export function ClubPolicySettingsPage() {
     const t = useTranslations("crm.clubPolicy");
@@ -79,6 +81,20 @@ export function ClubPolicySettingsPage() {
                         disabled={disabled}
                         onChange={(on) => update.mutate({ staffSelfOrders: on })}
                     />
+                    <PolicyRow
+                        title={t("monthlyLimit.title")}
+                        description={t("monthlyLimit.description")}
+                        checked={rules.monthlyLimitEnabled}
+                        disabled={disabled}
+                        onChange={(on) => update.mutate({ monthlyLimitEnabled: on })}
+                    />
+                    {rules.monthlyLimitEnabled && (
+                        <LimitDefaultRow
+                            grams={rules.defaultMonthlyLimitGrams}
+                            disabled={disabled}
+                            onSave={(grams) => update.mutate({ defaultMonthlyLimitGrams: grams })}
+                        />
+                    )}
                 </ul>
             </Card>
         </div>

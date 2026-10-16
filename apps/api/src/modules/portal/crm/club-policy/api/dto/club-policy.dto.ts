@@ -1,9 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 import { ClubJoinPolicy } from "@prisma/client";
-import { IsBoolean, IsEnum, IsOptional } from "class-validator";
+import { IsBoolean, IsEnum, IsNumber, IsOptional, Max, Min } from "class-validator";
 
-import { ShopDenial } from "../../domain/club-policy";
+import { MAX_LIMIT_GRAMS, ShopDenial } from "../../domain/club-policy";
 
 export class ClubPolicyDto {
     @ApiProperty({
@@ -25,6 +25,20 @@ export class ClubPolicyDto {
 
     @ApiProperty({ type: Boolean, description: "Сотрудник может оформить заказ на себя" })
     staffSelfOrders: boolean;
+
+    @ApiProperty({
+        type: Boolean,
+        description: "Лимит отпуска за последние 30 дней включён",
+    })
+    monthlyLimitEnabled: boolean;
+
+    @ApiProperty({
+        type: Number,
+        nullable: true,
+        example: 60,
+        description: "Лимит в граммах для участников без личного; null — без лимита",
+    })
+    defaultMonthlyLimitGrams: number | null;
 }
 
 export class UpdateClubPolicyDto {
@@ -47,6 +61,18 @@ export class UpdateClubPolicyDto {
     @IsOptional()
     @IsBoolean()
     staffSelfOrders?: boolean;
+
+    @ApiPropertyOptional({ type: Boolean })
+    @IsOptional()
+    @IsBoolean()
+    monthlyLimitEnabled?: boolean;
+
+    @ApiPropertyOptional({ type: Number, nullable: true, description: "null — без лимита" })
+    @IsOptional()
+    @IsNumber({ maxDecimalPlaces: 3 })
+    @Min(0)
+    @Max(MAX_LIMIT_GRAMS)
+    defaultMonthlyLimitGrams?: number | null;
 }
 
 export class ShopAccessDto {

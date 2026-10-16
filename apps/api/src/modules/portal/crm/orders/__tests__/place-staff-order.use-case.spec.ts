@@ -3,6 +3,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { EmployeeRole, Prisma, StageSemantic } from "@prisma/client";
 
 import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
+import { MemberLimitService } from "@modules/portal/crm/club-policy/application/services/member-limit.service";
 import { MemberAccessService } from "@modules/portal/crm/club-policy/application/services/member-access.service";
 import { MembersService } from "@modules/portal/crm/members/application/services/members.service";
 import { CrmCreateOrderDto } from "@modules/portal/crm/orders/api/dto/order.dto";
@@ -36,6 +37,13 @@ const mockOrderRepository = {
 
 const mockProductsService = {
     findById: jest.fn(),
+};
+
+/** Лимит клуба выключен: правила лимита проверяет отдельный набор тестов */
+const mockMemberLimits = {
+    settingsOf: jest
+        .fn()
+        .mockResolvedValue({ enabled: false, personalGrams: null, limitGrams: null }),
 };
 
 const mockMembersService = {
@@ -97,6 +105,7 @@ describe("PlaceStaffOrderUseCase — заказ из CRM", () => {
                 OrderPlacementService,
                 { provide: OrderRepository, useValue: mockOrderRepository },
                 { provide: ProductsService, useValue: mockProductsService },
+                { provide: MemberLimitService, useValue: mockMemberLimits },
                 { provide: MembersService, useValue: mockMembersService },
                 { provide: MemberAccessService, useValue: mockMemberAccess },
             ],

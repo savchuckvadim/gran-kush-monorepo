@@ -147,6 +147,7 @@ describe("Cabinet shop (e2e)", () => {
                 "id",
                 "imageUrl",
                 "inStock",
+                "limitGramsPerUnit",
                 "name",
                 "price",
                 "strain",

@@ -27,6 +27,19 @@ export abstract class ClubPolicyRepository {
         fieldKeys: readonly string[]
     ): Promise<string[]>;
 
+    /** The club's rules and the member's personal limit; `null` when the club has no such member. */
+    abstract findMemberLimit(
+        memberId: string,
+        portalId: string
+    ): Promise<{ rules: ClubPolicyRules; personalGrams: number | null } | null>;
+
+    /** Sets or clears (`null`) the member's personal limit; `false` when there is no such member. */
+    abstract saveMemberLimit(
+        memberId: string,
+        portalId: string,
+        grams: number | null
+    ): Promise<boolean>;
+
     /** Whose member record it is (the account), or `null` when the club has no such member. */
     abstract findMemberUserId(memberId: string, portalId: string): Promise<string | null>;
 }

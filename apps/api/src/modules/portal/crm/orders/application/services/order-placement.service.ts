@@ -4,8 +4,11 @@ import { Prisma } from "@prisma/client";
 
 import { isUniqueViolationOn } from "@common/prisma/unique-violation";
 import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
+import { MemberLimitService } from "@modules/portal/crm/club-policy/application/services/member-limit.service";
 import { Order, PaymentStatus } from "@modules/portal/crm/orders/domain/entity/order.entity";
 import { InsufficientStockError } from "@modules/portal/crm/orders/domain/errors/insufficient-stock.error";
+import { MonthlyLimitExceededError } from "@modules/portal/crm/orders/domain/errors/monthly-limit-exceeded.error";
+import { itemLimitGrams } from "@modules/portal/crm/orders/domain/monthly-limit";
 import {
     CreateOrderInput,
     CreateOrderItemInput,
@@ -22,6 +25,9 @@ const buildOrderNumberPrefix = (date: Date): string =>
 /** Конфликт по уникальному индексу `(portal_id, order_number)` */
 const isOrderNumberConflict = (error: unknown): boolean =>
     isUniqueViolationOn(error, "order_number");
+
+/** Код отказа, когда заказ превысил бы лимит участника; рядом — `remainingGrams`. */
+export const MONTHLY_LIMIT_EXCEEDED = "monthly_limit_exceeded";
 
 /** Позиция нового заказа. Цену и подарок задаёт только сотрудник CRM — у участника их нет */
 export interface NewOrderItem {
@@ -48,8 +54,9 @@ interface ResolvedOrderItem extends CreateOrderItemInput {
 }
 
 /**
- * Общее ядро оформления заказа для кабинета и CRM: проверить товары, посчитать суммы, выдать
- * номер и одной транзакцией создать заказ и списать товар. Правила того, кто и что может
+ * Общее ядро оформления заказа для кабинета и CRM: проверить товары, посчитать суммы и граммы
+ * лимита, выдать номер и одной транзакцией создать заказ, проверить лимит участника и списать
+ * товар. Правила того, кто и что может
  * заказать, — в сценариях `use-cases/place-*-order.use-case.ts`.
  */
 @Injectable()
@@ -58,7 +65,8 @@ export class OrderPlacementService {
 
     constructor(
         private readonly orderRepository: OrderRepository,
-        private readonly productsService: ProductsService
+        private readonly productsService: ProductsService,
+        private readonly memberLimits: MemberLimitService
     ) {}
 
     async place(portalId: string, input: PlaceOrderInput): Promise<Order> {
@@ -68,6 +76,7 @@ export class OrderPlacementService {
         const subtotal = +resolvedItems.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2);
         const discount = 0; // скидок в продукте пока нет
         const total = subtotal - discount;
+        const { limitGrams } = await this.memberLimits.settingsOf(memberId, portalId);
 
         let order: Order;
         try {
@@ -81,8 +90,16 @@ export class OrderPlacementService {
                 notes: input.notes,
                 items: resolvedItems,
                 stageId: input.stageId,
+                monthlyLimitGrams: limitGrams,
             });
         } catch (error) {
+            if (error instanceof MonthlyLimitExceededError) {
+                throw new BadRequestException({
+                    message: error.message,
+                    code: MONTHLY_LIMIT_EXCEEDED,
+                    remainingGrams: error.remainingGrams,
+                });
+            }
             if (!(error instanceof InsufficientStockError)) throw error;
             // проверка выше прошла, но товар успели заказать параллельно
             const name = resolvedItems.find((item) => item.productId === error.productId)?.name;
@@ -133,6 +150,10 @@ export class OrderPlacementService {
                 totalPrice: isGift ? 0 : +(unitPrice * item.quantity).toFixed(2),
                 isGift,
                 notes: item.notes,
+                limitGrams: itemLimitGrams(
+                    item.quantity,
+                    product.limitGramsPerUnit != null ? Number(product.limitGramsPerUnit) : null
+                ),
             });
         }
 

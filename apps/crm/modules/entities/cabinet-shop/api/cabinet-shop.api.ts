@@ -2,6 +2,7 @@ import {
     assertOpenApiOk,
     type SchemaCabinetProductCategoryDto,
     type SchemaCabinetProductDto,
+    type SchemaMonthlyLimitDto,
     type SchemaShopAccessDto,
 } from "@workspace/api-client/core";
 
@@ -16,6 +17,12 @@ import { $cabinetApi } from "@/modules/shared/api";
 export async function getShopAccess(): Promise<SchemaShopAccessDto> {
     const response = await $cabinetApi.GET("/cabinet/club/shop-access");
     return assertOpenApiOk<SchemaShopAccessDto>(response);
+}
+
+/** Мой лимит за последние 30 дней: сколько отпущено и сколько ещё можно заказать. */
+export async function getMyMonthlyLimit(): Promise<SchemaMonthlyLimitDto> {
+    const response = await $cabinetApi.GET("/cabinet/club/monthly-limit");
+    return assertOpenApiOk<SchemaMonthlyLimitDto>(response);
 }
 
 export async function getShopProducts(): Promise<SchemaCabinetProductDto[]> {

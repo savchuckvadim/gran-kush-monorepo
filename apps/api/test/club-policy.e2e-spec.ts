@@ -125,6 +125,8 @@ describe("Club policy (e2e)", () => {
             catalogOutsideClub: false,
             ordersRequireApproval: false,
             staffSelfOrders: false,
+            monthlyLimitEnabled: false,
+            defaultMonthlyLimitGrams: null,
         });
     });
 

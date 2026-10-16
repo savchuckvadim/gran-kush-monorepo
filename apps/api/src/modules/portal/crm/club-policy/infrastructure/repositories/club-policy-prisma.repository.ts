@@ -1,5 +1,7 @@
 import { Injectable } from "@nestjs/common";
 
+import { Prisma } from "@prisma/client";
+
 import { PrismaService } from "@common/prisma/prisma.service";
 
 import { ClubPolicyRules, DEFAULT_CLUB_POLICY } from "../../domain/club-policy";
@@ -13,23 +15,69 @@ const RULES_SELECT = {
     catalogOutsideClub: true,
     ordersRequireApproval: true,
     staffSelfOrders: true,
+    monthlyLimitEnabled: true,
+    defaultMonthlyLimitGrams: true,
 } as const;
+
+type RulesRow = Prisma.ClubPolicyGetPayload<{ select: typeof RULES_SELECT }>;
+
+const toRules = (row: RulesRow): ClubPolicyRules => ({
+    ...row,
+    defaultMonthlyLimitGrams:
+        row.defaultMonthlyLimitGrams === null ? null : Number(row.defaultMonthlyLimitGrams),
+});
 
 @Injectable()
 export class ClubPolicyPrismaRepository implements ClubPolicyRepository {
     constructor(private readonly prisma: PrismaService) {}
 
     async findRules(portalId: string): Promise<ClubPolicyRules | null> {
-        return this.prisma.clubPolicy.findUnique({ where: { portalId }, select: RULES_SELECT });
+        const row = await this.prisma.clubPolicy.findUnique({
+            where: { portalId },
+            select: RULES_SELECT,
+        });
+        return row ? toRules(row) : null;
     }
 
     async saveRules(portalId: string, rules: ClubPolicyRules): Promise<ClubPolicyRules> {
-        return this.prisma.clubPolicy.upsert({
+        const row = await this.prisma.clubPolicy.upsert({
             where: { portalId },
             create: { portalId, ...rules },
             update: rules,
             select: RULES_SELECT,
         });
+        return toRules(row);
+    }
+
+    async findMemberLimit(
+        memberId: string,
+        portalId: string
+    ): Promise<{ rules: ClubPolicyRules; personalGrams: number | null } | null> {
+        const member = await this.prisma.member.findFirst({
+            where: { id: memberId, portalId },
+            select: {
+                monthlyLimitGrams: true,
+                portal: { select: { policy: { select: RULES_SELECT } } },
+            },
+        });
+        if (!member) return null;
+        return {
+            rules: member.portal.policy ? toRules(member.portal.policy) : DEFAULT_CLUB_POLICY,
+            personalGrams:
+                member.monthlyLimitGrams === null ? null : Number(member.monthlyLimitGrams),
+        };
+    }
+
+    async saveMemberLimit(
+        memberId: string,
+        portalId: string,
+        grams: number | null
+    ): Promise<boolean> {
+        const { count } = await this.prisma.member.updateMany({
+            where: { id: memberId, portalId },
+            data: { monthlyLimitGrams: grams },
+        });
+        return count > 0;
     }
 
     async findMemberUserId(memberId: string, portalId: string): Promise<string | null> {
@@ -82,7 +130,7 @@ export class ClubPolicyPrismaRepository implements ClubPolicyRepository {
         });
         if (!member) return null;
         return {
-            rules: member.portal.policy ?? DEFAULT_CLUB_POLICY,
+            rules: member.portal.policy ? toRules(member.portal.policy) : DEFAULT_CLUB_POLICY,
             statusKey: member.profile.statusItem?.key ?? null,
             inClub: member.profile.presenceSessions.length > 0,
             subscription: member.portal.subscription,

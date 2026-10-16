@@ -54,4 +54,12 @@ export class CabinetProductDto {
 
     @ApiPropertyOptional({ example: "Variante A", type: String, nullable: true })
     strain: string | null;
+
+    @ApiPropertyOptional({
+        example: 1,
+        type: Number,
+        nullable: true,
+        description: "Сколько граммов лимита занимает единица; пусто — товар в лимит не входит",
+    })
+    limitGramsPerUnit: number | null;
 }

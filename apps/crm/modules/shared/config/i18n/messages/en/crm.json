@@ -277,6 +277,18 @@
                         "manual_employee": "Manually",
                         "auto_cron": "Automatically at night"
                     }
+                },
+                "limit": {
+                    "title": "Limit over 30 days",
+                    "used": "Dispensed {used} g of {limit} g",
+                    "remaining": "{remaining} g left",
+                    "noLimit": "No limit set. Dispensed over 30 days: {used} g.",
+                    "clubDefault": "The club's default limit applies.",
+                    "personal": "A personal limit is set.",
+                    "personalLabel": "Personal limit, g",
+                    "personalPlaceholder": "Club default",
+                    "save": "Save",
+                    "useClubDefault": "Use club default"
                 }
             }
         },
@@ -400,7 +412,9 @@
                 "unitRequiredHint": "Add at least one measurement unit before creating products.",
                 "creating": "Creating...",
                 "create": "Create product",
-                "createError": "Failed to create product"
+                "createError": "Failed to create product",
+                "limitGramsPerUnit": "Limit grams per unit",
+                "limitGramsPerUnitHint": "Empty — the product does not count towards the member's limit."
             },
             "detail": {
                 "loading": "Loading...",
@@ -427,7 +441,9 @@
                 "isAvailable": "Available for order",
                 "thc": "THC",
                 "cbd": "CBD",
-                "strain": "Strain"
+                "strain": "Strain",
+                "limitGramsPerUnit": "Counts per unit",
+                "notInLimit": "Does not count"
             },
             "audiences": {
                 "label": "Shown in the cabinet to",
@@ -1148,6 +1164,14 @@
             "staffSelfOrders": {
                 "title": "Staff may order for themselves",
                 "description": "An employee who is also a member places an order for their own record. Off — another employee places it."
+            },
+            "monthlyLimit": {
+                "title": "Dispensing limit over 30 days",
+                "description": "A member gets no more than the limit in grams over the last 30 days. Products with “grams per unit” count, gifts too; cancelled orders do not.",
+                "defaultTitle": "Default limit, g",
+                "defaultDescription": "For members without a personal limit. Empty — no limit.",
+                "defaultPlaceholder": "No limit",
+                "save": "Save"
             }
         }
     }

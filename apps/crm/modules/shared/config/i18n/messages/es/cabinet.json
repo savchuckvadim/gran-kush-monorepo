@@ -238,7 +238,12 @@
                 "unavailableProduct": "Ya no está en la tienda",
                 "errors": {
                     "product_unavailable": "Uno de los productos ya no está disponible. Actualiza la tienda.",
-                    "insufficient_stock": "Ahora no hay tanta cantidad. Reduce la cantidad."
+                    "insufficient_stock": "Ahora no hay tanta cantidad. Reduce la cantidad.",
+                    "monthly_limit_exceeded": "El pedido superaría tu límite de 30 días. Reduce la cantidad."
+                },
+                "limit": {
+                    "summary": "Cuentan {cart} g para tu límite; quedan {remaining} g en 30 días.",
+                    "over": "Supera el límite: reduce la cantidad."
                 }
             }
         },

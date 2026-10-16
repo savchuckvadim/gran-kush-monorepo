@@ -227,15 +227,19 @@ model Portal {
 
 /// Правила клуба для участников: вступление, каталог, заказы. Строки нет — действуют значения по умолчанию.
 model ClubPolicy {
-  portalId              String         @id @map("portal_id")
-  joinPolicy            ClubJoinPolicy @default(link_only) @map("join_policy")
+  portalId                 String         @id @map("portal_id")
+  joinPolicy               ClubJoinPolicy @default(link_only) @map("join_policy")
   /// Каталог и заказ из кабинета, когда участник не в клубе (нет открытого визита)
-  catalogOutsideClub    Boolean        @default(false) @map("catalog_outside_club")
+  catalogOutsideClub       Boolean        @default(false) @map("catalog_outside_club")
   /// Заказ из кабинета только у одобренного участника (статус approved)
-  ordersRequireApproval Boolean        @default(false) @map("orders_require_approval")
+  ordersRequireApproval    Boolean        @default(false) @map("orders_require_approval")
   /// Сотрудник может оформить заказ на свою же запись участника
-  staffSelfOrders       Boolean        @default(false) @map("staff_self_orders")
-  updatedAt             DateTime       @updatedAt @map("updated_at")
+  staffSelfOrders          Boolean        @default(false) @map("staff_self_orders")
+  /// Лимит отпуска за 30 дней включён: участнику можно задать лимит в граммах
+  monthlyLimitEnabled      Boolean        @default(false) @map("monthly_limit_enabled")
+  /// Лимит по умолчанию для участников без личного; пусто — без лимита
+  defaultMonthlyLimitGrams Decimal?       @map("default_monthly_limit_grams") @db.Decimal(10, 3)
+  updatedAt                DateTime       @updatedAt @map("updated_at")
 
   portal Portal @relation(fields: [portalId], references: [id], onDelete: Cascade)
 
@@ -433,6 +437,8 @@ model Member {
   consentConfirmedAt  DateTime?           @map("consent_confirmed_at")
   /// подпись аккаунта показана этому клубу
   signatureShared     Boolean             @default(false) @map("signature_shared")
+  /// Личный лимит отпуска за 30 дней в граммах; пусто — лимит клуба по умолчанию
+  monthlyLimitGrams   Decimal?            @map("monthly_limit_grams") @db.Decimal(10, 3)
   createdAt           DateTime            @default(now()) @map("created_at")
   updatedAt           DateTime            @updatedAt @map("updated_at")
 
@@ -1313,6 +1319,8 @@ model Product {
   strain            String?           @db.VarChar(100)
   /// Кому товар виден в кабинете: пусто — всем участникам, иначе тем, у кого клуб отметил хотя бы одну
   audiences         ProductAudience[] @default([])
+  /// Сколько граммов лимита участника занимает единица товара; пусто — товар в лимит не входит
+  limitGramsPerUnit Decimal?          @map("limit_grams_per_unit") @db.Decimal(10, 3)
   createdAt         DateTime          @default(now()) @map("created_at")
   updatedAt         DateTime          @updatedAt @map("updated_at")
   createdBy         String?           @map("created_by")
@@ -1413,6 +1421,8 @@ model OrderItem {
   totalPrice Decimal  @map("total_price") @db.Decimal(10, 2)
   /// подарок: товар списан со склада, но в сумму заказа не входит (total_price = 0)
   isGift     Boolean  @default(false) @map("is_gift")
+  /// граммы лимита участника на момент заказа (количество × граммы на единицу); подарок тоже входит
+  limitGrams Decimal  @default(0) @map("limit_grams") @db.Decimal(10, 3)
   notes      String?  @db.Text
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")

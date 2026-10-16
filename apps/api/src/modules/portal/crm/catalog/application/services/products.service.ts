@@ -71,6 +71,7 @@ export class ProductsService {
             cbd?: number;
             strain?: string;
             audiences?: ProductAudience[];
+            limitGramsPerUnit?: number | null;
         },
         portalId: string,
         employeeId: string
@@ -111,6 +112,10 @@ export class ProductsService {
             cbd: dto.cbd !== undefined ? new Prisma.Decimal(dto.cbd) : undefined,
             strain: dto.strain,
             audiences: dto.audiences,
+            limitGramsPerUnit:
+                dto.limitGramsPerUnit != null
+                    ? new Prisma.Decimal(dto.limitGramsPerUnit)
+                    : undefined,
             createdBy: employeeId,
         });
     }
@@ -134,6 +139,7 @@ export class ProductsService {
             cbd: number | null;
             strain: string | null;
             audiences: ProductAudience[];
+            limitGramsPerUnit: number | null;
         }>,
         portalId: string,
         employeeId: string
@@ -187,6 +193,9 @@ export class ProductsService {
         if (dto.cbd !== undefined) data.cbd = dto.cbd !== null ? new Prisma.Decimal(dto.cbd) : null;
         if (dto.strain !== undefined) data.strain = dto.strain;
         if (dto.audiences !== undefined) data.audiences = dto.audiences;
+        if (dto.limitGramsPerUnit !== undefined)
+            data.limitGramsPerUnit =
+                dto.limitGramsPerUnit !== null ? new Prisma.Decimal(dto.limitGramsPerUnit) : null;
 
         return this.productRepository.update(id, data);
     }

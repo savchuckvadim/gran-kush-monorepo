@@ -92,6 +92,7 @@ export class ProductPrismaRepository implements ProductRepository {
         cbd?: Decimal;
         strain?: string;
         audiences?: ProductAudience[];
+        limitGramsPerUnit?: Decimal;
         createdBy?: string;
     }): Promise<Product> {
         const raw = await this.prisma.$transaction(async (tx) => {
@@ -136,6 +137,7 @@ export class ProductPrismaRepository implements ProductRepository {
             cbd: Decimal | null;
             strain: string | null;
             audiences: ProductAudience[];
+            limitGramsPerUnit: Decimal | null;
             updatedBy: string;
         }>
     ): Promise<Product> {
@@ -204,6 +206,7 @@ export class ProductPrismaRepository implements ProductRepository {
             cbd: raw.cbd,
             strain: raw.strain,
             audiences: raw.audiences,
+            limitGramsPerUnit: raw.limitGramsPerUnit,
             createdAt: raw.createdAt,
             updatedAt: raw.updatedAt,
             createdBy: raw.createdBy,

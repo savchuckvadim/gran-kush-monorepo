@@ -2,7 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 
 import { cabinetKeys } from "@/modules/entities/cabinet-account";
 
-import { getShopAccess, getShopCategories, getShopProducts } from "../api/cabinet-shop.api";
+import {
+    getMyMonthlyLimit,
+    getShopAccess,
+    getShopCategories,
+    getShopProducts,
+} from "../api/cabinet-shop.api";
 
 const shopKey = (slug: string, part: string) => [...cabinetKeys.club(slug), "shop", part] as const;
 
@@ -12,6 +17,16 @@ export function useShopAccess(slug: string) {
         queryKey: shopKey(slug, "access"),
         queryFn: getShopAccess,
         refetchInterval: 30_000,
+        retry: false,
+    });
+}
+
+/** Лимит меняется с каждым заказом: после оформления его сбрасывает инвалидация клуба. */
+export function useMyMonthlyLimit(slug: string, enabled: boolean) {
+    return useQuery({
+        queryKey: shopKey(slug, "monthly-limit"),
+        queryFn: getMyMonthlyLimit,
+        enabled,
         retry: false,
     });
 }

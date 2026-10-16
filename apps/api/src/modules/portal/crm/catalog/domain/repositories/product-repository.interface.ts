@@ -43,6 +43,7 @@ export abstract class ProductRepository {
         cbd?: Decimal;
         strain?: string;
         audiences?: ProductAudience[];
+        limitGramsPerUnit?: Decimal;
         createdBy?: string;
     }): Promise<Product>;
     abstract update(
@@ -64,6 +65,7 @@ export abstract class ProductRepository {
             cbd: Decimal | null;
             strain: string | null;
             audiences: ProductAudience[];
+            limitGramsPerUnit: Decimal | null;
             updatedBy: string;
         }>
     ): Promise<Product>;

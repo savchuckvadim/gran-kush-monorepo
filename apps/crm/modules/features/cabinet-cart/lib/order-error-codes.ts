@@ -11,10 +11,14 @@ const SHOP_DENIALS: readonly SchemaShopDenial[] = [
     "club_subscription_inactive",
 ];
 
-/** Отказы оформления по составу корзины (`CABINET_ORDER_ERRORS` в API). */
-export type CartErrorCode = "product_unavailable" | "insufficient_stock";
+/** Отказы оформления по составу корзины (`CABINET_ORDER_ERRORS`, `MONTHLY_LIMIT_EXCEEDED` в API). */
+export type CartErrorCode = "product_unavailable" | "insufficient_stock" | "monthly_limit_exceeded";
 
-const CART_ERRORS: readonly CartErrorCode[] = ["product_unavailable", "insufficient_stock"];
+const CART_ERRORS: readonly CartErrorCode[] = [
+    "product_unavailable",
+    "insufficient_stock",
+    "monthly_limit_exceeded",
+];
 
 export const isShopDenial = (code: string | undefined): code is SchemaShopDenial =>
     SHOP_DENIALS.includes(code as SchemaShopDenial);

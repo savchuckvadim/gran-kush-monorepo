@@ -7,6 +7,7 @@ import { CrmClubPolicyController } from "./api/controllers/crm-club-policy.contr
 import { ShopAccessGuard } from "./api/guards/shop-access.guard";
 import { ClubPolicyService } from "./application/services/club-policy.service";
 import { MemberAccessService } from "./application/services/member-access.service";
+import { MemberLimitService } from "./application/services/member-limit.service";
 import { ClubPolicyRepository } from "./domain/repositories/club-policy-repository.interface";
 import { ClubPolicyPrismaRepository } from "./infrastructure/repositories/club-policy-prisma.repository";
 
@@ -17,9 +18,10 @@ import { ClubPolicyPrismaRepository } from "./infrastructure/repositories/club-p
     providers: [
         ClubPolicyService,
         MemberAccessService,
+        MemberLimitService,
         ShopAccessGuard,
         { provide: ClubPolicyRepository, useClass: ClubPolicyPrismaRepository },
     ],
-    exports: [ClubPolicyService, MemberAccessService, ShopAccessGuard],
+    exports: [ClubPolicyService, MemberAccessService, MemberLimitService, ShopAccessGuard],
 })
 export class ClubPolicyModule {}

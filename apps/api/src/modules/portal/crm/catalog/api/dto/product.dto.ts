@@ -81,6 +81,14 @@ export class ProductListDto {
     })
     audiences: ProductAudience[];
 
+    @ApiPropertyOptional({
+        example: 1,
+        type: Number,
+        nullable: true,
+        description: "Граммы лимита на единицу",
+    })
+    limitGramsPerUnit: number | null;
+
     @ApiProperty({ example: "2026-03-16T12:00:00.000Z", type: String })
     createdAt: string;
 }
@@ -205,6 +213,16 @@ export class CreateProductDto {
     @IsArray()
     @IsEnum(ProductAudience, { each: true })
     audiences?: ProductAudience[];
+
+    @ApiPropertyOptional({
+        example: 1,
+        type: Number,
+        description: "Граммы лимита участника на единицу товара; пусто — в лимит не входит",
+    })
+    @IsOptional()
+    @IsNumber({ maxDecimalPlaces: 3 })
+    @Min(0)
+    limitGramsPerUnit?: number;
 }
 
 // ─── Update DTO ──────────────────────────────────────────────────────────────
@@ -305,6 +323,17 @@ export class UpdateProductDto {
     @IsArray()
     @IsEnum(ProductAudience, { each: true })
     audiences?: ProductAudience[];
+
+    @ApiPropertyOptional({
+        example: 1,
+        type: Number,
+        nullable: true,
+        description: "Граммы лимита участника на единицу товара; пусто — в лимит не входит",
+    })
+    @IsOptional()
+    @IsNumber({ maxDecimalPlaces: 3 })
+    @Min(0)
+    limitGramsPerUnit?: number | null;
 }
 
 // ─── Filter DTO ──────────────────────────────────────────────────────────────

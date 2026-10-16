@@ -4,6 +4,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { Prisma } from "@prisma/client";
 
 import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
+import { MemberLimitService } from "@modules/portal/crm/club-policy/application/services/member-limit.service";
 import { OrderPlacementService } from "@modules/portal/crm/orders/application/services/order-placement.service";
 import { Order } from "@modules/portal/crm/orders/domain/entity/order.entity";
 import { InsufficientStockError } from "@modules/portal/crm/orders/domain/errors/insufficient-stock.error";
@@ -33,6 +34,13 @@ const mockOrderRepository = {
 
 const mockProductsService = {
     findById: jest.fn(),
+};
+
+/** Лимит клуба выключен: правила лимита проверяет отдельный набор тестов */
+const mockMemberLimits = {
+    settingsOf: jest
+        .fn()
+        .mockResolvedValue({ enabled: false, personalGrams: null, limitGrams: null }),
 };
 
 const orderNumberConflict = (): Prisma.PrismaClientKnownRequestError =>
@@ -69,6 +77,7 @@ describe("OrderPlacementService — номер заказа", () => {
                 OrderPlacementService,
                 { provide: OrderRepository, useValue: mockOrderRepository },
                 { provide: ProductsService, useValue: mockProductsService },
+                { provide: MemberLimitService, useValue: mockMemberLimits },
             ],
         }).compile();
 

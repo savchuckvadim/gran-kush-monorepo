@@ -277,6 +277,18 @@
                         "manual_employee": "Manual",
                         "auto_cron": "Automática por la noche"
                     }
+                },
+                "limit": {
+                    "title": "Límite en 30 días",
+                    "used": "Dispensado {used} g de {limit} g",
+                    "remaining": "quedan {remaining} g",
+                    "noLimit": "Sin límite. Dispensado en 30 días: {used} g.",
+                    "clubDefault": "Se aplica el límite por defecto del club.",
+                    "personal": "Tiene un límite propio.",
+                    "personalLabel": "Límite propio, g",
+                    "personalPlaceholder": "Como el club",
+                    "save": "Guardar",
+                    "useClubDefault": "Como el club"
                 }
             }
         },
@@ -400,7 +412,9 @@
                 "unitRequiredHint": "Agrega al menos una unidad de medida antes de crear productos.",
                 "creating": "Creando...",
                 "create": "Crear producto",
-                "createError": "No se pudo crear el producto"
+                "createError": "No se pudo crear el producto",
+                "limitGramsPerUnit": "Gramos de límite por unidad",
+                "limitGramsPerUnitHint": "Vacío: el producto no cuenta para el límite del socio."
             },
             "detail": {
                 "loading": "Cargando...",
@@ -427,7 +441,9 @@
                 "isAvailable": "Disponible para pedidos",
                 "thc": "THC",
                 "cbd": "CBD",
-                "strain": "Variedad"
+                "strain": "Variedad",
+                "limitGramsPerUnit": "Cuenta por unidad",
+                "notInLimit": "No cuenta"
             },
             "audiences": {
                 "label": "Visible en el área de socio para",
@@ -1148,6 +1164,14 @@
             "staffSelfOrders": {
                 "title": "El personal puede pedir para sí",
                 "description": "Un empleado que también es socio hace un pedido a su propio nombre. Apagado: lo hace otro empleado."
+            },
+            "monthlyLimit": {
+                "title": "Límite de dispensación en 30 días",
+                "description": "A un socio no se le dispensa más del límite en gramos en los últimos 30 días. Cuentan los productos con «gramos por unidad», también los regalos; los pedidos cancelados no.",
+                "defaultTitle": "Límite por defecto, g",
+                "defaultDescription": "Para socios sin límite propio. Vacío: sin límite.",
+                "defaultPlaceholder": "Sin límite",
+                "save": "Guardar"
             }
         }
     }

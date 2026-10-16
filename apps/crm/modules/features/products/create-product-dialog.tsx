@@ -188,6 +188,21 @@ export function CreateProductDialog() {
                         />
                     </div>
 
+                    <FieldInput
+                        label={t("limitGramsPerUnit")}
+                        helperText={t("limitGramsPerUnitHint")}
+                        type="number"
+                        value={form.limitGramsPerUnit == null ? "" : String(form.limitGramsPerUnit)}
+                        onChange={(e) =>
+                            setForm((prev) => ({
+                                ...prev,
+                                limitGramsPerUnit: e.target.value
+                                    ? Number(e.target.value)
+                                    : undefined,
+                            }))
+                        }
+                    />
+
                     <AudiencePicker
                         value={form.audiences ?? []}
                         onChange={(audiences) => setForm((prev) => ({ ...prev, audiences }))}

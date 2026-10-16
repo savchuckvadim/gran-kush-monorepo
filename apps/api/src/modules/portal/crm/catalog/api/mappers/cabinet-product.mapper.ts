@@ -30,5 +30,6 @@ export function mapProductToCabinetDto(p: Product): CabinetProductDto {
         thc: optionalNumber(p.thc),
         cbd: optionalNumber(p.cbd),
         strain: p.strain ?? null,
+        limitGramsPerUnit: optionalNumber(p.limitGramsPerUnit),
     };
 }

@@ -41,6 +41,9 @@ export class Product {
     /** Кому товар виден в кабинете; пусто — всем (`product-audience.ts`) */
     audiences: ProductAudience[];
 
+    /** Граммы лимита участника на единицу товара; пусто — товар в лимит не входит */
+    limitGramsPerUnit?: Decimal | null;
+
     createdAt: Date;
     updatedAt: Date;
     createdBy?: string | null;

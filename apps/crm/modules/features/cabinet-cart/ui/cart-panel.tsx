@@ -14,12 +14,14 @@ import {
 import { Button, Card } from "@workspace/ui";
 
 import { usePlaceMyOrder } from "@/modules/entities/cabinet-order";
+import { useMyMonthlyLimit } from "@/modules/entities/cabinet-shop";
 import { useCabinetLinks } from "@/modules/processes/member-auth";
 import { useMoneyFormat } from "@/modules/shared/lib/use-money-format";
 
 import { usePlaceOrderErrorText } from "../lib/use-place-order-error";
 import { useCart } from "../model/use-cart";
 
+import { CartLimitNote } from "./cart-limit-note";
 import { CartLineRow } from "./cart-line-row";
 
 interface CartPanelProps {
@@ -31,7 +33,8 @@ interface CartPanelProps {
 const NOTES_MAX = 1000;
 
 /**
- * Корзина и оформление. Сумма — по ценам витрины для подсказки; окончательную считает сервер.
+ * Корзина и оформление. Сумма и граммы лимита — по данным витрины для подсказки; окончательно
+ * их считает сервер в транзакции заказа.
  * Ключ идемпотентности живёт до успешного заказа: повторное «Оформить» после обрыва связи
  * не создаёт второй заказ.
  */
@@ -44,6 +47,7 @@ export function CartPanel({ slug, products, access }: CartPanelProps) {
     const links = useCabinetLinks();
     const cart = useCart(slug);
     const place = usePlaceMyOrder(slug);
+    const limit = useMyMonthlyLimit(slug, cart.lines.length > 0);
     const [notes, setNotes] = useState("");
     const [idempotencyKey, setIdempotencyKey] = useState(newIdempotencyKey);
 
@@ -54,6 +58,15 @@ export function CartPanel({ slug, products, access }: CartPanelProps) {
         (sum, row) => sum + (row.product?.price ?? 0) * row.line.quantity,
         0
     );
+    const cartGrams =
+        Math.round(
+            orderable.reduce(
+                (sum, row) => sum + (row.product?.limitGramsPerUnit ?? 0) * row.line.quantity,
+                0
+            ) * 1000
+        ) / 1000;
+    const remainingGrams = limit.data?.enabled ? limit.data.remainingGrams : null;
+    const overLimit = remainingGrams !== null && cartGrams > remainingGrams;
 
     const [denial] = access.reasons;
     const placeError = placeErrorText(place.error);
@@ -126,6 +139,9 @@ export function CartPanel({ slug, products, access }: CartPanelProps) {
                             </span>
                         </div>
                         <p className="text-xs text-muted-foreground">{t("totalHint")}</p>
+                        {remainingGrams !== null && (
+                            <CartLimitNote cartGrams={cartGrams} remainingGrams={remainingGrams} />
+                        )}
                     </>
                 )}
 
@@ -140,7 +156,9 @@ export function CartPanel({ slug, products, access }: CartPanelProps) {
 
                 <Button
                     className="w-full"
-                    disabled={!access.canOrder || orderable.length === 0 || place.isPending}
+                    disabled={
+                        !access.canOrder || orderable.length === 0 || overLimit || place.isPending
+                    }
                     onClick={submit}
                 >
                     {place.isPending && <Loader2 className="animate-spin" aria-hidden="true" />}

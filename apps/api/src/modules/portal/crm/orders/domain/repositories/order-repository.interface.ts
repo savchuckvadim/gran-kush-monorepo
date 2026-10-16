@@ -36,6 +36,8 @@ export interface CreateOrderItemInput {
     totalPrice: number;
     isGift?: boolean;
     notes?: string;
+    /** Граммы лимита участника, которые занимает позиция (`monthly-limit.ts`) */
+    limitGrams: number;
 }
 
 // ─── Данные для создания заказа ──────────────────────────────────────────────
@@ -53,6 +55,8 @@ export interface CreateOrderInput {
     items: CreateOrderItemInput[];
     /** Стадия воронки; без неё — первая рабочая стадия воронки по умолчанию */
     stageId?: string | null;
+    /** Лимит участника за 30 дней; задан — транзакция заказа проверяет его атомарно */
+    monthlyLimitGrams?: number | null;
 }
 
 /** Сколько товара вернуть на склад */
@@ -157,4 +161,7 @@ export abstract class OrderRepository {
      * Префикс несёт дату, поэтому дневная нумерация не зависит от таймзоны сервера.
      */
     abstract getLastOrderNumberWithPrefix(portalId: string, prefix: string): Promise<string | null>;
+
+    /** Граммы лимита, которые участник занял с `since` (без отменённых заказов). */
+    abstract sumLimitUsage(memberId: string, since: Date): Promise<number>;
 }

@@ -238,7 +238,12 @@
                 "unavailableProduct": "No longer in the shop",
                 "errors": {
                     "product_unavailable": "One of the products is no longer available. Refresh the shop.",
-                    "insufficient_stock": "There is not that much in stock right now. Lower the quantity."
+                    "insufficient_stock": "There is not that much in stock right now. Lower the quantity.",
+                    "monthly_limit_exceeded": "The order would go over your 30-day limit. Lower the quantity."
+                },
+                "limit": {
+                    "summary": "{cart} g counts towards your limit, {remaining} g left over 30 days.",
+                    "over": "That is over the limit — lower the quantity."
                 }
             }
         },

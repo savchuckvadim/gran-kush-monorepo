@@ -2460,6 +2460,41 @@ export interface paths {
         patch: operations["CabinetOrders_cancelMyOrder"];
         trace?: never;
     };
+    "/crm/members/{memberId}/monthly-limit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Лимит участника: действующий, отпущено и осталось за 30 дней */
+        get: operations["CrmMemberLimit_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Личный лимит участника (manager+); null — лимит клуба */
+        patch: operations["CrmMemberLimit_update"];
+        trace?: never;
+    };
+    "/cabinet/club/monthly-limit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Мой лимит: действующий, отпущено и осталось за 30 дней */
+        get: operations["CabinetMonthlyLimit_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/crm/finance/transactions": {
         parameters: {
             query?: never;
@@ -4659,6 +4694,11 @@ export interface components {
             measurementUnit?: components["schemas"]["MeasurementUnitDto"];
             /** @description Кому товар виден в кабинете; пусто — всем участникам */
             audiences: components["schemas"]["ProductAudience"][];
+            /**
+             * @description Граммы лимита на единицу
+             * @example 1
+             */
+            limitGramsPerUnit?: number | null;
             /** @example 2026-03-16T12:00:00.000Z */
             createdAt: string;
         };
@@ -4719,6 +4759,11 @@ export interface components {
             measurementUnit?: components["schemas"]["MeasurementUnitDto"];
             /** @description Кому товар виден в кабинете; пусто — всем участникам */
             audiences: components["schemas"]["ProductAudience"][];
+            /**
+             * @description Граммы лимита на единицу
+             * @example 1
+             */
+            limitGramsPerUnit?: number | null;
             /** @example 2026-03-16T12:00:00.000Z */
             createdAt: string;
             /** @example Descripción del producto */
@@ -4779,6 +4824,11 @@ export interface components {
             strain?: string;
             /** @description Кому товар виден в кабинете; пусто — всем участникам */
             audiences?: components["schemas"]["ProductAudience"][];
+            /**
+             * @description Граммы лимита участника на единицу товара; пусто — в лимит не входит
+             * @example 1
+             */
+            limitGramsPerUnit?: number;
         };
         UpdateProductDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
@@ -4813,6 +4863,11 @@ export interface components {
             strain?: string | null;
             /** @description Кому товар виден в кабинете; пусто — всем участникам */
             audiences?: components["schemas"]["ProductAudience"][];
+            /**
+             * @description Граммы лимита участника на единицу товара; пусто — в лимит не входит
+             * @example 1
+             */
+            limitGramsPerUnit?: number | null;
         };
         ProductCategoryTreeDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
@@ -4941,6 +4996,11 @@ export interface components {
             cbd?: number | null;
             /** @example Variante A */
             strain?: string | null;
+            /**
+             * @description Сколько граммов лимита занимает единица; пусто — товар в лимит не входит
+             * @example 1
+             */
+            limitGramsPerUnit?: number | null;
         };
         ScanQrCodeDto: {
             /**
@@ -5632,6 +5692,30 @@ export interface components {
              */
             reason?: string;
         };
+        MonthlyLimitDto: {
+            /** @description Лимит у клуба включён */
+            enabled: boolean;
+            /** @description Личный лимит участника, граммы; null — действует лимит клуба */
+            personalGrams: number | null;
+            /** @description Действующий лимит: личный, иначе клуба; null — без лимита */
+            limitGrams: number | null;
+            /** @description Отпущено за последние 30 дней, граммы */
+            usedGrams: number;
+            /** @description Осталось, граммы; null — без лимита */
+            remainingGrams: number | null;
+            /**
+             * @description Окно лимита в днях
+             * @example 30
+             */
+            windowDays: number;
+        };
+        UpdateMemberLimitDto: {
+            /**
+             * @description Личный лимит, граммы; null — вернуть лимит клуба
+             * @example 60
+             */
+            monthlyLimitGrams: number | null;
+        };
         TransactionOrderDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
             id: string;
@@ -6189,12 +6273,22 @@ export interface components {
             ordersRequireApproval: boolean;
             /** @description Сотрудник может оформить заказ на себя */
             staffSelfOrders: boolean;
+            /** @description Лимит отпуска за последние 30 дней включён */
+            monthlyLimitEnabled: boolean;
+            /**
+             * @description Лимит в граммах для участников без личного; null — без лимита
+             * @example 60
+             */
+            defaultMonthlyLimitGrams: number | null;
         };
         UpdateClubPolicyDto: {
             joinPolicy?: components["schemas"]["ClubJoinPolicy"];
             catalogOutsideClub?: boolean;
             ordersRequireApproval?: boolean;
             staffSelfOrders?: boolean;
+            monthlyLimitEnabled?: boolean;
+            /** @description null — без лимита */
+            defaultMonthlyLimitGrams?: number | null;
         };
         /**
          * @description Почему закрыто: not_in_club — нет открытого визита; not_approved — клуб ещё не одобрил; club_subscription_inactive — подписка клуба не действует
@@ -6415,6 +6509,8 @@ export type SchemaCabinetOrderDetailDto = components['schemas']['CabinetOrderDet
 export type SchemaCabinetOrderListDto = components['schemas']['CabinetOrderListDto'];
 export type SchemaPaginatedResponseCabinetOrderListDto = components['schemas']['PaginatedResponse_CabinetOrderListDto'];
 export type SchemaCancelOrderDto = components['schemas']['CancelOrderDto'];
+export type SchemaMonthlyLimitDto = components['schemas']['MonthlyLimitDto'];
+export type SchemaUpdateMemberLimitDto = components['schemas']['UpdateMemberLimitDto'];
 export type SchemaTransactionOrderDto = components['schemas']['TransactionOrderDto'];
 export type SchemaTransactionMemberDto = components['schemas']['TransactionMemberDto'];
 export type SchemaTransactionEmployeeDto = components['schemas']['TransactionEmployeeDto'];
@@ -14182,6 +14278,164 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmMemberLimit_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                memberId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MonthlyLimitDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmMemberLimit_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                memberId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMemberLimitDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MonthlyLimitDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CabinetMonthlyLimit_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MonthlyLimitDto"];
                 };
             };
             /** @description Unauthorized */

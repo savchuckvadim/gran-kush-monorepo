@@ -50,6 +50,7 @@ export function ProductDetailCard({ productId }: ProductDetailCardProps) {
             cbd: product.cbd ?? undefined,
             strain: product.strain ?? undefined,
             audiences: product.audiences,
+            limitGramsPerUnit: product.limitGramsPerUnit,
         });
         setIsEditing(true);
     }, [product]);
@@ -218,6 +219,22 @@ export function ProductDetailCard({ productId }: ProductDetailCardProps) {
                                 onChange={(e) => handleChange("strain", e.target.value)}
                             />
                         </div>
+
+                        <FieldInput
+                            label={t("limitGramsPerUnit")}
+                            type="number"
+                            value={
+                                form.limitGramsPerUnit == null ? "" : String(form.limitGramsPerUnit)
+                            }
+                            onChange={(e) =>
+                                setForm((prev) => ({
+                                    ...prev,
+                                    limitGramsPerUnit: e.target.value
+                                        ? Number(e.target.value)
+                                        : null,
+                                }))
+                            }
+                        />
 
                         <AudiencePicker
                             value={form.audiences ?? []}

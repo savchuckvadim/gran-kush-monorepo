@@ -37,6 +37,14 @@ export function ProductInfo({ product }: { product: SchemaProductDetailDto }) {
                 {product.cbd != null && <InfoRow label={t("cbd")} value={`${product.cbd}%`} />}
                 {product.strain && <InfoRow label={t("strain")} value={product.strain} />}
                 <InfoRow label={tAudience("label")} value={audiences} />
+                <InfoRow
+                    label={t("limitGramsPerUnit")}
+                    value={
+                        product.limitGramsPerUnit == null
+                            ? t("notInLimit")
+                            : `${product.limitGramsPerUnit} g`
+                    }
+                />
             </div>
 
             {product.description && (
