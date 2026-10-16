@@ -1,11 +1,13 @@
 import { INestApplication } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 
+import * as bcrypt from "bcrypt";
 import cookieParser from "cookie-parser";
 import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
+import { UserDocumentRepository } from "../src/modules/account/domain/repositories/user-document-repository.interface";
 
 jest.setTimeout(120_000);
 
@@ -578,6 +580,456 @@ describe("Security (e2e)", () => {
                 .send({ token: emailVerificationToken });
             expect(confirmed.status).toBe(201);
             expect((await memberLogin(email, "Squatter123")).status).toBe(201);
+        });
+    });
+
+    describe("TASK-702/703: ownership and consent without a password", () => {
+        const consentRow = (memberId: string) =>
+            prisma.member.findUniqueOrThrow({
+                where: { id: memberId },
+                select: { consentStatus: true, consentToken: true, isActive: true },
+            });
+
+        /** Аккаунт только с Google: владелец есть, пароля нет. */
+        const googleOnlyAccount = async (label: string) => {
+            const email = `${label}-${suffix}@test.local`;
+            const user = await prisma.user.create({
+                data: {
+                    email,
+                    passwordHash: null,
+                    status: "active",
+                    isActive: true,
+                    emailConfirmed: true,
+                },
+            });
+            await prisma.userIdentity.create({
+                data: {
+                    userId: user.id,
+                    provider: "google",
+                    providerUserId: `sub-${label}-${suffix}`,
+                    email,
+                    emailVerified: true,
+                },
+            });
+            return { email, userId: user.id };
+        };
+
+        /**
+         * Подтверждённый аккаунт с паролем и сессией кабинета. Создаётся напрямую в БД: письма
+         * подтверждения и регистрация по ссылке упираются в лимиты (EMAIL/SIGNUP) соседних тестов.
+         */
+        const memberWithSession = async (label: string) => {
+            const email = `${label}-${suffix}@test.local`;
+            const user = await prisma.user.create({
+                data: {
+                    email,
+                    passwordHash: await bcrypt.hash(PASSWORD, 4),
+                    status: "active",
+                    isActive: true,
+                    emailConfirmed: true,
+                },
+            });
+            const login = await request(app.getHttpServer())
+                .post("/lk/auth/login")
+                .send({ email, password: PASSWORD });
+            expect(login.status).toBe(201);
+            return { email, userId: user.id, cookies: cookieHeader(login) };
+        };
+
+        const lk = (cookies: string) => ({
+            get: (url: string, club?: Club) => {
+                const req = request(app.getHttpServer()).get(url).set("Cookie", cookies);
+                return club ? req.set("X-Portal-Slug", club.slug) : req;
+            },
+            post: (url: string, club?: Club) => {
+                const req = request(app.getHttpServer()).post(url).set("Cookie", cookies);
+                return club ? req.set("X-Portal-Slug", club.slug) : req;
+            },
+            delete: (url: string) =>
+                request(app.getHttpServer()).delete(url).set("Cookie", cookies),
+        });
+
+        it("a club adding a Google-only account waits for its consent; the token from the email is enough", async () => {
+            const owner = await googleOnlyAccount("g-only");
+
+            const created = await as(clubA)
+                .post("/crm/members")
+                .send({ email: owner.email, fields: { first_name: "Google" } });
+            expect(created.status).toBe(201);
+            expect(created.body.awaitingConsent).toBe(true);
+            const memberId = created.body.memberId as string;
+            const pending = await consentRow(memberId);
+            expect(pending.consentStatus).toBe("pending");
+
+            const info = await request(app.getHttpServer()).get(
+                `/public/consent/${pending.consentToken as string}`
+            );
+            expect(info.status).toBe(200);
+            expect(info.body.requiresPassword).toBe(false);
+
+            const confirmed = await request(app.getHttpServer())
+                .post(`/public/consent/${pending.consentToken as string}/confirm`)
+                .send({});
+            expect(confirmed.status).toBe(200);
+            expect((await consentRow(memberId)).consentStatus).toBe("confirmed");
+        });
+
+        it("a password account still needs its password on the consent page", async () => {
+            const owner = await memberWithSession("pw-consent");
+            const created = await as(clubB)
+                .post("/crm/members")
+                .send({ email: owner.email, fields: { first_name: "Password" } });
+            expect(created.body.awaitingConsent).toBe(true);
+            const memberId = created.body.memberId as string;
+            const token = (await consentRow(memberId)).consentToken as string;
+
+            const info = await request(app.getHttpServer()).get(`/public/consent/${token}`);
+            expect(info.status).toBe(200);
+            expect(info.body.requiresPassword).toBe(true);
+
+            const noPassword = await request(app.getHttpServer())
+                .post(`/public/consent/${token}/confirm`)
+                .send({});
+            expect(noPassword.status).toBe(401);
+            expect((await consentRow(memberId)).consentStatus).toBe("pending");
+
+            const withPassword = await request(app.getHttpServer())
+                .post(`/public/consent/${token}/confirm`)
+                .send({ password: PASSWORD });
+            expect(withPassword.status).toBe(200);
+        });
+
+        it("a club adding an account another club created waits for its owner", async () => {
+            const email = `other-club-${suffix}@test.local`;
+            const first = await as(clubA)
+                .post("/crm/members")
+                .send({ email, fields: { first_name: "Shared" } });
+            expect(first.status).toBe(201);
+            expect(first.body.awaitingConsent).toBe(false);
+
+            const second = await as(clubB)
+                .post("/crm/members")
+                .send({ email, fields: { first_name: "Shared" } });
+            expect(second.status).toBe(201);
+            expect(second.body.awaitingConsent).toBe(true);
+            expect((await consentRow(second.body.memberId as string)).consentStatus).toBe(
+                "pending"
+            );
+        });
+
+        it("an existing account is not attached as an employee without an invitation", async () => {
+            const owner = await googleOnlyAccount("emp-google");
+            const direct = await as(clubA)
+                .post("/crm/employees")
+                .send({ email: owner.email, role: "employee", fields: {} });
+            expect(direct.status).toBe(409);
+            expect(
+                await prisma.employee.count({
+                    where: { userId: owner.userId, portalId: await portalId(clubA) },
+                })
+            ).toBe(0);
+
+            const fresh = await as(clubA)
+                .post("/crm/employees")
+                .send({ email: `emp-new-${suffix}@test.local`, role: "employee", fields: {} });
+            expect(fresh.status).toBe(201);
+            expect(fresh.body.isNewUser).toBe(true);
+        });
+
+        it("the owner confirms under their own session; until then the club is closed to the account", async () => {
+            const owner = await memberWithSession("sess-confirm");
+            const created = await as(clubB)
+                .post("/crm/members")
+                .send({ email: owner.email, fields: { first_name: "Session" } });
+            expect(created.status).toBe(201);
+            expect(created.body.awaitingConsent).toBe(true);
+            const memberId = created.body.memberId as string;
+
+            const closed = await lk(owner.cookies).get("/lk/members/me", clubB);
+            expect(closed.status).toBe(403);
+
+            const list = await lk(owner.cookies).get("/lk/memberships");
+            expect(list.status).toBe(200);
+            const entry = (
+                list.body.memberships as { memberId: string; consentStatus: string; slug: string }[]
+            ).find((membership) => membership.memberId === memberId);
+            expect(entry).toMatchObject({ consentStatus: "pending", slug: clubB.slug });
+
+            const confirmed = await lk(owner.cookies)
+                .post(`/lk/memberships/${memberId}/confirm`)
+                .send({});
+            expect(confirmed.status).toBe(200);
+            expect((await consentRow(memberId)).consentStatus).toBe("confirmed");
+            expect((await lk(owner.cookies).get("/lk/members/me", clubB)).status).toBe(200);
+        });
+
+        it("TASK-701: the QR is issued on first request, a reissue kills the old code, the scanner says why", async () => {
+            const owner = await memberWithSession("qr-owner");
+            const added = await as(clubB)
+                .post("/crm/members")
+                .send({ email: owner.email, fields: { first_name: "Qr" } });
+            const memberId = added.body.memberId as string;
+
+            // Пока членство не подтверждено, клуб для аккаунта закрыт, в том числе QR
+            expect((await lk(owner.cookies).get("/lk/qr-code", clubB)).status).toBe(403);
+            expect(
+                (await lk(owner.cookies).post(`/lk/memberships/${memberId}/confirm`).send({}))
+                    .status
+            ).toBe(200);
+
+            const first = await lk(owner.cookies).get("/lk/qr-code", clubB);
+            expect(first.status).toBe(200);
+            const firstCode = first.body.encryptedCode as string;
+            expect(
+                (await as(clubB).post("/crm/qr-codes/scan").send({ encryptedCode: firstCode })).body
+            ).toMatchObject({ valid: true, memberId });
+
+            const again = await lk(owner.cookies).get("/lk/qr-code", clubB);
+            expect(again.body.encryptedCode).toBe(firstCode);
+
+            const reissued = await lk(owner.cookies).post("/lk/qr-code/regenerate", clubB).send({});
+            expect(reissued.status).toBe(201);
+            const newCode = reissued.body.encryptedCode as string;
+            expect(newCode).not.toBe(firstCode);
+
+            const stale = await as(clubB)
+                .post("/crm/qr-codes/scan")
+                .send({ encryptedCode: firstCode });
+            expect(stale.body).toMatchObject({ valid: false, errorCode: "revoked" });
+            const fresh = await as(clubB)
+                .post("/crm/qr-codes/scan")
+                .send({ encryptedCode: newCode });
+            expect(fresh.body.valid).toBe(true);
+
+            // Код другого клуба не принимается на стойке этого клуба
+            const wrongClub = await as(clubA)
+                .post("/crm/qr-codes/scan")
+                .send({ encryptedCode: newCode });
+            expect(wrongClub.body).toMatchObject({ valid: false, errorCode: "wrong_club" });
+
+            // Предпросмотр и подтверждение отказывают кодом причины, а не русской строкой
+            const preview = await as(clubA)
+                .post("/crm/presence/qr-preview")
+                .send({ encryptedCode: firstCode });
+            expect(preview.body).toMatchObject({ valid: false, errorCode: expect.any(String) });
+
+            const status = await lk(owner.cookies).get("/lk/presence/status", clubB);
+            expect(status.status).toBe(200);
+            expect(status.body).toEqual({ isPresent: false, currentSession: null });
+        });
+
+        /** Документ, записанный напрямую: загрузка файла упирается в живой S3. */
+        const passportOf = (userId: string, label: string, extra: Record<string, unknown> = {}) =>
+            prisma.userDocument.create({
+                data: {
+                    userId,
+                    type: "passport",
+                    side: "single",
+                    number: `N-${label}`,
+                    storagePath: `private/test/${suffix}/${label}.jpg`,
+                    ...extra,
+                },
+            });
+
+        it("TASK-704: joining a club shows no documents unless the owner picked them", async () => {
+            const owner = await memberWithSession("share-join");
+            const document = await passportOf(owner.userId, "share-join");
+            const someoneElses = await passportOf(
+                (await googleOnlyAccount("share-foreign")).userId,
+                "share-foreign"
+            );
+
+            // Чужой документ в выборе: 400, и членство не появилось
+            const rejected = await lk(owner.cookies)
+                .post(`/lk/portals/${clubB.slug}/join`)
+                .send({ fields: { first_name: "Join" }, shareDocumentIds: [someoneElses.id] });
+            expect(rejected.status).toBe(400);
+            expect(
+                await prisma.member.count({
+                    where: { userId: owner.userId, portalId: await portalId(clubB) },
+                })
+            ).toBe(0);
+
+            // Без выбора клуб не видит ничего
+            const joined = await lk(owner.cookies)
+                .post(`/lk/portals/${clubB.slug}/join`)
+                .send({ fields: { first_name: "Join" } });
+            expect(joined.status).toBe(201);
+            const memberId = joined.body.memberId as string;
+            const hidden = await as(clubB).get(`/crm/members/${memberId}`);
+            expect(hidden.body.documents).toEqual([]);
+
+            // Владелец показывает документ из «Моего паспорта» — клуб его видит
+            const shared = await lk(owner.cookies)
+                .post(`/lk/account/documents/${document.id}/share`)
+                .send({ memberId });
+            expect(shared.status).toBe(204);
+            const visible = await as(clubB).get(`/crm/members/${memberId}`);
+            expect(visible.body.documents.map((d: { id: string }) => d.id)).toEqual([document.id]);
+
+            // Список владельца говорит, какому клубу показан документ
+            const list = await lk(owner.cookies).get("/lk/account/documents");
+            const entry = (
+                list.body.documents as { id: string; sharedWith: { slug: string }[] }[]
+            ).find((d) => d.id === document.id);
+            expect(entry?.sharedWith.map((club) => club.slug)).toEqual([clubB.slug]);
+
+            // Отзыв закрывает клубу доступ
+            const revoked = await lk(owner.cookies)
+                .delete(`/lk/account/documents/${document.id}/share/${memberId}`)
+                .send();
+            expect(revoked.status).toBe(204);
+            expect((await as(clubB).get(`/crm/members/${memberId}`)).body.documents).toEqual([]);
+
+            // Журнал помнит и показ, и отзыв
+            const actions = (
+                await prisma.documentAccessLog.findMany({
+                    where: { userId: owner.userId, documentId: document.id },
+                    orderBy: { createdAt: "asc" },
+                })
+            ).map((row) => `${row.actorType}:${row.action}`);
+            expect(actions).toEqual(["owner:share", "owner:revoke"]);
+        });
+
+        it("TASK-704: a club keeps seeing the version it was shown; unshared old versions are dropped", async () => {
+            const owner = await memberWithSession("share-version");
+            const v1 = await passportOf(owner.userId, "v1");
+            const added = await as(clubA)
+                .post("/crm/members")
+                .send({ email: owner.email, fields: { first_name: "Version" } });
+            const memberId = added.body.memberId as string;
+            await lk(owner.cookies)
+                .post(`/lk/memberships/${memberId}/confirm`)
+                .send({
+                    shareDocumentIds: [v1.id],
+                });
+
+            // Владелец загрузил новую версию: в базе она рядом, клуб A по-прежнему видит v1
+            const v2 = await passportOf(owner.userId, "v2", { version: 2 });
+            const cardA = await as(clubA).get(`/crm/members/${memberId}`);
+            expect(cardA.body.documents.map((d: { id: string }) => d.id)).toEqual([v1.id]);
+
+            // «Мой паспорт» показывает текущую версию v2, не показанную никому
+            const list = await lk(owner.cookies).get("/lk/account/documents");
+            const current = (list.body.documents as { id: string; sharedWith: unknown[] }[]).filter(
+                (d) => [v1.id, v2.id].includes(d.id)
+            );
+            expect(current.map((d) => d.id)).toEqual([v2.id]);
+            expect(current[0]?.sharedWith).toEqual([]);
+
+            // Отозвали показ v1 — версия, которую никто не видит, удаляется
+            const revoked = await lk(owner.cookies)
+                .delete(`/lk/account/documents/${v1.id}/share/${memberId}`)
+                .send();
+            expect(revoked.status).toBe(204);
+            expect(await prisma.userDocument.findUnique({ where: { id: v1.id } })).toBeNull();
+            expect(await prisma.userDocument.findUnique({ where: { id: v2.id } })).not.toBeNull();
+        });
+
+        it("TASK-704: the document number is stored encrypted and read back plain", async () => {
+            const owner = await memberWithSession("share-number");
+            const document = await passportOf(owner.userId, "number");
+
+            const documents = app.get(UserDocumentRepository);
+            expect(await documents.sealLegacyNumbers()).toBeGreaterThanOrEqual(1);
+            const raw = await prisma.userDocument.findUniqueOrThrow({ where: { id: document.id } });
+            expect(raw.number?.startsWith("enc1:")).toBe(true);
+            expect(raw.number).not.toContain("N-number");
+
+            const list = await lk(owner.cookies).get("/lk/account/documents");
+            const entry = (list.body.documents as { id: string; number: string }[]).find(
+                (d) => d.id === document.id
+            );
+            expect(entry?.number).toBe("N-number");
+
+            // Повторное шифрование ничего не меняет
+            expect(await documents.sealLegacyNumbers()).toBe(0);
+        });
+
+        it("TASK-704: only my own confirmed membership can be a target of a share", async () => {
+            const owner = await memberWithSession("share-target");
+            const stranger = await memberWithSession("share-target-stranger");
+            const document = await passportOf(owner.userId, "target");
+            const strangerClub = await as(clubB)
+                .post("/crm/members")
+                .send({ email: stranger.email, fields: { first_name: "Stranger" } });
+            await lk(stranger.cookies)
+                .post(`/lk/memberships/${strangerClub.body.memberId as string}/confirm`)
+                .send({});
+
+            const toForeignMembership = await lk(owner.cookies)
+                .post(`/lk/account/documents/${document.id}/share`)
+                .send({ memberId: strangerClub.body.memberId });
+            expect(toForeignMembership.status).toBe(404);
+
+            const foreignDocument = await lk(stranger.cookies)
+                .post(`/lk/account/documents/${document.id}/share`)
+                .send({ memberId: strangerClub.body.memberId });
+            expect([403, 404]).toContain(foreignDocument.status);
+            expect(
+                await prisma.memberDocumentShare.count({ where: { userDocumentId: document.id } })
+            ).toBe(0);
+        });
+
+        it("someone else's membership cannot be confirmed, declined or left", async () => {
+            const owner = await memberWithSession("sess-owner");
+            const intruder = await memberWithSession("sess-intruder");
+            const created = await as(clubB)
+                .post("/crm/members")
+                .send({ email: owner.email, fields: { first_name: "Mine" } });
+            const memberId = created.body.memberId as string;
+
+            for (const action of ["confirm", "decline", "leave"]) {
+                const res = await lk(intruder.cookies)
+                    .post(`/lk/memberships/${memberId}/${action}`)
+                    .send({});
+                expect(res.status).toBe(404);
+            }
+            expect((await consentRow(memberId)).consentStatus).toBe("pending");
+        });
+
+        it("declining removes a pending membership; leaving closes a confirmed one and revokes the documents", async () => {
+            const owner = await memberWithSession("sess-leave");
+            const declinedBy = await as(clubB)
+                .post("/crm/members")
+                .send({ email: owner.email, fields: { first_name: "Decline" } });
+            const declinedId = declinedBy.body.memberId as string;
+            expect(
+                (await lk(owner.cookies).post(`/lk/memberships/${declinedId}/decline`).send({}))
+                    .status
+            ).toBe(200);
+            expect(await prisma.member.findUnique({ where: { id: declinedId } })).toBeNull();
+
+            const document = await prisma.userDocument.create({
+                data: {
+                    userId: owner.userId,
+                    type: "passport",
+                    side: "single",
+                    number: "X-LEAVE",
+                    storagePath: `private/test/${suffix}/leave.jpg`,
+                },
+            });
+            try {
+                const added = await as(clubA)
+                    .post("/crm/members")
+                    .send({ email: owner.email, fields: { first_name: "Leave" } });
+                const memberId = added.body.memberId as string;
+                const confirmed = await lk(owner.cookies)
+                    .post(`/lk/memberships/${memberId}/confirm`)
+                    .send({ shareDocumentIds: [document.id] });
+                expect(confirmed.status).toBe(200);
+                expect(await prisma.memberDocumentShare.count({ where: { memberId } })).toBe(1);
+
+                const left = await lk(owner.cookies)
+                    .post(`/lk/memberships/${memberId}/leave`)
+                    .send({});
+                expect(left.status).toBe(200);
+                expect((await consentRow(memberId)).isActive).toBe(false);
+                expect(await prisma.memberDocumentShare.count({ where: { memberId } })).toBe(0);
+                expect((await lk(owner.cookies).get("/lk/members/me", clubA)).status).toBe(403);
+            } finally {
+                await prisma.userDocument.delete({ where: { id: document.id } });
+            }
         });
     });
 

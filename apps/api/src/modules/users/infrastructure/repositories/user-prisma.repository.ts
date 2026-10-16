@@ -151,6 +151,7 @@ export class UserPrismaRepository implements UserRepository {
                     isActive: m.isActive,
                     joinSource: m.joinSource,
                     claimedAt: m.claimedAt ?? undefined,
+                    consentStatus: m.consentStatus,
                     createdAt: m.createdAt,
                     updatedAt: m.updatedAt,
                 })

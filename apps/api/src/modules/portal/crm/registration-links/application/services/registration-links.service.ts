@@ -268,7 +268,11 @@ export class RegistrationLinksService {
                 registrationLinkId: link.id,
                 // Пароль к аккаунту без пароля по ссылке не ставится, и его владелец ещё не
                 // доказан — клуб не получает документы, которые туда загрузил другой клуб
-                shareDocuments: !claimByEmail,
+                // Показ — только по явному выбору и только если владелец аккаунта доказан паролем;
+                // у аккаунта из клейма он не доказан
+                share: claimByEmail
+                    ? undefined
+                    : { documentIds: dto.shareDocumentIds, signature: dto.shareSignature },
                 // Членство из клейма ждёт, пока владелец адреса задаст пароль по ссылке
                 // из письма (подтверждается в resetPassword); в CRM — бейдж «ждёт согласия»
                 consent: claimByEmail

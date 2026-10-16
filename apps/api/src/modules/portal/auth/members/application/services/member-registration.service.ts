@@ -2,9 +2,9 @@ import { BadRequestException, ConflictException, Injectable } from "@nestjs/comm
 
 import type { SupportedLanguage } from "@mail/consts/mail.constants";
 import { MemberJoinSource, UserAccountStatus } from "@prisma/client";
+import { AccountOwnershipService } from "@users/application/services/account-ownership.service";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import * as bcrypt from "bcrypt";
-
 import { randomBytes } from "crypto";
 
 import { isUniqueViolationOn } from "@common/prisma/unique-violation";
@@ -35,6 +35,7 @@ export class MemberRegistrationService {
     constructor(
         private readonly membersService: MembersService,
         private readonly userRepository: UserRepository,
+        private readonly ownership: AccountOwnershipService,
         private readonly joinPortalService: JoinPortalService,
         private readonly emailVerificationService: EmailVerificationService,
         private readonly memberFilesService: MemberFilesService
@@ -51,7 +52,7 @@ export class MemberRegistrationService {
         const existing = await this.userRepository.findByEmail(dto.email);
         if (
             existing &&
-            (existing.passwordHash !== null || existing.status !== UserAccountStatus.pending_claim)
+            (this.ownership.isClaimed(existing) || this.ownership.hasPassword(existing))
         ) {
             throw new ConflictException("User with this email already exists");
         }
@@ -77,7 +78,6 @@ export class MemberRegistrationService {
                     portalId: dto.portalId,
                     fields: dto.fields ?? {},
                     joinSource: MemberJoinSource.self,
-                    shareDocuments: !claimByEmail,
                     // Владение адресом не доказано: членство ждёт клейма аккаунта
                     // (подтвердится в resetPassword, когда владелец задаст пароль)
                     consent: claimByEmail
@@ -99,7 +99,12 @@ export class MemberRegistrationService {
             });
         } else {
             if (dto.files) {
-                await this.memberFilesService.queueUpload({ userId, ...dto.files });
+                // Файлы, приложенные к вступлению в клуб, показываются этому клубу и только ему
+                await this.memberFilesService.queueUpload({
+                    userId,
+                    ...dto.files,
+                    shareWithMemberId: memberId,
+                });
             }
             await this.emailVerificationService.sendVerificationEmailToUserId(userId, mail);
         }

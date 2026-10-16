@@ -10,6 +10,7 @@ import { SharedAuthModule } from "@modules/portal/auth/shared/shared-auth.module
 import { EntityFieldsModule } from "@modules/portal/crm/entity-fields/entity-fields.module";
 import { CrmMembersController } from "@modules/portal/crm/members/api/controllers/crm-members.controller";
 import { LkMembersController } from "@modules/portal/crm/members/api/controllers/lk-members.controller";
+import { LkMembershipsController } from "@modules/portal/crm/members/api/controllers/lk-memberships.controller";
 import { PublicMemberConsentController } from "@modules/portal/crm/members/api/controllers/public-member-consent.controller";
 import { JoinPortalService } from "@modules/portal/crm/members/application/services/join-portal.service";
 import { MemberConsentService } from "@modules/portal/crm/members/application/services/member-consent.service";
@@ -47,7 +48,12 @@ import { UsersModule } from "@modules/users";
             useClass: MemberPrismaRepository,
         },
     ],
-    controllers: [CrmMembersController, LkMembersController, PublicMemberConsentController],
+    controllers: [
+        CrmMembersController,
+        LkMembersController,
+        LkMembershipsController,
+        PublicMemberConsentController,
+    ],
     exports: [MembersService, JoinPortalService, MemberFilesService, MemberRepository],
 })
 export class MembersModule {}

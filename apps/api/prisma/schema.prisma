@@ -244,6 +244,7 @@ model User {
   documents            UserDocument[]
   signature            UserSignature?
   identities           UserIdentity[]
+  documentAccessLogs   DocumentAccessLog[]
   portalReviews        PortalReview[]
   productReviews       ProductReview[]
   termsAcceptedPortals Portal[]        @relation("PortalTermsAcceptedBy")
@@ -254,12 +255,17 @@ model User {
   @@map("users")
 }
 
+/// Документ аккаунта. Текущий — версия с наибольшим номером в паре (type, side). Новая версия
+/// появляется, только если прежнюю уже показали какому-то клубу: клуб видит ровно тот файл,
+/// который ему показали, и чужая загрузка его не подменяет.
+/// number хранится зашифрованным (префикс enc1:, AES-256-GCM).
 model UserDocument {
   id          String           @id @default(uuid())
   userId      String           @map("user_id")
   type        String           @db.VarChar(50)
   side        UserDocumentSide @default(single)
-  number      String?          @db.VarChar(100)
+  version     Int              @default(1)
+  number      String?          @db.VarChar(400)
   meta        Json?
   storagePath String           @map("storage_path") @db.VarChar(500)
   createdAt   DateTime         @default(now()) @map("created_at")
@@ -268,10 +274,51 @@ model UserDocument {
   user   User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   shares MemberDocumentShare[]
 
-  @@unique([userId, type, side])
+  @@unique([userId, type, side, version])
   @@index([userId])
   @@index([type])
   @@map("user_documents")
+}
+
+enum DocumentAccessAction {
+  view
+  upload
+  replace
+  share
+  revoke
+  delete
+}
+
+enum DocumentAccessActor {
+  owner
+  club
+  system
+}
+
+/// Журнал обращений к документам и подписи аккаунта: кто, что и когда сделал. Без внешних ключей
+/// на документ, клуб и сотрудника: запись переживает их удаление, это след для разбора инцидентов.
+model DocumentAccessLog {
+  id         String               @id @default(uuid())
+  /// Чей аккаунт; при удалении аккаунта журнал уходит вместе с ним
+  userId     String               @map("user_id")
+  /// document | signature
+  subject    String               @db.VarChar(20)
+  documentId String?              @map("document_id")
+  /// Членство и клуб, через которые произошло действие (для owner — клуб, которому показали)
+  memberId   String?              @map("member_id")
+  portalId   String?              @map("portal_id")
+  actorType  DocumentAccessActor  @map("actor_type")
+  /// Сотрудник клуба (Employee.id) или аккаунт-владелец (User.id)
+  actorId    String?              @map("actor_id")
+  action     DocumentAccessAction
+  createdAt  DateTime             @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([documentId])
+  @@index([portalId, createdAt])
+  @@map("document_access_logs")
 }
 
 /// Документ аккаунта показан этому членству (клубу). Без строки клуб документ не видит.

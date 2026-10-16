@@ -38,14 +38,25 @@ export class PublicMemberConsentInfoDto {
 
     @ApiProperty({ type: Boolean })
     hasSignature: boolean;
+
+    @ApiProperty({
+        type: Boolean,
+        description:
+            "У аккаунта есть пароль, и его нужно ввести. Без пароля (только Google) достаточно токена из письма",
+    })
+    requiresPassword: boolean;
 }
 
 export class ConfirmMemberConsentDto {
-    @ApiProperty({ type: String, description: "Пароль аккаунта — доказательство, что он ваш" })
+    @ApiPropertyOptional({
+        type: String,
+        description: "Пароль аккаунта — доказательство, что он ваш. Нужен, если он у аккаунта есть",
+    })
+    @IsOptional()
     @IsString()
     @MinLength(1)
     @MaxLength(200)
-    password: string;
+    password?: string;
 
     @ApiPropertyOptional({
         type: [String],
@@ -64,11 +75,12 @@ export class ConfirmMemberConsentDto {
 }
 
 export class DeclineMemberConsentDto {
-    @ApiProperty({ type: String })
+    @ApiPropertyOptional({ type: String, description: "Нужен, если у аккаунта есть пароль" })
+    @IsOptional()
     @IsString()
     @MinLength(1)
     @MaxLength(200)
-    password: string;
+    password?: string;
 }
 
 export class MemberConsentResultDto {

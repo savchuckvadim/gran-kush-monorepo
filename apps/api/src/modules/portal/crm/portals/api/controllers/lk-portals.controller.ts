@@ -71,6 +71,7 @@ export class LkPortalsController {
             portalId: portal.id,
             fields: dto.fields ?? {},
             joinSource: MemberJoinSource.self,
+            share: { documentIds: dto.shareDocumentIds, signature: dto.shareSignature },
         });
         return { memberId: member.id, portalId: portal.id };
     }

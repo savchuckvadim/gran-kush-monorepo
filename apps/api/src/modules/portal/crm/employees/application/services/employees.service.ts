@@ -1,11 +1,13 @@
 import {
     BadRequestException,
+    ConflictException,
     ForbiddenException,
     Injectable,
     NotFoundException,
 } from "@nestjs/common";
 
 import { EmployeeRole } from "@prisma/client";
+import { AccountOwnershipService } from "@users/application/services/account-ownership.service";
 import { AccountProvisioningService } from "@users/application/services/account-provisioning.service";
 
 import {
@@ -25,7 +27,8 @@ export interface CreateEmployeeInput {
 export class EmployeesService {
     constructor(
         private readonly employeeRepository: EmployeeRepository,
-        private readonly accountProvisioning: AccountProvisioningService
+        private readonly accountProvisioning: AccountProvisioningService,
+        private readonly ownership: AccountOwnershipService
     ) {}
 
     async findAllByPortal(
@@ -59,6 +62,8 @@ export class EmployeesService {
     /**
      * Создание сотрудника по email: если аккаунта нет — создаётся pending_claim
      * (пользователь клеймит его позже, установив пароль при регистрации).
+     * Аккаунт, у которого уже есть владелец, напрямую не прикрепляется: его согласие даёт
+     * только принятое приглашение (`invitationId`), где владелец доказан паролем (TASK-702).
      */
     async create(
         input: CreateEmployeeInput,
@@ -71,6 +76,11 @@ export class EmployeesService {
         const { user, isNewUser } = await this.accountProvisioning.ensurePendingClaimUser(
             input.email
         );
+        if (!isNewUser && !input.invitationId && this.ownership.isClaimed(user)) {
+            throw new ConflictException(
+                "This email already has an account. Send an invitation instead"
+            );
+        }
 
         const employee = await this.employeeRepository.createWithProfile({
             userId: user.id,

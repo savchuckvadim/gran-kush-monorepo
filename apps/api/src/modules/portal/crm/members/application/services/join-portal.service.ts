@@ -3,7 +3,10 @@ import { BadRequestException, ConflictException, Injectable } from "@nestjs/comm
 import { FormPurpose, MemberJoinSource } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
-import { MemberDocumentShareRepository } from "@modules/account/domain/repositories/member-document-share-repository.interface";
+import {
+    MemberDocumentSharingService,
+    ShareSelection,
+} from "@modules/account/application/services/member-document-sharing.service";
 import { DynamicPayloadValidatorService } from "@modules/portal/crm/entity-fields/application/services/dynamic-payload-validator.service";
 import { FieldValuesService } from "@modules/portal/crm/entity-fields/application/services/field-values.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
@@ -21,10 +24,11 @@ export interface JoinPortalInput {
     /** CRM завёл чужой аккаунт по email: членство ждёт согласия владельца (TASK-663). */
     consent?: { token: string; requestedAt: Date };
     /**
-     * Показать клубу документы аккаунта. По умолчанию — при самостоятельном вступлении.
-     * `false`, когда вступает аккаунт, владение которым не доказано (TASK-664).
+     * Какие документы аккаунта показать клубу. Только явный выбор владельца: «показать всё»
+     * при вступлении больше не бывает (TASK-704). Не передают, когда вступает аккаунт,
+     * владение которым не доказано (TASK-664) или членство завёл клуб.
      */
-    shareDocuments?: boolean;
+    share?: ShareSelection;
 }
 
 /**
@@ -33,9 +37,9 @@ export interface JoinPortalInput {
  * Используется: самостоятельным join из ЛК, регистрацией по ссылке-форме,
  * созданием member из CRM.
  *
- * Документы аккаунта клуб видит только через MemberDocumentShare: когда участник вступает
- * сам (ЛК, ссылка-форма, киоск), ему показывают всё; созданное из CRM членство получает
- * только то, что загрузит сам клуб или что владелец выберет при подтверждении.
+ * Документы аккаунта клуб видит только через MemberDocumentShare, и только то, что владелец
+ * выбрал: при вступлении (поле `share`), при подтверждении членства или позже в «Моём паспорте».
+ * Созданное из CRM членство получает лишь то, что загрузит сам клуб.
  */
 @Injectable()
 export class JoinPortalService {
@@ -44,7 +48,7 @@ export class JoinPortalService {
         private readonly prisma: PrismaService,
         private readonly dynamicValidator: DynamicPayloadValidatorService,
         private readonly fieldValues: FieldValuesService,
-        private readonly shares: MemberDocumentShareRepository
+        private readonly sharing: MemberDocumentSharingService
     ) {}
 
     async joinPortal(input: JoinPortalInput): Promise<MemberWithRelations> {
@@ -54,6 +58,11 @@ export class JoinPortalService {
         );
         if (existing) {
             throw new ConflictException("User is already a member of this portal");
+        }
+
+        // Ошибка в выборе документов — до создания членства, а не после
+        if (input.share) {
+            await this.sharing.assertSelectable(input.userId, input.share);
         }
 
         const purpose =
@@ -81,8 +90,13 @@ export class JoinPortalService {
         });
 
         await this.fieldValues.upsertMemberFieldValues(input.portalId, member.id, validatedFields);
-        if (input.shareDocuments ?? input.joinSource !== MemberJoinSource.crm) {
-            await this.shares.shareAllOfUser(member.id, input.userId);
+        if (input.share && (input.share.documentIds?.length || input.share.signature)) {
+            await this.sharing.shareSelected({
+                userId: input.userId,
+                memberId: member.id,
+                portalId: input.portalId,
+                selection: input.share,
+            });
         }
 
         const result = await this.memberRepository.findByIdForPortal(member.id, input.portalId);

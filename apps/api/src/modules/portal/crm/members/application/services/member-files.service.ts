@@ -16,6 +16,8 @@ export interface QueueMemberFilesPayload {
     documentFirst?: string;
     documentSecond?: string;
     signature?: string;
+    /** Членство, которому показать загруженное (вступление в клуб с приложенными файлами). */
+    shareWithMemberId?: string;
 }
 
 @Injectable()

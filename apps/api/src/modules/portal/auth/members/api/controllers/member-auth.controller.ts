@@ -13,6 +13,7 @@ import {
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 
+import { MemberConsentStatus } from "@prisma/client";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import type { Request, Response } from "express";
 
@@ -147,6 +148,7 @@ export class MemberAuthController {
                 memberId: m.id,
                 membershipNumber: m.membershipNumber,
                 isActive: m.isActive,
+                consentStatus: m.consentStatus ?? MemberConsentStatus.confirmed,
             })),
         };
     }

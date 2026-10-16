@@ -3,6 +3,8 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { RegistrationLinkKind } from "@prisma/client";
 import { Type } from "class-transformer";
 import {
+    ArrayMaxSize,
+    IsArray,
     IsBoolean,
     IsDateString,
     IsEnum,
@@ -234,6 +236,22 @@ export class RegisterViaLinkDto {
     @IsOptional()
     @IsObject()
     fields?: Record<string, unknown>;
+
+    @ApiPropertyOptional({
+        type: [String],
+        description:
+            "Документы существующего аккаунта (владелец доказан паролем), которые показать клубу",
+    })
+    @IsOptional()
+    @IsArray()
+    @ArrayMaxSize(20)
+    @IsString({ each: true })
+    shareDocumentIds?: string[];
+
+    @ApiPropertyOptional({ type: Boolean, description: "Показать клубу подпись аккаунта" })
+    @IsOptional()
+    @IsBoolean()
+    shareSignature?: boolean;
 }
 
 export class RegisterViaLinkResponseDto {

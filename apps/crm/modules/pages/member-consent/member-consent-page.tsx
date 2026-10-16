@@ -16,8 +16,10 @@ import {
 } from "@/modules/entities/member";
 
 /**
- * Клуб добавил существующий аккаунт по email: владелец подтверждает членство паролем и
- * выбирает, какие документы показать клубу (TASK-663). Публичная страница CRM, без входа.
+ * Клуб добавил существующий аккаунт по email: владелец подтверждает членство и выбирает,
+ * какие документы показать клубу (TASK-663). Пароль просим, только если он есть у аккаунта:
+ * без пароля (вход только через Google) достаточно ссылки из письма (TASK-702).
+ * Публичная страница CRM, без входа.
  */
 export function MemberConsentPage({ token }: { token: string }) {
     const t = useTranslations("consent");
@@ -45,20 +47,22 @@ export function MemberConsentPage({ token }: { token: string }) {
     const confirm = useMutation({
         mutationFn: () =>
             confirmMemberConsent(token, {
-                password,
+                password: needsPassword ? password : undefined,
                 shareDocumentIds: Array.from(sharedDocuments),
                 shareSignature,
             }),
         onError: showError,
     });
     const decline = useMutation({
-        mutationFn: () => declineMemberConsent(token, { password }),
+        mutationFn: () =>
+            declineMemberConsent(token, { password: needsPassword ? password : undefined }),
         onError: showError,
     });
     const busy = confirm.isPending || decline.isPending;
+    const needsPassword = info.data?.requiresPassword ?? true;
 
     const withPassword = (run: () => void) => {
-        if (!password) {
+        if (needsPassword && !password) {
             setPasswordError(t("errors.password"));
             return;
         }
@@ -167,15 +171,17 @@ export function MemberConsentPage({ token }: { token: string }) {
                         )}
                     </section>
 
-                    <FieldInput
-                        label={t("password")}
-                        type="password"
-                        required
-                        autoComplete="current-password"
-                        value={password}
-                        onChange={(event) => setPassword(event.target.value)}
-                        error={passwordError ?? undefined}
-                    />
+                    {needsPassword && (
+                        <FieldInput
+                            label={t("password")}
+                            type="password"
+                            required
+                            autoComplete="current-password"
+                            value={password}
+                            onChange={(event) => setPassword(event.target.value)}
+                            error={passwordError ?? undefined}
+                        />
+                    )}
 
                     {serverError && <p className="text-sm text-destructive">{serverError}</p>}
 

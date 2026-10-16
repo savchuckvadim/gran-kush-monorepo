@@ -1,5 +1,6 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common";
 
+import { MemberConsentStatus } from "@prisma/client";
 import type { Request } from "express";
 
 import { PrismaService } from "@common/prisma/prisma.service";
@@ -16,6 +17,8 @@ import { PortalPrincipal } from "./portal-principal.types";
  * После JWT: резолвит membership глобального user в портале запроса.
  * - member → строка Member(userId, portalId), employee → Employee(userId, portalId);
  * - нет membership или он неактивен → 403;
+ * - членство участника без подтверждённого согласия владельца аккаунта → 403: пока человек не
+ *   согласился, клуб — чужой для него (QR, каталог, заказы, документы закрыты, TASK-703);
  * - req.principal = PortalPrincipal, req.user заменяется bridge-сущностью
  *   (совместимость с @CurrentMember/@CurrentEmployee), исходный user → req.authUser.
  * Публичные маршруты (без req.user) пропускает.
@@ -70,6 +73,9 @@ export class MembershipGuard implements CanActivate {
         });
         if (!member || !member.isActive) {
             throw new ForbiddenException("No active membership in this portal");
+        }
+        if (member.consentStatus !== MemberConsentStatus.confirmed) {
+            throw new ForbiddenException("Membership is awaiting your confirmation");
         }
         return new Member({
             id: member.id,

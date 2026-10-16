@@ -1,23 +1,19 @@
-import {
-    BadRequestException,
-    Injectable,
-    Logger,
-    NotFoundException,
-    UnauthorizedException,
-} from "@nestjs/common";
+import { BadRequestException, Injectable, Logger, NotFoundException } from "@nestjs/common";
 
-import { MemberConsentStatus } from "@prisma/client";
-import * as bcrypt from "bcrypt";
+import { MemberConsentStatus, MemberJoinSource } from "@prisma/client";
+import { AccountOwnershipService } from "@users/application/services/account-ownership.service";
 import { randomBytes } from "crypto";
 
-import { MemberDocumentShareRepository } from "@modules/account/domain/repositories/member-document-share-repository.interface";
+import { MemberDocumentSharingService } from "@modules/account/application/services/member-document-sharing.service";
 import { UserDocumentRepository } from "@modules/account/domain/repositories/user-document-repository.interface";
 import { UserSignatureRepository } from "@modules/account/domain/repositories/user-signature-repository.interface";
 import { MailService } from "@modules/mail/application/services/mail.service";
 import type { SupportedLanguage } from "@modules/mail/consts/mail.constants";
+import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
 import { MemberWithRelations } from "@modules/portal/crm/members/domain/entity/member.entity";
 import { MemberRepository } from "@modules/portal/crm/members/domain/repositories/member-repository.interface";
 
+import { ConfirmMyMembershipDto, MyMembershipDto } from "../../api/dto/lk-memberships.dto";
 import {
     ConfirmMemberConsentDto,
     DeclineMemberConsentDto,
@@ -29,8 +25,11 @@ const CONSENT_TTL_MS = 14 * 24 * 60 * 60 * 1000;
 
 /**
  * Согласие владельца аккаунта на членство, которое завёл клуб (TASK-663). Клуб знает только
- * email; токен уходит письмом, и владелец ещё доказывает, что аккаунт его, паролем — поэтому
- * сотрудник клуба не может «согласиться» за него.
+ * email; токен уходит письмом, и сотрудник клуба не может «согласиться» за владельца.
+ *
+ * Если у аккаунта есть пароль, владелец вводит и его. Без пароля (только Google или аккаунт,
+ * который завёл другой клуб) единственное доказательство — токен из письма на адрес аккаунта
+ * (TASK-702): иначе такому человеку нечем подтвердить членство.
  */
 @Injectable()
 export class MemberConsentService {
@@ -40,8 +39,10 @@ export class MemberConsentService {
         private readonly memberRepository: MemberRepository,
         private readonly userDocumentRepository: UserDocumentRepository,
         private readonly userSignatureRepository: UserSignatureRepository,
-        private readonly shares: MemberDocumentShareRepository,
-        private readonly mailService: MailService
+        private readonly sharing: MemberDocumentSharingService,
+        private readonly mailService: MailService,
+        private readonly ownership: AccountOwnershipService,
+        private readonly emailVerification: EmailVerificationService
     ) {}
 
     newToken(): string {
@@ -78,6 +79,16 @@ export class MemberConsentService {
             consentToken: this.newToken(),
             consentRequestedAt: new Date(),
         });
+        // Членство из клейма (самостоятельная регистрация на чужой email) подтверждает письмо
+        // «задайте пароль»; всё остальное — письмо согласия с токеном
+        if (member.joinSource !== MemberJoinSource.crm && !this.ownership.isClaimed(member.user)) {
+            await this.emailVerification.sendAccountSetup(member.user.email, {
+                app: "member",
+                language,
+                portalName: member.portal.displayName,
+            });
+            return;
+        }
         await this.sendRequest(updated, language);
     }
 
@@ -97,38 +108,107 @@ export class MemberConsentService {
                 side: document.side,
             })),
             hasSignature: signature !== null,
+            requiresPassword: this.ownership.proofMethod(member.user) === "password",
         };
     }
 
+    /** По ссылке из письма: токен плюс пароль, если он есть у аккаунта. */
     async confirm(token: string, dto: ConfirmMemberConsentDto): Promise<MemberConsentResultDto> {
         const member = await this.getPending(token);
-        await this.verifyPassword(member, dto.password);
+        await this.verifyOwner(member, dto.password);
+        return this.applyConfirmation(member, dto);
+    }
 
-        const own = await this.userDocumentRepository.findAllByUser(member.userId);
-        const ownIds = new Set(own.map((document) => document.id));
-        const requested = dto.shareDocumentIds ?? [];
-        if (requested.some((id) => !ownIds.has(id))) {
-            throw new BadRequestException("Unknown document");
+    async decline(token: string, dto: DeclineMemberConsentDto): Promise<MemberConsentResultDto> {
+        const member = await this.getPending(token);
+        await this.verifyOwner(member, dto.password);
+        await this.memberRepository.deleteWithProfile(member.id);
+        return { portalSlug: member.portal.name };
+    }
+
+    /** Все членства аккаунта, в том числе ждущие подтверждения; закрытые выходом тоже видны. */
+    async listMine(userId: string): Promise<MyMembershipDto[]> {
+        const members = await this.memberRepository.findAllByUser(userId);
+        return members.map((member) => ({
+            memberId: member.id,
+            portalId: member.portalId,
+            slug: member.portal.name,
+            displayName: member.portal.displayName,
+            consentStatus: member.consentStatus,
+            joinSource: member.joinSource,
+            isActive: member.isActive,
+            consentExpired:
+                member.consentStatus === MemberConsentStatus.pending
+                    ? this.isExpired(member)
+                    : undefined,
+            createdAt: member.createdAt.toISOString(),
+        }));
+    }
+
+    /**
+     * Подтвердить своё членство под сессией: сессия уже доказала владение аккаунтом,
+     * пароль и письмо не нужны. Клуб получает только отмеченные документы.
+     */
+    async confirmMine(
+        userId: string,
+        memberId: string,
+        dto: ConfirmMyMembershipDto
+    ): Promise<MemberConsentResultDto> {
+        const member = await this.getMinePending(userId, memberId);
+        await this.ownership.assertOwnerProof(member.user, { kind: "session", userId });
+        return this.applyConfirmation(member, dto);
+    }
+
+    async declineMine(userId: string, memberId: string): Promise<MemberConsentResultDto> {
+        const member = await this.getMinePending(userId, memberId);
+        await this.ownership.assertOwnerProof(member.user, { kind: "session", userId });
+        await this.memberRepository.deleteWithProfile(member.id);
+        return { portalSlug: member.portal.name };
+    }
+
+    /**
+     * Выйти из клуба: членство закрывается, показ документов и подписи отзывается.
+     * История (заказы, визиты) остаётся у клуба — пропадает только доступ участника.
+     */
+    async leaveMine(userId: string, memberId: string): Promise<MemberConsentResultDto> {
+        const member = await this.findMine(userId, memberId);
+        if (!member) {
+            throw new NotFoundException("Membership not found");
         }
+        await this.memberRepository.update(member.id, { isActive: false });
+        await this.sharing.revokeAll({
+            userId,
+            memberId: member.id,
+            portalId: member.portalId,
+        });
+        return { portalSlug: member.portal.name, memberId: member.id };
+    }
+
+    private async applyConfirmation(
+        member: MemberWithRelations,
+        dto: { shareDocumentIds?: string[]; shareSignature?: boolean }
+    ): Promise<MemberConsentResultDto> {
+        const selection = { documentIds: dto.shareDocumentIds, signature: dto.shareSignature };
+        // Сначала проверяем выбор: ошибка в нём не должна оставить членство подтверждённым
+        await this.sharing.assertSelectable(member.userId, selection);
 
         await this.memberRepository.update(member.id, {
             consentStatus: MemberConsentStatus.confirmed,
             consentToken: null,
             consentConfirmedAt: new Date(),
         });
-        await this.shares.shareDocuments(member.id, requested);
-        if (dto.shareSignature) {
-            const signature = await this.userSignatureRepository.findByUser(member.userId);
-            await this.shares.setSignatureShared(member.id, signature !== null);
-        }
+        await this.sharing.shareSelected({
+            userId: member.userId,
+            memberId: member.id,
+            portalId: member.portalId,
+            selection,
+        });
         return { portalSlug: member.portal.name, memberId: member.id };
     }
 
-    async decline(token: string, dto: DeclineMemberConsentDto): Promise<MemberConsentResultDto> {
-        const member = await this.getPending(token);
-        await this.verifyPassword(member, dto.password);
-        await this.memberRepository.deleteWithProfile(member.id);
-        return { portalSlug: member.portal.name };
+    private isExpired(member: MemberWithRelations): boolean {
+        const requestedAt = member.consentRequestedAt?.getTime() ?? 0;
+        return Date.now() - requestedAt > CONSENT_TTL_MS;
     }
 
     private async getPending(token: string): Promise<MemberWithRelations> {
@@ -136,18 +216,38 @@ export class MemberConsentService {
         if (!member || member.consentStatus !== MemberConsentStatus.pending) {
             throw new NotFoundException("Consent request not found");
         }
-        const requestedAt = member.consentRequestedAt?.getTime() ?? 0;
-        if (Date.now() - requestedAt > CONSENT_TTL_MS) {
+        if (this.isExpired(member)) {
             throw new NotFoundException("Consent request has expired");
         }
         return member;
     }
 
-    private async verifyPassword(member: MemberWithRelations, password: string): Promise<void> {
-        const hash = member.user.passwordHash;
-        const matches = hash ? await bcrypt.compare(password, hash) : false;
-        if (!matches) {
-            throw new UnauthorizedException("Invalid password for this account");
+    private async findMine(userId: string, memberId: string): Promise<MemberWithRelations | null> {
+        const all = await this.memberRepository.findAllByUser(userId);
+        return all.find((candidate) => candidate.id === memberId) ?? null;
+    }
+
+    /** Своё ожидающее членство: чужой memberId выглядит так же, как несуществующий. */
+    private async getMinePending(userId: string, memberId: string): Promise<MemberWithRelations> {
+        const member = await this.findMine(userId, memberId);
+        if (!member || member.consentStatus !== MemberConsentStatus.pending) {
+            throw new NotFoundException("Consent request not found");
         }
+        if (this.isExpired(member)) {
+            throw new NotFoundException("Consent request has expired");
+        }
+        return member;
+    }
+
+    private async verifyOwner(
+        member: MemberWithRelations,
+        password: string | undefined
+    ): Promise<void> {
+        await this.ownership.assertOwnerProof(
+            member.user,
+            this.ownership.proofMethod(member.user) === "password"
+                ? { kind: "password", password }
+                : { kind: "mailbox_token" }
+        );
     }
 }

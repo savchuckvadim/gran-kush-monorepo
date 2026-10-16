@@ -113,6 +113,7 @@ export class PortalContextMiddleware implements NestMiddleware {
             "/lk/mobile/auth",
             "/lk/account",
             "/lk/portals",
+            "/lk/memberships",
             "/lk/spending",
             "/lk/reviews",
             "/users/",

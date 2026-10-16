@@ -254,9 +254,17 @@ export class CrmMembersController {
             signature?: MulterFile[];
         },
         @PortalId() portalId: string,
-        @RequestLocale() locale: ContentLocale
+        @RequestLocale() locale: ContentLocale,
+        @CurrentPrincipal() principal: PortalPrincipal
     ): Promise<CrmMemberFullDto> {
-        return this.membersService.updateCrmMemberFiles(id, portalId, dto, files, locale);
+        return this.membersService.updateCrmMemberFiles(
+            id,
+            portalId,
+            dto,
+            files,
+            locale,
+            principal.membershipId
+        );
     }
 
     @Get(":id/documents/:documentId/preview")
@@ -269,12 +277,14 @@ export class CrmMembersController {
         @Param("id") memberId: string,
         @Param("documentId") documentId: string,
         @PortalId() portalId: string,
+        @CurrentPrincipal() principal: PortalPrincipal,
         @Res({ passthrough: true }) res: Response
     ): Promise<StreamableFile> {
         const document = await this.membersService.getMemberAccountDocument(
             memberId,
             portalId,
-            documentId
+            documentId,
+            principal.membershipId
         );
 
         return this.privateFile(res, document.storagePath);
@@ -289,9 +299,14 @@ export class CrmMembersController {
     async signaturePreview(
         @Param("id") memberId: string,
         @PortalId() portalId: string,
+        @CurrentPrincipal() principal: PortalPrincipal,
         @Res({ passthrough: true }) res: Response
     ): Promise<StreamableFile> {
-        const signature = await this.membersService.getMemberAccountSignature(memberId, portalId);
+        const signature = await this.membersService.getMemberAccountSignature(
+            memberId,
+            portalId,
+            principal.membershipId
+        );
 
         return this.privateFile(res, signature.storagePath);
     }

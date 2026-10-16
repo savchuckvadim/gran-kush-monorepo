@@ -1,7 +1,29 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 import { UserDocumentSide } from "@prisma/client";
-import { IsEnum, IsOptional, IsString, Matches, MaxLength } from "class-validator";
+import { IsEnum, IsOptional, IsString, IsUUID, Matches, MaxLength } from "class-validator";
+
+/** Клуб, которому владелец показал документ или подпись. */
+export class SharedClubDto {
+    @ApiProperty({ type: String, description: "Членство в этом клубе (memberId)" })
+    memberId: string;
+
+    @ApiProperty({ type: String })
+    portalId: string;
+
+    @ApiProperty({ example: "green-club", type: String })
+    slug: string;
+
+    @ApiProperty({ example: "Green Club", type: String })
+    displayName: string;
+}
+
+/** Кому показать: членство в клубе (id из `GET /lk/memberships`). */
+export class ShareWithMembershipDto {
+    @ApiProperty({ type: String })
+    @IsUUID()
+    memberId: string;
+}
 
 export class AccountDocumentDto {
     @ApiProperty({ type: String })
@@ -21,6 +43,12 @@ export class AccountDocumentDto {
 
     @ApiProperty({ example: "2026-01-01T00:00:00.000Z", type: String })
     updatedAt: string;
+
+    @ApiProperty({
+        type: [SharedClubDto],
+        description: "Клубы, которым показан именно этот файл (пусто — не показан никому)",
+    })
+    sharedWith: SharedClubDto[];
 }
 
 export class UploadAccountDocumentDto {
@@ -82,6 +110,9 @@ export class AccountDocumentsResponseDto {
 
     @ApiProperty({ type: Boolean })
     hasSignature: boolean;
+
+    @ApiProperty({ type: [SharedClubDto], description: "Клубы, которым показана подпись" })
+    signatureSharedWith: SharedClubDto[];
 }
 
 export class DeleteAccountDocumentResponseDto {

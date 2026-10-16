@@ -4,15 +4,14 @@ import {
     Injectable,
     Logger,
     NotFoundException,
-    UnauthorizedException,
 } from "@nestjs/common";
 
 import { MailService } from "@mail/application/services/mail.service";
 import type { SupportedLanguage } from "@mail/consts/mail.constants";
 import { EmployeeInvitation, InvitationStatus } from "@prisma/client";
+import { AccountOwnershipService } from "@users/application/services/account-ownership.service";
 import { AccountProvisioningService } from "@users/application/services/account-provisioning.service";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
-import * as bcrypt from "bcrypt";
 import { randomBytes } from "crypto";
 
 import { PrismaService } from "@common/prisma/prisma.service";
@@ -42,6 +41,7 @@ export class InvitationsService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly accountProvisioning: AccountProvisioningService,
+        private readonly ownership: AccountOwnershipService,
         private readonly employeesService: EmployeesService,
         private readonly employeeAuthService: EmployeeAuthService,
         private readonly userRepository: UserRepository,
@@ -161,17 +161,16 @@ export class InvitationsService {
         // принимающий доказывает, что аккаунт его, самим паролем — иначе приглашение на чужой email
         // выдавало бы токены этого аккаунта (security-audit, TASK-662)
         const existing = await this.userRepository.findByEmail(invitation.email);
-        if (existing?.passwordHash) {
-            const matches = dto.password
-                ? await bcrypt.compare(dto.password, existing.passwordHash)
-                : false;
-            if (!matches) {
-                throw new UnauthorizedException("Invalid password for this account");
-            }
+        if (existing && this.ownership.proofMethod(existing) === "password") {
+            await this.ownership.assertOwnerProof(existing, {
+                kind: "password",
+                password: dto.password,
+            });
         } else if (existing) {
-            // Аккаунт без пароля завёл другой клуб, в нём могут лежать документы. Токен видел
-            // админ, поэтому пароль здесь не ставится: владелец задаёт его по ссылке из письма
-            // и принимает приглашение уже с паролем (TASK-664)
+            // Аккаунт без пароля (pending_claim или только Google) мог завести другой клуб, в нём
+            // могут лежать документы. Токен видел админ, поэтому пароль здесь не ставится:
+            // владелец задаёт его по ссылке из письма и принимает приглашение уже с паролем
+            // (TASK-664). Принять сессией или Google — TASK-707
             await this.emailVerification.sendAccountSetup(invitation.email, {
                 app: "crm",
                 language,

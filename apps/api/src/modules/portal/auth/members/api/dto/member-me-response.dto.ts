@@ -1,5 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
+import { MemberConsentStatus } from "@prisma/client";
+
 export class MemberMembershipDto {
     @ApiProperty({ example: "f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f", type: String })
     portalId: string;
@@ -12,6 +14,12 @@ export class MemberMembershipDto {
 
     @ApiProperty({ example: true, type: Boolean })
     isActive: boolean;
+
+    @ApiProperty({
+        enum: MemberConsentStatus,
+        description: "pending — клуб добавил вас, ждёт вашего подтверждения (`/lk/memberships`)",
+    })
+    consentStatus: MemberConsentStatus;
 }
 
 /** Глобальный аккаунт ЛК: user + его membership-мосты по порталам. */

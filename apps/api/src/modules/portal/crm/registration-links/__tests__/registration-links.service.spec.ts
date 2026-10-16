@@ -115,13 +115,16 @@ describe("RegistrationLinksService — лимит использований", (
         );
     });
 
-    it("новый аккаунт: документы клубу видны, письмо подтверждения", async () => {
+    it("новый аккаунт: выбор документов передаётся как есть, письмо подтверждения", async () => {
         const { service, joinPortalService, emailVerification } = build();
 
         await service.registerViaLink("tok", dto as never, "es");
 
         expect(joinPortalService.joinPortal).toHaveBeenCalledWith(
-            expect.objectContaining({ shareDocuments: true, consent: undefined })
+            expect.objectContaining({
+                share: { documentIds: undefined, signature: undefined },
+                consent: undefined,
+            })
         );
         expect(emailVerification.sendVerificationEmailToUserId).toHaveBeenCalledWith("u-1", {
             app: "member",
@@ -138,7 +141,7 @@ describe("RegistrationLinksService — лимит использований", (
         // Членство ждёт клейма аккаунта: consent=pending до установки пароля по письму
         expect(joinPortalService.joinPortal).toHaveBeenCalledWith(
             expect.objectContaining({
-                shareDocuments: false,
+                share: undefined,
                 consent: expect.objectContaining({
                     token: expect.stringMatching(/^[0-9a-f]{64}$/) as string,
                     requestedAt: expect.any(Date) as Date,

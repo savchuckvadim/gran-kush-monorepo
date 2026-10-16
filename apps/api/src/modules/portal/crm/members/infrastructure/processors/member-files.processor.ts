@@ -23,6 +23,10 @@ export class MemberFilesProcessor extends WorkerHost {
 
     async process(job: Job<QueueMemberFilesPayload>): Promise<void> {
         const { userId, documentType, documentFirst, documentSecond, signature } = job.data;
+        // Показ — только членству, которое назвал сервер при постановке в очередь
+        const share = job.data.shareWithMemberId
+            ? { memberId: job.data.shareWithMemberId }
+            : ("none" as const);
 
         if ((documentFirst || documentSecond) && !documentType) {
             throw new Error("documentType is required when identity documents are provided.");
@@ -34,6 +38,7 @@ export class MemberFilesProcessor extends WorkerHost {
                 type: documentType,
                 side: UserDocumentSide.front,
                 file: decodeDataUrl(documentFirst),
+                share,
             });
         }
 
@@ -43,11 +48,16 @@ export class MemberFilesProcessor extends WorkerHost {
                 type: documentType,
                 side: UserDocumentSide.back,
                 file: decodeDataUrl(documentSecond),
+                share,
             });
         }
 
         if (signature) {
-            await this.accountFiles.replaceSignature({ userId, file: decodeDataUrl(signature) });
+            await this.accountFiles.replaceSignature({
+                userId,
+                file: decodeDataUrl(signature),
+                share,
+            });
         }
     }
 

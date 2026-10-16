@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
-import { IsObject, IsOptional } from "class-validator";
+import { ArrayMaxSize, IsArray, IsBoolean, IsObject, IsOptional, IsString } from "class-validator";
 
 export class MyClubDto {
     @ApiProperty({ type: String })
@@ -39,6 +39,21 @@ export class JoinPortalDto {
     @IsOptional()
     @IsObject()
     fields?: Record<string, unknown>;
+
+    @ApiPropertyOptional({
+        type: [String],
+        description: "Документы аккаунта, которые показать клубу. Не переданные клуб не видит",
+    })
+    @IsOptional()
+    @IsArray()
+    @ArrayMaxSize(20)
+    @IsString({ each: true })
+    shareDocumentIds?: string[];
+
+    @ApiPropertyOptional({ type: Boolean, description: "Показать клубу подпись аккаунта" })
+    @IsOptional()
+    @IsBoolean()
+    shareSignature?: boolean;
 }
 
 export class JoinPortalResponseDto {

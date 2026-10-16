@@ -5,6 +5,8 @@ import { User } from "@users/domain/entity/user.entity";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import * as bcrypt from "bcrypt";
 
+import { AccountOwnershipService } from "./account-ownership.service";
+
 const BCRYPT_ROUNDS = 10;
 
 /**
@@ -13,7 +15,10 @@ const BCRYPT_ROUNDS = 10;
  */
 @Injectable()
 export class AccountProvisioningService {
-    constructor(private readonly userRepository: UserRepository) {}
+    constructor(
+        private readonly userRepository: UserRepository,
+        private readonly ownership: AccountOwnershipService
+    ) {}
 
     /** CRM создаёт участника/сотрудника по email: аккаунт без пароля, ждёт клейма. */
     async ensurePendingClaimUser(email: string): Promise<{ user: User; isNewUser: boolean }> {
@@ -69,7 +74,9 @@ export class AccountProvisioningService {
             throw new UnauthorizedException("Account is blocked");
         }
 
-        if (existing.passwordHash === null) {
+        // Пароля нет: аккаунт завёл клуб (pending_claim) или в него входят только через Google.
+        // Владельца здесь не проверить паролем — только ссылкой из письма на его адрес.
+        if (this.ownership.proofMethod(existing) === "mailbox") {
             if (!options.emailVerified) {
                 return { user: existing, created: false, claimed: false, claimByEmail: true };
             }
@@ -86,12 +93,7 @@ export class AccountProvisioningService {
         }
 
         if (options.verifyPassword) {
-            const matches = password
-                ? await bcrypt.compare(password, existing.passwordHash)
-                : false;
-            if (!matches) {
-                throw new UnauthorizedException("Invalid password for this account");
-            }
+            await this.ownership.assertOwnerProof(existing, { kind: "password", password });
         }
 
         return { user: existing, created: false, claimed: false, claimByEmail: false };

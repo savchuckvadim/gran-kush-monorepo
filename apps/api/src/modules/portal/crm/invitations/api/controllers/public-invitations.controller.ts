@@ -2,6 +2,7 @@ import { Body, Controller, Get, Headers, Param, Post, Res } from "@nestjs/common
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 
+import { AccountOwnershipService } from "@users/application/services/account-ownership.service";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import type { Response } from "express";
 
@@ -27,6 +28,7 @@ export class PublicInvitationsController {
     constructor(
         private readonly invitationsService: InvitationsService,
         private readonly userRepository: UserRepository,
+        private readonly ownership: AccountOwnershipService,
         private readonly cookieService: AuthCookieService
     ) {}
 
@@ -43,7 +45,7 @@ export class PublicInvitationsController {
             role: invitation.role,
             portalSlug: invitation.portal.name,
             portalDisplayName: invitation.portal.displayName,
-            accountExists: user !== null && user.passwordHash !== null,
+            accountExists: user !== null && this.ownership.proofMethod(user) === "password",
         };
     }
 
