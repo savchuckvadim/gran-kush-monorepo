@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Plus } from "lucide-react";
 
 import type { SchemaMyPortalDto } from "@workspace/api-client/core";
 import {
@@ -14,6 +14,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@workspace/ui";
 import { cn } from "@workspace/ui/lib/utils";
@@ -21,6 +22,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { usePortalInfo } from "@/modules/entities/portal";
 import { usePortal } from "@/modules/processes";
 import { $api } from "@/modules/shared";
+import { ROUTES } from "@/modules/shared/config/routes";
 import { ClubBadge } from "@/modules/shared/ui/Brand";
 import { useSidebarPinned } from "@/modules/shared/ui/Sidebar";
 
@@ -118,6 +120,13 @@ export function PortalSwitcher({ className }: { className?: string }) {
                         </DropdownMenuItem>
                     ))
                 )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild className="gap-2.5">
+                    <a href={`/${locale}${ROUTES.NEW_CLUB}`}>
+                        <Plus className="text-muted-foreground" />
+                        {t("newClub")}
+                    </a>
+                </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     );

@@ -1,9 +1,9 @@
 import { defaultLocale, locales } from "@/i18n";
+import { isReservedClubSlug } from "@/modules/shared/config/club-routes";
 import { ROUTES } from "@/modules/shared/config/routes";
 
 // All /crm/* routes require authentication
 export const PROTECTED_ROUTES = ["/crm"] as const;
-const NON_PORTAL_SEGMENTS = new Set(["auth", "home", "scan", "join", "consent"]);
 
 type RouteContext = {
     portalSlug: string | null;
@@ -19,7 +19,8 @@ export function getRouteContext(pathname: string): RouteContext {
 
     if (firstSegment && locales.includes(firstSegment as (typeof locales)[number])) {
         const maybePortal =
-            secondSegment && !NON_PORTAL_SEGMENTS.has(secondSegment) ? secondSegment : null;
+            // Зарезервированные слова (auth, join, clubs, …) — страницы, а не клубы: один список с API
+            secondSegment && !isReservedClubSlug(secondSegment) ? secondSegment : null;
         const pathnameWithoutPortalAndLocale =
             `/${segments.slice(maybePortal ? 2 : 1).join("/")}` || "/";
         return {

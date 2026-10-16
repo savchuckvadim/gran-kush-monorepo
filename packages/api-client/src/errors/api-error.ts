@@ -5,7 +5,16 @@
 export type ApiErrorBody = {
     message?: string | string[];
     errors?: string[] | string;
+    /** Machine-readable reason next to the human message, when the API gives one (e.g. `email_taken`). */
+    code?: string;
 };
+
+/** The `code` of an API error, for reasons the UI answers differently than with the message. */
+export function getApiErrorCode(error: unknown): string | undefined {
+    if (!(error instanceof ApiClientError)) return undefined;
+    const code = (error.body as ApiErrorBody | undefined)?.code;
+    return typeof code === "string" ? code : undefined;
+}
 
 export class ApiClientError extends Error {
     readonly status: number;

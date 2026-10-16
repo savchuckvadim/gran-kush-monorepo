@@ -178,22 +178,24 @@ describe("SocialLoginService — вход участника через Google",
 });
 
 describe("SocialLoginService — вход сотрудника через Google", () => {
-    it("аккаунта нет — no_employment, пользователь НЕ создаётся", async () => {
+    it("аккаунта нет — заводится подтверждённый аккаунт без клубов", async () => {
         const { service, userRepository } = buildService({});
         const result = await service.loginEmployeeWithGoogle(profile());
-        expect(result).toEqual({ kind: "no_employment", email: "owner@test.local" });
-        expect(userRepository.create).not.toHaveBeenCalled();
+        expect(userRepository.create).toHaveBeenCalledWith(
+            expect.objectContaining({ email: "owner@test.local", emailConfirmed: true })
+        );
+        expect(result.hasClubs).toBe(false);
     });
 
-    it("аккаунт без активных трудоустройств — no_employment", async () => {
+    it("аккаунт без активных трудоустройств — входит без клубов", async () => {
         const { service } = buildService({ byEmail: user(), employees: [{ isActive: false }] });
         const result = await service.loginEmployeeWithGoogle(profile());
-        expect(result.kind).toBe("no_employment");
+        expect(result.hasClubs).toBe(false);
     });
 
-    it("владелец клуба входит", async () => {
+    it("владелец клуба входит с клубами", async () => {
         const { service } = buildService({ byEmail: user(), employees: [{ isActive: true }] });
         const result = await service.loginEmployeeWithGoogle(profile());
-        expect(result.kind).toBe("ok");
+        expect(result.hasClubs).toBe(true);
     });
 });

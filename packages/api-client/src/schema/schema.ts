@@ -1802,7 +1802,8 @@ export interface paths {
         /** Порталы, где текущий аккаунт — сотрудник (для переключателя) */
         get: operations["CrmMyPortals_myPortals"];
         put?: never;
-        post?: never;
+        /** Новый клуб для аккаунта сессии: аккаунт — его владелец, сессия CRM выдаётся заново HttpOnly-куками */
+        post: operations["CrmMyPortals_createClub"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4364,13 +4365,6 @@ export interface components {
             name: string;
             /** @example Green Club */
             displayName: string;
-            /** @example owner@greenclub.com */
-            email: string;
-            /**
-             * @description Password must contain uppercase, lowercase and number
-             * @example StrongPassword123
-             */
-            password: string;
             /** @example Owner */
             ownerName: string;
             /** @example Surname */
@@ -4391,6 +4385,13 @@ export interface components {
              * @example true
              */
             acceptTerms: boolean;
+            /** @example owner@greenclub.com */
+            email: string;
+            /**
+             * @description Password must contain uppercase, lowercase and number
+             * @example StrongPassword123
+             */
+            password: string;
         };
         RegisteredPortalDto: {
             /** @example f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f */
@@ -4464,6 +4465,35 @@ export interface components {
         };
         MyPortalsResponseDto: {
             portals: components["schemas"]["MyPortalDto"][];
+        };
+        CreateClubDto: {
+            /**
+             * @description Unique portal slug. Allowed chars: a-z, 0-9, dash
+             * @example green-club
+             */
+            name: string;
+            /** @example Green Club */
+            displayName: string;
+            /** @example Owner */
+            ownerName: string;
+            /** @example Surname */
+            ownerSurname?: string;
+            /**
+             * @description Billing plan code chosen on the product site (?plan=). Unknown or inactive codes fall back to the trial plan
+             * @example club-month
+             */
+            planCode?: string;
+            /**
+             * @description Language of the welcome and email confirmation letters
+             * @example es
+             * @enum {string}
+             */
+            locale?: "ru" | "es" | "en";
+            /**
+             * @description The owner accepts the Terms and conditions and the Data processing agreement and has read the Privacy policy. Must be true
+             * @example true
+             */
+            acceptTerms: boolean;
         };
         PortalSubscriptionInfoDto: {
             /**
@@ -6087,6 +6117,7 @@ export type SchemaJoinPortalDto = components['schemas']['JoinPortalDto'];
 export type SchemaJoinPortalResponseDto = components['schemas']['JoinPortalResponseDto'];
 export type SchemaMyPortalDto = components['schemas']['MyPortalDto'];
 export type SchemaMyPortalsResponseDto = components['schemas']['MyPortalsResponseDto'];
+export type SchemaCreateClubDto = components['schemas']['CreateClubDto'];
 export type SchemaPortalSubscriptionInfoDto = components['schemas']['PortalSubscriptionInfoDto'];
 export type SchemaPortalInfoDto = components['schemas']['PortalInfoDto'];
 export type SchemaProductCategoryDto = components['schemas']['ProductCategoryDto'];
@@ -11488,6 +11519,57 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmMyPortals_createClub: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateClubDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegisterPortalResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

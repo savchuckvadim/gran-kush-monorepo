@@ -8,9 +8,16 @@ const isSafeReturnPath = (from: string | null, clubPrefix: string): from is stri
         from && from.startsWith(`${clubPrefix}/`) && !from.includes("//") && !from.includes("..")
     );
 
+/** «Новый клуб» outside a club, with or without `?plan=` from the product site. */
+const isNewClubPath = (from: string | null, locale: string): from is string => {
+    const page = `/${locale}${ROUTES.NEW_CLUB}`;
+    return Boolean(from && (from === page || from.startsWith(`${page}?`)) && !from.includes("//"));
+};
+
 /**
  * Where a signed-in user goes from the login page, or `null` when they have to pick a club:
- * the club from the URL if they work there, otherwise their only club.
+ * «Новый клуб» if they came from there, the club from the URL if they work there, otherwise
+ * their only club.
  */
 export const resolveClubTarget = (
     clubs: SchemaMyPortalDto[],
@@ -18,6 +25,7 @@ export const resolveClubTarget = (
     urlClub: string | null,
     from: string | null
 ): string | null => {
+    if (isNewClubPath(from, locale)) return from;
     if (urlClub) {
         if (!clubs.some((club) => club.slug === urlClub)) return null;
         const prefix = `/${locale}/${urlClub}`;

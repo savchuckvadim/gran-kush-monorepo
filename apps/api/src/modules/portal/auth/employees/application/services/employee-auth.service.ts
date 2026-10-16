@@ -41,10 +41,9 @@ export class EmployeeAuthService {
         if (!user.isActive) {
             throw new UnauthorizedException("Email not confirmed");
         }
+        // Аккаунт без клубов тоже входит: пароль доказал владельца, а CRM предложит завести клуб
+        // (TASK-708). Маршруты клуба всё равно требуют сотрудника в этом клубе (MembershipGuard).
         const activeEmployments = user.employees.filter((e) => e.isActive);
-        if (activeEmployments.length === 0) {
-            throw new UnauthorizedException("Invalid credentials");
-        }
 
         const tokens = await this.tokenIssuer.issueForUser(
             { id: user.id, email: user.email },

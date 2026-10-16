@@ -8,9 +8,11 @@ import { RefreshTokenRepository } from "@modules/portal/auth/shared/domain/repos
 import { UserIdentityRepository } from "@modules/portal/auth/social/domain/repositories/user-identity-repository.interface";
 import { GoogleProfile } from "@modules/portal/auth/social/domain/social-profile";
 
-export type EmployeeSocialLoginResult =
-    | { kind: "ok"; user: User }
-    | { kind: "no_employment"; email: string };
+/** Вход в CRM через Google: аккаунт и есть ли у него клубы (без клубов CRM ведёт на «Новый клуб»). */
+export interface EmployeeSocialLogin {
+    user: User;
+    hasClubs: boolean;
+}
 
 /**
  * Вход через Google: подтверждённый Google-ом email — то же доказательство владения
@@ -56,21 +58,15 @@ export class SocialLoginService {
     }
 
     /**
-     * CRM: аккаунт не создаём — без клуба employee-сессия бесполезна;
-     * фронт ведёт на регистрацию клуба с предзаполненным email.
+     * CRM: аккаунт находится или заводится всегда — Google доказал адрес. Аккаунт без клубов
+     * получает сессию и заводит клуб на странице «Новый клуб» (TASK-708); маршруты клуба всё
+     * равно требуют сотрудника этого клуба.
      */
-    async loginEmployeeWithGoogle(profile: GoogleProfile): Promise<EmployeeSocialLoginResult> {
-        const existing = await this.findLinkedOrByEmail(profile);
-        if (!existing) {
-            return { kind: "no_employment", email: profile.email };
-        }
-        const user = await this.activateAndLink(existing, profile);
+    async loginEmployeeWithGoogle(profile: GoogleProfile): Promise<EmployeeSocialLogin> {
+        const user = await this.findOrCreateAccount(profile);
         const withMemberships = await this.userRepository.findByEmailWithMemberships(user.email);
-        const activeEmployments = withMemberships?.employees.filter((e) => e.isActive) ?? [];
-        if (activeEmployments.length === 0) {
-            return { kind: "no_employment", email: user.email };
-        }
-        return { kind: "ok", user };
+        const hasClubs = (withMemberships?.employees ?? []).some((e) => e.isActive);
+        return { user, hasClubs };
     }
 
     private async findLinkedOrByEmail(profile: GoogleProfile): Promise<User | null> {

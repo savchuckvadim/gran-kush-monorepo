@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 
-import { Building2, ChevronRight } from "lucide-react";
+import { Building2, ChevronRight, Plus } from "lucide-react";
 
 import type { SchemaMyPortalDto } from "@workspace/api-client/core";
 import { Button } from "@workspace/ui";
@@ -63,9 +64,16 @@ export function ClubPicker({ clubs, deniedClub, onSignOut, isSigningOut }: ClubP
                 </ul>
             )}
 
+            <Button asChild className="w-full" variant={clubs.length === 0 ? "default" : "outline"}>
+                <Link href={`/${locale}${ROUTES.NEW_CLUB}`}>
+                    <Plus aria-hidden="true" />
+                    {t("newClub")}
+                </Link>
+            </Button>
+
             <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 className="w-full"
                 onClick={onSignOut}
                 disabled={isSigningOut}

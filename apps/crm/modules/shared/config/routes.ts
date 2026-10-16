@@ -48,6 +48,8 @@ export const ROUTES = {
     /** Записи смарт-процессов: `${ROUTES.CRM_ENTITIES}/${code}` */
     CRM_ENTITIES: "/crm/entities",
     LOGIN: "/auth/login",
+    /** Новый клуб для вошедшего аккаунта (вне клуба: `/{locale}/clubs/new`); `?plan=` с сайта сохраняется */
+    NEW_CLUB: "/clubs/new",
     REGISTER: "/auth/register",
 } as const;
 

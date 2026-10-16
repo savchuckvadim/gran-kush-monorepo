@@ -208,16 +208,33 @@ describe("Google sign-in (e2e)", () => {
     describe("CRM", () => {
         const path = "/crm/auth/google";
 
-        it("аккаунта нет — на регистрацию клуба с email, аккаунт не создаётся", async () => {
+        it("аккаунта нет — заводится подтверждённый аккаунт, сессия и «Новый клуб»", async () => {
             google.email = `g-crm-new-${suffix}@test.local`;
             const { flowCookie, state } = await start(path);
 
             const res = await callback(path, state, flowCookie);
 
             expect(res.status).toBe(302);
-            expect(res.headers.location).toContain("/es/auth/register?email=");
-            expect(res.headers.location).toContain("from=google");
-            expect(await prisma.user.findUnique({ where: { email: google.email } })).toBeNull();
+            expect(new URL(res.headers.location).pathname).toBe("/es/clubs/new");
+            expect(cookieOf(res, "crm_access_token")).toBeTruthy();
+            const user = await prisma.user.findUniqueOrThrow({ where: { email: google.email } });
+            expect(user.emailConfirmed).toBe(true);
+            expect(user.passwordHash).toBeNull();
+        });
+
+        it("intent=club_signup ведёт на страницу из returnTo вместе с тарифом", async () => {
+            google.email = `g-crm-plan-${suffix}@test.local`;
+            const { flowCookie, state } = await start(
+                path,
+                `&intent=club_signup&returnTo=${encodeURIComponent("/es/clubs/new?plan=club-month")}`
+            );
+
+            const res = await callback(path, state, flowCookie);
+
+            const location = new URL(res.headers.location);
+            expect(location.pathname).toBe("/es/clubs/new");
+            expect(location.searchParams.get("plan")).toBe("club-month");
+            expect(cookieOf(res, "crm_access_token")).toBeTruthy();
         });
 
         it("владелец клуба входит и возвращается на указанную страницу", async () => {
@@ -334,7 +351,7 @@ describe("Google sign-in (e2e)", () => {
 
                 const res = await callback(path, state, flowCookie);
 
-                expect(res.headers.location).toContain("/es/auth/register?email=");
+                expect(new URL(res.headers.location).pathname).toBe("/es/clubs/new");
             });
         });
     });

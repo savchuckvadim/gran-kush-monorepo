@@ -1,243 +1,114 @@
-import { InjectQueue } from "@nestjs/bullmq";
-import { ConflictException, Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 
-import { EmployeeRole, Prisma } from "@prisma/client";
 import { hash } from "bcrypt";
-import { Queue } from "bullmq";
 
-import { LEGAL_TERMS_VERSION } from "@common/legal/legal-terms";
 import { PrismaService } from "@common/prisma/prisma.service";
-import { isUniqueViolationOn } from "@common/prisma/unique-violation";
-import { buildJobId } from "@common/queue/job-options";
-import { BillingSettings } from "@modules/billing/application/billing-settings";
 import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
 import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
-import { ProvisionPortalFromTemplatesService } from "@modules/portal/crm/entity-fields/application/services/provision-portal-from-templates.service";
-import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
-import { RegisterPortalDto } from "@modules/portal/crm/portals/api/dto/register-portal.dto";
-import {
-    PORTAL_EVENTS_JOB_NAMES,
-    PORTAL_EVENTS_QUEUE_NAME,
-    type PortalRegistrationInitPayload,
-} from "@modules/portal/crm/portals/events/portal-events.constants";
 
-type RegisterPortalResult = {
-    portal: {
-        id: string;
-        name: string;
-        displayName: string;
-        status: string;
-    };
-    owner: {
-        id: string;
-        email: string;
-        name: string;
-        role: string;
-        portalId: string;
-    };
-    tokens: {
-        accessToken: string;
-        refreshToken: string;
-    };
+import { CreateClubDto } from "../../api/dto/create-club.dto";
+import { RegisterPortalDto } from "../../api/dto/register-portal.dto";
+
+import { ClubFoundingService, emailTakenError, type FoundedClub } from "./club-founding.service";
+
+export type RegisterPortalResult = {
+    portal: { id: string; name: string; displayName: string; status: string };
+    owner: { id: string; email: string; name: string; role: string; portalId: string };
+    tokens: { accessToken: string; refreshToken: string };
 };
 
+/**
+ * Club owners: a new account with its first club (registration from the product site) and one
+ * more club for an account that is already signed in (a Google sign-in without a club ends there
+ * too). The club itself is founded by `ClubFoundingService`.
+ */
 @Injectable()
 export class PortalRegistrationService {
     private readonly logger = new Logger(PortalRegistrationService.name);
 
     constructor(
         private readonly prisma: PrismaService,
-        private readonly provisionFromTemplates: ProvisionPortalFromTemplatesService,
+        private readonly founding: ClubFoundingService,
         private readonly employeeAuthService: EmployeeAuthService,
-        private readonly emailVerificationService: EmailVerificationService,
-        private readonly billingSettings: BillingSettings,
-        @InjectQueue(PORTAL_EVENTS_QUEUE_NAME) private readonly portalEventsQueue: Queue
+        private readonly emailVerificationService: EmailVerificationService
     ) {}
 
+    /** A new account with a password; it signs in at once and confirms the email from a banner. */
     async registerPortal(dto: RegisterPortalDto, deviceId: string): Promise<RegisterPortalResult> {
-        const normalizedName = dto.name.trim().toLowerCase();
-        const normalizedEmail = dto.email.trim().toLowerCase();
-
-        const existingPortal = await this.prisma.portal.findUnique({
-            where: { name: normalizedName },
+        const email = dto.email.trim().toLowerCase();
+        await this.founding.assertNameFree(dto.name);
+        const existingUser = await this.prisma.user.findUnique({
+            where: { email },
             select: { id: true },
         });
-        if (existingPortal) {
-            throw new ConflictException("Portal with this name already exists");
-        }
-
-        const existingUser = await this.prisma.user.findUnique({
-            where: { email: normalizedEmail },
-            select: { id: true, passwordHash: true },
-        });
         if (existingUser) {
-            throw new ConflictException("User with this email already exists");
+            throw emailTakenError();
         }
 
         const passwordHash = await hash(dto.password, 10);
-
-        // Гонка двух одинаковых регистраций: unique-индекс отвечает 409, а не 500
-        const created = await this.createPortalWithOwner(async (tx) => {
+        const club = await this.founding.inTransaction(async (tx) => {
             const user = await tx.user.create({
-                data: {
-                    email: normalizedEmail,
-                    passwordHash,
-                    isActive: true,
-                    emailConfirmed: false,
-                },
+                data: { email, passwordHash, isActive: true, emailConfirmed: false },
             });
-
-            const portal = await tx.portal.create({
-                data: {
-                    name: normalizedName,
-                    displayName: dto.displayName.trim(),
-                    termsAcceptedAt: new Date(),
-                    termsVersion: LEGAL_TERMS_VERSION,
-                    termsAcceptedByUserId: user.id,
-                },
-            });
-
-            await this.provisionFromTemplates.provisionPortal(portal.id, portal.type, tx, {
-                planCode: dto.planCode,
-                trialEndsAt: this.billingSettings.trialEndFrom(new Date()),
-            });
-
-            const employeeDef = await tx.entityDefinition.findUniqueOrThrow({
-                where: {
-                    portalId_code: {
-                        portalId: portal.id,
-                        code: ENTITY_DEFINITION_CODES.EMPLOYEE,
-                    },
-                },
-            });
-            const record = await tx.entityRecord.create({
-                data: {
-                    portalId: portal.id,
-                    entityDefinitionId: employeeDef.id,
-                },
-            });
-
-            const employee = await tx.employee.create({
-                data: {
-                    portalId: portal.id,
-                    userId: user.id,
-                    entityRecordId: record.id,
-                    role: EmployeeRole.portal_owner,
-                    isActive: true,
-                },
-                include: {
-                    user: true,
-                },
-            });
-
-            const ownerFields: Record<string, string> = {
-                first_name: dto.ownerName.trim(),
-                ...(dto.ownerSurname?.trim() ? { last_name: dto.ownerSurname.trim() } : {}),
-            };
-            for (const [fieldKey, value] of Object.entries(ownerFields)) {
-                const fieldDef = await tx.fieldDefinition.findUnique({
-                    where: {
-                        entityDefinitionId_fieldKey: {
-                            entityDefinitionId: employeeDef.id,
-                            fieldKey,
-                        },
-                    },
-                    select: { id: true },
-                });
-                if (fieldDef) {
-                    await tx.fieldValue.create({
-                        data: {
-                            portalId: portal.id,
-                            entityRecordId: record.id,
-                            fieldDefinitionId: fieldDef.id,
-                            valueIndex: 0,
-                            valueJson: value,
-                        },
-                    });
-                }
-            }
-
-            return {
-                portal,
-                employee,
-            };
+            return this.founding.found(tx, user.id, dto);
         });
 
-        const tokens = await this.employeeAuthService.generateTokens(
-            { id: created.employee.user.id, email: created.employee.user.email },
-            deviceId
-        );
-
-        const initPayload: PortalRegistrationInitPayload = {
-            portalId: created.portal.id,
-            portalSlug: created.portal.name,
-            portalDisplayName: created.portal.displayName,
-            ownerId: created.employee.id,
-            ownerEmail: created.employee.user.email,
-            ownerName: dto.ownerName.trim(),
-            language: dto.locale,
-        };
-
-        // Portal events are processed asynchronously in PortalEventsProcessor.
-        // jobId фиксирован по порталу: регистрация случается один раз, и повторная
-        // постановка (ретрай запроса, вторая реплика) не должна давать второе уведомление.
-        await this.portalEventsQueue.add(
-            PORTAL_EVENTS_JOB_NAMES.PORTAL_REGISTRATION_INIT,
-            initPayload,
-            {
-                jobId: buildJobId(
-                    PORTAL_EVENTS_JOB_NAMES.PORTAL_REGISTRATION_INIT,
-                    created.portal.id
-                ),
-            }
-        );
-
+        const result = await this.finish(club, dto, deviceId);
         // Владелец уже внутри CRM; письмо с подтверждением можно запросить повторно из баннера,
         // поэтому сбой постановки в очередь не должен ронять уже созданный клуб.
         try {
-            await this.emailVerificationService.sendVerificationEmailToUserId(
-                created.employee.user.id,
-                { app: "crm", language: dto.locale }
-            );
+            await this.emailVerificationService.sendVerificationEmailToUserId(club.owner.user.id, {
+                app: "crm",
+                language: dto.locale,
+            });
         } catch (error: unknown) {
             this.logger.error(
-                `Email confirmation for portal ${created.portal.id} was not queued`,
+                `Email confirmation for portal ${club.portal.id} was not queued`,
                 error instanceof Error ? error.stack : String(error)
             );
         }
+        return result;
+    }
 
+    /** One more club for the account of the session; the session itself proves the account. */
+    async createClubForAccount(
+        account: { userId: string },
+        dto: CreateClubDto,
+        deviceId: string
+    ): Promise<RegisterPortalResult> {
+        await this.founding.assertNameFree(dto.name);
+        const club = await this.founding.inTransaction((tx) =>
+            this.founding.found(tx, account.userId, dto)
+        );
+        return this.finish(club, dto, deviceId);
+    }
+
+    /** A fresh CRM session for the owner and the club's welcome events. */
+    private async finish(
+        club: FoundedClub,
+        dto: CreateClubDto,
+        deviceId: string
+    ): Promise<RegisterPortalResult> {
+        const tokens = await this.employeeAuthService.generateTokens(
+            { id: club.owner.user.id, email: club.owner.user.email },
+            deviceId
+        );
+        await this.founding.announce(club, dto);
         return {
             portal: {
-                id: created.portal.id,
-                name: created.portal.name,
-                displayName: created.portal.displayName,
-                status: created.portal.status,
+                id: club.portal.id,
+                name: club.portal.name,
+                displayName: club.portal.displayName,
+                status: club.portal.status,
             },
             owner: {
-                id: created.employee.id,
-                email: created.employee.user.email,
+                id: club.owner.id,
+                email: club.owner.user.email,
                 name: dto.ownerName.trim(),
-                role: created.employee.role,
-                portalId: created.employee.portalId,
+                role: club.owner.role,
+                portalId: club.owner.portalId,
             },
             tokens,
         };
-    }
-
-    /** Транзакция создания клуба с переводом гонки на unique-индексах в 409. */
-    private async createPortalWithOwner<T>(
-        run: (tx: Prisma.TransactionClient) => Promise<T>
-    ): Promise<T> {
-        try {
-            return await this.prisma.$transaction(run);
-        } catch (error: unknown) {
-            if (isUniqueViolationOn(error, "email")) {
-                throw new ConflictException("User with this email already exists");
-            }
-            if (isUniqueViolationOn(error, "name")) {
-                throw new ConflictException("Portal with this name already exists");
-            }
-            throw error;
-        }
     }
 }

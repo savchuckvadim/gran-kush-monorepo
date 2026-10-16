@@ -29,13 +29,15 @@
                 },
                 "settings": "Ajustes",
                 "billing": "Plan y pago",
-                "appearance": "Apariencia"
+                "appearance": "Apariencia",
+                "newClub": "Nuevo club"
             },
             "club": {
                 "title": "Clubes",
                 "fallback": "Club",
                 "loading": "Cargando…",
-                "empty": "No hay clubes disponibles"
+                "empty": "No hay clubes disponibles",
+                "newClub": "Nuevo club"
             },
             "tray": {
                 "open": "Más",

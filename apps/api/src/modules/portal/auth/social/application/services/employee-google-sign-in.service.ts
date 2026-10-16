@@ -15,14 +15,19 @@ export interface EmployeeGoogleSignInResult {
     tokens?: { accessToken: string; refreshToken: string };
 }
 
+/** Страница CRM «Новый клуб»: туда ведут вход без клубов и вход ради нового клуба. */
+const NEW_CLUB_PATH = "/clubs/new";
+
 /** Почему приглашение не принято: попадает в адрес страницы приглашения, без персональных данных. */
 type InvitationFailure = "invite_email_mismatch" | "invite_invalid" | "invite_already_employee";
 
 /**
  * Что сделать после проверенного возврата от Google в CRM.
  *
- * - Без намерения — обычный вход: сотрудник получает сессию, аккаунт без клубов идёт на
- *   регистрацию клуба (аккаунт заранее не создаётся, TASK-508).
+ * - Без намерения — обычный вход. Аккаунт находится или заводится (Google доказал адрес), сессия
+ *   выдаётся всегда; без клубов — на «Новый клуб».
+ * - `club_signup` — вход ради нового клуба: на «Новый клуб» (или страницу из `returnTo` — там же
+ *   тариф с сайта), даже если клубы уже есть.
  * - `invitation` — приём приглашения: адрес из Google должен совпасть с адресом приглашения.
  *   Сверка идёт ДО поиска аккаунта, чтобы чужой Google-адрес не заводил аккаунтов.
  */
@@ -45,18 +50,23 @@ export class EmployeeGoogleSignInService {
             return this.acceptInvitation(profile, context.intent.token, context.locale, deviceId);
         }
 
-        const result = await this.socialLogin.loginEmployeeWithGoogle(profile);
-        const front = this.flow.frontendUrl("crm");
-        if (result.kind === "no_employment") {
-            const email = encodeURIComponent(result.email);
-            return {
-                redirect: `${front}/${context.locale}/auth/register?email=${email}&from=google`,
-            };
-        }
+        const { user, hasClubs } = await this.socialLogin.loginEmployeeWithGoogle(profile);
         const tokens = await this.employeeAuthService.generateTokens(
-            { id: result.user.id, email: result.user.email },
+            { id: user.id, email: user.email },
             deviceId
         );
+        const newClub = `${this.flow.frontendUrl("crm")}/${context.locale}${NEW_CLUB_PATH}`;
+        if (context.intent?.kind === "club_signup") {
+            return {
+                redirect: context.returnTo
+                    ? this.flow.successUrl("crm", context.locale, context.returnTo)
+                    : newClub,
+                tokens,
+            };
+        }
+        if (!hasClubs) {
+            return { redirect: newClub, tokens };
+        }
         return { redirect: this.flow.successUrl("crm", context.locale, context.returnTo), tokens };
     }
 

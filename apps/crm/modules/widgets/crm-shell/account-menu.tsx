@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { CreditCard, Languages, LogOut, Palette, Settings, UserRound } from "lucide-react";
+import { CreditCard, Languages, LogOut, Palette, Plus, Settings, UserRound } from "lucide-react";
 
 import {
     DropdownMenu,
@@ -101,6 +101,12 @@ export function AccountMenu() {
                                 />
                             </>
                         )}
+                        {/* the new club lives outside any club: no portal prefix in its address */}
+                        <AccountTileLink
+                            href={`/${locale}${ROUTES.NEW_CLUB}`}
+                            icon={Plus}
+                            label={t("newClub")}
+                        />
                         <DropdownMenuItem
                             className={ACCOUNT_TILE}
                             onSelect={() => setIsSkinsOpen(true)}

@@ -1,6 +1,7 @@
 import { INestApplication } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 
+import * as bcrypt from "bcrypt";
 import cookieParser from "cookie-parser";
 import request from "supertest";
 
@@ -12,6 +13,12 @@ jest.setTimeout(120_000);
 
 const suffix = Date.now().toString(36);
 const PASSWORD = "Password123";
+
+const cookieHeader = (res: request.Response): string => {
+    const raw = res.headers["set-cookie"];
+    const cookies: string[] = Array.isArray(raw) ? raw : raw ? [raw] : [];
+    return cookies.map((c) => c.split(";")[0]).join("; ");
+};
 
 /**
  * Регистрация клуба с сайта: тариф из ?plan= и откат на trial.
@@ -131,6 +138,80 @@ describe("Portal registration from the product site (e2e)", () => {
             expect.arrayContaining([expect.stringContaining("acceptTerms")])
         );
         expect(await prisma.portal.findUnique({ where: { name: slug } })).toBeNull();
+    });
+
+    describe("TASK-708: one more club and an account without clubs", () => {
+        const clubBody = (slug: string) => ({
+            name: slug,
+            displayName: `Second ${slug}`,
+            ownerName: "Owner",
+            acceptTerms: true,
+        });
+
+        it("a signed-in owner founds one more club and owns it", async () => {
+            const first = await register(`reg-first-${suffix}`);
+            expect(first.status).toBe(201);
+            const second = `reg-second-${suffix}`;
+            slugs.push(second);
+
+            const res = await request(app.getHttpServer())
+                .post("/crm/my-portals")
+                .set("Cookie", cookieHeader(first))
+                .send(clubBody(second));
+
+            expect(res.status).toBe(201);
+            expect(res.body.portal.name).toBe(second);
+            expect(res.body.owner.role).toBe("portal_owner");
+            const mine = await request(app.getHttpServer())
+                .get("/crm/my-portals")
+                .set("Cookie", cookieHeader(res));
+            expect(mine.body.portals.map((p: { slug: string }) => p.slug)).toEqual(
+                expect.arrayContaining([`reg-first-${suffix}`, second])
+            );
+        });
+
+        it("a reserved word or a taken slug is refused for the new club", async () => {
+            const owner = await register(`reg-third-${suffix}`);
+            const as = (body: Record<string, unknown>) =>
+                request(app.getHttpServer())
+                    .post("/crm/my-portals")
+                    .set("Cookie", cookieHeader(owner))
+                    .send(body);
+
+            expect((await as(clubBody("clubs"))).status).toBe(400);
+            expect((await as(clubBody(`reg-third-${suffix}`))).status).toBe(409);
+        });
+
+        it("a guest cannot found a club through the CRM endpoint", async () => {
+            const res = await request(app.getHttpServer())
+                .post("/crm/my-portals")
+                .send(clubBody(`reg-guest-${suffix}`));
+            expect(res.status).toBe(401);
+        });
+
+        it("an account without clubs signs in with its password and sees no clubs", async () => {
+            const email = `no-club-${suffix}@test.local`;
+            // Напрямую в БД: регистрация участника шлёт письмо, которое в jest не рендерится
+            await prisma.user.create({
+                data: {
+                    email,
+                    passwordHash: await bcrypt.hash(PASSWORD, 4),
+                    status: "active",
+                    isActive: true,
+                    emailConfirmed: true,
+                },
+            });
+
+            const login = await request(app.getHttpServer())
+                .post("/crm/auth/login")
+                .send({ email, password: PASSWORD });
+            expect(login.status).toBe(201);
+            const mine = await request(app.getHttpServer())
+                .get("/crm/my-portals")
+                .set("Cookie", cookieHeader(login));
+            expect(mine.status).toBe(200);
+            expect(mine.body.portals).toEqual([]);
+        });
     });
 
     it("stores which terms version the owner accepted", async () => {
