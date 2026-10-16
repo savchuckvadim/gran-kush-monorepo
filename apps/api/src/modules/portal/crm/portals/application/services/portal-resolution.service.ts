@@ -10,6 +10,8 @@ export type PortalInfoView = {
     displayName: string;
     type: PortalTypeEnum;
     status: PortalStatus;
+    /** Тема клуба по умолчанию; `null` — тема PafPaf */
+    defaultSkin: string | null;
     subscription: {
         status: SubscriptionStatus;
         planName: string | null;
@@ -53,6 +55,7 @@ export class PortalResolutionService {
             displayName: portal.displayName,
             type: portal.type,
             status: portal.status,
+            defaultSkin: portal.defaultSkin,
             subscription: portal.subscription
                 ? {
                       status: portal.subscription.status,

@@ -17,6 +17,13 @@ export class MyMembershipDto {
     @ApiProperty({ type: String })
     displayName: string;
 
+    @ApiProperty({
+        type: String,
+        nullable: true,
+        description: "Тема клуба по умолчанию; кабинет показывает её, пока человек не выбрал свою",
+    })
+    defaultSkin: string | null;
+
     @ApiProperty({ enum: MemberConsentStatus })
     consentStatus: MemberConsentStatus;
 

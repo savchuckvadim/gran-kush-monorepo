@@ -1,4 +1,4 @@
-import { BASE_SKIN, getSkin, resolveSkin } from "@/modules/shared/config/skins";
+import { BASE_SKIN, getSkin, resolveSkin, type SkinId } from "@/modules/shared/config/skins";
 
 import type { SkinPreferences } from "./skin-storage";
 
@@ -16,8 +16,11 @@ const suspendTransitions = (): (() => void) => {
 };
 
 /** Light/dark is not set here: next-themes applies it from `forcedTheme`. */
-export const applySkinToDocument = (preferences: SkinPreferences): void => {
-    const skin = getSkin(resolveSkin(preferences.skin));
+export const applySkinToDocument = (
+    preferences: SkinPreferences,
+    clubDefault: SkinId | null = null
+): void => {
+    const skin = getSkin(resolveSkin(preferences.skin, clubDefault ?? undefined));
     const root = document.documentElement;
     const resume = suspendTransitions();
 

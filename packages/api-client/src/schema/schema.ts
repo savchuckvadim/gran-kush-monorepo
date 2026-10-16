@@ -1830,6 +1830,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/crm/portal/appearance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Тема клуба по умолчанию для сотрудников и участников (admin) */
+        patch: operations["CrmPortalInfo_updateAppearance"];
+        trace?: never;
+    };
     "/crm/catalog/products": {
         parameters: {
             query?: never;
@@ -4275,6 +4292,8 @@ export interface components {
             portalId: string;
             slug: string;
             displayName: string;
+            /** @description Тема клуба по умолчанию; кабинет показывает её, пока человек не выбрал свою */
+            defaultSkin: string | null;
             /** @enum {string} */
             consentStatus: "confirmed" | "pending";
             /** @enum {string} */
@@ -4604,7 +4623,23 @@ export interface components {
             type: "CLUB" | "TATTOO_STUDIO" | "BEAUTY_STUDIO";
             /** @enum {string} */
             status: "active" | "suspended" | "archived";
+            /** @description Тема клуба по умолчанию (id темы CRM); null — тема PafPaf */
+            defaultSkin: string | null;
             subscription: components["schemas"]["PortalSubscriptionInfoDto"] | null;
+        };
+        UpdatePortalAppearanceDto: {
+            /**
+             * @description id темы CRM; null — тема PafPaf. Неизвестный id клиент покажет темой PafPaf
+             * @example coqueta
+             */
+            defaultSkin: string | null;
+        };
+        PortalAppearanceDto: {
+            /**
+             * @description Тема клуба по умолчанию; null — тема PafPaf
+             * @example coqueta
+             */
+            defaultSkin: string | null;
         };
         ProductCategoryDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
@@ -6451,6 +6486,8 @@ export type SchemaMyPortalsResponseDto = components['schemas']['MyPortalsRespons
 export type SchemaCreateClubDto = components['schemas']['CreateClubDto'];
 export type SchemaPortalSubscriptionInfoDto = components['schemas']['PortalSubscriptionInfoDto'];
 export type SchemaPortalInfoDto = components['schemas']['PortalInfoDto'];
+export type SchemaUpdatePortalAppearanceDto = components['schemas']['UpdatePortalAppearanceDto'];
+export type SchemaPortalAppearanceDto = components['schemas']['PortalAppearanceDto'];
 export type SchemaProductCategoryDto = components['schemas']['ProductCategoryDto'];
 export type SchemaMeasurementUnitDto = components['schemas']['MeasurementUnitDto'];
 export type SchemaProductAudience = components['schemas']['ProductAudience'];
@@ -11973,6 +12010,57 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmPortalInfo_updateAppearance: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePortalAppearanceDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalAppearanceDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

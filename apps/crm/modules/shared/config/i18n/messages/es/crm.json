@@ -742,7 +742,6 @@
         "appearance": {
             "title": "Apariencia",
             "description": "Temas de autor para la CRM. Tu elección se guarda en este dispositivo.",
-            "open": "Tema",
             "sheetTitle": "Temas",
             "sheetDescription": "Tu elección se guarda en este dispositivo.",
             "selected": "Tuyo",
@@ -849,6 +848,15 @@
                     "name": "Burberry",
                     "description": "El cuadro clásico — camel, negro, blanco e hilo rojo — en el menú y la cabecera, tarjetas crema, titulares con serifa. El logo lleva gorra."
                 }
+            },
+            "clubSkin": {
+                "notice": "El club tiene su propio tema: «{name}». Has elegido otro.",
+                "follow": "Tema del club",
+                "title": "Tema del club",
+                "description": "Lo ven el personal en el CRM y los socios en su área hasta que eligen el suyo. Lo cambia el administrador.",
+                "none": "Tema PafPaf",
+                "save": "Guardar",
+                "adminOnly": "El tema del club lo cambia el administrador."
             }
         },
         "billing": {

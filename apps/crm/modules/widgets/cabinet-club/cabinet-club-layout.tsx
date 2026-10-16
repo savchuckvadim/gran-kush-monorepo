@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { Card } from "@workspace/ui";
 
 import { useMyMemberships } from "@/modules/entities/membership";
+import { useClubDefaultSkin } from "@/modules/shared/lib/skin";
 import { ClubBadge } from "@/modules/shared/ui/Brand";
 
 import { ClubTabs } from "./club-tabs";
@@ -15,13 +16,15 @@ import { PresenceBadge } from "./presence-badge";
 /**
  * Раздел одного клуба в кабинете: шапка клуба, вкладки (клуб, витрина, заказы) и страница.
  * Страницы внутри открываются только участнику с подтверждённым и действующим членством —
- * остальным раздел объясняет, почему клуба нет, и запросов к клубу не делает.
+ * остальным раздел объясняет, почему клуба нет, и запросов к клубу не делает. Тема клуба
+ * действует, пока участник не выбрал свою.
  */
 export function CabinetClubLayout({ slug, children }: { slug: string; children: React.ReactNode }) {
     const t = useTranslations("cabinet.club");
     const { data: memberships = [], isLoading } = useMyMemberships();
     const membership = memberships.find((m) => m.slug === slug);
     const confirmed = membership?.consentStatus === "confirmed" && membership.isActive;
+    useClubDefaultSkin(confirmed ? membership.defaultSkin : null);
 
     if (isLoading) {
         return (

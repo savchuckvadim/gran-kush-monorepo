@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { Button } from "@workspace/ui";
 
-import { SkinPickerSheet } from "../skin-picker-dialog";
+import { SkinPickerSheet } from "../skin-picker-sheet";
 
 import { SkinSwatch } from "./skin-swatch";
 

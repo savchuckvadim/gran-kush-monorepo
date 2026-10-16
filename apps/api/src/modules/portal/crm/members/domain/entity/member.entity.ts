@@ -26,7 +26,7 @@ export class Member {
 
 export const memberWithRelationsInclude = {
     user: true,
-    portal: { select: { id: true, name: true, displayName: true } },
+    portal: { select: { id: true, name: true, displayName: true, defaultSkin: true } },
     profile: {
         include: {
             statusItem: true,

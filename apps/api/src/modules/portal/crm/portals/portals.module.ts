@@ -15,9 +15,13 @@ import { CrmPortalInfoController } from "@modules/portal/crm/portals/api/control
 import { PortalRegistrationController } from "@modules/portal/crm/portals/api/controllers/portal-registration.controller";
 import { PortalResolveController } from "@modules/portal/crm/portals/api/controllers/portal-resolve.controller";
 import { ClubFoundingService } from "@modules/portal/crm/portals/application/services/club-founding.service";
+import { PortalAppearanceService } from "@modules/portal/crm/portals/application/services/portal-appearance.service";
 import { PortalRegistrationService } from "@modules/portal/crm/portals/application/services/portal-registration.service";
 import { PORTAL_EVENTS_QUEUE_NAME } from "@modules/portal/crm/portals/events/portal-events.constants";
 import { PortalEventsProcessor } from "@modules/portal/crm/portals/infrastructure/processors/portal-events.processor";
+import { PortalAppearancePrismaRepository } from "@modules/portal/crm/portals/infrastructure/repositories/portal-appearance-prisma.repository";
+
+import { PortalAppearanceRepository } from "./domain/repositories/portal-appearance-repository.interface";
 
 @Module({
     imports: [
@@ -40,7 +44,13 @@ import { PortalEventsProcessor } from "@modules/portal/crm/portals/infrastructur
         CrmMyPortalsController,
         CrmPortalInfoController,
     ],
-    providers: [ClubFoundingService, PortalRegistrationService, PortalEventsProcessor],
+    providers: [
+        ClubFoundingService,
+        PortalRegistrationService,
+        PortalEventsProcessor,
+        PortalAppearanceService,
+        { provide: PortalAppearanceRepository, useClass: PortalAppearancePrismaRepository },
+    ],
     exports: [PortalRegistrationService],
 })
 export class PortalsModule {}

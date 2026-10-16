@@ -1,6 +1,7 @@
 import {
     assertOpenApiOk,
     type SchemaCreateClubDto,
+    type SchemaPortalAppearanceDto,
     type SchemaPortalInfoDto,
     type SchemaRegisterPortalDto,
     type SchemaRegisterPortalResponseDto,
@@ -10,10 +11,15 @@ import { $api } from "@/modules/shared";
 
 export async function getPortalInfo(): Promise<SchemaPortalInfoDto> {
     const response = await $api.GET("/crm/portal/info");
-    if (!response.response.ok) {
-        throw new Error(`Failed to fetch portal info: ${response.response.status}`);
-    }
-    return response.data as SchemaPortalInfoDto;
+    return assertOpenApiOk<SchemaPortalInfoDto>(response);
+}
+
+/** Тема клуба по умолчанию (admin); `null` — тема PafPaf. */
+export async function updatePortalAppearance(
+    defaultSkin: string | null
+): Promise<SchemaPortalAppearanceDto> {
+    const response = await $api.PATCH("/crm/portal/appearance", { body: { defaultSkin } });
+    return assertOpenApiOk<SchemaPortalAppearanceDto>(response);
 }
 
 /** A new account and its first club (the product site). Sets the CRM session cookies. */

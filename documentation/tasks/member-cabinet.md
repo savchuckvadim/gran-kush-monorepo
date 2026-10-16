@@ -423,10 +423,14 @@ MEMBER_AUTH_COOKIE_DOMAIN=lvh.me node dist/main.js`; CRM: `NEXT_PUBLIC_API_URL=h
 (язык, выход). Не сделано: вынос общих частей из `crm-shell` в `shared/ui/shell` (пока `member-shell` берёт
 переключатели оформления из `crm-shell`), бренд клуба и тема клуба по умолчанию (вопрос 10).
 
-- [ ] Вынести Sidebar, Burger, Brand, SkinBackdrop и элементы шапки в `modules/shared/ui/shell`;
-      `CrmShell` и `MemberShell` — две композиции.
+- [x] Общий каркас `shared/ui/shell` (`AppFrame`, `AppHeader`); `CrmShell` и `MemberShell` — две композиции;
+      переключатели оформления — `features/skin-picker/header` (`HeaderAppearance`), по файлу на компонент.
 - [ ] `AccountMenu` и `PortalSwitcher` с параметрами (источник клубов: `/crm/my-portals` или `/cabinet/portals`).
-- [ ] Бренд клуба для участника: LK-аналог `/crm/portal/info`. Тема — по решению (вопрос 10).
+- [x] Тема клуба по умолчанию (решение 10): `portals.default_skin`, `PATCH /crm/portal/appearance` (admin),
+      `defaultSkin` в `/crm/portal/info` и в членствах кабинета; CRM и раздел клуба в кабинете показывают её,
+      пока человек не выбрал свою; «Тема клуба» возвращает к ней. «Настройки → Оформление» — выбор темы клуба.
+      Ограничение: при перезагрузке страницы клуба тема клуба подставляется после загрузки данных клуба
+      (короткая смена темы); убрать — сохранить тему клуба для загрузочного скрипта.
 
 ### 4. Экраны кабинета
 

@@ -188,6 +188,8 @@ model Portal {
   latitude              Decimal?       @db.Decimal(9, 6)
   longitude             Decimal?       @db.Decimal(9, 6)
   isListedOnMap         Boolean        @default(false) @map("is_listed_on_map")
+  /// Тема клуба по умолчанию (id темы CRM); личный выбор человека поверх неё. Пусто — тема PafPaf
+  defaultSkin           String?        @map("default_skin") @db.VarChar(40)
   // Términos + Contrato de encargo accepted at sign-up; version = LEGAL_TERMS_VERSION
   termsAcceptedAt       DateTime?      @map("terms_accepted_at")
   termsVersion          String?        @map("terms_version") @db.VarChar(32)

@@ -134,6 +134,7 @@ export class MemberConsentService {
             portalId: member.portalId,
             slug: member.portal.name,
             displayName: member.portal.displayName,
+            defaultSkin: member.portal.defaultSkin,
             consentStatus: member.consentStatus,
             joinSource: member.joinSource,
             isActive: member.isActive,

@@ -1,11 +1,17 @@
-import { Controller, Get } from "@nestjs/common";
+import { Body, Controller, Get, Patch } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { RequireEmployeeJwtWithoutSubscriptionGate } from "@modules/portal/auth/employees";
+import { RequireAdmin } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
+import {
+    PortalAppearanceDto,
+    UpdatePortalAppearanceDto,
+} from "@modules/portal/crm/portals/api/dto/portal-appearance.dto";
 import { PortalInfoDto } from "@modules/portal/crm/portals/api/dto/portal-info.dto";
+import { PortalAppearanceService } from "@modules/portal/crm/portals/application/services/portal-appearance.service";
 import { PortalResolutionService } from "@modules/portal/crm/portals/application/services/portal-resolution.service";
 
 @ApiTags("CRM Portal")
@@ -13,7 +19,10 @@ import { PortalResolutionService } from "@modules/portal/crm/portals/application
 @RequireEmployeeJwtWithoutSubscriptionGate()
 @ApiBearerAuth()
 export class CrmPortalInfoController {
-    constructor(private readonly portalResolution: PortalResolutionService) {}
+    constructor(
+        private readonly portalResolution: PortalResolutionService,
+        private readonly appearance: PortalAppearanceService
+    ) {}
 
     @Get("info")
     @ApiOperation({
@@ -31,6 +40,7 @@ export class CrmPortalInfoController {
             displayName: portal.displayName,
             type: portal.type,
             status: portal.status,
+            defaultSkin: portal.defaultSkin,
             subscription: portal.subscription
                 ? {
                       status: portal.subscription.status,
@@ -41,5 +51,18 @@ export class CrmPortalInfoController {
                   }
                 : null,
         };
+    }
+
+    @Patch("appearance")
+    @RequireAdmin()
+    @ApiOperation({ summary: "Тема клуба по умолчанию для сотрудников и участников (admin)" })
+    @ApiSuccessResponse(PortalAppearanceDto)
+    @ApiErrorResponse([400, 401, 403])
+    async updateAppearance(
+        @PortalId() portalId: string,
+        @Body() dto: UpdatePortalAppearanceDto
+    ): Promise<PortalAppearanceDto> {
+        await this.appearance.setDefaultSkin(portalId, dto.defaultSkin);
+        return { defaultSkin: dto.defaultSkin };
     }
 }

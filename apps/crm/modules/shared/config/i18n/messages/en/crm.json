@@ -742,7 +742,6 @@
         "appearance": {
             "title": "Appearance",
             "description": "Authored themes for the CRM. Your choice is saved on this device.",
-            "open": "Theme",
             "sheetTitle": "Themes",
             "sheetDescription": "Your choice is saved on this device.",
             "selected": "Yours",
@@ -849,6 +848,15 @@
                     "name": "Burberry",
                     "description": "The heritage check — camel, black, white and a red thread — on the menu and the header, cream cards, serif headings. The mark wears a flat cap."
                 }
+            },
+            "clubSkin": {
+                "notice": "The club has its own theme — “{name}”. You picked another one.",
+                "follow": "Club theme",
+                "title": "Club theme",
+                "description": "Staff in the CRM and members in the cabinet see it until they pick their own. The admin changes it.",
+                "none": "PafPaf theme",
+                "save": "Save",
+                "adminOnly": "The admin changes the club theme."
             }
         },
         "billing": {

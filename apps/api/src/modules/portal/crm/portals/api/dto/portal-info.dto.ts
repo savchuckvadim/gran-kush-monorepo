@@ -45,6 +45,13 @@ export class PortalInfoDto {
     @ApiProperty({ enum: PortalStatus })
     status!: PortalStatus;
 
+    @ApiProperty({
+        type: String,
+        nullable: true,
+        description: "Тема клуба по умолчанию (id темы CRM); null — тема PafPaf",
+    })
+    defaultSkin!: string | null;
+
     @ApiProperty({ type: PortalSubscriptionInfoDto, nullable: true })
     subscription!: PortalSubscriptionInfoDto | null;
 }
