@@ -1,14 +1,11 @@
 import type {
+    SchemaMyPresenceStatusDto,
     SchemaPaginatedResponsePresenceSessionDto,
-    SchemaPresenceSessionDto,
 } from "@workspace/api-client/core";
 
 import { $api } from "@/modules/shared/api";
 
-export interface PresenceStatusResponse extends SchemaPresenceSessionDto {
-    isPresent: boolean;
-    currentSession: SchemaPresenceSessionDto | null;
-}
+export type PresenceStatusResponse = SchemaMyPresenceStatusDto;
 
 export interface PresenceHistoryParams {
     page?: number;
@@ -25,8 +22,7 @@ export async function getMyPresenceStatus(): Promise<PresenceStatusResponse> {
         const error = await response.response.text();
         throw new Error(error || "Failed to get presence status");
     }
-    const data = response.data as SchemaPresenceSessionDto;
-    return { isPresent: data.isActive, currentSession: data } as PresenceStatusResponse;
+    return response.data as PresenceStatusResponse;
 }
 
 /**

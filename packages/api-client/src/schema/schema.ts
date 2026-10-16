@@ -11,11 +11,28 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List account documents + signature flag */
+        /** Мои документы: для каждого — какие клубы его видят; плюс подпись и её показ */
         get: operations["Account_listDocuments"];
         put?: never;
-        /** Upload/replace account document (base64 data URL) */
+        /** Загрузить или заменить документ (base64 data URL). Клубам ничего не открывает: если прежнюю версию уже видит какой-то клуб, он продолжит видеть её */
         post: operations["Account_uploadDocument"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/account/documents/{id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Предпросмотр моего документа */
+        get: operations["Account_documentPreview"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -32,8 +49,42 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Delete account document */
+        /** Удалить документ вместе со всеми его версиями и показами */
         delete: operations["Account_deleteDocument"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/account/documents/{id}/share": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Показать документ клубу (членство должно быть подтверждено) */
+        post: operations["Account_shareDocument"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/account/documents/{id}/share/{memberId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Перестать показывать документ клубу */
+        delete: operations["Account_revokeDocument"];
         options?: never;
         head?: never;
         patch?: never;
@@ -46,12 +97,64 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get account signature meta */
+        /** Мета моей подписи */
         get: operations["Account_getSignature"];
-        /** Upload/replace account signature (base64 data URL) */
+        /** Загрузить или заменить подпись (base64 data URL) */
         put: operations["Account_putSignature"];
         post?: never;
+        /** Удалить подпись: показ клубам снимается */
+        delete: operations["Account_deleteSignature"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/account/signature/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Предпросмотр моей подписи */
+        get: operations["Account_signaturePreview"];
+        put?: never;
+        post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/account/signature/share": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Показать подпись клубу (членство должно быть подтверждено) */
+        post: operations["Account_shareSignature"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/account/signature/share/{memberId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Перестать показывать подпись клубу */
+        delete: operations["Account_revokeSignature"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1399,6 +1502,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/lk/memberships": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Все мои членства, в том числе ждущие подтверждения */
+        get: operations["LkMemberships_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/memberships/{id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Подтвердить членство под своей сессией и выбрать, что показать клубу */
+        post: operations["LkMemberships_confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/memberships/{id}/decline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Отказаться от ждущего членства: оно удаляется */
+        post: operations["LkMemberships_decline"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lk/memberships/{id}/leave": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Выйти из клуба: членство закрывается, показ документов и подписи отзывается */
+        post: operations["LkMemberships_leave"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/public/consent/{token}": {
         parameters: {
             query?: never;
@@ -1802,7 +1973,7 @@ export interface paths {
         };
         /**
          * Получить свой QR-код
-         * @description Возвращает QR-код текущего участника с зашифрованным payload. Payload нужно закодировать в QR-изображение на клиенте (qrcode.react).
+         * @description Возвращает действующий QR-код участника в текущем клубе (клуб — заголовок X-Portal-*). Если кода ещё нет или срок вышел, выдаёт новый: просить администратора не нужно. Строку encryptedCode нужно закодировать в QR-изображение на клиенте.
          */
         get: operations["LkQrCodes_getMyQrCode"];
         put?: never;
@@ -1824,7 +1995,7 @@ export interface paths {
         put?: never;
         /**
          * Запросить перегенерацию QR-кода
-         * @description Перегенерирует QR-код текущего участника. Старый QR-код перестанет работать.
+         * @description Перевыпускает QR-код участника в текущем клубе. Прежний код сразу перестаёт приниматься: используйте, если скриншот кода попал не туда.
          */
         post: operations["LkQrCodes_regenerateMyQrCode"];
         delete?: never;
@@ -2689,6 +2860,15 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        SharedClubDto: {
+            /** @description Членство в этом клубе (memberId) */
+            memberId: string;
+            portalId: string;
+            /** @example green-club */
+            slug: string;
+            /** @example Green Club */
+            displayName: string;
+        };
         AccountDocumentDto: {
             id: string;
             /** @example passport */
@@ -2703,10 +2883,14 @@ export interface components {
             createdAt: string;
             /** @example 2026-01-01T00:00:00.000Z */
             updatedAt: string;
+            /** @description Клубы, которым показан именно этот файл (пусто — не показан никому) */
+            sharedWith: components["schemas"]["SharedClubDto"][];
         };
         AccountDocumentsResponseDto: {
             documents: components["schemas"]["AccountDocumentDto"][];
             hasSignature: boolean;
+            /** @description Клубы, которым показана подпись */
+            signatureSharedWith: components["schemas"]["SharedClubDto"][];
         };
         ApiErrorResponseDto: {
             /**
@@ -2739,8 +2923,12 @@ export interface components {
              */
             file: string;
         };
+        StreamableFile: Record<string, never>;
         DeleteAccountDocumentResponseDto: {
             deleted: boolean;
+        };
+        ShareWithMembershipDto: {
+            memberId: string;
         };
         AccountSignatureDto: {
             id: string;
@@ -3234,6 +3422,11 @@ export interface components {
             membershipNumber?: string;
             /** @example true */
             isActive: boolean;
+            /**
+             * @description pending — клуб добавил вас, ждёт вашего подтверждения (`/lk/memberships`)
+             * @enum {string}
+             */
+            consentStatus: "confirmed" | "pending";
         };
         MemberMeResponseDto: {
             /** @example 123e4567-e89b-12d3-a456-426614174000 */
@@ -3949,7 +4142,36 @@ export interface components {
             /** Format: uuid */
             statusItemId: string;
         };
-        StreamableFile: Record<string, never>;
+        MyMembershipDto: {
+            memberId: string;
+            portalId: string;
+            slug: string;
+            displayName: string;
+            /** @enum {string} */
+            consentStatus: "confirmed" | "pending";
+            /** @enum {string} */
+            joinSource: "self" | "registration_link" | "kiosk" | "crm";
+            /** @description Членство не закрыто выходом или клубом */
+            isActive: boolean;
+            /** @description Запрос на подтверждение старше срока: пусть клуб отправит его заново */
+            consentExpired?: boolean;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        MyMembershipsResponseDto: {
+            memberships: components["schemas"]["MyMembershipDto"][];
+        };
+        ConfirmMyMembershipDto: {
+            /** @description Документы аккаунта, которые показать этому клубу */
+            shareDocumentIds?: string[];
+            /** @description Показать клубу подпись */
+            shareSignature?: boolean;
+        };
+        MemberConsentResultDto: {
+            portalSlug: string;
+            /** @description Есть, когда членство подтверждено */
+            memberId?: string;
+        };
         PublicConsentDocumentDto: {
             id: string;
             /** @example passport */
@@ -3963,22 +4185,20 @@ export interface components {
             email: string;
             documents: components["schemas"]["PublicConsentDocumentDto"][];
             hasSignature: boolean;
+            /** @description У аккаунта есть пароль, и его нужно ввести. Без пароля (только Google) достаточно токена из письма */
+            requiresPassword: boolean;
         };
         ConfirmMemberConsentDto: {
-            /** @description Пароль аккаунта — доказательство, что он ваш */
-            password: string;
+            /** @description Пароль аккаунта — доказательство, что он ваш. Нужен, если он у аккаунта есть */
+            password?: string;
             /** @description Документы аккаунта, которые показать этому клубу */
             shareDocumentIds?: string[];
             /** @description Показать клубу подпись */
             shareSignature?: boolean;
         };
-        MemberConsentResultDto: {
-            portalSlug: string;
-            /** @description Есть, когда членство подтверждено */
-            memberId?: string;
-        };
         DeclineMemberConsentDto: {
-            password: string;
+            /** @description Нужен, если у аккаунта есть пароль */
+            password?: string;
         };
         RegisterPortalDto: {
             /**
@@ -4066,6 +4286,10 @@ export interface components {
             fields?: {
                 [key: string]: unknown;
             };
+            /** @description Документы аккаунта, которые показать клубу. Не переданные клуб не видит */
+            shareDocumentIds?: string[];
+            /** @description Показать клубу подпись аккаунта */
+            shareSignature?: boolean;
         };
         JoinPortalResponseDto: {
             memberId: string;
@@ -4471,8 +4695,13 @@ export interface components {
              */
             valid: boolean;
             /**
-             * @description Причина ошибки
-             * @example QR-код истёк
+             * @description Причина отказа: клиент показывает текст на языке интерфейса по этому коду
+             * @enum {string}
+             */
+            errorCode?: "undecryptable" | "malformed" | "expired" | "revoked" | "wrong_member" | "wrong_club" | "member_inactive" | "membership_unconfirmed";
+            /**
+             * @description Та же причина английским текстом (для логов; интерфейс переводит errorCode)
+             * @example QR code has expired
              */
             error?: string;
             /**
@@ -4612,8 +4841,13 @@ export interface components {
              */
             valid: boolean;
             /**
-             * @description Сообщение об ошибке (если valid = false)
-             * @example QR-код истёк
+             * @description Причина отказа (если valid = false): интерфейс переводит по этому коду
+             * @enum {string}
+             */
+            errorCode?: "undecryptable" | "malformed" | "expired" | "revoked" | "wrong_member" | "wrong_club" | "member_inactive" | "membership_unconfirmed";
+            /**
+             * @description Та же причина английским текстом (если valid = false), для логов
+             * @example QR code has expired
              */
             error?: string;
             /** @description Информация об участнике */
@@ -4684,6 +4918,15 @@ export interface components {
              * @example 120
              */
             avgDurationMinutes?: number | null;
+        };
+        MyPresenceStatusDto: {
+            /**
+             * @description Участник сейчас в клубе (есть открытая сессия присутствия)
+             * @example true
+             */
+            isPresent: boolean;
+            /** @description Открытая сессия присутствия; null, если участника нет в клубе */
+            currentSession: components["schemas"]["PresenceSessionDto"] | null;
         };
         OrderStageDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
@@ -5376,6 +5619,10 @@ export interface components {
             fields?: {
                 [key: string]: unknown;
             };
+            /** @description Документы существующего аккаунта (владелец доказан паролем), которые показать клубу */
+            shareDocumentIds?: string[];
+            /** @description Показать клубу подпись аккаунта */
+            shareSignature?: boolean;
         };
         RegisterViaLinkResponseDto: {
             userId: string;
@@ -5607,11 +5854,14 @@ export interface components {
     headers: never;
     pathItems: never;
 }
+export type SchemaSharedClubDto = components['schemas']['SharedClubDto'];
 export type SchemaAccountDocumentDto = components['schemas']['AccountDocumentDto'];
 export type SchemaAccountDocumentsResponseDto = components['schemas']['AccountDocumentsResponseDto'];
 export type SchemaApiErrorResponseDto = components['schemas']['ApiErrorResponseDto'];
 export type SchemaUploadAccountDocumentDto = components['schemas']['UploadAccountDocumentDto'];
+export type SchemaStreamableFile = components['schemas']['StreamableFile'];
 export type SchemaDeleteAccountDocumentResponseDto = components['schemas']['DeleteAccountDocumentResponseDto'];
+export type SchemaShareWithMembershipDto = components['schemas']['ShareWithMembershipDto'];
 export type SchemaAccountSignatureDto = components['schemas']['AccountSignatureDto'];
 export type SchemaUploadAccountSignatureDto = components['schemas']['UploadAccountSignatureDto'];
 export type SchemaPlatformLoginDto = components['schemas']['PlatformLoginDto'];
@@ -5712,11 +5962,13 @@ export type SchemaCrmMemberAccountDocumentDto = components['schemas']['CrmMember
 export type SchemaCrmMemberFullDto = components['schemas']['CrmMemberFullDto'];
 export type SchemaCrmMemberFieldsPatchDto = components['schemas']['CrmMemberFieldsPatchDto'];
 export type SchemaCrmMemberStatusPatchDto = components['schemas']['CrmMemberStatusPatchDto'];
-export type SchemaStreamableFile = components['schemas']['StreamableFile'];
+export type SchemaMyMembershipDto = components['schemas']['MyMembershipDto'];
+export type SchemaMyMembershipsResponseDto = components['schemas']['MyMembershipsResponseDto'];
+export type SchemaConfirmMyMembershipDto = components['schemas']['ConfirmMyMembershipDto'];
+export type SchemaMemberConsentResultDto = components['schemas']['MemberConsentResultDto'];
 export type SchemaPublicConsentDocumentDto = components['schemas']['PublicConsentDocumentDto'];
 export type SchemaPublicMemberConsentInfoDto = components['schemas']['PublicMemberConsentInfoDto'];
 export type SchemaConfirmMemberConsentDto = components['schemas']['ConfirmMemberConsentDto'];
-export type SchemaMemberConsentResultDto = components['schemas']['MemberConsentResultDto'];
 export type SchemaDeclineMemberConsentDto = components['schemas']['DeclineMemberConsentDto'];
 export type SchemaRegisterPortalDto = components['schemas']['RegisterPortalDto'];
 export type SchemaRegisteredPortalDto = components['schemas']['RegisteredPortalDto'];
@@ -5760,6 +6012,7 @@ export type SchemaManualCheckInDto = components['schemas']['ManualCheckInDto'];
 export type SchemaManualCheckOutDto = components['schemas']['ManualCheckOutDto'];
 export type SchemaPaginatedResponsePresenceSessionDto = components['schemas']['PaginatedResponse_PresenceSessionDto'];
 export type SchemaPresenceStatsDto = components['schemas']['PresenceStatsDto'];
+export type SchemaMyPresenceStatusDto = components['schemas']['MyPresenceStatusDto'];
 export type SchemaOrderStageDto = components['schemas']['OrderStageDto'];
 export type SchemaOrderMemberDto = components['schemas']['OrderMemberDto'];
 export type SchemaOrderEmployeeDto = components['schemas']['OrderEmployeeDto'];
@@ -5906,6 +6159,55 @@ export interface operations {
             };
         };
     };
+    Account_documentPreview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Изображение документа */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StreamableFile"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
     Account_deleteDocument: {
         parameters: {
             query?: never;
@@ -5926,6 +6228,100 @@ export interface operations {
                     "application/json": components["schemas"]["DeleteAccountDocumentResponseDto"];
                 };
             };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    Account_shareDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShareWithMembershipDto"];
+            };
+        };
+        responses: {
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    Account_revokeDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                memberId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -6026,6 +6422,137 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    Account_deleteSignature: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    Account_signaturePreview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Изображение подписи */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StreamableFile"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    Account_shareSignature: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShareWithMembershipDto"];
+            };
+        };
+        responses: {
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    Account_revokeSignature: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                memberId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7948,7 +8475,10 @@ export interface operations {
     };
     MemberGoogleAuth_start: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Путь в кабинете, куда вернуть после входа (только относительный) */
+                returnTo?: unknown;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -7965,7 +8495,10 @@ export interface operations {
     };
     EmployeeGoogleAuth_start: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Путь в CRM, куда вернуть после входа (только относительный) */
+                returnTo?: unknown;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -9969,6 +10502,168 @@ export interface operations {
             };
         };
     };
+    LkMemberships_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyMembershipsResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    LkMemberships_confirm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmMyMembershipDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberConsentResultDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    LkMemberships_decline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberConsentResultDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    LkMemberships_leave: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberConsentResultDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
     PublicMemberConsent_info: {
         parameters: {
             query?: never;
@@ -11442,6 +12137,15 @@ export interface operations {
                     "application/json": components["schemas"]["QrCodeWithPayloadDto"];
                 };
             };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -11453,15 +12157,6 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Not Found */
-            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -11924,7 +12619,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PresenceSessionDto"];
+                    "application/json": components["schemas"]["MyPresenceStatusDto"];
                 };
             };
             /** @description Unauthorized */
