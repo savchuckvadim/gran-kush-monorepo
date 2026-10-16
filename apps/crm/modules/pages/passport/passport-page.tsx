@@ -20,7 +20,7 @@ import {
     usePutSignature,
     useToggleDocumentShare,
     useToggleSignatureShare,
-} from "@/modules/entities/lk-passport";
+} from "@/modules/entities/cabinet-passport";
 import { useAccountDocuments, useMyMemberships } from "@/modules/entities/membership";
 
 import { ClubShareList, type ShareClub } from "./club-share-list";

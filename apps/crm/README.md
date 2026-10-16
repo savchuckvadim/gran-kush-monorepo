@@ -1,43 +1,18 @@
-# Web Application
+# CRM and member cabinet
 
-## Структура проекта (FSD)
+Next.js 16 app on port 5000. One build serves two hosts:
 
-```
-apps/web/
-├── app/                    # Next.js app router (pages)
-├── shared/                 # Переиспользуемые компоненты и утилиты
-│   ├── ui/                 # UI компоненты-обертки
-│   │   ├── card/          # Card компонент
-│   │   ├── field/         # Field и FieldInput
-│   │   ├── signature-canvas/ # Компонент подписи
-│   │   └── file-upload/   # Компонент загрузки файлов
-│   ├── lib/                # Утилиты
-│   │   └── api.ts         # API client конфигурация
-│   └── config/            # Конфигурация
-│       ├── routes.ts      # Константы путей
-│       └── i18n/          # Переводы (ru, en, es)
-├── features/              # Функциональные возможности
-│   └── auth/              # (TODO: создать)
-│       ├── login/
-│       └── register/
-└── widgets/               # Композитные блоки
-    └── header/            # (TODO: рефакторинг)
+- `crm.paf-paf.app` — the CRM for club staff (`app/[locale]/[portal]/crm/…`);
+- `club.paf-paf.app` — the member cabinet (`app/[locale]/m/…`); `proxy.ts` rewrites the visible
+  addresses by host, rules in `modules/shared/config/club-routes.ts`.
+
+```bash
+pnpm --filter crm dev        # NEXT_PUBLIC_API_URL from .env.local
+pnpm --filter crm typecheck
 ```
 
-## Использование компонентов
+Structure follows FSD (`entities`, `features`, `widgets`, `pages`, `processes`, `shared`); route files
+in `app/` only compose pages.
 
-### Из UI пакета
-
-```typescript
-import { Button, Card, Input } from "@workspace/ui/components/...";
-```
-
-### Из shared/ui (обертки)
-
-```typescript
-import { Card, FieldInput, FileUpload, SignatureCanvasField } from "@/shared/ui/...";
-```
-
-## Следующие шаги
-
-См. `TASKS.md` для детального плана и `PROGRESS.md` для текущего прогресса.
+Docs: [CRM](../../documentation/crm/README.md), [member cabinet](../../documentation/tasks/member-cabinet.md),
+routes and auth — `CLAUDE.md` in the repo root.

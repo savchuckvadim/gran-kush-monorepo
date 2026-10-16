@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react";
 
 import type { SchemaMemberMeResponseDto } from "@workspace/api-client/core";
 
-import { useLkMe } from "@/modules/entities/lk-account";
+import { useCabinetMe } from "@/modules/entities/cabinet-account";
 
 interface MemberAuthValue {
     user: SchemaMemberMeResponseDto;
@@ -22,10 +22,10 @@ const MemberAuthContext = createContext<MemberAuthValue | null>(null);
  * `useMemberAuth()` всегда возвращает пользователя.
  *
  * Сюда же попадает человек с протухшей, но живой на вид кукой (прокси пускает по её наличию):
- * `/lk/auth/me` отвечает 401 после неудачного refresh, и вход начинается заново.
+ * `/cabinet/auth/me` отвечает 401 после неудачного refresh, и вход начинается заново.
  */
 export function MemberAuthProvider({ children }: { children: React.ReactNode }) {
-    const { data: user, isLoading, isError } = useLkMe();
+    const { data: user, isLoading, isError } = useCabinetMe();
     const router = useRouter();
     const locale = useLocale();
     const pathname = usePathname();

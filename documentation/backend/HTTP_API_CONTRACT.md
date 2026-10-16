@@ -71,7 +71,7 @@ Frontend apps must use **`fetch(..., { credentials: "include" })`** when calling
 Constants: `apps/api/src/common/portal/portal-http.constants.ts`.
 
 `PortalContextMiddleware` (`apps/api/src/modules/portal/crm/portals/infrastructure/middleware/portal-context.middleware.ts`)
-requires portal headers on every `/crm/*`, `/lk/*`, `/users/*`, `/public/*` route and answers
+requires portal headers on every `/crm/*`, `/cabinet/*`, `/users/*`, `/public/*` route and answers
 **400** (`Missing portal: send x-portal-id or x-portal-slug`) when they are absent.
 
 Routes listed in its `optionalPrefixes` work without the headers — auth, account, cross-portal
@@ -98,7 +98,7 @@ After JWT validation, **`PortalTenantMatchGuard`** ensures the authenticated use
 | `email` | 5 / мин | всё, что отправляет письмо | `THROTTLE_EMAIL_LIMIT` |
 | `public-token` | 30 / мин | `/public/invitations/*`, `/public/reg-links/*` | `THROTTLE_PUBLIC_TOKEN_LIMIT` |
 | `signup` | 10 / мин | регистрация участника, сотрудника, портала | `THROTTLE_SIGNUP_LIMIT` |
-| `upload` | 20 / мин | загрузка документов и подписи (LK и CRM) | `THROTTLE_UPLOAD_LIMIT` |
+| `upload` | 20 / мин | загрузка документов и подписи (кабинет и CRM) | `THROTTLE_UPLOAD_LIMIT` |
 
 ### `trust proxy` — обязателен за nginx
 
@@ -121,8 +121,8 @@ After JWT validation, **`PortalTenantMatchGuard`** ensures the authenticated use
 
 | Маршрут | Формат | Кто |
 |---|---|---|
-| `POST /lk/account/documents`, `PUT /lk/account/signature` | base64 data URL в JSON | участник |
-| `POST /lk/auth/member/files` | base64 data URL в JSON → очередь `member-files` | участник при регистрации |
+| `POST /cabinet/account/documents`, `PUT /cabinet/account/signature` | base64 data URL в JSON | участник |
+| `POST /cabinet/auth/member/files` | base64 data URL в JSON → очередь `member-files` | участник при регистрации |
 | `PATCH /crm/members/:id/files` | multipart | admin клуба |
 
 **Тип — по содержимому.** Заявленный клиентом MIME (префикс data URL, `Content-Type` части
@@ -144,7 +144,7 @@ multipart) не имеет значения: тип определяется п�
 (до контроллера). `client_max_body_size` в nginx (`infra/`) должен быть не меньше потолка
 маршрутов загрузки — сейчас оба 25 МБ.
 
-Замена документа или подписи удаляет прежний объект из бакета; `DELETE /lk/account/documents/:id`
+Замена документа или подписи удаляет прежний объект из бакета; `DELETE /cabinet/account/documents/:id`
 удаляет и строку, и объект. Превью в CRM отдаются с `Cache-Control: private, no-store` и
 `X-Content-Type-Options: nosniff`.
 
@@ -164,7 +164,7 @@ multipart) не имеет значения: тип определяется п�
 
 | Маршрут | Scope |
 |---|---|
-| `POST /lk/orders` | `lk.orders.create` |
+| `POST /cabinet/orders` | `lk.orders.create` |
 | `POST /crm/finance/transactions` | `crm.finance.transactions.create` |
 
 | Ситуация | Ответ |
@@ -191,7 +191,7 @@ multipart) не имеет значения: тип определяется п�
 ### Web (browser)
 
 - **CRM**: `EmployeeAuthController` prefix `crm/auth` — login sets **HttpOnly** cookies for access/refresh; refresh reads refresh cookie; logout clears cookies.
-- **LK (member)**: `MemberAuthController` prefix `lk/auth` — same idea for member scope.
+- **Cabinet (member)**: `MemberAuthController` prefix `cabinet/auth` — same idea for member scope.
 
 Cookie **names** and **domain** come from `ConfigCookieService` / env:
 
@@ -206,7 +206,7 @@ Cookies are **httpOnly**, **SameSite=Lax**, **path=/**, **secure** follows `AUTH
 Separate controllers avoid relying on cookies:
 
 - **CRM**: `crm/mobile/auth`
-- **LK**: `lk/mobile/auth`
+- **Cabinet**: `cabinet/mobile/auth`
 
 These typically return tokens in JSON and use **`Authorization: Bearer`** on subsequent calls.
 
@@ -254,7 +254,7 @@ Passport uses **separate strategies** for bearer vs cookie (see `apps/api/src/co
 | `COOKIE_SECRET` | `cookie-parser` signing |
 | `CORS_ORIGIN` | Allowed browser origins |
 | `CRM_FRONTEND_URL` | CRM cookie domain base |
-| `MEMBER_FRONTEND_URL` | LK cookie domain base |
+| `MEMBER_FRONTEND_URL` | Cabinet origin (club.): cookie domain base, links in emails |
 | `JWT_*` | Token signing and TTL |
 | `TRUST_PROXY_HOPS` | Число прокси перед API (за nginx из `infra/` — `1`, напрямую — `0`) |
 | `THROTTLE_DEFAULT_LIMIT` | Общий лимит запросов на IP в минуту (300) |

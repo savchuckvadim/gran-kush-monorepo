@@ -8,6 +8,6 @@ export const ALLOW_UNCONFIRMED_KEY = "allowUnconfirmed";
 
 /**
  * Разрешает доступ по JWT без проверки user.isActive (email не подтверждён).
- * Только для ограниченного набора эндпоинтов (например, POST /lk/auth/member/files).
+ * Только для ограниченного набора эндпоинтов (например, POST /cabinet/auth/member/files).
  */
 export const AllowUnconfirmed = () => SetMetadata(ALLOW_UNCONFIRMED_KEY, true);

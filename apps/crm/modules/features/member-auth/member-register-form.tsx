@@ -12,7 +12,7 @@ import { z } from "zod";
 import { getApiErrorMessage } from "@workspace/api-client/core";
 import { Button, FieldInput } from "@workspace/ui";
 
-import { registerMember } from "@/modules/entities/lk-account";
+import { registerMember } from "@/modules/entities/cabinet-account";
 import { useCabinetLinks } from "@/modules/processes/member-auth";
 
 /** Пароль по правилам API: от 8 знаков, заглавная, строчная и цифра. */

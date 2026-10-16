@@ -37,9 +37,9 @@
   язык входит в ключ запросов схем форм.
 
 Переводятся ответы для показа: схемы форм всех назначений (`/crm/members/form-schema`,
-`/lk/auth/member/registration-schema`, `/public/reg-links/{token}`, `/crm/employees/form-schema`,
+`/cabinet/auth/member/registration-schema`, `/public/reg-links/{token}`, `/crm/employees/form-schema`,
 `/crm/settings/entities/{code}/form-schema/{purpose}`), `filter-fields`, `member/status-items`, поля и статус
-в карточке/списке участника (`/crm/members`, `/lk/members/me`), поля сотрудника (`/crm/employees`), записи
+в карточке/списке участника (`/crm/members`, `/cabinet/members/me`), поля сотрудника (`/crm/employees`), записи
 смарт-процессов (`/crm/entities/{code}/records`).
 
 Эндпоинты редактора настроек (`/crm/settings/entities/{code}/fields`, `status-sets`) отдают **сырые** `label`,

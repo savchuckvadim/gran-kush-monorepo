@@ -9,7 +9,7 @@ import { RequireEmployeeUserJwt } from "@modules/portal/auth/employees/api/decor
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 import { PORTAL_SUMMARY_SELECT } from "@modules/portal/crm/portals/infrastructure/prisma-includes/portal-summary.select";
 
-import { MyPortalsResponseDto } from "../dto/lk-portals.dto";
+import { MyPortalsResponseDto } from "../dto/cabinet-portals.dto";
 
 @ApiTags("CRM My Portals")
 @Controller("crm/my-portals")

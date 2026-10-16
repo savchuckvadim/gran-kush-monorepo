@@ -152,7 +152,7 @@ describe("Registration links (e2e)", () => {
 
         const join = (token: string, cookies: string, body: Record<string, unknown> = {}) =>
             request(app.getHttpServer())
-                .post(`/lk/reg-links/${token}/join`)
+                .post(`/cabinet/reg-links/${token}/join`)
                 .set("Cookie", cookies)
                 .send({ fields: { first_name: "Ñandú" }, ...body });
 
@@ -160,7 +160,7 @@ describe("Registration links (e2e)", () => {
             const link = await createLink({ name: "Без сессии", kind: "public_link" });
 
             const res = await request(app.getHttpServer())
-                .post(`/lk/reg-links/${link.token}/join`)
+                .post(`/cabinet/reg-links/${link.token}/join`)
                 .send({});
 
             expect(res.status).toBe(401);

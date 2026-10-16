@@ -13,8 +13,7 @@
 #   the server, and a bare "api" or "site" could resolve to another container.
 # - Memory limits and log rotation protect the other projects on the server.
 # - The member cabinet (club.) is part of the CRM app: club.${DOMAIN} is a second
-#   domain of pafpaf-crm (port 3000), the CRM proxy routes it by host. The old
-#   pafpaf-web service (profile club) stays off and is removed by TASK-721.
+#   domain of pafpaf-crm (port 3000), the CRM proxy routes it by host.
 # - No YAML anchors on purpose: Dokploy rewrites this file to add its domain
 #   labels, and every service must keep both networks however it is parsed.
 
@@ -146,25 +145,6 @@ services:
   # crm.${DOMAIN}
   pafpaf-crm:
     image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/crm:${TAG:-latest}
-    restart: unless-stopped
-    pull_policy: always
-    networks: [default, dokploy-network]
-    environment:
-      HOSTNAME: 0.0.0.0
-    depends_on: [pafpaf-api]
-    logging:
-      driver: json-file
-      options: { max-size: "10m", max-file: "3" }
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-
-  # Legacy member cabinet, replaced by the cabinet inside pafpaf-crm (club.${DOMAIN}).
-  # Off by default; remove together with apps/web (TASK-721).
-  pafpaf-web:
-    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/web:${TAG:-latest}
-    profiles: [club]
     restart: unless-stopped
     pull_policy: always
     networks: [default, dokploy-network]

@@ -12,7 +12,7 @@ import { z } from "zod";
 import { ApiClientError, getApiErrorMessage } from "@workspace/api-client/core";
 import { Button, FieldInput } from "@workspace/ui";
 
-import { lkKeys, loginMember } from "@/modules/entities/lk-account";
+import { cabinetKeys, loginMember } from "@/modules/entities/cabinet-account";
 import { safeReturnPath, useCabinetLinks } from "@/modules/processes/member-auth";
 import { API_BASE_URL } from "@/modules/shared/api";
 
@@ -22,7 +22,7 @@ const EMAIL_NOT_CONFIRMED = "Email not confirmed";
 function GoogleLoginButton({ returnTo }: { returnTo: string }) {
     const t = useTranslations("cabinet.auth.login");
     const locale = useLocale();
-    const href = `${API_BASE_URL}/lk/auth/google/start?locale=${locale}&returnTo=${encodeURIComponent(returnTo)}`;
+    const href = `${API_BASE_URL}/cabinet/auth/google/start?locale=${locale}&returnTo=${encodeURIComponent(returnTo)}`;
 
     return (
         <div className="space-y-4">
@@ -90,7 +90,7 @@ export function MemberLoginForm() {
         mutationFn: loginMember,
         onSuccess: async () => {
             // Сессия появилась: «me» и всё остальное в кабинете надо перечитать
-            await queryClient.invalidateQueries({ queryKey: lkKeys.all });
+            await queryClient.invalidateQueries({ queryKey: cabinetKeys.all });
             router.replace(from);
         },
     });

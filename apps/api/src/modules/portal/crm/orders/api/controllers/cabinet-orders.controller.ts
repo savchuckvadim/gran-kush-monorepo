@@ -1,0 +1,137 @@
+import {
+    Body,
+    Controller,
+    Get,
+    NotFoundException,
+    Param,
+    Patch,
+    Post,
+    Query,
+} from "@nestjs/common";
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+
+import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
+import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
+import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { type ContentLocale, RequestLocale } from "@common/i18n";
+import { IdempotencyScope, Idempotent } from "@common/idempotency";
+import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
+import { PaginationUtil } from "@common/paginate/utils/pagination.util";
+import { RequireMemberJwt } from "@modules/portal/auth/members";
+import { CurrentMember } from "@modules/portal/auth/members/api/decorators/current-member.decorator";
+import { Member } from "@modules/portal/crm/members/domain/entity/member.entity";
+import {
+    CancelOrderDto,
+    CreateOrderDto,
+    OrderDetailDto,
+    OrderListDto,
+    OrderListQueryDto,
+} from "@modules/portal/crm/orders/api/dto/order.dto";
+import { mapOrderToDetailDto, mapOrderToListDto } from "@modules/portal/crm/orders/api/mappers";
+import { OrdersService } from "@modules/portal/crm/orders/application/services/orders.service";
+
+/** Заказы участника в клубе: оформление, свои заказы, отмена. */
+@ApiTags("Cabinet Orders")
+@Controller("cabinet/orders")
+@RequireMemberJwt()
+@ApiBearerAuth()
+export class CabinetOrdersController {
+    constructor(private readonly ordersService: OrdersService) {}
+
+    // ─── Создать заказ ───────────────────────────────────────────────────────
+
+    @Post()
+    @Idempotent(IdempotencyScope.LK_ORDER_CREATE)
+    @ApiOperation({
+        summary: "Создать заказ",
+        description:
+            "Член клуба оформляет заказ. Товары проверяются на наличие, " +
+            "рассчитывается стоимость, номер заказа генерируется автоматически.",
+    })
+    @ApiSuccessResponse(OrderDetailDto, { status: 201 })
+    @ApiErrorResponse([400, 401, 403, 404])
+    async createOrder(
+        @Body() dto: CreateOrderDto,
+        @CurrentMember() member: Member,
+        @RequestLocale() locale: ContentLocale
+    ): Promise<OrderDetailDto> {
+        const order = await this.ordersService.createOrder(member.id, dto, member.portalId);
+        return mapOrderToDetailDto(order, locale);
+    }
+
+    // ─── Мои заказы ──────────────────────────────────────────────────────────
+
+    @Get()
+    @ApiOperation({
+        summary: "Мои заказы",
+        description: "Список заказов текущего члена клуба с пагинацией и фильтрами.",
+    })
+    @ApiPaginatedResponse(OrderListDto, {
+        description: "Paginated list of member orders",
+    })
+    @ApiErrorResponse([401, 403])
+    async listMyOrders(
+        @Query() query: OrderListQueryDto,
+        @CurrentMember() member: Member,
+        @RequestLocale() locale: ContentLocale
+    ): Promise<PaginatedResult<OrderListDto>> {
+        const { page = 1, limit = 10, sortBy, sortOrder, ...filters } = query;
+        const skip = PaginationUtil.getSkip(page, limit);
+
+        // Принудительно фильтруем по текущему члену
+        const memberFilters = { ...filters, memberId: member.id };
+
+        const [orders, total] = await Promise.all([
+            this.ordersService.findAll(memberFilters, limit, skip, sortBy, sortOrder),
+            this.ordersService.count(memberFilters),
+        ]);
+
+        const items = orders.map((order) => mapOrderToListDto(order, locale));
+        return PaginationUtil.createPaginatedResult(items, total, page, limit);
+    }
+
+    // ─── Детали моего заказа ─────────────────────────────────────────────────
+
+    @Get(":id")
+    @ApiOperation({
+        summary: "Детали моего заказа",
+        description: "Полная информация о заказе с позициями. Доступен только свой заказ.",
+    })
+    @ApiSuccessResponse(OrderDetailDto)
+    @ApiErrorResponse([401, 403, 404])
+    async getMyOrder(
+        @Param("id") id: string,
+        @CurrentMember() member: Member,
+        @RequestLocale() locale: ContentLocale
+    ): Promise<OrderDetailDto> {
+        const order = await this.ordersService.findById(id);
+        if (!order || order.memberId !== member.id) {
+            throw new NotFoundException("Заказ не найден");
+        }
+        return mapOrderToDetailDto(order, locale);
+    }
+
+    // ─── Отменить заказ ──────────────────────────────────────────────────────
+
+    @Patch(":id/cancel")
+    @ApiOperation({
+        summary: "Отменить заказ",
+        description: "Отмена возможна, пока заказ в стадии «новый». Товары возвращаются на склад.",
+    })
+    @ApiSuccessResponse(OrderDetailDto)
+    @ApiErrorResponse([400, 401, 403, 404])
+    async cancelMyOrder(
+        @Param("id") id: string,
+        @Body() dto: CancelOrderDto,
+        @CurrentMember() member: Member,
+        @RequestLocale() locale: ContentLocale
+    ): Promise<OrderDetailDto> {
+        const order = await this.ordersService.cancelOrderByMember(
+            id,
+            member.id,
+            member.portalId,
+            dto.reason
+        );
+        return mapOrderToDetailDto(order, locale);
+    }
+}

@@ -14,7 +14,7 @@ import { assertOpenApiOk } from "@workspace/api-client/core";
 import type { FormSchemaField } from "@workspace/dynamic-forms";
 
 import { $api, API_BASE_URL } from "@/modules/shared";
-import { $lkApi } from "@/modules/shared/api";
+import { $cabinetApi } from "@/modules/shared/api";
 
 export type RegistrationLink = SchemaRegistrationLinkDto;
 export type RegistrationLinkStatus = RegistrationLink["status"];
@@ -98,7 +98,7 @@ export async function joinViaLinkAsMember(
     token: string,
     body: SchemaJoinViaLinkDto
 ): Promise<SchemaJoinViaLinkResponseDto> {
-    const response = await $lkApi.POST("/lk/reg-links/{token}/join", {
+    const response = await $cabinetApi.POST("/cabinet/reg-links/{token}/join", {
         params: { path: { token } },
         body,
     });

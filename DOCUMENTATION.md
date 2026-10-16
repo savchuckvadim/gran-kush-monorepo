@@ -10,7 +10,7 @@ This is a monorepo project migrating from an old React + Firebase application to
 gran-kush/
 ├── apps/
 │   ├── api/          # NestJS backend API
-│   ├── web/          # Next.js frontend application
+│   ├── crm/          # Next.js CRM + member cabinet
 │   ├── admin/        # Admin panel (future)
 │   └── crm/          # CRM system (future)
 ├── packages/
@@ -100,8 +100,8 @@ pnpm dev
 # API (port 3000)
 cd apps/api && pnpm start:dev
 
-# Web (port 3001)
-cd apps/web && pnpm dev
+# CRM and member cabinet (port 5000)
+cd apps/crm && pnpm dev
 ```
 
 ### Generating API Client
@@ -115,8 +115,8 @@ pnpm generate
 ## API Endpoints
 
 ### Member Registration
-- `POST /lk/auth/member/register` - Register new member
-- `POST /lk/auth/member/check` - Check if user exists
+- `POST /cabinet/auth/member/register` - Register new member
+- `POST /cabinet/auth/member/check` - Check if user exists
 
 ### Authentication
 - `POST /auth/login` - User login
@@ -137,9 +137,7 @@ pnpm generate
 - `/contacts` - Contact information
 
 ### Protected Pages
-- `/lk` - Personal cabinet (dashboard)
-- `/lk/profile` - User profile
-- `/lk/settings` - Account settings
+- Member cabinet routes: see «URL Routing» in `CLAUDE.md`
 
 ## UI Components
 
@@ -190,7 +188,7 @@ PORT=3000
 FRONTEND_URL=http://localhost:3001
 ```
 
-### Web (.env.local in apps/web)
+### CRM (.env.local in apps/crm)
 ```
 NEXT_PUBLIC_API_URL=http://localhost:3000
 ```

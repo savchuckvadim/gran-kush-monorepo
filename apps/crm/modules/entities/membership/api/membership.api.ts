@@ -7,11 +7,11 @@ import {
     type SchemaMyMembershipsResponseDto,
 } from "@workspace/api-client/core";
 
-import { $lkApi } from "@/modules/shared/api";
+import { $cabinetApi } from "@/modules/shared/api";
 
 /** Все членства аккаунта, в том числе ждущие подтверждения и закрытые выходом. */
 export async function listMyMemberships(): Promise<SchemaMyMembershipDto[]> {
-    const response = await $lkApi.GET("/lk/memberships");
+    const response = await $cabinetApi.GET("/cabinet/memberships");
     const data = await assertOpenApiOk<SchemaMyMembershipsResponseDto>(response);
     return data.memberships;
 }
@@ -21,7 +21,7 @@ export async function confirmMembership(
     memberId: string,
     body: SchemaConfirmMyMembershipDto
 ): Promise<SchemaMemberConsentResultDto> {
-    const response = await $lkApi.POST("/lk/memberships/{id}/confirm", {
+    const response = await $cabinetApi.POST("/cabinet/memberships/{id}/confirm", {
         params: { path: { id: memberId } },
         body,
     });
@@ -29,7 +29,7 @@ export async function confirmMembership(
 }
 
 export async function declineMembership(memberId: string): Promise<SchemaMemberConsentResultDto> {
-    const response = await $lkApi.POST("/lk/memberships/{id}/decline", {
+    const response = await $cabinetApi.POST("/cabinet/memberships/{id}/decline", {
         params: { path: { id: memberId } },
     });
     return assertOpenApiOk<SchemaMemberConsentResultDto>(response);
@@ -37,7 +37,7 @@ export async function declineMembership(memberId: string): Promise<SchemaMemberC
 
 /** Выход из клуба: членство закрывается, показ документов и подписи отзывается. */
 export async function leaveMembership(memberId: string): Promise<SchemaMemberConsentResultDto> {
-    const response = await $lkApi.POST("/lk/memberships/{id}/leave", {
+    const response = await $cabinetApi.POST("/cabinet/memberships/{id}/leave", {
         params: { path: { id: memberId } },
     });
     return assertOpenApiOk<SchemaMemberConsentResultDto>(response);
@@ -45,6 +45,6 @@ export async function leaveMembership(memberId: string): Promise<SchemaMemberCon
 
 /** Документы аккаунта: нужны при подтверждении членства, чтобы выбрать, что показать клубу. */
 export async function listAccountDocuments(): Promise<SchemaAccountDocumentsResponseDto> {
-    const response = await $lkApi.GET("/lk/account/documents");
+    const response = await $cabinetApi.GET("/cabinet/account/documents");
     return assertOpenApiOk<SchemaAccountDocumentsResponseDto>(response);
 }

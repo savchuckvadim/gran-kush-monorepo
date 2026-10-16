@@ -12,7 +12,7 @@ import { z } from "zod";
 import { getApiErrorMessage } from "@workspace/api-client/core";
 import { Button, FieldInput } from "@workspace/ui";
 
-import { type CabinetLocale, requestMemberPasswordReset } from "@/modules/entities/lk-account";
+import { type CabinetLocale, requestMemberPasswordReset } from "@/modules/entities/cabinet-account";
 import { useCabinetLinks } from "@/modules/processes/member-auth";
 
 /** Запрос письма со ссылкой на сброс пароля. Ответ API не говорит, есть ли такой адрес. */

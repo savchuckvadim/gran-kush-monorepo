@@ -8,8 +8,7 @@ Turborepo monorepo. Node.js ≥ 20, pnpm workspaces, TypeScript strict mode in e
 gran-kush/
 ├── apps/
 │   ├── api/          # NestJS 11 backend (port 3000)
-│   ├── crm/          # Next.js 16 CRM for employees (port 5000)
-│   ├── web/          # Next.js 16 member portal / LK (port 5001)
+│   ├── crm/          # Next.js 16: CRM for employees + member cabinet on club. (port 5000)
 │   ├── site/         # Next.js 16 + Payload 3: product sites PafPaf / Nagual (port 5002)
 │   └── admin/        # Admin app
 ├── packages/
@@ -44,10 +43,6 @@ pnpm --filter crm dev           # Next.js + turbopack, port 5000
 pnpm --filter crm build
 pnpm --filter crm typecheck     # tsc --noEmit
 
-pnpm --filter web dev           # Next.js + turbopack, port 5001
-pnpm --filter web build
-pnpm --filter web typecheck
-
 pnpm --filter site dev          # Next.js + Payload, port 5002 (documentation/site/PRODUCT_SITES.md)
 pnpm --filter site seed         # PafPaf content in es/ru/en
 pnpm --filter site generate     # payload-types.ts + admin import map
@@ -77,7 +72,7 @@ pnpm --filter api prisma:studio           # prisma studio
 - **@nestjs/swagger** — OpenAPI (`GET /docs`, `GET /docs-json`)
 - **bcrypt** — password hashing (10 rounds)
 
-### Frontend (`apps/crm`, `apps/web`)
+### Frontend (`apps/crm`)
 
 - **Next.js 16** (App Router) — React 19
 - **TanStack Query v5** — server state
@@ -122,7 +117,17 @@ Platform registration (create portal + owner): `POST /platform/portals/register`
 /{locale}/auth/login
 ```
 
-**LK / Web** (member-facing): `/{locale}/{portal}/...`
+**Cabinet** (member-facing, the same CRM app on `club.paf-paf.app`; `proxy.ts` routes by host,
+rules in `modules/shared/config/club-routes.ts`):
+
+```
+/{locale}                      home: my clubs, memberships waiting for confirmation
+/{locale}/auth/…               login, registration, password reset, email confirmation
+/{locale}/me/clubs | passport  account: memberships, documents and signature
+/{locale}/{club}               club: QR, presence, visits
+/{locale}/join/{token}         club link (shared CRM page)
+/{locale}/consent/{token}      consent from an email (shared CRM page)
+```
 
 ### Auth Transport
 
@@ -136,15 +141,15 @@ Two principal types — **Member** and **Employee** — each with web (cookies) 
 | CRM refresh| `POST /crm/auth/refresh` |
 | CRM logout | `POST /crm/auth/logout`  |
 | CRM me     | `GET /crm/auth/me`       |
-| LK login   | `POST /lk/auth/login`    |
-| LK refresh | `POST /lk/auth/refresh`  |
+| Cabinet login   | `POST /cabinet/auth/login`   |
+| Cabinet refresh | `POST /cabinet/auth/refresh` |
 
 Cookie names: `crm_access_token`, `crm_refresh_token`, `member_access_token`, `member_refresh_token`.
 Cookies: `HttpOnly`, `SameSite=Lax`, `Secure` follows `AUTH_COOKIE_SECURE`.
 
 **Mobile (Bearer `Authorization: Bearer ...`)**:
 - CRM: `crm/mobile/auth/*`
-- LK: `lk/mobile/auth/*`
+- Cabinet: `cabinet/mobile/auth/*`
 
 Frontend calls API with `credentials: "include"` for cookie auth.
 
@@ -243,7 +248,7 @@ Error handling:
 
 ### FSD (Feature-Sliced Design)
 
-Target architecture for both `apps/crm` and `apps/web`:
+Target architecture for `apps/crm` (CRM and cabinet trees alike):
 
 - `entities/` — data models and API calls (e.g. `entities/member`)
 - `features/` — user interactions
@@ -267,7 +272,7 @@ All routes are prefixed with `/{locale}`.
 | `JWT_REFRESH_SECRET` | Refresh token signing secret |
 | `CORS_ORIGIN` | Comma-separated allowed origins |
 | `CRM_FRONTEND_URL` | CRM cookie domain base |
-| `MEMBER_FRONTEND_URL` | LK cookie domain base |
+| `MEMBER_FRONTEND_URL` | Cabinet origin (club.): cookie domain base, links in emails |
 | `COOKIE_SECRET` | cookie-parser signing |
 | `AUTH_COOKIE_SECURE` | `true` in production |
 | `MAIL_HOST` / `MAIL_USER` / `MAIL_PASS` | SMTP |
@@ -294,13 +299,16 @@ All routes are prefixed with `/{locale}`.
 - `strict: true` in all packages — `any` requires explicit justification
 - `// @ts-ignore` is BANNED; use `// @ts-expect-error <reason>` if unavoidable
 - `as` casts outside DTO boundaries require review
-- Named exports only — no default exports
+- Named exports only — no default exports (except files Next.js requires to default-export: `page`, `layout`, `icon`, `apple-icon`, `opengraph-image`, …)
 - Import from `@workspace/*` packages for shared code, never from `../../../apps/...`
 - Use `workspace:*` protocol for internal deps in `package.json`
 
 ## Code Style
 
-- No comments unless the WHY is non-obvious
+- No comments unless the WHY is non-obvious. A comment explains intent, a contract or a constraint (what a class guarantees, why a check exists) in full sentences; it does not narrate the code, keep commented-out code or point at the chat. A class or exported function with non-trivial rules gets a doc comment (`/** … */`).
+- **One component per file.** A `.tsx` file holds exactly one React component (exported or private); a second component — even a tiny one — goes to its own file next to it. Plain helpers (pure functions, constants, types) may stay.
+- **300 lines max** for a file, a class or a component. Split by responsibility (SOLID: one reason to change), not by cutting a file in half; when you touch a file that is already over the limit, split the part you change.
+- **No hardcode and no temporary workarounds.** Hosts, URLs, limits, timeouts and feature switches come from env/config or named constants in a config module; magic strings and numbers in business code are not allowed. A workaround is acceptable only with a task number and a plan to remove it.
 - No `console.log` in production code paths
 - Arrow functions preferred
 - Group imports: react/next → libraries → `@workspace/*` → local

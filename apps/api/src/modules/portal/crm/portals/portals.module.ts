@@ -8,9 +8,9 @@ import { EmployeeAuthModule } from "@modules/portal/auth/employees/employee-auth
 import { SharedAuthModule } from "@modules/portal/auth/shared/shared-auth.module";
 import { EntityFieldsModule } from "@modules/portal/crm/entity-fields/entity-fields.module";
 import { MembersModule } from "@modules/portal/crm/members/members.module";
+import { CabinetPortalsController } from "@modules/portal/crm/portals/api/controllers/cabinet-portals.controller";
 import { CrmMyPortalsController } from "@modules/portal/crm/portals/api/controllers/crm-my-portals.controller";
 import { CrmPortalInfoController } from "@modules/portal/crm/portals/api/controllers/crm-portal-info.controller";
-import { LkPortalsController } from "@modules/portal/crm/portals/api/controllers/lk-portals.controller";
 import { PortalRegistrationController } from "@modules/portal/crm/portals/api/controllers/portal-registration.controller";
 import { PortalResolveController } from "@modules/portal/crm/portals/api/controllers/portal-resolve.controller";
 import { PortalRegistrationService } from "@modules/portal/crm/portals/application/services/portal-registration.service";
@@ -33,7 +33,7 @@ import { PortalEventsProcessor } from "@modules/portal/crm/portals/infrastructur
     controllers: [
         PortalRegistrationController,
         PortalResolveController,
-        LkPortalsController,
+        CabinetPortalsController,
         CrmMyPortalsController,
         CrmPortalInfoController,
     ],

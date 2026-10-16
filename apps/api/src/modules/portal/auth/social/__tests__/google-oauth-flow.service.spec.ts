@@ -100,7 +100,7 @@ describe("GoogleOAuthFlowService — защита входа", () => {
                 httpOnly: true,
                 sameSite: "lax",
                 secure: true,
-                path: "/lk/auth/google",
+                path: "/cabinet/auth/google",
             });
             expect(flow.flowCookieOptions("crm").path).toBe("/crm/auth/google");
         });

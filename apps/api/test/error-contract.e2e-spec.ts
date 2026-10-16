@@ -107,7 +107,7 @@ describe("Error contract (e2e)", () => {
 
         it("битый JSON → 400 от body-parser в том же формате", async () => {
             const res = await request(app.getHttpServer())
-                .post("/lk/auth/member/check")
+                .post("/cabinet/auth/member/check")
                 .set("Content-Type", "application/json")
                 .send("{ not json");
             expect(res.status).toBe(400);
@@ -118,7 +118,7 @@ describe("Error contract (e2e)", () => {
 
         it("тело сверх потолка → 413 в том же формате", async () => {
             const res = await request(app.getHttpServer())
-                .post("/lk/auth/member/check")
+                .post("/cabinet/auth/member/check")
                 .send({ email: `big-${suffix}@test.local`, padding: "a".repeat(2 * MiB) });
             expect(res.status).toBe(413);
             expect(res.body.message).toMatch(/too large/);

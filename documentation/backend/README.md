@@ -106,17 +106,17 @@ module-name/
 **Domain Model**:
 - `Member` - Core row: `userId`, `portalId`, `membershipNumber`, `statusItemId` (FK to `status_items`), `isActive`; profile attributes live in `field_values` keyed by `portal_field_definitions`
   - Relations: `User`, `FieldValue[]`, `IdentityDocument[]`, `Signature`, `MemberMjStatus[]`, `MemberDocument[]`
-  - Consent (TASK-663): `consentStatus` (`confirmed` | `pending`), `consentToken`, `consentRequestedAt`, `consentConfirmedAt`, `signatureShared`. A club that adds an **existing** account by email gets a `pending` membership: the owner confirms it from the email (`/{locale}/consent/{token}` in the CRM, password required) or declines (membership deleted). `GET /lk/portals` hides `pending` memberships.
-- `MemberDocumentShare` (`member_document_shares`) - which account documents a membership may see. Documents and the signature belong to the account; the CRM lists, previews and replaces only what is shared with that membership (`MemberDocumentShareRepository`, `AccountFilesService.replace*({ share })`). Self-initiated joins (LK, registration link, kiosk) share everything; a CRM-created membership gets only what the club uploads itself or what the owner selects when confirming.
+  - Consent (TASK-663): `consentStatus` (`confirmed` | `pending`), `consentToken`, `consentRequestedAt`, `consentConfirmedAt`, `signatureShared`. A club that adds an **existing** account by email gets a `pending` membership: the owner confirms it from the email (`/{locale}/consent/{token}` in the CRM, password required) or declines (membership deleted). `GET /cabinet/portals` hides `pending` memberships.
+- `MemberDocumentShare` (`member_document_shares`) - which account documents a membership may see. Documents and the signature belong to the account; the CRM lists, previews and replaces only what is shared with that membership (`MemberDocumentShareRepository`, `AccountFilesService.replace*({ share })`). Self-initiated joins (cabinet, registration link, kiosk) share everything; a CRM-created membership gets only what the club uploads itself or what the owner selects when confirming.
 
 **API Endpoints**:
-- `POST /lk/auth/member/register` - Register new member account (portal-scoped; `PortalId` from context)
+- `POST /cabinet/auth/member/register` - Register new member account (portal-scoped; `PortalId` from context)
 - `GET /public/consent/:token`, `POST /public/consent/:token/confirm`, `POST /public/consent/:token/decline` - membership consent of an existing account (public, `PUBLIC_TOKEN_THROTTLE`, token valid 14 days)
 - `POST /crm/members/:id/consent/resend` - send the consent email again (`EMAIL_THROTTLE`)
-- `POST /lk/auth/member/files` - Queue private documents/signature upload (BullMQ)
-- `POST /lk/auth/login` - Member login (web cookies under `lk/auth`)
-- `POST /lk/auth/refresh` - Refresh member session (cookie-based for web)
-- **Mobile:** `lk/mobile/auth` — Bearer-based flows parallel to web
+- `POST /cabinet/auth/member/files` - Queue private documents/signature upload (BullMQ)
+- `POST /cabinet/auth/login` - Member login (web cookies under `cabinet/auth`)
+- `POST /cabinet/auth/refresh` - Refresh member session (cookie-based for web)
+- **Mobile:** `cabinet/mobile/auth` — Bearer-based flows parallel to web
 
 **Repositories**:
 - `MembersRepository`
@@ -168,12 +168,12 @@ module-name/
 - JWT generation/validation; refresh persistence in DB
 - Password reset and email verification (shared controllers under `auth`)
 
-**Transport**: **Web** uses HttpOnly cookies (`crm/auth`, `lk/auth`); **mobile** uses separate route prefixes and Bearer tokens — details in [HTTP_API_CONTRACT.md](./HTTP_API_CONTRACT.md).
+**Transport**: **Web** uses HttpOnly cookies (`crm/auth`, `cabinet/auth`); **mobile** uses separate route prefixes and Bearer tokens — details in [HTTP_API_CONTRACT.md](./HTTP_API_CONTRACT.md).
 
 **API Endpoints (non-exhaustive)**:
-- `POST /lk/auth/login` - Member login (web cookies)
-- `POST /lk/auth/member/register` - Member registration
-- `POST /lk/auth/refresh` - Refresh member session
+- `POST /cabinet/auth/login` - Member login (web cookies)
+- `POST /cabinet/auth/member/register` - Member registration
+- `POST /cabinet/auth/refresh` - Refresh member session
 - `POST /crm/auth/login` - Employee login (web cookies)
 - `POST /crm/auth/refresh` - Refresh employee session
 - `POST /auth/password/reset` - Request password reset
@@ -374,8 +374,8 @@ Platform onboarding: **`POST /platform/portals/register`** creates a portal and 
 The system implements two separate authentication **domains**:
 
 1. **Member Authentication**:
-   - Web: `/lk/auth/*` (HttpOnly cookies for session)
-   - Mobile: `/lk/mobile/auth` (Bearer)
+   - Web: `/cabinet/auth/*` (HttpOnly cookies for session)
+   - Mobile: `/cabinet/mobile/auth` (Bearer)
    - Refresh tokens: stored in `tokens` (member/user scope as implemented)
 
 2. **Employee Authentication**:
@@ -586,7 +586,7 @@ For detailed information about each module, see:
 - [Authentication System](../AUTHENTICATION.md) — long-form flows (partially historical; cross-check with contract)
 - [Storage Module](../STORAGE.md)
 - [Module Development Principles](./MODULE_DEVELOPMENT_PRINCIPLES.md)
-- [Site Documentation](../site/README.md) - Frontend integration
+- [Member cabinet](../tasks/member-cabinet.md) - member-facing flows in `apps/crm`
 - [CRM Documentation](../crm/README.md) - CRM system
 
 ## Architecture Decisions

@@ -17,7 +17,8 @@ export class MemberMembershipDto {
 
     @ApiProperty({
         enum: MemberConsentStatus,
-        description: "pending — клуб добавил вас, ждёт вашего подтверждения (`/lk/memberships`)",
+        description:
+            "pending — клуб добавил вас, ждёт вашего подтверждения (`/cabinet/memberships`)",
     })
     consentStatus: MemberConsentStatus;
 }

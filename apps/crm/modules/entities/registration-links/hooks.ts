@@ -10,7 +10,7 @@ import type {
     SchemaUpdateRegistrationLinkDto,
 } from "@workspace/api-client/core";
 
-import { lkKeys } from "@/modules/entities/lk-account";
+import { cabinetKeys } from "@/modules/entities/cabinet-account";
 
 import {
     createRegistrationLink,
@@ -57,7 +57,7 @@ export function useJoinViaLinkAsMember(token: string) {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (body: SchemaJoinViaLinkDto) => joinViaLinkAsMember(token, body),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: lkKeys.all }),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: cabinetKeys.all }),
     });
 }
 

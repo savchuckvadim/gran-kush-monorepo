@@ -44,7 +44,7 @@ import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-
  * сам решает, какому клубу что показать, и может отозвать показ в любой момент.
  */
 @ApiTags("Account (documents & signature)")
-@Controller("lk/account")
+@Controller("cabinet/account")
 export class AccountController {
     constructor(
         private readonly accountDocuments: AccountDocumentsService,

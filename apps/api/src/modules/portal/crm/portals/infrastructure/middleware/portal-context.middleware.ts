@@ -86,7 +86,7 @@ export class PortalContextMiddleware implements NestMiddleware {
         }
         return (
             path.startsWith("/crm/") ||
-            path.startsWith("/lk/") ||
+            path.startsWith("/cabinet/") ||
             path.startsWith("/users/") ||
             path.startsWith("/public/")
         );
@@ -109,14 +109,14 @@ export class PortalContextMiddleware implements NestMiddleware {
             // Google возвращает на callback без наших заголовков — портал ещё не выбран
             "/crm/auth/google",
             "/crm/mobile/auth",
-            "/lk/auth",
-            "/lk/mobile/auth",
-            "/lk/account",
-            "/lk/portals",
-            "/lk/memberships",
-            "/lk/reg-links",
-            "/lk/spending",
-            "/lk/reviews",
+            "/cabinet/auth",
+            "/cabinet/mobile/auth",
+            "/cabinet/account",
+            "/cabinet/portals",
+            "/cabinet/memberships",
+            "/cabinet/reg-links",
+            "/cabinet/spending",
+            "/cabinet/reviews",
             "/users/",
             "/public/",
         ];

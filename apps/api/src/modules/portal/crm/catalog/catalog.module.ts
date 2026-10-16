@@ -1,8 +1,8 @@
 import { Module } from "@nestjs/common";
 
 import { PrismaModule } from "@common/prisma/prisma.module";
+import { CabinetCatalogController } from "@modules/portal/crm/catalog/api/controllers/cabinet-catalog.controller";
 import { CrmCatalogController } from "@modules/portal/crm/catalog/api/controllers/crm-catalog.controller";
-import { LkCatalogController } from "@modules/portal/crm/catalog/api/controllers/lk-catalog.controller";
 import { MeasurementUnitsService } from "@modules/portal/crm/catalog/application/services/measurement-units.service";
 import { ProductCategoriesService } from "@modules/portal/crm/catalog/application/services/product-categories.service";
 import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
@@ -34,7 +34,7 @@ import { ProductPrismaRepository } from "@modules/portal/crm/catalog/infrastruct
             useClass: MeasurementUnitPrismaRepository,
         },
     ],
-    controllers: [CrmCatalogController, LkCatalogController],
+    controllers: [CrmCatalogController, CabinetCatalogController],
     exports: [ProductsService, ProductCategoriesService, MeasurementUnitsService],
 })
 export class CatalogModule {}

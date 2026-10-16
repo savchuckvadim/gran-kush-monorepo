@@ -47,11 +47,7 @@ pnpm prisma generate
 cd apps/api
 pnpm dev
 
-# Public Website (Next.js)
-cd apps/web
-pnpm dev
-
-# CRM System (Next.js) - Planned
+# CRM and member cabinet (Next.js)
 cd apps/crm
 pnpm dev
 ```
@@ -68,7 +64,7 @@ pnpm format
 pnpm format:check
 
 # Format specific package
-cd apps/web
+cd apps/crm
 pnpm format
 ```
 
@@ -80,9 +76,9 @@ The monorepo uses a shared Prettier configuration (`@workspace/prettier-config`)
 gran-kush/
 ├── apps/
 │   ├── api/          # NestJS backend API
-│   ├── web/          # Next.js public website & member portal
-│   ├── crm/          # Next.js CRM system (planned)
-│   └── admin/        # Admin panel (future)
+│   ├── crm/          # Next.js CRM for employees + member cabinet on club.
+│   ├── site/         # Next.js + Payload product site (paf-paf.app)
+│   └── admin/        # Platform admin
 ├── packages/
 │   ├── api-client/   # Auto-generated OpenAPI TypeScript client
 │   ├── ui/           # Shared UI components (shadcn/ui)
@@ -121,22 +117,22 @@ Comprehensive documentation is available in the [`documentation/`](./documentati
 
 - **[Documentation Overview](./documentation/README.md)** - Complete project documentation
 - **[Backend Documentation](./documentation/backend/README.md)** - API architecture, modules, and technical details
-- **[Site Documentation](./documentation/site/README.md)** - Public website and member portal
-- **[CRM Documentation](./documentation/crm/README.md)** - CRM system (planned)
+- **[Member cabinet](./documentation/tasks/member-cabinet.md)** - member-facing flows in `apps/crm` (club.paf-paf.app)
+- **[CRM Documentation](./documentation/crm/README.md)** - CRM for club staff
 
 ### Key Documentation Topics
 
 - [Authentication System](./documentation/AUTHENTICATION.md) - Dual authentication architecture
 - [Storage Module](./documentation/STORAGE.md) - File storage and management
 - [Backend Modules](./documentation/backend/README.md) - Detailed module descriptions
-- [Frontend Architecture](./documentation/site/README.md) - Next.js app structure
+- [CRM Architecture](./documentation/crm/README.md) - Next.js app structure
 
 ## Architecture Highlights
 
 ### Dual Authentication System
 
 The platform implements two completely separate authentication mechanisms:
-- **Member Authentication** - For club members accessing the public site
+- **Member Authentication** - For club members in the cabinet
 - **Employee Authentication** - For employees accessing the CRM system
 
 This design allows:
@@ -183,7 +179,7 @@ pnpm test:e2e
 
 Please read the documentation before contributing. Key areas:
 - [Backend Architecture](./documentation/backend/README.md)
-- [Frontend Architecture](./documentation/site/README.md)
+- [CRM Architecture](./documentation/crm/README.md)
 - [Authentication System](./documentation/AUTHENTICATION.md)
 
 ## License

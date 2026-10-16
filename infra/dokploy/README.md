@@ -119,11 +119,13 @@
 3. APIs & Services → Credentials → Create Credentials → **OAuth client ID**, тип Web application:
    - Authorized redirect URIs — ровно два:
      - `https://api.paf-paf.app/crm/auth/google/callback`
-     - `https://api.paf-paf.app/lk/auth/google/callback`
+     - `https://api.paf-paf.app/cabinet/auth/google/callback`
    - Authorized JavaScript origins можно не заполнять (флоу редиректный).
+   - С 16.10.2026 вход участника возвращается на `/cabinet/auth/google/callback` (раньше `/lk/…`): в уже
+     созданном клиенте заменить старый URI на новый.
 4. Dokploy → Environment: `GOOGLE_CLIENT_ID` и `GOOGLE_CLIENT_SECRET` из созданного клиента → Deploy.
 
-Для локальной разработки — отдельный OAuth client с redirect URI `http://localhost:3000/crm/auth/google/callback` и `http://localhost:3000/lk/auth/google/callback`, значения в `apps/api/.env` (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `API_PUBLIC_URL=http://localhost:3000`).
+Для локальной разработки — отдельный OAuth client с redirect URI `http://localhost:3000/crm/auth/google/callback` и `http://localhost:3000/cabinet/auth/google/callback`, значения в `apps/api/.env` (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `API_PUBLIC_URL=http://localhost:3000`).
 
 ## Telegram-боты
 

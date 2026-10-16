@@ -13,7 +13,7 @@ import { z } from "zod";
 import { getApiErrorMessage } from "@workspace/api-client/core";
 import { Button, FieldInput } from "@workspace/ui";
 
-import { confirmMemberPasswordReset } from "@/modules/entities/lk-account";
+import { confirmMemberPasswordReset } from "@/modules/entities/cabinet-account";
 import { useCabinetLinks } from "@/modules/processes/member-auth";
 
 const PASSWORD_RULE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;

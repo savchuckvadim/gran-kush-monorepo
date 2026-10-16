@@ -13,7 +13,7 @@ import { EmailVerificationService } from "@modules/portal/auth/shared/applicatio
 import { MemberWithRelations } from "@modules/portal/crm/members/domain/entity/member.entity";
 import { MemberRepository } from "@modules/portal/crm/members/domain/repositories/member-repository.interface";
 
-import { ConfirmMyMembershipDto, MyMembershipDto } from "../../api/dto/lk-memberships.dto";
+import { ConfirmMyMembershipDto, MyMembershipDto } from "../../api/dto/cabinet-memberships.dto";
 import {
     ConfirmMemberConsentDto,
     DeclineMemberConsentDto,

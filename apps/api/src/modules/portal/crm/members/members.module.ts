@@ -8,9 +8,9 @@ import { MEMBER_FILES_JOB_OPTIONS } from "@common/queue/job-options";
 import { AccountModule } from "@modules/account/account.module";
 import { SharedAuthModule } from "@modules/portal/auth/shared/shared-auth.module";
 import { EntityFieldsModule } from "@modules/portal/crm/entity-fields/entity-fields.module";
+import { CabinetMembersController } from "@modules/portal/crm/members/api/controllers/cabinet-members.controller";
+import { CabinetMembershipsController } from "@modules/portal/crm/members/api/controllers/cabinet-memberships.controller";
 import { CrmMembersController } from "@modules/portal/crm/members/api/controllers/crm-members.controller";
-import { LkMembersController } from "@modules/portal/crm/members/api/controllers/lk-members.controller";
-import { LkMembershipsController } from "@modules/portal/crm/members/api/controllers/lk-memberships.controller";
 import { PublicMemberConsentController } from "@modules/portal/crm/members/api/controllers/public-member-consent.controller";
 import { JoinPortalService } from "@modules/portal/crm/members/application/services/join-portal.service";
 import { MemberConsentService } from "@modules/portal/crm/members/application/services/member-consent.service";
@@ -50,8 +50,8 @@ import { UsersModule } from "@modules/users";
     ],
     controllers: [
         CrmMembersController,
-        LkMembersController,
-        LkMembershipsController,
+        CabinetMembersController,
+        CabinetMembershipsController,
         PublicMemberConsentController,
     ],
     exports: [MembersService, JoinPortalService, MemberFilesService, MemberRepository],

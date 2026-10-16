@@ -120,4 +120,4 @@ OpenAPI-generated types in **`packages/api-client`** are the source of truth for
 - [HTTP API Contract](../backend/HTTP_API_CONTRACT.md) — errors, CORS, portal headers, cookies
 - [Authentication System](../AUTHENTICATION.md) — long-form narrative (verify against contract for cookie/mobile split)
 - [Storage Module](../STORAGE.md)
-- [Site + LK Documentation](../site/README.md)
+- [Member cabinet](../tasks/member-cabinet.md)

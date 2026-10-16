@@ -267,7 +267,7 @@ describe("Order stock (e2e)", () => {
         const productId = await createProduct(randomUUID(), `Lk ${suffix}`, 5);
 
         const res = await request(app.getHttpServer())
-            .post("/lk/orders")
+            .post("/cabinet/orders")
             .set("Cookie", memberCookies)
             .set("X-Portal-Slug", slug)
             .send({ items: [{ productId, quantity: 1, unitPrice: 0, isGift: true }] });

@@ -16,7 +16,7 @@ import {
     FieldSelect,
 } from "@workspace/ui";
 
-import { type DocumentSide, useUploadDocument } from "@/modules/entities/lk-passport";
+import { type DocumentSide, useUploadDocument } from "@/modules/entities/cabinet-passport";
 
 import { DOCUMENT_ACCEPT, fileToDataUrl, MAX_DOCUMENT_BYTES } from "./file-to-data-url";
 

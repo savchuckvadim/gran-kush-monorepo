@@ -17,7 +17,7 @@ import {
     DropdownMenuTrigger,
 } from "@workspace/ui";
 
-import { logoutMember } from "@/modules/entities/lk-account";
+import { logoutMember } from "@/modules/entities/cabinet-account";
 import { useChangeLocale } from "@/modules/features/lang-switcher/use-change-locale";
 import { useCabinetLinks, useMemberAuth } from "@/modules/processes/member-auth";
 import { localeNames, locales } from "@/modules/shared/config/i18n";
@@ -35,7 +35,7 @@ export function MemberAccountMenu() {
         mutationFn: logoutMember,
         onSettled: () => {
             // Кэш кабинета принадлежит ушедшему аккаунту: остаться в нём нельзя
-            queryClient.removeQueries({ queryKey: ["lk"] });
+            queryClient.removeQueries({ queryKey: ["cabinet"] });
             router.replace(links.login);
         },
     });

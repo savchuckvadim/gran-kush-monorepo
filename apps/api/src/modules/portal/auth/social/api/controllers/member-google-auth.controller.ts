@@ -23,8 +23,8 @@ import { SocialLoginService } from "@modules/portal/auth/social/application/serv
  * `GoogleOAuthFlowService`. Ошибки не рендерим — возвращаем на форму входа с ?error=, причина
  * пишется в лог без персональных данных.
  */
-@ApiTags("Member Authentication (Site Web)")
-@Controller("lk/auth/google")
+@ApiTags("Cabinet Auth (web)")
+@Controller("cabinet/auth/google")
 export class MemberGoogleAuthController {
     private readonly logger = new Logger(MemberGoogleAuthController.name);
 

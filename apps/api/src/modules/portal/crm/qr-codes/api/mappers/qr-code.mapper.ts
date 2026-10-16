@@ -25,7 +25,7 @@ export function mapQrCodeToDto(qr: QrCode): QrCodeDto {
 }
 
 /**
- * Маппинг QrCode entity → QrCodeWithPayloadDto (с encryptedCode — для LK)
+ * Маппинг QrCode entity → QrCodeWithPayloadDto (с encryptedCode — для кабинета)
  */
 export function mapQrCodeToPayloadDto(qr: QrCode): QrCodeWithPayloadDto {
     return {

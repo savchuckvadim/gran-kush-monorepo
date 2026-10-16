@@ -36,8 +36,8 @@ import {
     MemberConfirmEmailResponseDto,
 } from "../dto/member-confirm-email.dto";
 
-@ApiTags("Member Registration (Site)")
-@Controller("lk/auth/member")
+@ApiTags("Cabinet Registration")
+@Controller("cabinet/auth/member")
 export class MemberRegistrationController {
     constructor(
         private readonly memberRegistrationUseCase: MemberRegistrationUseCase,
@@ -87,7 +87,7 @@ export class MemberRegistrationController {
     @Post("files")
     @RequireUserJwt()
     @Throttle(UPLOAD_THROTTLE)
-    @ApiOperation({ summary: "Queue account documents/signature upload (Site)" })
+    @ApiOperation({ summary: "Queue account documents/signature upload" })
     @ApiSuccessResponse(UploadMemberFilesResponseDto, {
         status: 201,
         description: "Files were queued for asynchronous processing",

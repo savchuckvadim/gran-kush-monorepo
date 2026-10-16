@@ -48,8 +48,6 @@ jobs:
             dockerfile: infra/docker/api.Dockerfile
           - app: crm
             dockerfile: infra/docker/next.Dockerfile
-          - app: web
-            dockerfile: infra/docker/next.Dockerfile
           - app: admin
             dockerfile: infra/docker/next.Dockerfile
           - app: site

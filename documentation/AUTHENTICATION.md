@@ -5,14 +5,14 @@
 > глобальный `User` без портала (`MULTI_PORTAL_ACCOUNTS_REFACTOR.md`), мосты `Member`/`Employee`
 > резолвит `MembershipGuard` по `X-Portal-Id`/`X-Portal-Slug`; refresh хранится в БД как SHA-256
 > и **ротируется** при каждом `/refresh` (одна строка на `X-Device-Id`); веб-refresh отдаёт новую
-> пару только в HttpOnly-куки, JSON-токены — только у `/crm/mobile/auth/*` и `/lk/mobile/auth/*`;
+> пару только в HttpOnly-куки, JSON-токены — только у `/crm/mobile/auth/*` и `/cabinet/mobile/auth/*`;
 > письма подтверждения/клейма — `documentation/backend/MAIL.md`; состояние дыр и фиксов —
 > `documentation/tasks/security-audit.md`. При расхождении с текстом ниже приоритет у кода.
 
 ## Обзор архитектуры
 
 Система аутентификации полностью разделена на два независимых потока:
-- **Member (Член клуба)** - для входа на сайт (LK)
+- **Member (Член клуба)** - для входа в кабинет участника (`club.`)
 - **Employee (Сотрудник)** - для входа в CRM и админку (если роль = `admin`)
 
 ### Модель User
@@ -61,7 +61,7 @@
 
 #### Шаг 1: Проверка существования пользователя
 
-**POST** `/lk/auth/member/check`
+**POST** `/cabinet/auth/member/check`
 
 ```json
 {
@@ -86,7 +86,7 @@
 
 #### Шаг 2: Регистрация
 
-**POST** `/lk/auth/member/register?force=true`
+**POST** `/cabinet/auth/member/register?force=true`
 
 **Процесс:**
 1. `MembersService.createMember()` проверяет существование User через `UserPrismaRepository`
@@ -120,7 +120,7 @@
 
 #### Шаг 3: Асинхронная загрузка документов и подписи
 
-**POST** `/lk/auth/member/files`
+**POST** `/cabinet/auth/member/files`
 
 **Headers:**
 ```
@@ -157,7 +157,7 @@ Authorization: Bearer {accessToken}
 
 ### 2. Вход Member (Сайт)
 
-**POST** `/lk/auth/login`
+**POST** `/cabinet/auth/login`
 
 ```json
 {
@@ -195,7 +195,7 @@ Authorization: Bearer {accessToken}
 
 ### 3. Использование Access Token
 
-**GET** `/lk/auth/me`
+**GET** `/cabinet/auth/me`
 
 **Заголовок:**
 ```
@@ -229,7 +229,7 @@ Authorization: Bearer <accessToken>
 
 ### 4. Обновление Access Token
 
-**POST** `/lk/auth/refresh`
+**POST** `/cabinet/auth/refresh`
 
 ```json
 {
@@ -256,7 +256,7 @@ Authorization: Bearer <accessToken>
 
 ### 5. Выход
 
-**POST** `/lk/auth/logout`
+**POST** `/cabinet/auth/logout`
 
 ```json
 {
@@ -413,15 +413,15 @@ return { accessToken, refreshToken };
 
 ## Эндпоинты аутентификации
 
-### Member (Сайт - LK)
+### Member (кабинет)
 
 #### Регистрация
 
-**POST** `/lk/auth/member/check`
+**POST** `/cabinet/auth/member/check`
 - Проверка существования пользователя перед регистрацией
 - Возвращает информацию о том, является ли пользователь Employee
 
-**POST** `/lk/auth/member/register?force=true`
+**POST** `/cabinet/auth/member/register?force=true`
 - Регистрация нового Member
 - Создает `User` и `Member` с полными данными
 - Создает связи с `MjStatus` и `Document`
@@ -430,21 +430,21 @@ return { accessToken, refreshToken };
 
 #### Вход и управление сессией
 
-**POST** `/lk/auth/login`
+**POST** `/cabinet/auth/login`
 - Вход Member (только для зарегистрированных Member)
 - Использует `MemberLocalAuthGuard` и `MemberLocalStrategy`
 - Возвращает `accessToken` и `refreshToken`
 
-**POST** `/lk/auth/refresh`
+**POST** `/cabinet/auth/refresh`
 - Обновление access token через refresh token
 - Проверяет refresh token в базе данных (таблица `tokens`)
 - Возвращает новый `accessToken`
 
-**POST** `/lk/auth/logout`
+**POST** `/cabinet/auth/logout`
 - Выход (удаление refresh token из БД)
 - Требует `refreshToken` в теле запроса
 
-**GET** `/lk/auth/me`
+**GET** `/cabinet/auth/me`
 - Получение информации о текущем Member
 - Использует `MemberJwtAuthGuard` и `MemberJwtStrategy`
 - Требует `Authorization: Bearer <accessToken>` в заголовке
@@ -525,7 +525,7 @@ auth/employees/
 - Services: `EmployeeAuthService`, `EmployeeRegistrationService`
 - DTOs: все DTO для employees
 
-#### `modules/auth/members` - Аутентификация членов (Site/LK)
+#### `modules/auth/members` - Аутентификация членов (кабинет)
 
 **Расположение:** `apps/api/src/modules/auth/members/`
 
@@ -592,10 +592,10 @@ export class CrmMembersController {
     }
 }
 
-// LK контроллер (для членов)
-@Controller("lk/members")
+// Контроллер кабинета (для членов)
+@Controller("cabinet/members")
 @UseGuards(MemberJwtAuthGuard)  // Требуется авторизация члена
-export class LkMembersController {
+export class CabinetMembersController {
     @Get("me")
     async getMe(@CurrentMember() member: Member) {
         // Член может получить только свои данные
@@ -664,7 +664,7 @@ export class LkMembersController {
   - `CrmMembersController` (`/crm/members/*`) - для сотрудников CRM
     - Защита: `EmployeeJwtAuthGuard`
     - Операции создания/обновления: `AdminGuard` + `@Admin()`
-  - `LkMembersController` (`/lk/members/*`) - для членов (только свои данные)
+  - `LkMembersController` (`/cabinet/members/*`) - для членов (только свои данные)
     - Защита: `MemberJwtAuthGuard`
     - Доступ только к собственным данным
 - **Сервисы:**
@@ -695,8 +695,8 @@ export class LkMembersController {
 
 ### Разделение доступа
 
-- **Member** может входить только через `/lk/auth/*` эндпоинты
-- **Member** может получать только свои данные через `/lk/members/me`
+- **Member** может входить только через `/cabinet/auth/*` эндпоинты
+- **Member** может получать только свои данные через `/cabinet/members/me`
 - **Employee** может входить только через `/crm/auth/*` эндпоинты
 - **Employee** может просматривать всех членов через `/crm/members/*`
 - **Employee с ролью `admin`** может:
@@ -731,7 +731,7 @@ export class LkMembersController {
 
 ```bash
 # 1. Проверка существования
-POST /lk/auth/member/check
+POST /cabinet/auth/member/check
 Content-Type: application/json
 
 {
@@ -747,7 +747,7 @@ Content-Type: application/json
 }
 
 # 2. Регистрация (если User уже Employee, используйте ?force=true)
-POST /lk/auth/member/register?force=true
+POST /cabinet/auth/member/register?force=true
 Content-Type: application/json
 
 {
@@ -785,7 +785,7 @@ Content-Type: application/json
 ### Вход Member
 
 ```bash
-POST /lk/auth/login
+POST /cabinet/auth/login
 Content-Type: application/json
 
 {
@@ -810,7 +810,7 @@ Content-Type: application/json
 
 ```bash
 # Получение информации о текущем Member
-GET /lk/auth/me
+GET /cabinet/auth/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 # Ответ:
@@ -825,7 +825,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 
 # Обновление токена (когда access token истек)
-POST /lk/auth/refresh
+POST /cabinet/auth/refresh
 Content-Type: application/json
 
 {
@@ -838,7 +838,7 @@ Content-Type: application/json
 }
 
 # Выход
-POST /lk/auth/logout
+POST /cabinet/auth/logout
 Content-Type: application/json
 
 {

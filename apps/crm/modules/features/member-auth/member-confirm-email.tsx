@@ -9,7 +9,7 @@ import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 
 import { Button } from "@workspace/ui";
 
-import { confirmMemberEmail } from "@/modules/entities/lk-account";
+import { confirmMemberEmail } from "@/modules/entities/cabinet-account";
 import { useCabinetLinks } from "@/modules/processes/member-auth";
 
 /** Ссылка из письма подтверждения: токен в адресе, подтверждение запускается один раз при открытии. */

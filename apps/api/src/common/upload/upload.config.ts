@@ -24,7 +24,7 @@ export const JSON_BODY_LIMIT = process.env.JSON_BODY_LIMIT ?? "1mb";
 
 /**
  * Маршруты, принимающие файлы как base64 data URL. Худший случай — два документа и подпись
- * в одном запросе (`POST /lk/auth/member/files`), base64 раздувает на треть. Считается от
+ * в одном запросе (`POST /cabinet/auth/member/files`), base64 раздувает на треть. Считается от
  * лимитов на файл, чтобы потолок тела не разошёлся с ними при переопределении через env.
  * `client_max_body_size` в nginx должен быть не меньше — иначе 413 придёт оттуда.
  */

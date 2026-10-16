@@ -29,8 +29,8 @@ import { MemberRefreshTokenResponseDto } from "@modules/portal/auth/members/api/
 import { MemberAuthService } from "@modules/portal/auth/members/application/services/member-auth.service";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 
-@ApiTags("Member Authentication (Site Mobile / Native)")
-@Controller("lk/mobile/auth")
+@ApiTags("Cabinet Auth (mobile)")
+@Controller("cabinet/mobile/auth")
 export class MemberMobileAuthController {
     constructor(
         private readonly memberAuthService: MemberAuthService,

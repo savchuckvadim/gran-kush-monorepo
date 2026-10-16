@@ -18,7 +18,7 @@ export class SharedClubDto {
     displayName: string;
 }
 
-/** Кому показать: членство в клубе (id из `GET /lk/memberships`). */
+/** Кому показать: членство в клубе (id из `GET /cabinet/memberships`). */
 export class ShareWithMembershipDto {
     @ApiProperty({ type: String })
     @IsUUID()

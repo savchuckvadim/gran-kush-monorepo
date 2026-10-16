@@ -37,8 +37,8 @@ import { ResetPasswordDto } from "@modules/portal/auth/shared/api/dto/reset-pass
 import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 
-@ApiTags("Member Authentication (Site Web)")
-@Controller("lk/auth")
+@ApiTags("Cabinet Auth (web)")
+@Controller("cabinet/auth")
 export class MemberAuthController {
     constructor(
         private readonly memberAuthService: MemberAuthService,

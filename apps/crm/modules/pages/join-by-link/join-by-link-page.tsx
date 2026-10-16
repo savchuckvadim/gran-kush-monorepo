@@ -16,7 +16,7 @@ import {
 } from "@workspace/dynamic-forms";
 import { Button, Card, FieldInput } from "@workspace/ui";
 
-import { useLkMe } from "@/modules/entities/lk-account";
+import { useCabinetMe } from "@/modules/entities/cabinet-account";
 import {
     getPublicRegistrationLink,
     registerViaLink,
@@ -48,7 +48,7 @@ export function JoinByLinkPage({ token }: { token: string }) {
     const [serverError, setServerError] = useState<string | null>(null);
     // Вошедший участник по умолчанию вступает своим аккаунтом; «другой адрес» возвращает анкету
     const [otherAccount, setOtherAccount] = useState(false);
-    const me = useLkMe();
+    const me = useCabinetMe();
 
     const info = useQuery({
         queryKey: ["public-registration-link", token],

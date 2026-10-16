@@ -225,7 +225,7 @@ export class GoogleOAuthFlowService {
             secure: this.configService.get<string>("AUTH_COOKIE_SECURE") === "true",
             // Возврат от Google — переход верхнего уровня по GET: Lax эту куку пропускает
             sameSite: "lax",
-            path: app === "crm" ? "/crm/auth/google" : "/lk/auth/google",
+            path: app === "crm" ? "/crm/auth/google" : "/cabinet/auth/google",
             maxAge: FLOW_COOKIE_MAX_AGE_MS,
         };
     }
@@ -255,7 +255,7 @@ export class GoogleOAuthFlowService {
         ).replace(/\/+$/, "");
         return app === "crm"
             ? `${base}/crm/auth/google/callback`
-            : `${base}/lk/auth/google/callback`;
+            : `${base}/cabinet/auth/google/callback`;
     }
 
     /** Ключ подписи state выведен из секрета JWT, но не равен ему. */

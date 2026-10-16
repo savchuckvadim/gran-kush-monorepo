@@ -8,7 +8,7 @@
 >   (`QR_CODE_EXPIRATION_DAYS`). Участник нескольких клубов получает отдельный код в каждом.
 > - **Код действителен, только пока совпадает с тем, что лежит в БД.** Перевыпуск мгновенно гасит
 >   прежний, отзыв тоже; подделка невозможна без записи в БД, даже при утёкшем ключе шифрования.
-> - **Выдаётся сам:** `GET /lk/qr-code` возвращает действующий код, выдаёт его при первом
+> - **Выдаётся сам:** `GET /cabinet/qr-code` возвращает действующий код, выдаёт его при первом
 >   обращении и продлевает просроченный. Просить администратора не нужно.
 > - **Только подтвердившим членство** и только активным участникам (TASK-703).
 > - **Сканер ничего не открывает по ссылке из QR**, а берёт из неё код и показывает предпросмотр на
@@ -25,7 +25,7 @@
 2. [Архитектура системы](#архитектура-системы)
 3. [База данных](#база-данных)
 4. [Бэкенд (NestJS)](#бэкенд-nestjs)
-5. [Фронтенд - Личный кабинет (LK)](#фронтенд---личный-кабинет-lk)
+5. [Фронтенд - кабинет участника](#-фронтенд---кабинет-участника)
 6. [Фронтенд - CRM](#фронтенд---crm)
 7. [Безопасность и шифрование](#безопасность-и-шифрование)
 8. [API Endpoints](#api-endpoints)
@@ -53,7 +53,7 @@
 ```
 ┌─────────────────┐         ┌─────────────────┐
 │   Личный        │         │      CRM        │
-│   кабинет (LK)  │────────▶│   (Desktop +    │
+│   кабинет       │────────▶│   (Desktop +    │
 │   (Web)         │         │    Mobile)      │
 └────────┬────────┘         └────────┬────────┘
          │                            │
@@ -530,14 +530,14 @@ export class QrCodeGenerationService {
 
 #### 2.2. Контроллеры
 
-**LK Controller:** `apps/api/src/modules/qr-codes/api/controllers/lk-qr-codes.controller.ts`
+**Контроллер кабинета:** `apps/api/src/modules/portal/crm/qr-codes/api/controllers/cabinet-qr-codes.controller.ts`
 
 ```typescript
-@ApiTags("Member QR Codes (Site - LK)")
-@Controller("lk/qr-codes")
+@ApiTags("Cabinet QR Codes")
+@Controller("cabinet/qr-codes")
 @UseGuards(MemberJwtAuthGuard)
 @ApiBearerAuth()
-export class LkQrCodesController {
+export class CabinetQrCodesController {
     @Get("me")
     @ApiOperation({ summary: "Get current member's QR code" })
     async getMyQrCode(@CurrentMember() member: Member) {
@@ -760,155 +760,13 @@ export class PresenceNotificationService {
 
 ---
 
-## 🎨 Фронтенд - Личный кабинет (LK)
+## 🎨 Фронтенд - кабинет участника
 
-### Структура модулей (FSD)
+Кабинет — часть приложения CRM на `club.paf-paf.app` (TASK-710…713). QR и присутствие:
 
-```
-apps/web/modules/
-├── entities/
-│   └── qr-code/
-│       ├── api/
-│       │   └── qr-code.api.ts
-│       ├── hooks/
-│       │   └── use-qr-code.hook.ts
-│       └── ui/
-│           └── qr-code-display.tsx
-│
-├── features/
-│   ├── qr-code/
-│   │   ├── ui/
-│   │   │   ├── qr-code-page.tsx
-│   │   │   └── regenerate-qr-code-button.tsx
-│   │   └── qr-code-feature.tsx
-│   │
-│   └── presence/
-│       ├── ui/
-│       │   └── presence-history-page.tsx
-│       └── presence-feature.tsx
-│
-└── widgets/
-    └── member-dashboard/
-        └── ui/
-            └── member-dashboard.tsx (включает QR-код)
-```
-
-### 1. API клиент для QR-кодов
-
-**Файл:** `apps/web/modules/entities/qr-code/api/qr-code.api.ts`
-
-```typescript
-import { $apiSite } from "@/modules/shared/api/api"; // API клиент для Site
-import { SchemaQrCodeResponseDto, SchemaRegenerateQrCodeResponseDto } from "@workspace/api-client/core";
-
-export async function getMyQrCode(): Promise<SchemaQrCodeResponseDto> {
-    const response = await $apiSite.GET("/lk/qr-codes/me");
-    if (!response.response.ok) {
-        throw new Error("Failed to fetch QR code");
-    }
-    return response.data as SchemaQrCodeResponseDto;
-}
-
-export async function regenerateQrCode(): Promise<SchemaRegenerateQrCodeResponseDto> {
-    const response = await $apiSite.POST("/lk/qr-codes/regenerate");
-    if (!response.response.ok) {
-        throw new Error("Failed to regenerate QR code");
-    }
-    return response.data as SchemaRegenerateQrCodeResponseDto;
-}
-```
-
-### 2. React Query хуки
-
-**Файл:** `apps/web/modules/entities/qr-code/hooks/use-qr-code.hook.ts`
-
-```typescript
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getMyQrCode, regenerateQrCode } from "../api/qr-code.api";
-
-export const qrCodeKeys = {
-    all: ["qrCode"] as const,
-    my: () => [...qrCodeKeys.all, "my"] as const,
-};
-
-export function useMyQrCode() {
-    return useQuery({
-        queryKey: qrCodeKeys.my(),
-        queryFn: getMyQrCode,
-        staleTime: 5 * 60 * 1000, // 5 минут
-    });
-}
-
-export function useRegenerateQrCode() {
-    const queryClient = useQueryClient();
-    
-    return useMutation({
-        mutationFn: regenerateQrCode,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: qrCodeKeys.my() });
-        },
-    });
-}
-```
-
-### 3. UI компоненты
-
-**Файл:** `apps/web/modules/entities/qr-code/ui/qr-code-display.tsx`
-
-```typescript
-"use client";
-
-import Image from "next/image";
-import { useMyQrCode } from "../hooks/use-qr-code.hook";
-
-export function QrCodeDisplay() {
-    const { data, isLoading } = useMyQrCode();
-
-    if (isLoading) {
-        return <div>Loading QR code...</div>;
-    }
-
-    if (!data?.qrCodeImage) {
-        return <div>QR code not available</div>;
-    }
-
-    return (
-        <div className="flex flex-col items-center gap-4">
-            <Image
-                src={data.qrCodeImage}
-                alt="QR Code"
-                width={256}
-                height={256}
-                className="border-2 border-gray-300 rounded-lg"
-            />
-            <p className="text-sm text-gray-600">
-                Покажите этот QR-код при входе в клуб
-            </p>
-        </div>
-    );
-}
-```
-
-**Файл:** `apps/web/modules/features/qr-code/ui/qr-code-page.tsx`
-
-```typescript
-"use client";
-
-import { QrCodeDisplay } from "@/modules/entities/qr-code/ui/qr-code-display";
-import { RegenerateQrCodeButton } from "./regenerate-qr-code-button";
-
-export function QrCodePage() {
-    return (
-        <div className="container mx-auto py-8">
-            <h1 className="text-2xl font-bold mb-6">Мой QR-код</h1>
-            <QrCodeDisplay />
-            <div className="mt-6">
-                <RegenerateQrCodeButton />
-            </div>
-        </div>
-    );
-}
-```
+- API и хуки: `apps/crm/modules/entities/cabinet-club` (`/cabinet/qr-code`, `/cabinet/presence/*`).
+- Страница клуба: `apps/crm/modules/pages/cabinet/cabinet-club-page.tsx` — QR (тёмный на светлом,
+  уровень M), статус «в клубе», последние визиты, перевыпуск с подтверждением.
 
 ---
 
@@ -1143,13 +1001,13 @@ openssl rand -hex 32
 
 ## 📡 API Endpoints
 
-### LK (Личный кабинет)
+### Кабинет участника
 
 ```
-GET    /lk/qr-codes/me                    - Получить свой QR-код
-POST   /lk/qr-codes/regenerate            - Регенерировать QR-код
-GET    /lk/presence/history               - История визитов
-GET    /lk/presence/current               - Текущее присутствие
+GET    /cabinet/qr-codes/me                    - Получить свой QR-код
+POST   /cabinet/qr-codes/regenerate            - Регенерировать QR-код
+GET    /cabinet/presence/history               - История визитов
+GET    /cabinet/presence/current               - Текущее присутствие
 ```
 
 ### CRM
@@ -1195,7 +1053,7 @@ POST   /crm/presence/auto-exit            - Принудительный вых�
 }
 ```
 
-### Frontend (Web - LK)
+### Frontend (кабинет в CRM)
 
 ```json
 {
@@ -1311,7 +1169,7 @@ export class PresenceLogResponseDto {
 - [ ] Добавить эндпоинты в Swagger
 - [ ] Написать тесты
 
-### Frontend LK
+### Frontend кабинета
 - [ ] Создать API клиент для QR-кодов
 - [ ] Создать React Query хуки
 - [ ] Создать UI компоненты
@@ -1826,14 +1684,14 @@ export class OrdersService {
 
 ### API Endpoints
 
-#### LK (Личный кабинет)
+#### Кабинет участника
 
 ```
-GET    /lk/catalog/products              - Получить каталог (только при присутствии)
-GET    /lk/catalog/products/:id          - Получить товар
-POST   /lk/orders                        - Создать заказ (только при присутствии)
-GET    /lk/orders                        - Мои заказы
-GET    /lk/orders/:id                    - Детали заказа
+GET    /cabinet/catalog/products              - Получить каталог (только при присутствии)
+GET    /cabinet/catalog/products/:id          - Получить товар
+POST   /cabinet/orders                        - Создать заказ (только при присутствии)
+GET    /cabinet/orders                        - Мои заказы
+GET    /cabinet/orders/:id                    - Детали заказа
 ```
 
 #### CRM
@@ -2289,7 +2147,7 @@ apps/crm/modules/
 
 1. **Проверка присутствия при просмотре каталога:**
    - Член может видеть каталог только если `isActive = true` в `presence_logs`
-   - API endpoint `/lk/catalog/products` проверяет активное присутствие
+   - API endpoint `/cabinet/catalog/products` проверяет активное присутствие
 
 2. **Создание заказа:**
    - Заказ можно создать только при активном присутствии

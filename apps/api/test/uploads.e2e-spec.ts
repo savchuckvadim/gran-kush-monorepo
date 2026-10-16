@@ -108,7 +108,7 @@ describe("Uploads (e2e)", () => {
 
     const postAccountDocument = (file: string) =>
         request(app.getHttpServer())
-            .post("/lk/account/documents")
+            .post("/cabinet/account/documents")
             .set("Cookie", memberCookies)
             .send({ type: "passport", file });
 
@@ -121,7 +121,7 @@ describe("Uploads (e2e)", () => {
 
         it("подпись не может быть PDF", async () => {
             const res = await request(app.getHttpServer())
-                .put("/lk/account/signature")
+                .put("/cabinet/account/signature")
                 .set("Cookie", memberCookies)
                 .send({ file: dataUrl("image/png", Buffer.from("%PDF-1.7\n")) });
             expect(res.status).toBe(400);
@@ -135,7 +135,7 @@ describe("Uploads (e2e)", () => {
 
         it("документ без файлов в аккаунте не появился", async () => {
             const res = await request(app.getHttpServer())
-                .get("/lk/account/documents")
+                .get("/cabinet/account/documents")
                 .set("Cookie", memberCookies);
             expect(res.status).toBe(200);
             expect(res.body.documents).toEqual([]);
@@ -161,7 +161,7 @@ describe("Uploads (e2e)", () => {
         it("широкий потолок только на маршрутах загрузки: тот же JSON на другом маршруте → 413", async () => {
             const payload = { email: `x-${suffix}@test.local`, padding: "a".repeat(2 * MiB) };
             const res = await request(app.getHttpServer())
-                .post("/lk/auth/member/check")
+                .post("/cabinet/auth/member/check")
                 .send(payload);
             expect(res.status).toBe(413);
         });
@@ -170,7 +170,7 @@ describe("Uploads (e2e)", () => {
     describe("очередь регистрации", () => {
         it("мусор отклоняется синхронно, а не оседает в Redis с молчаливым падением воркера", async () => {
             const res = await request(app.getHttpServer())
-                .post("/lk/auth/member/files")
+                .post("/cabinet/auth/member/files")
                 .set("Cookie", memberCookies)
                 .send({ documentType: "passport", documentFirst: dataUrl("image/jpeg", HTML) });
             expect(res.status).toBe(400);
@@ -179,7 +179,7 @@ describe("Uploads (e2e)", () => {
 
         it("подпись проверяется по своему лимиту", async () => {
             const res = await request(app.getHttpServer())
-                .post("/lk/auth/member/files")
+                .post("/cabinet/auth/member/files")
                 .set("Cookie", memberCookies)
                 .send({
                     signature: dataUrl("image/png", pngOfSize(UPLOAD_LIMITS.signatureBytes + 1)),

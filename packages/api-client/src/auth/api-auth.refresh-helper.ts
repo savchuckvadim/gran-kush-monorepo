@@ -1,7 +1,7 @@
 import type { ApiAuthStrategy } from "../client/client";
 
 import { ApiTokensStorage } from "./api-auth.storage";
-import { ApiAuthType } from "./api-auth.type";
+import { ApiAuthType, REFRESH_PATH } from "./api-auth.type";
 
 /**
  * Обновление токенов идёт по одному запросу на тип клиента. Общий для всех клиентов промис не
@@ -20,7 +20,7 @@ export class ApiRefreshHelper {
         this.type = type;
         this.baseurl = baseurl;
         this.storage = new ApiTokensStorage(type);
-        this.refreshUrl = type === ApiAuthType.CRM ? "/crm/auth/refresh" : "/lk/auth/refresh";
+        this.refreshUrl = REFRESH_PATH[type];
         this.authStrategy = authStrategy;
     }
 

@@ -3,7 +3,7 @@ import { PresenceSession } from "@modules/portal/crm/presence/domain/entity/pres
 
 /**
  * Маппинг PresenceSession entity → PresenceSessionDto
- * Используется и в CRM, и в LK контроллерах.
+ * Используется и в CRM, и в кабинете.
  */
 export function mapPresenceSessionToDto(s: PresenceSession): PresenceSessionDto {
     return {

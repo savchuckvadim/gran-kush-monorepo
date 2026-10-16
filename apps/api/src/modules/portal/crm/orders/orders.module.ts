@@ -4,8 +4,8 @@ import { PrismaModule } from "@common/prisma/prisma.module";
 import { CatalogModule } from "@modules/portal/crm/catalog/catalog.module";
 import { MembersModule } from "@modules/portal/crm/members/members.module";
 
+import { CabinetOrdersController } from "./api/controllers/cabinet-orders.controller";
 import { CrmOrdersController } from "./api/controllers/crm-orders.controller";
-import { LkOrdersController } from "./api/controllers/lk-orders.controller";
 import { OrdersService } from "./application/services/orders.service";
 import { OrderRepository } from "./domain/repositories/order-repository.interface";
 import { OrderPrismaRepository } from "./infrastructure/repositories/order-prisma.repository";
@@ -19,7 +19,7 @@ import { OrderPrismaRepository } from "./infrastructure/repositories/order-prism
             useClass: OrderPrismaRepository,
         },
     ],
-    controllers: [CrmOrdersController, LkOrdersController],
+    controllers: [CrmOrdersController, CabinetOrdersController],
     exports: [OrdersService],
 })
 export class OrdersModule {}

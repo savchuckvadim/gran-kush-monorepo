@@ -7,8 +7,8 @@ import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
-import { MemberAuthService } from "../src/modules/portal/auth/members/application/services/member-auth.service";
 import { UserDocumentRepository } from "../src/modules/account/domain/repositories/user-document-repository.interface";
+import { MemberAuthService } from "../src/modules/portal/auth/members/application/services/member-auth.service";
 
 jest.setTimeout(120_000);
 
@@ -327,7 +327,7 @@ describe("Security (e2e)", () => {
 
             // «Самозванец» регистрируется этим email в клубе B: членство не активируется
             const reg = await request(app.getHttpServer())
-                .post("/lk/auth/member/register")
+                .post("/cabinet/auth/member/register")
                 .set("X-Portal-Slug", clubB.slug)
                 .send({ email, password: "Attacker123", fields: { first_name: "Impostor" } });
             expect(reg.status).toBe(201);
@@ -341,7 +341,7 @@ describe("Security (e2e)", () => {
 
             // Пароль «самозванца» не установлен — войти им нельзя
             const login = await request(app.getHttpServer())
-                .post("/lk/auth/login")
+                .post("/cabinet/auth/login")
                 .send({ email, password: "Attacker123" });
             expect(login.status).toBe(401);
 
@@ -351,7 +351,7 @@ describe("Security (e2e)", () => {
                 select: { resetPasswordToken: true },
             });
             const confirm = await request(app.getHttpServer())
-                .post("/lk/auth/password/reset/confirm")
+                .post("/cabinet/auth/password/reset/confirm")
                 .send({
                     token: userRow?.resetPasswordToken as string,
                     newPassword: "OwnerPass123",
@@ -371,9 +371,9 @@ describe("Security (e2e)", () => {
             expect(shares).toEqual([]);
         });
 
-        it("TASK-665: POST /lk/auth/member/check is gone", async () => {
+        it("TASK-665: POST /cabinet/auth/member/check is gone", async () => {
             const res = await request(app.getHttpServer())
-                .post("/lk/auth/member/check")
+                .post("/cabinet/auth/member/check")
                 .send({ email: clubB.ownerEmail });
             expect(res.status).toBe(404);
         });
@@ -445,7 +445,7 @@ describe("Security (e2e)", () => {
         };
 
         const memberLogin = (email: string, password: string) =>
-            request(app.getHttpServer()).post("/lk/auth/login").send({ email, password });
+            request(app.getHttpServer()).post("/cabinet/auth/login").send({ email, password });
 
         it("an invitation cannot hand out the owner role", async () => {
             const res = await as(clubA)
@@ -577,7 +577,7 @@ describe("Security (e2e)", () => {
             });
             expect(emailVerificationToken).toBeTruthy();
             const confirmed = await request(app.getHttpServer())
-                .post("/lk/auth/member/confirm-email")
+                .post("/cabinet/auth/member/confirm-email")
                 .send({ token: emailVerificationToken });
             expect(confirmed.status).toBe(201);
             expect((await memberLogin(email, "Squatter123")).status).toBe(201);
@@ -750,10 +750,10 @@ describe("Security (e2e)", () => {
             expect(created.body.awaitingConsent).toBe(true);
             const memberId = created.body.memberId as string;
 
-            const closed = await lk(owner.cookies).get("/lk/members/me", clubB);
+            const closed = await lk(owner.cookies).get("/cabinet/members/me", clubB);
             expect(closed.status).toBe(403);
 
-            const list = await lk(owner.cookies).get("/lk/memberships");
+            const list = await lk(owner.cookies).get("/cabinet/memberships");
             expect(list.status).toBe(200);
             const entry = (
                 list.body.memberships as { memberId: string; consentStatus: string; slug: string }[]
@@ -761,11 +761,11 @@ describe("Security (e2e)", () => {
             expect(entry).toMatchObject({ consentStatus: "pending", slug: clubB.slug });
 
             const confirmed = await lk(owner.cookies)
-                .post(`/lk/memberships/${memberId}/confirm`)
+                .post(`/cabinet/memberships/${memberId}/confirm`)
                 .send({});
             expect(confirmed.status).toBe(200);
             expect((await consentRow(memberId)).consentStatus).toBe("confirmed");
-            expect((await lk(owner.cookies).get("/lk/members/me", clubB)).status).toBe(200);
+            expect((await lk(owner.cookies).get("/cabinet/members/me", clubB)).status).toBe(200);
         });
 
         it("TASK-701: the QR is issued on first request, a reissue kills the old code, the scanner says why", async () => {
@@ -776,23 +776,25 @@ describe("Security (e2e)", () => {
             const memberId = added.body.memberId as string;
 
             // Пока членство не подтверждено, клуб для аккаунта закрыт, в том числе QR
-            expect((await lk(owner.cookies).get("/lk/qr-code", clubB)).status).toBe(403);
+            expect((await lk(owner.cookies).get("/cabinet/qr-code", clubB)).status).toBe(403);
             expect(
-                (await lk(owner.cookies).post(`/lk/memberships/${memberId}/confirm`).send({}))
+                (await lk(owner.cookies).post(`/cabinet/memberships/${memberId}/confirm`).send({}))
                     .status
             ).toBe(200);
 
-            const first = await lk(owner.cookies).get("/lk/qr-code", clubB);
+            const first = await lk(owner.cookies).get("/cabinet/qr-code", clubB);
             expect(first.status).toBe(200);
             const firstCode = first.body.encryptedCode as string;
             expect(
                 (await as(clubB).post("/crm/qr-codes/scan").send({ encryptedCode: firstCode })).body
             ).toMatchObject({ valid: true, memberId });
 
-            const again = await lk(owner.cookies).get("/lk/qr-code", clubB);
+            const again = await lk(owner.cookies).get("/cabinet/qr-code", clubB);
             expect(again.body.encryptedCode).toBe(firstCode);
 
-            const reissued = await lk(owner.cookies).post("/lk/qr-code/regenerate", clubB).send({});
+            const reissued = await lk(owner.cookies)
+                .post("/cabinet/qr-code/regenerate", clubB)
+                .send({});
             expect(reissued.status).toBe(201);
             const newCode = reissued.body.encryptedCode as string;
             expect(newCode).not.toBe(firstCode);
@@ -818,7 +820,7 @@ describe("Security (e2e)", () => {
                 .send({ encryptedCode: firstCode });
             expect(preview.body).toMatchObject({ valid: false, errorCode: expect.any(String) });
 
-            const status = await lk(owner.cookies).get("/lk/presence/status", clubB);
+            const status = await lk(owner.cookies).get("/cabinet/presence/status", clubB);
             expect(status.status).toBe(200);
             expect(status.body).toEqual({ isPresent: false, currentSession: null });
         });
@@ -846,7 +848,7 @@ describe("Security (e2e)", () => {
 
             // Чужой документ в выборе: 400, и членство не появилось
             const rejected = await lk(owner.cookies)
-                .post(`/lk/portals/${clubB.slug}/join`)
+                .post(`/cabinet/portals/${clubB.slug}/join`)
                 .send({ fields: { first_name: "Join" }, shareDocumentIds: [someoneElses.id] });
             expect(rejected.status).toBe(400);
             expect(
@@ -857,7 +859,7 @@ describe("Security (e2e)", () => {
 
             // Без выбора клуб не видит ничего
             const joined = await lk(owner.cookies)
-                .post(`/lk/portals/${clubB.slug}/join`)
+                .post(`/cabinet/portals/${clubB.slug}/join`)
                 .send({ fields: { first_name: "Join" } });
             expect(joined.status).toBe(201);
             const memberId = joined.body.memberId as string;
@@ -866,14 +868,14 @@ describe("Security (e2e)", () => {
 
             // Владелец показывает документ из «Моего паспорта» — клуб его видит
             const shared = await lk(owner.cookies)
-                .post(`/lk/account/documents/${document.id}/share`)
+                .post(`/cabinet/account/documents/${document.id}/share`)
                 .send({ memberId });
             expect(shared.status).toBe(204);
             const visible = await as(clubB).get(`/crm/members/${memberId}`);
             expect(visible.body.documents.map((d: { id: string }) => d.id)).toEqual([document.id]);
 
             // Список владельца говорит, какому клубу показан документ
-            const list = await lk(owner.cookies).get("/lk/account/documents");
+            const list = await lk(owner.cookies).get("/cabinet/account/documents");
             const entry = (
                 list.body.documents as { id: string; sharedWith: { slug: string }[] }[]
             ).find((d) => d.id === document.id);
@@ -881,7 +883,7 @@ describe("Security (e2e)", () => {
 
             // Отзыв закрывает клубу доступ
             const revoked = await lk(owner.cookies)
-                .delete(`/lk/account/documents/${document.id}/share/${memberId}`)
+                .delete(`/cabinet/account/documents/${document.id}/share/${memberId}`)
                 .send();
             expect(revoked.status).toBe(204);
             expect((await as(clubB).get(`/crm/members/${memberId}`)).body.documents).toEqual([]);
@@ -904,7 +906,7 @@ describe("Security (e2e)", () => {
                 .send({ email: owner.email, fields: { first_name: "Version" } });
             const memberId = added.body.memberId as string;
             await lk(owner.cookies)
-                .post(`/lk/memberships/${memberId}/confirm`)
+                .post(`/cabinet/memberships/${memberId}/confirm`)
                 .send({
                     shareDocumentIds: [v1.id],
                 });
@@ -915,7 +917,7 @@ describe("Security (e2e)", () => {
             expect(cardA.body.documents.map((d: { id: string }) => d.id)).toEqual([v1.id]);
 
             // «Мой паспорт» показывает текущую версию v2, не показанную никому
-            const list = await lk(owner.cookies).get("/lk/account/documents");
+            const list = await lk(owner.cookies).get("/cabinet/account/documents");
             const current = (list.body.documents as { id: string; sharedWith: unknown[] }[]).filter(
                 (d) => [v1.id, v2.id].includes(d.id)
             );
@@ -924,7 +926,7 @@ describe("Security (e2e)", () => {
 
             // Отозвали показ v1 — версия, которую никто не видит, удаляется
             const revoked = await lk(owner.cookies)
-                .delete(`/lk/account/documents/${v1.id}/share/${memberId}`)
+                .delete(`/cabinet/account/documents/${v1.id}/share/${memberId}`)
                 .send();
             expect(revoked.status).toBe(204);
             expect(await prisma.userDocument.findUnique({ where: { id: v1.id } })).toBeNull();
@@ -939,7 +941,7 @@ describe("Security (e2e)", () => {
                 .send({ email: owner.email, fields: { first_name: "Replace" } });
             const memberId = added.body.memberId as string;
             await lk(owner.cookies)
-                .post(`/lk/memberships/${memberId}/confirm`)
+                .post(`/cabinet/memberships/${memberId}/confirm`)
                 .send({ shareDocumentIds: [v1.id] });
             const v2 = await passportOf(owner.userId, "r2", { version: 2 });
 
@@ -950,7 +952,7 @@ describe("Security (e2e)", () => {
             };
             const listed = async () =>
                 (
-                    (await lk(owner.cookies).get("/lk/account/documents")).body as {
+                    (await lk(owner.cookies).get("/cabinet/account/documents")).body as {
                         documents: Listed[];
                     }
                 ).documents.find((d) => d.id === v2.id);
@@ -961,7 +963,7 @@ describe("Security (e2e)", () => {
             expect(before?.staleSharedWith.map((club) => club.slug)).toEqual([clubA.slug]);
 
             const shared = await lk(owner.cookies)
-                .post(`/lk/account/documents/${v2.id}/share`)
+                .post(`/cabinet/account/documents/${v2.id}/share`)
                 .send({ memberId });
             expect(shared.status).toBe(204);
 
@@ -984,7 +986,7 @@ describe("Security (e2e)", () => {
             expect(raw.number?.startsWith("enc1:")).toBe(true);
             expect(raw.number).not.toContain("N-number");
 
-            const list = await lk(owner.cookies).get("/lk/account/documents");
+            const list = await lk(owner.cookies).get("/cabinet/account/documents");
             const entry = (list.body.documents as { id: string; number: string }[]).find(
                 (d) => d.id === document.id
             );
@@ -1002,16 +1004,16 @@ describe("Security (e2e)", () => {
                 .post("/crm/members")
                 .send({ email: stranger.email, fields: { first_name: "Stranger" } });
             await lk(stranger.cookies)
-                .post(`/lk/memberships/${strangerClub.body.memberId as string}/confirm`)
+                .post(`/cabinet/memberships/${strangerClub.body.memberId as string}/confirm`)
                 .send({});
 
             const toForeignMembership = await lk(owner.cookies)
-                .post(`/lk/account/documents/${document.id}/share`)
+                .post(`/cabinet/account/documents/${document.id}/share`)
                 .send({ memberId: strangerClub.body.memberId });
             expect(toForeignMembership.status).toBe(404);
 
             const foreignDocument = await lk(stranger.cookies)
-                .post(`/lk/account/documents/${document.id}/share`)
+                .post(`/cabinet/account/documents/${document.id}/share`)
                 .send({ memberId: strangerClub.body.memberId });
             expect([403, 404]).toContain(foreignDocument.status);
             expect(
@@ -1029,7 +1031,7 @@ describe("Security (e2e)", () => {
 
             for (const action of ["confirm", "decline", "leave"]) {
                 const res = await lk(intruder.cookies)
-                    .post(`/lk/memberships/${memberId}/${action}`)
+                    .post(`/cabinet/memberships/${memberId}/${action}`)
                     .send({});
                 expect(res.status).toBe(404);
             }
@@ -1043,8 +1045,11 @@ describe("Security (e2e)", () => {
                 .send({ email: owner.email, fields: { first_name: "Decline" } });
             const declinedId = declinedBy.body.memberId as string;
             expect(
-                (await lk(owner.cookies).post(`/lk/memberships/${declinedId}/decline`).send({}))
-                    .status
+                (
+                    await lk(owner.cookies)
+                        .post(`/cabinet/memberships/${declinedId}/decline`)
+                        .send({})
+                ).status
             ).toBe(200);
             expect(await prisma.member.findUnique({ where: { id: declinedId } })).toBeNull();
 
@@ -1063,18 +1068,20 @@ describe("Security (e2e)", () => {
                     .send({ email: owner.email, fields: { first_name: "Leave" } });
                 const memberId = added.body.memberId as string;
                 const confirmed = await lk(owner.cookies)
-                    .post(`/lk/memberships/${memberId}/confirm`)
+                    .post(`/cabinet/memberships/${memberId}/confirm`)
                     .send({ shareDocumentIds: [document.id] });
                 expect(confirmed.status).toBe(200);
                 expect(await prisma.memberDocumentShare.count({ where: { memberId } })).toBe(1);
 
                 const left = await lk(owner.cookies)
-                    .post(`/lk/memberships/${memberId}/leave`)
+                    .post(`/cabinet/memberships/${memberId}/leave`)
                     .send({});
                 expect(left.status).toBe(200);
                 expect((await consentRow(memberId)).isActive).toBe(false);
                 expect(await prisma.memberDocumentShare.count({ where: { memberId } })).toBe(0);
-                expect((await lk(owner.cookies).get("/lk/members/me", clubA)).status).toBe(403);
+                expect((await lk(owner.cookies).get("/cabinet/members/me", clubA)).status).toBe(
+                    403
+                );
             } finally {
                 await prisma.userDocument.delete({ where: { id: document.id } });
             }
@@ -1097,7 +1104,7 @@ describe("Security (e2e)", () => {
                 where: { email },
             });
             const confirmed = await request(app.getHttpServer())
-                .post("/lk/auth/member/confirm-email")
+                .post("/cabinet/auth/member/confirm-email")
                 .send({ token: emailVerificationToken });
             expect([200, 201]).toContain(confirmed.status);
             return { email, userId: id };
@@ -1131,7 +1138,7 @@ describe("Security (e2e)", () => {
             const user = await confirmedMember("hashed");
             const login = () =>
                 request(app.getHttpServer())
-                    .post("/lk/auth/login")
+                    .post("/cabinet/auth/login")
                     .set("X-Device-Id", `audit-device-${suffix}`)
                     .send({ email: user.email, password: PASSWORD });
 
@@ -1157,7 +1164,7 @@ describe("Security (e2e)", () => {
 
             // Кука при этом рабочая
             const refreshed = await request(app.getHttpServer())
-                .post("/lk/auth/refresh")
+                .post("/cabinet/auth/refresh")
                 .set("Cookie", cookieHeader(await login()));
             expect(refreshed.status).toBe(201);
         });
@@ -1170,14 +1177,14 @@ describe("Security (e2e)", () => {
             });
 
             const login = await request(app.getHttpServer())
-                .post("/lk/auth/login")
+                .post("/cabinet/auth/login")
                 .send({ email: user.email, password: PASSWORD });
             expect(login.status).toBe(401);
             expect(login.body.message).toBe("Account is blocked");
 
             // Сброс пароля отвечает как обычно, но токен не выписывает
             const reset = await request(app.getHttpServer())
-                .post("/lk/auth/password/reset")
+                .post("/cabinet/auth/password/reset")
                 .send({ email: user.email });
             expect(reset.status).toBe(201);
             const after = await prisma.user.findUniqueOrThrow({ where: { id: user.userId } });
@@ -1200,7 +1207,7 @@ describe("Security (e2e)", () => {
 
             const resend = (target: string) =>
                 request(app.getHttpServer())
-                    .post("/lk/auth/member/confirm-email/resend")
+                    .post("/cabinet/auth/member/confirm-email/resend")
                     .send({ email: target });
 
             const known = await resend(email);

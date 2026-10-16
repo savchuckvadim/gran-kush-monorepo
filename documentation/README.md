@@ -4,16 +4,16 @@
 
 Unified documentation for the platform split into three product areas:
 
-- **Member Personal Cabinet (LK)** - `apps/web` authenticated member flows
+- **Member cabinet** - part of `apps/crm`, served on `club.paf-paf.app`
 - **CRM for Employees** - `apps/crm` operational interface for staff
 - **Backend API** - `apps/api` modules, contracts, storage, queues, auth
 
 ## Product Documentation Map
 
-### 1) Member Portal (Site + LK)
+### 1) Member cabinet
 
-- [Site/LK Documentation](./site/README.md)
-- Covers public website, member registration, member profile, i18n, frontend architecture
+- [Cabinet plan and decisions](./tasks/member-cabinet.md) — routes, ownership and consent, passport, QR, what is left
+- [Product sites](./site/PRODUCT_SITES.md) — paf-paf.app (`apps/site`)
 
 ### 2) CRM for Employees
 
@@ -37,12 +37,12 @@ Unified documentation for the platform split into three product areas:
 - [Развёртывание на чистом VPS](./VPS_SETUP.md) — пошаговый рунбук Hetzner + Cloudflare: сервер, DNS, TLS, первый запуск, автодеплой, бэкапы
 - [Развёртывание и эксплуатация](./DEPLOYMENT.md) — справочник для DevOps: инфраструктура, env, CI/CD, домены и куки, реплики
 - [Work log](./HISTORY.md) — dated notes on non-obvious bugs and the decisions behind their fixes
-- [Authentication System](./AUTHENTICATION.md) - dual auth model (`/lk/auth/*`, `/crm/auth/*`); **for cookie/mobile and tenant headers prefer [HTTP API Contract](./backend/HTTP_API_CONTRACT.md)**
+- [Authentication System](./AUTHENTICATION.md) - dual auth model (`/cabinet/auth/*`, `/crm/auth/*`); **for cookie/mobile and tenant headers prefer [HTTP API Contract](./backend/HTTP_API_CONTRACT.md)**
 - [Storage Module](./STORAGE.md) - private/public file storage and member documents
 
 ## Current Status
 
-- `apps/web`: implemented, including member registration and LK auth routes
+- member cabinet: inside `apps/crm` (TASK-710…715), `apps/web` removed in TASK-721
 - `apps/crm`: implemented base shell and member management routes; advanced modules are in progress
 - `apps/api`: implemented modular backend (NestJS + Prisma + BullMQ + Redis)
 
@@ -74,6 +74,6 @@ Unified documentation for the platform split into three product areas:
   - **Implemented** for current behavior
   - **Planned** for future scope
 - Keep endpoints synchronized with backend source of truth:
-  - member web: `/lk/auth/*`, mobile: `/lk/mobile/auth/*`
+  - member web: `/cabinet/auth/*`, mobile: `/cabinet/mobile/auth/*`
   - employee web: `/crm/auth/*`, mobile: `/crm/mobile/auth/*`
   - platform (onboarding): `/platform/portals/*`

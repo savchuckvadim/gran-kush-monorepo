@@ -6,10 +6,10 @@ import { JSON_BODY_LIMIT, UPLOAD_JSON_BODY_LIMIT } from "@common/upload/upload.c
 
 /** Маршруты, принимающие файлы как base64 data URL в JSON. */
 const UPLOAD_JSON_ROUTES = [
-    { path: "lk/account/documents", method: RequestMethod.POST },
-    { path: "lk/account/signature", method: RequestMethod.PUT },
-    { path: "lk/auth/member/files", method: RequestMethod.POST },
-    { path: "lk/auth/member/register", method: RequestMethod.POST },
+    { path: "cabinet/account/documents", method: RequestMethod.POST },
+    { path: "cabinet/account/signature", method: RequestMethod.PUT },
+    { path: "cabinet/auth/member/files", method: RequestMethod.POST },
+    { path: "cabinet/auth/member/register", method: RequestMethod.POST },
 ];
 
 /** Вебхуки провайдеров оплаты: подпись считается по байтам тела, разбирать его в JSON нельзя. */

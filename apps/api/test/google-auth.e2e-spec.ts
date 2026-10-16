@@ -99,7 +99,7 @@ describe("Google sign-in (e2e)", () => {
     });
 
     describe("кабинет участника", () => {
-        const path = "/lk/auth/google";
+        const path = "/cabinet/auth/google";
 
         it("старт ставит HttpOnly-куку привязки и отправляет Google хеш verifier и nonce", async () => {
             const { res, flowCookie } = await start(path);
@@ -107,7 +107,7 @@ describe("Google sign-in (e2e)", () => {
             expect(res.headers.location).toContain("https://accounts.example/auth");
             const header = setCookies(res).find((c) => c.startsWith("google_oauth_flow="));
             expect(header).toContain("HttpOnly");
-            expect(header).toContain("Path=/lk/auth/google");
+            expect(header).toContain("Path=/cabinet/auth/google");
             expect(header).toContain("SameSite=Lax");
 
             const [nonce, verifier] = (flowCookie as string).split(".");

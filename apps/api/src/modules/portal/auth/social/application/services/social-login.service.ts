@@ -18,7 +18,7 @@ export type EmployeeSocialLoginResult =
  *
  * Ожидающие членства вход НЕ подтверждает: их мог завести кто угодно, вписав чужой email,
  * и первый же вход через Google молча записал бы человека в чужой клуб. Подтверждает
- * владелец сам, явно: в кабинете (`/lk/memberships`) или по ссылке из письма (TASK-703).
+ * владелец сам, явно: в кабинете (`/cabinet/memberships`) или по ссылке из письма (TASK-703).
  */
 @Injectable()
 export class SocialLoginService {

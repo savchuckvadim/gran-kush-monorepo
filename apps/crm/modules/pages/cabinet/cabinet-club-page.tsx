@@ -13,7 +13,7 @@ import {
     useMyPresenceStatus,
     useMyQrCode,
     useRegenerateQrCode,
-} from "@/modules/entities/lk-club";
+} from "@/modules/entities/cabinet-club";
 import { useMyMemberships } from "@/modules/entities/membership";
 import { ClubBadge } from "@/modules/shared/ui/Brand";
 

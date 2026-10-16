@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/lk/account/documents": {
+    "/cabinet/account/documents": {
         parameters: {
             query?: never;
             header?: never;
@@ -22,7 +22,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/account/documents/{id}/preview": {
+    "/cabinet/account/documents/{id}/preview": {
         parameters: {
             query?: never;
             header?: never;
@@ -39,7 +39,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/account/documents/{id}": {
+    "/cabinet/account/documents/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -56,7 +56,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/account/documents/{id}/share": {
+    "/cabinet/account/documents/{id}/share": {
         parameters: {
             query?: never;
             header?: never;
@@ -73,7 +73,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/account/documents/{id}/share/{memberId}": {
+    "/cabinet/account/documents/{id}/share/{memberId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -90,7 +90,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/account/signature": {
+    "/cabinet/account/signature": {
         parameters: {
             query?: never;
             header?: never;
@@ -109,7 +109,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/account/signature/preview": {
+    "/cabinet/account/signature/preview": {
         parameters: {
             query?: never;
             header?: never;
@@ -126,7 +126,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/account/signature/share": {
+    "/cabinet/account/signature/share": {
         parameters: {
             query?: never;
             header?: never;
@@ -143,7 +143,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/account/signature/share/{memberId}": {
+    "/cabinet/account/signature/share/{memberId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -708,7 +708,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/auth/login": {
+    "/cabinet/auth/login": {
         parameters: {
             query?: never;
             header?: never;
@@ -725,7 +725,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/auth/refresh": {
+    "/cabinet/auth/refresh": {
         parameters: {
             query?: never;
             header?: never;
@@ -742,7 +742,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/auth/logout": {
+    "/cabinet/auth/logout": {
         parameters: {
             query?: never;
             header?: never;
@@ -759,7 +759,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/auth/me": {
+    "/cabinet/auth/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -776,7 +776,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/auth/password/reset": {
+    "/cabinet/auth/password/reset": {
         parameters: {
             query?: never;
             header?: never;
@@ -793,7 +793,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/auth/password/reset/confirm": {
+    "/cabinet/auth/password/reset/confirm": {
         parameters: {
             query?: never;
             header?: never;
@@ -810,7 +810,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/mobile/auth/login": {
+    "/cabinet/mobile/auth/login": {
         parameters: {
             query?: never;
             header?: never;
@@ -827,7 +827,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/mobile/auth/refresh": {
+    "/cabinet/mobile/auth/refresh": {
         parameters: {
             query?: never;
             header?: never;
@@ -844,7 +844,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/mobile/auth/logout": {
+    "/cabinet/mobile/auth/logout": {
         parameters: {
             query?: never;
             header?: never;
@@ -861,7 +861,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/mobile/auth/me": {
+    "/cabinet/mobile/auth/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -878,7 +878,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/auth/member/registration-schema": {
+    "/cabinet/auth/member/registration-schema": {
         parameters: {
             query?: never;
             header?: never;
@@ -895,7 +895,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/auth/member/register": {
+    "/cabinet/auth/member/register": {
         parameters: {
             query?: never;
             header?: never;
@@ -912,7 +912,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/auth/member/files": {
+    "/cabinet/auth/member/files": {
         parameters: {
             query?: never;
             header?: never;
@@ -921,7 +921,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Queue account documents/signature upload (Site) */
+        /** Queue account documents/signature upload */
         post: operations["MemberRegistration_uploadFiles"];
         delete?: never;
         options?: never;
@@ -929,7 +929,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/auth/member/confirm-email/resend": {
+    "/cabinet/auth/member/confirm-email/resend": {
         parameters: {
             query?: never;
             header?: never;
@@ -946,7 +946,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/auth/member/confirm-email": {
+    "/cabinet/auth/member/confirm-email": {
         parameters: {
             query?: never;
             header?: never;
@@ -1031,7 +1031,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/auth/google/start": {
+    "/cabinet/auth/google/start": {
         parameters: {
             query?: never;
             header?: never;
@@ -1485,7 +1485,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/members/me": {
+    "/cabinet/members/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -1493,7 +1493,7 @@ export interface paths {
             cookie?: never;
         };
         /** Get current member profile (Site - own data only) */
-        get: operations["LkMembers_getMe"];
+        get: operations["CabinetMembers_getMe"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1502,7 +1502,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/memberships": {
+    "/cabinet/memberships": {
         parameters: {
             query?: never;
             header?: never;
@@ -1510,7 +1510,7 @@ export interface paths {
             cookie?: never;
         };
         /** Все мои членства, в том числе ждущие подтверждения */
-        get: operations["LkMemberships_list"];
+        get: operations["CabinetMemberships_list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1519,7 +1519,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/memberships/{id}/confirm": {
+    "/cabinet/memberships/{id}/confirm": {
         parameters: {
             query?: never;
             header?: never;
@@ -1529,14 +1529,14 @@ export interface paths {
         get?: never;
         put?: never;
         /** Подтвердить членство под своей сессией и выбрать, что показать клубу */
-        post: operations["LkMemberships_confirm"];
+        post: operations["CabinetMemberships_confirm"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/lk/memberships/{id}/decline": {
+    "/cabinet/memberships/{id}/decline": {
         parameters: {
             query?: never;
             header?: never;
@@ -1546,14 +1546,14 @@ export interface paths {
         get?: never;
         put?: never;
         /** Отказаться от ждущего членства: оно удаляется */
-        post: operations["LkMemberships_decline"];
+        post: operations["CabinetMemberships_decline"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/lk/memberships/{id}/leave": {
+    "/cabinet/memberships/{id}/leave": {
         parameters: {
             query?: never;
             header?: never;
@@ -1563,7 +1563,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Выйти из клуба: членство закрывается, показ документов и подписи отзывается */
-        post: operations["LkMemberships_leave"];
+        post: operations["CabinetMemberships_leave"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1655,7 +1655,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/portals": {
+    "/cabinet/portals": {
         parameters: {
             query?: never;
             header?: never;
@@ -1663,7 +1663,7 @@ export interface paths {
             cookie?: never;
         };
         /** Мои клубы (memberships текущего аккаунта) */
-        get: operations["LkPortals_myClubs"];
+        get: operations["CabinetPortals_myClubs"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1672,7 +1672,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/portals/{slug}/join": {
+    "/cabinet/portals/{slug}/join": {
         parameters: {
             query?: never;
             header?: never;
@@ -1682,7 +1682,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Вступить в клуб: поля по форме public_registration; документы/подпись подтягиваются из аккаунта */
-        post: operations["LkPortals_join"];
+        post: operations["CabinetPortals_join"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1852,7 +1852,7 @@ export interface paths {
         patch: operations["CrmCatalog_updateMeasurementUnit"];
         trace?: never;
     };
-    "/lk/catalog/products": {
+    "/cabinet/catalog/products": {
         parameters: {
             query?: never;
             header?: never;
@@ -1860,7 +1860,7 @@ export interface paths {
             cookie?: never;
         };
         /** Каталог товаров (только активные и доступные) */
-        get: operations["LkCatalog_getProducts"];
+        get: operations["CabinetCatalog_getProducts"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1869,7 +1869,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/catalog/products/{id}": {
+    "/cabinet/catalog/products/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1877,7 +1877,7 @@ export interface paths {
             cookie?: never;
         };
         /** Детали товара */
-        get: operations["LkCatalog_getProduct"];
+        get: operations["CabinetCatalog_getProduct"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1886,7 +1886,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/catalog/categories": {
+    "/cabinet/catalog/categories": {
         parameters: {
             query?: never;
             header?: never;
@@ -1894,7 +1894,7 @@ export interface paths {
             cookie?: never;
         };
         /** Список категорий */
-        get: operations["LkCatalog_getCategories"];
+        get: operations["CabinetCatalog_getCategories"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1964,7 +1964,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/qr-code": {
+    "/cabinet/qr-code": {
         parameters: {
             query?: never;
             header?: never;
@@ -1975,7 +1975,7 @@ export interface paths {
          * Получить свой QR-код
          * @description Возвращает действующий QR-код участника в текущем клубе (клуб — заголовок X-Portal-*). Если кода ещё нет или срок вышел, выдаёт новый: просить администратора не нужно. Строку encryptedCode нужно закодировать в QR-изображение на клиенте.
          */
-        get: operations["LkQrCodes_getMyQrCode"];
+        get: operations["CabinetQrCodes_getMyQrCode"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1984,7 +1984,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/qr-code/regenerate": {
+    "/cabinet/qr-code/regenerate": {
         parameters: {
             query?: never;
             header?: never;
@@ -1997,7 +1997,7 @@ export interface paths {
          * Запросить перегенерацию QR-кода
          * @description Перевыпускает QR-код участника в текущем клубе. Прежний код сразу перестаёт приниматься: используйте, если скриншот кода попал не туда.
          */
-        post: operations["LkQrCodes_regenerateMyQrCode"];
+        post: operations["CabinetQrCodes_regenerateMyQrCode"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2149,7 +2149,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/presence/status": {
+    "/cabinet/presence/status": {
         parameters: {
             query?: never;
             header?: never;
@@ -2160,7 +2160,7 @@ export interface paths {
          * Мой текущий статус присутствия
          * @description Возвращает true если участник сейчас в клубе (есть активная сессия).
          */
-        get: operations["LkPresence_getMyPresenceStatus"];
+        get: operations["CabinetPresence_getMyPresenceStatus"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2169,7 +2169,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/presence/history": {
+    "/cabinet/presence/history": {
         parameters: {
             query?: never;
             header?: never;
@@ -2180,7 +2180,7 @@ export interface paths {
          * Моя история посещений
          * @description Список всех сессий присутствия текущего участника.
          */
-        get: operations["LkPresence_getMyPresenceHistory"];
+        get: operations["CabinetPresence_getMyPresenceHistory"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2292,7 +2292,7 @@ export interface paths {
         patch: operations["CrmOrders_updatePaymentStatus"];
         trace?: never;
     };
-    "/lk/orders": {
+    "/cabinet/orders": {
         parameters: {
             query?: never;
             header?: never;
@@ -2303,20 +2303,20 @@ export interface paths {
          * Мои заказы
          * @description Список заказов текущего члена клуба с пагинацией и фильтрами.
          */
-        get: operations["LkOrders_listMyOrders"];
+        get: operations["CabinetOrders_listMyOrders"];
         put?: never;
         /**
          * Создать заказ
          * @description Член клуба оформляет заказ. Товары проверяются на наличие, рассчитывается стоимость, номер заказа генерируется автоматически.
          */
-        post: operations["LkOrders_createOrder"];
+        post: operations["CabinetOrders_createOrder"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/lk/orders/{id}": {
+    "/cabinet/orders/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -2327,7 +2327,7 @@ export interface paths {
          * Детали моего заказа
          * @description Полная информация о заказе с позициями. Доступен только свой заказ.
          */
-        get: operations["LkOrders_getMyOrder"];
+        get: operations["CabinetOrders_getMyOrder"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2336,7 +2336,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/orders/{id}/cancel": {
+    "/cabinet/orders/{id}/cancel": {
         parameters: {
             query?: never;
             header?: never;
@@ -2353,7 +2353,7 @@ export interface paths {
          * Отменить заказ
          * @description Отмена возможна, пока заказ в стадии «новый». Товары возвращаются на склад.
          */
-        patch: operations["LkOrders_cancelMyOrder"];
+        patch: operations["CabinetOrders_cancelMyOrder"];
         trace?: never;
     };
     "/crm/finance/transactions": {
@@ -2643,7 +2643,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/reg-links/{token}/join": {
+    "/cabinet/reg-links/{token}/join": {
         parameters: {
             query?: never;
             header?: never;
@@ -2653,7 +2653,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Вступить в клуб по ссылке-форме под текущей сессией; документы — только по выбору */
-        post: operations["LkRegistrationLinks_join"];
+        post: operations["CabinetRegistrationLinks_join"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2803,7 +2803,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/reviews/portals/{portalId}": {
+    "/cabinet/reviews/portals/{portalId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -2811,9 +2811,9 @@ export interface paths {
             cookie?: never;
         };
         /** Моя оценка клуба */
-        get: operations["LkReviews_myPortalReview"];
+        get: operations["CabinetReviews_myPortalReview"];
         /** Поставить/обновить оценку клубу (только member клуба) */
-        put: operations["LkReviews_reviewPortal"];
+        put: operations["CabinetReviews_reviewPortal"];
         post?: never;
         delete?: never;
         options?: never;
@@ -2821,7 +2821,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/reviews/products/{productId}": {
+    "/cabinet/reviews/products/{productId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -2830,7 +2830,7 @@ export interface paths {
         };
         get?: never;
         /** Поставить/обновить оценку товару (только member клуба товара) */
-        put: operations["LkReviews_reviewProduct"];
+        put: operations["CabinetReviews_reviewProduct"];
         post?: never;
         delete?: never;
         options?: never;
@@ -2838,7 +2838,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/lk/spending": {
+    "/cabinet/spending": {
         parameters: {
             query?: never;
             header?: never;
@@ -2846,7 +2846,7 @@ export interface paths {
             cookie?: never;
         };
         /** Мои траты по всем клубам */
-        get: operations["LkSpending_mySpending"];
+        get: operations["CabinetSpending_mySpending"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3442,7 +3442,7 @@ export interface components {
             /** @example true */
             isActive: boolean;
             /**
-             * @description pending — клуб добавил вас, ждёт вашего подтверждения (`/lk/memberships`)
+             * @description pending — клуб добавил вас, ждёт вашего подтверждения (`/cabinet/memberships`)
              * @enum {string}
              */
             consentStatus: "confirmed" | "pending";
@@ -10499,7 +10499,7 @@ export interface operations {
             };
         };
     };
-    LkMembers_getMe: {
+    CabinetMembers_getMe: {
         parameters: {
             query?: never;
             header?: never;
@@ -10537,7 +10537,7 @@ export interface operations {
             };
         };
     };
-    LkMemberships_list: {
+    CabinetMemberships_list: {
         parameters: {
             query?: never;
             header?: never;
@@ -10566,7 +10566,7 @@ export interface operations {
             };
         };
     };
-    LkMemberships_confirm: {
+    CabinetMemberships_confirm: {
         parameters: {
             query?: never;
             header?: never;
@@ -10619,7 +10619,7 @@ export interface operations {
             };
         };
     };
-    LkMemberships_decline: {
+    CabinetMemberships_decline: {
         parameters: {
             query?: never;
             header?: never;
@@ -10659,7 +10659,7 @@ export interface operations {
             };
         };
     };
-    LkMemberships_leave: {
+    CabinetMemberships_leave: {
         parameters: {
             query?: never;
             header?: never;
@@ -10907,7 +10907,7 @@ export interface operations {
             };
         };
     };
-    LkPortals_myClubs: {
+    CabinetPortals_myClubs: {
         parameters: {
             query?: never;
             header?: never;
@@ -10936,7 +10936,7 @@ export interface operations {
             };
         };
     };
-    LkPortals_join: {
+    CabinetPortals_join: {
         parameters: {
             query?: never;
             header?: never;
@@ -11829,7 +11829,7 @@ export interface operations {
             };
         };
     };
-    LkCatalog_getProducts: {
+    CabinetCatalog_getProducts: {
         parameters: {
             query?: never;
             header?: never;
@@ -11867,7 +11867,7 @@ export interface operations {
             };
         };
     };
-    LkCatalog_getProduct: {
+    CabinetCatalog_getProduct: {
         parameters: {
             query?: never;
             header?: never;
@@ -11916,7 +11916,7 @@ export interface operations {
             };
         };
     };
-    LkCatalog_getCategories: {
+    CabinetCatalog_getCategories: {
         parameters: {
             query?: never;
             header?: never;
@@ -12154,7 +12154,7 @@ export interface operations {
             };
         };
     };
-    LkQrCodes_getMyQrCode: {
+    CabinetQrCodes_getMyQrCode: {
         parameters: {
             query?: never;
             header?: never;
@@ -12201,7 +12201,7 @@ export interface operations {
             };
         };
     };
-    LkQrCodes_regenerateMyQrCode: {
+    CabinetQrCodes_regenerateMyQrCode: {
         parameters: {
             query?: never;
             header?: never;
@@ -12639,7 +12639,7 @@ export interface operations {
             };
         };
     };
-    LkPresence_getMyPresenceStatus: {
+    CabinetPresence_getMyPresenceStatus: {
         parameters: {
             query?: never;
             header?: never;
@@ -12677,7 +12677,7 @@ export interface operations {
             };
         };
     };
-    LkPresence_getMyPresenceHistory: {
+    CabinetPresence_getMyPresenceHistory: {
         parameters: {
             query?: {
                 page?: number;
@@ -13175,7 +13175,7 @@ export interface operations {
             };
         };
     };
-    LkOrders_listMyOrders: {
+    CabinetOrders_listMyOrders: {
         parameters: {
             query?: {
                 page?: number;
@@ -13229,7 +13229,7 @@ export interface operations {
             };
         };
     };
-    LkOrders_createOrder: {
+    CabinetOrders_createOrder: {
         parameters: {
             query?: never;
             header?: {
@@ -13310,7 +13310,7 @@ export interface operations {
             };
         };
     };
-    LkOrders_getMyOrder: {
+    CabinetOrders_getMyOrder: {
         parameters: {
             query?: never;
             header?: never;
@@ -13359,7 +13359,7 @@ export interface operations {
             };
         };
     };
-    LkOrders_cancelMyOrder: {
+    CabinetOrders_cancelMyOrder: {
         parameters: {
             query?: never;
             header?: never;
@@ -14351,7 +14351,7 @@ export interface operations {
             };
         };
     };
-    LkRegistrationLinks_join: {
+    CabinetRegistrationLinks_join: {
         parameters: {
             query?: never;
             header?: never;
@@ -15045,7 +15045,7 @@ export interface operations {
             };
         };
     };
-    LkReviews_myPortalReview: {
+    CabinetReviews_myPortalReview: {
         parameters: {
             query?: never;
             header?: never;
@@ -15085,7 +15085,7 @@ export interface operations {
             };
         };
     };
-    LkReviews_reviewPortal: {
+    CabinetReviews_reviewPortal: {
         parameters: {
             query?: never;
             header?: never;
@@ -15147,7 +15147,7 @@ export interface operations {
             };
         };
     };
-    LkReviews_reviewProduct: {
+    CabinetReviews_reviewProduct: {
         parameters: {
             query?: never;
             header?: never;
@@ -15209,7 +15209,7 @@ export interface operations {
             };
         };
     };
-    LkSpending_mySpending: {
+    CabinetSpending_mySpending: {
         parameters: {
             query?: never;
             header?: never;

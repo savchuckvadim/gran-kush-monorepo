@@ -4,8 +4,8 @@ import { PrismaModule } from "@common/prisma/prisma.module";
 import { MembersModule } from "@modules/portal/crm/members/members.module";
 import { QrCodesModule } from "@modules/portal/crm/qr-codes/qr-codes.module";
 
+import { CabinetPresenceController } from "./api/controllers/cabinet-presence.controller";
 import { CrmPresenceController } from "./api/controllers/crm-presence.controller";
-import { LkPresenceController } from "./api/controllers/lk-presence.controller";
 import { PresenceService } from "./application/services/presence.service";
 import { PresenceSessionRepository } from "./domain/repositories/presence-session-repository.interface";
 import { PresenceSessionPrismaRepository } from "./infrastructure/repositories/presence-session-prisma.repository";
@@ -19,7 +19,7 @@ import { PresenceSessionPrismaRepository } from "./infrastructure/repositories/p
             useClass: PresenceSessionPrismaRepository,
         },
     ],
-    controllers: [CrmPresenceController, LkPresenceController],
+    controllers: [CrmPresenceController, CabinetPresenceController],
     exports: [PresenceService],
 })
 export class PresenceModule {}

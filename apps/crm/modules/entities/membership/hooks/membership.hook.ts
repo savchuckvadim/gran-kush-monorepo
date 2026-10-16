@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { SchemaConfirmMyMembershipDto } from "@workspace/api-client/core";
 
-import { lkKeys } from "@/modules/entities/lk-account";
+import { cabinetKeys } from "@/modules/entities/cabinet-account";
 
 import {
     confirmMembership,
@@ -14,7 +14,7 @@ import {
 
 export function useMyMemberships() {
     return useQuery({
-        queryKey: lkKeys.memberships,
+        queryKey: cabinetKeys.memberships,
         queryFn: listMyMemberships,
         staleTime: 15_000,
     });
@@ -22,7 +22,7 @@ export function useMyMemberships() {
 
 export function useAccountDocuments(enabled = true) {
     return useQuery({
-        queryKey: lkKeys.documents,
+        queryKey: cabinetKeys.documents,
         queryFn: listAccountDocuments,
         enabled,
     });
@@ -31,7 +31,7 @@ export function useAccountDocuments(enabled = true) {
 /** Любое изменение членства меняет список клубов и данные аккаунта, поэтому кэш сбрасывается разом. */
 function useRefreshAfterChange() {
     const queryClient = useQueryClient();
-    return () => Promise.all([queryClient.invalidateQueries({ queryKey: lkKeys.all })]);
+    return () => Promise.all([queryClient.invalidateQueries({ queryKey: cabinetKeys.all })]);
 }
 
 export function useConfirmMembership() {

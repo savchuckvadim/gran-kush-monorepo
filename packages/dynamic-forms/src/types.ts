@@ -1,6 +1,6 @@
 import type React from "react";
 
-/** Поле схемы формы (ответ form-schema эндпоинтов CRM/LK). */
+/** Поле схемы формы (ответ form-schema эндпоинтов CRM и кабинета). */
 export type FormSchemaField = {
     fieldKey: string;
     type: string;

@@ -273,11 +273,7 @@ export class QrPreviewResultDto {
     proposedAction: "entry" | "exit";
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// LK: мой статус присутствия
-// ═══════════════════════════════════════════════════════════════════════════════
-
-/** Ответ `GET /lk/presence/status`: в клубе ли участник сейчас и текущий визит. */
+/** Ответ `GET /cabinet/presence/status`: в клубе ли участник сейчас и текущий визит. */
 export class MyPresenceStatusDto {
     @ApiProperty({
         example: true,

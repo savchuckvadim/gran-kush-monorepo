@@ -111,7 +111,7 @@ describe("Content i18n: system labels follow Accept-Language (e2e)", () => {
         ["en", "First name"],
     ])("public registration schema: %s → %s", async (locale, expected) => {
         const res = await request(app.getHttpServer())
-            .get("/lk/auth/member/registration-schema")
+            .get("/cabinet/auth/member/registration-schema")
             .set("X-Portal-Slug", slug)
             .set("Accept-Language", locale);
         expect(res.status).toBe(200);

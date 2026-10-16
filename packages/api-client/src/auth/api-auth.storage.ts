@@ -1,23 +1,25 @@
 import { ApiAuthType } from "./api-auth.type";
 
-const ACCESS_TOKEN_KEY_CRM = "access_token_crm";
-const REFRESH_TOKEN_KEY_CRM = "refresh_token_crm";
-const ACCESS_TOKEN_KEY_SITE = "access_token_site";
-const REFRESH_TOKEN_KEY_SITE = "refresh_token_site";
+/**
+ * Token keys for the bearer strategy only (mobile, scripts). Web clients use HttpOnly cookies and
+ * never put tokens into localStorage.
+ */
+const TOKEN_KEYS: Record<ApiAuthType, { access: string; refresh: string }> = {
+    [ApiAuthType.CRM]: { access: "access_token_crm", refresh: "refresh_token_crm" },
+    [ApiAuthType.CABINET]: { access: "access_token_cabinet", refresh: "refresh_token_cabinet" },
+};
 
 function canUseBrowserStorage(): boolean {
     return typeof window !== "undefined";
 }
 
 export class ApiTokensStorage {
-    private readonly ACCESS_TOKEN_KEY: string = ACCESS_TOKEN_KEY_CRM;
-    private readonly REFRESH_TOKEN_KEY: string = REFRESH_TOKEN_KEY_CRM;
+    private readonly ACCESS_TOKEN_KEY: string;
+    private readonly REFRESH_TOKEN_KEY: string;
 
     constructor(type: ApiAuthType) {
-        this.ACCESS_TOKEN_KEY =
-            type === ApiAuthType.CRM ? ACCESS_TOKEN_KEY_CRM : ACCESS_TOKEN_KEY_SITE;
-        this.REFRESH_TOKEN_KEY =
-            type === ApiAuthType.CRM ? REFRESH_TOKEN_KEY_CRM : REFRESH_TOKEN_KEY_SITE;
+        this.ACCESS_TOKEN_KEY = TOKEN_KEYS[type].access;
+        this.REFRESH_TOKEN_KEY = TOKEN_KEYS[type].refresh;
     }
     public getAccessToken = (): string | null => {
         if (!canUseBrowserStorage()) {

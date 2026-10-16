@@ -5,7 +5,7 @@ import type { Request } from "express";
 import type { PortalRequestContext } from "@common/portal/portal-context.types";
 
 /**
- * Полный контекст портала из запроса (после middleware), может быть undefined вне CRM/LK.
+ * Полный контекст портала из запроса (после middleware), может быть undefined вне CRM и кабинета.
  */
 export const CurrentPortalContext = createParamDecorator(
     (_data: unknown, ctx: ExecutionContext): PortalRequestContext | undefined => {
