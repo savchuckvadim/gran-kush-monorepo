@@ -2118,7 +2118,7 @@ export interface paths {
         };
         /**
          * Получить свой QR-код
-         * @description Возвращает действующий QR-код участника в текущем клубе (клуб — заголовок X-Portal-*). Если кода ещё нет или срок вышел, выдаёт новый: просить администратора не нужно. Строку encryptedCode нужно закодировать в QR-изображение на клиенте.
+         * @description Возвращает действующий QR-код участника в текущем клубе (клуб — заголовок X-Portal-*). Если кода ещё нет или срок вышел, выдаёт новый: просить администратора не нужно. Строку code нужно закодировать в QR-изображение на клиенте.
          */
         get: operations["CabinetQrCodes_getMyQrCode"];
         put?: never;
@@ -5108,10 +5108,10 @@ export interface components {
         };
         ScanQrCodeDto: {
             /**
-             * @description Зашифрованный payload, полученный при сканировании QR-кода
-             * @example a1b2c3d4e5f6...
+             * @description Строка, прочитанная из QR-кода
+             * @example VQ6EAOKbQdSnFkRmVPgHxl3Fq2bW1Xc8
              */
-            encryptedCode: string;
+            code: string;
         };
         QrCodeMemberDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
@@ -5137,7 +5137,7 @@ export interface components {
              * @description Причина отказа: клиент показывает текст на языке интерфейса по этому коду
              * @enum {string}
              */
-            errorCode?: "undecryptable" | "malformed" | "expired" | "revoked" | "wrong_member" | "wrong_club" | "member_inactive" | "membership_unconfirmed";
+            errorCode?: "malformed" | "expired" | "revoked" | "wrong_club" | "member_inactive" | "membership_unconfirmed";
             /**
              * @description Та же причина английским текстом (для логов; интерфейс переводит errorCode)
              * @example QR code has expired
@@ -5173,10 +5173,10 @@ export interface components {
             updatedAt: string;
             member?: components["schemas"]["QrCodeMemberDto"];
             /**
-             * @description Зашифрованный payload — строка, которую нужно закодировать в QR-изображение на клиенте
-             * @example a1b2c3d4e5f6...
+             * @description Строка для QR-изображения, 38 знаков: клиент кодирует её как есть
+             * @example VQ6EAOKbQdSnFkRmVPgHxl3Fq2bW1Xc8
              */
-            encryptedCode: string;
+            code: string;
         };
         RegenerateQrCodeDto: {
             /**
@@ -5187,10 +5187,10 @@ export interface components {
         };
         QrCheckInDto: {
             /**
-             * @description Зашифрованный payload из QR-кода
-             * @example a1b2c3d4e5f6...
+             * @description Строка, прочитанная из QR-кода
+             * @example VQ6EAOKbQdSnFkRmVPgHxl3Fq2bW1Xc8
              */
-            encryptedCode: string;
+            code: string;
             /**
              * @description Действие из предпросмотра: сервер его не переключает сам
              * @enum {string}
@@ -5264,10 +5264,10 @@ export interface components {
         };
         QrPreviewDto: {
             /**
-             * @description Зашифрованный payload из QR-кода
-             * @example a1b2c3d4e5f6...
+             * @description Строка, прочитанная из QR-кода
+             * @example VQ6EAOKbQdSnFkRmVPgHxl3Fq2bW1Xc8
              */
-            encryptedCode: string;
+            code: string;
         };
         QrPreviewResultDto: {
             /**
@@ -5279,7 +5279,7 @@ export interface components {
              * @description Причина отказа (если valid = false): интерфейс переводит по этому коду
              * @enum {string}
              */
-            errorCode?: "undecryptable" | "malformed" | "expired" | "revoked" | "wrong_member" | "wrong_club" | "member_inactive" | "membership_unconfirmed";
+            errorCode?: "malformed" | "expired" | "revoked" | "wrong_club" | "member_inactive" | "membership_unconfirmed";
             /**
              * @description Та же причина английским текстом (если valid = false), для логов
              * @example QR code has expired

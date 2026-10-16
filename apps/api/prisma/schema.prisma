@@ -1220,7 +1220,9 @@ model ProductReview {
 model QrCode {
   id             String   @id @default(uuid())
   entityRecordId String   @unique @map("entity_record_id")
-  encryptedCode  String   @map("encrypted_code") @db.VarChar(1000)
+  /// Момент выпуска: из него и id сервер считает подпись кода, поэтому перевыпуск гасит прежний код.
+  /// Самого кода в БД нет (QrCodesService)
+  issuedAt       DateTime @default(now()) @map("issued_at")
   expiresAt      DateTime @map("expires_at")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
@@ -1228,7 +1230,6 @@ model QrCode {
   entityRecord EntityRecord @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
 
   @@index([entityRecordId])
-  @@index([encryptedCode])
   @@index([expiresAt])
   @@map("qr_codes")
 }

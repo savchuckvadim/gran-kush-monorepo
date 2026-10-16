@@ -3,16 +3,17 @@ import { ConfigService } from "@nestjs/config";
 
 import { EncryptionService } from "@encryption/application/services/encryption.service";
 import { MemberConsentStatus } from "@prisma/client";
-import { randomUUID, timingSafeEqual } from "crypto";
+import { timingSafeEqual } from "crypto";
 
 import { DEFAULT_CONTENT_LOCALE } from "@common/i18n";
 import { isUniqueViolationOn } from "@common/prisma/unique-violation";
 import { MembersService } from "@modules/portal/crm/members/application/services/members.service";
-import { QrCode, QrCodePayload } from "@modules/portal/crm/qr-codes/domain/entity/qr-code.entity";
+import { QrCode } from "@modules/portal/crm/qr-codes/domain/entity/qr-code.entity";
 import {
     QR_SCAN_ERROR_MESSAGES,
     QrScanErrorCode,
 } from "@modules/portal/crm/qr-codes/domain/qr-scan-error";
+import { formatQrToken, parseQrToken } from "@modules/portal/crm/qr-codes/domain/qr-token";
 import { QrCodeRepository } from "@modules/portal/crm/qr-codes/domain/repositories/qr-code-repository.interface";
 
 export interface QrScanValidation {
@@ -26,6 +27,9 @@ export interface QrScanValidation {
     member?: QrCode["member"];
 }
 
+/** Цель ключа подписи кода входа; смена версии гасит все выданные коды. */
+const QR_TOKEN_PURPOSE = "qr-entry-token/v1";
+
 /**
  * QR-код участника — как он устроен и почему так.
  *
@@ -33,19 +37,17 @@ export interface QrScanValidation {
  * и выход. QR ни во что не вмешивается сам по себе: он лишь называет участника. Что делать
  * дальше (пустить, закрыть визит), решает сервер по состоянию участника.
  *
- * ЧТО ВНУТРИ. Строка `encryptedCode` — зашифрованный AES-256-GCM payload
- * `{ memberId, qrCodeId, issuedAt, expiresAt }`. Шифрование здесь нужно не для секретности
- * (сканер всё равно получает строку целиком), а чтобы нельзя было собрать код руками, не зная
- * ключа сервера: GCM ещё и проверяет целостность.
+ * ЧТО ВНУТРИ. Строка кода — 38 знаков (`domain/qr-token.ts`): id записи кода и подпись сервера
+ * к нему, HMAC от `id:issuedAt` ключом, выведенным из мастер-ключа только для этой цели. Короткая
+ * строка даёт редкий QR, который читается с первого раза.
  *
- * ЧТО ДЕЛАЕТ КОД ДЕЙСТВИТЕЛЬНЫМ. Одной расшифровки мало, иначе код жил бы до срока, даже
- * если его перевыпустили, а ключ сервера давал бы возможность подделывать коды. Поэтому
- * сервер дополнительно требует, чтобы присланная строка ПОБАЙТОВО совпала с той, что лежит
- * в БД у участника (`qr_codes.encrypted_code`). Из этого следует:
- *   - перевыпуск (смена строки в БД) мгновенно гасит прежний код: шифртекст каждый раз новый,
- *     потому что у AES-GCM случайный IV, а `issuedAt` меняется;
- *   - отзыв (удаление строки) гасит код;
- *   - подделка без доступа на запись в БД невозможна, даже при утёкшем ключе шифрования.
+ * ЧТО ДЕЛАЕТ КОД ДЕЙСТВИТЕЛЬНЫМ. Подпись должна совпасть с той, что сервер считает по записи в
+ * БД прямо сейчас. Секрета в БД нет совсем — ни кода, ни его хеша: из БД код не прочитать, а без
+ * ключа сервера его не собрать. Из этого следует:
+ *   - перевыпуск (новый `issuedAt`) мгновенно гасит прежний код: его подпись больше не сходится;
+ *   - отзыв (удаление записи) гасит код;
+ *   - утечка БД без ключа ничего не даёт; утечка ключа лечится сменой ключа, после неё все коды
+ *     перевыпускаются сами при следующем открытии кабинета.
  *
  * ОБЛАСТЬ ДЕЙСТВИЯ. Один код на членство (то есть на пару «аккаунт — клуб»), а не на аккаунт:
  * участник нескольких клубов получает отдельный код в каждом. Сканер клуба принимает только
@@ -60,10 +62,6 @@ export interface QrScanValidation {
  * КОМУ МОЖНО. Код выдаётся только активному участнику, подтвердившему членство
  * (`consentStatus = confirmed`): клуб, который лишь вписал чужой email, не может стать
  * местом, где этот человек «отмечается» (TASK-703).
- *
- * КУДА РАЗВИВАТЬ (TASK-714, QR v2). Вместо шифртекста в ~420 символов — короткий случайный
- * токен (в БД только его хеш): QR получается редким и читается с первого раза, а доверие к
- * ключу шифрования пропадает совсем. Поведение для клиентов от этого не меняется.
  */
 @Injectable()
 export class QrCodesService {
@@ -74,7 +72,7 @@ export class QrCodesService {
 
     constructor(
         private readonly qrCodeRepository: QrCodeRepository,
-        private readonly encryptionService: EncryptionService,
+        private readonly encryption: EncryptionService,
         private readonly membersService: MembersService,
         private readonly configService: ConfigService
     ) {
@@ -102,6 +100,11 @@ export class QrCodesService {
         return this.qrCodeRepository.findById(id);
     }
 
+    /** Строка для QR-изображения: считается заново, в БД её нет. */
+    codeOf(qr: QrCode): string {
+        return formatQrToken(qr.id, this.signatureOf(qr.id, qr.issuedAt));
+    }
+
     /**
      * Действующий код участника: выдаёт, если кода ещё нет, и продлевает, если срок вышел.
      * Так новому участнику не нужно просить администратора «сделать QR», а старому не нужно
@@ -121,8 +124,7 @@ export class QrCodesService {
 
     /**
      * Создать или перевыпустить QR-код участника.
-     * Перевыпуск ВСЕГДА гасит прежний код: строка в БД заменяется, а сервер принимает только
-     * строку, совпадающую с БД (см. описание класса).
+     * Перевыпуск ВСЕГДА гасит прежний код: новый момент выпуска меняет подпись (см. описание класса).
      */
     async generateOrRegenerate(memberId: string, portalId: string): Promise<QrCode> {
         const member = await this.membersService.findByIdForPortal(memberId, portalId);
@@ -150,17 +152,8 @@ export class QrCodesService {
             return this.reissue(existing, issuedAt, expiresAt);
         }
 
-        // id задаём сами: он входит в зашифрованный payload, поэтому строку делаем ДО вставки и
-        // пишем одним INSERT. Раньше сначала создавалась строка с кодом «temp» и тут же
-        // обновлялась: параллельный запрос успевал увидеть «temp» или упасть на уникальном ключе.
-        const id = randomUUID();
         try {
-            const created = await this.qrCodeRepository.create({
-                id,
-                memberId,
-                encryptedCode: this.seal({ memberId, qrCodeId: id, issuedAt, expiresAt }),
-                expiresAt,
-            });
+            const created = await this.qrCodeRepository.create({ memberId, issuedAt, expiresAt });
             this.logger.log(
                 `QR code issued for member ${memberId}, expires ${expiresAt.toISOString()}`
             );
@@ -187,63 +180,46 @@ export class QrCodesService {
      * Проверить отсканированный код. Ничего не пишет: решение «вход или выход» принимает
      * вызывающий (`PresenceService`) по результату и состоянию участника.
      *
-     * Порядок проверок важен: сначала дешёвые и безопасные (без обращения к БД), и только
-     * потом всё, что требует БД. Каждый отказ возвращает код (`errorCode`), по которому клиент
+     * Порядок проверок важен: сначала форма строки (без БД), потом подпись, и только подписанный
+     * код говорит о клубе, сроке и участнике. Каждый отказ возвращает код (`errorCode`), по которому клиент
      * показывает понятную причину: «истёк» говорит участнику открыть кабинет, «перевыпущен» —
      * что у него в телефоне старая картинка.
      */
-    async validateScannedCode(encryptedCode: string, portalId: string): Promise<QrScanValidation> {
-        // 1. Расшифровка: чужая или испорченная строка не расшифруется (GCM проверяет тег).
-        let payload: QrCodePayload;
-        try {
-            payload = JSON.parse(this.encryptionService.decrypt(encryptedCode)) as QrCodePayload;
-        } catch {
-            return this.reject("undecryptable");
-        }
-
-        // 2. В payload есть всё, что нужно дальше.
-        if (!payload.memberId || !payload.qrCodeId || !payload.expiresAt) {
+    async validateScannedCode(code: string, portalId: string): Promise<QrScanValidation> {
+        // 1. Форма строки: чужой QR или обрывок снимка отсекается без обращения к БД.
+        const parts = parseQrToken(code.trim());
+        if (!parts) {
             return this.reject("malformed");
         }
 
-        // 3. Срок из самого payload. Проверка раньше БД: просроченный код не стоит запроса.
-        if (new Date(payload.expiresAt) < new Date()) {
-            return this.reject("expired", payload.memberId, payload.qrCodeId);
-        }
-
-        // 4. Строка в БД есть: иначе код отозван (запись удалена).
-        const qrCode = await this.qrCodeRepository.findById(payload.qrCodeId);
+        // 2. Запись кода есть: иначе код отозван (запись удалена).
+        const qrCode = await this.qrCodeRepository.findById(parts.qrCodeId);
         if (!qrCode) {
             return this.reject("revoked");
         }
 
-        // 5. Присланная строка — именно ТЕКУЩАЯ у участника. Это и есть гашение при перевыпуске:
-        // расшифровать можно и прежний код, но в БД уже лежит другая строка.
-        if (!this.sameCode(encryptedCode, qrCode.encryptedCode)) {
+        // 3. Подпись сходится с текущим выпуском. Это и есть гашение при перевыпуске: у прежнего
+        // кода подпись от прежнего `issuedAt`. До этой проверки код ничего не говорит о клубе.
+        if (!this.sameSignature(parts.signature, this.signatureOf(qrCode.id, qrCode.issuedAt))) {
             return this.reject("revoked", qrCode.memberId, qrCode.id);
         }
 
-        // 6. Payload и БД говорят об одном участнике.
-        if (qrCode.memberId !== payload.memberId) {
-            return this.reject("wrong_member");
-        }
-
-        // 7. Участник принадлежит клубу сканирующего сотрудника.
+        // 4. Участник принадлежит клубу сканирующего сотрудника.
         if (!qrCode.member || qrCode.member.portalId !== portalId) {
             return this.reject("wrong_club");
         }
 
-        // 8. Срок по БД (его могли сократить или продлить уже после выпуска).
+        // 5. Срок действия.
         if (qrCode.isExpired()) {
             return this.reject("expired", qrCode.memberId, qrCode.id);
         }
 
-        // 9. Участник не отключён клубом.
+        // 6. Участник не отключён клубом.
         if (!qrCode.member.isActive) {
             return this.reject("member_inactive", qrCode.memberId, qrCode.id, qrCode.member);
         }
 
-        // 10. Участник сам подтвердил членство. Код не должен работать у клуба, который лишь
+        // 7. Участник сам подтвердил членство. Код не должен работать у клуба, который лишь
         // вписал чужой email и ждёт согласия владельца аккаунта.
         if (qrCode.member.consentStatus !== MemberConsentStatus.confirmed) {
             return this.reject("membership_unconfirmed", qrCode.memberId, qrCode.id);
@@ -279,15 +255,13 @@ export class QrCodesService {
     // Internals
     // ═══════════════════════════════════════════════════════════════════════════
 
-    /** Заменить строку у существующей записи: прежний код при этом перестаёт приниматься. */
+    /** Новый момент выпуска у существующей записи: прежний код при этом перестаёт приниматься. */
     private async reissue(existing: QrCode, issuedAt: Date, expiresAt: Date): Promise<QrCode> {
+        // перевыпуск в ту же миллисекунду дал бы ту же подпись, и прежний код не погас бы
+        const at =
+            issuedAt > existing.issuedAt ? issuedAt : new Date(existing.issuedAt.getTime() + 1);
         const updated = await this.qrCodeRepository.update(existing.id, {
-            encryptedCode: this.seal({
-                memberId: existing.memberId,
-                qrCodeId: existing.id,
-                issuedAt,
-                expiresAt,
-            }),
+            issuedAt: at,
             expiresAt,
         });
         this.logger.log(
@@ -296,29 +270,18 @@ export class QrCodesService {
         return updated;
     }
 
-    private seal(input: {
-        memberId: string;
-        qrCodeId: string;
-        issuedAt: Date;
-        expiresAt: Date;
-    }): string {
-        const payload: QrCodePayload = {
-            memberId: input.memberId,
-            qrCodeId: input.qrCodeId,
-            issuedAt: input.issuedAt.toISOString(),
-            expiresAt: input.expiresAt.toISOString(),
-        };
-        return this.encryptionService.encrypt(JSON.stringify(payload));
+    private signatureOf(qrCodeId: string, issuedAt: Date): Buffer {
+        return this.encryption.sign(QR_TOKEN_PURPOSE, `${qrCodeId}:${issuedAt.toISOString()}`);
     }
 
-    /**
-     * Сравнение строк кода за постоянное время: по времени ответа нельзя подбирать код
-     * посимвольно. Разная длина — сразу «не совпало» (длина строки не секрет).
-     */
-    private sameCode(submitted: string, stored: string): boolean {
-        const left = Buffer.from(submitted);
-        const right = Buffer.from(stored);
-        return left.length === right.length && timingSafeEqual(left, right);
+    /** Сравнение подписи за постоянное время: по времени ответа её нельзя подбирать побайтово. */
+    private sameSignature(submitted: Buffer, expected: Buffer): boolean {
+        const right = expected.subarray(0, submitted.length);
+        return (
+            submitted.length > 0 &&
+            right.length === submitted.length &&
+            timingSafeEqual(submitted, right)
+        );
     }
 
     private reject(

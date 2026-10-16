@@ -61,7 +61,7 @@ export function usePresenceStats(filters?: PresenceStatsFilter) {
  */
 export function useQrPreview() {
     return useMutation({
-        mutationFn: (encryptedCode: string) => previewQrCodeScan(encryptedCode),
+        mutationFn: (code: string) => previewQrCodeScan(code),
     });
 }
 

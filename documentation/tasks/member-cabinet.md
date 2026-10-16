@@ -454,7 +454,10 @@ MEMBER_AUTH_COOKIE_DOMAIN=lvh.me node dist/main.js`; CRM: `NEXT_PUBLIC_API_URL=h
 
 ### TASK-714: QR и присутствие v2 `[~]` P1 — 2026-10-16
 
-- [ ] Токен, уровень M, тёмный на светлом, срок, wake lock, автовыпуск и продление.
+- [x] Токен, уровень M, тёмный на светлом, срок, wake lock, автовыпуск и продление. В QR — 38 знаков: id записи и
+      HMAC от `id:issuedAt` (ключ из мастер-ключа через HKDF, `qr-entry-token/v1`); в БД кода нет, перевыпуск
+      гасит прежний новым `issuedAt`. Поле API `encryptedCode` → `code`; отказы `undecryptable`/`wrong_member` убраны
+      (`malformed` — не код клуба). Экран кабинета с QR не гаснет (`useWakeLock`).
 - [x] Скан с явным действием, сотрудник на вход и выход, `closeOpenSession` с условием `exitedAt IS NULL`,
       идемпотентность подтверждения (`ConfirmDoorScanUseCase`, `@Idempotent`, 409 `not_present`).
 - [x] Настройки присутствия клуба: `presence_settings` (часовой пояс IANA, время авто-выхода `HH:MM`, потолок

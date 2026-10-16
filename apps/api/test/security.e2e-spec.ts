@@ -885,40 +885,34 @@ describe("Security (e2e)", () => {
 
             const first = await lk(owner.cookies).get("/cabinet/qr-code", clubB);
             expect(first.status).toBe(200);
-            const firstCode = first.body.encryptedCode as string;
+            const firstCode = first.body.code as string;
             expect(
-                (await as(clubB).post("/crm/qr-codes/scan").send({ encryptedCode: firstCode })).body
+                (await as(clubB).post("/crm/qr-codes/scan").send({ code: firstCode })).body
             ).toMatchObject({ valid: true, memberId });
 
             const again = await lk(owner.cookies).get("/cabinet/qr-code", clubB);
-            expect(again.body.encryptedCode).toBe(firstCode);
+            expect(again.body.code).toBe(firstCode);
 
             const reissued = await lk(owner.cookies)
                 .post("/cabinet/qr-code/regenerate", clubB)
                 .send({});
             expect(reissued.status).toBe(201);
-            const newCode = reissued.body.encryptedCode as string;
+            const newCode = reissued.body.code as string;
             expect(newCode).not.toBe(firstCode);
 
-            const stale = await as(clubB)
-                .post("/crm/qr-codes/scan")
-                .send({ encryptedCode: firstCode });
+            const stale = await as(clubB).post("/crm/qr-codes/scan").send({ code: firstCode });
             expect(stale.body).toMatchObject({ valid: false, errorCode: "revoked" });
-            const fresh = await as(clubB)
-                .post("/crm/qr-codes/scan")
-                .send({ encryptedCode: newCode });
+            const fresh = await as(clubB).post("/crm/qr-codes/scan").send({ code: newCode });
             expect(fresh.body.valid).toBe(true);
 
             // Код другого клуба не принимается на стойке этого клуба
-            const wrongClub = await as(clubA)
-                .post("/crm/qr-codes/scan")
-                .send({ encryptedCode: newCode });
+            const wrongClub = await as(clubA).post("/crm/qr-codes/scan").send({ code: newCode });
             expect(wrongClub.body).toMatchObject({ valid: false, errorCode: "wrong_club" });
 
             // Предпросмотр и подтверждение отказывают кодом причины, а не русской строкой
             const preview = await as(clubA)
                 .post("/crm/presence/qr-preview")
-                .send({ encryptedCode: firstCode });
+                .send({ code: firstCode });
             expect(preview.body).toMatchObject({ valid: false, errorCode: expect.any(String) });
 
             const status = await lk(owner.cookies).get("/cabinet/presence/status", clubB);

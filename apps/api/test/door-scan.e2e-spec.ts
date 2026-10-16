@@ -69,11 +69,13 @@ describe("Door scan (e2e)", () => {
     const qrOf = async (slug: string): Promise<string> => {
         const res = await cabinet(slug).get("/cabinet/qr-code");
         expect(res.status).toBe(200);
-        return res.body.encryptedCode as string;
+        // короткий подписанный код (QR v2), а не прежний шифртекст в ~420 знаков
+        expect(res.body.code).toMatch(/^[A-Za-z0-9_-]{38}$/);
+        return res.body.code as string;
     };
 
-    const scan = (slug: string, encryptedCode: string, action: "entry" | "exit", key?: string) =>
-        crm(slug).post("/crm/presence/qr-scan", key).send({ encryptedCode, action });
+    const scan = (slug: string, code: string, action: "entry" | "exit", key?: string) =>
+        crm(slug).post("/crm/presence/qr-scan", key).send({ code, action });
 
     beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -139,9 +141,7 @@ describe("Door scan (e2e)", () => {
         const [club] = clubs as [string, string];
         const code = await qrOf(club);
 
-        const preview = await crm(club)
-            .post("/crm/presence/qr-preview")
-            .send({ encryptedCode: code });
+        const preview = await crm(club).post("/crm/presence/qr-preview").send({ code: code });
         expect(preview.body).toMatchObject({
             valid: true,
             isPresent: false,
@@ -162,9 +162,7 @@ describe("Door scan (e2e)", () => {
     it("exit closes the visit once; the same key replays the answer, another key gets 409", async () => {
         const [club] = clubs as [string, string];
         const code = await qrOf(club);
-        const preview = await crm(club)
-            .post("/crm/presence/qr-preview")
-            .send({ encryptedCode: code });
+        const preview = await crm(club).post("/crm/presence/qr-preview").send({ code: code });
         expect(preview.body.proposedAction).toBe("exit");
 
         const key = `exit-${suffix}`;
@@ -188,7 +186,7 @@ describe("Door scan (e2e)", () => {
         const fresh = await cabinet(club).post("/cabinet/qr-code/regenerate");
         expect(fresh.status).toBe(201);
 
-        const stale = await crm(club).post("/crm/presence/qr-preview").send({ encryptedCode: old });
+        const stale = await crm(club).post("/crm/presence/qr-preview").send({ code: old });
         expect(stale.body).toMatchObject({ valid: false, errorCode: "revoked" });
         const refused = await scan(club, old, "entry");
         expect(refused.status).toBe(400);
@@ -202,29 +200,23 @@ describe("Door scan (e2e)", () => {
 
         const staffView = await crm(club).get(`/crm/qr-codes/member/${memberId}`);
         expect(staffView.status).toBe(200);
-        expect(staffView.body.encryptedCode).toBe(current);
+        expect(staffView.body.code).toBe(current);
 
         await crm(club).delete(`/crm/qr-codes/member/${memberId}`).expect(200);
-        const revoked = await crm(club)
-            .post("/crm/presence/qr-preview")
-            .send({ encryptedCode: current });
+        const revoked = await crm(club).post("/crm/presence/qr-preview").send({ code: current });
         expect(revoked.body).toMatchObject({ valid: false, errorCode: "revoked" });
         expect((await crm(club).get(`/crm/qr-codes/member/${memberId}`)).status).toBe(404);
 
         const fresh = await qrOf(club);
         expect(fresh).not.toBe(current);
-        const preview = await crm(club)
-            .post("/crm/presence/qr-preview")
-            .send({ encryptedCode: fresh });
+        const preview = await crm(club).post("/crm/presence/qr-preview").send({ code: fresh });
         expect(preview.body.valid).toBe(true);
     });
 
     it("the QR of one club does not open the door of another", async () => {
         const [clubA, clubB] = clubs as [string, string];
         const codeOfB = await qrOf(clubB);
-        const preview = await crm(clubA)
-            .post("/crm/presence/qr-preview")
-            .send({ encryptedCode: codeOfB });
+        const preview = await crm(clubA).post("/crm/presence/qr-preview").send({ code: codeOfB });
         expect(preview.body).toMatchObject({ valid: false, errorCode: "wrong_club" });
     });
 });

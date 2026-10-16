@@ -49,18 +49,10 @@ export class QrCodePrismaRepository extends QrCodeRepository {
         return row ? this.mapToEntity(row) : null;
     }
 
-    async findByEncryptedCode(encryptedCode: string): Promise<QrCode | null> {
-        const row = await this.prisma.qrCode.findFirst({
-            where: { encryptedCode },
-            include: QR_CODE_INCLUDE,
-        });
-        return row ? this.mapToEntity(row) : null;
-    }
-
     async create(data: {
         id?: string;
         memberId: string;
-        encryptedCode: string;
+        issuedAt: Date;
         expiresAt: Date;
     }): Promise<QrCode> {
         const entityRecordId = await this.entityRecordIdForMember(data.memberId);
@@ -68,7 +60,7 @@ export class QrCodePrismaRepository extends QrCodeRepository {
             data: {
                 ...(data.id ? { id: data.id } : {}),
                 entityRecordId,
-                encryptedCode: data.encryptedCode,
+                issuedAt: data.issuedAt,
                 expiresAt: data.expiresAt,
             },
             include: QR_CODE_INCLUDE,
@@ -76,7 +68,7 @@ export class QrCodePrismaRepository extends QrCodeRepository {
         return this.mapToEntity(row);
     }
 
-    async update(id: string, data: { encryptedCode: string; expiresAt: Date }): Promise<QrCode> {
+    async update(id: string, data: { issuedAt: Date; expiresAt: Date }): Promise<QrCode> {
         const row = await this.prisma.qrCode.update({
             where: { id },
             data,
@@ -87,19 +79,6 @@ export class QrCodePrismaRepository extends QrCodeRepository {
 
     async delete(id: string): Promise<void> {
         await this.prisma.qrCode.delete({ where: { id } });
-    }
-
-    async deleteByMemberId(memberId: string): Promise<void> {
-        const entityRecordId = await this.entityRecordIdForMember(memberId);
-        await this.prisma.qrCode.deleteMany({ where: { entityRecordId } });
-    }
-
-    async findExpired(): Promise<QrCode[]> {
-        const rows = await this.prisma.qrCode.findMany({
-            where: { expiresAt: { lt: new Date() } },
-            include: QR_CODE_INCLUDE,
-        });
-        return rows.map((row) => this.mapToEntity(row));
     }
 
     private mapToEntity(row: QrCodeRow): QrCode {
@@ -140,7 +119,7 @@ export class QrCodePrismaRepository extends QrCodeRepository {
         return new QrCode({
             id: row.id,
             memberId: rawMember?.id ?? row.entityRecordId,
-            encryptedCode: row.encryptedCode,
+            issuedAt: row.issuedAt,
             expiresAt: row.expiresAt,
             createdAt: row.createdAt,
             updatedAt: row.updatedAt,

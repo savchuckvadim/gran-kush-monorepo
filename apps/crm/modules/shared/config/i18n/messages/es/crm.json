@@ -321,11 +321,9 @@
                 "scanning": "Verificando...",
                 "scanError": "No se pudo reconocer el código QR. Intenta de nuevo.",
                 "errors": {
-                    "undecryptable": "Este no es un código QR de socio. Que lo abra en su cuenta.",
-                    "malformed": "El código QR está dañado. Que el socio lo actualice en su cuenta.",
+                    "malformed": "Este no es un código de entrada del club. Que el socio abra su QR en su cuenta.",
                     "expired": "El código QR ha caducado. Que el socio abra su cuenta: se renueva solo.",
                     "revoked": "Este código QR fue sustituido por uno nuevo. Pide el actual.",
-                    "wrong_member": "El código QR no coincide con el socio. Que lo muestre de nuevo.",
                     "wrong_club": "Este código QR es de otro club.",
                     "member_inactive": "El socio está desactivado en este club.",
                     "membership_unconfirmed": "El socio aún no ha confirmado su membresía.",

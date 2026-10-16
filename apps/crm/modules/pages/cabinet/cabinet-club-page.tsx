@@ -13,6 +13,7 @@ import {
     useMyQrCode,
     useRegenerateQrCode,
 } from "@/modules/entities/cabinet-club";
+import { useWakeLock } from "@/modules/shared/lib/use-wake-lock";
 
 const formatDateTime = (iso: string, locale: string) =>
     new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(
@@ -28,7 +29,7 @@ const formatDuration = (minutes: number) => {
  * Главная клуба: QR для стойки и последние визиты; членство уже проверил раздел клуба.
  * QR всегда тёмный на светлом, независимо от темы сайта: сканер на стойке читает его контрастным.
  * Уровень коррекции M — код редкий и читается с первого раза. Код выдаёт и продлевает сам API
- * при первом открытии.
+ * при первом открытии. Пока код на экране, экран не гаснет.
  */
 export function CabinetClubPage({ slug }: { slug: string }) {
     const t = useTranslations("cabinet.club");
@@ -38,6 +39,7 @@ export function CabinetClubPage({ slug }: { slug: string }) {
     const qr = useMyQrCode(slug);
     const regenerate = useRegenerateQrCode(slug);
     const history = useMyPresenceHistory(slug);
+    useWakeLock(Boolean(qr.data));
 
     const sessions = history.data?.items ?? [];
     const qrError =
@@ -70,7 +72,7 @@ export function CabinetClubPage({ slug }: { slug: string }) {
                         )}
                         {qr.data && (
                             <div className="space-y-3">
-                                <ScannableQrCode value={qr.data.encryptedCode} />
+                                <ScannableQrCode value={qr.data.code} />
                                 <p className="text-center text-xs text-muted-foreground">
                                     {t("validUntil", {
                                         date: formatDateTime(qr.data.expiresAt, locale),

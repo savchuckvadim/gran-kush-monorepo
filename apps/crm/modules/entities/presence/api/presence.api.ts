@@ -35,8 +35,8 @@ export interface PresenceStatsFilter {
  * Предпросмотр QR на стойке — только проверка и участник, без записи: предлагает действие,
  * которое сотрудник потом подтверждает.
  */
-export async function previewQrCodeScan(encryptedCode: string): Promise<QrPreviewResult> {
-    const response = await $api.POST("/crm/presence/qr-preview", { body: { encryptedCode } });
+export async function previewQrCodeScan(code: string): Promise<QrPreviewResult> {
+    const response = await $api.POST("/crm/presence/qr-preview", { body: { code } });
     return assertOpenApiOk<QrPreviewResult>(response);
 }
 

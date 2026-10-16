@@ -6,9 +6,8 @@ import * as crypto from "crypto";
 /**
  * Сервис шифрования чувствительных данных (AES-256-GCM)
  *
- * Используется для шифрования:
- * - QR-кодов членов клуба
- * - Других чувствительных данных в БД
+ * Используется для шифрования чувствительных данных в БД (номера документов) и для подписей
+ * (`sign`: код входа участника).
  *
  * Формат зашифрованных данных: iv:authTag:ciphertext (hex)
  */
@@ -20,6 +19,7 @@ export class EncryptionService {
     private readonly ivLength = 16; // 128 бит
     private readonly authTagLength = 16; // 128 бит
     private readonly encryptionKey: Buffer;
+    private readonly purposeKeys = new Map<string, Buffer>();
 
     constructor(private readonly configService: ConfigService) {
         const keyHex = this.configService.get<string>("ENCRYPTION_MASTER_KEY");
@@ -87,6 +87,31 @@ export class EncryptionService {
         decrypted += decipher.final("utf8");
 
         return decrypted;
+    }
+
+    /**
+     * Подпись HMAC-SHA256 ключом, выведенным из мастер-ключа для одной цели (HKDF). Свой ключ на
+     * цель: подпись одной подсистемы не подходит другой, а AES-ключ не используется для HMAC.
+     */
+    sign(purpose: string, data: string): Buffer {
+        return crypto.createHmac("sha256", this.keyFor(purpose)).update(data).digest();
+    }
+
+    private keyFor(purpose: string): Buffer {
+        let key = this.purposeKeys.get(purpose);
+        if (!key) {
+            key = Buffer.from(
+                crypto.hkdfSync(
+                    "sha256",
+                    this.encryptionKey,
+                    Buffer.alloc(0),
+                    purpose,
+                    this.keyLength
+                )
+            );
+            this.purposeKeys.set(purpose, key);
+        }
+        return key;
     }
 
     /**

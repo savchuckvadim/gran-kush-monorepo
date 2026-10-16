@@ -59,7 +59,7 @@ export class CrmPresenceController {
         @PortalId() portalId: string
     ): Promise<CheckInResultDto> {
         const result = await this.confirmDoorScan.execute({
-            encryptedCode: dto.encryptedCode,
+            code: dto.code,
             action: dto.action,
             portalId,
             employeeId: employee.id,
@@ -90,7 +90,7 @@ export class CrmPresenceController {
         @Body() dto: QrPreviewDto,
         @PortalId() portalId: string
     ): Promise<QrPreviewResultDto> {
-        return this.presenceService.previewQrScan(dto.encryptedCode, portalId);
+        return this.presenceService.previewQrScan(dto.code, portalId);
     }
 
     // ─── Manual Check-in ─────────────────────────────────────────────────────

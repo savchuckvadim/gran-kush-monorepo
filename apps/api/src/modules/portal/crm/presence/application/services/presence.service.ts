@@ -164,7 +164,7 @@ export class PresenceService {
      * информацию о действии (вход/выход) — без записи в БД.
      */
     async previewQrScan(
-        encryptedCode: string,
+        code: string,
         portalId: string
     ): Promise<{
         valid: boolean;
@@ -181,7 +181,7 @@ export class PresenceService {
         proposedAction: "entry" | "exit";
     }> {
         // 1. Валидируем QR
-        const scanResult = await this.qrCodesService.validateScannedCode(encryptedCode, portalId);
+        const scanResult = await this.qrCodesService.validateScannedCode(code, portalId);
 
         if (!scanResult.valid) {
             return {
@@ -195,7 +195,8 @@ export class PresenceService {
 
         const memberId = scanResult.memberId!;
 
-        // 2. Проверяем текущую активную сессию (без создания), участник должен принадлежать порталу
+        // 2. Текущий визит (без создания). Участника не в этом клубе код уже отсёк как wrong_club;
+        // NotFound здесь — участника удалили между проверкой и чтением.
         let activeSession: PresenceSession | null;
         try {
             activeSession = await this.sessionRepository.findActiveByMemberId(memberId, portalId);
@@ -203,8 +204,8 @@ export class PresenceService {
             if (error instanceof NotFoundException) {
                 return {
                     valid: false,
-                    errorCode: "wrong_member",
-                    error: QR_SCAN_ERROR_MESSAGES.wrong_member,
+                    errorCode: "wrong_club",
+                    error: QR_SCAN_ERROR_MESSAGES.wrong_club,
                     isPresent: false,
                     proposedAction: "entry",
                 };

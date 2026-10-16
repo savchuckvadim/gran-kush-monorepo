@@ -67,7 +67,7 @@ export function MemberQrCodeCard({ memberId }: { memberId: string }) {
 
             {qr.data && (
                 <div className="space-y-3">
-                    <ScannableQrCode value={qr.data.encryptedCode} size={200} />
+                    <ScannableQrCode value={qr.data.code} size={200} />
                     <p
                         className={
                             qr.data.isExpired

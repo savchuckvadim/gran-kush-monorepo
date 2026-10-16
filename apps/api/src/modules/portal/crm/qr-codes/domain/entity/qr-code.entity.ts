@@ -1,19 +1,15 @@
 import type { MemberConsentStatus } from "@prisma/client";
 
 /**
- * Domain Entity — QrCode (QR-код члена клуба)
- *
- * QR-код содержит зашифрованный payload с данными участника.
- * Используется для:
- * - Входа/выхода из клуба (сканирование на стойке)
- * - Идентификации при заказе
+ * QR-код участника для входа в клуб. Сама строка кода здесь не хранится: её считает
+ * `QrCodesService` из `id` и `issuedAt` (см. описание сервиса).
  */
 export class QrCode {
     id: string;
     memberId: string;
 
-    /** Зашифрованный payload (AES-256-GCM) */
-    encryptedCode: string;
+    /** Момент выпуска: входит в подпись кода, поэтому перевыпуск гасит прежний код */
+    issuedAt: Date;
 
     /** Срок действия QR-кода */
     expiresAt: Date;
@@ -21,7 +17,6 @@ export class QrCode {
     createdAt: Date;
     updatedAt: Date;
 
-    // Relations (опционально)
     member?: {
         id: string;
         portalId: string;
@@ -40,19 +35,4 @@ export class QrCode {
     isExpired(): boolean {
         return new Date() > this.expiresAt;
     }
-}
-
-/**
- * Расшифрованный payload QR-кода.
- * Содержится внутри encryptedCode после дешифрования.
- */
-export interface QrCodePayload {
-    /** ID члена клуба */
-    memberId: string;
-    /** ID самого QR-кода */
-    qrCodeId: string;
-    /** Время создания (ISO) */
-    issuedAt: string;
-    /** Время истечения (ISO) */
-    expiresAt: string;
 }

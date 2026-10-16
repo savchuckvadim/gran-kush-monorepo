@@ -248,7 +248,7 @@ describe("Cross-portal isolation (e2e)", () => {
     });
 
     describe("QR codes isolation", () => {
-        let encryptedCodeB: string;
+        let codeB: string;
 
         beforeAll(async () => {
             // Сотрудник портала B генерирует QR своему участнику
@@ -258,16 +258,7 @@ describe("Cross-portal isolation (e2e)", () => {
                 .set("X-Portal-Slug", portalB.slug)
                 .send({ memberId: memberBId });
             expect(res.status).toBe(201);
-
-            const memberB = await prisma.member.findUniqueOrThrow({
-                where: { id: memberBId },
-                select: { entityRecordId: true },
-            });
-            const qr = await prisma.qrCode.findUniqueOrThrow({
-                where: { entityRecordId: memberB.entityRecordId },
-                select: { encryptedCode: true },
-            });
-            encryptedCodeB = qr.encryptedCode;
+            codeB = res.body.code as string;
         });
 
         it("returns 404 for portal B member QR code requested by employee A", async () => {
@@ -300,7 +291,7 @@ describe("Cross-portal isolation (e2e)", () => {
                 .post("/crm/qr-codes/scan")
                 .set("Cookie", portalA.cookies)
                 .set("X-Portal-Slug", portalA.slug)
-                .send({ encryptedCode: encryptedCodeB });
+                .send({ code: codeB });
             expect(res.status).toBe(201);
             const result = res.body.data ?? res.body;
             expect(result.valid).toBe(false);
@@ -311,7 +302,7 @@ describe("Cross-portal isolation (e2e)", () => {
                 .post("/crm/qr-codes/scan")
                 .set("Cookie", portalB.cookies)
                 .set("X-Portal-Slug", portalB.slug)
-                .send({ encryptedCode: encryptedCodeB });
+                .send({ code: codeB });
             expect(res.status).toBe(201);
             const result = res.body.data ?? res.body;
             expect(result.valid).toBe(true);

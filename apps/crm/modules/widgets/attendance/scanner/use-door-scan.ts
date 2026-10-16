@@ -82,7 +82,7 @@ export function useDoorScan() {
         if (!pending) return false;
         try {
             const recorded = await confirm.mutateAsync({
-                body: { encryptedCode: pending.code, action: pending.preview.proposedAction },
+                body: { code: pending.code, action: pending.preview.proposedAction },
                 idempotencyKey: pending.idempotencyKey,
             });
             setResult(recorded);

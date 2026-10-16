@@ -62,12 +62,11 @@ export class QrCodeDto {
  */
 export class QrCodeWithPayloadDto extends QrCodeDto {
     @ApiProperty({
-        example: "a1b2c3d4e5f6...",
+        example: "VQ6EAOKbQdSnFkRmVPgHxl3Fq2bW1Xc8",
         type: String,
-        description:
-            "Зашифрованный payload — строка, которую нужно закодировать в QR-изображение на клиенте",
+        description: "Строка для QR-изображения, 38 знаков: клиент кодирует её как есть",
     })
-    encryptedCode: string;
+    code: string;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -76,14 +75,14 @@ export class QrCodeWithPayloadDto extends QrCodeDto {
 
 export class ScanQrCodeDto {
     @ApiProperty({
-        example: "a1b2c3d4e5f6...",
+        example: "VQ6EAOKbQdSnFkRmVPgHxl3Fq2bW1Xc8",
         type: String,
-        description: "Зашифрованный payload, полученный при сканировании QR-кода",
+        description: "Строка, прочитанная из QR-кода",
     })
     @IsString()
     @IsNotEmpty()
-    @MaxLength(2000)
-    encryptedCode: string;
+    @MaxLength(512)
+    code: string;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

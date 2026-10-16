@@ -40,7 +40,7 @@ export class CrmQrCodesController {
         @Body() dto: ScanQrCodeDto,
         @PortalId() portalId: string
     ): Promise<QrCodeScanResultDto> {
-        return this.qrCodesService.validateScannedCode(dto.encryptedCode, portalId);
+        return this.qrCodesService.validateScannedCode(dto.code, portalId);
     }
 
     // ─── Получить QR-код участника ───────────────────────────────────────────
@@ -62,7 +62,7 @@ export class CrmQrCodesController {
         if (!qr) {
             throw new NotFoundException("QR-код для этого участника не найден");
         }
-        return mapQrCodeToPayloadDto(qr);
+        return mapQrCodeToPayloadDto(qr, this.qrCodesService.codeOf(qr));
     }
 
     // ─── Сгенерировать / перегенерировать QR-код ─────────────────────────────
@@ -81,7 +81,7 @@ export class CrmQrCodesController {
         @PortalId() portalId: string
     ): Promise<QrCodeWithPayloadDto> {
         const qr = await this.qrCodesService.generateOrRegenerate(dto.memberId, portalId);
-        return mapQrCodeToPayloadDto(qr);
+        return mapQrCodeToPayloadDto(qr, this.qrCodesService.codeOf(qr));
     }
 
     // ─── Отозвать QR-код ─────────────────────────────────────────────────────

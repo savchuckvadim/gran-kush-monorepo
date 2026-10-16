@@ -68,7 +68,7 @@ export function MemberQrPrintPage({ memberId }: { memberId: string }) {
                         )}
                     </div>
                     <ScannableQrCode
-                        value={qr.data.encryptedCode}
+                        value={qr.data.code}
                         size={280}
                         className="rounded-none border border-neutral-200 p-4"
                     />

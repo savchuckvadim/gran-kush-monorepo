@@ -120,14 +120,14 @@ export class ManualCheckOutDto {
 /** Предпросмотр скана на стойке: только код из QR, без записи */
 export class QrPreviewDto {
     @ApiProperty({
-        example: "a1b2c3d4e5f6...",
+        example: "VQ6EAOKbQdSnFkRmVPgHxl3Fq2bW1Xc8",
         type: String,
-        description: "Зашифрованный payload из QR-кода",
+        description: "Строка, прочитанная из QR-кода",
     })
     @IsString()
     @IsNotEmpty()
-    @MaxLength(2000)
-    encryptedCode: string;
+    @MaxLength(512)
+    code: string;
 }
 
 /** Подтверждение скана: код из QR и действие, которое показал предпросмотр */

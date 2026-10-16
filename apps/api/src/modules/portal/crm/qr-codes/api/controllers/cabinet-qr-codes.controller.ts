@@ -26,13 +26,13 @@ export class CabinetQrCodesController {
         description:
             "Возвращает действующий QR-код участника в текущем клубе (клуб — заголовок X-Portal-*). " +
             "Если кода ещё нет или срок вышел, выдаёт новый: просить администратора не нужно. " +
-            "Строку encryptedCode нужно закодировать в QR-изображение на клиенте.",
+            "Строку code нужно закодировать в QR-изображение на клиенте.",
     })
     @ApiSuccessResponse(QrCodeWithPayloadDto)
     @ApiErrorResponse([400, 401, 403])
     async getMyQrCode(@CurrentMember() member: Member): Promise<QrCodeWithPayloadDto> {
         const qr = await this.qrCodesService.ensureCurrent(member.id, member.portalId);
-        return mapQrCodeToPayloadDto(qr);
+        return mapQrCodeToPayloadDto(qr, this.qrCodesService.codeOf(qr));
     }
 
     // ─── Запросить перегенерацию QR-кода ─────────────────────────────────────
@@ -48,6 +48,6 @@ export class CabinetQrCodesController {
     @ApiErrorResponse([400, 401, 403])
     async regenerateMyQrCode(@CurrentMember() member: Member): Promise<QrCodeWithPayloadDto> {
         const qr = await this.qrCodesService.generateOrRegenerate(member.id, member.portalId);
-        return mapQrCodeToPayloadDto(qr);
+        return mapQrCodeToPayloadDto(qr, this.qrCodesService.codeOf(qr));
     }
 }

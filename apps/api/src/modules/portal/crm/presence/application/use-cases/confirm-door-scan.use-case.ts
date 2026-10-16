@@ -39,13 +39,13 @@ export class ConfirmDoorScanUseCase {
     ) {}
 
     async execute(command: {
-        encryptedCode: string;
+        code: string;
         action: DoorAction;
         portalId: string;
         employeeId: string;
     }): Promise<DoorScanResult> {
         const { action, portalId, employeeId } = command;
-        const scan = await this.qrCodes.validateScannedCode(command.encryptedCode, portalId);
+        const scan = await this.qrCodes.validateScannedCode(command.code, portalId);
         if (!scan.valid || !scan.memberId) {
             // В errors лежит код причины: клиент показывает перевод, а не строку сервера
             throw new BadRequestException({

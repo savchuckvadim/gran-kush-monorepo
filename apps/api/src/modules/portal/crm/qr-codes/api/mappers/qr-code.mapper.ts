@@ -23,9 +23,6 @@ export function mapQrCodeToDto(qr: QrCode): QrCodeDto {
 }
 
 /** QrCode → QrCodeWithPayloadDto: с кодом для изображения (кабинет — свой, CRM — для печати). */
-export function mapQrCodeToPayloadDto(qr: QrCode): QrCodeWithPayloadDto {
-    return {
-        ...mapQrCodeToDto(qr),
-        encryptedCode: qr.encryptedCode,
-    };
+export function mapQrCodeToPayloadDto(qr: QrCode, code: string): QrCodeWithPayloadDto {
+    return { ...mapQrCodeToDto(qr), code };
 }
