@@ -231,8 +231,8 @@ describe("GoogleOAuthFlowService — защита входа", () => {
             expect(flow.sanitizeReturnTo(raw, "es")).toBeUndefined();
         });
 
-        it("без названной страницы кабинет ведёт в профиль, а не на лендинг", () => {
-            expect(flow.successUrl("member", "es")).toBe("https://club.test/es/profile");
+        it("без названной страницы кабинет ведёт на свою главную", () => {
+            expect(flow.successUrl("member", "es")).toBe("https://club.test/es");
             expect(flow.successUrl("crm", "es")).toBe("https://crm.test/es");
             expect(flow.successUrl("member", "es", "/es/join/abc")).toBe(
                 "https://club.test/es/join/abc"

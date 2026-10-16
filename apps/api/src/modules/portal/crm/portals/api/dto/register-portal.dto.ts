@@ -3,6 +3,7 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from "@mail/consts/mail.constants";
 import { Equals, IsIn, IsOptional, IsString, Matches, MaxLength, MinLength } from "class-validator";
 
+import { IsNotReservedPortalSlug } from "@common/portal/reserved-slugs";
 import { IsEmailWithLowerCase } from "@common/decorators/dto/is-email-with-lower-case.decorator";
 
 export class RegisterPortalDto {
@@ -15,6 +16,7 @@ export class RegisterPortalDto {
     @MinLength(3)
     @MaxLength(40)
     @Matches(/^[a-z0-9-]+$/)
+    @IsNotReservedPortalSlug()
     name: string;
 
     @ApiProperty({ example: "Green Club", type: String })

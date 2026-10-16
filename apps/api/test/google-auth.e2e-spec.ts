@@ -131,13 +131,13 @@ describe("Google sign-in (e2e)", () => {
             expect(google.lastVerifier).toBe((flowCookie as string).split(".")[1]);
         });
 
-        it("без названной страницы возврата ведёт в профиль, а не на лендинг", async () => {
+        it("без названной страницы возврата ведёт на главную кабинета", async () => {
             google.email = `g-home-${suffix}@test.local`;
             const { flowCookie, state } = await start(path);
 
             const res = await callback(path, state, flowCookie);
 
-            expect(new URL(res.headers.location).pathname).toBe("/es/profile");
+            expect(new URL(res.headers.location).pathname).toBe("/es");
         });
 
         it.each([
@@ -156,7 +156,7 @@ describe("Google sign-in (e2e)", () => {
 
             expect(res.status).toBe(302);
             const location = new URL(res.headers.location);
-            expect(location.pathname).toBe("/es/profile");
+            expect(location.pathname).toBe("/es");
             expect(location.hostname).not.toBe("evil.example");
         });
 

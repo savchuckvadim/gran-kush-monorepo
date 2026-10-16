@@ -25,8 +25,8 @@ const FLOW_COOKIE_MAX_AGE_MS = 10 * 60 * 1000;
 const DEFAULT_LANDING: Record<SocialApp, (locale: string) => string> = {
     // CRM сама решает по клубам, куда отправить
     crm: (locale) => `/${locale}`,
-    // Кабинет участника: профиль, а не лендинг
-    member: (locale) => `/${locale}/profile`,
+    // Кабинет участника: его главная (мои клубы), а не лендинг
+    member: (locale) => `/${locale}`,
 };
 
 interface OAuthState {
