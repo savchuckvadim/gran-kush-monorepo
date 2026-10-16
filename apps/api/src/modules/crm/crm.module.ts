@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 
 import { CatalogModule } from "@modules/portal/crm/catalog/catalog.module";
+import { ClubPolicyModule } from "@modules/portal/crm/club-policy/club-policy.module";
 import { EmployeesModule } from "@modules/portal/crm/employees/employees.module";
 import { EntityFieldsModule } from "@modules/portal/crm/entity-fields/entity-fields.module";
 import { FinanceModule } from "@modules/portal/crm/finance/finance.module";
@@ -36,6 +37,7 @@ import { PublicPortalModule } from "@modules/portal/public/public-portal.module"
         SearchModule,
         UiSettingsModule,
         PublicPortalModule,
+        ClubPolicyModule,
     ],
 })
 export class CrmModule {}

@@ -46,22 +46,22 @@ enum IdentityProvider {
 /// (из кабинета) и сама аккаунт не создаёт и ничего не клеймит.
 /// Имя, фамилия и язык нужны, чтобы предзаполнить регистрацию клуба или анкету; аватар не храним.
 model UserIdentity {
-  id             String             @id @default(uuid())
-  userId         String             @map("user_id")
+  id             String           @id @default(uuid())
+  userId         String           @map("user_id")
   provider       IdentityProvider
-  providerUserId String             @map("provider_user_id") @db.VarChar(255)
-  email          String?            @db.VarChar(255)
+  providerUserId String           @map("provider_user_id") @db.VarChar(255)
+  email          String?          @db.VarChar(255)
   /// Провайдер подтвердил этот email (Google `email_verified`); у Telegram email нет.
-  emailVerified  Boolean            @default(false) @map("email_verified")
-  displayName    String?            @map("display_name") @db.VarChar(255)
-  givenName      String?            @map("given_name") @db.VarChar(255)
-  familyName     String?            @map("family_name") @db.VarChar(255)
+  emailVerified  Boolean          @default(false) @map("email_verified")
+  displayName    String?          @map("display_name") @db.VarChar(255)
+  givenName      String?          @map("given_name") @db.VarChar(255)
+  familyName     String?          @map("family_name") @db.VarChar(255)
   /// Публичное имя в Telegram (@username); может меняться или отсутствовать.
-  username       String?            @db.VarChar(255)
-  locale         String?            @db.VarChar(16)
-  lastLoginAt    DateTime?          @map("last_login_at")
-  createdAt      DateTime           @default(now()) @map("created_at")
-  updatedAt      DateTime           @updatedAt @map("updated_at")
+  username       String?          @db.VarChar(255)
+  locale         String?          @db.VarChar(16)
+  lastLoginAt    DateTime?        @map("last_login_at")
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -94,6 +94,12 @@ enum MemberJoinSource {
 enum MemberConsentStatus {
   confirmed
   pending
+}
+
+/// Как человек попадает в клуб без сотрудника: только по ссылке клуба или заявкой, которую клуб одобряет
+enum ClubJoinPolicy {
+  link_only
+  approval
 }
 
 enum UserDocumentSide {
@@ -211,11 +217,29 @@ model Portal {
   portalReviews         PortalReview[]
   productReviews        ProductReview[]
   uiSettings            UiSetting[]
+  policy                ClubPolicy?
 
   @@index([name])
   @@index([status])
   @@index([isListedOnMap])
   @@map("portals")
+}
+
+/// Правила клуба для участников: вступление, каталог, заказы. Строки нет — действуют значения по умолчанию.
+model ClubPolicy {
+  portalId              String         @id @map("portal_id")
+  joinPolicy            ClubJoinPolicy @default(link_only) @map("join_policy")
+  /// Каталог и заказ из кабинета, когда участник не в клубе (нет открытого визита)
+  catalogOutsideClub    Boolean        @default(false) @map("catalog_outside_club")
+  /// Заказ из кабинета только у одобренного участника (статус approved)
+  ordersRequireApproval Boolean        @default(false) @map("orders_require_approval")
+  /// Сотрудник может оформить заказ на свою же запись участника
+  staffSelfOrders       Boolean        @default(false) @map("staff_self_orders")
+  updatedAt             DateTime       @updatedAt @map("updated_at")
+
+  portal Portal @relation(fields: [portalId], references: [id], onDelete: Cascade)
+
+  @@map("club_policies")
 }
 
 // ========================
@@ -247,7 +271,7 @@ model User {
   documentAccessLogs   DocumentAccessLog[]
   portalReviews        PortalReview[]
   productReviews       ProductReview[]
-  termsAcceptedPortals Portal[]        @relation("PortalTermsAcceptedBy")
+  termsAcceptedPortals Portal[]            @relation("PortalTermsAcceptedBy")
 
   @@index([email])
   @@index([status])
@@ -392,31 +416,31 @@ model RefreshToken {
 // ========================
 
 model Member {
-  id                  String           @id @default(uuid())
-  userId              String           @map("user_id")
-  portalId            String           @map("portal_id")
-  entityRecordId      String           @unique @map("entity_record_id")
-  membershipNumber    String?          @map("membership_number") @db.VarChar(50)
-  isActive            Boolean          @default(true) @map("is_active")
-  joinSource          MemberJoinSource @default(self) @map("join_source")
-  registrationLinkId  String?          @map("registration_link_id")
-  createdByEmployeeId String?          @map("created_by_employee_id")
-  claimedAt           DateTime?        @map("claimed_at")
+  id                  String              @id @default(uuid())
+  userId              String              @map("user_id")
+  portalId            String              @map("portal_id")
+  entityRecordId      String              @unique @map("entity_record_id")
+  membershipNumber    String?             @map("membership_number") @db.VarChar(50)
+  isActive            Boolean             @default(true) @map("is_active")
+  joinSource          MemberJoinSource    @default(self) @map("join_source")
+  registrationLinkId  String?             @map("registration_link_id")
+  createdByEmployeeId String?             @map("created_by_employee_id")
+  claimedAt           DateTime?           @map("claimed_at")
   /// pending — клуб завёл существующий аккаунт по email, владелец ещё не подтвердил
   consentStatus       MemberConsentStatus @default(confirmed) @map("consent_status")
-  consentToken        String?          @unique @map("consent_token") @db.VarChar(128)
-  consentRequestedAt  DateTime?        @map("consent_requested_at")
-  consentConfirmedAt  DateTime?        @map("consent_confirmed_at")
+  consentToken        String?             @unique @map("consent_token") @db.VarChar(128)
+  consentRequestedAt  DateTime?           @map("consent_requested_at")
+  consentConfirmedAt  DateTime?           @map("consent_confirmed_at")
   /// подпись аккаунта показана этому клубу
-  signatureShared     Boolean          @default(false) @map("signature_shared")
-  createdAt           DateTime         @default(now()) @map("created_at")
-  updatedAt           DateTime         @updatedAt @map("updated_at")
+  signatureShared     Boolean             @default(false) @map("signature_shared")
+  createdAt           DateTime            @default(now()) @map("created_at")
+  updatedAt           DateTime            @updatedAt @map("updated_at")
 
-  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  portal            Portal            @relation(fields: [portalId], references: [id], onDelete: Cascade)
-  profile           EntityRecord      @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
-  registrationLink  RegistrationLink? @relation(fields: [registrationLinkId], references: [id], onDelete: SetNull)
-  createdByEmployee Employee?         @relation("MemberCreatedBy", fields: [createdByEmployeeId], references: [id], onDelete: SetNull)
+  user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  portal            Portal                @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  profile           EntityRecord          @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
+  registrationLink  RegistrationLink?     @relation(fields: [registrationLinkId], references: [id], onDelete: SetNull)
+  createdByEmployee Employee?             @relation("MemberCreatedBy", fields: [createdByEmployeeId], references: [id], onDelete: SetNull)
   orders            Order[]
   documentShares    MemberDocumentShare[]
 

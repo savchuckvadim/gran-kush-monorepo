@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 
 import { PrismaModule } from "@common/prisma/prisma.module";
 import { CatalogModule } from "@modules/portal/crm/catalog/catalog.module";
+import { ClubPolicyModule } from "@modules/portal/crm/club-policy/club-policy.module";
 import { MembersModule } from "@modules/portal/crm/members/members.module";
 
 import { CabinetOrdersController } from "./api/controllers/cabinet-orders.controller";
@@ -11,7 +12,7 @@ import { OrderRepository } from "./domain/repositories/order-repository.interfac
 import { OrderPrismaRepository } from "./infrastructure/repositories/order-prisma.repository";
 
 @Module({
-    imports: [PrismaModule, CatalogModule, MembersModule],
+    imports: [PrismaModule, CatalogModule, MembersModule, ClubPolicyModule],
     providers: [
         OrdersService,
         {

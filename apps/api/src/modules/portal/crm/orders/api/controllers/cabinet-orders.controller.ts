@@ -19,6 +19,7 @@ import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.in
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import { RequireMemberJwt } from "@modules/portal/auth/members";
 import { CurrentMember } from "@modules/portal/auth/members/api/decorators/current-member.decorator";
+import { RequireShopAccess } from "@modules/portal/crm/club-policy/api/guards/shop-access.guard";
 import { Member } from "@modules/portal/crm/members/domain/entity/member.entity";
 import {
     CancelOrderDto,
@@ -41,6 +42,7 @@ export class CabinetOrdersController {
     // ─── Создать заказ ───────────────────────────────────────────────────────
 
     @Post()
+    @RequireShopAccess("order")
     @Idempotent(IdempotencyScope.LK_ORDER_CREATE)
     @ApiOperation({
         summary: "Создать заказ",

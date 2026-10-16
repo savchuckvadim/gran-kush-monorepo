@@ -940,6 +940,12 @@ describe("Security (e2e)", () => {
             });
 
         it("TASK-704: joining a club shows no documents unless the owner picked them", async () => {
+            // Заявка без ссылки — только в клуб, который их принимает (правила клуба, TASK-719)
+            await prisma.clubPolicy.upsert({
+                where: { portalId: await portalId(clubB) },
+                create: { portalId: await portalId(clubB), joinPolicy: "approval" },
+                update: { joinPolicy: "approval" },
+            });
             const owner = await memberWithSession("share-join");
             const document = await passportOf(owner.userId, "share-join");
             const someoneElses = await passportOf(

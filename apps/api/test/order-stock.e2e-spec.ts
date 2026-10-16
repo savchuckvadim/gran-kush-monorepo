@@ -94,6 +94,8 @@ describe("Order stock (e2e)", () => {
         expect(res.status).toBe(201);
         portalId = res.body.portal.id as string;
         cookies = cookieHeader(res);
+        // Склад, а не присутствие: каталог и заказ из кабинета открыты и вне клуба (правила клуба)
+        await prisma.clubPolicy.create({ data: { portalId, catalogOutsideClub: true } });
 
         unitId = (
             await prisma.measurementUnit.create({

@@ -6,6 +6,7 @@ import { PORTAL_EVENTS_JOB_OPTIONS } from "@common/queue/job-options";
 import { BillingModule } from "@modules/billing/billing.module";
 import { EmployeeAuthModule } from "@modules/portal/auth/employees/employee-auth.module";
 import { SharedAuthModule } from "@modules/portal/auth/shared/shared-auth.module";
+import { ClubPolicyModule } from "@modules/portal/crm/club-policy/club-policy.module";
 import { EntityFieldsModule } from "@modules/portal/crm/entity-fields/entity-fields.module";
 import { MembersModule } from "@modules/portal/crm/members/members.module";
 import { CabinetPortalsController } from "@modules/portal/crm/portals/api/controllers/cabinet-portals.controller";
@@ -26,6 +27,7 @@ import { PortalEventsProcessor } from "@modules/portal/crm/portals/infrastructur
         SharedAuthModule,
         BillingModule,
         MembersModule,
+        ClubPolicyModule,
         BullModule.registerQueue({
             name: PORTAL_EVENTS_QUEUE_NAME,
             defaultJobOptions: PORTAL_EVENTS_JOB_OPTIONS,

@@ -985,6 +985,10 @@
                 "quickSkin": {
                     "title": "Cambiar tema",
                     "description": "Abrir la galería de temas sin salir de la página."
+                },
+                "clubPolicy": {
+                    "title": "Normas del club",
+                    "description": "Unirse sin enlace, catálogo fuera del club, aprobación para pedidos, pedidos para uno mismo"
                 }
             }
         },
@@ -1116,6 +1120,27 @@
             "openPage": "Abrir como página",
             "copyLink": "Copiar enlace",
             "copied": "Enlace copiado"
+        },
+        "clubPolicy": {
+            "title": "Normas del club",
+            "subtitle": "Cómo se unen y piden los socios. Por defecto todo está cerrado: abre lo que necesite el club.",
+            "adminOnly": "Solo un administrador del club puede cambiar las normas.",
+            "joinByRequest": {
+                "title": "Solicitudes sin enlace",
+                "description": "Una persona puede pedir unirse desde su cuenta; queda en «En curso» y el club la aprueba. Apagado: solo con el enlace del club o a través del personal."
+            },
+            "catalogOutsideClub": {
+                "title": "Catálogo fuera del club",
+                "description": "El socio ve el catálogo y pide desde su cuenta aunque no esté en el club. Apagado: solo durante la visita."
+            },
+            "ordersRequireApproval": {
+                "title": "Pedidos solo para aprobados",
+                "description": "Solo un socio con estado «Aprobado» puede pedir desde su cuenta. El catálogo lo ven todos los socios."
+            },
+            "staffSelfOrders": {
+                "title": "El personal puede pedir para sí",
+                "description": "Un empleado que también es socio hace un pedido a su propio nombre. Apagado: lo hace otro empleado."
+            }
         }
     }
 }

@@ -1,7 +1,15 @@
-import { Body, Controller, Get, NotFoundException, Param, Post } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    ForbiddenException,
+    Get,
+    NotFoundException,
+    Param,
+    Post,
+} from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
-import { MemberConsentStatus, MemberJoinSource } from "@prisma/client";
+import { ClubJoinPolicy, MemberConsentStatus, MemberJoinSource } from "@prisma/client";
 
 import { CurrentAuthUser } from "@common/decorators/auth/current-auth-user.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
@@ -9,6 +17,7 @@ import { ApiSuccessResponse } from "@common/decorators/response/api-success-resp
 import { PrismaService } from "@common/prisma/prisma.service";
 import { RequireUserJwt } from "@modules/portal/auth/members/api/decorators/require-member-jwt.decorator";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
+import { ClubPolicyService } from "@modules/portal/crm/club-policy/application/services/club-policy.service";
 import { JoinPortalService } from "@modules/portal/crm/members/application/services/join-portal.service";
 import { PortalResolutionService } from "@modules/portal/crm/portals/application/services/portal-resolution.service";
 import { PORTAL_SUMMARY_SELECT } from "@modules/portal/crm/portals/infrastructure/prisma-includes/portal-summary.select";
@@ -25,7 +34,8 @@ export class CabinetPortalsController {
     constructor(
         private readonly prisma: PrismaService,
         private readonly portalResolution: PortalResolutionService,
-        private readonly joinPortalService: JoinPortalService
+        private readonly joinPortalService: JoinPortalService,
+        private readonly policies: ClubPolicyService
     ) {}
 
     @Get()
@@ -57,7 +67,8 @@ export class CabinetPortalsController {
     @RequireUserJwt()
     @ApiOperation({
         summary:
-            "Вступить в клуб: поля по форме public_registration; документы/подпись подтягиваются из аккаунта",
+            "Заявка в клуб без ссылки — только если клуб её принимает (joinPolicy=approval): участник " +
+            "заводится в статусе «В работе», клуб одобряет его в CRM. Иначе 403 join_by_link_only",
     })
     @ApiSuccessResponse(JoinPortalResponseDto, { status: 201 })
     @ApiErrorResponse([400, 401, 404, 409])
@@ -69,6 +80,14 @@ export class CabinetPortalsController {
         const portal = await this.portalResolution.findActiveByIdOrSlug(undefined, slug);
         if (!portal) {
             throw new NotFoundException("Portal not found");
+        }
+        // Решение владельца 2026-10-16: без ссылки — только с одобрения клуба, если он это включил
+        const { joinPolicy } = await this.policies.get(portal.id);
+        if (joinPolicy !== ClubJoinPolicy.approval) {
+            throw new ForbiddenException({
+                message: "This club accepts members only by its link",
+                code: "join_by_link_only",
+            });
         }
         const member = await this.joinPortalService.joinPortal({
             userId: user.userId,

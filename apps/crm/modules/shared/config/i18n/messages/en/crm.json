@@ -985,6 +985,10 @@
                 "quickSkin": {
                     "title": "Change theme",
                     "description": "Open the theme gallery without leaving the page."
+                },
+                "clubPolicy": {
+                    "title": "Club rules",
+                    "description": "Joining without a link, catalog outside the club, approval for orders, ordering for oneself"
                 }
             }
         },
@@ -1116,6 +1120,27 @@
             "openPage": "Open as a page",
             "copyLink": "Copy link",
             "copied": "Link copied"
+        },
+        "clubPolicy": {
+            "title": "Club rules",
+            "subtitle": "How members join and order. Everything is closed by default — open what the club needs.",
+            "adminOnly": "Only a club admin can change the rules.",
+            "joinByRequest": {
+                "title": "Requests without a link",
+                "description": "A person can ask to join from the cabinet; they get the «In progress» status and the club approves them. Off — members join only by the club link or through staff."
+            },
+            "catalogOutsideClub": {
+                "title": "Catalog outside the club",
+                "description": "Members see the catalog and order from the cabinet even when they are not in the club. Off — only during a visit."
+            },
+            "ordersRequireApproval": {
+                "title": "Orders only for approved members",
+                "description": "Only a member with the «Approved» status can order from the cabinet. The catalog is visible to all members."
+            },
+            "staffSelfOrders": {
+                "title": "Staff may order for themselves",
+                "description": "An employee who is also a member places an order for their own record. Off — another employee places it."
+            }
         }
     }
 }

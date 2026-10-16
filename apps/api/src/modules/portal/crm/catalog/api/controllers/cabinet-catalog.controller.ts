@@ -14,8 +14,9 @@ import {
 } from "@modules/portal/crm/catalog/api/mappers";
 import { ProductCategoriesService } from "@modules/portal/crm/catalog/application/services/product-categories.service";
 import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
+import { RequireShopAccess } from "@modules/portal/crm/club-policy/api/guards/shop-access.guard";
 
-/** Каталог клуба для его участников. */
+/** Каталог клуба для его участников: открыт по правилам клуба (`RequireShopAccess`). */
 @ApiTags("Cabinet Catalog")
 @Controller("cabinet/catalog")
 @RequireMemberJwt()
@@ -27,6 +28,7 @@ export class CabinetCatalogController {
     ) {}
 
     @Get("products")
+    @RequireShopAccess("browse")
     @ApiOperation({ summary: "Каталог товаров (только активные и доступные)" })
     @ApiSuccessResponse(ProductListDto, { isArray: true })
     @ApiErrorResponse([401, 403])
@@ -36,6 +38,7 @@ export class CabinetCatalogController {
     }
 
     @Get("products/:id")
+    @RequireShopAccess("browse")
     @ApiOperation({ summary: "Детали товара" })
     @ApiSuccessResponse(ProductDetailDto)
     @ApiErrorResponse([401, 403, 404])
@@ -51,6 +54,7 @@ export class CabinetCatalogController {
     }
 
     @Get("categories")
+    @RequireShopAccess("browse")
     @ApiOperation({ summary: "Список категорий" })
     @ApiSuccessResponse(ProductCategoryDto, { isArray: true })
     @ApiErrorResponse([401, 403])

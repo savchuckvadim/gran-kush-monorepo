@@ -22,6 +22,7 @@ import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import { MANAGER_ROLES, RequireEmployeeJwt } from "@modules/portal/auth/employees";
 import { CurrentEmployee } from "@modules/portal/auth/employees/api/decorators/current-employee.decorator";
 import { RequireManager } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
+import { MemberAccessService } from "@modules/portal/crm/club-policy/application/services/member-access.service";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import {
     CrmCreateOrderDto,
@@ -46,7 +47,10 @@ import { OrdersService } from "@modules/portal/crm/orders/application/services/o
 @RequireEmployeeJwt()
 @ApiBearerAuth()
 export class CrmOrdersController {
-    constructor(private readonly ordersService: OrdersService) {}
+    constructor(
+        private readonly ordersService: OrdersService,
+        private readonly memberAccess: MemberAccessService
+    ) {}
 
     // ─── Список заказов ──────────────────────────────────────────────────────
 
@@ -131,6 +135,8 @@ export class CrmOrdersController {
         if (dto.stageId && !MANAGER_ROLES.includes(employee.role)) {
             throw new ForbiddenException("Выбрать стадию нового заказа может manager и выше");
         }
+        // Заказ на свою же запись участника — только если клуб это разрешил (правила клуба)
+        await this.memberAccess.assertStaffMayOrderFor(employee.userId, dto.memberId, portalId);
         const order = await this.ordersService.createOrderByEmployee(dto, employee.id, portalId);
         return mapOrderToDetailDto(order, locale);
     }

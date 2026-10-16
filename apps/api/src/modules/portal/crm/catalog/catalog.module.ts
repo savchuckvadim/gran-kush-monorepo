@@ -12,9 +12,10 @@ import { ProductRepository } from "@modules/portal/crm/catalog/domain/repositori
 import { MeasurementUnitPrismaRepository } from "@modules/portal/crm/catalog/infrastructure/repositories/measurement-unit-prisma.repository";
 import { ProductCategoryPrismaRepository } from "@modules/portal/crm/catalog/infrastructure/repositories/product-category-prisma.repository";
 import { ProductPrismaRepository } from "@modules/portal/crm/catalog/infrastructure/repositories/product-prisma.repository";
+import { ClubPolicyModule } from "@modules/portal/crm/club-policy/club-policy.module";
 
 @Module({
-    imports: [PrismaModule],
+    imports: [PrismaModule, ClubPolicyModule],
     providers: [
         // Services
         ProductsService,

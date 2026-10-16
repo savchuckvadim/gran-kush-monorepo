@@ -1784,7 +1784,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Вступить в клуб: поля по форме public_registration; документы/подпись подтягиваются из аккаунта */
+        /** Заявка в клуб без ссылки — только если клуб её принимает (joinPolicy=approval): участник заводится в статусе «В работе», клуб одобряет его в CRM. Иначе 403 join_by_link_only */
         post: operations["CabinetPortals_join"];
         delete?: never;
         options?: never;
@@ -2906,6 +2906,41 @@ export interface paths {
         head?: never;
         /** Обновить настройки портала (admin) */
         patch: operations["CrmPortalSettings_update"];
+        trace?: never;
+    };
+    "/crm/settings/club-policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Правила клуба (сохранённые или по умолчанию) */
+        get: operations["CrmClubPolicy_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Изменить правила клуба; не названные поля остаются как были */
+        patch: operations["CrmClubPolicy_update"];
+        trace?: never;
+    };
+    "/cabinet/club/shop-access": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Каталог и заказ: открыты ли и почему нет */
+        get: operations["CabinetShopAccess_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
 }
@@ -5976,6 +6011,40 @@ export interface components {
             longitude?: number | null;
             isListedOnMap?: boolean;
         };
+        /**
+         * @description link_only — только по ссылке клуба; approval — заявка из кабинета, клуб одобряет
+         * @enum {string}
+         */
+        ClubJoinPolicy: "link_only" | "approval";
+        ClubPolicyDto: {
+            /** @description link_only — только по ссылке клуба; approval — заявка из кабинета, клуб одобряет */
+            joinPolicy: components["schemas"]["ClubJoinPolicy"];
+            /** @description Каталог и заказ из кабинета, когда участник не в клубе */
+            catalogOutsideClub: boolean;
+            /** @description Заказ из кабинета только у одобренного участника */
+            ordersRequireApproval: boolean;
+            /** @description Сотрудник может оформить заказ на себя */
+            staffSelfOrders: boolean;
+        };
+        UpdateClubPolicyDto: {
+            joinPolicy?: components["schemas"]["ClubJoinPolicy"];
+            catalogOutsideClub?: boolean;
+            ordersRequireApproval?: boolean;
+            staffSelfOrders?: boolean;
+        };
+        /**
+         * @description Почему закрыто: not_in_club — нет открытого визита; not_approved — клуб ещё не одобрил; club_subscription_inactive — подписка клуба не действует
+         * @enum {string}
+         */
+        ShopDenial: "not_in_club" | "not_approved" | "club_subscription_inactive";
+        ShopAccessDto: {
+            /** @description Каталог открыт */
+            canBrowse: boolean;
+            /** @description Можно оформить заказ */
+            canOrder: boolean;
+            /** @description Почему закрыто: not_in_club — нет открытого визита; not_approved — клуб ещё не одобрил; club_subscription_inactive — подписка клуба не действует */
+            reasons: components["schemas"]["ShopDenial"][];
+        };
     };
     responses: never;
     parameters: never;
@@ -6222,6 +6291,11 @@ export type SchemaSpendingByPortalDto = components['schemas']['SpendingByPortalD
 export type SchemaMySpendingResponseDto = components['schemas']['MySpendingResponseDto'];
 export type SchemaPortalSettingsDto = components['schemas']['PortalSettingsDto'];
 export type SchemaUpdatePortalSettingsDto = components['schemas']['UpdatePortalSettingsDto'];
+export type SchemaClubJoinPolicy = components['schemas']['ClubJoinPolicy'];
+export type SchemaClubPolicyDto = components['schemas']['ClubPolicyDto'];
+export type SchemaUpdateClubPolicyDto = components['schemas']['UpdateClubPolicyDto'];
+export type SchemaShopDenial = components['schemas']['ShopDenial'];
+export type SchemaShopAccessDto = components['schemas']['ShopAccessDto'];
 export type $defs = Record<string, never>;
 export interface operations {
     Account_listDocuments: {
@@ -15634,6 +15708,142 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmClubPolicy_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClubPolicyDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmClubPolicy_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateClubPolicyDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClubPolicyDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CabinetShopAccess_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopAccessDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
