@@ -12,5 +12,11 @@
         "next": "Next",
         "required": "Required field",
         "allRightsReserved": "All rights reserved"
+    },
+    "meta": {
+        "crm": "PafPaf CRM",
+        "cabinet": "PafPaf Club",
+        "crmDescription": "Members, orders and the door of your club",
+        "cabinetDescription": "Your clubs, QR at the door, shop and orders"
     }
 }

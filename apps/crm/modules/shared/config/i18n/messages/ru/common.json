@@ -12,5 +12,11 @@
         "next": "Далее",
         "required": "Обязательное поле",
         "allRightsReserved": "Все права защищены"
+    },
+    "meta": {
+        "crm": "PafPaf CRM",
+        "cabinet": "PafPaf — кабинет",
+        "crmDescription": "Участники, заказы и вход вашего клуба",
+        "cabinetDescription": "Ваши клубы, QR на входе, витрина и заказы"
     }
 }

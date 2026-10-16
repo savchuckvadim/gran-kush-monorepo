@@ -12,5 +12,11 @@
         "next": "Siguiente",
         "required": "Campo obligatorio",
         "allRightsReserved": "Todos los derechos reservados"
+    },
+    "meta": {
+        "crm": "PafPaf CRM",
+        "cabinet": "PafPaf — área de socio",
+        "crmDescription": "Socios, pedidos y la entrada de tu club",
+        "cabinetDescription": "Tus clubes, QR en la entrada, tienda y pedidos"
     }
 }

@@ -414,7 +414,8 @@ MEMBER_AUTH_COOKIE_DOMAIN=lvh.me node dist/main.js`; CRM: `NEXT_PUBLIC_API_URL=h
 - [ ] Зарезервированные slug в API и CRM; `me` в `NON_PORTAL_SEGMENTS`.
 - [ ] Dokploy: домен club. на `pafpaf-crm`, профиль `club` выключить. Решить, куда ведут ссылки клубов
       (`NEXT_PUBLIC_MEMBER_URL` в сборку или оставить crm.).
-- [ ] Для club.: manifest, иконки PafPaf, `title`, `lang`, theme-color.
+- [x] manifest по хосту (`app/manifest.ts`: PafPaf CRM / PafPaf Club), иконки PafPaf, `title` и описание по хосту
+      и языку (`generateMetadata`, сообщения `meta`), `<html lang>` из next-intl, `theme-color` для светлой и тёмной.
 
 ### TASK-712: оболочка участника `[x]` P1 — 2026-10-16
 
