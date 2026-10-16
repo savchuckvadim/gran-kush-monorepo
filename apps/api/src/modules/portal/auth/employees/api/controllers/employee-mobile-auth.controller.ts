@@ -28,6 +28,8 @@ import { EmployeeRefreshTokenResponseDto } from "@modules/portal/auth/employees/
 import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 
+import { toEmployeeMe } from "../mappers/employee-me.mapper";
+
 @ApiTags("Employee Authentication (CRM Mobile / Native)")
 @Controller("crm/mobile/auth")
 export class EmployeeMobileAuthController {
@@ -93,16 +95,6 @@ export class EmployeeMobileAuthController {
         if (!user) {
             throw new NotFoundException("User not found");
         }
-        return {
-            id: user.id,
-            email: user.email,
-            emailConfirmed: user.emailConfirmed,
-            employments: user.employees.map((e) => ({
-                portalId: e.portalId,
-                employeeId: e.id,
-                role: e.role,
-                isActive: e.isActive,
-            })),
-        };
+        return toEmployeeMe(user);
     }
 }

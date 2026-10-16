@@ -15,7 +15,8 @@
             "account": "Аккаунт",
             "language": "Язык",
             "logout": "Выйти",
-            "passport": "Мой паспорт"
+            "passport": "Мой паспорт",
+            "openCrm": "Открыть CRM"
         },
         "auth": {
             "login": {

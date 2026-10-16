@@ -6,9 +6,9 @@ import { useTranslations } from "next-intl";
 import { Building2, Home, ShieldCheck } from "lucide-react";
 
 import { useCabinetLinks } from "@/modules/processes/member-auth";
-import { BurgerButton } from "@/modules/shared/ui/Burger";
 import { ShellBrand } from "@/modules/shared/ui/Brand";
-import { Sidebar, type ISidebarItem, useSidebar } from "@/modules/shared/ui/Sidebar";
+import { BurgerButton } from "@/modules/shared/ui/Burger";
+import { type ISidebarItem, Sidebar, useSidebar } from "@/modules/shared/ui/Sidebar";
 import { SkinBackdrop } from "@/modules/shared/ui/SkinBackdrop";
 import { HeaderEcoToggle, HeaderSkinButton } from "@/modules/widgets/crm-shell/header-appearance";
 import { HeaderThemeToggle } from "@/modules/widgets/crm-shell/header-theme-toggle";

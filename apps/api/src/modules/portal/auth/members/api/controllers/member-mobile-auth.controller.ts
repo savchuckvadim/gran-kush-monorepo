@@ -10,7 +10,6 @@ import {
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 
-import { MemberConsentStatus } from "@prisma/client";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 
 import { resolveDeviceIdFromHeaders } from "@common/auth";
@@ -28,6 +27,8 @@ import { MemberMeResponseDto } from "@modules/portal/auth/members/api/dto/member
 import { MemberRefreshTokenResponseDto } from "@modules/portal/auth/members/api/dto/member-refresh-token-response.dto";
 import { MemberAuthService } from "@modules/portal/auth/members/application/services/member-auth.service";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
+
+import { toMemberMe } from "../mappers/member-me.mapper";
 
 @ApiTags("Cabinet Auth (mobile)")
 @Controller("cabinet/mobile/auth")
@@ -95,18 +96,6 @@ export class MemberMobileAuthController {
         if (!user) {
             throw new NotFoundException("User not found");
         }
-
-        return {
-            id: user.id,
-            email: user.email,
-            emailConfirmed: user.emailConfirmed,
-            memberships: user.members.map((m) => ({
-                portalId: m.portalId,
-                memberId: m.id,
-                membershipNumber: m.membershipNumber,
-                isActive: m.isActive,
-                consentStatus: m.consentStatus ?? MemberConsentStatus.confirmed,
-            })),
-        };
+        return toMemberMe(user);
     }
 }

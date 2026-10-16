@@ -3323,6 +3323,8 @@ export interface components {
             /** @example false */
             emailConfirmed: boolean;
             employments: components["schemas"]["EmployeeEmploymentDto"][];
+            /** @description Аккаунт ещё и участник клуба (подтверждённое членство): CRM показывает «Мой кабинет» */
+            hasMemberships: boolean;
         };
         RequestPasswordResetDto: {
             /** @example user@example.com */
@@ -3490,6 +3492,8 @@ export interface components {
             /** @example true */
             emailConfirmed: boolean;
             memberships: components["schemas"]["MemberMembershipDto"][];
+            /** @description Аккаунт ещё и сотрудник клуба (активное трудоустройство): кабинет показывает «Открыть CRM» */
+            hasEmployments: boolean;
         };
         MemberAuthResponseDto: {
             /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */

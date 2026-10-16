@@ -30,7 +30,8 @@
                 "settings": "Ajustes",
                 "billing": "Plan y pago",
                 "appearance": "Apariencia",
-                "newClub": "Nuevo club"
+                "newClub": "Nuevo club",
+                "cabinet": "Mi cuenta de socio"
             },
             "club": {
                 "title": "Clubes",

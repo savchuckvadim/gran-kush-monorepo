@@ -30,7 +30,8 @@
                 "settings": "Settings",
                 "billing": "Plan and payment",
                 "appearance": "Appearance",
-                "newClub": "New club"
+                "newClub": "New club",
+                "cabinet": "My cabinet"
             },
             "club": {
                 "title": "Clubs",

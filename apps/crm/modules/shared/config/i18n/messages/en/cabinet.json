@@ -15,7 +15,8 @@
             "account": "Account",
             "language": "Language",
             "logout": "Log out",
-            "passport": "My passport"
+            "passport": "My passport",
+            "openCrm": "Open the CRM"
         },
         "auth": {
             "login": {

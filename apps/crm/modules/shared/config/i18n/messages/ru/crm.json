@@ -30,7 +30,8 @@
                 "settings": "Настройки",
                 "billing": "Тариф и оплата",
                 "appearance": "Оформление",
-                "newClub": "Новый клуб"
+                "newClub": "Новый клуб",
+                "cabinet": "Мой кабинет"
             },
             "club": {
                 "title": "Клубы",

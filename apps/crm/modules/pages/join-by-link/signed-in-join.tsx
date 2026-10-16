@@ -16,7 +16,8 @@ import {
 import { Button, Card, Switch } from "@workspace/ui";
 
 import { useAccountDocuments } from "@/modules/entities/membership";
-import { buildCabinetUrl, useJoinViaLinkAsMember } from "@/modules/entities/registration-links";
+import { useJoinViaLinkAsMember } from "@/modules/entities/registration-links";
+import { cabinetAppUrl } from "@/modules/shared/config/app-urls";
 import { StatusCard } from "@/modules/shared/ui/StatusCard";
 
 interface SignedInJoinProps {
@@ -76,7 +77,7 @@ export function SignedInJoin({
     };
 
     if (join.isSuccess) {
-        const cabinet = buildCabinetUrl(`/${locale}/${join.data.portalSlug}`);
+        const cabinet = cabinetAppUrl(`/${locale}/${join.data.portalSlug}`);
         return (
             <StatusCard tone="success" title={t("done.title")} text={t("done.text", { club })}>
                 {cabinet && (

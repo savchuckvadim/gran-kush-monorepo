@@ -42,6 +42,8 @@ import { VerifyEmailResponseDto } from "@modules/portal/auth/shared/api/dto/veri
 import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 
+import { toEmployeeMe } from "../mappers/employee-me.mapper";
+
 @ApiTags("Employee Authentication (CRM Web)")
 @Controller("crm/auth")
 export class EmployeeAuthController {
@@ -142,17 +144,7 @@ export class EmployeeAuthController {
         if (!user) {
             throw new NotFoundException("User not found");
         }
-        return {
-            id: user.id,
-            email: user.email,
-            emailConfirmed: user.emailConfirmed,
-            employments: user.employees.map((e) => ({
-                portalId: e.portalId,
-                employeeId: e.id,
-                role: e.role,
-                isActive: e.isActive,
-            })),
-        };
+        return toEmployeeMe(user);
     }
 
     @Post("password/reset")

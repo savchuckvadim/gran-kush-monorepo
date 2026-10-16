@@ -3,7 +3,16 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { CreditCard, Languages, LogOut, Palette, Plus, Settings, UserRound } from "lucide-react";
+import {
+    CreditCard,
+    IdCard,
+    Languages,
+    LogOut,
+    Palette,
+    Plus,
+    Settings,
+    UserRound,
+} from "lucide-react";
 
 import {
     DropdownMenu,
@@ -21,6 +30,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { usePortalInfo, usePortalRole } from "@/modules/entities/portal";
 import { SkinPickerSheet, useChangeLocale } from "@/modules/features";
 import { useAuth } from "@/modules/processes";
+import { cabinetAppUrl } from "@/modules/shared/config/app-urls";
 import { localeNames, locales } from "@/modules/shared/config/i18n";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
@@ -46,6 +56,8 @@ export function AccountMenu() {
     const { data: info } = usePortalInfo();
     const { role, isAdmin: canManage } = usePortalRole();
     const email = currentUser?.email;
+    // Аккаунт ещё и участник клуба: его кабинет на club. — та же персона в другой роли
+    const cabinetHref = currentUser?.hasMemberships ? cabinetAppUrl(`/${locale}`) : null;
 
     return (
         <>
@@ -100,6 +112,13 @@ export function AccountMenu() {
                                     label={t("billing")}
                                 />
                             </>
+                        )}
+                        {cabinetHref && (
+                            <AccountTileLink
+                                href={cabinetHref}
+                                icon={IdCard}
+                                label={t("cabinet")}
+                            />
                         )}
                         {/* the new club lives outside any club: no portal prefix in its address */}
                         <AccountTileLink

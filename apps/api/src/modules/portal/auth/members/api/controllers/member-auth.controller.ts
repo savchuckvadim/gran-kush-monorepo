@@ -8,12 +8,10 @@ import {
     Post,
     Req,
     Res,
-    UseGuards,
 } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 
-import { MemberConsentStatus } from "@prisma/client";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import type { Request, Response } from "express";
 
@@ -36,6 +34,8 @@ import { RequestPasswordResetDto } from "@modules/portal/auth/shared/api/dto/req
 import { ResetPasswordDto } from "@modules/portal/auth/shared/api/dto/reset-password.dto";
 import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
+
+import { toMemberMe } from "../mappers/member-me.mapper";
 
 @ApiTags("Cabinet Auth (web)")
 @Controller("cabinet/auth")
@@ -138,19 +138,7 @@ export class MemberAuthController {
         if (!user) {
             throw new NotFoundException("User not found");
         }
-
-        return {
-            id: user.id,
-            email: user.email,
-            emailConfirmed: user.emailConfirmed,
-            memberships: user.members.map((m) => ({
-                portalId: m.portalId,
-                memberId: m.id,
-                membershipNumber: m.membershipNumber,
-                isActive: m.isActive,
-                consentStatus: m.consentStatus ?? MemberConsentStatus.confirmed,
-            })),
-        };
+        return toMemberMe(user);
     }
 
     @Post("password/reset")

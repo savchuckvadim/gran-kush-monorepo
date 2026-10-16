@@ -11,7 +11,8 @@
 #   DOKPLOY_URL, DOKPLOY_API_KEY, DOKPLOY_COMPOSE_ID — PafPaf on Dokploy: once the
 #     images are pushed, Dokploy is asked to redeploy (infra/dokploy/README.md)
 # Repository variables (build/smoke):
-#   NEXT_PUBLIC_API_URL, NEXT_PUBLIC_CRM_URL, NEXT_PUBLIC_MAIN_SITE_URL —
+#   NEXT_PUBLIC_API_URL, NEXT_PUBLIC_CRM_URL, NEXT_PUBLIC_MEMBER_URL (cabinet, https://club.<domain>),
+#   NEXT_PUBLIC_MAIN_SITE_URL —
 #     inlined into the Next.js bundles at BUILD time (changing them = rebuild)
 #   NEXT_PUBLIC_SITE_URL — product site with the legal pages; empty = https://paf-paf.app
 #   NEXT_PUBLIC_PLANS_PURCHASABLE — `true` once Stripe is live: the site's plan buttons lead to
@@ -81,6 +82,7 @@ jobs:
             APP=${{ matrix.app }}
             NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
             NEXT_PUBLIC_CRM_URL=${{ vars.NEXT_PUBLIC_CRM_URL }}
+            NEXT_PUBLIC_MEMBER_URL=${{ vars.NEXT_PUBLIC_MEMBER_URL }}
             NEXT_PUBLIC_MAIN_SITE_URL=${{ vars.NEXT_PUBLIC_MAIN_SITE_URL }}
             NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL }}
             NEXT_PUBLIC_PLANS_PURCHASABLE=${{ vars.NEXT_PUBLIC_PLANS_PURCHASABLE }}

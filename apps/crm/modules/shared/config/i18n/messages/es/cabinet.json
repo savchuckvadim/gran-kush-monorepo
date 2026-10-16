@@ -15,7 +15,8 @@
             "account": "Cuenta",
             "language": "Idioma",
             "logout": "Cerrar sesión",
-            "passport": "Mi pasaporte"
+            "passport": "Mi pasaporte",
+            "openCrm": "Abrir el CRM"
         },
         "auth": {
             "login": {

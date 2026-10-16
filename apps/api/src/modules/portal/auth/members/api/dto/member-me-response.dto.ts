@@ -36,4 +36,11 @@ export class MemberMeResponseDto {
 
     @ApiProperty({ type: () => [MemberMembershipDto] })
     memberships: MemberMembershipDto[];
+
+    @ApiProperty({
+        type: Boolean,
+        description:
+            "Аккаунт ещё и сотрудник клуба (активное трудоустройство): кабинет показывает «Открыть CRM»",
+    })
+    hasEmployments: boolean;
 }
