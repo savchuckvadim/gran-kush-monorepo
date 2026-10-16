@@ -22,6 +22,7 @@ import { usePortalInfo } from "@/modules/entities/portal";
 import { usePortal } from "@/modules/processes";
 import { $api } from "@/modules/shared";
 import { ClubBadge } from "@/modules/shared/ui/Brand";
+import { useSidebarPinned } from "@/modules/shared/ui/Sidebar";
 
 function useMyPortals(enabled: boolean) {
     return useQuery({
@@ -32,13 +33,18 @@ function useMyPortals(enabled: boolean) {
     });
 }
 
-/** Текущий клуб и переход в другой клуб сотрудника. */
+/**
+ * Текущий клуб и переход в другой клуб сотрудника. Бренд PafPaf виден в меню, только пока оно
+ * закреплено раскрытым на широком экране; когда меню свёрнуто, название клуба в шапке встаёт на
+ * место бренда: без значка и стрелки, крупным начертанием. Выбор клуба по клику остаётся.
+ */
 export function PortalSwitcher({ className }: { className?: string }) {
     const t = useTranslations("crm.shell.club");
     const router = useRouter();
     const locale = useLocale();
     const queryClient = useQueryClient();
     const { portalSlug } = usePortal();
+    const [pinned] = useSidebarPinned();
     const [isOpen, setIsOpen] = useState(false);
     const { data: info } = usePortalInfo();
     const { data: portals = [], isLoading } = useMyPortals(isOpen);
@@ -60,11 +66,27 @@ export function PortalSwitcher({ className }: { className?: string }) {
                     variant="ghost"
                     className={cn("min-w-0 gap-2 pl-1.5 pr-2 font-semibold", className)}
                 >
-                    <ClubBadge name={label} className="size-6 text-[0.625rem]" />
-                    <span className="max-w-16 truncate min-[400px]:max-w-24 sm:max-w-44">
+                    <ClubBadge
+                        name={label}
+                        className={cn(
+                            "size-6 text-[0.625rem]",
+                            pinned ? "hidden lg:flex" : "hidden"
+                        )}
+                    />
+                    <span
+                        className={cn(
+                            "max-w-28 truncate text-lg font-bold tracking-tight first-letter:uppercase min-[400px]:max-w-36 sm:max-w-56",
+                            pinned && "lg:max-w-44 lg:text-sm lg:font-semibold lg:tracking-normal"
+                        )}
+                    >
                         {label}
                     </span>
-                    <ChevronsUpDown className="text-muted-foreground" />
+                    <ChevronsUpDown
+                        className={cn(
+                            "text-muted-foreground",
+                            pinned ? "hidden lg:block" : "hidden"
+                        )}
+                    />
                 </Button>
             </DropdownMenuTrigger>
 

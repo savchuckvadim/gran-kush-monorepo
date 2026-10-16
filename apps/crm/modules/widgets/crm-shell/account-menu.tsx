@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 
-import type { LucideIcon } from "lucide-react";
 import { CreditCard, Languages, LogOut, Palette, Settings, UserRound } from "lucide-react";
 
 import {
@@ -28,36 +26,9 @@ import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 import { useCrmLogout } from "@/modules/shared/ui/NavButtons";
 
+import { AccountAvatar } from "./account-avatar";
+import { ACCOUNT_TILE, AccountTileLink } from "./account-tile";
 import { HeaderClock } from "./header-clock";
-
-function Avatar({ email, className }: { email?: string; className?: string }) {
-    return (
-        <span
-            aria-hidden="true"
-            className={cn(
-                "flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground",
-                className
-            )}
-        >
-            {email ? email.charAt(0).toUpperCase() : "?"}
-        </span>
-    );
-}
-
-/** A tile of the account card: icon on top, label under it. */
-const TILE =
-    "relative flex h-auto flex-col items-start gap-2 rounded-xl border border-transparent p-3 text-sm [&_svg:not([class*='size-'])]:size-5 focus:border-border";
-
-function TileLink({ href, icon: Icon, label }: { href: string; icon: LucideIcon; label: string }) {
-    return (
-        <DropdownMenuItem asChild className={TILE}>
-            <Link href={href}>
-                <Icon />
-                <span className="font-medium">{label}</span>
-            </Link>
-        </DropdownMenuItem>
-    );
-}
 
 /**
  * Капсула аккаунта: часы, дата и аватар; по клику — карточка аккаунта. На десктопе — широкая
@@ -88,7 +59,7 @@ export function AccountMenu() {
                         className="flex items-center gap-2 rounded-full p-1 outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 md:py-1 md:pr-1 md:pl-3"
                     >
                         <HeaderClock className="hidden md:flex" />
-                        <Avatar email={email} />
+                        <AccountAvatar email={email} />
                     </button>
                 </DropdownMenuTrigger>
 
@@ -99,7 +70,7 @@ export function AccountMenu() {
                     className="w-[min(18rem,calc(100vw-1.5rem))] p-0 md:w-[24rem]"
                 >
                     <div className="flex items-center gap-3 border-b p-4">
-                        <Avatar email={email} className="size-11 text-base" />
+                        <AccountAvatar email={email} className="size-11 text-base" />
                         <div className="min-w-0">
                             <p className="truncate text-sm font-semibold">{email}</p>
                             <p className="text-muted-foreground mt-0.5 truncate text-xs">
@@ -111,41 +82,43 @@ export function AccountMenu() {
                     </div>
 
                     <div className="grid grid-cols-1 gap-1 p-2 md:grid-cols-2">
-                        <TileLink
+                        <AccountTileLink
                             href={localizedLink(ROUTES.CRM_PROFILE)}
                             icon={UserRound}
                             label={t("profile")}
                         />
                         {canManage && (
                             <>
-                                <TileLink
+                                <AccountTileLink
                                     href={localizedLink(ROUTES.CRM_SETTINGS)}
                                     icon={Settings}
                                     label={t("settings")}
                                 />
-                                <TileLink
+                                <AccountTileLink
                                     href={localizedLink(ROUTES.CRM_SETTINGS_BILLING)}
                                     icon={CreditCard}
                                     label={t("billing")}
                                 />
                             </>
                         )}
-                        <DropdownMenuItem className={TILE} onSelect={() => setIsSkinsOpen(true)}>
+                        <DropdownMenuItem
+                            className={ACCOUNT_TILE}
+                            onSelect={() => setIsSkinsOpen(true)}
+                        >
                             <Palette />
                             <span className="font-medium">{t("appearance")}</span>
                         </DropdownMenuItem>
                         <DropdownMenuSub>
-                            {/* the sub-trigger's own chevron goes to the tile's corner */}
+                            {/* the sub-trigger's own chevron goes to the tile's right edge */}
                             <DropdownMenuSubTrigger
-                                className={cn(
-                                    TILE,
-                                    "[&>svg:last-child]:absolute [&>svg:last-child]:top-3 [&>svg:last-child]:right-3"
-                                )}
+                                className={cn(ACCOUNT_TILE, "[&>svg:last-child]:ml-auto")}
                             >
                                 <Languages />
-                                <span className="font-medium">{t("language")}</span>
-                                <span className="text-muted-foreground -mt-1.5 text-xs">
-                                    {localeNames[locale as keyof typeof localeNames]}
+                                <span className="flex min-w-0 flex-col">
+                                    <span className="font-medium">{t("language")}</span>
+                                    <span className="text-muted-foreground text-xs">
+                                        {localeNames[locale as keyof typeof localeNames]}
+                                    </span>
                                 </span>
                             </DropdownMenuSubTrigger>
                             <DropdownMenuSubContent>
