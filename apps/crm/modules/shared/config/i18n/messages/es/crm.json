@@ -290,7 +290,9 @@
                     "save": "Guardar",
                     "useClubDefault": "Como el club"
                 }
-            }
+            },
+            "signatureClear": "Borrar",
+            "signatureSave": "Guardar firma"
         },
         "attendance": {
             "title": "Asistencia",

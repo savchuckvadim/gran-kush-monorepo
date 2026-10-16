@@ -10,14 +10,9 @@ export interface IMemberSignatureCardProps {
     memberId: string;
     signatureTitle: string;
 }
-export function MemberSignatureCard({
-    memberId,
-    signatureTitle,
-}: IMemberSignatureCardProps) {
+export function MemberSignatureCard({ memberId, signatureTitle }: IMemberSignatureCardProps) {
     const toAppPath = useLocalizedLink();
-    const signaturePath = toAppPath(
-        `${ROUTES.CRM_MEMBER_DETAILS}/${memberId}/documents/signature`
-    );
+    const signaturePath = toAppPath(`${ROUTES.CRM_MEMBER_DETAILS}/${memberId}/documents/signature`);
     return (
         <Link href={signaturePath} className="group overflow-hidden rounded-md border bg-muted/30">
             <div className="flex h-40 w-full items-center justify-center bg-muted/30 p-2">

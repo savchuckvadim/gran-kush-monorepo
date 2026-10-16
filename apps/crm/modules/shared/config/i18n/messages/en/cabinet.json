@@ -204,7 +204,16 @@
                 "replace": "Replace",
                 "tooBig": "The file is larger than 2 MB.",
                 "deleteTitle": "Delete the signature?",
-                "deleteText": "The signature will disappear, and clubs it was shown to will stop seeing it."
+                "deleteText": "The signature will disappear, and clubs it was shown to will stop seeing it.",
+                "draw": "Draw",
+                "drawTitle": "Draw your signature",
+                "drawHint": "Sign with a finger or a mouse. The signature is kept in your account and shown to a club only when you switch it on.",
+                "drawPlaceholder": "Sign here",
+                "cancel": "Cancel",
+                "clear": "Clear",
+                "done": "Done",
+                "useDrawn": "Save signature",
+                "saving": "Saving…"
             }
         },
         "shop": {

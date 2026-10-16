@@ -4,10 +4,9 @@ import { useTranslations } from "next-intl";
 
 import { Upload } from "lucide-react";
 
-import { Button, Field } from "@workspace/ui";
+import { Button, Field, ThemedSignatureImage } from "@workspace/ui";
 import { FieldContent, FieldLabel } from "@workspace/ui/components/field";
 
-import { ThemedSignatureImage } from "@/modules/entities/member";
 import { useSignaturePreview } from "@/modules/entities/member-documents";
 
 export interface ISignatureUploadProps {
@@ -16,7 +15,6 @@ export interface ISignatureUploadProps {
     filePreview: string | null;
     fileInputRef: React.RefObject<HTMLInputElement | null> | null;
     file: File | null;
-    setFile: (file: File | null) => void;
     handleFileChange: (event: ChangeEvent<HTMLInputElement>) => void;
 }
 export const SignatureUpload = ({
@@ -25,7 +23,6 @@ export const SignatureUpload = ({
     filePreview,
     fileInputRef,
     file,
-    setFile,
     handleFileChange,
 }: ISignatureUploadProps) => {
     const t = useTranslations("crm.members");

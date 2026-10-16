@@ -290,7 +290,9 @@
                     "save": "Save",
                     "useClubDefault": "Use club default"
                 }
-            }
+            },
+            "signatureClear": "Clear",
+            "signatureSave": "Save signature"
         },
         "attendance": {
             "title": "Attendance",

@@ -3,5 +3,4 @@ export * from "./MemberDocumentPreview";
 export * from "./MemberPrivateDocumentPreviewActions";
 export * from "./MemberPrivateDocumentPreviewViewer";
 export * from "./MemberSignatureCard";
-export * from "./MemberSignatureEditCard";
 export * from "./MemberSignaturePreview";

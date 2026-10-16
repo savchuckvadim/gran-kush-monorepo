@@ -290,7 +290,9 @@
                     "save": "Сохранить",
                     "useClubDefault": "Как у клуба"
                 }
-            }
+            },
+            "signatureClear": "Стереть",
+            "signatureSave": "Сохранить подпись"
         },
         "attendance": {
             "title": "Посещаемость",

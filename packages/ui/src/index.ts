@@ -90,6 +90,7 @@ export {
     SignatureCanvasField,
     type SignatureCanvasProps,
 } from "./shared/signature-canvas/signature-canvas";
+export { ThemedSignatureImage } from "./shared/signature-canvas/themed-signature-image";
 export { SlideOver, type SlideOverProps } from "./shared/slide-over";
 export { StageStep, type StageStepProps, StageSteps } from "./shared/stage-steps";
 export { StatTile, type StatTileProps } from "./shared/stat-tile";

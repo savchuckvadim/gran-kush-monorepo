@@ -30,7 +30,7 @@ export function MemberPrivateDocumentPreviewActions({
 
             {!isSignature && identityDocument ? (
                 <MemberDocumentEditModal
-                    documentId={documentId}
+                    documentId={identityDocument.id}
                     memberId={memberId}
                     isSignature={false}
                     payloadKey={

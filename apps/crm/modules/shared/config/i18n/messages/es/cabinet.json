@@ -204,7 +204,16 @@
                 "replace": "Reemplazar",
                 "tooBig": "El archivo supera los 2 MB.",
                 "deleteTitle": "¿Eliminar la firma?",
-                "deleteText": "La firma desaparecerá y los clubes a los que se mostró dejarán de verla."
+                "deleteText": "La firma desaparecerá y los clubes a los que se mostró dejarán de verla.",
+                "draw": "Dibujar",
+                "drawTitle": "Dibuja tu firma",
+                "drawHint": "Firma con el dedo o el ratón. La firma se guarda en tu cuenta y solo se muestra a un club cuando lo activas.",
+                "drawPlaceholder": "Firma aquí",
+                "cancel": "Cancelar",
+                "clear": "Borrar",
+                "done": "Listo",
+                "useDrawn": "Guardar firma",
+                "saving": "Guardando…"
             }
         },
         "shop": {

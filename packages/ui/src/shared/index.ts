@@ -23,6 +23,7 @@ export {
     SignatureCanvasField,
     type SignatureCanvasProps,
 } from "./signature-canvas/signature-canvas";
+export { ThemedSignatureImage } from "./signature-canvas/themed-signature-image";
 export { SlideOver, type SlideOverProps } from "./slide-over";
 export { StageStep, type StageStepProps, StageSteps } from "./stage-steps";
 export { StatTile, type StatTileProps } from "./stat-tile";

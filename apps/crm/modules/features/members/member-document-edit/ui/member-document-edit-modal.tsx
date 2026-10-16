@@ -1,20 +1,13 @@
 "use client";
 
 import { ChangeEvent, useRef, useState } from "react";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { Pencil, Upload } from "lucide-react";
-
 import { Button, FieldInput, SignatureCanvasField } from "@workspace/ui";
-import { Field, FieldContent, FieldLabel } from "@workspace/ui/components/field";
 
-import { ThemedSignatureImage } from "@/modules/entities/member";
 import {
     type UpdateCrmMemberFilesPayload,
-    useIdentityDocumentPreview,
-    useSignaturePreview,
     useUpdateCrmMemberFiles,
 } from "@/modules/entities/member-documents";
 import { EditMemberDocumentButton, isApiErrorWithStatus } from "@/modules/shared";
@@ -57,14 +50,6 @@ export function MemberDocumentEditModal({
     const [filePreview, setFilePreview] = useState<string | null>(null);
     const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const identityDocumentIdFromPreviewUrl = (() => {
-        // currentPreviewUrl example:
-        //   /crm/members/{memberId}/documents/{documentId}/preview
-        // allow full URL + optional query/hash
-        const match = currentPreviewUrl.match(/documents\/([^/?#]+)\/preview(?:[?#].*)?$/u);
-        return match?.[1] ?? "";
-    })();
 
     const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
         const selectedFile = event.target.files?.[0] ?? null;
@@ -160,12 +145,11 @@ export function MemberDocumentEditModal({
                                 />
                                 <FileUpload
                                     memberId={memberId}
-                                    documentId={identityDocumentIdFromPreviewUrl}
+                                    documentId={documentId}
                                     currentPreviewUrl={currentPreviewUrl}
                                     filePreview={filePreview}
                                     fileInputRef={fileInputRef}
                                     file={file}
-                                    setFile={setFile}
                                     handleFileChange={handleFileChange}
                                 />
                             </div>
@@ -195,7 +179,6 @@ export function MemberDocumentEditModal({
                                         filePreview={filePreview}
                                         fileInputRef={fileInputRef}
                                         file={file}
-                                        setFile={setFile}
                                         handleFileChange={handleFileChange}
                                     />
                                 ) : (
@@ -203,6 +186,10 @@ export function MemberDocumentEditModal({
                                         value={signatureDataUrl ?? undefined}
                                         onChange={setSignatureDataUrl}
                                         placeholder={t("signaturePlaceholder")}
+                                        labels={{
+                                            clear: t("signatureClear"),
+                                            save: t("signatureSave"),
+                                        }}
                                     />
                                 )}
                             </div>

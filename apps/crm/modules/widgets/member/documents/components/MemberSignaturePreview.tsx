@@ -1,6 +1,7 @@
 "use client";
 
-import { ThemedSignatureImage } from "@/modules/entities/member";
+import { ThemedSignatureImage } from "@workspace/ui";
+
 import { useSignaturePreview } from "@/modules/entities/member-documents";
 
 interface IMemberSignaturePreviewProps {
