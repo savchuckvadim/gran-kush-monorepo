@@ -33,22 +33,40 @@ enum UserAccountStatus {
   blocked
 }
 
-/// Внешний вход (Google и т.п.): провайдер подтвердил владение адресом,
-/// providerUserId — стабильный id у провайдера (Google `sub`).
+enum IdentityProvider {
+  google
+  telegram
+}
+
+/// Внешний вход: провайдер подтвердил, кто пришёл. `providerUserId` — стабильный id у провайдера
+/// (Google `sub`, числовой id Telegram); email и имя меняются, id — нет.
+///
+/// Google отдаёт подтверждённый email, поэтому вход им доказывает владение адресом.
+/// Telegram email не отдаёт: его identity только привязывается к уже существующему аккаунту
+/// (из кабинета) и сама аккаунт не создаёт и ничего не клеймит.
+/// Имя, фамилия и язык нужны, чтобы предзаполнить регистрацию клуба или анкету; аватар не храним.
 model UserIdentity {
-  id             String   @id @default(uuid())
-  userId         String   @map("user_id")
-  provider       String   @db.VarChar(50)
-  providerUserId String   @map("provider_user_id") @db.VarChar(255)
-  email          String?  @db.VarChar(255)
-  displayName    String?  @map("display_name") @db.VarChar(255)
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  id             String             @id @default(uuid())
+  userId         String             @map("user_id")
+  provider       IdentityProvider
+  providerUserId String             @map("provider_user_id") @db.VarChar(255)
+  email          String?            @db.VarChar(255)
+  /// Провайдер подтвердил этот email (Google `email_verified`); у Telegram email нет.
+  emailVerified  Boolean            @default(false) @map("email_verified")
+  displayName    String?            @map("display_name") @db.VarChar(255)
+  givenName      String?            @map("given_name") @db.VarChar(255)
+  familyName     String?            @map("family_name") @db.VarChar(255)
+  /// Публичное имя в Telegram (@username); может меняться или отсутствовать.
+  username       String?            @db.VarChar(255)
+  locale         String?            @db.VarChar(16)
+  lastLoginAt    DateTime?          @map("last_login_at")
+  createdAt      DateTime           @default(now()) @map("created_at")
+  updatedAt      DateTime           @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerUserId])
-  @@index([userId])
+  @@index([userId, provider])
   @@map("user_identities")
 }
 

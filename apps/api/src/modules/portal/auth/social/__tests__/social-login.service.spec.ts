@@ -31,6 +31,10 @@ const profile = (overrides: Partial<GoogleProfile> = {}): GoogleProfile => ({
     email: "owner@test.local",
     emailVerified: true,
     displayName: "Owner",
+    givenName: "Own",
+    familyName: "Er",
+    locale: "es",
+    nonce: null,
     ...overrides,
 });
 
@@ -68,14 +72,12 @@ const buildService = (options: {
         link: jest.fn().mockResolvedValue(undefined),
     };
     const refreshTokens = { revokeAllForUser: jest.fn().mockResolvedValue(0) };
-    const claimedMemberships = { confirmPendingSelfJoins: jest.fn().mockResolvedValue(0) };
     const service = new SocialLoginService(
         userRepository as never,
         identities as never,
-        refreshTokens as never,
-        claimedMemberships as never
+        refreshTokens as never
     );
-    return { service, userRepository, identities, refreshTokens, claimedMemberships, updated };
+    return { service, userRepository, identities, refreshTokens, updated };
 };
 
 describe("SocialLoginService — вход участника через Google", () => {
@@ -123,8 +125,8 @@ describe("SocialLoginService — вход участника через Google",
         expect(identities.link).toHaveBeenCalledWith(expect.objectContaining({ userId: "u1" }));
     });
 
-    it("pending_claim клеймится: активация, подтверждение членств", async () => {
-        const { service, refreshTokens, claimedMemberships, updated } = buildService({
+    it("pending_claim клеймится: активация и отзыв сессий, членства сами не подтверждаются", async () => {
+        const { service, refreshTokens, updated } = buildService({
             byEmail: user({
                 status: UserAccountStatus.pending_claim,
                 passwordHash: null,
@@ -139,7 +141,20 @@ describe("SocialLoginService — вход участника через Google",
             emailConfirmed: true,
         });
         expect(refreshTokens.revokeAllForUser).toHaveBeenCalledWith("u1");
-        expect(claimedMemberships.confirmPendingSelfJoins).toHaveBeenCalledWith("u1");
+    });
+
+    it("в identity сохраняются подтверждение email, имя и язык из профиля Google", async () => {
+        const { service, identities } = buildService({ byEmail: user() });
+        await service.loginMemberWithGoogle(profile());
+        expect(identities.link).toHaveBeenCalledWith(
+            expect.objectContaining({
+                provider: "google",
+                emailVerified: true,
+                givenName: "Own",
+                familyName: "Er",
+                locale: "es",
+            })
+        );
     });
 
     it("пароль неподтверждённого аккаунта сбрасывается при клейме (TASK-664)", async () => {

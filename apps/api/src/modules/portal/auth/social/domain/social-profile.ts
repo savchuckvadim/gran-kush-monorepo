@@ -6,4 +6,9 @@ export interface GoogleProfile {
     /** Google подтвердил владение адресом; без него email не доказан. */
     emailVerified: boolean;
     displayName: string | null;
+    givenName: string | null;
+    familyName: string | null;
+    locale: string | null;
+    /** nonce из id_token: должен совпасть с тем, что мы отправили при старте входа. */
+    nonce: string | null;
 }

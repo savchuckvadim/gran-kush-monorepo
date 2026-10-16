@@ -1,5 +1,7 @@
 import { Injectable } from "@nestjs/common";
 
+import type { IdentityProvider } from "@prisma/client";
+
 import { PrismaService } from "@common/prisma/prisma.service";
 import {
     LinkIdentityInput,
@@ -12,7 +14,10 @@ export class UserIdentityPrismaRepository extends UserIdentityRepository {
         super();
     }
 
-    async findUserIdByProvider(provider: string, providerUserId: string): Promise<string | null> {
+    async findUserIdByProvider(
+        provider: IdentityProvider,
+        providerUserId: string
+    ): Promise<string | null> {
         const identity = await this.prisma.userIdentity.findUnique({
             where: { provider_providerUserId: { provider, providerUserId } },
             select: { userId: true },
@@ -21,6 +26,16 @@ export class UserIdentityPrismaRepository extends UserIdentityRepository {
     }
 
     async link(input: LinkIdentityInput): Promise<void> {
+        const profile = {
+            email: input.email ?? null,
+            emailVerified: input.emailVerified ?? false,
+            displayName: input.displayName ?? null,
+            givenName: input.givenName ?? null,
+            familyName: input.familyName ?? null,
+            username: input.username ?? null,
+            locale: input.locale ?? null,
+            lastLoginAt: new Date(),
+        };
         await this.prisma.userIdentity.upsert({
             where: {
                 provider_providerUserId: {
@@ -32,14 +47,9 @@ export class UserIdentityPrismaRepository extends UserIdentityRepository {
                 userId: input.userId,
                 provider: input.provider,
                 providerUserId: input.providerUserId,
-                email: input.email ?? null,
-                displayName: input.displayName ?? null,
+                ...profile,
             },
-            update: {
-                userId: input.userId,
-                email: input.email ?? null,
-                displayName: input.displayName ?? null,
-            },
+            update: { userId: input.userId, ...profile },
         });
     }
 }

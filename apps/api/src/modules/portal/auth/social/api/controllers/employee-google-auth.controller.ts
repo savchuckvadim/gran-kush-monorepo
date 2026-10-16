@@ -1,25 +1,33 @@
-import { Controller, Get, Headers, Query, Res } from "@nestjs/common";
-import { ApiExcludeEndpoint, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Controller, Get, Headers, Logger, Query, Req, Res } from "@nestjs/common";
+import { ApiExcludeEndpoint, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 
-import type { Response } from "express";
+import type { Request, Response } from "express";
 
 import { AUTH_GLOBAL_SCOPE, resolveDeviceIdFromHeaders } from "@common/auth";
 import { AUTH_THROTTLE } from "@common/config/throttler/throttler.config";
 import { AuthCookieService } from "@common/cookie/services/auth-cookie.service";
 import { Public } from "@common/decorators/auth/public.decorator";
 import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
-import { GoogleOAuthFlowService } from "@modules/portal/auth/social/application/services/google-oauth-flow.service";
+import {
+    GoogleFlowError,
+    GoogleOAuthFlowService,
+    OAUTH_FLOW_COOKIE,
+} from "@modules/portal/auth/social/application/services/google-oauth-flow.service";
 import { SocialLoginService } from "@modules/portal/auth/social/application/services/social-login.service";
 
 /**
  * Google-вход в CRM. Аккаунта с таким email нет (или нет ни одного клуба) —
  * ведём на регистрацию клуба с предзаполненным email; аккаунт заранее не создаём,
  * иначе регистрация клуба упрётся в 409 «email занят» (TASK-508).
+ * Защита входа (nonce, PKCE, подпись state, фильтр страницы возврата) — в
+ * `GoogleOAuthFlowService`.
  */
 @ApiTags("Employee Authentication (CRM Web)")
 @Controller("crm/auth/google")
 export class EmployeeGoogleAuthController {
+    private readonly logger = new Logger(EmployeeGoogleAuthController.name);
+
     constructor(
         private readonly flow: GoogleOAuthFlowService,
         private readonly socialLogin: SocialLoginService,
@@ -31,12 +39,23 @@ export class EmployeeGoogleAuthController {
     @Public()
     @Throttle(AUTH_THROTTLE)
     @ApiOperation({ summary: "Начать вход через Google (редирект на Google)" })
-    start(@Query("locale") locale: string | undefined, @Res() response: Response): void {
+    @ApiQuery({
+        name: "returnTo",
+        required: false,
+        description: "Путь в CRM, куда вернуть после входа (только относительный)",
+    })
+    start(
+        @Query("locale") locale: string | undefined,
+        @Query("returnTo") returnTo: string | undefined,
+        @Res() response: Response
+    ): void {
         if (!this.flow.isConfigured()) {
             response.redirect(this.loginUrl(this.flow.sanitizeLocale(locale), "google_off"));
             return;
         }
-        response.redirect(this.flow.buildStartUrl("crm", locale));
+        const { url, cookieValue } = this.flow.buildStart("crm", locale, returnTo);
+        response.cookie(OAUTH_FLOW_COOKIE, cookieValue, this.flow.flowCookieOptions("crm"));
+        response.redirect(url);
     }
 
     @Get("callback")
@@ -48,16 +67,21 @@ export class EmployeeGoogleAuthController {
         @Query("state") state: string | undefined,
         @Query("error") oauthError: string | undefined,
         @Headers() headers: Record<string, string | string[] | undefined>,
+        @Req() request: Request,
         @Res() response: Response
     ): Promise<void> {
         let locale = this.flow.sanitizeLocale(undefined);
+        const flowCookie = (request.cookies as Record<string, string> | undefined)?.[
+            OAUTH_FLOW_COOKIE
+        ];
+        response.clearCookie(OAUTH_FLOW_COOKIE, this.flow.flowCookieOptions("crm"));
         try {
-            ({ locale } = this.flow.verifyState("crm", state));
+            const verified = this.flow.verifyCallback("crm", state, flowCookie);
+            locale = verified.locale;
             if (oauthError || !code) {
-                response.redirect(this.loginUrl(locale, "google_auth"));
-                return;
+                throw new GoogleFlowError("provider_error");
             }
-            const profile = await this.flow.exchangeCode("crm", code);
+            const profile = await this.flow.exchangeCode("crm", code, verified.binding);
             const result = await this.socialLogin.loginEmployeeWithGoogle(profile);
             const front = this.flow.frontendUrl("crm");
             if (result.kind === "no_employment") {
@@ -71,8 +95,10 @@ export class EmployeeGoogleAuthController {
                 deviceId
             );
             this.cookieService.setAuthCookies(response, AUTH_GLOBAL_SCOPE.CRM, tokens);
-            response.redirect(`${front}/${locale}`);
-        } catch {
+            response.redirect(this.flow.successUrl("crm", locale, verified.returnTo));
+        } catch (error: unknown) {
+            const reason = error instanceof GoogleFlowError ? error.reason : "login_rejected";
+            this.logger.warn(`CRM Google sign-in rejected: ${reason}`);
             response.redirect(this.loginUrl(locale, "google_auth"));
         }
     }

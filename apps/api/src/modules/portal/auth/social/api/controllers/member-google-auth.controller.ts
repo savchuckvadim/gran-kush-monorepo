@@ -1,25 +1,33 @@
-import { Controller, Get, Headers, Query, Res } from "@nestjs/common";
-import { ApiExcludeEndpoint, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Controller, Get, Headers, Logger, Query, Req, Res } from "@nestjs/common";
+import { ApiExcludeEndpoint, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 
-import type { Response } from "express";
+import type { Request, Response } from "express";
 
 import { AUTH_GLOBAL_SCOPE, resolveDeviceIdFromHeaders } from "@common/auth";
 import { AUTH_THROTTLE } from "@common/config/throttler/throttler.config";
 import { AuthCookieService } from "@common/cookie/services/auth-cookie.service";
 import { Public } from "@common/decorators/auth/public.decorator";
 import { MemberAuthService } from "@modules/portal/auth/members/application/services/member-auth.service";
-import { GoogleOAuthFlowService } from "@modules/portal/auth/social/application/services/google-oauth-flow.service";
+import {
+    GoogleFlowError,
+    GoogleOAuthFlowService,
+    OAUTH_FLOW_COOKIE,
+} from "@modules/portal/auth/social/application/services/google-oauth-flow.service";
 import { SocialLoginService } from "@modules/portal/auth/social/application/services/social-login.service";
 
 /**
- * Google-вход в кабинет участника. Браузерный редирект-флоу: /start уводит на Google,
- * /callback ставит обычные member-куки и возвращает в кабинет. Ошибки не рендерим —
- * возвращаем на форму входа с ?error=, текст показывает фронт.
+ * Google-вход в кабинет участника. Браузерный редирект-флоу: /start уводит на Google и ставит
+ * куку привязки, /callback проверяет её, ставит обычные member-куки и возвращает на страницу,
+ * с которой человек пришёл. Защиту входа (nonce, PKCE, подпись state) описывает
+ * `GoogleOAuthFlowService`. Ошибки не рендерим — возвращаем на форму входа с ?error=, причина
+ * пишется в лог без персональных данных.
  */
 @ApiTags("Member Authentication (Site Web)")
 @Controller("lk/auth/google")
 export class MemberGoogleAuthController {
+    private readonly logger = new Logger(MemberGoogleAuthController.name);
+
     constructor(
         private readonly flow: GoogleOAuthFlowService,
         private readonly socialLogin: SocialLoginService,
@@ -31,12 +39,23 @@ export class MemberGoogleAuthController {
     @Public()
     @Throttle(AUTH_THROTTLE)
     @ApiOperation({ summary: "Начать вход через Google (редирект на Google)" })
-    start(@Query("locale") locale: string | undefined, @Res() response: Response): void {
+    @ApiQuery({
+        name: "returnTo",
+        required: false,
+        description: "Путь в кабинете, куда вернуть после входа (только относительный)",
+    })
+    start(
+        @Query("locale") locale: string | undefined,
+        @Query("returnTo") returnTo: string | undefined,
+        @Res() response: Response
+    ): void {
         if (!this.flow.isConfigured()) {
             response.redirect(this.loginUrl(this.flow.sanitizeLocale(locale), "google_off"));
             return;
         }
-        response.redirect(this.flow.buildStartUrl("member", locale));
+        const { url, cookieValue } = this.flow.buildStart("member", locale, returnTo);
+        response.cookie(OAUTH_FLOW_COOKIE, cookieValue, this.flow.flowCookieOptions("member"));
+        response.redirect(url);
     }
 
     @Get("callback")
@@ -48,16 +67,22 @@ export class MemberGoogleAuthController {
         @Query("state") state: string | undefined,
         @Query("error") oauthError: string | undefined,
         @Headers() headers: Record<string, string | string[] | undefined>,
+        @Req() request: Request,
         @Res() response: Response
     ): Promise<void> {
         let locale = this.flow.sanitizeLocale(undefined);
+        // Кука нужна один раз: удаляем её при любом исходе, повторный заход по ссылке не пройдёт
+        const flowCookie = (request.cookies as Record<string, string> | undefined)?.[
+            OAUTH_FLOW_COOKIE
+        ];
+        response.clearCookie(OAUTH_FLOW_COOKIE, this.flow.flowCookieOptions("member"));
         try {
-            ({ locale } = this.flow.verifyState("member", state));
+            const verified = this.flow.verifyCallback("member", state, flowCookie);
+            locale = verified.locale;
             if (oauthError || !code) {
-                response.redirect(this.loginUrl(locale, "google_auth"));
-                return;
+                throw new GoogleFlowError("provider_error");
             }
-            const profile = await this.flow.exchangeCode("member", code);
+            const profile = await this.flow.exchangeCode("member", code, verified.binding);
             const user = await this.socialLogin.loginMemberWithGoogle(profile);
             const deviceId = resolveDeviceIdFromHeaders(headers);
             const tokens = await this.memberAuthService.generateTokens(
@@ -65,10 +90,16 @@ export class MemberGoogleAuthController {
                 deviceId
             );
             this.cookieService.setAuthCookies(response, AUTH_GLOBAL_SCOPE.SITE, tokens);
-            response.redirect(`${this.flow.frontendUrl("member")}/${locale}`);
-        } catch {
+            response.redirect(this.flow.successUrl("member", locale, verified.returnTo));
+        } catch (error: unknown) {
+            this.logFailure(error);
             response.redirect(this.loginUrl(locale, "google_auth"));
         }
+    }
+
+    private logFailure(error: unknown): void {
+        const reason = error instanceof GoogleFlowError ? error.reason : "login_rejected";
+        this.logger.warn(`Member Google sign-in rejected: ${reason}`);
     }
 
     private loginUrl(locale: string, error: string): string {
