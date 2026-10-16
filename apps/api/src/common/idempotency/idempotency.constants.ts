@@ -18,6 +18,7 @@ export const IdempotencyScope = {
     LK_ORDER_CREATE: "lk.orders.create",
     CRM_ORDER_CREATE: "crm.orders.create",
     CRM_FINANCE_TRANSACTION_CREATE: "crm.finance.transactions.create",
+    CRM_PRESENCE_SCAN: "crm.presence.scan",
 } as const;
 
 export type IdempotencyScope = (typeof IdempotencyScope)[keyof typeof IdempotencyScope];

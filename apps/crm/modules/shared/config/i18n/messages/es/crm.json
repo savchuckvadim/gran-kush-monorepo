@@ -318,7 +318,8 @@
                     "wrong_member": "El código QR no coincide con el socio. Que lo muestre de nuevo.",
                     "wrong_club": "Este código QR es de otro club.",
                     "member_inactive": "El socio está desactivado en este club.",
-                    "membership_unconfirmed": "El socio aún no ha confirmado su membresía."
+                    "membership_unconfirmed": "El socio aún no ha confirmado su membresía.",
+                    "not_present": "El socio ya ha salido del club."
                 },
                 "currentStatus": "Estado",
                 "statusInClub": "En el club",
@@ -338,7 +339,8 @@
                 "duration": "Duración",
                 "minutes": "min",
                 "scanAnother": "Escanear otro",
-                "unknownMember": "Miembro desconocido"
+                "unknownMember": "Miembro desconocido",
+                "alreadyRecorded": "Ya estaba registrado: no hay una segunda marca."
             },
             "present": {
                 "title": "Actualmente en el club",

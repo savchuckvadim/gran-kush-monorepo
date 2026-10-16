@@ -318,7 +318,8 @@
                     "wrong_member": "The QR code does not match the member. Ask them to show it again.",
                     "wrong_club": "This QR code belongs to another club.",
                     "member_inactive": "The member is deactivated in this club.",
-                    "membership_unconfirmed": "The member has not confirmed their membership yet."
+                    "membership_unconfirmed": "The member has not confirmed their membership yet.",
+                    "not_present": "The member has already left the club."
                 },
                 "currentStatus": "Status",
                 "statusInClub": "In club",
@@ -338,7 +339,8 @@
                 "duration": "Duration",
                 "minutes": "min",
                 "scanAnother": "Scan another",
-                "unknownMember": "Unknown member"
+                "unknownMember": "Unknown member",
+                "alreadyRecorded": "This was already recorded — no second mark."
             },
             "present": {
                 "title": "Currently in club",

@@ -2,7 +2,10 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import type { SchemaQrCheckInDto } from "@workspace/api-client/core";
+
 import {
+    confirmDoorScan,
     getCurrentlyPresent,
     getPresenceSessions,
     getPresenceStats,
@@ -11,7 +14,6 @@ import {
     type PresenceSessionsFilter,
     type PresenceStatsFilter,
     previewQrCodeScan,
-    scanQrCodeForPresence,
 } from "../api/presence.api";
 
 const PRESENCE_KEYS = {
@@ -63,14 +65,18 @@ export function useQrPreview() {
     });
 }
 
-/**
- * Сканирование QR (вход/выход)
- */
-export function useQrScan() {
+/** Подтверждение входа или выхода из предпросмотра (ключ — на этот предпросмотр). */
+export function useConfirmDoorScan() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (encryptedCode: string) => scanQrCodeForPresence(encryptedCode),
+        mutationFn: ({
+            body,
+            idempotencyKey,
+        }: {
+            body: SchemaQrCheckInDto;
+            idempotencyKey: string;
+        }) => confirmDoorScan(body, idempotencyKey),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: PRESENCE_KEYS.all });
         },

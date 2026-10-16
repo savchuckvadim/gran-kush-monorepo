@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, IntersectionType } from "@nestjs/swagger";
 
 import { Type } from "class-transformer";
-import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from "class-validator";
+import { IsEnum, IsIn, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from "class-validator";
 
 import { IsQueryBoolean } from "@common/decorators/dto/query-boolean.decorator";
 import { PaginationDto } from "@common/paginate/dto/pagination.dto";
@@ -117,8 +117,8 @@ export class ManualCheckOutDto {
     memberId: string;
 }
 
-/** Чек-ин через QR (encryptedCode из сканирования) */
-export class QrCheckInDto {
+/** Предпросмотр скана на стойке: только код из QR, без записи */
+export class QrPreviewDto {
     @ApiProperty({
         example: "a1b2c3d4e5f6...",
         type: String,
@@ -128,6 +128,16 @@ export class QrCheckInDto {
     @IsNotEmpty()
     @MaxLength(2000)
     encryptedCode: string;
+}
+
+/** Подтверждение скана: код из QR и действие, которое показал предпросмотр */
+export class QrCheckInDto extends QrPreviewDto {
+    @ApiProperty({
+        enum: ["entry", "exit"],
+        description: "Действие из предпросмотра: сервер его не переключает сам",
+    })
+    @IsIn(["entry", "exit"])
+    action: "entry" | "exit";
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -145,6 +155,12 @@ export class CheckInResultDto {
 
     @ApiProperty({ type: () => PresenceSessionDto })
     session: PresenceSessionDto;
+
+    @ApiProperty({
+        type: Boolean,
+        description: "Это действие уже было записано (второе подтверждение) — ничего не изменилось",
+    })
+    repeated: boolean;
 
     @ApiPropertyOptional({ example: "Участник отмечен на вход", type: String })
     message?: string;

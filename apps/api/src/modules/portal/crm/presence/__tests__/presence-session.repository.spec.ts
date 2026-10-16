@@ -39,7 +39,7 @@ describe("PresenceSessionPrismaRepository — одна открытая сесс
             presenceSession: {
                 create: jest.fn(),
                 findFirst: jest.fn(),
-                update: jest.fn(),
+                findUniqueOrThrow: jest.fn(),
                 updateMany: jest.fn(),
             },
         };
@@ -112,19 +112,30 @@ describe("PresenceSessionPrismaRepository — одна открытая сесс
         expect(prisma.presenceSession.findFirst).not.toHaveBeenCalled();
     });
 
-    it("закрытие сессии снимает маркер", async () => {
+    it("закрытие сессии снимает маркер и закрывает только открытую", async () => {
         const { prisma, repo } = build();
-        prisma.presenceSession.update.mockResolvedValue(
+        prisma.presenceSession.updateMany.mockResolvedValue({ count: 1 });
+        prisma.presenceSession.findUniqueOrThrow.mockResolvedValue(
             sessionRow({ exitedAt: new Date(), exitMethod: "qr", activeEntityRecordId: null })
         );
 
-        await repo.closeSession("s-1", { exitMethod: "qr" });
+        const closed = await repo.closeOpenSession("s-1", { exitMethod: "qr" });
 
-        expect(prisma.presenceSession.update).toHaveBeenCalledWith(
+        expect(closed).not.toBeNull();
+        expect(prisma.presenceSession.updateMany).toHaveBeenCalledWith(
             expect.objectContaining({
+                where: { id: "s-1", exitedAt: null },
                 data: expect.objectContaining({ activeEntityRecordId: null }),
             })
         );
+    });
+
+    it("уже закрытую сессию не переписывает — null", async () => {
+        const { prisma, repo } = build();
+        prisma.presenceSession.updateMany.mockResolvedValue({ count: 0 });
+
+        expect(await repo.closeOpenSession("s-1", { exitMethod: "qr" })).toBeNull();
+        expect(prisma.presenceSession.findUniqueOrThrow).not.toHaveBeenCalled();
     });
 
     it("массовое закрытие снимает маркер и не трогает уже закрытые", async () => {

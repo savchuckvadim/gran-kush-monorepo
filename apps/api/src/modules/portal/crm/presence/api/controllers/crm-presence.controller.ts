@@ -5,6 +5,7 @@ import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { IdempotencyScope, Idempotent } from "@common/idempotency";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
@@ -19,10 +20,12 @@ import {
     PresenceStatsDto,
     PresenceStatsQueryDto,
     QrCheckInDto,
+    QrPreviewDto,
     QrPreviewResultDto,
 } from "@modules/portal/crm/presence/api/dto/presence.dto";
 import { mapPresenceSessionToDto } from "@modules/portal/crm/presence/api/mappers";
 import { PresenceService } from "@modules/portal/crm/presence/application/services/presence.service";
+import { ConfirmDoorScanUseCase } from "@modules/portal/crm/presence/application/use-cases/confirm-door-scan.use-case";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CRM Presence Controller
@@ -33,27 +36,38 @@ import { PresenceService } from "@modules/portal/crm/presence/application/servic
 @RequireEmployeeJwt()
 @ApiBearerAuth()
 export class CrmPresenceController {
-    constructor(private readonly presenceService: PresenceService) {}
+    constructor(
+        private readonly presenceService: PresenceService,
+        private readonly confirmDoorScan: ConfirmDoorScanUseCase
+    ) {}
 
-    // ─── QR Check-in/out (Toggle) ────────────────────────────────────────────
+    // ─── QR: подтверждение входа или выхода ──────────────────────────────────
 
     @Post("qr-scan")
+    @Idempotent(IdempotencyScope.CRM_PRESENCE_SCAN)
     @ApiOperation({
-        summary: "Сканирование QR на стойке (вход/выход)",
+        summary: "Подтвердить вход или выход по QR на стойке",
         description:
-            "Если участник не в клубе — регистрирует вход. " +
-            "Если уже в клубе — регистрирует выход.",
+            "Действие — из предпросмотра (qr-preview). Повтор входа отдаёт открытую сессию " +
+            "(`repeated`), выход уже вышедшего — 409 `not_present`.",
     })
     @ApiSuccessResponse(CheckInResultDto)
-    @ApiErrorResponse([400, 401, 403])
+    @ApiErrorResponse([400, 401, 403, 409])
     async qrScan(
         @Body() dto: QrCheckInDto,
+        @CurrentEmployee() employee: Employee,
         @PortalId() portalId: string
     ): Promise<CheckInResultDto> {
-        const result = await this.presenceService.handleQrScan(dto.encryptedCode, portalId);
+        const result = await this.confirmDoorScan.execute({
+            encryptedCode: dto.encryptedCode,
+            action: dto.action,
+            portalId,
+            employeeId: employee.id,
+        });
         return {
             action: result.action,
             session: mapPresenceSessionToDto(result.session),
+            repeated: result.repeated,
             message:
                 result.action === "entry"
                     ? "Участник отмечен на вход"
@@ -73,7 +87,7 @@ export class CrmPresenceController {
     @ApiSuccessResponse(QrPreviewResultDto)
     @ApiErrorResponse([400, 401, 403])
     async previewQrScan(
-        @Body() dto: QrCheckInDto,
+        @Body() dto: QrPreviewDto,
         @PortalId() portalId: string
     ): Promise<QrPreviewResultDto> {
         return this.presenceService.previewQrScan(dto.encryptedCode, portalId);

@@ -1,48 +1,22 @@
-import type {
-    SchemaCheckInResultDto,
-    SchemaManualCheckInDto,
-    SchemaManualCheckOutDto,
-    SchemaPaginatedResponsePresenceSessionDto,
-    SchemaPresenceSessionDto,
-    SchemaPresenceStatsDto,
-    SchemaQrCheckInDto,
+import {
+    assertOpenApiOk,
+    IDEMPOTENCY_HEADER,
+    type SchemaCheckInResultDto,
+    type SchemaPaginatedResponsePresenceSessionDto,
+    type SchemaPresenceSessionDto,
+    type SchemaPresenceStatsDto,
+    type SchemaQrCheckInDto,
+    type SchemaQrPreviewResultDto,
 } from "@workspace/api-client/core";
 
 import { $api } from "@/modules/shared";
 
-// ─── Local types (до регенерации OpenAPI-схемы) ──────────────────────────────
-
-export interface QrPreviewMember {
-    id: string;
-    name: string;
-    surname?: string | null;
-    membershipNumber?: string | null;
-    isActive: boolean;
-}
+export type QrPreviewResult = SchemaQrPreviewResultDto;
 
 /** Причины отказа сканера; тексты на языке интерфейса — `crm.attendance.scanner.errors.<код>`. */
-export type QrScanErrorCode =
-    | "undecryptable"
-    | "malformed"
-    | "expired"
-    | "revoked"
-    | "wrong_member"
-    | "wrong_club"
-    | "member_inactive"
-    | "membership_unconfirmed";
+export type QrScanErrorCode = NonNullable<SchemaQrPreviewResultDto["errorCode"]>;
 
-export interface QrPreviewResult {
-    valid: boolean;
-    errorCode?: QrScanErrorCode;
-    error?: string;
-    member?: QrPreviewMember;
-    /** Присутствует ли участник в клубе прямо сейчас */
-    isPresent: boolean;
-    /** Предлагаемое действие: вход или выход */
-    proposedAction: "entry" | "exit";
-}
-
-// ─── Query params ────────────────────────────────────────────────────────────
+export type DoorAction = SchemaQrCheckInDto["action"];
 
 export interface PresenceSessionsFilter {
     memberId?: string;
@@ -57,74 +31,42 @@ export interface PresenceStatsFilter {
     endDate?: string;
 }
 
-// ─── API functions ───────────────────────────────────────────────────────────
-
 /**
- * Сканировать QR-код (вход/выход — toggle)
- */
-export async function scanQrCodeForPresence(
-    encryptedCode: string
-): Promise<SchemaCheckInResultDto> {
-    const response = await $api.POST("/crm/presence/qr-scan", {
-        body: { encryptedCode } satisfies SchemaQrCheckInDto,
-    });
-
-    if (!response.response.ok) {
-        throw new Error(`Failed to scan QR code: ${response.response.status}`);
-    }
-
-    return response.data as SchemaCheckInResultDto;
-}
-
-/**
- * Предпросмотр QR-кода — только валидация и информация, без записи в БД.
- * Возвращает данные участника + предлагаемое действие (вход/выход).
+ * Предпросмотр QR на стойке — только проверка и участник, без записи: предлагает действие,
+ * которое сотрудник потом подтверждает.
  */
 export async function previewQrCodeScan(encryptedCode: string): Promise<QrPreviewResult> {
-    const response = await $api.POST("/crm/presence/qr-preview", {
-        body: { encryptedCode },
-    });
-
-    if (!response.response.ok) {
-        throw new Error(`QR preview failed: ${response.response.status}`);
-    }
-
-    return response.data as QrPreviewResult;
+    const response = await $api.POST("/crm/presence/qr-preview", { body: { encryptedCode } });
+    return assertOpenApiOk<QrPreviewResult>(response);
 }
 
 /**
- * Ручной чек-ин участника (сотрудником)
+ * Подтвердить вход или выход из предпросмотра. Ключ идемпотентности живёт столько же, сколько
+ * предпросмотр: двойное нажатие получает тот же ответ, а не вторую отметку.
  */
+export async function confirmDoorScan(
+    body: SchemaQrCheckInDto,
+    idempotencyKey: string
+): Promise<SchemaCheckInResultDto> {
+    const response = await $api.POST("/crm/presence/qr-scan", {
+        body,
+        headers: { [IDEMPOTENCY_HEADER]: idempotencyKey },
+    });
+    return assertOpenApiOk<SchemaCheckInResultDto>(response);
+}
+
+/** Ручная отметка входа сотрудником. */
 export async function manualCheckIn(memberId: string): Promise<SchemaPresenceSessionDto> {
-    const response = await $api.POST("/crm/presence/manual/check-in", {
-        body: { memberId } satisfies SchemaManualCheckInDto,
-    });
-
-    if (!response.response.ok) {
-        throw new Error(`Failed to check in member: ${response.response.status}`);
-    }
-
-    return response.data as SchemaPresenceSessionDto;
+    const response = await $api.POST("/crm/presence/manual/check-in", { body: { memberId } });
+    return assertOpenApiOk<SchemaPresenceSessionDto>(response);
 }
 
-/**
- * Ручной чек-аут участника (сотрудником)
- */
+/** Ручная отметка выхода сотрудником. */
 export async function manualCheckOut(memberId: string): Promise<SchemaPresenceSessionDto> {
-    const response = await $api.POST("/crm/presence/manual/check-out", {
-        body: { memberId } satisfies SchemaManualCheckOutDto,
-    });
-
-    if (!response.response.ok) {
-        throw new Error(`Failed to check out member: ${response.response.status}`);
-    }
-
-    return response.data as SchemaPresenceSessionDto;
+    const response = await $api.POST("/crm/presence/manual/check-out", { body: { memberId } });
+    return assertOpenApiOk<SchemaPresenceSessionDto>(response);
 }
 
-/**
- * Получить список сессий присутствия (с пагинацией и фильтрами)
- */
 export async function getPresenceSessions(
     filters?: PresenceSessionsFilter
 ): Promise<SchemaPaginatedResponsePresenceSessionDto> {
@@ -139,60 +81,26 @@ export async function getPresenceSessions(
             },
         },
     });
-
-    if (!response.response.ok) {
-        throw new Error(`Failed to fetch sessions: ${response.response.status}`);
-    }
-
-    return response.data as SchemaPaginatedResponsePresenceSessionDto;
+    return assertOpenApiOk<SchemaPaginatedResponsePresenceSessionDto>(response);
 }
 
-/**
- * Получить сессию по ID
- */
 export async function getPresenceSessionById(id: string): Promise<SchemaPresenceSessionDto> {
     const response = await $api.GET("/crm/presence/sessions/{id}", {
         params: { path: { id } },
     });
-
-    if (!response.response.ok) {
-        throw new Error(`Failed to fetch session: ${response.response.status}`);
-    }
-
-    return response.data as SchemaPresenceSessionDto;
+    return assertOpenApiOk<SchemaPresenceSessionDto>(response);
 }
 
-/**
- * Получить текущих присутствующих участников
- */
 export async function getCurrentlyPresent(): Promise<SchemaPresenceSessionDto[]> {
     const response = await $api.GET("/crm/presence/currently-present");
-
-    if (!response.response.ok) {
-        throw new Error(`Failed to fetch currently present: ${response.response.status}`);
-    }
-
-    return (response.data as SchemaPresenceSessionDto[]) ?? [];
+    return assertOpenApiOk<SchemaPresenceSessionDto[]>(response);
 }
 
-/**
- * Получить статистику присутствия
- */
 export async function getPresenceStats(
     filters?: PresenceStatsFilter
 ): Promise<SchemaPresenceStatsDto> {
     const response = await $api.GET("/crm/presence/stats", {
-        params: {
-            query: {
-                startDate: filters?.startDate,
-                endDate: filters?.endDate,
-            },
-        },
+        params: { query: { startDate: filters?.startDate, endDate: filters?.endDate } },
     });
-
-    if (!response.response.ok) {
-        throw new Error(`Failed to fetch stats: ${response.response.status}`);
-    }
-
-    return response.data as SchemaPresenceStatsDto;
+    return assertOpenApiOk<SchemaPresenceStatsDto>(response);
 }

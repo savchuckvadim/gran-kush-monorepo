@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from "@nestjs/common";
+import {
+    BadRequestException,
+    ConflictException,
+    Injectable,
+    Logger,
+    NotFoundException,
+} from "@nestjs/common";
 
 import { MembersService } from "@modules/portal/crm/members/application/services/members.service";
 import {
@@ -6,6 +12,7 @@ import {
     ExitMethod,
     PresenceSession,
 } from "@modules/portal/crm/presence/domain/entity/presence-session.entity";
+import { NOT_PRESENT } from "@modules/portal/crm/presence/domain/presence-errors";
 import {
     PresenceFilters,
     PresenceSessionRepository,
@@ -70,65 +77,7 @@ export class PresenceService {
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
-    // QR Check-in / Check-out (Toggle)
-    // ═══════════════════════════════════════════════════════════════════════════
-
-    /**
-     * Сканирование QR-кода на стойке.
-     * Если участник не в клубе → check-in (вход).
-     * Если участник в клубе → check-out (выход).
-     */
-    async handleQrScan(
-        encryptedCode: string,
-        portalId: string
-    ): Promise<{
-        action: "entry" | "exit";
-        session: PresenceSession;
-    }> {
-        // 1. Валидируем QR-код
-        const scanResult = await this.qrCodesService.validateScannedCode(encryptedCode, portalId);
-
-        if (!scanResult.valid) {
-            // В errors лежит код причины: клиент показывает перевод, а не строку сервера
-            throw new BadRequestException({
-                message: scanResult.error ?? "Invalid QR code",
-                errors: scanResult.errorCode ? [scanResult.errorCode] : [],
-            });
-        }
-
-        const memberId = scanResult.memberId!;
-
-        // 2. Проверяем, есть ли активная сессия (участник должен принадлежать порталу)
-        const activeSession = await this.sessionRepository.findActiveByMemberId(memberId, portalId);
-
-        if (activeSession) {
-            // Выход
-            const session = await this.sessionRepository.closeSession(activeSession.id, {
-                exitMethod: ExitMethod.QR,
-            });
-
-            this.logger.log(
-                `🚪 Выход (QR): участник ${memberId}, ` +
-                    `был в клубе ${session.getDurationMinutes() ?? "?"} мин`
-            );
-
-            return { action: "exit", session };
-        }
-
-        // Вход
-        const session = await this.sessionRepository.createEntry({
-            memberId,
-            entryMethod: EntryMethod.QR,
-            portalId,
-        });
-
-        this.logger.log(`🚪 Вход (QR): участник ${memberId}`);
-
-        return { action: "entry", session };
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    // Manual Check-in (Employee)
+    // Manual Check-in (Employee). Скан QR на стойке — ConfirmDoorScanUseCase
     // ═══════════════════════════════════════════════════════════════════════════
 
     /**
@@ -186,10 +135,16 @@ export class PresenceService {
             );
         }
 
-        const session = await this.sessionRepository.closeSession(activeSession.id, {
+        const session = await this.sessionRepository.closeOpenSession(activeSession.id, {
             exitMethod: ExitMethod.MANUAL_EMPLOYEE,
             employeeId,
         });
+        if (!session) {
+            throw new ConflictException({
+                message: "The member is not in the club",
+                code: NOT_PRESENT,
+            });
+        }
 
         this.logger.log(
             `🚪 Выход (ручной): участник ${memberId}, сотрудник ${employeeId}, ` +

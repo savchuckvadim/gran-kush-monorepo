@@ -47,8 +47,9 @@ export function ScanResultCard({ result, onReset }: ScanResultCardProps) {
                 >
                     {isEntry ? t("entryConfirmed") : t("exitConfirmed")}
                 </p>
-
-                <p className="text-sm text-muted-foreground">{result.message}</p>
+                {result.repeated && (
+                    <p className="text-sm text-muted-foreground">{t("alreadyRecorded")}</p>
+                )}
             </div>
 
             {/* Данные участника */}

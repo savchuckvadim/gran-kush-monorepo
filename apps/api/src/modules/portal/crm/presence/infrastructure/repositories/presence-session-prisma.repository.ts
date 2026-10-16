@@ -118,23 +118,25 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
         }
     }
 
-    async closeSession(
+    async closeOpenSession(
         id: string,
         data: { exitMethod: string; employeeId?: string }
-    ): Promise<PresenceSession> {
-        const updateData: Prisma.PresenceSessionUpdateInput = {
-            exitedAt: new Date(),
-            exitMethod: data.exitMethod,
-            // Снимаем маркер — иначе участник не сможет войти снова.
-            activeEntityRecordId: null,
-        };
-        if (data.employeeId) {
-            updateData.employee = { connect: { id: data.employeeId } };
-        }
-
-        const row = await this.prisma.presenceSession.update({
+    ): Promise<PresenceSession | null> {
+        // Условие exitedAt: null проверяет сам UPDATE: два одновременных выхода закрывают
+        // сессию один раз, второй получает ноль строк и узнаёт, что участник уже вышел
+        const { count } = await this.prisma.presenceSession.updateMany({
+            where: { id, exitedAt: null },
+            data: {
+                exitedAt: new Date(),
+                exitMethod: data.exitMethod,
+                // Снимаем маркер — иначе участник не сможет войти снова.
+                activeEntityRecordId: null,
+                ...(data.employeeId && { employeeId: data.employeeId }),
+            },
+        });
+        if (count === 0) return null;
+        const row = await this.prisma.presenceSession.findUniqueOrThrow({
             where: { id },
-            data: updateData,
             include: SESSION_INCLUDE,
         });
         return this.mapToEntity(row);

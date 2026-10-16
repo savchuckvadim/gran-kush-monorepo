@@ -62,14 +62,17 @@ export abstract class PresenceSessionRepository {
         portalId?: string;
     }): Promise<PresenceSession>;
 
-    /** Закрыть сессию (выход) */
-    abstract closeSession(
+    /**
+     * Закрыть сессию (выход), только если она ещё открыта; `null` — её уже закрыли
+     * (параллельный скан, сотрудник, крон): чужое время выхода не переписывается.
+     */
+    abstract closeOpenSession(
         id: string,
         data: {
             exitMethod: string;
             employeeId?: string;
         }
-    ): Promise<PresenceSession>;
+    ): Promise<PresenceSession | null>;
 
     /**
      * Закрыть все незакрытые сессии одним запросом (для auto_cron).

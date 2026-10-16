@@ -2156,8 +2156,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Сканирование QR на стойке (вход/выход)
-         * @description Если участник не в клубе — регистрирует вход. Если уже в клубе — регистрирует выход.
+         * Подтвердить вход или выход по QR на стойке
+         * @description Действие — из предпросмотра (qr-preview). Повтор входа отдаёт открытую сессию (`repeated`), выход уже вышедшего — 409 `not_present`.
          */
         post: operations["CrmPresence_qrScan"];
         delete?: never;
@@ -5188,6 +5188,11 @@ export interface components {
              * @example a1b2c3d4e5f6...
              */
             encryptedCode: string;
+            /**
+             * @description Действие из предпросмотра: сервер его не переключает сам
+             * @enum {string}
+             */
+            action: "entry" | "exit";
         };
         PresenceMemberDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
@@ -5249,8 +5254,17 @@ export interface components {
              */
             action: "entry" | "exit";
             session: components["schemas"]["PresenceSessionDto"];
+            /** @description Это действие уже было записано (второе подтверждение) — ничего не изменилось */
+            repeated: boolean;
             /** @example Участник отмечен на вход */
             message?: string;
+        };
+        QrPreviewDto: {
+            /**
+             * @description Зашифрованный payload из QR-кода
+             * @example a1b2c3d4e5f6...
+             */
+            encryptedCode: string;
         };
         QrPreviewResultDto: {
             /**
@@ -6566,6 +6580,7 @@ export type SchemaPresenceMemberDto = components['schemas']['PresenceMemberDto']
 export type SchemaPresenceEmployeeDto = components['schemas']['PresenceEmployeeDto'];
 export type SchemaPresenceSessionDto = components['schemas']['PresenceSessionDto'];
 export type SchemaCheckInResultDto = components['schemas']['CheckInResultDto'];
+export type SchemaQrPreviewDto = components['schemas']['QrPreviewDto'];
 export type SchemaQrPreviewResultDto = components['schemas']['QrPreviewResultDto'];
 export type SchemaManualCheckInDto = components['schemas']['ManualCheckInDto'];
 export type SchemaManualCheckOutDto = components['schemas']['ManualCheckOutDto'];
@@ -13359,7 +13374,10 @@ export interface operations {
     CrmPresence_qrScan: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Ключ идемпотентности. Повтор с тем же ключом и тем же телом возвращает сохранённый ответ вместо повторного выполнения. Тот же ключ с другим телом → 422, ключ ещё в работе → 409. */
+                "idempotency-key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -13405,6 +13423,28 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
+            /**
+             * @description Conflict
+             *
+             *     Conflict
+             */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
         };
     };
     CrmPresence_previewQrScan: {
@@ -13416,7 +13456,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["QrCheckInDto"];
+                "application/json": components["schemas"]["QrPreviewDto"];
             };
         };
         responses: {
