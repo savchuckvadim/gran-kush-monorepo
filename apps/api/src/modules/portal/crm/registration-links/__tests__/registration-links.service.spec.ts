@@ -1,4 +1,4 @@
-import { ConflictException, NotFoundException } from "@nestjs/common";
+import { ConflictException, ForbiddenException, NotFoundException } from "@nestjs/common";
 
 import { MemberJoinSource, RegistrationLinkKind } from "@prisma/client";
 
@@ -154,6 +154,132 @@ describe("RegistrationLinksService — лимит использований", (
             portalName: "Club",
         });
         expect(result.accountCreated).toBe(true);
+    });
+});
+
+describe("RegistrationLinksService.joinViaLinkAsUser — вступление под своей сессией", () => {
+    const build = (
+        opts: {
+            link?: Record<string, unknown>;
+            email?: string;
+            alreadyMember?: boolean;
+            consumed?: number;
+            joinFails?: Error;
+        } = {}
+    ) => {
+        const prisma = {
+            registrationLink: { findUnique: jest.fn().mockResolvedValue(link(opts.link)) },
+            user: { findUnique: jest.fn().mockResolvedValue({ email: opts.email ?? "a@b.c" }) },
+            member: {
+                findUnique: jest.fn().mockResolvedValue(opts.alreadyMember ? { id: "m-0" } : null),
+            },
+            $executeRaw: jest.fn().mockResolvedValue(opts.consumed ?? 1),
+        };
+        const joinPortalService = {
+            joinPortal: opts.joinFails
+                ? jest.fn().mockRejectedValue(opts.joinFails)
+                : jest.fn().mockResolvedValue({ id: "member-1" }),
+        };
+        const service = new RegistrationLinksService(
+            prisma as unknown as PrismaService,
+            {} as never,
+            joinPortalService as never,
+            {} as never,
+            {} as never,
+            {} as never
+        );
+        return { service, prisma, joinPortalService };
+    };
+
+    it("вступает без пароля и без письма, выбор документов передаётся как есть", async () => {
+        const { service, joinPortalService } = build();
+
+        const result = await service.joinViaLinkAsUser("tok", "u-1", {
+            fields: { first_name: "A" },
+            shareDocumentIds: ["d-1"],
+            shareSignature: true,
+        });
+
+        expect(result).toEqual({ memberId: "member-1", portalSlug: "club" });
+        expect(joinPortalService.joinPortal).toHaveBeenCalledWith(
+            expect.objectContaining({
+                userId: "u-1",
+                portalId: PORTAL_ID,
+                joinSource: MemberJoinSource.registration_link,
+                registrationLinkId: LINK_ID,
+                share: { documentIds: ["d-1"], signature: true },
+            })
+        );
+        expect(joinPortalService.joinPortal.mock.calls[0][0]).not.toHaveProperty("consent");
+    });
+
+    it("kiosk-ссылка размечает источник вступления", async () => {
+        const { service, joinPortalService } = build({
+            link: { kind: RegistrationLinkKind.kiosk },
+        });
+
+        await service.joinViaLinkAsUser("tok", "u-1", {});
+
+        expect(joinPortalService.joinPortal).toHaveBeenCalledWith(
+            expect.objectContaining({ joinSource: MemberJoinSource.kiosk })
+        );
+    });
+
+    it("уже участник: отказ до траты слота", async () => {
+        const { service, prisma, joinPortalService } = build({ alreadyMember: true });
+
+        await expect(service.joinViaLinkAsUser("tok", "u-1", {})).rejects.toBeInstanceOf(
+            ConflictException
+        );
+        expect(prisma.$executeRaw).not.toHaveBeenCalled();
+        expect(joinPortalService.joinPortal).not.toHaveBeenCalled();
+    });
+
+    it("личная ссылка на другой адрес: 403, слот не тратится", async () => {
+        const { service, prisma } = build({
+            link: {
+                kind: RegistrationLinkKind.personal,
+                prefillJson: { email: "Other@Example.com" },
+            },
+        });
+
+        await expect(service.joinViaLinkAsUser("tok", "u-1", {})).rejects.toBeInstanceOf(
+            ForbiddenException
+        );
+        expect(prisma.$executeRaw).not.toHaveBeenCalled();
+    });
+
+    it("личная ссылка на адрес аккаунта (без учёта регистра) пускает", async () => {
+        const { service, joinPortalService } = build({
+            email: "Nandu@Example.com",
+            link: {
+                kind: RegistrationLinkKind.personal,
+                prefillJson: { email: "nandu@example.com" },
+            },
+        });
+
+        await service.joinViaLinkAsUser("tok", "u-1", {});
+
+        expect(joinPortalService.joinPortal).toHaveBeenCalledTimes(1);
+    });
+
+    it("исчерпанный лимит: вступление не начинается", async () => {
+        const { service, joinPortalService } = build({ consumed: 0 });
+
+        await expect(service.joinViaLinkAsUser("tok", "u-1", {})).rejects.toBeInstanceOf(
+            NotFoundException
+        );
+        expect(joinPortalService.joinPortal).not.toHaveBeenCalled();
+    });
+
+    it("сбой вступления возвращает слот", async () => {
+        const failure = new Error("boom");
+        const { service, prisma } = build({ joinFails: failure });
+
+        await expect(service.joinViaLinkAsUser("tok", "u-1", {})).rejects.toBe(failure);
+
+        // consume + release
+        expect(prisma.$executeRaw).toHaveBeenCalledTimes(2);
     });
 });
 

@@ -271,6 +271,40 @@ export class RegisterViaLinkResponseDto {
     accountCreated: boolean;
 }
 
+export class JoinViaLinkDto {
+    @ApiPropertyOptional({
+        type: "object",
+        additionalProperties: true,
+        description: "Динамические поля формы public_registration портала",
+    })
+    @IsOptional()
+    @IsObject()
+    fields?: Record<string, unknown>;
+
+    @ApiPropertyOptional({
+        type: [String],
+        description: "Документы аккаунта, которые показать клубу",
+    })
+    @IsOptional()
+    @IsArray()
+    @ArrayMaxSize(20)
+    @IsString({ each: true })
+    shareDocumentIds?: string[];
+
+    @ApiPropertyOptional({ type: Boolean, description: "Показать клубу подпись аккаунта" })
+    @IsOptional()
+    @IsBoolean()
+    shareSignature?: boolean;
+}
+
+export class JoinViaLinkResponseDto {
+    @ApiProperty({ type: String })
+    memberId: string;
+
+    @ApiProperty({ type: String })
+    portalSlug: string;
+}
+
 export class RegistrationLinkPresenceDto {
     @ApiProperty({
         type: String,

@@ -6,11 +6,15 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 
 import type {
     SchemaCreateRegistrationLinkDto,
+    SchemaJoinViaLinkDto,
     SchemaUpdateRegistrationLinkDto,
 } from "@workspace/api-client/core";
 
+import { lkKeys } from "@/modules/entities/lk-account";
+
 import {
     createRegistrationLink,
+    joinViaLinkAsMember,
     leaveRegistrationLink,
     listRegistrationLinks,
     pingRegistrationLink,
@@ -48,6 +52,15 @@ export function useCreateRegistrationLink() {
     });
 }
 
+/** Новое членство меняет список клубов аккаунта, поэтому кэш кабинета сбрасывается целиком. */
+export function useJoinViaLinkAsMember(token: string) {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (body: SchemaJoinViaLinkDto) => joinViaLinkAsMember(token, body),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: lkKeys.all }),
+    });
+}
+
 export function useUpdateRegistrationLink() {
     const queryClient = useQueryClient();
     return useMutation({
@@ -68,16 +81,24 @@ export function useRevokeRegistrationLink() {
 const HEARTBEAT_MS = 30_000;
 const VIEWER_KEY = "pafpaf.reglink.viewer";
 
+/** `randomUUID` exists only in secure contexts; `getRandomValues` works over plain http too. */
+const randomId = (): string =>
+    typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : Array.from(crypto.getRandomValues(new Uint8Array(16)), (byte) =>
+              byte.toString(16).padStart(2, "0")
+          ).join("");
+
 /** One id per browser tab: two tabs of the same person count as two viewers, like two people. */
 const viewerId = (): string => {
     try {
         const stored = window.sessionStorage.getItem(VIEWER_KEY);
         if (stored) return stored;
-        const created = crypto.randomUUID();
+        const created = randomId();
         window.sessionStorage.setItem(VIEWER_KEY, created);
         return created;
     } catch {
-        return crypto.randomUUID();
+        return randomId();
     }
 };
 

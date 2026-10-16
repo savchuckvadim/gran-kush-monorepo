@@ -1,5 +1,7 @@
 import type {
     SchemaCreateRegistrationLinkDto,
+    SchemaJoinViaLinkDto,
+    SchemaJoinViaLinkResponseDto,
     SchemaPublicRegistrationLinkInfoDto,
     SchemaRegisterViaLinkDto,
     SchemaRegisterViaLinkResponseDto,
@@ -12,6 +14,7 @@ import { assertOpenApiOk } from "@workspace/api-client/core";
 import type { FormSchemaField } from "@workspace/dynamic-forms";
 
 import { $api, API_BASE_URL } from "@/modules/shared";
+import { $lkApi } from "@/modules/shared/api";
 
 export type RegistrationLink = SchemaRegistrationLinkDto;
 export type RegistrationLinkStatus = RegistrationLink["status"];
@@ -88,6 +91,18 @@ export async function registerViaLink(
         body,
     });
     return assertOpenApiOk<SchemaRegisterViaLinkResponseDto>(response);
+}
+
+/** Вступление по ссылке под сессией участника: новый аккаунт и пароль не нужны. */
+export async function joinViaLinkAsMember(
+    token: string,
+    body: SchemaJoinViaLinkDto
+): Promise<SchemaJoinViaLinkResponseDto> {
+    const response = await $lkApi.POST("/lk/reg-links/{token}/join", {
+        params: { path: { token } },
+        body,
+    });
+    return assertOpenApiOk<SchemaJoinViaLinkResponseDto>(response);
 }
 
 /** Heartbeat of an open public form; the link list shows how many people are on it now. */

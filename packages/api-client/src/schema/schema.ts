@@ -2643,6 +2643,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/lk/reg-links/{token}/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Вступить в клуб по ссылке-форме под текущей сессией; документы — только по выбору */
+        post: operations["LkRegistrationLinks_join"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/crm/entities/{code}/records": {
         parameters: {
             query?: never;
@@ -5644,6 +5661,20 @@ export interface components {
             /** @description Сколько человек сейчас смотрят анкету */
             online: number;
         };
+        JoinViaLinkDto: {
+            /** @description Динамические поля формы public_registration портала */
+            fields?: {
+                [key: string]: unknown;
+            };
+            /** @description Документы аккаунта, которые показать клубу */
+            shareDocumentIds?: string[];
+            /** @description Показать клубу подпись аккаунта */
+            shareSignature?: boolean;
+        };
+        JoinViaLinkResponseDto: {
+            memberId: string;
+            portalSlug: string;
+        };
         EntityRecordStageDto: {
             id: string;
             name: string;
@@ -6063,6 +6094,8 @@ export type SchemaRegisterViaLinkDto = components['schemas']['RegisterViaLinkDto
 export type SchemaRegisterViaLinkResponseDto = components['schemas']['RegisterViaLinkResponseDto'];
 export type SchemaRegistrationLinkPresenceDto = components['schemas']['RegistrationLinkPresenceDto'];
 export type SchemaRegistrationLinkPresenceResponseDto = components['schemas']['RegistrationLinkPresenceResponseDto'];
+export type SchemaJoinViaLinkDto = components['schemas']['JoinViaLinkDto'];
+export type SchemaJoinViaLinkResponseDto = components['schemas']['JoinViaLinkResponseDto'];
 export type SchemaEntityRecordStageDto = components['schemas']['EntityRecordStageDto'];
 export type SchemaEntityRecordStatusDto = components['schemas']['EntityRecordStatusDto'];
 export type SchemaEntityRecordFieldDto = components['schemas']['EntityRecordFieldDto'];
@@ -14309,6 +14342,77 @@ export interface operations {
             };
             /** @description Bad Request */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    LkRegistrationLinks_join: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JoinViaLinkDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JoinViaLinkResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

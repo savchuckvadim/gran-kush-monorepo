@@ -16,11 +16,14 @@ import {
 } from "@workspace/dynamic-forms";
 import { Button, Card, FieldInput } from "@workspace/ui";
 
+import { useLkMe } from "@/modules/entities/lk-account";
 import {
     getPublicRegistrationLink,
     registerViaLink,
     useRegistrationLinkPresence,
 } from "@/modules/entities/registration-links";
+
+import { SignedInJoin } from "./signed-in-join";
 
 // Documents and the signature are attached to an existing member later, so the public form
 // asks only for data fields — the same rule as the CRM's own "new member" form.
@@ -43,6 +46,9 @@ export function JoinByLinkPage({ token }: { token: string }) {
     const [edited, setEdited] = useState<Record<string, unknown>>({});
     const [errors, setErrors] = useState<FieldErrors>({});
     const [serverError, setServerError] = useState<string | null>(null);
+    // Вошедший участник по умолчанию вступает своим аккаунтом; «другой адрес» возвращает анкету
+    const [otherAccount, setOtherAccount] = useState(false);
+    const me = useLkMe();
 
     const info = useQuery({
         queryKey: ["public-registration-link", token],
@@ -90,7 +96,7 @@ export function JoinByLinkPage({ token }: { token: string }) {
         register.mutate();
     };
 
-    if (info.isLoading) {
+    if (info.isLoading || me.isLoading) {
         return (
             <div className="flex min-h-[50vh] items-center justify-center">
                 <Loader2 className="size-6 animate-spin text-muted-foreground" />
@@ -105,6 +111,19 @@ export function JoinByLinkPage({ token }: { token: string }) {
                     <p className="text-sm text-destructive">{t("invalid")}</p>
                 </Card>
             </div>
+        );
+    }
+
+    if (me.data && !otherAccount) {
+        return (
+            <SignedInJoin
+                token={token}
+                account={me.data}
+                club={info.data.portalDisplayName}
+                fields={dataFields as FormSchemaField[]}
+                prefill={prefill?.fields}
+                onUseOtherAccount={() => setOtherAccount(true)}
+            />
         );
     }
 

@@ -6,6 +6,7 @@ import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
+import { MemberAuthService } from "../src/modules/portal/auth/members/application/services/member-auth.service";
 
 jest.setTimeout(120_000);
 
@@ -128,6 +129,109 @@ describe("Registration links (e2e)", () => {
                     prefill: { email: "a@b.c", portalId: "evil" },
                 });
             expect(res.status).toBe(400);
+        });
+    });
+
+    describe("join under a session", () => {
+        // Токены выписываются напрямую: настоящий вход упирается в лимит логинов на сьют
+        const accountWithSession = async (label: string) => {
+            const email = `${label}-${suffix}@test.local`;
+            const user = await prisma.user.create({
+                data: {
+                    email,
+                    passwordHash: "not-a-real-hash",
+                    isActive: true,
+                    emailConfirmed: true,
+                },
+            });
+            const tokens = await app
+                .get(MemberAuthService)
+                .generateTokens({ id: user.id, email }, `device-${label}-${suffix}`);
+            return { userId: user.id, cookies: `member_access_token=${tokens.accessToken}` };
+        };
+
+        const join = (token: string, cookies: string, body: Record<string, unknown> = {}) =>
+            request(app.getHttpServer())
+                .post(`/lk/reg-links/${token}/join`)
+                .set("Cookie", cookies)
+                .send({ fields: { first_name: "Ñandú" }, ...body });
+
+        it("needs a session", async () => {
+            const link = await createLink({ name: "Без сессии", kind: "public_link" });
+
+            const res = await request(app.getHttpServer())
+                .post(`/lk/reg-links/${link.token}/join`)
+                .send({});
+
+            expect(res.status).toBe(401);
+        });
+
+        it("joins the signed-in account, spends the slot and refuses a second join", async () => {
+            const { userId, cookies: session } = await accountWithSession("join-a");
+            const link = await createLink({ name: "Одно место", kind: "public_link", maxUses: 1 });
+
+            const res = await join(link.token, session);
+            expect(res.status).toBe(201);
+            expect(res.body.portalSlug).toBe(slug);
+
+            const member = await prisma.member.findFirst({
+                where: { userId, portal: { name: slug } },
+            });
+            expect(member?.id).toBe(res.body.memberId);
+            expect(member?.registrationLinkId).toBe(link.id);
+            expect(member?.consentStatus).toBe("confirmed");
+
+            const again = await join(link.token, session);
+            expect(again.status).toBe(404);
+        });
+
+        it("does not burn the slot when the account is already a member", async () => {
+            const { cookies: session } = await accountWithSession("join-b");
+            const first = await createLink({ name: "Первая", kind: "public_link" });
+            const second = await createLink({ name: "Вторая", kind: "public_link", maxUses: 1 });
+
+            expect((await join(first.token, session)).status).toBe(201);
+            expect((await join(second.token, session)).status).toBe(409);
+
+            const row = await prisma.registrationLink.findUnique({ where: { id: second.id } });
+            expect(row?.usesCount).toBe(0);
+        });
+
+        it("a personal link works only for its own address", async () => {
+            const { userId, cookies: session } = await accountWithSession("join-c");
+            const stranger = await createLink({
+                name: "Чужая",
+                kind: "personal",
+                prefill: { email: `someone-else-${suffix}@test.local` },
+            });
+            const own = await createLink({
+                name: "Своя",
+                kind: "personal",
+                prefill: { email: `join-c-${suffix}@test.local` },
+            });
+
+            expect((await join(stranger.token, session)).status).toBe(403);
+            expect(
+                (await prisma.registrationLink.findUnique({ where: { id: stranger.id } }))
+                    ?.usesCount
+            ).toBe(0);
+
+            expect((await join(own.token, session)).status).toBe(201);
+            expect(await prisma.member.count({ where: { userId } })).toBe(1);
+        });
+
+        it("rejects documents that are not the account's own", async () => {
+            const { userId, cookies: session } = await accountWithSession("join-d");
+            const link = await createLink({ name: "Чужой документ", kind: "public_link" });
+
+            const res = await join(link.token, session, {
+                shareDocumentIds: ["00000000-0000-4000-8000-000000000000"],
+            });
+
+            expect(res.status).toBe(400);
+            expect(await prisma.member.count({ where: { userId } })).toBe(0);
+            const row = await prisma.registrationLink.findUnique({ where: { id: link.id } });
+            expect(row?.usesCount).toBe(0);
         });
     });
 

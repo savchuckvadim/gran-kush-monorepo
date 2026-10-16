@@ -1,6 +1,7 @@
 import {
     BadRequestException,
     ConflictException,
+    ForbiddenException,
     Injectable,
     Logger,
     NotFoundException,
@@ -28,6 +29,8 @@ import { PORTAL_SUMMARY_SELECT } from "@modules/portal/crm/portals/infrastructur
 
 import {
     CreateRegistrationLinkDto,
+    JoinViaLinkDto,
+    JoinViaLinkResponseDto,
     RegisterViaLinkDto,
     RegisterViaLinkResponseDto,
     RegistrationLinkPrefillDto,
@@ -310,6 +313,64 @@ export class RegistrationLinksService {
             portalSlug: link.portal.name,
             accountCreated: created || claimed || claimByEmail,
         };
+    }
+
+    /**
+     * Вступление в клуб по ссылке из уже открытой сессии: аккаунт один, новый не заводится и
+     * пароль не нужен — владелец доказан самой сессией, поэтому документы можно показать клубу
+     * сразу, но только те, что он выбрал. Слот ссылки занимается так же, как при регистрации.
+     */
+    async joinViaLinkAsUser(
+        token: string,
+        userId: string,
+        dto: JoinViaLinkDto
+    ): Promise<JoinViaLinkResponseDto> {
+        const link = await this.getActiveByToken(token);
+
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: { email: true },
+        });
+        if (!user) {
+            throw new NotFoundException("Account not found");
+        }
+
+        // Личная ссылка выписана на один адрес: чужой аккаунт не должен тратить её
+        const expectedEmail =
+            link.kind === RegistrationLinkKind.personal
+                ? this.normalizePrefill(link.prefillJson)?.email
+                : undefined;
+        if (expectedEmail && expectedEmail !== user.email.trim().toLowerCase()) {
+            throw new ForbiddenException("This link was issued for another email address");
+        }
+
+        // Уже участник — отказ до траты слота: иначе одноразовая ссылка сгорела бы зря
+        const existing = await this.prisma.member.findUnique({
+            where: { userId_portalId: { userId, portalId: link.portalId } },
+            select: { id: true },
+        });
+        if (existing) {
+            throw new ConflictException("User is already a member of this portal");
+        }
+
+        await this.consumeUse(link.id);
+        try {
+            const member = await this.joinPortalService.joinPortal({
+                userId,
+                portalId: link.portalId,
+                fields: dto.fields ?? {},
+                joinSource:
+                    link.kind === RegistrationLinkKind.kiosk
+                        ? MemberJoinSource.kiosk
+                        : MemberJoinSource.registration_link,
+                registrationLinkId: link.id,
+                share: { documentIds: dto.shareDocumentIds, signature: dto.shareSignature },
+            });
+            return { memberId: member.id, portalSlug: link.portal.name };
+        } catch (error) {
+            await this.releaseUse(link.id);
+            throw error;
+        }
     }
 
     /** Only the two prefill keys survive: nothing else from a request body reaches the stored JSON. */
