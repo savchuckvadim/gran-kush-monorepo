@@ -31,8 +31,8 @@ Product catalog → **Add product**. Для каждого тарифа — пр
 | Продукт | Цена | Период | Код тарифа у нас |
 |---|---|---|---|
 | PafPaf Prueba | 5,00 € | Monthly | `prueba-month` |
-| PafPaf Calada | 25,00 € | Monthly | `calada-month` |
-| PafPaf Calada | 240,00 € | Yearly | `calada-year` |
+| PafPaf Barrio | 25,00 € | Monthly | `barrio-month` |
+| PafPaf Barrio | 240,00 € | Yearly | `barrio-year` |
 | PafPaf Club | 49,00 € | Monthly | `club-month` |
 | PafPaf Club | 468,00 € | Yearly | `club-year` |
 | PafPaf Cadena | 99,00 € | Monthly | `cadena-month` |
@@ -69,7 +69,7 @@ Developers → **Webhooks** (в новом интерфейсе — Workbench �
 1. **Customer portal** (Settings → Billing → Customer portal) — включить:
    - обновление способа оплаты;
    - отмена подписки — «в конце периода»;
-   - смена тарифа: добавьте продукты Calada, Club, Cadena;
+   - смена тарифа: добавьте продукты Barrio, Club, Cadena;
    - история счетов;
    - название бизнеса, ссылки на условия и политику конфиденциальности.
 2. **Subscriptions and emails** (Settings → Billing → Subscriptions and emails):
@@ -110,7 +110,7 @@ BILLING_GRACE_DAYS=7
 `https://admin.paf-paf.app` → **Тарифы** → Новый тариф.
 
 - `prueba-month`: id цены «PafPaf Prueba», **публичный — выключить**.
-- `calada-month` … `cadena-year`: id соответствующих цен, публичные.
+- `barrio-month` … `cadena-year`: id соответствующих цен, публичные.
 
 Сумма, валюта и период подтянутся из Stripe. Если ключ не задан, админка ответит ошибкой «STRIPE_SECRET_KEY is not set».
 

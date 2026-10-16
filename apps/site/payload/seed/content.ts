@@ -345,9 +345,9 @@ export const PAGES: { slug: string; title: L; seoTitle: L; seoDescription: L; la
         title: { es: "Precios", ru: "Цены", en: "Pricing" },
         seoTitle: { es: "Precios — PafPaf", ru: "Цены — PafPaf", en: "Pricing — PafPaf" },
         seoDescription: {
-            es: "Calada, Club y Cadena: sin permanencia, con el IVA a la vista y migración incluida desde el plan Club.",
-            ru: "Calada, Club и Cadena: без обязательств, НДС виден сразу, перенос данных включён с тарифа Club.",
-            en: "Calada, Club and Cadena: no lock-in, VAT shown upfront and migration included from the Club plan.",
+            es: "Barrio, Club y Cadena: sin permanencia, con el IVA a la vista y migración incluida desde el plan Club.",
+            ru: "Barrio, Club и Cadena: без обязательств, НДС виден сразу, перенос данных включён с тарифа Club.",
+            en: "Barrio, Club and Cadena: no lock-in, VAT shown upfront and migration included from the Club plan.",
         },
         layout: pricingLayout,
     },
@@ -360,22 +360,22 @@ type PlanSeed = Omit<Plan, "id" | "createdAt" | "updatedAt" | "forWhom" | "featu
 
 export const PLANS: PlanSeed[] = [
     {
-        code: "calada",
-        name: "Calada",
+        code: "barrio",
+        name: "Barrio",
         order: 1,
         forWhom: { es: "Para clubes que empiezan", ru: "Для клубов, которые только начинают", en: "For clubs that are starting out" },
         features: [
-            { id: "calada-1", text: { es: "Hasta 300 socios", ru: "До 300 участников", en: "Up to 300 members" } },
+            { id: "barrio-1", text: { es: "Hasta 300 socios", ru: "До 300 участников", en: "Up to 300 members" } },
             {
-                id: "calada-2",
+                id: "barrio-2",
                 text: { es: "CRM, zona del socio y entrada QR", ru: "CRM, кабинет участника и вход по QR", en: "CRM, member zone and QR entry" },
             },
-            { id: "calada-3", text: { es: "Pedidos y stock", ru: "Заказы и склад", en: "Orders and stock" } },
-            { id: "calada-4", text: { es: "Soporte por chat", ru: "Поддержка в чате", en: "Chat support" } },
+            { id: "barrio-3", text: { es: "Pedidos y stock", ru: "Заказы и склад", en: "Orders and stock" } },
+            { id: "barrio-4", text: { es: "Soporte por chat", ru: "Поддержка в чате", en: "Chat support" } },
         ],
         maxMembers: 300,
         highlight: false,
-        billing: { monthlyCode: "calada-month", yearlyCode: "calada-year", fallbackMonthly: 25, fallbackYearly: 20 },
+        billing: { monthlyCode: "barrio-month", yearlyCode: "barrio-year", fallbackMonthly: 25, fallbackYearly: 20 },
     },
     {
         code: "club",
@@ -384,7 +384,7 @@ export const PLANS: PlanSeed[] = [
         forWhom: { es: "Para el club que va en serio", ru: "Для клуба, который работает всерьёз", en: "For the club that means business" },
         features: [
             { id: "club-1", text: { es: "Hasta 1.500 socios", ru: "До 1 500 участников", en: "Up to 1,500 members" } },
-            { id: "club-2", text: { es: "Todo lo de Calada", ru: "Всё из Calada", en: "Everything in Calada" } },
+            { id: "club-2", text: { es: "Todo lo de Barrio", ru: "Всё из Barrio", en: "Everything in Barrio" } },
             { id: "club-3", text: { es: "Caja e informes", ru: "Касса и отчёты", en: "Cash and reports" } },
             { id: "club-4", text: { es: "Roles del equipo", ru: "Роли команды", en: "Team roles" } },
             { id: "club-5", text: { es: "Migración incluida", ru: "Перенос данных включён", en: "Migration included" } },

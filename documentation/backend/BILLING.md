@@ -27,7 +27,7 @@
 База сайта (Payload) и база CRM разные и друг другу не мешают. Сайт читает цены из
 `GET /platform/billing/plans` по коду тарифа (`BILLING_API_URL`). Если API недоступен или тарифа с таким кодом нет,
 сайт показывает запасную цену из Payload (`fallbackMonthly` / `fallbackYearly`). Поэтому коды в админке и в
-Payload должны совпадать: `calada-month`, `calada-year`, `club-month`, `club-year`, `cadena-month`, `cadena-year`.
+Payload должны совпадать: `barrio-month`, `barrio-year`, `club-month`, `club-year`, `cadena-month`, `cadena-year`.
 
 ## Тарифы
 
@@ -35,8 +35,8 @@ Payload должны совпадать: `calada-month`, `calada-year`, `club-mo
 |---|---|---|---|
 | `trial` | Бесплатный период: новые клубы, разработка | нет | 0 |
 | `prueba-month` | Проверка оплаты настоящей картой | нет, только по ссылке | 5 €/мес |
-| `calada-month`, `club-month`, `cadena-month` | Боевые | да | 25 / 49 / 99 €/мес |
-| `calada-year`, `club-year`, `cadena-year` | Боевые, оплата за год | да | 240 / 468 / 948 €/год |
+| `barrio-month`, `club-month`, `cadena-month` | Боевые | да | 25 / 49 / 99 €/мес |
+| `barrio-year`, `club-year`, `cadena-year` | Боевые, оплата за год | да | 240 / 468 / 948 €/год |
 
 - Тариф заводится в админке (`Тарифы`) или через `POST /platform/admin/billing/plans`. С `stripePriceId`
   сумма, валюта и период берутся из Stripe. Без него тариф годится только для ручной оплаты.

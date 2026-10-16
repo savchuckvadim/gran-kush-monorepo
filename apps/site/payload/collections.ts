@@ -109,7 +109,7 @@ export const Plans: CollectionConfig = {
                     required: true,
                     unique: true,
                     options: [
-                        { label: "Calada", value: "calada" },
+                        { label: "Barrio", value: "barrio" },
                         { label: "Club", value: "club" },
                         { label: "Cadena", value: "cadena" },
                     ],

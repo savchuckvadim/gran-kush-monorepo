@@ -57,7 +57,7 @@ describe("BillingPlanPrismaRepository — публичный каталог та
     it("цена — строка ровно с двумя знаками после точки", async () => {
         const { repo } = build([
             planRow({ code: "trial", priceAmount: new Prisma.Decimal("0") }),
-            planRow({ code: "calada-year", priceAmount: new Prisma.Decimal("239.9") }),
+            planRow({ code: "barrio-year", priceAmount: new Prisma.Decimal("239.9") }),
             planRow({ code: "club-month", priceAmount: new Prisma.Decimal("49") }),
         ]);
 

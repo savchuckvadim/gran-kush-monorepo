@@ -1,5 +1,5 @@
 export interface PlanView {
-    code: "calada" | "club" | "cadena";
+    code: "barrio" | "club" | "cadena";
     name: string;
     forWhom: string;
     features: string[];

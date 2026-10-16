@@ -367,7 +367,7 @@ export interface FinalCtaBlock {
  */
 export interface Plan {
   id: number;
-  code: 'calada' | 'club' | 'cadena';
+  code: 'barrio' | 'club' | 'cadena';
   name: string;
   order?: number | null;
   forWhom?: string | null;
