@@ -377,7 +377,7 @@ Google находит или заводит аккаунт и всегда вы�
 
 ### 3. Каркас кабинета в CRM
 
-### TASK-710: два принципала в одном приложении `[~]` P1 — 2026-10-16
+### TASK-710: два принципала в одном приложении `[x]` P1 — 2026-10-16
 
 Сделано: refresh в api-client идёт по одному запросу на тип клиента; второй клиент `$cabinetApi`
 (`ApiAuthType.CABINET`, клуб из видимого адреса); ключи кабинета в react-query начинаются с `cabinet`, выход
@@ -386,8 +386,9 @@ Google находит или заводит аккаунт и всегда вы�
 ошибка типов. ESLint запрещает импорт CRM-`$api` в коде кабинета (`apps/crm/eslint.config.js`).
 
 - [x] `packages/api-client`: `refreshPromise` по типу клиента.
-- [ ] Тест на одновременный 401 двух клиентов: в `packages/` нет тестового раннера (jest только в `apps/api`);
-      нужен vitest в devDependencies `packages/api-client`.
+- [x] Тест на одновременный 401 двух клиентов: vitest в `packages/api-client` (`test/auth-refresh.test.ts`, шаг CI
+      «Unit tests (api-client)»): один refresh на клиента, CRM и кабинет — каждый свой, отказ одного не роняет
+      другой, оба повторяют свой запрос.
 - [x] `$cabinetApi`; сужение `paths` по префиксам; eslint-запрет CRM-`$api` в дереве кабинета.
 - [x] Ключи react-query кабинета с префиксом `cabinet`; `MemberAuthProvider`; очистка кэша кабинета по префиксу.
 
