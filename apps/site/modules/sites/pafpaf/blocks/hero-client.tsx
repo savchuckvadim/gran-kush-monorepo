@@ -83,14 +83,14 @@ export const HeroLens = () => {
 };
 
 interface LiveBarProps {
-    labels: { inside: string; pickups: string; cash: string };
+    labels: { inside: string; orders: string; cash: string };
 }
 
 // Example numbers that tick like a live club evening.
 export const LiveBar = ({ labels }: LiveBarProps) => {
     const locale = useLocale();
-    const [live, setLive] = useState({ inside: 23, pickups: 64, cash: 1284.5 });
-    const [bumped, setBumped] = useState<"inside" | "pickups" | null>(null);
+    const [live, setLive] = useState({ inside: 23, orders: 64, cash: 1284.5 });
+    const [bumped, setBumped] = useState<"inside" | "orders" | null>(null);
 
     useEffect(() => {
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -100,8 +100,8 @@ export const LiveBar = ({ labels }: LiveBarProps) => {
                 setBumped("inside");
             } else {
                 const ticket = [7.5, 8, 15, 6.5][Math.floor(Math.random() * 4)] ?? 7.5;
-                setLive((v) => ({ ...v, pickups: v.pickups + 1, cash: v.cash + ticket }));
-                setBumped("pickups");
+                setLive((v) => ({ ...v, orders: v.orders + 1, cash: v.cash + ticket }));
+                setBumped("orders");
             }
             window.setTimeout(() => setBumped(null), 600);
         }, 3200);
@@ -123,14 +123,14 @@ export const LiveBar = ({ labels }: LiveBarProps) => {
                 </b>
             </div>
             <div>
-                <small>{labels.pickups}</small>
-                <b className={bumped === "pickups" ? "bump" : undefined}>
-                    {number.format(live.pickups)}
+                <small>{labels.orders}</small>
+                <b className={bumped === "orders" ? "bump" : undefined}>
+                    {number.format(live.orders)}
                 </b>
             </div>
             <div>
                 <small>{labels.cash}</small>
-                <b className={bumped === "pickups" ? "bump" : undefined}>
+                <b className={bumped === "orders" ? "bump" : undefined}>
                     {money.format(live.cash)}
                 </b>
             </div>

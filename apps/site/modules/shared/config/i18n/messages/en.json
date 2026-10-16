@@ -23,34 +23,32 @@
     },
     "live": {
         "inside": "Inside now",
-        "pickups": "Pick-ups today",
+        "orders": "Orders today",
         "cash": "Cash today"
     },
     "phone": {
         "member": "Member No. 0147",
         "fee": "Fee paid",
         "sponsor": "Sponsor No. 0098",
-        "limit": "41 / 60 g",
+        "signed": "Form signed",
         "ok": "Entry recorded"
     },
     "flask": {
-        "today": "Today's pick-up",
-        "of": "of {limit} g this month",
-        "ok": "It fits: {n} g left this month.",
-        "over": "Over by {n} g: the CRM won't record it."
-    },
-    "units": {
-        "g": "g"
+        "today": "New members",
+        "unit": "members",
+        "of": "of {limit} seats in the plan",
+        "ok": "It fits: {n} seats left in the plan.",
+        "over": "Over by {n}: time for the next plan, your data stays where it is."
     },
     "roles": {
-        "disp": "Dispensing",
+        "desk": "Front desk",
         "manager": "Manager",
         "admin": "Admin"
     },
     "record": {
         "since": "Member since 2024",
         "number": "Member No.",
-        "limit": "Monthly limit",
+        "visits": "Visits this month",
         "fee": "Fee",
         "feeValue": "Paid",
         "sponsor": "Sponsor",

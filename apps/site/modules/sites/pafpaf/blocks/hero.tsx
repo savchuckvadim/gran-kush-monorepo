@@ -36,7 +36,7 @@ export const Hero = async ({ block, locale }: { block: HeroBlock; locale: Locale
                 </div>
                 {block.showLiveBar && (
                     <LiveBar
-                        labels={{ inside: t("inside"), pickups: t("pickups"), cash: t("cash") }}
+                        labels={{ inside: t("inside"), orders: t("orders"), cash: t("cash") }}
                     />
                 )}
             </div>

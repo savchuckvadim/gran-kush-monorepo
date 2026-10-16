@@ -23,34 +23,32 @@
     },
     "live": {
         "inside": "Dentro ahora",
-        "pickups": "Retiradas hoy",
+        "orders": "Pedidos hoy",
         "cash": "Caja de hoy"
     },
     "phone": {
         "member": "Socia Nº 0147",
         "fee": "Cuota al día",
         "sponsor": "Aval Nº 0098",
-        "limit": "41 / 60 g",
+        "signed": "Ficha firmada",
         "ok": "Entrada registrada"
     },
     "flask": {
-        "today": "Retirada de hoy",
-        "of": "de {limit} g este mes",
-        "ok": "Cabe: quedan {n} g este mes.",
-        "over": "Se pasa {n} g: la CRM no la registra."
-    },
-    "units": {
-        "g": "g"
+        "today": "Socios nuevos",
+        "unit": "socios",
+        "of": "de {limit} plazas del plan",
+        "ok": "Cabe: quedan {n} plazas en el plan.",
+        "over": "Te pasas por {n}: toca el plan siguiente, tus datos se quedan donde están."
     },
     "roles": {
-        "disp": "Dispensación",
+        "desk": "Recepción",
         "manager": "Encargado",
         "admin": "Administración"
     },
     "record": {
         "since": "Socia desde 2024",
         "number": "Nº de socio",
-        "limit": "Límite del mes",
+        "visits": "Visitas este mes",
         "fee": "Cuota",
         "feeValue": "Al día",
         "sponsor": "Avalista",
