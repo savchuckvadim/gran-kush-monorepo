@@ -227,6 +227,26 @@ describe("OrdersService — стадии заказа", () => {
         );
     });
 
+    it("отмена участником дописывается к заметкам сотрудников, а не стирает их", async () => {
+        repository.findByIdForPortal.mockResolvedValue(order({ adminNotes: "позвонить до 18:00" }));
+
+        await service.cancelOrderByMember("order-1", "member-1", PORTAL, "передумал");
+
+        expect(repository.update).toHaveBeenCalledWith(
+            "order-1",
+            expect.objectContaining({
+                adminNotes: "позвонить до 18:00\nОтменено участником: передумал",
+            })
+        );
+    });
+
+    it("чужой заказ участник не отменяет — 404, как будто его нет", async () => {
+        await expect(
+            service.cancelOrderByMember("order-1", "member-2", PORTAL)
+        ).rejects.toMatchObject({ status: 404 });
+        expect(repository.compareAndSetStage).not.toHaveBeenCalled();
+    });
+
     it("участник не отменяет заказ, который клуб уже взял в работу", async () => {
         repository.findByIdForPortal.mockResolvedValue(order({ stage: PREPARING }));
 

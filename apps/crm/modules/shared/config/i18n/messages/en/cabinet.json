@@ -115,7 +115,13 @@
             "cancel": "Cancel",
             "visitsTitle": "Recent visits",
             "noVisits": "No visits yet.",
-            "nowInClub": "in the club now"
+            "nowInClub": "in the club now",
+            "tabs": {
+                "label": "Club sections",
+                "club": "Club",
+                "shop": "Shop",
+                "orders": "My orders"
+            }
         },
         "clubs": {
             "title": "All memberships",
@@ -198,6 +204,58 @@
                 "deleteTitle": "Delete the signature?",
                 "deleteText": "The signature will disappear, and clubs it was shown to will stop seeing it."
             }
+        },
+        "shop": {
+            "title": "Shop",
+            "search": "Search by name or strain",
+            "allCategories": "All",
+            "empty": "The club has not put anything in the shop yet.",
+            "nothingFound": "Nothing found. Try another category or search.",
+            "outOfStock": "Out of stock",
+            "addToCart": "Add to cart",
+            "thc": "THC {value}%",
+            "cbd": "CBD {value}%",
+            "closedTitle": "The shop opens in the club",
+            "closedText": "The club shows its catalog while you are in the club: check in with your QR code at the entrance and the shop opens.",
+            "denial": {
+                "not_in_club": "You can place an order while you are in the club.",
+                "not_approved": "Ordering opens once the club approves your membership.",
+                "club_subscription_inactive": "The club does not take orders right now."
+            },
+            "cart": {
+                "title": "Cart",
+                "empty": "Your cart is empty. Add products from the shop.",
+                "notes": "Note for the club",
+                "notesPlaceholder": "For example, when you will pick it up",
+                "total": "Total",
+                "totalHint": "The club confirms the final amount when the order is placed.",
+                "place": "Place order",
+                "open": "Cart · {count}",
+                "remove": "Remove from cart",
+                "decrease": "Less",
+                "increase": "More",
+                "outOfStock": "Sold out — not included in the order",
+                "unavailableProduct": "No longer in the shop"
+            }
+        },
+        "orders": {
+            "empty": "No orders in this club yet.",
+            "toShop": "Open the shop",
+            "loadMore": "Show more",
+            "noStage": "New",
+            "items": "{count, plural, one {# item} other {# items}}",
+            "back": "My orders",
+            "notFound": "Order not found.",
+            "orderedAt": "Placed {date}",
+            "closedAt": "closed {date}",
+            "discount": "Discount",
+            "total": "Total",
+            "gift": "Gift",
+            "cancel": "Cancel order",
+            "cancelTitle": "Cancel the order?",
+            "cancelText": "The club has not started on it yet. Once cancelled, the products go back to the shop.",
+            "cancelConfirm": "Cancel order",
+            "keep": "Keep it"
         }
     }
 }

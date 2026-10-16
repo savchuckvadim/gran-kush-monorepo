@@ -6,16 +6,13 @@ import { useLocale, useTranslations } from "next-intl";
 import { Loader2, QrCode, RefreshCw } from "lucide-react";
 
 import { ApiClientError, getApiErrorMessage } from "@workspace/api-client/core";
-import { Badge, Button, Card, ConfirmDialog, QrCodeDisplay } from "@workspace/ui";
+import { Button, Card, ConfirmDialog, QrCodeDisplay } from "@workspace/ui";
 
 import {
     useMyPresenceHistory,
-    useMyPresenceStatus,
     useMyQrCode,
     useRegenerateQrCode,
 } from "@/modules/entities/cabinet-club";
-import { useMyMemberships } from "@/modules/entities/membership";
-import { ClubBadge } from "@/modules/shared/ui/Brand";
 
 const formatDateTime = (iso: string, locale: string) =>
     new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(
@@ -28,44 +25,20 @@ const formatDuration = (minutes: number) => {
 };
 
 /**
- * Главная клуба: QR для стойки и присутствие. QR всегда тёмный на светлом, независимо от темы
- * сайта: сканер на стойке читает его контрастным. Уровень коррекции M — код редкий и читается
- * с первого раза. Код выдаёт и продлевает сам API при первом открытии.
+ * Главная клуба: QR для стойки и последние визиты; членство уже проверил раздел клуба.
+ * QR всегда тёмный на светлом, независимо от темы сайта: сканер на стойке читает его контрастным.
+ * Уровень коррекции M — код редкий и читается с первого раза. Код выдаёт и продлевает сам API
+ * при первом открытии.
  */
 export function CabinetClubPage({ slug }: { slug: string }) {
     const t = useTranslations("cabinet.club");
     const locale = useLocale();
     const [confirmReissue, setConfirmReissue] = useState(false);
 
-    const { data: memberships = [], isLoading: loadingMemberships } = useMyMemberships();
-    const membership = memberships.find((m) => m.slug === slug);
-
-    const confirmed = membership?.consentStatus === "confirmed" && membership.isActive;
     const qr = useMyQrCode(slug);
     const regenerate = useRegenerateQrCode(slug);
-    const presence = useMyPresenceStatus(slug);
     const history = useMyPresenceHistory(slug);
 
-    if (loadingMemberships) {
-        return (
-            <div className="flex flex-1 items-center justify-center">
-                <Loader2 className="size-6 animate-spin text-muted-foreground" aria-hidden="true" />
-            </div>
-        );
-    }
-
-    if (!membership || !confirmed) {
-        return (
-            <Card>
-                <div className="space-y-1 px-4">
-                    <p className="font-medium">{t("notMemberTitle")}</p>
-                    <p className="text-sm text-muted-foreground">{t("notMemberText")}</p>
-                </div>
-            </Card>
-        );
-    }
-
-    const present = presence.data?.isPresent === true;
     const sessions = history.data?.items ?? [];
     const qrError =
         qr.error instanceof ApiClientError && qr.error.status === 403
@@ -76,20 +49,6 @@ export function CabinetClubPage({ slug }: { slug: string }) {
 
     return (
         <div className="space-y-6">
-            <header className="flex items-center gap-3">
-                <ClubBadge name={membership.displayName} className="size-10" />
-                <div className="min-w-0">
-                    <h1 className="truncate text-2xl font-semibold tracking-tight">
-                        {membership.displayName}
-                    </h1>
-                    {presence.data && (
-                        <Badge variant={present ? "default" : "outline"}>
-                            {present ? t("inClub") : t("outsideClub")}
-                        </Badge>
-                    )}
-                </div>
-            </header>
-
             <div className="grid gap-4 lg:grid-cols-2">
                 <Card>
                     <div className="space-y-4 px-4">

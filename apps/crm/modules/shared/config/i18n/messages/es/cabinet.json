@@ -115,7 +115,13 @@
             "cancel": "Cancelar",
             "visitsTitle": "Últimas visitas",
             "noVisits": "Aún no hay visitas.",
-            "nowInClub": "ahora en el club"
+            "nowInClub": "ahora en el club",
+            "tabs": {
+                "label": "Secciones del club",
+                "club": "Club",
+                "shop": "Tienda",
+                "orders": "Mis pedidos"
+            }
         },
         "clubs": {
             "title": "Todas las membresías",
@@ -198,6 +204,58 @@
                 "deleteTitle": "¿Eliminar la firma?",
                 "deleteText": "La firma desaparecerá y los clubes a los que se mostró dejarán de verla."
             }
+        },
+        "shop": {
+            "title": "Tienda",
+            "search": "Buscar por nombre o variedad",
+            "allCategories": "Todo",
+            "empty": "El club aún no ha puesto nada en la tienda.",
+            "nothingFound": "No se encontró nada. Prueba otra categoría u otra búsqueda.",
+            "outOfStock": "Agotado",
+            "addToCart": "Añadir",
+            "thc": "THC {value}%",
+            "cbd": "CBD {value}%",
+            "closedTitle": "La tienda se abre en el club",
+            "closedText": "El club muestra su catálogo mientras estás en el club: registra tu entrada con el código QR y la tienda se abrirá.",
+            "denial": {
+                "not_in_club": "Puedes hacer un pedido mientras estás en el club.",
+                "not_approved": "Podrás pedir cuando el club apruebe tu membresía.",
+                "club_subscription_inactive": "El club no acepta pedidos en este momento."
+            },
+            "cart": {
+                "title": "Carrito",
+                "empty": "El carrito está vacío. Añade productos de la tienda.",
+                "notes": "Nota para el club",
+                "notesPlaceholder": "Por ejemplo, cuándo lo recogerás",
+                "total": "Total",
+                "totalHint": "El club confirma el importe final al tramitar el pedido.",
+                "place": "Hacer pedido",
+                "open": "Carrito · {count}",
+                "remove": "Quitar del carrito",
+                "decrease": "Menos",
+                "increase": "Más",
+                "outOfStock": "Agotado: no entra en el pedido",
+                "unavailableProduct": "Ya no está en la tienda"
+            }
+        },
+        "orders": {
+            "empty": "Aún no tienes pedidos en este club.",
+            "toShop": "Abrir la tienda",
+            "loadMore": "Mostrar más",
+            "noStage": "Nuevo",
+            "items": "{count, plural, one {# artículo} other {# artículos}}",
+            "back": "Mis pedidos",
+            "notFound": "Pedido no encontrado.",
+            "orderedAt": "Realizado el {date}",
+            "closedAt": "cerrado el {date}",
+            "discount": "Descuento",
+            "total": "Total",
+            "gift": "Regalo",
+            "cancel": "Cancelar pedido",
+            "cancelTitle": "¿Cancelar el pedido?",
+            "cancelText": "El club aún no ha empezado a prepararlo. Al cancelarlo, los productos vuelven a la tienda.",
+            "cancelConfirm": "Cancelar pedido",
+            "keep": "No cancelar"
         }
     }
 }

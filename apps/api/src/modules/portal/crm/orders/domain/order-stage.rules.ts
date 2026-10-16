@@ -15,6 +15,10 @@ export const isSuccessStage = (stage: StageKind): boolean =>
 export const isClosedStage = (stage: StageKind): boolean =>
     isFailureStage(stage) || isSuccessStage(stage);
 
+/** Участник отменяет заказ сам, пока клуб не взял его в работу: заказ ещё в стадии «новый». */
+export const memberMayCancel = (stage: Pick<OrderStage, "semantic"> | null | undefined): boolean =>
+    !stage || stage.semantic === StageSemantic.NEW;
+
 /** Названия стадий системной воронки, из которых раньше брался статус. */
 const LEGACY_STATUS_BY_NAME: Readonly<Record<string, OrderStatus>> = {
     pending: OrderStatus.PENDING,

@@ -5,18 +5,22 @@ import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { RequireMemberJwt } from "@modules/portal/auth/members";
-import { ProductDetailDto, ProductListDto } from "@modules/portal/crm/catalog/api/dto/product.dto";
-import { ProductCategoryDto } from "@modules/portal/crm/catalog/api/dto/product-category.dto";
 import {
-    mapCategoryToDto,
-    mapProductToDetailDto,
-    mapProductToListDto,
+    CabinetProductCategoryDto,
+    CabinetProductDto,
+} from "@modules/portal/crm/catalog/api/dto/cabinet-product.dto";
+import {
+    mapCategoryToCabinetDto,
+    mapProductToCabinetDto,
 } from "@modules/portal/crm/catalog/api/mappers";
 import { ProductCategoriesService } from "@modules/portal/crm/catalog/application/services/product-categories.service";
 import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
 import { RequireShopAccess } from "@modules/portal/crm/club-policy/api/guards/shop-access.guard";
 
-/** Каталог клуба для его участников: открыт по правилам клуба (`RequireShopAccess`). */
+/**
+ * Витрина клуба для его участников: открыта по правилам клуба (`RequireShopAccess`). Отдаёт
+ * только активные и доступные товары и без складских данных клуба.
+ */
 @ApiTags("Cabinet Catalog")
 @Controller("cabinet/catalog")
 @RequireMemberJwt()
@@ -29,37 +33,37 @@ export class CabinetCatalogController {
 
     @Get("products")
     @RequireShopAccess("browse")
-    @ApiOperation({ summary: "Каталог товаров (только активные и доступные)" })
-    @ApiSuccessResponse(ProductListDto, { isArray: true })
+    @ApiOperation({ summary: "Витрина: активные и доступные товары" })
+    @ApiSuccessResponse(CabinetProductDto, { isArray: true })
     @ApiErrorResponse([401, 403])
-    async getProducts(@PortalId() portalId: string): Promise<ProductListDto[]> {
+    async getProducts(@PortalId() portalId: string): Promise<CabinetProductDto[]> {
         const products = await this.productsService.findActive(portalId);
-        return products.map(mapProductToListDto);
+        return products.map(mapProductToCabinetDto);
     }
 
     @Get("products/:id")
     @RequireShopAccess("browse")
-    @ApiOperation({ summary: "Детали товара" })
-    @ApiSuccessResponse(ProductDetailDto)
+    @ApiOperation({ summary: "Товар витрины" })
+    @ApiSuccessResponse(CabinetProductDto)
     @ApiErrorResponse([401, 403, 404])
     async getProduct(
         @Param("id") id: string,
         @PortalId() portalId: string
-    ): Promise<ProductDetailDto> {
+    ): Promise<CabinetProductDto> {
         const product = await this.productsService.findById(id, portalId);
         if (!product || !product.isActive || !product.isAvailable) {
             throw new NotFoundException("Product not found or not available");
         }
-        return mapProductToDetailDto(product);
+        return mapProductToCabinetDto(product);
     }
 
     @Get("categories")
     @RequireShopAccess("browse")
-    @ApiOperation({ summary: "Список категорий" })
-    @ApiSuccessResponse(ProductCategoryDto, { isArray: true })
+    @ApiOperation({ summary: "Категории витрины" })
+    @ApiSuccessResponse(CabinetProductCategoryDto, { isArray: true })
     @ApiErrorResponse([401, 403])
-    async getCategories(@PortalId() portalId: string): Promise<ProductCategoryDto[]> {
-        const cats = await this.categoriesService.findAll(portalId, true);
-        return cats.map(mapCategoryToDto);
+    async getCategories(@PortalId() portalId: string): Promise<CabinetProductCategoryDto[]> {
+        const categories = await this.categoriesService.findAll(portalId, true);
+        return categories.map(mapCategoryToCabinetDto);
     }
 }

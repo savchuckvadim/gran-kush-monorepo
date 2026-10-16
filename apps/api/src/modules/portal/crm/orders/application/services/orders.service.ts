@@ -1,13 +1,12 @@
 import {
     BadRequestException,
     ConflictException,
-    ForbiddenException,
     Injectable,
     Logger,
     NotFoundException,
 } from "@nestjs/common";
 
-import { Prisma, StageSemantic } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 import { isUniqueViolationOn } from "@common/prisma/unique-violation";
 import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
@@ -32,6 +31,7 @@ import {
     isClosedStage,
     isFailureStage,
     lifecycleFieldFor,
+    memberMayCancel,
     stageForLegacyStatus,
 } from "@modules/portal/crm/orders/domain/order-stage.rules";
 import {
@@ -443,12 +443,12 @@ export class OrdersService {
     ): Promise<Order> {
         const order = await this.findByIdForPortalOrFail(orderId, portalId);
 
-        // Проверить, что заказ принадлежит этому члену
+        // чужой заказ для участника не существует — как и в GET /cabinet/orders/:id
         if (order.memberId !== memberId) {
-            throw new ForbiddenException("Нет доступа к этому заказу");
+            throw new NotFoundException("Заказ не найден");
         }
 
-        if (order.stage && order.stage.semantic !== StageSemantic.NEW) {
+        if (!memberMayCancel(order.stage)) {
             throw new BadRequestException(
                 "Отмена невозможна: клуб уже взял заказ в работу. Отменить можно только новый заказ"
             );
@@ -463,8 +463,10 @@ export class OrdersService {
             throw new BadRequestException("В воронке заказа нет стадии отмены");
         }
 
+        // заметки сотрудников остаются: отметка участника дописывается к ним
+        const note = reason ? `Отменено участником: ${reason}` : "Отменено участником";
         const updated = await this.applyStage(order, cancelStage, portalId, {
-            adminNotes: reason ? `Отменено участником: ${reason}` : "Отменено участником",
+            adminNotes: order.adminNotes ? `${order.adminNotes}\n${note}` : note,
         });
 
         this.logger.log(`❌ Заказ ${order.orderNumber} отменён участником ${memberId}`);

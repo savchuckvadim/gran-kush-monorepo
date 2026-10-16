@@ -1963,7 +1963,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Каталог товаров (только активные и доступные) */
+        /** Витрина: активные и доступные товары */
         get: operations["CabinetCatalog_getProducts"];
         put?: never;
         post?: never;
@@ -1980,7 +1980,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Детали товара */
+        /** Товар витрины */
         get: operations["CabinetCatalog_getProduct"];
         put?: never;
         post?: never;
@@ -1997,7 +1997,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Список категорий */
+        /** Категории витрины */
         get: operations["CabinetCatalog_getCategories"];
         put?: never;
         post?: never;
@@ -2405,13 +2405,13 @@ export interface paths {
         };
         /**
          * Мои заказы
-         * @description Список заказов текущего члена клуба с пагинацией и фильтрами.
+         * @description Сначала новые.
          */
         get: operations["CabinetOrders_listMyOrders"];
         put?: never;
         /**
-         * Создать заказ
-         * @description Член клуба оформляет заказ. Товары проверяются на наличие, рассчитывается стоимость, номер заказа генерируется автоматически.
+         * Оформить заказ
+         * @description Товары проверяются на наличие, стоимость считается на сервере, номер заказа выдаётся автоматически.
          */
         post: operations["CabinetOrders_createOrder"];
         delete?: never;
@@ -2428,8 +2428,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Детали моего заказа
-         * @description Полная информация о заказе с позициями. Доступен только свой заказ.
+         * Мой заказ
+         * @description Только свой заказ в этом клубе.
          */
         get: operations["CabinetOrders_getMyOrder"];
         put?: never;
@@ -2455,7 +2455,7 @@ export interface paths {
         head?: never;
         /**
          * Отменить заказ
-         * @description Отмена возможна, пока заказ в стадии «новый». Товары возвращаются на склад.
+         * @description Пока клуб не взял заказ в работу (стадия «новый»). Товары возвращаются на склад.
          */
         patch: operations["CabinetOrders_cancelMyOrder"];
         trace?: never;
@@ -4892,6 +4892,43 @@ export interface components {
             /** @example true */
             isActive?: boolean;
         };
+        CabinetProductCategoryDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example Flores */
+            name: string;
+        };
+        CabinetProductUnitDto: {
+            /** @example g */
+            code: string;
+            /** @example Gramo */
+            name: string;
+        };
+        CabinetProductDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example Producto A */
+            name: string;
+            /** @example Descripción del producto */
+            description?: string | null;
+            /**
+             * @description Цена за единицу
+             * @example 15.5
+             */
+            price: number;
+            /** @example /storage/products/img.jpg */
+            imageUrl?: string | null;
+            category?: components["schemas"]["CabinetProductCategoryDto"] | null;
+            unit?: components["schemas"]["CabinetProductUnitDto"] | null;
+            /** @description Есть на складе (точный остаток не раскрывается) */
+            inStock: boolean;
+            /** @example 22.5 */
+            thc?: number | null;
+            /** @example 0.5 */
+            cbd?: number | null;
+            /** @example Variante A */
+            strain?: string | null;
+        };
         ScanQrCodeDto: {
             /**
              * @description Зашифрованный payload, полученный при сканировании QR-кода
@@ -5460,6 +5497,120 @@ export interface components {
             items: components["schemas"]["CreateOrderItemDto"][];
             /** @example Побыстрее, пожалуйста */
             notes?: string;
+        };
+        CabinetOrderStageDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /**
+             * @description На языке запроса
+             * @example Готовится
+             */
+            name: string;
+            /** @example #7c3aed */
+            color: string | null;
+            /**
+             * @example IN_PROGRESS
+             * @enum {string}
+             */
+            semantic: "NEW" | "IN_PROGRESS" | "SUCCESS" | "FAILURE";
+        };
+        CabinetOrderItemDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            productId: string;
+            /** @example Producto A */
+            name: string;
+            /** @example /storage/products/img.jpg */
+            imageUrl?: string | null;
+            /** @example g */
+            unitCode?: string | null;
+            /** @example 2.5 */
+            quantity: number;
+            /** @example 15.5 */
+            unitPrice: number;
+            /** @example 38.75 */
+            totalPrice: number;
+            /**
+             * @description Подарок клуба: в сумму не входит
+             * @example false
+             */
+            isGift: boolean;
+        };
+        CabinetOrderDetailDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example ORD-20260316-0001 */
+            orderNumber: string;
+            stage: components["schemas"]["CabinetOrderStageDto"] | null;
+            /**
+             * @example pending
+             * @enum {string}
+             */
+            paymentStatus: "pending" | "paid" | "refunded";
+            /** @example 38.75 */
+            total: number;
+            /** @example 2 */
+            itemsCount: number;
+            /** @example 2026-03-16T12:00:00.000Z */
+            orderedAt: string;
+            /** @description Участник ещё может отменить заказ сам */
+            canCancel: boolean;
+            /** @example 38.75 */
+            subtotal: number;
+            /** @example 0 */
+            discount: number;
+            /** @example Recogeré a las 18:00 */
+            notes?: string | null;
+            items: components["schemas"]["CabinetOrderItemDto"][];
+            /** @example 2026-03-16T12:00:00.000Z */
+            completedAt?: string | null;
+            /** @example 2026-03-16T12:00:00.000Z */
+            cancelledAt?: string | null;
+        };
+        CabinetOrderListDto: {
+            /** @example 550e8400-e29b-41d4-a716-446655440000 */
+            id: string;
+            /** @example ORD-20260316-0001 */
+            orderNumber: string;
+            stage: components["schemas"]["CabinetOrderStageDto"] | null;
+            /**
+             * @example pending
+             * @enum {string}
+             */
+            paymentStatus: "pending" | "paid" | "refunded";
+            /** @example 38.75 */
+            total: number;
+            /** @example 2 */
+            itemsCount: number;
+            /** @example 2026-03-16T12:00:00.000Z */
+            orderedAt: string;
+            /** @description Участник ещё может отменить заказ сам */
+            canCancel: boolean;
+        };
+        PaginatedResponse_CabinetOrderListDto: {
+            /** @description Array of items */
+            items: components["schemas"]["CabinetOrderListDto"][];
+            /**
+             * @description Total number of items
+             * @example 100
+             */
+            total: number;
+            /**
+             * @description Current page number
+             * @example 1
+             */
+            page: number;
+            /**
+             * @description Items per page
+             * @example 10
+             */
+            limit: number;
+            /**
+             * @description Total number of pages
+             * @example 10
+             */
+            totalPages: number;
         };
         CancelOrderDto: {
             /**
@@ -6206,6 +6357,9 @@ export type SchemaCreateProductCategoryDto = components['schemas']['CreateProduc
 export type SchemaUpdateProductCategoryDto = components['schemas']['UpdateProductCategoryDto'];
 export type SchemaCreateMeasurementUnitDto = components['schemas']['CreateMeasurementUnitDto'];
 export type SchemaUpdateMeasurementUnitDto = components['schemas']['UpdateMeasurementUnitDto'];
+export type SchemaCabinetProductCategoryDto = components['schemas']['CabinetProductCategoryDto'];
+export type SchemaCabinetProductUnitDto = components['schemas']['CabinetProductUnitDto'];
+export type SchemaCabinetProductDto = components['schemas']['CabinetProductDto'];
 export type SchemaScanQrCodeDto = components['schemas']['ScanQrCodeDto'];
 export type SchemaQrCodeMemberDto = components['schemas']['QrCodeMemberDto'];
 export type SchemaQrCodeScanResultDto = components['schemas']['QrCodeScanResultDto'];
@@ -6241,6 +6395,11 @@ export type SchemaUpdateOrderStatusDto = components['schemas']['UpdateOrderStatu
 export type SchemaUpdatePaymentStatusDto = components['schemas']['UpdatePaymentStatusDto'];
 export type SchemaCreateOrderItemDto = components['schemas']['CreateOrderItemDto'];
 export type SchemaCreateOrderDto = components['schemas']['CreateOrderDto'];
+export type SchemaCabinetOrderStageDto = components['schemas']['CabinetOrderStageDto'];
+export type SchemaCabinetOrderItemDto = components['schemas']['CabinetOrderItemDto'];
+export type SchemaCabinetOrderDetailDto = components['schemas']['CabinetOrderDetailDto'];
+export type SchemaCabinetOrderListDto = components['schemas']['CabinetOrderListDto'];
+export type SchemaPaginatedResponseCabinetOrderListDto = components['schemas']['PaginatedResponse_CabinetOrderListDto'];
 export type SchemaCancelOrderDto = components['schemas']['CancelOrderDto'];
 export type SchemaTransactionOrderDto = components['schemas']['TransactionOrderDto'];
 export type SchemaTransactionMemberDto = components['schemas']['TransactionMemberDto'];
@@ -12474,7 +12633,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProductListDto"][];
+                    "application/json": components["schemas"]["CabinetProductDto"][];
                 };
             };
             /** @description Unauthorized */
@@ -12514,7 +12673,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProductDetailDto"];
+                    "application/json": components["schemas"]["CabinetProductDto"];
                 };
             };
             /** @description Unauthorized */
@@ -12561,7 +12720,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProductCategoryDto"][];
+                    "application/json": components["schemas"]["CabinetProductCategoryDto"][];
                 };
             };
             /** @description Unauthorized */
@@ -13812,17 +13971,6 @@ export interface operations {
                 limit?: number;
                 sortBy?: string;
                 sortOrder?: "asc" | "desc";
-                status?: "pending" | "confirmed" | "preparing" | "ready" | "completed" | "cancelled";
-                /** @description Стадия воронки (колонка канбана) */
-                stageId?: string;
-                paymentStatus?: "pending" | "paid" | "refunded";
-                memberId?: string;
-                /** @description Поиск по номеру заказа */
-                search?: string;
-                /** @description Начало периода */
-                startDate?: string;
-                /** @description Конец периода */
-                endDate?: string;
             };
             header?: never;
             path?: never;
@@ -13830,13 +13978,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Paginated list of member orders */
+            /** @description Заказы участника в клубе */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_OrderListDto"];
+                    "application/json": components["schemas"]["PaginatedResponse_CabinetOrderListDto"];
                 };
             };
             /** @description Unauthorized */
@@ -13881,7 +14029,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrderDetailDto"];
+                    "application/json": components["schemas"]["CabinetOrderDetailDto"];
                 };
             };
             /** @description Bad Request */
@@ -13957,7 +14105,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrderDetailDto"];
+                    "application/json": components["schemas"]["CabinetOrderDetailDto"];
                 };
             };
             /** @description Unauthorized */
@@ -14010,7 +14158,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrderDetailDto"];
+                    "application/json": components["schemas"]["CabinetOrderDetailDto"];
                 };
             };
             /** @description Bad Request */

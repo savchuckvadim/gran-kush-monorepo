@@ -15,6 +15,7 @@ import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { type ContentLocale, RequestLocale } from "@common/i18n";
 import { IdempotencyScope, Idempotent } from "@common/idempotency";
+import { PaginationDto } from "@common/paginate/dto/pagination.dto";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import { RequireMemberJwt } from "@modules/portal/auth/members";
@@ -22,16 +23,20 @@ import { CurrentMember } from "@modules/portal/auth/members/api/decorators/curre
 import { RequireShopAccess } from "@modules/portal/crm/club-policy/api/guards/shop-access.guard";
 import { Member } from "@modules/portal/crm/members/domain/entity/member.entity";
 import {
-    CancelOrderDto,
-    CreateOrderDto,
-    OrderDetailDto,
-    OrderListDto,
-    OrderListQueryDto,
-} from "@modules/portal/crm/orders/api/dto/order.dto";
-import { mapOrderToDetailDto, mapOrderToListDto } from "@modules/portal/crm/orders/api/mappers";
+    CabinetOrderDetailDto,
+    CabinetOrderListDto,
+} from "@modules/portal/crm/orders/api/dto/cabinet-order.dto";
+import { CancelOrderDto, CreateOrderDto } from "@modules/portal/crm/orders/api/dto/order.dto";
+import {
+    mapOrderToCabinetDetailDto,
+    mapOrderToCabinetListDto,
+} from "@modules/portal/crm/orders/api/mappers";
 import { OrdersService } from "@modules/portal/crm/orders/application/services/orders.service";
 
-/** Заказы участника в клубе: оформление, свои заказы, отмена. */
+/**
+ * Заказы участника в клубе: оформление, свои заказы, отмена. Ответы — в форме кабинета
+ * (`CabinetOrder*Dto`), без внутренних данных клуба.
+ */
 @ApiTags("Cabinet Orders")
 @Controller("cabinet/orders")
 @RequireMemberJwt()
@@ -39,101 +44,84 @@ import { OrdersService } from "@modules/portal/crm/orders/application/services/o
 export class CabinetOrdersController {
     constructor(private readonly ordersService: OrdersService) {}
 
-    // ─── Создать заказ ───────────────────────────────────────────────────────
-
     @Post()
     @RequireShopAccess("order")
     @Idempotent(IdempotencyScope.LK_ORDER_CREATE)
     @ApiOperation({
-        summary: "Создать заказ",
+        summary: "Оформить заказ",
         description:
-            "Член клуба оформляет заказ. Товары проверяются на наличие, " +
-            "рассчитывается стоимость, номер заказа генерируется автоматически.",
+            "Товары проверяются на наличие, стоимость считается на сервере, номер заказа " +
+            "выдаётся автоматически.",
     })
-    @ApiSuccessResponse(OrderDetailDto, { status: 201 })
+    @ApiSuccessResponse(CabinetOrderDetailDto, { status: 201 })
     @ApiErrorResponse([400, 401, 403, 404])
     async createOrder(
         @Body() dto: CreateOrderDto,
         @CurrentMember() member: Member,
         @RequestLocale() locale: ContentLocale
-    ): Promise<OrderDetailDto> {
+    ): Promise<CabinetOrderDetailDto> {
         const order = await this.ordersService.createOrder(member.id, dto, member.portalId);
-        return mapOrderToDetailDto(order, locale);
+        return mapOrderToCabinetDetailDto(order, locale);
     }
 
-    // ─── Мои заказы ──────────────────────────────────────────────────────────
-
     @Get()
-    @ApiOperation({
-        summary: "Мои заказы",
-        description: "Список заказов текущего члена клуба с пагинацией и фильтрами.",
-    })
-    @ApiPaginatedResponse(OrderListDto, {
-        description: "Paginated list of member orders",
-    })
+    @ApiOperation({ summary: "Мои заказы", description: "Сначала новые." })
+    @ApiPaginatedResponse(CabinetOrderListDto, { description: "Заказы участника в клубе" })
     @ApiErrorResponse([401, 403])
     async listMyOrders(
-        @Query() query: OrderListQueryDto,
+        @Query() query: PaginationDto,
         @CurrentMember() member: Member,
         @RequestLocale() locale: ContentLocale
-    ): Promise<PaginatedResult<OrderListDto>> {
-        const { page = 1, limit = 10, sortBy, sortOrder, ...filters } = query;
+    ): Promise<PaginatedResult<CabinetOrderListDto>> {
+        const { page = 1, limit = 10, sortBy, sortOrder } = query;
         const skip = PaginationUtil.getSkip(page, limit);
-
-        // Принудительно фильтруем по текущему члену
-        const memberFilters = { ...filters, memberId: member.id };
+        const filters = { portalId: member.portalId, memberId: member.id };
 
         const [orders, total] = await Promise.all([
-            this.ordersService.findAll(memberFilters, limit, skip, sortBy, sortOrder),
-            this.ordersService.count(memberFilters),
+            this.ordersService.findAll(filters, limit, skip, sortBy, sortOrder),
+            this.ordersService.count(filters),
         ]);
 
-        const items = orders.map((order) => mapOrderToListDto(order, locale));
+        const items = orders.map((order) => mapOrderToCabinetListDto(order, locale));
         return PaginationUtil.createPaginatedResult(items, total, page, limit);
     }
 
-    // ─── Детали моего заказа ─────────────────────────────────────────────────
-
     @Get(":id")
-    @ApiOperation({
-        summary: "Детали моего заказа",
-        description: "Полная информация о заказе с позициями. Доступен только свой заказ.",
-    })
-    @ApiSuccessResponse(OrderDetailDto)
+    @ApiOperation({ summary: "Мой заказ", description: "Только свой заказ в этом клубе." })
+    @ApiSuccessResponse(CabinetOrderDetailDto)
     @ApiErrorResponse([401, 403, 404])
     async getMyOrder(
         @Param("id") id: string,
         @CurrentMember() member: Member,
         @RequestLocale() locale: ContentLocale
-    ): Promise<OrderDetailDto> {
-        const order = await this.ordersService.findById(id);
+    ): Promise<CabinetOrderDetailDto> {
+        const order = await this.ordersService.findByIdForPortal(id, member.portalId);
         if (!order || order.memberId !== member.id) {
             throw new NotFoundException("Заказ не найден");
         }
-        return mapOrderToDetailDto(order, locale);
+        return mapOrderToCabinetDetailDto(order, locale);
     }
-
-    // ─── Отменить заказ ──────────────────────────────────────────────────────
 
     @Patch(":id/cancel")
     @ApiOperation({
         summary: "Отменить заказ",
-        description: "Отмена возможна, пока заказ в стадии «новый». Товары возвращаются на склад.",
+        description:
+            "Пока клуб не взял заказ в работу (стадия «новый»). Товары возвращаются на склад.",
     })
-    @ApiSuccessResponse(OrderDetailDto)
+    @ApiSuccessResponse(CabinetOrderDetailDto)
     @ApiErrorResponse([400, 401, 403, 404])
     async cancelMyOrder(
         @Param("id") id: string,
         @Body() dto: CancelOrderDto,
         @CurrentMember() member: Member,
         @RequestLocale() locale: ContentLocale
-    ): Promise<OrderDetailDto> {
+    ): Promise<CabinetOrderDetailDto> {
         const order = await this.ordersService.cancelOrderByMember(
             id,
             member.id,
             member.portalId,
             dto.reason
         );
-        return mapOrderToDetailDto(order, locale);
+        return mapOrderToCabinetDetailDto(order, locale);
     }
 }
