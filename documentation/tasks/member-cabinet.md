@@ -416,7 +416,7 @@ MEMBER_AUTH_COOKIE_DOMAIN=lvh.me node dist/main.js`; CRM: `NEXT_PUBLIC_API_URL=h
       (`NEXT_PUBLIC_MEMBER_URL` в сборку или оставить crm.).
 - [ ] Для club.: manifest, иконки PafPaf, `title`, `lang`, theme-color.
 
-### TASK-712: оболочка участника `[~]` P1 — 2026-10-16
+### TASK-712: оболочка участника `[x]` P1 — 2026-10-16
 
 Сделано: `MemberShell` собран из деталей оболочки CRM (сайдбар, бургер, подложка темы, переключатели
 оформления), поэтому у кабинета те же темы; свои меню, `ClubSwitcher` (подтверждённые клубы) и меню аккаунта
@@ -425,7 +425,9 @@ MEMBER_AUTH_COOKIE_DOMAIN=lvh.me node dist/main.js`; CRM: `NEXT_PUBLIC_API_URL=h
 
 - [x] Общий каркас `shared/ui/shell` (`AppFrame`, `AppHeader`); `CrmShell` и `MemberShell` — две композиции;
       переключатели оформления — `features/skin-picker/header` (`HeaderAppearance`), по файлу на компонент.
-- [ ] `AccountMenu` и `PortalSwitcher` с параметрами (источник клубов: `/crm/my-portals` или `/cabinet/portals`).
+- [x] Общие `shared/ui/AccountCard` (карточка аккаунта, плитки, язык) и `shared/ui/ClubMenu` (переключатель
+      клубов): CRM и кабинет — две композиции. В кабинете появилось «Оформление» в карточке аккаунта (на
+      телефоне его в шапке нет).
 - [x] Тема клуба по умолчанию (решение 10): `portals.default_skin`, `PATCH /crm/portal/appearance` (admin),
       `defaultSkin` в `/crm/portal/info` и в членствах кабинета; CRM и раздел клуба в кабинете показывают её,
       пока человек не выбрал свою; «Тема клуба» возвращает к ней. «Настройки → Оформление» — выбор темы клуба.

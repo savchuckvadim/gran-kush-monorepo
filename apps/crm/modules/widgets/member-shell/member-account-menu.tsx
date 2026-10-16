@@ -1,32 +1,29 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Briefcase, LogOut } from "lucide-react";
+import { Briefcase, Palette } from "lucide-react";
 
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuRadioGroup,
-    DropdownMenuRadioItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@workspace/ui";
-
-import { logoutMember } from "@/modules/entities/cabinet-account";
-import { useChangeLocale } from "@/modules/features/lang-switcher/use-change-locale";
+import { cabinetKeys, logoutMember } from "@/modules/entities/cabinet-account";
+import { SkinPickerSheet, useChangeLocale } from "@/modules/features";
 import { useCabinetLinks, useMemberAuth } from "@/modules/processes/member-auth";
 import { crmAppUrl } from "@/modules/shared/config/app-urls";
-import { localeNames, locales } from "@/modules/shared/config/i18n";
 import { ROUTES } from "@/modules/shared/config/routes";
+import {
+    AccountAvatar,
+    AccountCard,
+    AccountTileButton,
+    AccountTileLink,
+    LanguageTile,
+} from "@/modules/shared/ui/AccountCard";
 
 /**
- * Аккаунт участника: почта, переход в CRM (если аккаунт ещё и сотрудник), язык, выход. Выход
- * сбрасывает кэш кабинета и уводит на вход; сессия CRM при этом остаётся — у неё свои куки.
+ * Аккаунт участника — та же карточка, что у сотрудника в CRM: переход в CRM (если аккаунт ещё и
+ * сотрудник), оформление, язык, выход. Выход сбрасывает кэш кабинета и уводит на вход; сессия
+ * CRM при этом остаётся — у неё свои куки.
  */
 export function MemberAccountMenu() {
     const t = useTranslations("cabinet.shell");
@@ -35,6 +32,8 @@ export function MemberAccountMenu() {
     const router = useRouter();
     const queryClient = useQueryClient();
     const { locale, changeLocale } = useChangeLocale();
+    // the sheet lives next to the menu, not inside it: picking the tile closes the menu
+    const [isSkinsOpen, setIsSkinsOpen] = useState(false);
     // Вход CRM сам выбирает клуб сотрудника: открыть его и есть «перейти в CRM»
     const crmHref = user.hasEmployments ? crmAppUrl(`/${locale}${ROUTES.LOGIN}`) : null;
 
@@ -42,63 +41,44 @@ export function MemberAccountMenu() {
         mutationFn: logoutMember,
         onSettled: () => {
             // Кэш кабинета принадлежит ушедшему аккаунту: остаться в нём нельзя
-            queryClient.removeQueries({ queryKey: ["cabinet"] });
+            queryClient.removeQueries({ queryKey: cabinetKeys.all });
             router.replace(links.login);
         },
     });
 
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <button
-                    type="button"
-                    data-slot="account-capsule"
-                    aria-label={t("account")}
-                    title={user.email}
-                    className="flex items-center rounded-full p-1 outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50"
-                >
-                    <span
-                        aria-hidden="true"
-                        className="flex size-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground"
+        <>
+            <AccountCard
+                email={user.email}
+                subtitle={t("subtitle")}
+                logout={{
+                    label: t("logout"),
+                    pending: logout.isPending,
+                    onSelect: () => logout.mutate(),
+                }}
+                trigger={
+                    <button
+                        type="button"
+                        data-slot="account-capsule"
+                        aria-label={t("account")}
+                        title={user.email}
+                        className="flex items-center rounded-full p-1 outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50"
                     >
-                        {user.email.charAt(0).toUpperCase()}
-                    </span>
-                </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" sideOffset={8} className="w-64">
-                <DropdownMenuLabel className="truncate">{user.email}</DropdownMenuLabel>
-                <DropdownMenuSeparator />
+                        <AccountAvatar email={user.email} className="size-8 text-sm" />
+                    </button>
+                }
+            >
                 {crmHref && (
-                    <>
-                        <DropdownMenuItem asChild>
-                            <a href={crmHref}>
-                                <Briefcase />
-                                {t("openCrm")}
-                            </a>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                    </>
+                    <AccountTileLink href={crmHref} icon={Briefcase} label={t("openCrm")} />
                 )}
-                <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-                    {t("language")}
-                </DropdownMenuLabel>
-                <DropdownMenuRadioGroup value={locale} onValueChange={changeLocale}>
-                    {locales.map((item) => (
-                        <DropdownMenuRadioItem key={item} value={item}>
-                            {localeNames[item]}
-                        </DropdownMenuRadioItem>
-                    ))}
-                </DropdownMenuRadioGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                    variant="destructive"
-                    disabled={logout.isPending}
-                    onSelect={() => logout.mutate()}
-                >
-                    <LogOut />
-                    {t("logout")}
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+                <AccountTileButton
+                    icon={Palette}
+                    label={t("appearance")}
+                    onSelect={() => setIsSkinsOpen(true)}
+                />
+                <LanguageTile label={t("language")} locale={locale} onChange={changeLocale} />
+            </AccountCard>
+            <SkinPickerSheet open={isSkinsOpen} onOpenChange={setIsSkinsOpen} />
+        </>
     );
 }

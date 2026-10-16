@@ -4,10 +4,9 @@ import type { LucideIcon } from "lucide-react";
 
 import { DropdownMenuItem } from "@workspace/ui";
 
-/** A tile of the account card: the icon with its label next to it. */
-export const ACCOUNT_TILE =
-    "relative flex h-auto flex-row items-center gap-3 rounded-xl border border-transparent p-3 text-sm [&_svg:not([class*='size-'])]:size-5 focus:border-border";
+import { ACCOUNT_TILE } from "./account-tile-class";
 
+/** A tile that goes somewhere: a page of the app or the other app (CRM ↔ cabinet). */
 export function AccountTileLink({
     href,
     icon: Icon,

@@ -16,7 +16,9 @@
             "language": "Idioma",
             "logout": "Cerrar sesión",
             "passport": "Mi pasaporte",
-            "openCrm": "Abrir el CRM"
+            "openCrm": "Abrir el CRM",
+            "appearance": "Apariencia",
+            "subtitle": "Área de socio"
         },
         "auth": {
             "login": {

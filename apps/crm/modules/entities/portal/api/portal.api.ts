@@ -1,6 +1,8 @@
 import {
     assertOpenApiOk,
     type SchemaCreateClubDto,
+    type SchemaMyPortalDto,
+    type SchemaMyPortalsResponseDto,
     type SchemaPortalAppearanceDto,
     type SchemaPortalInfoDto,
     type SchemaRegisterPortalDto,
@@ -28,6 +30,13 @@ export async function registerClub(
 ): Promise<SchemaRegisterPortalResponseDto> {
     const response = await $api.POST("/platform/portals/register", { body });
     return assertOpenApiOk<SchemaRegisterPortalResponseDto>(response);
+}
+
+/** Клубы, в которых аккаунт — сотрудник: переключатель клубов в шапке. */
+export async function getMyPortals(): Promise<SchemaMyPortalDto[]> {
+    const response = await $api.GET("/crm/my-portals");
+    const { portals } = await assertOpenApiOk<SchemaMyPortalsResponseDto>(response);
+    return portals;
 }
 
 /** One more club for the signed-in account; the session cookies are issued again. */

@@ -16,7 +16,9 @@
             "language": "Язык",
             "logout": "Выйти",
             "passport": "Мой паспорт",
-            "openCrm": "Открыть CRM"
+            "openCrm": "Открыть CRM",
+            "appearance": "Оформление",
+            "subtitle": "Кабинет участника"
         },
         "auth": {
             "login": {

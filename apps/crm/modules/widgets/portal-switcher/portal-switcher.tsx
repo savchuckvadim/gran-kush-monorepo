@@ -4,36 +4,18 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, ChevronsUpDown, Plus } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { ChevronsUpDown, Plus } from "lucide-react";
 
-import type { SchemaMyPortalDto } from "@workspace/api-client/core";
-import {
-    Button,
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@workspace/ui";
+import { Button } from "@workspace/ui";
 import { cn } from "@workspace/ui/lib/utils";
 
-import { usePortalInfo } from "@/modules/entities/portal";
+import { useMyPortals, usePortalInfo } from "@/modules/entities/portal";
 import { usePortal } from "@/modules/processes";
-import { $api } from "@/modules/shared";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { ClubBadge } from "@/modules/shared/ui/Brand";
+import { ClubMenu } from "@/modules/shared/ui/ClubMenu";
 import { useSidebarPinned } from "@/modules/shared/ui/Sidebar";
-
-function useMyPortals(enabled: boolean) {
-    return useQuery({
-        queryKey: ["crm-my-portals"],
-        enabled,
-        queryFn: () => $api.GET("/crm/my-portals"),
-        select: (response) => (response.data?.portals ?? []) as SchemaMyPortalDto[],
-    });
-}
 
 /**
  * Текущий клуб и переход в другой клуб сотрудника. Бренд PafPaf виден в меню, только пока оно
@@ -53,17 +35,30 @@ export function PortalSwitcher({ className }: { className?: string }) {
 
     const label = info?.displayName ?? portalSlug ?? t("fallback");
 
-    function selectPortal(slug: string) {
+    const selectPortal = (slug: string) => {
         if (slug === portalSlug) return;
         // Многие query-ключи не содержат slug (members, orders, products):
         // без очистки новый клуб секунду показывает данные предыдущего
         queryClient.clear();
         router.push(`/${locale}/${slug}/crm`);
-    }
+    };
 
     return (
-        <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-            <DropdownMenuTrigger asChild>
+        <ClubMenu
+            open={isOpen}
+            onOpenChange={setIsOpen}
+            title={t("title")}
+            loading={isLoading}
+            texts={{ loading: t("loading"), empty: t("empty") }}
+            clubs={portals.map((portal) => ({
+                id: portal.slug,
+                name: portal.displayName,
+                hint: portal.slug,
+                current: portal.slug === portalSlug,
+            }))}
+            onSelect={selectPortal}
+            actions={[{ label: t("newClub"), icon: Plus, href: `/${locale}${ROUTES.NEW_CLUB}` }]}
+            trigger={
                 <Button
                     variant="ghost"
                     className={cn("min-w-0 gap-2 pl-1.5 pr-2 font-semibold", className)}
@@ -90,44 +85,7 @@ export function PortalSwitcher({ className }: { className?: string }) {
                         )}
                     />
                 </Button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent align="start" className="w-64">
-                <DropdownMenuLabel className="text-muted-foreground text-xs font-medium">
-                    {t("title")}
-                </DropdownMenuLabel>
-                {isLoading ? (
-                    <p className="text-muted-foreground px-2 py-1.5 text-sm">{t("loading")}</p>
-                ) : portals.length === 0 ? (
-                    <p className="text-muted-foreground px-2 py-1.5 text-sm">{t("empty")}</p>
-                ) : (
-                    portals.map((portal) => (
-                        <DropdownMenuItem
-                            key={portal.portalId}
-                            onSelect={() => selectPortal(portal.slug)}
-                            className="gap-2.5"
-                        >
-                            <ClubBadge name={portal.displayName} className="size-7" />
-                            <span className="min-w-0 flex-1">
-                                <span className="block truncate font-medium">
-                                    {portal.displayName}
-                                </span>
-                                <span className="text-muted-foreground block truncate text-xs">
-                                    {portal.slug}
-                                </span>
-                            </span>
-                            {portal.slug === portalSlug && <Check className="text-primary" />}
-                        </DropdownMenuItem>
-                    ))
-                )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild className="gap-2.5">
-                    <a href={`/${locale}${ROUTES.NEW_CLUB}`}>
-                        <Plus className="text-muted-foreground" />
-                        {t("newClub")}
-                    </a>
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+            }
+        />
     );
 }

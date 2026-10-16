@@ -3,23 +3,16 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { Check, ChevronsUpDown, LayoutGrid } from "lucide-react";
+import { ChevronsUpDown, LayoutGrid } from "lucide-react";
 
-import {
-    Button,
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@workspace/ui";
+import { Button } from "@workspace/ui";
 import { cn } from "@workspace/ui/lib/utils";
 
 import { useMyMemberships } from "@/modules/entities/membership";
 import { useCabinetLinks } from "@/modules/processes/member-auth";
 import { getClubSlugFromPath } from "@/modules/shared/config/club-routes";
 import { ClubBadge } from "@/modules/shared/ui/Brand";
+import { ClubMenu } from "@/modules/shared/ui/ClubMenu";
 
 /**
  * Клуб, в котором находится участник, и переход в другой клуб. Список — подтверждённые и
@@ -38,8 +31,17 @@ export function ClubSwitcher({ className }: { className?: string }) {
     const label = current?.displayName ?? t("allClubs");
 
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+        <ClubMenu
+            title={t("yourClubs")}
+            texts={{ empty: t("noClubs") }}
+            clubs={clubs.map((club) => ({
+                id: club.slug,
+                name: club.displayName,
+                current: club.slug === currentSlug,
+            }))}
+            onSelect={(slug) => router.push(links.club(slug))}
+            actions={[{ label: t("manageClubs"), href: links.clubs }]}
+            trigger={
                 <Button
                     variant="ghost"
                     data-slot="club-switcher"
@@ -58,30 +60,7 @@ export function ClubSwitcher({ className }: { className?: string }) {
                     <span className="truncate text-sm font-semibold">{label}</span>
                     <ChevronsUpDown className="size-4 shrink-0 opacity-60" aria-hidden="true" />
                 </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="min-w-56">
-                <DropdownMenuLabel>{t("yourClubs")}</DropdownMenuLabel>
-                {clubs.length === 0 && (
-                    <p className="px-2 py-1.5 text-sm text-muted-foreground">{t("noClubs")}</p>
-                )}
-                {clubs.map((club) => (
-                    <DropdownMenuItem
-                        key={club.memberId}
-                        onSelect={() => router.push(links.club(club.slug))}
-                        className="gap-2"
-                    >
-                        <ClubBadge name={club.displayName} />
-                        <span className="min-w-0 flex-1 truncate">{club.displayName}</span>
-                        {club.slug === currentSlug && (
-                            <Check className="size-4 shrink-0" aria-hidden="true" />
-                        )}
-                    </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => router.push(links.clubs)}>
-                    {t("manageClubs")}
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+            }
+        />
     );
 }

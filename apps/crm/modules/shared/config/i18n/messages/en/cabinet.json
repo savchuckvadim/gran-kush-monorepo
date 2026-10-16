@@ -16,7 +16,9 @@
             "language": "Language",
             "logout": "Log out",
             "passport": "My passport",
-            "openCrm": "Open the CRM"
+            "openCrm": "Open the CRM",
+            "appearance": "Appearance",
+            "subtitle": "Member cabinet"
         },
         "auth": {
             "login": {
