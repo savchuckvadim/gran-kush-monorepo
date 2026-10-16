@@ -5,61 +5,27 @@ import { JwtService } from "@nestjs/jwt";
 import { createHash, createHmac, randomBytes, timingSafeEqual } from "crypto";
 import type { CookieOptions } from "express";
 
+import { PublicUrlsService } from "@common/config/public-urls/public-urls.service";
 import { JWT_ENV_KEYS } from "@modules/portal/auth/domain/constants/jwt.constants";
 import { GoogleOAuthGateway } from "@modules/portal/auth/social/domain/google-oauth.gateway";
 import { GoogleProfile } from "@modules/portal/auth/social/domain/social-profile";
 
-export type SocialApp = "member" | "crm";
-
-export const SOCIAL_LOCALES = ["ru", "en", "es"] as const;
-const DEFAULT_LOCALE = "es";
-
-/** Имя куки, которая привязывает вход к браузеру, начавшему его. */
-export const OAUTH_FLOW_COOKIE = "google_oauth_flow";
-
-const STATE_PURPOSE = "google_oauth";
-const STATE_TTL = "10m";
-const FLOW_COOKIE_MAX_AGE_MS = 10 * 60 * 1000;
-
-/** Куда ведёт вход, если фронт не назвал страницу возврата. */
-const DEFAULT_LANDING: Record<SocialApp, (locale: string) => string> = {
-    // CRM сама решает по клубам, куда отправить
-    crm: (locale) => `/${locale}`,
-    // Кабинет участника: его главная (мои клубы), а не лендинг
-    member: (locale) => `/${locale}`,
-};
-
-interface OAuthState {
-    purpose: string;
-    app: SocialApp;
-    locale: string;
-    /** Привязка к браузеру: то же значение лежит в HttpOnly-куке и сверяется в callback. */
-    nonce: string;
-    /** Относительный путь возврата, уже проверенный по правилам `sanitizeReturnTo`. */
-    returnTo?: string;
-}
-
-/** Секреты одного входа; ключ PKCE наружу не выходит — только в HttpOnly-куке. */
-export interface OAuthBinding {
-    nonce: string;
-    codeVerifier: string;
-}
-
-/** Почему вход отклонён. Попадает в лог (без персональных данных); пользователь видит общую ошибку. */
-export type GoogleFlowFailure =
-    | "state_missing"
-    | "state_invalid"
-    | "binding_missing"
-    | "binding_mismatch"
-    | "provider_error"
-    | "nonce_mismatch"
-    | "exchange_failed";
-
-export class GoogleFlowError extends Error {
-    constructor(readonly reason: GoogleFlowFailure) {
-        super(`Google OAuth flow rejected: ${reason}`);
-    }
-}
+import {
+    CALLBACK_PATH,
+    DEFAULT_LANDING,
+    DEFAULT_LOCALE,
+    FLOW_COOKIE_MAX_AGE_MS,
+    FLOW_COOKIE_PATH,
+    GoogleFlowError,
+    type GoogleIntent,
+    INVITATION_TOKEN,
+    type OAuthBinding,
+    type OAuthState,
+    SOCIAL_LOCALES,
+    type SocialApp,
+    STATE_PURPOSE,
+    STATE_TTL,
+} from "./google-oauth-flow.types";
 
 /**
  * Редирект-флоу Google OAuth и всё, что его защищает.
@@ -88,7 +54,8 @@ export class GoogleOAuthFlowService {
     constructor(
         private readonly google: GoogleOAuthGateway,
         private readonly jwtService: JwtService,
-        private readonly configService: ConfigService
+        private readonly configService: ConfigService,
+        private readonly urls: PublicUrlsService
     ) {}
 
     isConfigured(): boolean {
@@ -108,7 +75,8 @@ export class GoogleOAuthFlowService {
     buildStart(
         app: SocialApp,
         locale: string | undefined,
-        returnTo?: string
+        returnTo?: string,
+        intent?: GoogleIntent
     ): { url: string; cookieValue: string } {
         const binding: OAuthBinding = {
             nonce: randomBytes(16).toString("base64url"),
@@ -121,6 +89,7 @@ export class GoogleOAuthFlowService {
                 locale: this.sanitizeLocale(locale),
                 nonce: binding.nonce,
                 returnTo: this.sanitizeReturnTo(returnTo, this.sanitizeLocale(locale)),
+                intent: this.sanitizeIntent(intent),
             } satisfies OAuthState,
             { secret: this.stateSecret(), expiresIn: STATE_TTL }
         );
@@ -141,7 +110,7 @@ export class GoogleOAuthFlowService {
         app: SocialApp,
         state: string | undefined,
         cookieValue: string | undefined
-    ): { locale: string; returnTo?: string; binding: OAuthBinding } {
+    ): { locale: string; returnTo?: string; intent?: GoogleIntent; binding: OAuthBinding } {
         if (!state) {
             throw new GoogleFlowError("state_missing");
         }
@@ -166,8 +135,16 @@ export class GoogleOAuthFlowService {
         return {
             locale,
             returnTo: this.sanitizeReturnTo(decoded.returnTo, locale),
+            intent: this.sanitizeIntent(decoded.intent),
             binding,
         };
+    }
+
+    /** Намерение из запроса старта: известный вид и токен правильной формы, иначе — обычный вход. */
+    parseIntent(kind: string | undefined, token: string | undefined): GoogleIntent | undefined {
+        if (kind === "invitation" && token) return this.sanitizeIntent({ kind, token });
+        if (kind === "club_signup") return { kind };
+        return undefined;
     }
 
     /** Обмен кода на профиль: PKCE-verifier к Google, nonce из id_token — с нашим. */
@@ -225,15 +202,22 @@ export class GoogleOAuthFlowService {
             secure: this.configService.get<string>("AUTH_COOKIE_SECURE") === "true",
             // Возврат от Google — переход верхнего уровня по GET: Lax эту куку пропускает
             sameSite: "lax",
-            path: app === "crm" ? "/crm/auth/google" : "/cabinet/auth/google",
+            path: FLOW_COOKIE_PATH[app],
             maxAge: FLOW_COOKIE_MAX_AGE_MS,
         };
     }
 
     frontendUrl(app: SocialApp): string {
-        const key = app === "crm" ? "CRM_FRONTEND_URL" : "MEMBER_FRONTEND_URL";
-        const fallback = app === "crm" ? "http://localhost:5000" : "http://localhost:5001";
-        return (this.configService.get<string>(key) || fallback).replace(/\/+$/, "");
+        return app === "crm" ? this.urls.crm : this.urls.cabinet;
+    }
+
+    private sanitizeIntent(intent: GoogleIntent | undefined): GoogleIntent | undefined {
+        if (!intent) return undefined;
+        if (intent.kind === "club_signup") return { kind: "club_signup" };
+        if (intent.kind === "invitation" && INVITATION_TOKEN.test(intent.token)) {
+            return { kind: "invitation", token: intent.token };
+        }
+        return undefined;
     }
 
     private parseBinding(cookieValue: string | undefined): OAuthBinding | null {
@@ -250,12 +234,7 @@ export class GoogleOAuthFlowService {
     }
 
     private redirectUri(app: SocialApp): string {
-        const base = (
-            this.configService.get<string>("API_PUBLIC_URL") || "http://localhost:3000"
-        ).replace(/\/+$/, "");
-        return app === "crm"
-            ? `${base}/crm/auth/google/callback`
-            : `${base}/cabinet/auth/google/callback`;
+        return `${this.urls.api}${CALLBACK_PATH[app]}`;
     }
 
     /** Ключ подписи state выведен из секрета JWT, но не равен ему. */

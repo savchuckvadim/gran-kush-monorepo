@@ -8,12 +8,13 @@ import type {
 } from "@workspace/api-client/core";
 import { assertOpenApiOk } from "@workspace/api-client/core";
 
-import { $api } from "@/modules/shared";
+import { $api, $cabinetApi } from "@/modules/shared";
 
 export type Invitation = SchemaInvitationDto;
 /** Токен есть только в ответе на создание: в списке его нет */
 export type CreatedInvitation = SchemaCreatedInvitationDto;
 export type PublicInvitationInfo = SchemaPublicInvitationInfoDto;
+export type InvitationAcceptance = SchemaAcceptInvitationResponseDto;
 
 export async function listInvitations(): Promise<Invitation[]> {
     const response = await $api.GET("/crm/settings/invitations");
@@ -42,13 +43,34 @@ export async function getPublicInvitation(token: string): Promise<PublicInvitati
     return assertOpenApiOk<PublicInvitationInfo>(response);
 }
 
-export async function acceptInvitation(
+/** Публичная форма: новый аккаунт задаёт пароль, существующий доказывает себя своим. */
+export async function acceptInvitationWithPassword(
     token: string,
     body: SchemaAcceptInvitationDto
-): Promise<SchemaAcceptInvitationResponseDto> {
+): Promise<InvitationAcceptance> {
     const response = await $api.POST("/public/invitations/{token}/accept", {
         params: { path: { token } },
         body,
     });
-    return assertOpenApiOk<SchemaAcceptInvitationResponseDto>(response);
+    return assertOpenApiOk<InvitationAcceptance>(response);
+}
+
+/** Открытая сессия CRM приглашённого адреса: пароль не нужен. */
+export async function acceptInvitationWithCrmSession(token: string): Promise<InvitationAcceptance> {
+    const response = await $api.POST("/crm/auth/invitations/{token}/accept", {
+        params: { path: { token } },
+        body: {},
+    });
+    return assertOpenApiOk<InvitationAcceptance>(response);
+}
+
+/** Открытая сессия кабинета приглашённого адреса: участник становится и сотрудником. */
+export async function acceptInvitationWithCabinetSession(
+    token: string
+): Promise<InvitationAcceptance> {
+    const response = await $cabinetApi.POST("/cabinet/invitations/{token}/accept", {
+        params: { path: { token } },
+        body: {},
+    });
+    return assertOpenApiOk<InvitationAcceptance>(response);
 }

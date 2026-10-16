@@ -9,8 +9,11 @@ import { EmployeeAuthModule } from "@modules/portal/auth/employees/employee-auth
 import { SharedAuthModule } from "@modules/portal/auth/shared/shared-auth.module";
 import { EmployeesModule } from "@modules/portal/crm/employees/employees.module";
 
+import { CabinetInvitationsController } from "./api/controllers/cabinet-invitations.controller";
 import { CrmInvitationsController } from "./api/controllers/crm-invitations.controller";
+import { CrmSessionInvitationsController } from "./api/controllers/crm-session-invitations.controller";
 import { PublicInvitationsController } from "./api/controllers/public-invitations.controller";
+import { InvitationAcceptanceService } from "./application/services/invitation-acceptance.service";
 import { InvitationsService } from "./application/services/invitations.service";
 
 @Module({
@@ -23,8 +26,13 @@ import { InvitationsService } from "./application/services/invitations.service";
         SharedAuthModule,
         MailModule,
     ],
-    controllers: [CrmInvitationsController, PublicInvitationsController],
-    providers: [InvitationsService],
-    exports: [InvitationsService],
+    controllers: [
+        CrmInvitationsController,
+        PublicInvitationsController,
+        CrmSessionInvitationsController,
+        CabinetInvitationsController,
+    ],
+    providers: [InvitationsService, InvitationAcceptanceService],
+    exports: [InvitationsService, InvitationAcceptanceService],
 })
 export class InvitationsModule {}

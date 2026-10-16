@@ -8,6 +8,7 @@ import request from "supertest";
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { UserDocumentRepository } from "../src/modules/account/domain/repositories/user-document-repository.interface";
+import { EmployeeAuthService } from "../src/modules/portal/auth/employees/application/services/employee-auth.service";
 import { MemberAuthService } from "../src/modules/portal/auth/members/application/services/member-auth.service";
 
 jest.setTimeout(120_000);
@@ -480,7 +481,8 @@ describe("Security (e2e)", () => {
             const accepted = await request(app.getHttpServer())
                 .post(`/public/invitations/${invitation.body.token as string}/accept`)
                 .send({ password: "Attacker123" });
-            expect(accepted.status).toBe(409);
+            expect(accepted.status).toBe(200);
+            expect(accepted.body.outcome).toBe("password_setup_sent");
             expect(accepted.body).not.toHaveProperty("accessToken");
 
             const after = await prisma.user.findUniqueOrThrow({ where: { id: victim.userId } });
@@ -530,8 +532,8 @@ describe("Security (e2e)", () => {
             const accepted = await request(app.getHttpServer())
                 .post(`/public/invitations/${invitation.body.token as string}/accept`)
                 .send({ password: PASSWORD, fields: { first_name: "Invited" } });
-            expect(accepted.status).toBe(201);
-            expect(accepted.body.awaitingEmailConfirmation).toBe(true);
+            expect(accepted.status).toBe(200);
+            expect(accepted.body.outcome).toBe("accepted_pending_email");
             expect(accepted.body).not.toHaveProperty("accessToken");
 
             const login = (password: string) =>
@@ -652,6 +654,105 @@ describe("Security (e2e)", () => {
             },
             delete: (url: string) =>
                 request(app.getHttpServer()).delete(url).set("Cookie", cookies),
+        });
+
+        describe("TASK-707: accepting an invitation with a session", () => {
+            const invite = async (email: string): Promise<string> => {
+                const res = await as(clubB)
+                    .post("/crm/settings/invitations")
+                    .send({ email, role: "employee" });
+                expect(res.status).toBe(201);
+                return res.body.token as string;
+            };
+            const employeesOfClubB = async (userId: string) =>
+                prisma.employee.count({ where: { userId, portalId: await portalId(clubB) } });
+
+            it("a cabinet session of the invited address accepts it and gets a CRM session", async () => {
+                const member = await memberWithSession("inv-session");
+                const token = await invite(member.email);
+
+                const res = await lk(member.cookies)
+                    .post(`/cabinet/invitations/${token}/accept`)
+                    .send({});
+
+                expect(res.status).toBe(200);
+                expect(res.body.outcome).toBe("accepted");
+                const cookies = cookieHeader(res);
+                expect(cookies).toContain("crm_access_token=");
+                const me = await request(app.getHttpServer())
+                    .get("/crm/auth/me")
+                    .set("Cookie", cookies);
+                expect(me.status).toBe(200);
+                expect(await employeesOfClubB(member.userId)).toBe(1);
+            });
+
+            it("a CRM session of the invited address accepts it without a password", async () => {
+                const email = `inv-crm-${suffix}@test.local`;
+                const user = await prisma.user.create({
+                    data: {
+                        email,
+                        passwordHash: null,
+                        status: "active",
+                        isActive: true,
+                        emailConfirmed: true,
+                    },
+                });
+                const tokens = await app
+                    .get(EmployeeAuthService)
+                    .generateTokens({ id: user.id, email }, `device-inv-crm-${suffix}`);
+                const token = await invite(email);
+
+                const res = await request(app.getHttpServer())
+                    .post(`/crm/auth/invitations/${token}/accept`)
+                    .set("Cookie", `crm_access_token=${tokens.accessToken}`)
+                    .send({});
+
+                expect(res.status).toBe(200);
+                expect(res.body.outcome).toBe("accepted");
+                expect(await employeesOfClubB(user.id)).toBe(1);
+            });
+
+            it("a session of another address is refused and leaves the invitation pending", async () => {
+                const stranger = await memberWithSession("inv-stranger");
+                const token = await invite(`inv-target-${suffix}@test.local`);
+
+                const res = await lk(stranger.cookies)
+                    .post(`/cabinet/invitations/${token}/accept`)
+                    .send({});
+
+                expect(res.status).toBe(403);
+                expect(await employeesOfClubB(stranger.userId)).toBe(0);
+                const invitation = await prisma.employeeInvitation.findUniqueOrThrow({
+                    where: { token },
+                });
+                expect(invitation.status).toBe("pending");
+            });
+
+            it("an unconfirmed account cannot accept with its session", async () => {
+                const email = `inv-unconfirmed-${suffix}@test.local`;
+                const user = await prisma.user.create({
+                    data: {
+                        email,
+                        passwordHash: null,
+                        status: "active",
+                        isActive: true,
+                        emailConfirmed: false,
+                    },
+                });
+                const tokens = await app
+                    .get(EmployeeAuthService)
+                    .generateTokens({ id: user.id, email }, `device-inv-unconf-${suffix}`);
+                const token = await invite(email);
+
+                const res = await request(app.getHttpServer())
+                    .post(`/crm/auth/invitations/${token}/accept`)
+                    .set("Cookie", `crm_access_token=${tokens.accessToken}`)
+                    .send({});
+
+                expect(res.status).toBe(401);
+                expect(cookieHeader(res)).not.toContain("crm_access_token=");
+                expect(await employeesOfClubB(user.id)).toBe(0);
+            });
         });
 
         it("a club adding a Google-only account waits for its consent; the token from the email is enough", async () => {
@@ -1120,8 +1221,8 @@ describe("Security (e2e)", () => {
             const accepted = await request(app.getHttpServer())
                 .post(`/public/invitations/${invitation.body.token as string}/accept`)
                 .send({ password: PASSWORD });
-            expect(accepted.status).toBe(201);
-            expect(accepted.body.awaitingEmailConfirmation).toBe(false);
+            expect(accepted.status).toBe(200);
+            expect(accepted.body.outcome).toBe("accepted");
             expect(accepted.body).not.toHaveProperty("accessToken");
             expect(accepted.body).not.toHaveProperty("refreshToken");
 

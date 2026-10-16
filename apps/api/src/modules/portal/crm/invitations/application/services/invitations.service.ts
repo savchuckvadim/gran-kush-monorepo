@@ -10,43 +10,31 @@ import { MailService } from "@mail/application/services/mail.service";
 import type { SupportedLanguage } from "@mail/consts/mail.constants";
 import { EmployeeInvitation, InvitationStatus } from "@prisma/client";
 import { AccountOwnershipService } from "@users/application/services/account-ownership.service";
-import { AccountProvisioningService } from "@users/application/services/account-provisioning.service";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import { randomBytes } from "crypto";
 
 import { PrismaService } from "@common/prisma/prisma.service";
-import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
-import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
-import { EmployeesService } from "@modules/portal/crm/employees/application/services/employees.service";
 import { PORTAL_SUMMARY_SELECT } from "@modules/portal/crm/portals/infrastructure/prisma-includes/portal-summary.select";
 
-import { AcceptInvitationResponseDto, CreateInvitationDto } from "../../api/dto/invitation.dto";
+import { CreateInvitationDto, PublicInvitationInfoDto } from "../../api/dto/invitation.dto";
+import { InvitationAccountState } from "../../domain/invitation-acceptance";
 
 const INVITATION_TTL_DAYS = 7;
 
-/** Токены не попадают в тело ответа: контроллер кладёт их в HttpOnly-куки CRM. */
-export interface AcceptInvitationResult {
-    response: AcceptInvitationResponseDto;
-    tokens?: { accessToken: string; refreshToken: string };
-}
-
-type InvitationWithPortal = EmployeeInvitation & {
+export type InvitationWithPortal = EmployeeInvitation & {
     portal: { id: string; name: string; displayName: string };
 };
 
+/** Приглашения сотрудников: выдача, список, отзыв и чтение по токену. Приём — `InvitationAcceptanceService`. */
 @Injectable()
 export class InvitationsService {
     private readonly logger = new Logger(InvitationsService.name);
 
     constructor(
         private readonly prisma: PrismaService,
-        private readonly accountProvisioning: AccountProvisioningService,
         private readonly ownership: AccountOwnershipService,
-        private readonly employeesService: EmployeesService,
-        private readonly employeeAuthService: EmployeeAuthService,
         private readonly userRepository: UserRepository,
-        private readonly mailService: MailService,
-        private readonly emailVerification: EmailVerificationService
+        private readonly mailService: MailService
     ) {}
 
     async create(
@@ -149,95 +137,21 @@ export class InvitationsService {
         return invitation;
     }
 
-    async accept(
-        token: string,
-        dto: { password?: string; fields?: Record<string, unknown> },
-        language: SupportedLanguage,
-        deviceId: string
-    ): Promise<AcceptInvitationResult> {
+    /** Что показать на странице приглашения: клуб, роль и как принимающий может доказать адрес. */
+    async getPublicInfo(token: string): Promise<PublicInvitationInfoDto> {
         const invitation = await this.getActiveByToken(token);
-
-        // Токен знает и админ, который выдал приглашение, поэтому для аккаунта с паролем
-        // принимающий доказывает, что аккаунт его, самим паролем — иначе приглашение на чужой email
-        // выдавало бы токены этого аккаунта (security-audit, TASK-662)
-        const existing = await this.userRepository.findByEmail(invitation.email);
-        if (existing && this.ownership.proofMethod(existing) === "password") {
-            await this.ownership.assertOwnerProof(existing, {
-                kind: "password",
-                password: dto.password,
-            });
-        } else if (existing) {
-            // Аккаунт без пароля (pending_claim или только Google) мог завести другой клуб, в нём
-            // могут лежать документы. Токен видел админ, поэтому пароль здесь не ставится:
-            // владелец задаёт его по ссылке из письма и принимает приглашение уже с паролем
-            // (TASK-664). Принять сессией или Google — TASK-707
-            await this.emailVerification.sendAccountSetup(invitation.email, {
-                app: "crm",
-                language,
-                portalName: invitation.portal.displayName,
-            });
-            throw new ConflictException(
-                "This email already has an account without a password. We sent a link to set it; then open the invitation again"
-            );
-        }
-
-        // Новый аккаунт: ссылку видел и админ, поэтому владение адресом доказывает только
-        // подтверждение почты — до него сессии нет (TASK-664)
-        const { user, created } = await this.accountProvisioning.ensureUserWithPassword(
-            invitation.email,
-            dto.password,
-            { emailVerified: false }
-        );
-
-        const { employee } = await this.employeesService.create(
-            {
-                email: invitation.email,
-                role: invitation.role,
-                fields: dto.fields ?? {},
-                invitationId: invitation.id,
-            },
-            invitation.portalId
-        );
-
-        await this.prisma.employeeInvitation.update({
-            where: { id: invitation.id },
-            data: {
-                status: InvitationStatus.accepted,
-                acceptedAt: new Date(),
-                acceptedUserId: user.id,
-            },
-        });
-
-        const base = {
-            employeeId: employee.employee.id,
-            userId: user.id,
-            portalSlug: invitation.portal.name,
-        };
-
-        if (created) {
-            try {
-                await this.emailVerification.sendVerificationEmailToUserId(user.id, {
-                    app: "crm",
-                    language,
-                });
-            } catch (error: unknown) {
-                // Сотрудник уже создан; письмо можно запросить повторно с экрана входа
-                this.logger.error(
-                    `Verification email for invited user ${user.id} was not queued`,
-                    error instanceof Error ? error.stack : String(error)
-                );
-            }
-            return { response: { ...base, awaitingEmailConfirmation: true } };
-        }
-
-        const tokens = await this.employeeAuthService.generateTokens(
-            { id: user.id, email: user.email },
-            deviceId
-        );
-
+        const user = await this.userRepository.findByEmail(invitation.email);
+        const accountState = !user
+            ? InvitationAccountState.new
+            : this.ownership.hasPassword(user)
+              ? InvitationAccountState.password
+              : InvitationAccountState.passwordless;
         return {
-            response: { ...base, awaitingEmailConfirmation: false },
-            tokens,
+            email: invitation.email,
+            role: invitation.role,
+            portalSlug: invitation.portal.name,
+            portalDisplayName: invitation.portal.displayName,
+            accountState,
         };
     }
 }

@@ -8,20 +8,18 @@ import { AUTH_GLOBAL_SCOPE, resolveDeviceIdFromHeaders } from "@common/auth";
 import { AUTH_THROTTLE } from "@common/config/throttler/throttler.config";
 import { AuthCookieService } from "@common/cookie/services/auth-cookie.service";
 import { Public } from "@common/decorators/auth/public.decorator";
-import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
+import { EmployeeGoogleSignInService } from "@modules/portal/auth/social/application/services/employee-google-sign-in.service";
+import { GoogleOAuthFlowService } from "@modules/portal/auth/social/application/services/google-oauth-flow.service";
 import {
     GoogleFlowError,
-    GoogleOAuthFlowService,
     OAUTH_FLOW_COOKIE,
-} from "@modules/portal/auth/social/application/services/google-oauth-flow.service";
-import { SocialLoginService } from "@modules/portal/auth/social/application/services/social-login.service";
+} from "@modules/portal/auth/social/application/services/google-oauth-flow.types";
 
 /**
- * Google-вход в CRM. Аккаунта с таким email нет (или нет ни одного клуба) —
- * ведём на регистрацию клуба с предзаполненным email; аккаунт заранее не создаём,
- * иначе регистрация клуба упрётся в 409 «email занят» (TASK-508).
- * Защита входа (nonce, PKCE, подпись state, фильтр страницы возврата) — в
- * `GoogleOAuthFlowService`.
+ * Google-вход в CRM: обычный вход, приём приглашения сотрудника (`intent=invitation`) и
+ * регистрация клуба (`intent=club_signup`). Что делать после возврата —
+ * `EmployeeGoogleSignInService`; защита входа (nonce, PKCE, подпись state, фильтр страницы
+ * возврата) — `GoogleOAuthFlowService`.
  */
 @ApiTags("Employee Authentication (CRM Web)")
 @Controller("crm/auth/google")
@@ -30,8 +28,7 @@ export class EmployeeGoogleAuthController {
 
     constructor(
         private readonly flow: GoogleOAuthFlowService,
-        private readonly socialLogin: SocialLoginService,
-        private readonly employeeAuthService: EmployeeAuthService,
+        private readonly signIn: EmployeeGoogleSignInService,
         private readonly cookieService: AuthCookieService
     ) {}
 
@@ -44,16 +41,34 @@ export class EmployeeGoogleAuthController {
         required: false,
         description: "Путь в CRM, куда вернуть после входа (только относительный)",
     })
+    @ApiQuery({
+        name: "intent",
+        required: false,
+        enum: ["invitation", "club_signup"],
+        description: "invitation — принять приглашение (нужен token); club_signup — завести клуб",
+    })
+    @ApiQuery({
+        name: "token",
+        required: false,
+        description: "Токен приглашения для intent=invitation",
+    })
     start(
         @Query("locale") locale: string | undefined,
         @Query("returnTo") returnTo: string | undefined,
+        @Query("intent") intent: string | undefined,
+        @Query("token") token: string | undefined,
         @Res() response: Response
     ): void {
         if (!this.flow.isConfigured()) {
             response.redirect(this.loginUrl(this.flow.sanitizeLocale(locale), "google_off"));
             return;
         }
-        const { url, cookieValue } = this.flow.buildStart("crm", locale, returnTo);
+        const { url, cookieValue } = this.flow.buildStart(
+            "crm",
+            locale,
+            returnTo,
+            this.flow.parseIntent(intent, token)
+        );
         response.cookie(OAUTH_FLOW_COOKIE, cookieValue, this.flow.flowCookieOptions("crm"));
         response.redirect(url);
     }
@@ -82,20 +97,15 @@ export class EmployeeGoogleAuthController {
                 throw new GoogleFlowError("provider_error");
             }
             const profile = await this.flow.exchangeCode("crm", code, verified.binding);
-            const result = await this.socialLogin.loginEmployeeWithGoogle(profile);
-            const front = this.flow.frontendUrl("crm");
-            if (result.kind === "no_employment") {
-                const email = encodeURIComponent(result.email);
-                response.redirect(`${front}/${locale}/auth/register?email=${email}&from=google`);
-                return;
-            }
-            const deviceId = resolveDeviceIdFromHeaders(headers);
-            const tokens = await this.employeeAuthService.generateTokens(
-                { id: result.user.id, email: result.user.email },
-                deviceId
+            const result = await this.signIn.complete(
+                profile,
+                verified,
+                resolveDeviceIdFromHeaders(headers)
             );
-            this.cookieService.setAuthCookies(response, AUTH_GLOBAL_SCOPE.CRM, tokens);
-            response.redirect(this.flow.successUrl("crm", locale, verified.returnTo));
+            if (result.tokens) {
+                this.cookieService.setAuthCookies(response, AUTH_GLOBAL_SCOPE.CRM, result.tokens);
+            }
+            response.redirect(result.redirect);
         } catch (error: unknown) {
             const reason = error instanceof GoogleFlowError ? error.reason : "login_rejected";
             this.logger.warn(`CRM Google sign-in rejected: ${reason}`);

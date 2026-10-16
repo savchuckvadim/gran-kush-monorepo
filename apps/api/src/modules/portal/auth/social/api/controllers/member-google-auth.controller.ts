@@ -9,11 +9,11 @@ import { AUTH_THROTTLE } from "@common/config/throttler/throttler.config";
 import { AuthCookieService } from "@common/cookie/services/auth-cookie.service";
 import { Public } from "@common/decorators/auth/public.decorator";
 import { MemberAuthService } from "@modules/portal/auth/members/application/services/member-auth.service";
+import { GoogleOAuthFlowService } from "@modules/portal/auth/social/application/services/google-oauth-flow.service";
 import {
     GoogleFlowError,
-    GoogleOAuthFlowService,
     OAUTH_FLOW_COOKIE,
-} from "@modules/portal/auth/social/application/services/google-oauth-flow.service";
+} from "@modules/portal/auth/social/application/services/google-oauth-flow.types";
 import { SocialLoginService } from "@modules/portal/auth/social/application/services/social-login.service";
 
 /**

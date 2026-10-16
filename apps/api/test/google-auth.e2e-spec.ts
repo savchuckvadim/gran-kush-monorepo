@@ -248,5 +248,94 @@ describe("Google sign-in (e2e)", () => {
                 await prisma.portal.deleteMany({ where: { name: slug } });
             }
         });
+
+        describe("приглашение сотрудника (intent=invitation)", () => {
+            const slug = `g-inv-${suffix}`;
+            let ownerCookies: string;
+
+            const invite = async (email: string): Promise<string> => {
+                const res = await request(app.getHttpServer())
+                    .post("/crm/settings/invitations")
+                    .set("Cookie", ownerCookies)
+                    .set("X-Portal-Slug", slug)
+                    .send({ email, role: "employee" });
+                expect(res.status).toBe(201);
+                return res.body.token as string;
+            };
+
+            beforeAll(async () => {
+                const registered = await request(app.getHttpServer())
+                    .post("/platform/portals/register")
+                    .send({
+                        name: slug,
+                        displayName: `Invite ${slug}`,
+                        email: `owner-${slug}@test.local`,
+                        password: PASSWORD,
+                        ownerName: "Owner",
+                        acceptTerms: true,
+                    });
+                expect(registered.status).toBe(201);
+                ownerCookies = setCookies(registered)
+                    .map((cookie) => cookie.split(";")[0])
+                    .join("; ");
+            });
+
+            afterAll(async () => {
+                await prisma.portal.deleteMany({ where: { name: slug } });
+            });
+
+            it("адрес Google совпал: аккаунт заведён, сотрудник создан, сессия CRM, вход в клуб", async () => {
+                google.email = `g-invitee-${suffix}@test.local`;
+                const token = await invite(google.email);
+
+                const { flowCookie, state } = await start(
+                    path,
+                    `&intent=invitation&token=${token}`
+                );
+                const res = await callback(path, state, flowCookie);
+
+                expect(new URL(res.headers.location).pathname).toBe(`/es/${slug}/crm`);
+                expect(cookieOf(res, "crm_access_token")).toBeTruthy();
+                const user = await prisma.user.findUniqueOrThrow({
+                    where: { email: google.email },
+                });
+                expect(user.emailConfirmed).toBe(true);
+                expect(
+                    await prisma.employee.count({
+                        where: { userId: user.id, portal: { name: slug } },
+                    })
+                ).toBe(1);
+                const invitation = await prisma.employeeInvitation.findUniqueOrThrow({
+                    where: { token },
+                });
+                expect(invitation.status).toBe("accepted");
+            });
+
+            it("чужой адрес Google: назад к приглашению, аккаунт не заводится, сессии нет", async () => {
+                const token = await invite(`g-invited-${suffix}@test.local`);
+                google.email = `g-stranger-${suffix}@test.local`;
+
+                const { flowCookie, state } = await start(
+                    path,
+                    `&intent=invitation&token=${token}`
+                );
+                const res = await callback(path, state, flowCookie);
+
+                const location = new URL(res.headers.location);
+                expect(location.pathname).toBe(`/es/auth/invite/${token}`);
+                expect(location.searchParams.get("error")).toBe("invite_email_mismatch");
+                expect(cookieOf(res, "crm_access_token")).toBeFalsy();
+                expect(await prisma.user.findUnique({ where: { email: google.email } })).toBeNull();
+            });
+
+            it("токен приглашения неправильной формы отбрасывается при старте: это обычный вход", async () => {
+                google.email = `g-plain-${suffix}@test.local`;
+                const { flowCookie, state } = await start(path, "&intent=invitation&token=../../x");
+
+                const res = await callback(path, state, flowCookie);
+
+                expect(res.headers.location).toContain("/es/auth/register?email=");
+            });
+        });
     });
 });

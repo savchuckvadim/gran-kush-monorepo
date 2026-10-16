@@ -30,6 +30,15 @@ export class SocialLoginService {
 
     /** Кабинет: аккаунта нет — создаём (без клуба; вступит по ссылке или регистрации). */
     async loginMemberWithGoogle(profile: GoogleProfile): Promise<User> {
+        return this.findOrCreateAccount(profile);
+    }
+
+    /**
+     * Аккаунт для подтверждённого Google-ом адреса: привязанный, найденный по email (и тогда
+     * заявленный этим входом) или новый. Нужен везде, где Google доказывает владение адресом:
+     * вход в кабинет, приём приглашения сотрудника.
+     */
+    async findOrCreateAccount(profile: GoogleProfile): Promise<User> {
         const existing = await this.findLinkedOrByEmail(profile);
         if (existing) {
             return this.activateAndLink(existing, profile);

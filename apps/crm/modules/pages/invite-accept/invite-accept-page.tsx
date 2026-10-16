@@ -1,125 +1,147 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 
-import { Button, Card, FieldInput } from "@workspace/ui";
+import { Card } from "@workspace/ui";
 
-import { acceptInvitation, getPublicInvitation } from "@/modules/entities/invitations";
-import { getApiErrorMessage } from "@/modules/shared";
-import { ROUTES } from "@/modules/shared/config/routes";
+import {
+    getPublicInvitation,
+    type InvitationAcceptance,
+    type OpenSession,
+    useOpenSessions,
+} from "@/modules/entities/invitations";
+import { googleSignInUrl } from "@/modules/shared/api/google-sign-in";
+import { GoogleButton } from "@/modules/shared/ui/GoogleButton";
 
+import { InviteMessage } from "./invite-message";
+import { InvitePasswordForm } from "./invite-password-form";
+import { InviteSessionAccept } from "./invite-session-accept";
+
+/** Причины, с которыми Google-вход возвращает на приглашение (`?error=`). */
+const GOOGLE_ERRORS = ["invite_email_mismatch", "invite_invalid", "invite_already_employee"];
+
+const isFor = (session: OpenSession | null, email: string): session is OpenSession =>
+    session !== null && session.email.trim().toLowerCase() === email.trim().toLowerCase();
+
+/**
+ * Приглашение сотрудника. Способ принять выбирается по тому, что уже есть у человека: открытая
+ * сессия на адрес приглашения — одна кнопка; иначе пароль (новый или от аккаунта) или Google.
+ * Принято — сразу в CRM клуба; всё остальное (подтвердить почту, задать пароль) — карточкой.
+ */
 export function InviteAcceptPage({ token }: { token: string }) {
-    const router = useRouter();
+    const t = useTranslations("invite");
     const locale = useLocale();
-
-    const infoQuery = useQuery({
+    const router = useRouter();
+    const params = useSearchParams();
+    const [outcome, setOutcome] = useState<InvitationAcceptance | null>(null);
+    const sessions = useOpenSessions();
+    const info = useQuery({
         queryKey: ["public-invitation", token],
         queryFn: () => getPublicInvitation(token),
+        retry: false,
     });
 
-    const [password, setPassword] = useState("");
-    const [firstName, setFirstName] = useState("");
-    const [error, setError] = useState<string | null>(null);
+    const finish = (result: InvitationAcceptance) => {
+        if (result.outcome === "accepted") {
+            router.push(`/${locale}/${result.portalSlug}/crm`);
+            return;
+        }
+        setOutcome(result);
+    };
 
-    const acceptMutation = useMutation({
-        mutationFn: () =>
-            acceptInvitation(token, {
-                password: password || undefined,
-                fields: firstName.trim() ? { first_name: firstName.trim() } : undefined,
-            }),
-        onSuccess: (data) => {
-            // Новый аккаунт входит после подтверждения почты: сессии в ответе нет
-            if (data.awaitingEmailConfirmation) return;
-            const slug = infoQuery.data?.portalSlug;
-            router.push(slug ? `/${locale}/${slug}/crm` : `/${locale}${ROUTES.LOGIN}`);
-        },
-        onError: (e) => setError(getApiErrorMessage(e)),
-    });
-
-    if (infoQuery.isLoading) {
+    if (info.isLoading || sessions.isLoading) {
         return (
             <div className="flex min-h-[50vh] items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                <Loader2 className="size-6 animate-spin text-muted-foreground" aria-hidden="true" />
             </div>
         );
     }
+    if (info.isError || !info.data) {
+        return <InviteMessage tone="error" text={t("invalid")} />;
+    }
 
-    if (infoQuery.isError || !infoQuery.data) {
+    const invitation = info.data;
+    if (outcome) {
         return (
-            <div className="flex min-h-[50vh] items-center justify-center p-4">
-                <Card className="max-w-md p-6 text-center">
-                    <p className="text-sm text-destructive">
-                        Приглашение недействительно или истекло.
-                    </p>
-                </Card>
-            </div>
+            <InviteMessage
+                title={t(`outcomes.${outcome.outcome}.title`)}
+                text={t(`outcomes.${outcome.outcome}.text`, {
+                    email: invitation.email,
+                    club: invitation.portalDisplayName,
+                })}
+            />
         );
     }
 
-    const info = infoQuery.data;
-
-    if (acceptMutation.data?.awaitingEmailConfirmation) {
-        return (
-            <div className="flex min-h-[50vh] items-center justify-center p-4">
-                <Card className="w-full max-w-md p-6 text-center">
-                    <h1 className="text-xl font-semibold">Осталось подтвердить почту</h1>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                        Мы отправили письмо на {info.email}. Перейдите по ссылке из него, после
-                        этого можно войти в {info.portalDisplayName}.
-                    </p>
-                </Card>
-            </div>
-        );
-    }
+    const ownSession = isFor(sessions.crm, invitation.email)
+        ? { kind: "crm" as const, ...sessions.crm }
+        : isFor(sessions.cabinet, invitation.email)
+          ? { kind: "cabinet" as const, ...sessions.cabinet }
+          : null;
+    // Сессия на этот адрес без подтверждённой почты владельца не доказывает: подтвердить или Google
+    const session = ownSession?.emailConfirmed ? ownSession.kind : null;
+    const otherEmail = ownSession ? null : (sessions.crm?.email ?? sessions.cabinet?.email ?? null);
+    const googleError = params.get("error");
 
     return (
         <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center p-4">
             <Card className="w-full max-w-md p-6">
-                <h1 className="text-xl font-semibold">Приглашение в {info.portalDisplayName}</h1>
+                <h1 className="text-xl font-semibold">
+                    {t("title", { club: invitation.portalDisplayName })}
+                </h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                    {info.email} · роль {info.role}
+                    {t("subtitle", {
+                        email: invitation.email,
+                        role: t(`roles.${invitation.role}`),
+                    })}
                 </p>
 
-                <div className="mt-4 space-y-3">
-                    {!info.accountExists && (
-                        <FieldInput
-                            label="Имя"
-                            value={firstName}
-                            onChange={(e) => setFirstName(e.target.value)}
-                        />
-                    )}
-                    {/* the admin holds the link too: an existing account proves itself with its password */}
-                    {info.accountExists && (
-                        <p className="text-sm text-muted-foreground">
-                            У вас уже есть аккаунт — введите его пароль, чтобы присоединиться.
+                <div className="mt-4 space-y-4">
+                    {googleError && GOOGLE_ERRORS.includes(googleError) && (
+                        <p role="alert" className="text-sm text-destructive">
+                            {t(`errors.${googleError}`)}
                         </p>
                     )}
-                    <FieldInput
-                        label={info.accountExists ? "Пароль вашего аккаунта" : "Пароль"}
-                        type="password"
-                        required
-                        autoComplete={info.accountExists ? "current-password" : "new-password"}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
 
-                    {error ? <p className="text-sm text-destructive">{error}</p> : null}
-
-                    <Button
-                        className="w-full"
-                        onClick={() => {
-                            setError(null);
-                            acceptMutation.mutate();
-                        }}
-                        disabled={acceptMutation.isPending || password.length === 0}
-                    >
-                        {acceptMutation.isPending ? "Принятие…" : "Принять приглашение"}
-                    </Button>
+                    {session ? (
+                        <InviteSessionAccept
+                            token={token}
+                            session={session}
+                            email={invitation.email}
+                            onDone={finish}
+                        />
+                    ) : (
+                        <>
+                            {otherEmail && (
+                                <p className="text-sm text-muted-foreground">
+                                    {t("otherSession", { email: otherEmail })}
+                                </p>
+                            )}
+                            {ownSession && !ownSession.emailConfirmed && (
+                                <p className="text-sm text-muted-foreground">
+                                    {t("unconfirmedSession", { email: ownSession.email })}
+                                </p>
+                            )}
+                            <InvitePasswordForm
+                                token={token}
+                                accountState={invitation.accountState}
+                                onDone={finish}
+                            />
+                            <GoogleButton
+                                href={googleSignInUrl("crm", {
+                                    locale,
+                                    intent: { kind: "invitation", token },
+                                })}
+                                label={t("google")}
+                                separator={t("or")}
+                            />
+                        </>
+                    )}
                 </div>
             </Card>
         </div>

@@ -106,6 +106,7 @@ export class PortalContextMiddleware implements NestMiddleware {
             "/crm/auth/me",
             "/crm/auth/password",
             "/crm/auth/confirm-email",
+            "/crm/auth/invitations",
             // Google возвращает на callback без наших заголовков — портал ещё не выбран
             "/crm/auth/google",
             "/crm/mobile/auth",
@@ -114,6 +115,7 @@ export class PortalContextMiddleware implements NestMiddleware {
             "/cabinet/account",
             "/cabinet/portals",
             "/cabinet/memberships",
+            "/cabinet/invitations",
             "/cabinet/reg-links",
             "/cabinet/spending",
             "/cabinet/reviews",

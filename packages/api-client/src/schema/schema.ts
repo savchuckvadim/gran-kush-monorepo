@@ -1621,6 +1621,109 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/crm/settings/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список приглашений портала (admin) */
+        get: operations["CrmInvitations_list"];
+        put?: never;
+        /** Пригласить сотрудника по email (admin): ссылка уходит письмом */
+        post: operations["CrmInvitations_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/settings/invitations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Отозвать приглашение (admin) */
+        delete: operations["CrmInvitations_revoke"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/invitations/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Клуб, роль и состояние аккаунта приглашённого по токену */
+        get: operations["PublicInvitations_info"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/invitations/{token}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Принять приглашение паролем: новый аккаунт задаёт пароль, существующий доказывает себя своим. Сессия выдаётся HttpOnly-куками CRM, токенов в теле нет; что произошло — в `outcome` */
+        post: operations["PublicInvitations_accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/auth/invitations/{token}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Принять приглашение сессией CRM (адрес аккаунта = адрес приглашения) */
+        post: operations["CrmSessionInvitations_accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cabinet/invitations/{token}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Принять приглашение сотрудника сессией кабинета (адрес аккаунта = адрес приглашения) */
+        post: operations["CabinetInvitations_accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/platform/portals/register": {
         parameters: {
             query?: never;
@@ -2448,75 +2551,6 @@ export interface paths {
         get: operations["CrmFinance_getByDate"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/crm/settings/invitations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Список приглашений портала (admin) */
-        get: operations["CrmInvitations_list"];
-        put?: never;
-        /** Пригласить сотрудника по email (admin): ссылка уходит письмом */
-        post: operations["CrmInvitations_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/crm/settings/invitations/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Отозвать приглашение (admin) */
-        delete: operations["CrmInvitations_revoke"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/public/invitations/{token}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Информация о приглашении по токену */
-        get: operations["PublicInvitations_info"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/public/invitations/{token}/accept": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Принять приглашение: новый аккаунт или существующий с его паролем + Employee. Аккаунт без пароля — 409 и письмо, чтобы задать пароль. Сессия существующего аккаунта выдаётся HttpOnly-куками, токенов в теле нет */
-        post: operations["PublicInvitations_accept"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4219,6 +4253,109 @@ export interface components {
             /** @description Нужен, если у аккаунта есть пароль */
             password?: string;
         };
+        CreateInvitationDto: {
+            /** @example new-employee@example.com */
+            email: string;
+            /**
+             * @example employee
+             * @enum {string}
+             */
+            role: "admin" | "manager" | "employee";
+        };
+        CreatedInvitationDto: {
+            id: string;
+            /** @example new-employee@example.com */
+            email: string;
+            /** @enum {string} */
+            role: "portal_owner" | "admin" | "manager" | "employee";
+            /** @enum {string} */
+            status: "pending" | "accepted" | "revoked" | "expired";
+            /** @example 2026-01-08T00:00:00.000Z */
+            expiresAt: string;
+            /** @example 2026-01-02T00:00:00.000Z */
+            acceptedAt?: string;
+            /** @example 2026-01-01T00:00:00.000Z */
+            createdAt: string;
+            /** @description Одноразовый токен ссылки-приглашения. Ссылка уходит и письмом; в списке токена нет */
+            token: string;
+        };
+        InvitationDto: {
+            id: string;
+            /** @example new-employee@example.com */
+            email: string;
+            /** @enum {string} */
+            role: "portal_owner" | "admin" | "manager" | "employee";
+            /** @enum {string} */
+            status: "pending" | "accepted" | "revoked" | "expired";
+            /** @example 2026-01-08T00:00:00.000Z */
+            expiresAt: string;
+            /** @example 2026-01-02T00:00:00.000Z */
+            acceptedAt?: string;
+            /** @example 2026-01-01T00:00:00.000Z */
+            createdAt: string;
+        };
+        InvitationListResponseDto: {
+            invitations: components["schemas"]["InvitationDto"][];
+        };
+        RevokeInvitationResponseDto: {
+            revoked: boolean;
+        };
+        /**
+         * @description new — аккаунта нет (задать пароль); password — есть, принять его паролем, сессией или Google; passwordless — есть, но без пароля: принять сессией или Google, либо задать пароль по письму
+         * @enum {string}
+         */
+        InvitationAccountState: "new" | "password" | "passwordless";
+        PublicInvitationInfoDto: {
+            /** @example new-employee@example.com */
+            email: string;
+            /** @enum {string} */
+            role: "portal_owner" | "admin" | "manager" | "employee";
+            /** @example green-club */
+            portalSlug: string;
+            /** @example Green Club */
+            portalDisplayName: string;
+            /** @description new — аккаунта нет (задать пароль); password — есть, принять его паролем, сессией или Google; passwordless — есть, но без пароля: принять сессией или Google, либо задать пароль по письму */
+            accountState: components["schemas"]["InvitationAccountState"];
+        };
+        AcceptInvitationDto: {
+            /**
+             * @description Обязателен, если аккаунта ещё нет (или он pending_claim)
+             * @example Password123
+             */
+            password?: string;
+            /**
+             * @description Динамические поля профиля сотрудника
+             * @example {
+             *       "first_name": "John"
+             *     }
+             */
+            fields?: {
+                [key: string]: unknown;
+            };
+        };
+        /**
+         * @description accepted — сотрудник создан, сессия CRM выдана HttpOnly-куками; accepted_pending_email — новый аккаунт и сотрудник созданы, вход после подтверждения почты; confirm_email_first — почта аккаунта не подтверждена, письмо отправлено заново, приглашение не принято; password_setup_sent — у аккаунта нет пароля, отправлена ссылка, чтобы его задать; приглашение не принято
+         * @enum {string}
+         */
+        AcceptInvitationOutcome: "accepted" | "accepted_pending_email" | "confirm_email_first" | "password_setup_sent";
+        AcceptInvitationResponseDto: {
+            /** @description accepted — сотрудник создан, сессия CRM выдана HttpOnly-куками; accepted_pending_email — новый аккаунт и сотрудник созданы, вход после подтверждения почты; confirm_email_first — почта аккаунта не подтверждена, письмо отправлено заново, приглашение не принято; password_setup_sent — у аккаунта нет пароля, отправлена ссылка, чтобы его задать; приглашение не принято */
+            outcome: components["schemas"]["AcceptInvitationOutcome"];
+            portalSlug: string;
+            /** @description Только когда приглашение принято */
+            employeeId?: string;
+        };
+        AcceptInvitationWithSessionDto: {
+            /**
+             * @description Динамические поля профиля сотрудника
+             * @example {
+             *       "first_name": "John"
+             *     }
+             */
+            fields?: {
+                [key: string]: unknown;
+            };
+        };
         RegisterPortalDto: {
             /**
              * @description Unique portal slug. Allowed chars: a-z, 0-9, dash
@@ -5472,88 +5609,6 @@ export interface components {
             /** @example 8 */
             count: number;
         };
-        CreateInvitationDto: {
-            /** @example new-employee@example.com */
-            email: string;
-            /**
-             * @example employee
-             * @enum {string}
-             */
-            role: "admin" | "manager" | "employee";
-        };
-        CreatedInvitationDto: {
-            id: string;
-            /** @example new-employee@example.com */
-            email: string;
-            /** @enum {string} */
-            role: "portal_owner" | "admin" | "manager" | "employee";
-            /** @enum {string} */
-            status: "pending" | "accepted" | "revoked" | "expired";
-            /** @example 2026-01-08T00:00:00.000Z */
-            expiresAt: string;
-            /** @example 2026-01-02T00:00:00.000Z */
-            acceptedAt?: string;
-            /** @example 2026-01-01T00:00:00.000Z */
-            createdAt: string;
-            /** @description Одноразовый токен ссылки-приглашения. Ссылка уходит и письмом; в списке токена нет */
-            token: string;
-        };
-        InvitationDto: {
-            id: string;
-            /** @example new-employee@example.com */
-            email: string;
-            /** @enum {string} */
-            role: "portal_owner" | "admin" | "manager" | "employee";
-            /** @enum {string} */
-            status: "pending" | "accepted" | "revoked" | "expired";
-            /** @example 2026-01-08T00:00:00.000Z */
-            expiresAt: string;
-            /** @example 2026-01-02T00:00:00.000Z */
-            acceptedAt?: string;
-            /** @example 2026-01-01T00:00:00.000Z */
-            createdAt: string;
-        };
-        InvitationListResponseDto: {
-            invitations: components["schemas"]["InvitationDto"][];
-        };
-        RevokeInvitationResponseDto: {
-            revoked: boolean;
-        };
-        PublicInvitationInfoDto: {
-            /** @example new-employee@example.com */
-            email: string;
-            /** @enum {string} */
-            role: "portal_owner" | "admin" | "manager" | "employee";
-            /** @example green-club */
-            portalSlug: string;
-            /** @example Green Club */
-            portalDisplayName: string;
-            /** @description true если аккаунт с этим email уже существует и имеет пароль */
-            accountExists: boolean;
-        };
-        AcceptInvitationDto: {
-            /**
-             * @description Обязателен, если аккаунта ещё нет (или он pending_claim)
-             * @example Password123
-             */
-            password?: string;
-            /**
-             * @description Динамические поля профиля сотрудника
-             * @example {
-             *       "first_name": "John"
-             *     }
-             */
-            fields?: {
-                [key: string]: unknown;
-            };
-        };
-        AcceptInvitationResponseDto: {
-            employeeId: string;
-            userId: string;
-            portalSlug: string;
-            /** @description Новый аккаунт: сессии нет, на почту ушло подтверждение; вход — после него. Для существующего аккаунта false, сессия выдана HttpOnly-куками CRM */
-            awaitingEmailConfirmation: boolean;
-        };
         RegistrationLinkPrefillDto: {
             /** @example socio@example.com */
             email?: string;
@@ -6003,6 +6058,17 @@ export type SchemaPublicConsentDocumentDto = components['schemas']['PublicConsen
 export type SchemaPublicMemberConsentInfoDto = components['schemas']['PublicMemberConsentInfoDto'];
 export type SchemaConfirmMemberConsentDto = components['schemas']['ConfirmMemberConsentDto'];
 export type SchemaDeclineMemberConsentDto = components['schemas']['DeclineMemberConsentDto'];
+export type SchemaCreateInvitationDto = components['schemas']['CreateInvitationDto'];
+export type SchemaCreatedInvitationDto = components['schemas']['CreatedInvitationDto'];
+export type SchemaInvitationDto = components['schemas']['InvitationDto'];
+export type SchemaInvitationListResponseDto = components['schemas']['InvitationListResponseDto'];
+export type SchemaRevokeInvitationResponseDto = components['schemas']['RevokeInvitationResponseDto'];
+export type SchemaInvitationAccountState = components['schemas']['InvitationAccountState'];
+export type SchemaPublicInvitationInfoDto = components['schemas']['PublicInvitationInfoDto'];
+export type SchemaAcceptInvitationDto = components['schemas']['AcceptInvitationDto'];
+export type SchemaAcceptInvitationOutcome = components['schemas']['AcceptInvitationOutcome'];
+export type SchemaAcceptInvitationResponseDto = components['schemas']['AcceptInvitationResponseDto'];
+export type SchemaAcceptInvitationWithSessionDto = components['schemas']['AcceptInvitationWithSessionDto'];
 export type SchemaRegisterPortalDto = components['schemas']['RegisterPortalDto'];
 export type SchemaRegisteredPortalDto = components['schemas']['RegisteredPortalDto'];
 export type SchemaPortalOwnerInfoDto = components['schemas']['PortalOwnerInfoDto'];
@@ -6075,14 +6141,6 @@ export type SchemaCreateFinancialTransactionDto = components['schemas']['CreateF
 export type SchemaTransactionSummaryDto = components['schemas']['TransactionSummaryDto'];
 export type SchemaTransactionGroupedByTypeDto = components['schemas']['TransactionGroupedByTypeDto'];
 export type SchemaTransactionGroupedByDateDto = components['schemas']['TransactionGroupedByDateDto'];
-export type SchemaCreateInvitationDto = components['schemas']['CreateInvitationDto'];
-export type SchemaCreatedInvitationDto = components['schemas']['CreatedInvitationDto'];
-export type SchemaInvitationDto = components['schemas']['InvitationDto'];
-export type SchemaInvitationListResponseDto = components['schemas']['InvitationListResponseDto'];
-export type SchemaRevokeInvitationResponseDto = components['schemas']['RevokeInvitationResponseDto'];
-export type SchemaPublicInvitationInfoDto = components['schemas']['PublicInvitationInfoDto'];
-export type SchemaAcceptInvitationDto = components['schemas']['AcceptInvitationDto'];
-export type SchemaAcceptInvitationResponseDto = components['schemas']['AcceptInvitationResponseDto'];
 export type SchemaRegistrationLinkPrefillDto = components['schemas']['RegistrationLinkPrefillDto'];
 export type SchemaCreateRegistrationLinkDto = components['schemas']['CreateRegistrationLinkDto'];
 export type SchemaRegistrationLinkCreatedByDto = components['schemas']['RegistrationLinkCreatedByDto'];
@@ -8531,6 +8589,10 @@ export interface operations {
     EmployeeGoogleAuth_start: {
         parameters: {
             query?: {
+                /** @description Токен приглашения для intent=invitation */
+                token?: unknown;
+                /** @description invitation — принять приглашение (нужен token); club_signup — завести клуб */
+                intent?: "invitation" | "club_signup";
                 /** @description Путь в CRM, куда вернуть после входа (только относительный) */
                 returnTo?: unknown;
             };
@@ -10818,6 +10880,406 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmInvitations_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationListResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmInvitations_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateInvitationDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreatedInvitationDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmInvitations_revoke: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RevokeInvitationResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    PublicInvitations_info: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicInvitationInfoDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    PublicInvitations_accept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcceptInvitationDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AcceptInvitationResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmSessionInvitations_accept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcceptInvitationWithSessionDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AcceptInvitationResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CabinetInvitations_accept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcceptInvitationWithSessionDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AcceptInvitationResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -13714,255 +14176,6 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    CrmInvitations_list: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InvitationListResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    CrmInvitations_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateInvitationDto"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CreatedInvitationDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    CrmInvitations_revoke: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RevokeInvitationResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    PublicInvitations_info: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                token: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PublicInvitationInfoDto"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    PublicInvitations_accept: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                token: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AcceptInvitationDto"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AcceptInvitationResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Conflict */
-            409: {
                 headers: {
                     [name: string]: unknown;
                 };

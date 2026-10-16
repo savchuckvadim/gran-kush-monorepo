@@ -5,6 +5,11 @@ import { IsIn, IsObject, IsOptional, IsString, Matches, MinLength } from "class-
 
 import { IsEmailWithLowerCase } from "@common/decorators/dto/is-email-with-lower-case.decorator";
 
+import {
+    AcceptInvitationOutcome,
+    InvitationAccountState,
+} from "../../domain/invitation-acceptance";
+
 /** Владелец у клуба один и появляется при регистрации — приглашением его не выдать (TASK-662). */
 export const INVITABLE_ROLES = [
     EmployeeRole.admin,
@@ -75,10 +80,13 @@ export class PublicInvitationInfoDto {
     portalDisplayName: string;
 
     @ApiProperty({
-        type: Boolean,
-        description: "true если аккаунт с этим email уже существует и имеет пароль",
+        enum: InvitationAccountState,
+        enumName: "InvitationAccountState",
+        description:
+            "new — аккаунта нет (задать пароль); password — есть, принять его паролем, сессией или Google; " +
+            "passwordless — есть, но без пароля: принять сессией или Google, либо задать пароль по письму",
     })
-    accountExists: boolean;
+    accountState: InvitationAccountState;
 }
 
 export class AcceptInvitationDto {
@@ -106,23 +114,36 @@ export class AcceptInvitationDto {
     fields?: Record<string, unknown>;
 }
 
-export class AcceptInvitationResponseDto {
-    @ApiProperty({ type: String })
-    employeeId: string;
+/** Приём сессией: пароль не нужен, владелец доказан самой сессией. */
+export class AcceptInvitationWithSessionDto {
+    @ApiPropertyOptional({
+        type: "object",
+        additionalProperties: true,
+        description: "Динамические поля профиля сотрудника",
+        example: { first_name: "John" },
+    })
+    @IsOptional()
+    @IsObject()
+    fields?: Record<string, unknown>;
+}
 
-    @ApiProperty({ type: String })
-    userId: string;
+export class AcceptInvitationResponseDto {
+    @ApiProperty({
+        enum: AcceptInvitationOutcome,
+        enumName: "AcceptInvitationOutcome",
+        description:
+            "accepted — сотрудник создан, сессия CRM выдана HttpOnly-куками; " +
+            "accepted_pending_email — новый аккаунт и сотрудник созданы, вход после подтверждения почты; " +
+            "confirm_email_first — почта аккаунта не подтверждена, письмо отправлено заново, приглашение не принято; " +
+            "password_setup_sent — у аккаунта нет пароля, отправлена ссылка, чтобы его задать; приглашение не принято",
+    })
+    outcome: AcceptInvitationOutcome;
 
     @ApiProperty({ type: String })
     portalSlug: string;
 
-    @ApiProperty({
-        type: Boolean,
-        description:
-            "Новый аккаунт: сессии нет, на почту ушло подтверждение; вход — после него. " +
-            "Для существующего аккаунта false, сессия выдана HttpOnly-куками CRM",
-    })
-    awaitingEmailConfirmation: boolean;
+    @ApiPropertyOptional({ type: String, description: "Только когда приглашение принято" })
+    employeeId?: string;
 }
 
 export class RevokeInvitationResponseDto {

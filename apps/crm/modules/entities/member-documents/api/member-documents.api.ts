@@ -4,7 +4,7 @@ import {
 } from "@workspace/api-client/core";
 
 import type { CrmMemberDetails } from "@/modules/entities/member";
-import { $api, isApiErrorWithStatus } from "@/modules/shared";
+import { $api, API_BASE_URL, isApiErrorWithStatus } from "@/modules/shared";
 
 /** Документ аккаунта (паспорт/ID) — совпадает с OpenAPI `CrmMemberAccountDocumentDto`. */
 export type IdentityDocument = SchemaCrmMemberAccountDocumentDto;
@@ -69,14 +69,12 @@ export async function getSignaturePreview(memberId: string): Promise<Blob | null
     }
 }
 
-// Legacy functions for backward compatibility (return URL strings)
+/** Адреса превью для `<img>`: файл приватный, браузер шлёт куки CRM сам. */
 export function getIdentityDocumentPreviewUrl(memberId: string, documentId: string): string {
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
     return `${API_BASE_URL}/crm/members/${memberId}/documents/${documentId}/preview`;
 }
 
 export function getSignaturePreviewUrl(memberId: string): string {
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
     return `${API_BASE_URL}/crm/members/${memberId}/signature/preview`;
 }
 

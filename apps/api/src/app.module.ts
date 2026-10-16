@@ -6,6 +6,7 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { configureBodyParsers } from "./common/config/body-parser/body-parser.config";
+import { PublicUrlsModule } from "./common/config/public-urls/public-urls.module";
 import { getThrottlerConfig } from "./common/config/throttler/throttler.config";
 import { createValidationPipe } from "./common/config/validation/validation.config";
 import { GlobalExceptionFilter } from "./common/filters/global-exception.filter";
@@ -33,6 +34,7 @@ import { StorageModule } from "./modules/storage/storage.module";
             expandVariables: true,
         }),
         ThrottlerModule.forRoot(getThrottlerConfig()),
+        PublicUrlsModule,
         CoreModule,
         PrismaModule,
         IdempotencyModule,

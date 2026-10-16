@@ -2,11 +2,10 @@ import { JwtService } from "@nestjs/jwt";
 
 import { createHash } from "crypto";
 
-import {
-    GoogleFlowError,
-    GoogleOAuthFlowService,
-    OAuthBinding,
-} from "../application/services/google-oauth-flow.service";
+import { PublicUrlsService } from "@common/config/public-urls/public-urls.service";
+
+import { GoogleOAuthFlowService } from "../application/services/google-oauth-flow.service";
+import { GoogleFlowError, OAuthBinding } from "../application/services/google-oauth-flow.types";
 import { GoogleProfile } from "../domain/social-profile";
 
 const SECRET = "jwt-secret-for-tests";
@@ -59,15 +58,17 @@ const buildFlow = (options: { exchangeNonce?: (sent: string) => string | null } 
             );
         }),
     };
+    const settings = config({
+        API_PUBLIC_URL: "https://api.test",
+        CRM_FRONTEND_URL: "https://crm.test/",
+        MEMBER_FRONTEND_URL: "https://club.test",
+        AUTH_COOKIE_SECURE: "true",
+    });
     const flow = new GoogleOAuthFlowService(
         gateway as never,
         new JwtService({}),
-        config({
-            API_PUBLIC_URL: "https://api.test",
-            CRM_FRONTEND_URL: "https://crm.test/",
-            MEMBER_FRONTEND_URL: "https://club.test",
-            AUTH_COOKIE_SECURE: "true",
-        }) as never
+        settings as never,
+        new PublicUrlsService(settings as never)
     );
     return { flow, gateway, sent };
 };
