@@ -10,7 +10,10 @@ import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import { RequireMemberJwt } from "@modules/portal/auth/members";
 import { CurrentMember } from "@modules/portal/auth/members/api/decorators/current-member.decorator";
 import { Member } from "@modules/portal/crm/members/domain/entity/member.entity";
-import { PresenceSessionDto } from "@modules/portal/crm/presence/api/dto/presence.dto";
+import {
+    MyPresenceStatusDto,
+    PresenceSessionDto,
+} from "@modules/portal/crm/presence/api/dto/presence.dto";
 import { mapPresenceSessionToDto } from "@modules/portal/crm/presence/api/mappers";
 import { PresenceService } from "@modules/portal/crm/presence/application/services/presence.service";
 
@@ -32,12 +35,9 @@ export class LkPresenceController {
         summary: "Мой текущий статус присутствия",
         description: "Возвращает true если участник сейчас в клубе (есть активная сессия).",
     })
-    @ApiSuccessResponse(PresenceSessionDto)
+    @ApiSuccessResponse(MyPresenceStatusDto)
     @ApiErrorResponse([401, 403])
-    async getMyPresenceStatus(@CurrentMember() member: Member): Promise<{
-        isPresent: boolean;
-        currentSession: PresenceSessionDto | null;
-    }> {
+    async getMyPresenceStatus(@CurrentMember() member: Member): Promise<MyPresenceStatusDto> {
         const session = await this.presenceService.findActiveByMemberId(member.id);
         return {
             isPresent: session !== null,

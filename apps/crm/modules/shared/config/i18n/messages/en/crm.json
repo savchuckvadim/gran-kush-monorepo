@@ -293,6 +293,16 @@
                 "submitScan": "Verify code",
                 "scanning": "Verifying...",
                 "scanError": "Failed to recognize QR code. Please try again.",
+                "errors": {
+                    "undecryptable": "This is not a member's QR code. Ask them to open it in their account.",
+                    "malformed": "The QR code is damaged. Ask the member to refresh it in their account.",
+                    "expired": "The QR code has expired. Ask the member to open their account: it renews itself.",
+                    "revoked": "This QR code was replaced by a new one. Ask the member for the current one.",
+                    "wrong_member": "The QR code does not match the member. Ask them to show it again.",
+                    "wrong_club": "This QR code belongs to another club.",
+                    "member_inactive": "The member is deactivated in this club.",
+                    "membership_unconfirmed": "The member has not confirmed their membership yet."
+                },
                 "currentStatus": "Status",
                 "statusInClub": "In club",
                 "statusNotInClub": "Not in club",

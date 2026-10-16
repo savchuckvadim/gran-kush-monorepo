@@ -9,6 +9,8 @@ import {
     EntryMethod,
     ExitMethod,
 } from "@modules/portal/crm/presence/domain/entity/presence-session.entity";
+import type { QrScanErrorCode } from "@modules/portal/crm/qr-codes/domain/qr-scan-error";
+import { QR_SCAN_ERROR_CODES } from "@modules/portal/crm/qr-codes/domain/qr-scan-error";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Вложенные DTO
@@ -237,9 +239,15 @@ export class QrPreviewResultDto {
     valid: boolean;
 
     @ApiPropertyOptional({
-        example: "QR-код истёк",
+        enum: QR_SCAN_ERROR_CODES,
+        description: "Причина отказа (если valid = false): интерфейс переводит по этому коду",
+    })
+    errorCode?: QrScanErrorCode;
+
+    @ApiPropertyOptional({
+        example: "QR code has expired",
         type: String,
-        description: "Сообщение об ошибке (если valid = false)",
+        description: "Та же причина английским текстом (если valid = false), для логов",
     })
     error?: string;
 
@@ -263,4 +271,25 @@ export class QrPreviewResultDto {
         description: "Предлагаемое действие: вход (entry) или выход (exit)",
     })
     proposedAction: "entry" | "exit";
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LK: мой статус присутствия
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/** Ответ `GET /lk/presence/status`: в клубе ли участник сейчас и текущий визит. */
+export class MyPresenceStatusDto {
+    @ApiProperty({
+        example: true,
+        type: Boolean,
+        description: "Участник сейчас в клубе (есть открытая сессия присутствия)",
+    })
+    isPresent: boolean;
+
+    @ApiProperty({
+        type: () => PresenceSessionDto,
+        nullable: true,
+        description: "Открытая сессия присутствия; null, если участника нет в клубе",
+    })
+    currentSession: PresenceSessionDto | null;
 }

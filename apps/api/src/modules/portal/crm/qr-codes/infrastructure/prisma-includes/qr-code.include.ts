@@ -12,6 +12,7 @@ export const QR_CODE_INCLUDE = {
                     portalId: true,
                     membershipNumber: true,
                     isActive: true,
+                    consentStatus: true,
                 },
             },
             fieldValues: PROFILE_NAME_FIELD_VALUES,

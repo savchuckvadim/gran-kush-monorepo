@@ -10,8 +10,13 @@ export abstract class QrCodeRepository {
     /** Найти QR-код по зашифрованному коду */
     abstract findByEncryptedCode(encryptedCode: string): Promise<QrCode | null>;
 
-    /** Создать QR-код */
+    /**
+     * Создать QR-код. `id` задаёт вызывающий: он нужен внутри зашифрованного payload, поэтому
+     * строку шифруют до вставки и пишут одним INSERT (без «временной» строки, которую успевали
+     * увидеть параллельные запросы). Второй вызов для того же участника — нарушение уникальности.
+     */
     abstract create(data: {
+        id?: string;
         memberId: string;
         encryptedCode: string;
         expiresAt: Date;

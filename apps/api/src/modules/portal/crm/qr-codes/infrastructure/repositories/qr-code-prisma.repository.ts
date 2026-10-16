@@ -58,6 +58,7 @@ export class QrCodePrismaRepository extends QrCodeRepository {
     }
 
     async create(data: {
+        id?: string;
         memberId: string;
         encryptedCode: string;
         expiresAt: Date;
@@ -65,6 +66,7 @@ export class QrCodePrismaRepository extends QrCodeRepository {
         const entityRecordId = await this.entityRecordIdForMember(data.memberId);
         const row = await this.prisma.qrCode.create({
             data: {
+                ...(data.id ? { id: data.id } : {}),
                 entityRecordId,
                 encryptedCode: data.encryptedCode,
                 expiresAt: data.expiresAt,
@@ -120,6 +122,7 @@ export class QrCodePrismaRepository extends QrCodeRepository {
                     surname: lastName,
                     membershipNumber: rawMember.membershipNumber,
                     isActive: rawMember.isActive,
+                    consentStatus: rawMember.consentStatus,
                 };
             } else {
                 memberPayload = {
@@ -129,6 +132,7 @@ export class QrCodePrismaRepository extends QrCodeRepository {
                     surname: "",
                     membershipNumber: rawMember.membershipNumber,
                     isActive: rawMember.isActive,
+                    consentStatus: rawMember.consentStatus,
                 };
             }
         }

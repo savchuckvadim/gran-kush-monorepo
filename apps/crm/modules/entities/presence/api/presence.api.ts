@@ -20,8 +20,20 @@ export interface QrPreviewMember {
     isActive: boolean;
 }
 
+/** Причины отказа сканера; тексты на языке интерфейса — `crm.attendance.scanner.errors.<код>`. */
+export type QrScanErrorCode =
+    | "undecryptable"
+    | "malformed"
+    | "expired"
+    | "revoked"
+    | "wrong_member"
+    | "wrong_club"
+    | "member_inactive"
+    | "membership_unconfirmed";
+
 export interface QrPreviewResult {
     valid: boolean;
+    errorCode?: QrScanErrorCode;
     error?: string;
     member?: QrPreviewMember;
     /** Присутствует ли участник в клубе прямо сейчас */

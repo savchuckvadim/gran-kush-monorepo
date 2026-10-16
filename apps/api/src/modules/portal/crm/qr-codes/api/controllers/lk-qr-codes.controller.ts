@@ -1,4 +1,4 @@
-import { Controller, Get, NotFoundException, Post } from "@nestjs/common";
+import { Controller, Get, Post } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
@@ -27,18 +27,14 @@ export class LkQrCodesController {
     @ApiOperation({
         summary: "Получить свой QR-код",
         description:
-            "Возвращает QR-код текущего участника с зашифрованным payload. " +
-            "Payload нужно закодировать в QR-изображение на клиенте (qrcode.react).",
+            "Возвращает действующий QR-код участника в текущем клубе (клуб — заголовок X-Portal-*). " +
+            "Если кода ещё нет или срок вышел, выдаёт новый: просить администратора не нужно. " +
+            "Строку encryptedCode нужно закодировать в QR-изображение на клиенте.",
     })
     @ApiSuccessResponse(QrCodeWithPayloadDto)
-    @ApiErrorResponse([401, 403, 404])
+    @ApiErrorResponse([400, 401, 403])
     async getMyQrCode(@CurrentMember() member: Member): Promise<QrCodeWithPayloadDto> {
-        const qr = await this.qrCodesService.findByMemberId(member.id, member.portalId);
-        if (!qr) {
-            throw new NotFoundException(
-                "QR-код не найден. Обратитесь к администратору для генерации."
-            );
-        }
+        const qr = await this.qrCodesService.ensureCurrent(member.id, member.portalId);
         return mapQrCodeToPayloadDto(qr);
     }
 
@@ -48,7 +44,8 @@ export class LkQrCodesController {
     @ApiOperation({
         summary: "Запросить перегенерацию QR-кода",
         description:
-            "Перегенерирует QR-код текущего участника. " + "Старый QR-код перестанет работать.",
+            "Перевыпускает QR-код участника в текущем клубе. Прежний код сразу перестаёт " +
+            "приниматься: используйте, если скриншот кода попал не туда.",
     })
     @ApiSuccessResponse(QrCodeWithPayloadDto)
     @ApiErrorResponse([400, 401, 403])

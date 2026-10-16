@@ -111,48 +111,34 @@ export function QrScannerDialog({ autoScanCode, autoOpen, onClosed }: QrScannerD
     const [previewData, setPreviewData] = useState<QrPreviewResult | null>(null);
     const [scanResult, setScanResult] = useState<SchemaCheckInResultDto | null>(null);
     const [validationError, setValidationError] = useState<string | null>(null);
-    const [scanDebugMessage, setScanDebugMessage] = useState<string | null>(null);
     const autoScanConsumedRef = useRef<string | null>(null);
 
     // ── Обработка считанного кода ─────────────────────────────────────────────
 
     const handleCodeScanned = useCallback(
         async (code: string) => {
+            // Из ссылки или строки берём только сам код. Никуда не переходим: ссылка из QR
+            // — чужие данные, и переход по ней был бы открытым редиректом.
             const payload = normalizeScannedPayload(code);
             if (!payload) return;
-            setScanDebugMessage(`QR пойман. Длина payload: ${payload.length}`);
-            console.info("[QR] scanned", { raw: code, payload });
-
-            // If QR contains a full/relative scan URL - redirect immediately.
-            // This makes the UX clear and lets `/scan` route do token-based redirection.
-            const trimmed = code.trim();
-            const looksLikeScanUrl = /^https?:\/\//i.test(trimmed) || trimmed.startsWith("/");
-            if (looksLikeScanUrl && /\/scan\b/i.test(trimmed)) {
-                setScanDebugMessage("Обнаружена scan-ссылка. Выполняю переход...");
-                console.info("[QR] redirecting to scan URL", { url: trimmed });
-                window.location.replace(trimmed);
-                return;
-            }
 
             setValidationError(null);
             setScannedCode(payload);
-            setScanDebugMessage("Проверяю QR на сервере...");
 
             try {
                 const preview = await qrPreview.mutateAsync(payload);
                 if (!preview.valid) {
-                    setValidationError(preview.error ?? t("scanError"));
-                    setScanDebugMessage("QR распознан, но backend вернул невалидный результат.");
-                    // Разрешаем повторный скан текущего QR: перезапустим декодер.
+                    setValidationError(
+                        preview.errorCode ? t(`errors.${preview.errorCode}`) : t("scanError")
+                    );
+                    // Разрешаем повторный скан: перезапускаем декодер камеры.
                     setCameraRestartKey((v) => v + 1);
                     return;
                 }
-                setScanDebugMessage("QR валиден. Переход к подтверждению.");
                 setPreviewData(preview);
                 setStep("preview");
             } catch {
                 setValidationError(t("scanError"));
-                setScanDebugMessage("Ошибка при проверке QR. Смотри network/console.");
                 setCameraRestartKey((v) => v + 1);
             }
         },
@@ -170,7 +156,6 @@ export function QrScannerDialog({ autoScanCode, autoOpen, onClosed }: QrScannerD
         setPreviewData(null);
         setScanResult(null);
         setValidationError(null);
-        setScanDebugMessage(null);
         setCameraRestartKey((v) => v + 1);
         qrPreview.reset();
         qrScan.reset();
@@ -325,13 +310,6 @@ export function QrScannerDialog({ autoScanCode, autoOpen, onClosed }: QrScannerD
                             <div className="flex items-start gap-2 rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
                                 <XCircle className="h-4 w-4 mt-0.5 shrink-0" />
                                 <span>{validationError}</span>
-                            </div>
-                        )}
-
-                        {/* Технический статус сканирования (для отладки в поле) */}
-                        {scanDebugMessage && (
-                            <div className="rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground">
-                                {scanDebugMessage}
                             </div>
                         )}
                     </div>

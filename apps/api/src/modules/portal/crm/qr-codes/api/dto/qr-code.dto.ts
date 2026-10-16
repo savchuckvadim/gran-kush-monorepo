@@ -2,6 +2,9 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 import { IsNotEmpty, IsString, IsUUID, MaxLength } from "class-validator";
 
+import type { QrScanErrorCode } from "@modules/portal/crm/qr-codes/domain/qr-scan-error";
+import { QR_SCAN_ERROR_CODES } from "@modules/portal/crm/qr-codes/domain/qr-scan-error";
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // Вложенные DTO
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -91,7 +94,17 @@ export class QrCodeScanResultDto {
     @ApiProperty({ example: true, type: Boolean, description: "QR-код валиден" })
     valid: boolean;
 
-    @ApiPropertyOptional({ example: "QR-код истёк", type: String, description: "Причина ошибки" })
+    @ApiPropertyOptional({
+        enum: QR_SCAN_ERROR_CODES,
+        description: "Причина отказа: клиент показывает текст на языке интерфейса по этому коду",
+    })
+    errorCode?: QrScanErrorCode;
+
+    @ApiPropertyOptional({
+        example: "QR code has expired",
+        type: String,
+        description: "Та же причина английским текстом (для логов; интерфейс переводит errorCode)",
+    })
     error?: string;
 
     @ApiPropertyOptional({

@@ -12,7 +12,15 @@ export function mapQrCodeToDto(qr: QrCode): QrCodeDto {
         expiresAt: qr.expiresAt.toISOString(),
         createdAt: qr.createdAt.toISOString(),
         updatedAt: qr.updatedAt.toISOString(),
-        member: qr.member,
+        // Только то, что нужно клиенту: статус подтверждения членства остаётся внутри API
+        member: qr.member && {
+            id: qr.member.id,
+            portalId: qr.member.portalId,
+            name: qr.member.name,
+            surname: qr.member.surname,
+            membershipNumber: qr.member.membershipNumber,
+            isActive: qr.member.isActive,
+        },
     };
 }
 

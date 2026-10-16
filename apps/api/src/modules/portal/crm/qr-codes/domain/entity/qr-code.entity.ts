@@ -1,3 +1,5 @@
+import type { MemberConsentStatus } from "@prisma/client";
+
 /**
  * Domain Entity — QrCode (QR-код члена клуба)
  *
@@ -27,6 +29,7 @@ export class QrCode {
         surname?: string | null;
         membershipNumber?: string | null;
         isActive: boolean;
+        consentStatus: MemberConsentStatus;
     };
 
     constructor(partial: Partial<QrCode>) {

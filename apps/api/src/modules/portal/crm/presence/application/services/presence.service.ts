@@ -12,6 +12,10 @@ import {
     PresenceStats,
 } from "@modules/portal/crm/presence/domain/repositories/presence-session-repository.interface";
 import { QrCodesService } from "@modules/portal/crm/qr-codes/application/services/qr-codes.service";
+import {
+    QR_SCAN_ERROR_MESSAGES,
+    QrScanErrorCode,
+} from "@modules/portal/crm/qr-codes/domain/qr-scan-error";
 
 @Injectable()
 export class PresenceService {
@@ -85,7 +89,11 @@ export class PresenceService {
         const scanResult = await this.qrCodesService.validateScannedCode(encryptedCode, portalId);
 
         if (!scanResult.valid) {
-            throw new BadRequestException(scanResult.error ?? "Невалидный QR-код");
+            // В errors лежит код причины: клиент показывает перевод, а не строку сервера
+            throw new BadRequestException({
+                message: scanResult.error ?? "Invalid QR code",
+                errors: scanResult.errorCode ? [scanResult.errorCode] : [],
+            });
         }
 
         const memberId = scanResult.memberId!;
@@ -226,6 +234,7 @@ export class PresenceService {
         portalId: string
     ): Promise<{
         valid: boolean;
+        errorCode?: QrScanErrorCode;
         error?: string;
         member?: {
             id: string;
@@ -243,6 +252,7 @@ export class PresenceService {
         if (!scanResult.valid) {
             return {
                 valid: false,
+                errorCode: scanResult.errorCode,
                 error: scanResult.error,
                 isPresent: false,
                 proposedAction: "entry",
@@ -259,7 +269,8 @@ export class PresenceService {
             if (error instanceof NotFoundException) {
                 return {
                     valid: false,
-                    error: "Участник не найден",
+                    errorCode: "wrong_member",
+                    error: QR_SCAN_ERROR_MESSAGES.wrong_member,
                     isPresent: false,
                     proposedAction: "entry",
                 };
