@@ -22,7 +22,7 @@
 - **База** — своя база `site` на том же Postgres, что и API. Prisma её не видит, `migrate reset` её не сотрёт, бэкапы раздельные.
 - **Цены** берутся из API: `GET /platform/billing/plans`, `BillingPlan`. По этим цифрам CRM выставляет счёт.
   - Payload хранит только тексты тарифа и запасные цены на случай, если API недоступен.
-  - Коды тарифов: `calada-month`, `calada-year`, `club-month`, `club-year`, `cadena-month`, `cadena-year`.
+  - Коды тарифов: `barrio-month`, `barrio-year`, `club-month`, `club-year`, `cadena-month`, `cadena-year`.
   - Годовая строка хранит сумму за год, сайт показывает цену в месяц.
 - **Деньги — только в API.** Payload не списывает и не хранит платежи.
 - **Дизайн сайта лежит в `modules/sites/<site>/`:**
@@ -100,8 +100,8 @@ pnpm --filter site dev                         # http://localhost:5002/es
 
 ```sql
 INSERT INTO "billing_plans" ("id","code","name","price_amount","currency","interval","features_json","updated_at") VALUES
-  (gen_random_uuid()::text,'calada-month','Calada',25.00,'EUR','month','{...}',CURRENT_TIMESTAMP),
-  (gen_random_uuid()::text,'calada-year','Calada',240.00,'EUR','year','{...}',CURRENT_TIMESTAMP),
+  (gen_random_uuid()::text,'barrio-month','Barrio',25.00,'EUR','month','{...}',CURRENT_TIMESTAMP),
+  (gen_random_uuid()::text,'barrio-year','Barrio',240.00,'EUR','year','{...}',CURRENT_TIMESTAMP),
   (gen_random_uuid()::text,'club-month','Club',49.00,'EUR','month','{...}',CURRENT_TIMESTAMP),
   (gen_random_uuid()::text,'club-year','Club',468.00,'EUR','year','{...}',CURRENT_TIMESTAMP),
   (gen_random_uuid()::text,'cadena-month','Cadena',99.00,'EUR','month','{...}',CURRENT_TIMESTAMP),
