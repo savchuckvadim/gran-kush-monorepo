@@ -15,10 +15,16 @@ const SEO_DESCRIPTION: L = {
     en: "Members with electronic signature, one passport, QR entry, attendance and reports. Made in Torrevieja.",
 };
 
+const HERO_TITLE: L = {
+    es: "Tu club, sin colas\nni papeles.",
+    ru: "Клуб без очередей\nи бумаг.",
+    en: "Your club, no queues,\nno paperwork.",
+};
+
 const HERO_TEXT: L = {
-    es: "Socios, firmas, entrada e informes en una sola pantalla. Sin colas, sin carpetas, sin fricción.",
-    ru: "Участники, подписи, вход и отчёты — на одном экране. Без очередей, папок и заминок.",
-    en: "Members, signatures, entry and reports on one screen. No queues, no folders, no friction.",
+    es: "Socios, firmas, entrada e informes en una sola pantalla.",
+    ru: "Участники, подписи, вход и отчёты — на одном экране.",
+    en: "Members, signatures, entry and reports on one screen.",
 };
 
 const QR_DOOR_TEXT: L = {
@@ -109,11 +115,11 @@ const FLASK = {
     maxDraw: 60,
 };
 
-/** Only the fields that talked about grams, pick-ups and a monthly limit; the rest of a block stays. */
+/** Only the fields that talked about grams, pick-ups, a monthly limit or smoke; the rest of a block stays. */
 const patch = (block: Block, locale: Locale): Block => {
     switch (block.blockType) {
         case "hero":
-            return { ...block, text: HERO_TEXT[locale] };
+            return { ...block, title: HERO_TITLE[locale], text: HERO_TEXT[locale] };
         case "qrDoor":
             return { ...block, text: QR_DOOR_TEXT[locale] };
         case "featureGrid":
@@ -143,9 +149,10 @@ const patch = (block: Block, locale: Locale): Block => {
 };
 
 /*
- * The home page talked about grams, pick-ups and a monthly limit: now it reads as any members' club —
- * electronic signature, one passport, QR entry, attendance, reports; the flask shows the seats left in
- * the plan. Production content was seeded once, so the seed change alone never reaches it.
+ * The home page talked about grams, pick-ups and a monthly limit, and its slogan about smoke: now it
+ * reads as any members' club — electronic signature, one passport, QR entry, attendance, reports; the
+ * flask shows the seats left in the plan. Production content was seeded once, so the seed change
+ * alone never reaches it.
  *
  * Only those fields change, in every locale. Everything else is read back as it is in production and
  * written unchanged, so edits made in the Payload admin survive. `fallbackLocale: false` keeps an

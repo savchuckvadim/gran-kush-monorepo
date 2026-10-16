@@ -94,12 +94,15 @@ export const homeLayout = (locale: Locale): Block[] => [
         id: "hero",
         blockType: "hero",
         eyebrow: pick({ es: "PafPaf · CRM para clubes", ru: "PafPaf · CRM для клубов", en: "PafPaf · CRM for clubs" }, locale),
-        title: pick({ es: "Fluido\ncomo el humo.", ru: "Плавно,\nкак дым.", en: "Smooth\nas smoke." }, locale),
+        title: pick(
+            { es: "Tu club, sin colas\nni papeles.", ru: "Клуб без очередей\nи бумаг.", en: "Your club, no queues,\nno paperwork." },
+            locale,
+        ),
         text: pick(
             {
-                es: "Socios, firmas, entrada e informes en una sola pantalla. Sin colas, sin carpetas, sin fricción.",
-                ru: "Участники, подписи, вход и отчёты — на одном экране. Без очередей, папок и заминок.",
-                en: "Members, signatures, entry and reports on one screen. No queues, no folders, no friction.",
+                es: "Socios, firmas, entrada e informes en una sola pantalla.",
+                ru: "Участники, подписи, вход и отчёты — на одном экране.",
+                en: "Members, signatures, entry and reports on one screen.",
             },
             locale,
         ),
