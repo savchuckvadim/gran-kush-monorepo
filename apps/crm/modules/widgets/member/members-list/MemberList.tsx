@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 
-import { Button } from "@workspace/ui";
+import { Button, InitialsAvatar } from "@workspace/ui";
 
 import { toFilterFields } from "@/modules/entities/entity-settings";
 import { CrmMemberListItem, useCrmMembers, useMembersListMeta } from "@/modules/entities/member";
@@ -158,6 +158,13 @@ export function MemberList() {
                     `${member.name} ${member.surname ?? ""}`.trim() || member.email
                 )
             }
+            cardAvatar={(member) => (
+                <InitialsAvatar
+                    colorful
+                    name={`${member.name} ${member.surname ?? ""}`.trim() || member.email}
+                    className="size-16 text-xl"
+                />
+            )}
             defaultVisibleCardFieldKeys={["email", "phone", "status"]}
             isCardClickable
             onCardClick={(member) => openEntity({ kind: "member", id: member.id })}

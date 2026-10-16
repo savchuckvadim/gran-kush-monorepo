@@ -10,7 +10,6 @@ import {
     type OrderListItem,
     OrderMemberLink,
     PaymentStatusBadge,
-    stageColor,
 } from "@/modules/entities/order";
 import { NextStageButton } from "@/modules/features/order-stage";
 import { personName, useCompactDateFormat, useMoneyFormat } from "@/modules/shared";
@@ -40,8 +39,7 @@ export function OrderKanbanCard({ order, fields, next, onMoveNext }: OrderKanban
     return (
         <article
             data-slot="order-card"
-            className="rounded-xl border-l-4 bg-card p-3 text-sm text-card-foreground shadow-sm"
-            style={{ borderLeftColor: order.stage ? stageColor(order.stage) : undefined }}
+            className="rounded-xl bg-card p-3 text-sm text-card-foreground shadow-sm"
         >
             <div className="flex items-start justify-between gap-2">
                 <EntityLink

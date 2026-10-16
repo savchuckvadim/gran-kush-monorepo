@@ -90,6 +90,8 @@ export interface EntityListProps<T> {
     defaultVisibleCardFieldKeys?: string[];
     /** The heading of a card (a name, a number) above its fields. */
     cardTitle?: (item: T) => React.ReactNode;
+    /** A portrait above the title: cards become small centred tiles (members). */
+    cardAvatar?: (item: T) => React.ReactNode;
 
     enableVisibilitySettings?: boolean; // default = true
     visibilityStorageKey?: string;
@@ -132,6 +134,7 @@ export function EntityList<T>({
     cardFields,
     defaultVisibleCardFieldKeys,
     cardTitle,
+    cardAvatar,
 
     enableVisibilitySettings = true,
     visibilityStorageKey,
@@ -315,6 +318,7 @@ export function EntityList<T>({
                     getRowKey={getRowKey}
                     visibleFields={visibleFields}
                     cardTitle={cardTitle}
+                    cardAvatar={cardAvatar}
                     isCardClickable={isCardClickable}
                     onCardClick={onCardClick}
                     renderCardActions={renderCardActions}
