@@ -1,4 +1,4 @@
-import createClient from "openapi-fetch";
+import createClient, { type Client } from "openapi-fetch";
 
 import { getAuthMiddleware } from "../auth/api-auth.middleware";
 import { ApiAuthType } from "../auth/api-auth.type";
@@ -8,7 +8,11 @@ import { paths } from "../schema/schema";
 
 export type ApiAuthStrategy = "token" | "cookie";
 
-export const configureApiClient = (
+/**
+ * Клиент API одного принципала. `P` — набор путей, которые ему можно вызывать
+ * (`CrmPaths`, `CabinetPaths`); по умолчанию — весь API.
+ */
+export const configureApiClient = <P extends object = paths>(
     baseurl: string,
     type: ApiAuthType,
     options?: {
@@ -19,9 +23,9 @@ export const configureApiClient = (
         /** Проставлять Idempotency-Key на мутациях. По умолчанию включено. */
         idempotency?: boolean;
     }
-): ReturnType<typeof createClient<paths>> => {
+): Client<P> => {
     const authStrategy = options?.authStrategy ?? "token";
-    const client = createClient<paths>({
+    const client = createClient<P>({
         baseUrl: baseurl,
         fetch:
             authStrategy === "cookie"

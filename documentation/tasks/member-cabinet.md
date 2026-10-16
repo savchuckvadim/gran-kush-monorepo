@@ -379,14 +379,17 @@ Google находит или заводит аккаунт и всегда вы�
 
 ### TASK-710: два принципала в одном приложении `[~]` P1 — 2026-10-16
 
-Сделано: refresh в api-client идёт по одному запросу на тип клиента; второй клиент `$lkApi` (`ApiAuthType.SITE`,
-клуб из видимого адреса); ключи кабинета в react-query начинаются с `lk`; выход чистит только их. Не сделано:
-сузить тип `paths` у клиентов до своих префиксов, eslint-запрет CRM-`$api` в дереве кабинета, тест на
-одновременный 401 двух клиентов.
+Сделано: refresh в api-client идёт по одному запросу на тип клиента; второй клиент `$cabinetApi`
+(`ApiAuthType.CABINET`, клуб из видимого адреса); ключи кабинета в react-query начинаются с `cabinet`, выход
+чистит только их. Типы путей сужены: `configureApiClient<P>` обобщён, `$cabinetApi` видит только
+`/cabinet/*` (`CabinetPaths`), `$api` CRM и админки — всё, кроме него (`CrmPaths`); вызов чужого пути —
+ошибка типов. ESLint запрещает импорт CRM-`$api` в коде кабинета (`apps/crm/eslint.config.js`).
 
-- [ ] `packages/api-client`: `refreshPromise` по типу клиента + тест на одновременный 401 двух клиентов.
-- [ ] `$lkApi`; сузить тип `paths` у клиентов до своих префиксов; eslint-запрет CRM-`$api` в дереве кабинета.
-- [ ] Ключи react-query с принципалом; `MemberAuthProvider`; очистка кэша по префиксу вместо `clear()`.
+- [x] `packages/api-client`: `refreshPromise` по типу клиента.
+- [ ] Тест на одновременный 401 двух клиентов: в `packages/` нет тестового раннера (jest только в `apps/api`);
+      нужен vitest в devDependencies `packages/api-client`.
+- [x] `$cabinetApi`; сужение `paths` по префиксам; eslint-запрет CRM-`$api` в дереве кабинета.
+- [x] Ключи react-query кабинета с префиксом `cabinet`; `MemberAuthProvider`; очистка кэша кабинета по префиксу.
 
 ### TASK-711: домен club. как алиас CRM `[x]` код · Dokploy `[ ]` P1 — 2026-10-16
 
