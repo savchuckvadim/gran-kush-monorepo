@@ -1,8 +1,7 @@
-import { readFileSync } from "fs";
-import { resolve } from "path";
-
 import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 
 import { RegisterPortalDto } from "@modules/portal/crm/portals/api/dto/register-portal.dto";
 

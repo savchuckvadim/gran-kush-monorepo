@@ -68,14 +68,12 @@ export function ThemedSignatureImage({
     const processedSrc = isDark && processed?.src === src ? processed.dataUrl : null;
 
     if (!isDark) {
-        // eslint-disable-next-line @next/next/no-img-element -- a data URL or a private file, not a page image
         return <img src={src} alt={alt} className={className} />;
     }
 
     return (
         <>
             <canvas ref={canvasRef} className="hidden" />
-            {/* eslint-disable-next-line @next/next/no-img-element -- a data URL or a private file, not a page image */}
             <img src={processedSrc ?? src} alt={alt} className={className} />
         </>
     );

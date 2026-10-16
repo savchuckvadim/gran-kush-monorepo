@@ -3,8 +3,8 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { EmployeeRole, Prisma, StageSemantic } from "@prisma/client";
 
 import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
-import { MemberLimitService } from "@modules/portal/crm/club-policy/application/services/member-limit.service";
 import { MemberAccessService } from "@modules/portal/crm/club-policy/application/services/member-access.service";
+import { MemberLimitService } from "@modules/portal/crm/club-policy/application/services/member-limit.service";
 import { MembersService } from "@modules/portal/crm/members/application/services/members.service";
 import { CrmCreateOrderDto } from "@modules/portal/crm/orders/api/dto/order.dto";
 import { OrderPlacementService } from "@modules/portal/crm/orders/application/services/order-placement.service";
