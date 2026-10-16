@@ -2,8 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 
 import { Prisma, StageSemantic } from "@prisma/client";
 
-import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
-import { MembersService } from "@modules/portal/crm/members/application/services/members.service";
+import { OrderStagesService } from "@modules/portal/crm/orders/application/services/order-stages.service";
 import { OrdersService } from "@modules/portal/crm/orders/application/services/orders.service";
 import {
     Order,
@@ -73,10 +72,8 @@ const repository = {
     getLastOrderNumberWithPrefix: jest.fn(),
 };
 
-const products = { findById: jest.fn() };
-
-describe("OrdersService — стадии заказа", () => {
-    let service: OrdersService;
+describe("OrderStagesService — стадии заказа", () => {
+    let service: OrderStagesService;
 
     beforeEach(async () => {
         jest.clearAllMocks();
@@ -89,13 +86,12 @@ describe("OrdersService — стадии заказа", () => {
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
+                OrderStagesService,
                 OrdersService,
                 { provide: OrderRepository, useValue: repository },
-                { provide: ProductsService, useValue: products },
-                { provide: MembersService, useValue: {} },
             ],
         }).compile();
-        service = module.get(OrdersService);
+        service = module.get(OrderStagesService);
     });
 
     it("переводит compare-and-set'ом от текущей стадии и отмечает сотрудника", async () => {

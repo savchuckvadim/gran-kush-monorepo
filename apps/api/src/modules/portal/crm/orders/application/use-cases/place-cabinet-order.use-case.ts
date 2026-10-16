@@ -2,10 +2,9 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 
 import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
 import { MemberAccessService } from "@modules/portal/crm/club-policy/application/services/member-access.service";
-import { CreateOrderDto } from "@modules/portal/crm/orders/api/dto/order.dto";
 import { Order } from "@modules/portal/crm/orders/domain/entity/order.entity";
 
-import { OrdersService } from "./orders.service";
+import { OrderPlacementService } from "../services/order-placement.service";
 
 /** Коды отказа, которые кабинет переводит сам: сообщение API — для журнала. */
 export const CABINET_ORDER_ERRORS = {
@@ -13,26 +12,36 @@ export const CABINET_ORDER_ERRORS = {
     insufficientStock: "insufficient_stock",
 } as const;
 
+export interface PlaceCabinetOrderCommand {
+    items: { productId: string; quantity: number; notes?: string }[];
+    notes?: string;
+}
+
 /**
- * Заказ участника из кабинета. Поверх общих правил заказа (`OrdersService`):
+ * Участник оформляет заказ из кабинета. Правила сценария поверх общего оформления
+ * (`OrderPlacementService`); открыт ли заказ вообще, уже решил `RequireShopAccess("order")`:
  * - товар, который клуб не показывает аудиториям участника, для него не существует — как и на
  *   витрине, иначе скрытый товар заказывался бы по id;
  * - нехватку товара участник видит без точного остатка: склад клуба ему не раскрывается.
  * Остаток всё равно атомарно проверяет транзакция заказа; здесь — понятный отказ до неё.
  */
 @Injectable()
-export class CabinetOrderPlacementService {
+export class PlaceCabinetOrderUseCase {
     constructor(
-        private readonly orders: OrdersService,
+        private readonly placement: OrderPlacementService,
         private readonly products: ProductsService,
         private readonly access: MemberAccessService
     ) {}
 
-    async place(memberId: string, portalId: string, dto: CreateOrderDto): Promise<Order> {
+    async execute(
+        memberId: string,
+        portalId: string,
+        command: PlaceCabinetOrderCommand
+    ): Promise<Order> {
         const audiences = await this.access.audiencesOf(memberId, portalId);
 
         const requested = new Map<string, number>();
-        for (const item of dto.items) {
+        for (const item of command.items) {
             requested.set(item.productId, (requested.get(item.productId) ?? 0) + item.quantity);
         }
 
@@ -52,6 +61,10 @@ export class CabinetOrderPlacementService {
             }
         }
 
-        return this.orders.createOrder(memberId, dto, portalId);
+        return this.placement.place(portalId, {
+            memberId,
+            items: command.items,
+            notes: command.notes,
+        });
     }
 }

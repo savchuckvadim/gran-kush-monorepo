@@ -10,7 +10,9 @@ It is focused on predictability, strict typing, performance, and stable reposito
 Each module must keep a clear layered structure:
 
 - `api/` - controllers and DTOs
-- `application/` - use-case services
+- `application/services/` - reusable operations of the module (queries, one aggregate)
+- `application/use-cases/` - one class per complex scenario (`<scenario>.use-case.ts`, `execute()`): several
+  services or modules, who-may-do-what rules, a transaction; controllers call it and hold no business rules
 - `domain/` - entities and repository interfaces (contracts)
 - `infrastructure/` - Prisma and other external implementations
 
@@ -21,9 +23,9 @@ Rule: dependencies go inward (API -> application -> domain; infrastructure imple
 1. Repository interfaces must never expose `any`.
 2. Contracts must describe exactly what the service needs.
 3. Use separate repository methods for different data shapes:
-   - `findByEmailForAuth(...)`
-   - `findProfileByUserId(...)`
-   - `findByIdWithDocuments(...)`
+    - `findByEmailForAuth(...)`
+    - `findProfileByUserId(...)`
+    - `findByIdWithDocuments(...)`
 
 Do not create one generic method that returns "everything".
 
@@ -122,10 +124,10 @@ Before merging a repository/service change:
 ## Naming Guidelines
 
 - Repository methods must be explicit:
-  - good: `findByEmailForAuth`, `findMemberWithStatuses`
-  - bad: `findByEmailWithRelations` (too broad)
+    - good: `findByEmailForAuth`, `findMemberWithStatuses`
+    - bad: `findByEmailWithRelations` (too broad)
 - Type names must reflect use-case:
-  - `UserAuthView`, `MemberProfileView`, `EmployeeAccessView`
+    - `UserAuthView`, `MemberProfileView`, `EmployeeAccessView`
 
 ## Migration Strategy for Existing Code
 

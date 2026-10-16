@@ -8,7 +8,7 @@ import request from "supertest";
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { MemberAuthService } from "../src/modules/portal/auth/members/application/services/member-auth.service";
-import { OrdersService } from "../src/modules/portal/crm/orders/application/services/orders.service";
+import { OrderPlacementService } from "../src/modules/portal/crm/orders/application/services/order-placement.service";
 
 jest.setTimeout(120_000);
 
@@ -32,7 +32,7 @@ const cookieHeader = (res: request.Response): string => {
 describe("Order stock (e2e)", () => {
     let app: INestApplication;
     let prisma: PrismaService;
-    let orders: OrdersService;
+    let orders: OrderPlacementService;
 
     const slug = `stock-${suffix}`;
     let portalId: string;
@@ -69,7 +69,7 @@ describe("Order stock (e2e)", () => {
     };
 
     const orderOne = (productId: string, quantity = 1) =>
-        orders.createOrder(memberId, { items: [{ productId, quantity }] }, portalId);
+        orders.place(portalId, { memberId, items: [{ productId, quantity }] });
 
     beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -79,7 +79,7 @@ describe("Order stock (e2e)", () => {
         app.use(cookieParser());
         await app.init();
         prisma = app.get(PrismaService);
-        orders = app.get(OrdersService);
+        orders = app.get(OrderPlacementService);
 
         const res = await request(app.getHttpServer())
             .post("/platform/portals/register")
@@ -178,17 +178,14 @@ describe("Order stock (e2e)", () => {
         const ordersBefore = await prisma.order.count({ where: { portalId } });
 
         // two lines of the scarce product pass the per-line check, together they need 2
-        const attempt = orders.createOrder(
+        const attempt = orders.place(portalId, {
             memberId,
-            {
-                items: [
-                    { productId: plentiful, quantity: 1 },
-                    { productId: scarce, quantity: 1 },
-                    { productId: scarce, quantity: 1 },
-                ],
-            },
-            portalId
-        );
+            items: [
+                { productId: plentiful, quantity: 1 },
+                { productId: scarce, quantity: 1 },
+                { productId: scarce, quantity: 1 },
+            ],
+        });
 
         await expect(attempt).rejects.toThrow(`Недостаточно товара "Scarce ${suffix}"`);
         expect(await stockOf(plentiful)).toEqual({ quantity: 5, isAvailable: true });

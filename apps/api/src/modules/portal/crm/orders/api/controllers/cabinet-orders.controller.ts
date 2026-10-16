@@ -31,8 +31,9 @@ import {
     mapOrderToCabinetDetailDto,
     mapOrderToCabinetListDto,
 } from "@modules/portal/crm/orders/api/mappers";
-import { CabinetOrderPlacementService } from "@modules/portal/crm/orders/application/services/cabinet-order-placement.service";
+import { OrderStagesService } from "@modules/portal/crm/orders/application/services/order-stages.service";
 import { OrdersService } from "@modules/portal/crm/orders/application/services/orders.service";
+import { PlaceCabinetOrderUseCase } from "@modules/portal/crm/orders/application/use-cases/place-cabinet-order.use-case";
 
 /**
  * Заказы участника в клубе: оформление, свои заказы, отмена. Ответы — в форме кабинета
@@ -45,7 +46,8 @@ import { OrdersService } from "@modules/portal/crm/orders/application/services/o
 export class CabinetOrdersController {
     constructor(
         private readonly ordersService: OrdersService,
-        private readonly placement: CabinetOrderPlacementService
+        private readonly stages: OrderStagesService,
+        private readonly placeOrder: PlaceCabinetOrderUseCase
     ) {}
 
     @Post()
@@ -64,7 +66,7 @@ export class CabinetOrdersController {
         @CurrentMember() member: Member,
         @RequestLocale() locale: ContentLocale
     ): Promise<CabinetOrderDetailDto> {
-        const order = await this.placement.place(member.id, member.portalId, dto);
+        const order = await this.placeOrder.execute(member.id, member.portalId, dto);
         return mapOrderToCabinetDetailDto(order, locale);
     }
 
@@ -120,7 +122,7 @@ export class CabinetOrdersController {
         @CurrentMember() member: Member,
         @RequestLocale() locale: ContentLocale
     ): Promise<CabinetOrderDetailDto> {
-        const order = await this.ordersService.cancelOrderByMember(
+        const order = await this.stages.cancelOrderByMember(
             id,
             member.id,
             member.portalId,

@@ -90,10 +90,10 @@ Every business entity (`Employee`, `Member`, `Order`, etc.) is scoped to a **por
 
 Portal context is resolved from HTTP headers:
 
-| Header          | Purpose                      |
-|-----------------|------------------------------|
-| `X-Portal-Id`   | Portal UUID (preferred)      |
-| `X-Portal-Slug` | Portal slug (alternative)    |
+| Header          | Purpose                   |
+| --------------- | ------------------------- |
+| `X-Portal-Id`   | Portal UUID (preferred)   |
+| `X-Portal-Slug` | Portal slug (alternative) |
 
 After JWT validation, **`PortalTenantMatchGuard`** rejects cross-portal access (→ 403).
 
@@ -135,12 +135,12 @@ Two principal types — **Member** and **Employee** — each with web (cookies) 
 
 **Web (HttpOnly cookies)**:
 
-| Flow    | Endpoint                    |
-|---------|-----------------------------|
-| CRM login  | `POST /crm/auth/login`   |
-| CRM refresh| `POST /crm/auth/refresh` |
-| CRM logout | `POST /crm/auth/logout`  |
-| CRM me     | `GET /crm/auth/me`       |
+| Flow            | Endpoint                     |
+| --------------- | ---------------------------- |
+| CRM login       | `POST /crm/auth/login`       |
+| CRM refresh     | `POST /crm/auth/refresh`     |
+| CRM logout      | `POST /crm/auth/logout`      |
+| CRM me          | `GET /crm/auth/me`           |
 | Cabinet login   | `POST /cabinet/auth/login`   |
 | Cabinet refresh | `POST /cabinet/auth/refresh` |
 
@@ -148,6 +148,7 @@ Cookie names: `crm_access_token`, `crm_refresh_token`, `member_access_token`, `m
 Cookies: `HttpOnly`, `SameSite=Lax`, `Secure` follows `AUTH_COOKIE_SECURE`.
 
 **Mobile (Bearer `Authorization: Bearer ...`)**:
+
 - CRM: `crm/mobile/auth/*`
 - Cabinet: `cabinet/mobile/auth/*`
 
@@ -173,7 +174,8 @@ module-name/
 │   ├── controllers/    # REST controllers (NestJS decorators only)
 │   └── dto/            # Input/output DTOs (class-validator)
 ├── application/
-│   └── services/       # Use-case services (consume repositories only)
+│   ├── services/       # Reusable module operations: queries, one aggregate (consume repositories)
+│   └── use-cases/      # One class per complex scenario: <name>.use-case.ts, execute()
 ├── domain/
 │   ├── entity/         # Domain classes
 │   └── repositories/   # Repository interfaces (no Prisma types)
@@ -184,6 +186,13 @@ module-name/
 ```
 
 **Rule: dependencies go inward** — API → application → domain; infrastructure implements domain contracts.
+
+**Use cases for complex flows.** A scenario that combines several services or modules, decides who may do
+what, or spans a transaction (place a cabinet order, a staff order, join a club, accept an invitation) is a
+class in `application/use-cases/<scenario>.use-case.ts` with one `execute()` method. Its doc comment lists
+the rules of the scenario. Controllers call the use case and hold no business rules (role checks beyond
+guards, cross-module checks). Services in `application/services/` stay reusable operations of the module;
+simple CRUD needs no use-case wrapper. Example: `orders/application/use-cases/place-staff-order.use-case.ts`.
 
 ### Repository Pattern
 
@@ -208,8 +217,8 @@ All exceptions go through `GlobalExceptionFilter` (`APP_FILTER` in `AppModule`):
 
 ```json
 {
-  "message": "Human-readable message",
-  "errors": ["field constraint", "..."]
+    "message": "Human-readable message",
+    "errors": ["field constraint", "..."]
 }
 ```
 
@@ -219,8 +228,9 @@ Client: use `assertOpenApiOk(result)` / `getApiErrorMessage(error)` from `@works
 ### Global ValidationPipe
 
 Registered as `APP_PIPE` in `AppModule` (`common/config/validation/validation.config.ts`), so e2e tests run the same pipe — do not add `useGlobalPipes` in tests:
+
 ```ts
-new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true })
+new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true });
 ```
 
 Unknown fields are rejected outright (400, `property x should not exist`) — in bodies and in query strings. Every endpoint that accepts input has a typed DTO class. **One `@Query()` DTO per handler**: pagination + filters are merged via `IntersectionType(PaginationDto, XxxFilterDto)`; two DTOs on the same query reject each other's fields.
@@ -237,12 +247,13 @@ Frontend must use `credentials: "include"` for cookie-based calls.
 
 ```ts
 // apps/crm/modules/shared/api/api.ts
-configureApiClient(baseUrl, ApiAuthType.CRM, { authStrategy: "cookie" })
+configureApiClient(baseUrl, ApiAuthType.CRM, { authStrategy: "cookie" });
 ```
 
 `getAuthMiddleware` handles 401 → refresh → retry automatically.
 
 Error handling:
+
 - `notifyApiError(error)` — shows Sonner toast
 - `getApiErrorMessage(error)` — extracts message for form inline errors
 
@@ -264,35 +275,35 @@ All routes are prefixed with `/{locale}`.
 
 ### API (`apps/api/.env`)
 
-| Variable | Purpose |
-|----------|---------|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `REDIS_URL` | Redis connection string |
-| `JWT_SECRET` | Access token signing secret |
-| `JWT_REFRESH_SECRET` | Refresh token signing secret |
-| `CORS_ORIGIN` | Comma-separated allowed origins |
-| `CRM_FRONTEND_URL` | CRM cookie domain base |
-| `MEMBER_FRONTEND_URL` | Cabinet origin (club.): cookie domain base, links in emails |
-| `COOKIE_SECRET` | cookie-parser signing |
-| `AUTH_COOKIE_SECURE` | `true` in production |
-| `MAIL_HOST` / `MAIL_USER` / `MAIL_PASS` | SMTP |
-| `BOOTSTRAP_ADMIN_ENABLED` | Enable root-admin seed |
-| `BOOTSTRAP_ADMIN_EMAIL` | Root admin email |
-| `BOOTSTRAP_ADMIN_PASSWORD` | Root admin password |
+| Variable                                | Purpose                                                     |
+| --------------------------------------- | ----------------------------------------------------------- |
+| `DATABASE_URL`                          | PostgreSQL connection string                                |
+| `REDIS_URL`                             | Redis connection string                                     |
+| `JWT_SECRET`                            | Access token signing secret                                 |
+| `JWT_REFRESH_SECRET`                    | Refresh token signing secret                                |
+| `CORS_ORIGIN`                           | Comma-separated allowed origins                             |
+| `CRM_FRONTEND_URL`                      | CRM cookie domain base                                      |
+| `MEMBER_FRONTEND_URL`                   | Cabinet origin (club.): cookie domain base, links in emails |
+| `COOKIE_SECRET`                         | cookie-parser signing                                       |
+| `AUTH_COOKIE_SECURE`                    | `true` in production                                        |
+| `MAIL_HOST` / `MAIL_USER` / `MAIL_PASS` | SMTP                                                        |
+| `BOOTSTRAP_ADMIN_ENABLED`               | Enable root-admin seed                                      |
+| `BOOTSTRAP_ADMIN_EMAIL`                 | Root admin email                                            |
+| `BOOTSTRAP_ADMIN_PASSWORD`              | Root admin password                                         |
 
 ### CRM (`apps/crm/.env.local`)
 
-| Variable | Purpose |
-|----------|---------|
+| Variable              | Purpose                |
+| --------------------- | ---------------------- |
 | `NEXT_PUBLIC_API_URL` | Base URL of `apps/api` |
 
 ## Queue System (BullMQ)
 
-| Queue | Purpose |
-|-------|---------|
-| `mail` | Email sending (Nodemailer + React Email templates) |
-| `member-files` | Async member document/signature processing |
-| `portal-events` | Portal registration notifications |
+| Queue           | Purpose                                            |
+| --------------- | -------------------------------------------------- |
+| `mail`          | Email sending (Nodemailer + React Email templates) |
+| `member-files`  | Async member document/signature processing         |
+| `portal-events` | Portal registration notifications                  |
 
 ## TypeScript Conventions
 

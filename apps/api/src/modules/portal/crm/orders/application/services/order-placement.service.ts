@@ -1,0 +1,193 @@
+import { BadRequestException, Injectable, Logger, NotFoundException } from "@nestjs/common";
+
+import { Prisma } from "@prisma/client";
+
+import { isUniqueViolationOn } from "@common/prisma/unique-violation";
+import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
+import { Order, PaymentStatus } from "@modules/portal/crm/orders/domain/entity/order.entity";
+import { InsufficientStockError } from "@modules/portal/crm/orders/domain/errors/insufficient-stock.error";
+import {
+    CreateOrderInput,
+    CreateOrderItemInput,
+    OrderRepository,
+} from "@modules/portal/crm/orders/domain/repositories/order-repository.interface";
+
+/** Сколько раз подбирать свободный номер заказа, прежде чем сдаться */
+const ORDER_NUMBER_MAX_ATTEMPTS = 5;
+
+/** `ORD-20260316-` — дата всегда в UTC, чтобы нумерация не зависела от таймзоны сервера */
+const buildOrderNumberPrefix = (date: Date): string =>
+    `ORD-${date.toISOString().slice(0, 10).replace(/-/g, "")}-`;
+
+/** Конфликт по уникальному индексу `(portal_id, order_number)` */
+const isOrderNumberConflict = (error: unknown): boolean =>
+    isUniqueViolationOn(error, "order_number");
+
+/** Позиция нового заказа. Цену и подарок задаёт только сотрудник CRM — у участника их нет */
+export interface NewOrderItem {
+    productId: string;
+    quantity: number;
+    notes?: string;
+    unitPrice?: number;
+    isGift?: boolean;
+}
+
+export interface PlaceOrderInput {
+    memberId: string;
+    items: NewOrderItem[];
+    notes?: string;
+    /** Сотрудник CRM, оформивший заказ; заказ из кабинета — без него */
+    employeeId?: string;
+    /** Стадия воронки; без неё — первая рабочая стадия воронки по умолчанию */
+    stageId?: string;
+}
+
+/** Позиция, проверенная по каталогу; имя — для понятной ошибки, если товар кончится */
+interface ResolvedOrderItem extends CreateOrderItemInput {
+    name: string;
+}
+
+/**
+ * Общее ядро оформления заказа для кабинета и CRM: проверить товары, посчитать суммы, выдать
+ * номер и одной транзакцией создать заказ и списать товар. Правила того, кто и что может
+ * заказать, — в сценариях `use-cases/place-*-order.use-case.ts`.
+ */
+@Injectable()
+export class OrderPlacementService {
+    private readonly logger = new Logger(OrderPlacementService.name);
+
+    constructor(
+        private readonly orderRepository: OrderRepository,
+        private readonly productsService: ProductsService
+    ) {}
+
+    async place(portalId: string, input: PlaceOrderInput): Promise<Order> {
+        const { memberId, employeeId } = input;
+        const resolvedItems = await this.resolveOrderItems(input.items, portalId);
+
+        const subtotal = +resolvedItems.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2);
+        const discount = 0; // скидок в продукте пока нет
+        const total = subtotal - discount;
+
+        let order: Order;
+        try {
+            order = await this.createWithGeneratedOrderNumber(portalId, {
+                memberId,
+                employeeId,
+                paymentStatus: PaymentStatus.PENDING,
+                subtotal,
+                discount,
+                total,
+                notes: input.notes,
+                items: resolvedItems,
+                stageId: input.stageId,
+            });
+        } catch (error) {
+            if (!(error instanceof InsufficientStockError)) throw error;
+            // проверка выше прошла, но товар успели заказать параллельно
+            const name = resolvedItems.find((item) => item.productId === error.productId)?.name;
+            throw new BadRequestException(
+                `Недостаточно товара "${name ?? error.productId}": его только что заказали. ` +
+                    "Обновите каталог"
+            );
+        }
+
+        this.logger.log(
+            `✅ Заказ ${order.orderNumber} создан для члена ${memberId}, ` +
+                `позиций: ${resolvedItems.length}, сумма: ${total}` +
+                (employeeId ? ` (сотрудник: ${employeeId})` : "")
+        );
+
+        return order;
+    }
+
+    /** Проверить товары и остатки, посчитать цены позиций. */
+    private async resolveOrderItems(
+        items: NewOrderItem[],
+        portalId: string
+    ): Promise<ResolvedOrderItem[]> {
+        const resolved: ResolvedOrderItem[] = [];
+
+        for (const item of items) {
+            const product = await this.productsService.findById(item.productId, portalId);
+            if (!product) {
+                throw new NotFoundException(`Товар с ID "${item.productId}" не найден`);
+            }
+            if (!product.isActive || !product.isAvailable) {
+                throw new BadRequestException(`Товар "${product.name}" недоступен для заказа`);
+            }
+            if (product.currentQuantity.lessThan(new Prisma.Decimal(item.quantity))) {
+                throw new BadRequestException(
+                    `Недостаточно товара "${product.name}". ` +
+                        `Доступно: ${product.currentQuantity.toString()}, запрошено: ${item.quantity}`
+                );
+            }
+
+            const unitPrice = item.unitPrice ?? Number(product.price);
+            const isGift = item.isGift ?? false;
+            resolved.push({
+                productId: item.productId,
+                name: product.name,
+                quantity: item.quantity,
+                unitPrice,
+                totalPrice: isGift ? 0 : +(unitPrice * item.quantity).toFixed(2),
+                isGift,
+                notes: item.notes,
+            });
+        }
+
+        return resolved;
+    }
+
+    /**
+     * Создать заказ, подобрав номер, свободный в пределах портала.
+     *
+     * Номер вычисляется из максимального существующего, поэтому два параллельных заказа
+     * могут получить одинаковый. Гонку ловит уникальный индекс `(portal_id, order_number)`:
+     * при конфликте транзакция откатывается целиком и номер подбирается заново.
+     */
+    private async createWithGeneratedOrderNumber(
+        portalId: string,
+        input: Omit<CreateOrderInput, "orderNumber">
+    ): Promise<Order> {
+        for (let attempt = 1; attempt <= ORDER_NUMBER_MAX_ATTEMPTS; attempt++) {
+            const orderNumber = await this.generateOrderNumber(portalId);
+            try {
+                return await this.orderRepository.create({ ...input, orderNumber });
+            } catch (error) {
+                if (attempt === ORDER_NUMBER_MAX_ATTEMPTS || !isOrderNumberConflict(error)) {
+                    throw error;
+                }
+                this.logger.warn(
+                    `Номер заказа ${orderNumber} занят (попытка ${attempt}), подбираю следующий`
+                );
+            }
+        }
+
+        // Недостижимо: цикл либо возвращает заказ, либо пробрасывает ошибку на последней попытке
+        throw new Error("Не удалось подобрать номер заказа");
+    }
+
+    /**
+     * Номер заказа ORD-YYYYMMDD-NNNN. Нумерация ведётся отдельно в каждом портале — номера
+     * одного клуба не выдают объём другого.
+     */
+    private async generateOrderNumber(portalId: string): Promise<string> {
+        const prefix = buildOrderNumberPrefix(new Date());
+        const lastNumber = await this.orderRepository.getLastOrderNumberWithPrefix(
+            portalId,
+            prefix
+        );
+
+        let sequence = 1;
+        if (lastNumber) {
+            // ORD-20260316-0042 → 42
+            const lastSeq = parseInt(lastNumber.slice(prefix.length), 10);
+            if (!isNaN(lastSeq)) {
+                sequence = lastSeq + 1;
+            }
+        }
+
+        return `${prefix}${sequence.toString().padStart(4, "0")}`;
+    }
+}

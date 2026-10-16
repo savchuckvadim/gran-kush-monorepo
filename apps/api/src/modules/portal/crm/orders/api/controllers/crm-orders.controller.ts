@@ -1,7 +1,6 @@
 import {
     Body,
     Controller,
-    ForbiddenException,
     Get,
     NotFoundException,
     Param,
@@ -19,10 +18,9 @@ import { type ContentLocale, RequestLocale } from "@common/i18n";
 import { IdempotencyScope, Idempotent } from "@common/idempotency";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
-import { MANAGER_ROLES, RequireEmployeeJwt } from "@modules/portal/auth/employees";
+import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
 import { CurrentEmployee } from "@modules/portal/auth/employees/api/decorators/current-employee.decorator";
 import { RequireManager } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
-import { MemberAccessService } from "@modules/portal/crm/club-policy/application/services/member-access.service";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import {
     CrmCreateOrderDto,
@@ -36,7 +34,9 @@ import {
     UpdatePaymentStatusDto,
 } from "@modules/portal/crm/orders/api/dto/order.dto";
 import { mapOrderToDetailDto, mapOrderToListDto } from "@modules/portal/crm/orders/api/mappers";
+import { OrderStagesService } from "@modules/portal/crm/orders/application/services/order-stages.service";
 import { OrdersService } from "@modules/portal/crm/orders/application/services/orders.service";
+import { PlaceStaffOrderUseCase } from "@modules/portal/crm/orders/application/use-cases/place-staff-order.use-case";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CRM Orders Controller
@@ -49,7 +49,8 @@ import { OrdersService } from "@modules/portal/crm/orders/application/services/o
 export class CrmOrdersController {
     constructor(
         private readonly ordersService: OrdersService,
-        private readonly memberAccess: MemberAccessService
+        private readonly stages: OrderStagesService,
+        private readonly placeOrder: PlaceStaffOrderUseCase
     ) {}
 
     // ─── Список заказов ──────────────────────────────────────────────────────
@@ -92,7 +93,7 @@ export class CrmOrdersController {
         @PortalId() portalId: string
     ): Promise<OrderStageSummaryDto> {
         const { categoryId, ...filters } = query;
-        const stages = await this.ordersService.summarizeFunnel(portalId, categoryId, filters);
+        const stages = await this.stages.summarizeFunnel(portalId, categoryId, filters);
         return { stages };
     }
 
@@ -131,13 +132,7 @@ export class CrmOrdersController {
         @PortalId() portalId: string,
         @RequestLocale() locale: ContentLocale
     ): Promise<OrderDetailDto> {
-        // выбор стадии — то же право, что перевод стадии (PATCH :id/stage)
-        if (dto.stageId && !MANAGER_ROLES.includes(employee.role)) {
-            throw new ForbiddenException("Выбрать стадию нового заказа может manager и выше");
-        }
-        // Заказ на свою же запись участника — только если клуб это разрешил (правила клуба)
-        await this.memberAccess.assertStaffMayOrderFor(employee.userId, dto.memberId, portalId);
-        const order = await this.ordersService.createOrderByEmployee(dto, employee.id, portalId);
+        const order = await this.placeOrder.execute(dto, employee, portalId);
         return mapOrderToDetailDto(order, locale);
     }
 
@@ -158,7 +153,7 @@ export class CrmOrdersController {
         @PortalId() portalId: string,
         @RequestLocale() locale: ContentLocale
     ): Promise<OrderDetailDto> {
-        const order = await this.ordersService.moveToStage(id, dto.stageId, employee.id, portalId);
+        const order = await this.stages.moveToStage(id, dto.stageId, employee.id, portalId);
         return mapOrderToDetailDto(order, locale);
     }
 
@@ -178,7 +173,7 @@ export class CrmOrdersController {
         @PortalId() portalId: string,
         @RequestLocale() locale: ContentLocale
     ): Promise<OrderDetailDto> {
-        const order = await this.ordersService.updateStatus(
+        const order = await this.stages.updateStatus(
             id,
             dto.status,
             employee.id,
