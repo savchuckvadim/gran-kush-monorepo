@@ -46,13 +46,21 @@ export class CrmEntityRecordsController {
         @RequestLocale() locale: ContentLocale,
         @Query() query: EntityRecordListQueryDto
     ): Promise<EntityRecordListResponseDto> {
-        const { limit = 50, skip = 0, stageId, statusItemId, q, filter } = query;
+        const {
+            limit = 50,
+            skip = 0,
+            sortBy,
+            stageId,
+            stageCategoryId,
+            statusItemId,
+            q,
+            filter,
+        } = query;
         return this.recordsService.list(
             portalId,
             code,
-            limit,
-            skip,
-            { stageId, statusItemId, q, conditions: filter },
+            { limit, skip, sortBy },
+            { stageId, stageCategoryId, statusItemId, q, conditions: filter },
             locale
         );
     }
@@ -72,7 +80,7 @@ export class CrmEntityRecordsController {
         return this.recordsService.create(
             portalId,
             code,
-            dto.fields,
+            { fields: dto.fields, stageId: dto.stageId },
             locale,
             principal.membershipId
         );
@@ -122,7 +130,10 @@ export class CrmEntityRecordsController {
 
     @Patch(":id/stage")
     @RequireManager()
-    @ApiOperation({ summary: "Сменить стадию записи (kanban). Роль: manager+" })
+    @ApiOperation({
+        summary:
+            "Перенести карточку: стадия и место в колонке (afterId — сосед сверху). Роль: manager+",
+    })
     @ApiSuccessResponse(EntityRecordDto)
     @ApiErrorResponse([400, 401, 403, 404])
     async setStage(
@@ -132,7 +143,13 @@ export class CrmEntityRecordsController {
         @Body() dto: SetRecordStageDto,
         @RequestLocale() locale: ContentLocale
     ): Promise<EntityRecordDto> {
-        return this.recordsService.setStage(portalId, code, id, dto.stageId, locale);
+        return this.recordsService.setStage(
+            portalId,
+            code,
+            id,
+            { stageId: dto.stageId, afterId: dto.afterId },
+            locale
+        );
     }
 
     @Patch(":id/status")

@@ -19,6 +19,7 @@ import {
     OrderRepository,
     UpdateOrderInput,
 } from "@modules/portal/crm/orders/domain/repositories/order-repository.interface";
+import { OrderStageRepository } from "@modules/portal/crm/orders/domain/repositories/order-stage-repository.interface";
 
 import { NewOrderItem, OrderPlacementService } from "../services/order-placement.service";
 
@@ -43,6 +44,7 @@ export class PlaceStaffOrderUseCase {
     constructor(
         private readonly placement: OrderPlacementService,
         private readonly orderRepository: OrderRepository,
+        private readonly stageRepository: OrderStageRepository,
         private readonly members: MembersService,
         private readonly memberAccess: MemberAccessService
     ) {}
@@ -83,7 +85,7 @@ export class PlaceStaffOrderUseCase {
 
     /** Стадия, в которой заказ может появиться: из воронки этого клуба и не отмена. */
     private async openingStage(portalId: string, stageId: string): Promise<OrderStage> {
-        const stage = await this.orderRepository.findStageInPortal(portalId, stageId);
+        const stage = await this.stageRepository.findStageInPortal(portalId, stageId);
         if (!stage) {
             throw new BadRequestException("Стадия не из воронки заказов этого клуба");
         }

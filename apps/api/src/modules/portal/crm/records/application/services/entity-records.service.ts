@@ -11,7 +11,6 @@ import { ContentLocale } from "@common/i18n";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { DynamicPayloadValidatorService } from "@modules/portal/crm/entity-fields/application/services/dynamic-payload-validator.service";
 import { FieldValuesService } from "@modules/portal/crm/entity-fields/application/services/field-values.service";
-import type { EntityListFilter } from "@modules/portal/crm/entity-fields/domain/entity-filter";
 import {
     EntityRecordFilterBuilder,
     recordTextContains,
@@ -21,15 +20,15 @@ import {
     type EntityRecordView,
     toEntityRecordView,
 } from "@modules/portal/crm/records/application/mappers/entity-record-view.mapper";
+import type {
+    EntityRecordListFilters,
+    EntityRecordListPage,
+} from "@modules/portal/crm/records/domain/entity-record-list";
 import { ENTITY_RECORD_INCLUDE } from "@modules/portal/crm/records/infrastructure/prisma-includes/entity-record.include";
+import { ENTITY_RECORD_LIST_ORDER } from "@modules/portal/crm/records/infrastructure/prisma-includes/entity-record-order";
 
 import { RecordRelationsService } from "./record-relations.service";
-
-export interface EntityRecordListFilters extends EntityListFilter {
-    stageId?: string;
-    statusItemId?: string;
-    isActive?: boolean;
-}
+import { RecordStageService } from "./record-stage.service";
 
 /** Универсальный CRUD записей произвольных EntityDefinition (смарт-процессы). */
 @Injectable()
@@ -39,7 +38,8 @@ export class EntityRecordsService {
         private readonly validator: DynamicPayloadValidatorService,
         private readonly fieldValues: FieldValuesService,
         private readonly recordFilter: EntityRecordFilterBuilder,
-        private readonly relations: RecordRelationsService
+        private readonly relations: RecordRelationsService,
+        private readonly stages: RecordStageService
     ) {}
 
     private async getDefinition(portalId: string, code: string) {
@@ -63,8 +63,7 @@ export class EntityRecordsService {
     async list(
         portalId: string,
         code: string,
-        limit: number,
-        skip: number,
+        page: EntityRecordListPage,
         filters: EntityRecordListFilters,
         locale: ContentLocale
     ): Promise<{ items: EntityRecordView[]; total: number }> {
@@ -75,6 +74,7 @@ export class EntityRecordsService {
             entityDefinitionId: def.id,
         };
         if (filters.stageId) where.stageId = filters.stageId;
+        if (filters.stageCategoryId) where.stage = { stageCategoryId: filters.stageCategoryId };
         if (filters.statusItemId) where.statusItemId = filters.statusItemId;
         if (filters.isActive !== undefined) where.isActive = filters.isActive;
 
@@ -89,9 +89,9 @@ export class EntityRecordsService {
         const [rows, total] = await Promise.all([
             this.prisma.entityRecord.findMany({
                 where,
-                take: limit,
-                skip,
-                orderBy: { createdAt: "desc" },
+                take: page.limit,
+                skip: page.skip,
+                orderBy: ENTITY_RECORD_LIST_ORDER[page.sortBy ?? "createdAt"],
                 include: ENTITY_RECORD_INCLUDE,
             }),
             this.prisma.entityRecord.count({ where }),
@@ -132,20 +132,21 @@ export class EntityRecordsService {
         portalId: string,
         entityDefinitionId: string,
         recordId: string
-    ): Promise<void> {
+    ): Promise<{ id: string; stageId: string | null }> {
         const row = await this.prisma.entityRecord.findFirst({
             where: { id: recordId, portalId, entityDefinitionId },
-            select: { id: true },
+            select: { id: true, stageId: true },
         });
         if (!row) {
             throw new NotFoundException("Record not found");
         }
+        return row;
     }
 
     async create(
         portalId: string,
         code: string,
-        fields: Record<string, unknown>,
+        input: { fields: Record<string, unknown>; stageId?: string },
         locale: ContentLocale,
         createdByEmployeeId?: string
     ): Promise<EntityRecordView> {
@@ -154,7 +155,7 @@ export class EntityRecordsService {
 
         const { plainFields, relationFields } = await this.relations.splitRelationFields(
             def.id,
-            fields
+            input.fields
         );
         const validated = await this.validator.validatePayload(
             portalId,
@@ -163,7 +164,10 @@ export class EntityRecordsService {
             plainFields
         );
 
-        const stageId = await this.resolveDefaultStageId(portalId, def.id);
+        const stageId = await this.stages.stageForNewRecord(
+            { portalId, entityDefinitionId: def.id },
+            input.stageId
+        );
         const record = await this.prisma.$transaction(async (tx) => {
             const created = await tx.entityRecord.create({
                 data: {
@@ -237,31 +241,22 @@ export class EntityRecordsService {
         await this.prisma.entityRecord.delete({ where: { id: recordId } });
     }
 
+    /** Перенос карточки по стадиям и внутри колонки — правила в {@link RecordStageService.move}. */
     async setStage(
         portalId: string,
         code: string,
         recordId: string,
-        stageId: string | null,
+        move: { stageId: string | null; afterId?: string | null },
         locale: ContentLocale
     ): Promise<EntityRecordView> {
         const def = await this.getDefinition(portalId, code);
-        await this.getRecordOrThrow(portalId, def.id, recordId);
-        if (stageId) {
-            const stage = await this.prisma.stage.findFirst({
-                where: {
-                    id: stageId,
-                    stageCategory: { portalId, entityDefinitionId: def.id },
-                },
-                select: { id: true },
-            });
-            if (!stage) {
-                throw new BadRequestException("Stage does not belong to this entity");
-            }
-        }
-        await this.prisma.entityRecord.update({
-            where: { id: recordId },
-            data: { stageId },
-        });
+        const record = await this.getRecordOrThrow(portalId, def.id, recordId);
+        await this.stages.move(
+            { portalId, entityDefinitionId: def.id },
+            record,
+            move.stageId,
+            move.afterId
+        );
         return this.fetchView(portalId, code, def.id, recordId, locale);
     }
 
@@ -291,21 +286,5 @@ export class EntityRecordsService {
             data: { statusItemId },
         });
         return this.fetchView(portalId, code, def.id, recordId, locale);
-    }
-
-    // ─── Helpers ─────────────────────────────────────────────────────────────
-
-    private async resolveDefaultStageId(
-        portalId: string,
-        entityDefinitionId: string
-    ): Promise<string | null> {
-        const stage = await this.prisma.stage.findFirst({
-            where: {
-                stageCategory: { portalId, entityDefinitionId, isDefault: true },
-            },
-            orderBy: { sortOrder: "asc" },
-            select: { id: true },
-        });
-        return stage?.id ?? null;
     }
 }

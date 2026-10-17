@@ -3,6 +3,7 @@ import { ApiProperty, ApiPropertyOptional, IntersectionType } from "@nestjs/swag
 import { Type } from "class-transformer";
 import {
     IsBoolean,
+    IsIn,
     IsInt,
     IsObject,
     IsOptional,
@@ -13,6 +14,10 @@ import {
 } from "class-validator";
 
 import { EntityFilterDto } from "@modules/portal/crm/entity-fields/api/dto/entity-filter.dto";
+import {
+    ENTITY_RECORD_LIST_SORTS,
+    type EntityRecordListSort,
+} from "@modules/portal/crm/records/domain/entity-record-list";
 
 export class EntityRecordListPageDto {
     @ApiPropertyOptional({ type: Number, default: 50, minimum: 1, maximum: 200 })
@@ -35,13 +40,27 @@ export class EntityRecordListPageDto {
     @IsUUID()
     stageId?: string;
 
+    @ApiPropertyOptional({ type: String, format: "uuid", description: "Воронка: записи её стадий" })
+    @IsOptional()
+    @IsUUID()
+    stageCategoryId?: string;
+
     @ApiPropertyOptional({ type: String, format: "uuid" })
     @IsOptional()
     @IsUUID()
     statusItemId?: string;
+
+    @ApiPropertyOptional({
+        enum: ENTITY_RECORD_LIST_SORTS,
+        default: "createdAt",
+        description: "createdAt — новые сверху; stagePosition — порядок карточек в колонке канбана",
+    })
+    @IsOptional()
+    @IsIn(ENTITY_RECORD_LIST_SORTS)
+    sortBy?: EntityRecordListSort;
 }
 
-/** GET /crm/entities/:code/records: limit/skip, стадия, статус, поиск `q` и условия `filter`. */
+/** GET /crm/entities/:code/records: limit/skip, стадия или воронка, статус, порядок, поиск `q` и условия `filter`. */
 export class EntityRecordListQueryDto extends IntersectionType(
     EntityRecordListPageDto,
     EntityFilterDto
@@ -64,6 +83,9 @@ export class EntityRecordFieldDto {
 export class EntityRecordStageDto {
     @ApiProperty({ type: String })
     id: string;
+
+    @ApiProperty({ type: String, description: "Воронка стадии" })
+    stageCategoryId: string;
 
     @ApiProperty({ type: String })
     name: string;
@@ -142,6 +164,15 @@ export class CreateEntityRecordDto {
     })
     @IsObject()
     fields: Record<string, unknown>;
+
+    @ApiPropertyOptional({
+        type: String,
+        format: "uuid",
+        description: "Стадия новой записи; по умолчанию — первая стадия воронки по умолчанию",
+    })
+    @IsOptional()
+    @IsUUID()
+    stageId?: string;
 }
 
 export class UpdateEntityRecordDto {
@@ -161,6 +192,17 @@ export class SetRecordStageDto {
     @IsOptional()
     @IsString()
     stageId: string | null;
+
+    @ApiPropertyOptional({
+        type: String,
+        format: "uuid",
+        nullable: true,
+        description:
+            "Сосед сверху в колонке: карточка встаёт сразу под ним; null — наверх. Не передан: смена стадии ставит наверх, та же стадия — без изменений",
+    })
+    @IsOptional()
+    @IsUUID()
+    afterId?: string | null;
 }
 
 export class SetRecordStatusDto {

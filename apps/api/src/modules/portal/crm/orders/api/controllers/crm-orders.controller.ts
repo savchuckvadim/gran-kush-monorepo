@@ -142,7 +142,7 @@ export class CrmOrdersController {
     @RequireManager()
     @ApiOperation({
         summary:
-            "Перевести заказ в стадию воронки. Роль: manager+. 400 — чужая стадия или заказ закрыт, 409 — гонка",
+            "Перевести заказ в стадию воронки или переставить карточку в колонке (afterId). Роль: manager+. 400 — чужая стадия или заказ закрыт, 409 — гонка",
     })
     @ApiSuccessResponse(OrderDetailDto)
     @ApiErrorResponse([400, 401, 403, 404, 409])
@@ -153,7 +153,13 @@ export class CrmOrdersController {
         @PortalId() portalId: string,
         @RequestLocale() locale: ContentLocale
     ): Promise<OrderDetailDto> {
-        const order = await this.stages.moveToStage(id, dto.stageId, employee.id, portalId);
+        const order = await this.stages.moveToStage(
+            id,
+            dto.stageId,
+            employee.id,
+            portalId,
+            dto.afterId
+        );
         return mapOrderToDetailDto(order, locale);
     }
 

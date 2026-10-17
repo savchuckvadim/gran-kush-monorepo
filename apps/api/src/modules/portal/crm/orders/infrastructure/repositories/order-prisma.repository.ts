@@ -4,64 +4,20 @@ import { Prisma, StageSemantic } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
-import {
-    buildMemberFieldMap,
-    type FieldRow,
-    getMemberDisplayNameParts,
-} from "@modules/portal/crm/entity-fields/lib/member-field-values";
-import {
-    Order,
-    OrderItem,
-    OrderStatus,
-    PaymentStatus,
-} from "@modules/portal/crm/orders/domain/entity/order.entity";
-import {
-    OrderStage,
-    OrderStageSummary,
-} from "@modules/portal/crm/orders/domain/entity/order-stage.entity";
+import { Order, PaymentStatus } from "@modules/portal/crm/orders/domain/entity/order.entity";
 import { limitWindowStart, roundGrams } from "@modules/portal/crm/orders/domain/monthly-limit";
-import { legacyStatusOf } from "@modules/portal/crm/orders/domain/order-stage.rules";
 import {
     CreateOrderInput,
     OrderFilters,
     OrderRepository,
-    StockLine,
     UpdateOrderInput,
 } from "@modules/portal/crm/orders/domain/repositories/order-repository.interface";
-import {
-    ORDER_INCLUDE,
-    ORDER_STAGE_SELECT,
-    toOrderStage,
-} from "@modules/portal/crm/orders/infrastructure/prisma-includes";
+import { ORDER_INCLUDE } from "@modules/portal/crm/orders/infrastructure/prisma-includes";
 
 import { enforceMonthlyLimit, sumLimitUsage } from "./order-limit.prisma";
-import { reserveStock, returnStock } from "./order-stock.prisma";
-
-type OrderWithRelations = Prisma.OrderGetPayload<{ include: typeof ORDER_INCLUDE }>;
-
-const PAYMENT_STATUS_VALUES: ReadonlySet<string> = new Set(Object.values(PaymentStatus));
-
-const isPaymentStatus = (raw: string): raw is PaymentStatus => PAYMENT_STATUS_VALUES.has(raw);
-
-const coercePaymentStatus = (raw: string): PaymentStatus =>
-    isPaymentStatus(raw) ? raw : PaymentStatus.PENDING;
-
-/** Стадии воронок заказов портала: воронка принадлежит порталу и сущности `order`. */
-const orderFunnelWhere = (portalId: string): Prisma.StageCategoryWhereInput => ({
-    portalId,
-    entityDefinition: { code: ENTITY_DEFINITION_CODES.ORDER },
-});
-
-/** Старый статус → условие на стадию: закрытие — по семантике, рабочие — по имени. */
-const legacyStatusStageWhere = (status: OrderStatus): Prisma.StageWhereInput => {
-    if (status === OrderStatus.CANCELLED) {
-        return { OR: [{ semantic: StageSemantic.FAILURE }, { isTerminalFailure: true }] };
-    }
-    if (status === OrderStatus.COMPLETED) {
-        return { OR: [{ semantic: StageSemantic.SUCCESS }, { isTerminalSuccess: true }] };
-    }
-    return { name: { equals: status, mode: "insensitive" } };
-};
+import { buildOrderOrderBy, buildOrderWhere } from "./order-query.prisma";
+import { toOrderEntity } from "./order-row.mapper";
+import { reserveStock } from "./order-stock.prisma";
 
 @Injectable()
 export class OrderPrismaRepository extends OrderRepository {
@@ -76,7 +32,7 @@ export class OrderPrismaRepository extends OrderRepository {
             where: { id },
             include: ORDER_INCLUDE,
         });
-        return row ? this.mapToEntity(row) : null;
+        return row ? toOrderEntity(row) : null;
     }
 
     async findByIdForPortal(id: string, portalId: string): Promise<Order | null> {
@@ -84,7 +40,7 @@ export class OrderPrismaRepository extends OrderRepository {
             where: { id, portalId },
             include: ORDER_INCLUDE,
         });
-        return row ? this.mapToEntity(row) : null;
+        return row ? toOrderEntity(row) : null;
     }
 
     // ─── Список с фильтрами и пагинацией ────────────────────────────────────
@@ -96,8 +52,8 @@ export class OrderPrismaRepository extends OrderRepository {
         sortBy?: string,
         sortOrder?: "asc" | "desc"
     ): Promise<Order[]> {
-        const where = this.buildWhere(filters);
-        const orderBy = this.buildOrderBy(sortBy, sortOrder);
+        const where = buildOrderWhere(filters);
+        const orderBy = buildOrderOrderBy(sortBy, sortOrder);
 
         const rows = await this.prisma.order.findMany({
             where,
@@ -107,13 +63,13 @@ export class OrderPrismaRepository extends OrderRepository {
             orderBy,
         });
 
-        return rows.map((row) => this.mapToEntity(row));
+        return rows.map((row) => toOrderEntity(row));
     }
 
     // ─── Подсчет ─────────────────────────────────────────────────────────────
 
     async count(filters?: OrderFilters): Promise<number> {
-        const where = this.buildWhere(filters);
+        const where = buildOrderWhere(filters);
         return this.prisma.order.count({ where });
     }
 
@@ -191,7 +147,7 @@ export class OrderPrismaRepository extends OrderRepository {
             });
         });
 
-        return this.mapToEntity(row);
+        return toOrderEntity(row);
     }
 
     async sumLimitUsage(memberId: string, since: Date): Promise<number> {
@@ -226,85 +182,6 @@ export class OrderPrismaRepository extends OrderRepository {
         return result.count === 1;
     }
 
-    // ─── Перевод стадии (compare-and-set) ────────────────────────────────────
-
-    /**
-     * Стадия живёт на EntityRecord заказа. Один `UPDATE ... WHERE stage_id = from`: две
-     * параллельные отмены не пройдут обе, и товар не вернётся на склад дважды. Возврат на склад —
-     * в той же транзакции: смена стадии без возврата (или наоборот) не случится.
-     */
-    async compareAndSetStage(input: {
-        orderId: string;
-        portalId: string;
-        fromStageId: string | null;
-        toStageId: string;
-        restock?: readonly StockLine[];
-    }): Promise<boolean> {
-        const order = await this.prisma.order.findFirst({
-            where: { id: input.orderId, portalId: input.portalId },
-            select: { entityRecordId: true },
-        });
-        if (!order) return false;
-
-        return this.prisma.$transaction(async (tx) => {
-            const { count } = await tx.entityRecord.updateMany({
-                where: { id: order.entityRecordId, stageId: input.fromStageId },
-                data: { stageId: input.toStageId },
-            });
-            if (count !== 1) return false;
-            if (input.restock?.length) await returnStock(tx, input.portalId, input.restock);
-            return true;
-        });
-    }
-
-    // ─── Стадии воронок заказов ──────────────────────────────────────────────
-
-    async findStageInPortal(portalId: string, stageId: string): Promise<OrderStage | null> {
-        const row = await this.prisma.stage.findFirst({
-            where: { id: stageId, stageCategory: orderFunnelWhere(portalId) },
-            select: ORDER_STAGE_SELECT,
-        });
-        return row ? toOrderStage(row) : null;
-    }
-
-    async findFunnelStages(
-        portalId: string,
-        stageCategoryId?: string | null
-    ): Promise<OrderStage[]> {
-        const rows = await this.prisma.stage.findMany({
-            where: {
-                stageCategory: {
-                    ...orderFunnelWhere(portalId),
-                    ...(stageCategoryId ? { id: stageCategoryId } : { isDefault: true }),
-                },
-            },
-            orderBy: { sortOrder: "asc" },
-            select: ORDER_STAGE_SELECT,
-        });
-        return rows.map(toOrderStage);
-    }
-
-    async summarizeByStage(
-        filters: OrderFilters,
-        stageIds: readonly string[]
-    ): Promise<OrderStageSummary[]> {
-        const base = this.buildWhere({ ...filters, stageId: undefined, status: undefined });
-        return Promise.all(
-            stageIds.map(async (stageId) => {
-                const aggregate = await this.prisma.order.aggregate({
-                    where: { ...base, entityRecord: { stageId } },
-                    _count: { _all: true },
-                    _sum: { total: true },
-                });
-                return {
-                    stageId,
-                    count: aggregate._count._all,
-                    total: Number(aggregate._sum.total ?? 0),
-                };
-            })
-        );
-    }
-
     // ─── Обновление заказа ───────────────────────────────────────────────────
 
     async update(id: string, data: UpdateOrderInput): Promise<Order> {
@@ -331,7 +208,7 @@ export class OrderPrismaRepository extends OrderRepository {
             data: updateData,
             include: ORDER_INCLUDE,
         });
-        return this.mapToEntity(row);
+        return toOrderEntity(row);
     }
 
     // ─── Последний номер заказа по префиксу (в пределах портала) ─────────────
@@ -369,149 +246,5 @@ export class OrderPrismaRepository extends OrderRepository {
             select: { id: true },
         });
         return stage?.id ?? null;
-    }
-
-    private buildWhere(filters?: OrderFilters): Prisma.OrderWhereInput {
-        if (!filters) return {};
-
-        const where: Prisma.OrderWhereInput = {};
-
-        if (filters.portalId) where.portalId = filters.portalId;
-        if (filters.memberId) where.memberId = filters.memberId;
-        if (filters.employeeId) where.employeeId = filters.employeeId;
-
-        const record: Prisma.EntityRecordWhereInput = {};
-        if (filters.stageId) record.stageId = filters.stageId;
-        if (filters.status) record.stage = legacyStatusStageWhere(filters.status);
-        if (filters.stageId || filters.status) where.entityRecord = record;
-
-        if (filters.paymentStatus) where.paymentStatus = filters.paymentStatus;
-
-        // Поиск по номеру заказа
-        if (filters.search) {
-            where.orderNumber = { contains: filters.search, mode: "insensitive" };
-        }
-
-        // Диапазон дат
-        if (filters.startDate || filters.endDate) {
-            where.orderedAt = {};
-            if (filters.startDate) where.orderedAt.gte = filters.startDate;
-            if (filters.endDate) where.orderedAt.lte = filters.endDate;
-        }
-
-        return where;
-    }
-
-    private buildOrderBy(
-        sortBy?: string,
-        sortOrder?: "asc" | "desc"
-    ): Prisma.OrderOrderByWithRelationInput {
-        const order = sortOrder ?? "desc";
-
-        switch (sortBy) {
-            case "orderNumber":
-                return { orderNumber: order };
-            case "total":
-                return { total: order };
-            case "orderedAt":
-                return { orderedAt: order };
-            default:
-                return { createdAt: order };
-        }
-    }
-
-    // ─── Маппинг Prisma → Domain Entity ─────────────────────────────────────
-
-    private mapToEntity(row: OrderWithRelations): Order {
-        const stage = row.entityRecord.stage ? toOrderStage(row.entityRecord.stage) : null;
-
-        const order = new Order({
-            id: row.id,
-            memberId: row.memberId,
-            employeeId: row.employeeId,
-            orderNumber: row.orderNumber,
-            stage,
-            status: legacyStatusOf(stage),
-            paymentStatus: coercePaymentStatus(row.paymentStatus),
-            subtotal: row.subtotal,
-            discount: row.discount,
-            total: row.total,
-            orderedAt: row.orderedAt,
-            confirmedAt: row.confirmedAt,
-            preparedAt: row.preparedAt,
-            readyAt: row.readyAt,
-            completedAt: row.completedAt,
-            cancelledAt: row.cancelledAt,
-            notes: row.notes,
-            adminNotes: row.adminNotes,
-            createdAt: row.createdAt,
-            updatedAt: row.updatedAt,
-        });
-
-        if (row.member) {
-            const fieldMap = buildMemberFieldMap(
-                (row.member.profile?.fieldValues ?? []).map(
-                    (fv): FieldRow => ({
-                        valueJson: fv.valueJson,
-                        fieldDefinition: fv.fieldDefinition,
-                    })
-                )
-            );
-            const { firstName, lastName } = getMemberDisplayNameParts(fieldMap);
-            order.member = {
-                id: row.member.id,
-                name: firstName,
-                surname: lastName,
-                membershipNumber: row.member.membershipNumber,
-            };
-        }
-
-        // Employee (имя — из профильных EAV-полей)
-        if (row.employee) {
-            const fieldMap = buildMemberFieldMap(
-                (row.employee.profile?.fieldValues ?? []).map(
-                    (fv): FieldRow => ({
-                        valueJson: fv.valueJson,
-                        fieldDefinition: fv.fieldDefinition,
-                    })
-                )
-            );
-            const { firstName, lastName } = getMemberDisplayNameParts(fieldMap);
-            order.employee = {
-                id: row.employee.id,
-                name: firstName,
-                surname: lastName,
-            };
-        }
-
-        // Items
-        if (row.items) {
-            order.items = row.items.map(
-                (item) =>
-                    new OrderItem({
-                        id: item.id,
-                        orderId: item.orderId,
-                        productId: item.productId,
-                        quantity: item.quantity,
-                        unitPrice: item.unitPrice,
-                        totalPrice: item.totalPrice,
-                        isGift: item.isGift,
-                        notes: item.notes,
-                        createdAt: item.createdAt,
-                        updatedAt: item.updatedAt,
-                        product: item.product
-                            ? {
-                                  id: item.product.id,
-                                  name: item.product.name,
-                                  sku: item.product.sku,
-                                  imageUrl: item.product.imageUrl,
-                                  measurementUnit: item.product.measurementUnit,
-                              }
-                            : undefined,
-                    })
-            );
-        }
-
-        return order;
     }
 }

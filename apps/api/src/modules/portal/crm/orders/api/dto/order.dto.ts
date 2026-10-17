@@ -372,6 +372,17 @@ export class MoveOrderStageDto {
     })
     @IsUUID()
     stageId: string;
+
+    @ApiPropertyOptional({
+        type: String,
+        format: "uuid",
+        nullable: true,
+        description:
+            "Заказ-сосед сверху в колонке канбана: карточка встаёт сразу под ним; null — наверх. Не передан: новая стадия ставит наверх, та же — без изменений",
+    })
+    @IsOptional()
+    @IsUUID()
+    afterId?: string | null;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

@@ -5,7 +5,16 @@ import { Prisma } from "@prisma/client";
  * стадия, статус-элемент, значения полей (со схемой) и связи-источники.
  */
 export const ENTITY_RECORD_INCLUDE = {
-    stage: { select: { id: true, name: true, color: true, semantic: true } },
+    stage: {
+        select: {
+            id: true,
+            stageCategoryId: true,
+            name: true,
+            nameI18n: true,
+            color: true,
+            semantic: true,
+        },
+    },
     statusItem: { select: { id: true, key: true, label: true, labelI18n: true, color: true } },
     fieldValues: {
         orderBy: [{ fieldDefinitionId: "asc" as const }, { valueIndex: "asc" as const }],

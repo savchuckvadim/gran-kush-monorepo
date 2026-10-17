@@ -843,6 +843,9 @@ model EntityRecord {
   statusItemId        String?  @map("status_item_id")
   stageId             String?  @map("stage_id")
   isActive            Boolean  @default(true) @map("is_active")
+  /// Место карточки в колонке канбана: меньше — выше. По умолчанию -время создания в мс, поэтому
+  /// новая запись встаёт наверх своей стадии без отдельного запроса (records/domain/stage-position.ts).
+  stagePosition       Float    @default(dbgenerated("(- (EXTRACT(epoch FROM now()) * (1000)::numeric))")) @map("stage_position")
   createdByEmployeeId String?  @map("created_by_employee_id")
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @updatedAt @map("updated_at")
@@ -866,7 +869,7 @@ model EntityRecord {
 
   @@index([portalId, entityDefinitionId])
   @@index([statusItemId])
-  @@index([stageId])
+  @@index([stageId, stagePosition])
   @@map("entity_records")
 }
 

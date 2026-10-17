@@ -15,6 +15,7 @@ import {
     CreateOrderInput,
     OrderRepository,
 } from "@modules/portal/crm/orders/domain/repositories/order-repository.interface";
+import { OrderStageRepository } from "@modules/portal/crm/orders/domain/repositories/order-stage-repository.interface";
 
 const PORTAL_A = "portal-a";
 const MEMBER_ID = "member-1";
@@ -104,6 +105,7 @@ describe("PlaceStaffOrderUseCase — заказ из CRM", () => {
                 PlaceStaffOrderUseCase,
                 OrderPlacementService,
                 { provide: OrderRepository, useValue: mockOrderRepository },
+                { provide: OrderStageRepository, useValue: mockOrderRepository },
                 { provide: ProductsService, useValue: mockProductsService },
                 { provide: MemberLimitService, useValue: mockMemberLimits },
                 { provide: MembersService, useValue: mockMembersService },

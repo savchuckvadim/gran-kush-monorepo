@@ -2609,7 +2609,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Перевести заказ в стадию воронки. Роль: manager+. 400 — чужая стадия или заказ закрыт, 409 — гонка */
+        /** Перевести заказ в стадию воронки или переставить карточку в колонке (afterId). Роль: manager+. 400 — чужая стадия или заказ закрыт, 409 — гонка */
         patch: operations["CrmOrders_moveToStage"];
         trace?: never;
     };
@@ -3031,7 +3031,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Сменить стадию записи (kanban). Роль: manager+ */
+        /** Перенести карточку: стадия и место в колонке (afterId — сосед сверху). Роль: manager+ */
         patch: operations["CrmEntityRecords_setStage"];
         trace?: never;
     };
@@ -5911,6 +5911,11 @@ export interface components {
              * @example 550e8400-e29b-41d4-a716-446655440000
              */
             stageId: string;
+            /**
+             * Format: uuid
+             * @description Заказ-сосед сверху в колонке канбана: карточка встаёт сразу под ним; null — наверх. Не передан: новая стадия ставит наверх, та же — без изменений
+             */
+            afterId?: string | null;
         };
         UpdateOrderStatusDto: {
             /**
@@ -6445,6 +6450,8 @@ export interface components {
         };
         EntityRecordStageDto: {
             id: string;
+            /** @description Воронка стадии */
+            stageCategoryId: string;
             name: string;
             color: string | null;
             /** @example IN_PROGRESS */
@@ -6490,6 +6497,11 @@ export interface components {
             fields: {
                 [key: string]: unknown;
             };
+            /**
+             * Format: uuid
+             * @description Стадия новой записи; по умолчанию — первая стадия воронки по умолчанию
+             */
+            stageId?: string;
         };
         UpdateEntityRecordDto: {
             fields?: {
@@ -6502,6 +6514,11 @@ export interface components {
         };
         SetRecordStageDto: {
             stageId: string | null;
+            /**
+             * Format: uuid
+             * @description Сосед сверху в колонке: карточка встаёт сразу под ним; null — наверх. Не передан: смена стадии ставит наверх, та же стадия — без изменений
+             */
+            afterId?: string | null;
         };
         SetRecordStatusDto: {
             statusItemId: string | null;
@@ -16265,7 +16282,11 @@ export interface operations {
                 limit?: number;
                 skip?: number;
                 stageId?: string;
+                /** @description Воронка: записи её стадий */
+                stageCategoryId?: string;
                 statusItemId?: string;
+                /** @description createdAt — новые сверху; stagePosition — порядок карточек в колонке канбана */
+                sortBy?: "createdAt" | "stagePosition";
                 /** @description Поиск по тексту: каждое слово ищется в текстовых полях (без учёта регистра) */
                 q?: string;
                 /** @description Условия по полям — JSON-массив: [{"field":"city","op":"in","value":["madrid"]}]. Условия складываются через И */

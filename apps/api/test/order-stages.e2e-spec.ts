@@ -330,4 +330,41 @@ describe("Order stages (e2e)", () => {
             "Cancelado",
         ]);
     });
+
+    it("keeps the order of cards inside a column and moves a card under its neighbour", async () => {
+        const pending = stageNamed("Pending").id;
+        const [a, b, c] = [
+            await createOrder("pos-a"),
+            await createOrder("pos-b"),
+            await createOrder("pos-c"),
+        ];
+        const move = (id: string, afterId: string | null) =>
+            crm("patch", `/crm/orders/${id}/stage`).send({ stageId: pending, afterId });
+        const column = async (): Promise<string[]> => {
+            const res = await crm(
+                "get",
+                `/crm/orders?stageId=${pending}&sortBy=stagePosition&sortOrder=asc&limit=100`
+            );
+            expect(res.status).toBe(200);
+            const ours = new Set([a, b, c]);
+            return (res.body.items as { id: string }[])
+                .map((order) => order.id)
+                .filter((id) => ours.has(id));
+        };
+
+        expect((await move(a, null)).status).toBe(200);
+        expect((await move(b, a)).status).toBe(200);
+        expect((await move(c, b)).status).toBe(200);
+        expect(await column()).toEqual([a, b, c]);
+
+        await move(c, a);
+        expect(await column()).toEqual([a, c, b]);
+
+        await move(a, b);
+        expect(await column()).toEqual([c, b, a]);
+
+        // повтор той же стадии без соседа — ничего не меняет
+        await crm("patch", `/crm/orders/${b}/stage`).send({ stageId: pending });
+        expect(await column()).toEqual([c, b, a]);
+    });
 });

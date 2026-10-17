@@ -5,7 +5,13 @@ export interface EntityRecordView {
     id: string;
     entityCode: string;
     isActive: boolean;
-    stage: { id: string; name: string; color: string | null; semantic: string } | null;
+    stage: {
+        id: string;
+        stageCategoryId: string;
+        name: string;
+        color: string | null;
+        semantic: string;
+    } | null;
     statusItem: { id: string; key: string; label: string; color: string | null } | null;
     fields: { fieldKey: string; type: string; label: string | null; value: unknown }[];
     relations: { fieldKey: string; targetRecordIds: string[] }[];
@@ -13,7 +19,7 @@ export interface EntityRecordView {
     updatedAt: string;
 }
 
-/** Запись для API: значения полей по порядку схемы, подписи — на языке запроса. */
+/** Запись для API: значения полей по порядку схемы, подписи и стадия — на языке запроса. */
 export const toEntityRecordView = (
     entityCode: string,
     row: EntityRecordWithRelations,
@@ -53,7 +59,13 @@ export const toEntityRecordView = (
         id: row.id,
         entityCode,
         isActive: row.isActive,
-        stage: row.stage,
+        stage: row.stage && {
+            id: row.stage.id,
+            stageCategoryId: row.stage.stageCategoryId,
+            name: resolveLabel({ label: row.stage.name, labelI18n: row.stage.nameI18n }, locale),
+            color: row.stage.color,
+            semantic: row.stage.semantic,
+        },
         statusItem: row.statusItem && {
             id: row.statusItem.id,
             key: row.statusItem.key,

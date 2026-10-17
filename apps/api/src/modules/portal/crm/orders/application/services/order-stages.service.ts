@@ -24,6 +24,8 @@ import {
     StockLine,
     UpdateOrderInput,
 } from "@modules/portal/crm/orders/domain/repositories/order-repository.interface";
+import { OrderStageRepository } from "@modules/portal/crm/orders/domain/repositories/order-stage-repository.interface";
+import { StagePositionService } from "@modules/portal/crm/records/application/services/stage-position.service";
 
 import { OrdersService } from "./orders.service";
 
@@ -44,25 +46,62 @@ export class OrderStagesService {
 
     constructor(
         private readonly orderRepository: OrderRepository,
-        private readonly orders: OrdersService
+        private readonly stageRepository: OrderStageRepository,
+        private readonly orders: OrdersService,
+        private readonly positions: StagePositionService
     ) {}
 
     /**
      * Перевести заказ в стадию воронки (сотрудник CRM, manager+). Между рабочими стадиями —
      * в любую сторону; закрытый заказ не двигается; отмена возвращает товар на склад.
+     * `afterOrderId` — сосед сверху в колонке канбана (null — наверх); в той же стадии это
+     * перестановка карточки. Не передан: новая стадия ставит наверх, та же — ничего не меняет.
      */
     async moveToStage(
         orderId: string,
         stageId: string,
         employeeId: string,
-        portalId: string
+        portalId: string,
+        afterOrderId?: string | null
     ): Promise<Order> {
         const order = await this.orders.findByIdForPortalOrFail(orderId, portalId);
-        const target = await this.orderRepository.findStageInPortal(portalId, stageId);
+        const target = await this.stageRepository.findStageInPortal(portalId, stageId);
         if (!target) {
             throw new BadRequestException("Стадия не из воронки заказов этого клуба");
         }
-        return this.applyStage(order, target, portalId, { employeeId });
+        if (order.stage?.id === target.id) {
+            if (afterOrderId !== undefined) {
+                const card = await this.cardPlacement(order.id, target.id, portalId, afterOrderId);
+                if (card)
+                    await this.stageRepository.setStagePosition(card.entityRecordId, card.position);
+            }
+            return order;
+        }
+        const card = await this.cardPlacement(order.id, target.id, portalId, afterOrderId ?? null);
+        return this.applyStage(order, target, portalId, {
+            employeeId,
+            stagePosition: card?.position,
+        });
+    }
+
+    /** Место карточки заказа в колонке `stageId` под соседом `afterOrderId` (null — наверх). */
+    private async cardPlacement(
+        orderId: string,
+        stageId: string,
+        portalId: string,
+        afterOrderId: string | null
+    ): Promise<{ entityRecordId: string; position: number } | null> {
+        const card = await this.stageRepository.findCardRecord(orderId, portalId);
+        if (!card) return null;
+        const after = afterOrderId
+            ? await this.stageRepository.findCardRecord(afterOrderId, portalId)
+            : null;
+        const position = await this.positions.positionFor(
+            { portalId, entityDefinitionId: card.entityDefinitionId, stageId },
+            card.entityRecordId,
+            after?.entityRecordId ?? null
+        );
+        return { entityRecordId: card.entityRecordId, position };
     }
 
     /**
@@ -77,7 +116,7 @@ export class OrderStagesService {
         adminNotes?: string
     ): Promise<Order> {
         const order = await this.orders.findByIdForPortalOrFail(orderId, portalId);
-        const stages = await this.orderRepository.findFunnelStages(
+        const stages = await this.stageRepository.findFunnelStages(
             portalId,
             order.stage?.stageCategoryId
         );
@@ -90,7 +129,7 @@ export class OrderStagesService {
 
     /** Стадии воронки, в которой стоит заказ (или воронки по умолчанию, если стадии нет), по порядку. */
     async funnelOf(order: Order, portalId: string): Promise<OrderStage[]> {
-        return this.orderRepository.findFunnelStages(portalId, order.stage?.stageCategoryId);
+        return this.stageRepository.findFunnelStages(portalId, order.stage?.stageCategoryId);
     }
 
     /** Число и сумма заказов в стадиях воронки — шапки колонок канбана. */
@@ -99,11 +138,11 @@ export class OrderStagesService {
         stageCategoryId: string,
         filters: Omit<OrderFilters, "portalId" | "stageId" | "status">
     ): Promise<OrderStageSummary[]> {
-        const stages = await this.orderRepository.findFunnelStages(portalId, stageCategoryId);
+        const stages = await this.stageRepository.findFunnelStages(portalId, stageCategoryId);
         if (stages.length === 0) {
             throw new NotFoundException("Воронка заказов не найдена");
         }
-        return this.orderRepository.summarizeByStage(
+        return this.stageRepository.summarizeByStage(
             { ...filters, portalId },
             stages.map((stage) => stage.id)
         );
@@ -132,7 +171,7 @@ export class OrderStagesService {
             );
         }
 
-        const stages = await this.orderRepository.findFunnelStages(
+        const stages = await this.stageRepository.findFunnelStages(
             portalId,
             order.stage?.stageCategoryId
         );
@@ -160,7 +199,7 @@ export class OrderStagesService {
         order: Order,
         target: OrderStage,
         portalId: string,
-        extra: { employeeId?: string; adminNotes?: string }
+        extra: { employeeId?: string; adminNotes?: string; stagePosition?: number }
     ): Promise<Order> {
         const current = order.stage ?? null;
         if (current?.id === target.id) {
@@ -172,11 +211,12 @@ export class OrderStagesService {
         }
 
         // отмена возвращает товар на склад в одной транзакции со сменой стадии
-        const won = await this.orderRepository.compareAndSetStage({
+        const won = await this.stageRepository.compareAndSetStage({
             orderId: order.id,
             portalId,
             fromStageId: current?.id ?? null,
             toStageId: target.id,
+            stagePosition: extra.stagePosition,
             restock: isFailureStage(target) ? stockLinesOf(order) : undefined,
         });
         if (!won) {

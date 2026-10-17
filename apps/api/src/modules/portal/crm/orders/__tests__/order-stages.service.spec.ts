@@ -12,6 +12,8 @@ import {
 } from "@modules/portal/crm/orders/domain/entity/order.entity";
 import { OrderStage } from "@modules/portal/crm/orders/domain/entity/order-stage.entity";
 import { OrderRepository } from "@modules/portal/crm/orders/domain/repositories/order-repository.interface";
+import { OrderStageRepository } from "@modules/portal/crm/orders/domain/repositories/order-stage-repository.interface";
+import { StagePositionService } from "@modules/portal/crm/records/application/services/stage-position.service";
 
 const PORTAL = "portal-a";
 const FUNNEL = "funnel-default";
@@ -69,8 +71,12 @@ const repository = {
     findStageInPortal: jest.fn(),
     findFunnelStages: jest.fn(),
     summarizeByStage: jest.fn(),
+    findCardRecord: jest.fn(),
+    setStagePosition: jest.fn(),
     getLastOrderNumberWithPrefix: jest.fn(),
 };
+
+const positions = { positionFor: jest.fn() };
 
 describe("OrderStagesService — стадии заказа", () => {
     let service: OrderStagesService;
@@ -80,6 +86,13 @@ describe("OrderStagesService — стадии заказа", () => {
         repository.findByIdForPortal.mockResolvedValue(order());
         repository.findFunnelStages.mockResolvedValue(FUNNEL_STAGES);
         repository.compareAndSetStage.mockResolvedValue(true);
+        repository.findCardRecord.mockImplementation((orderId: string) =>
+            Promise.resolve({
+                entityRecordId: `record-of-${orderId}`,
+                entityDefinitionId: "def-order",
+            })
+        );
+        positions.positionFor.mockResolvedValue(-42);
         repository.update.mockImplementation((_id: string, data: Partial<Order>) =>
             Promise.resolve(order(data))
         );
@@ -89,6 +102,8 @@ describe("OrderStagesService — стадии заказа", () => {
                 OrderStagesService,
                 OrdersService,
                 { provide: OrderRepository, useValue: repository },
+                { provide: OrderStageRepository, useValue: repository },
+                { provide: StagePositionService, useValue: positions },
             ],
         }).compile();
         service = module.get(OrderStagesService);
@@ -105,12 +120,41 @@ describe("OrderStagesService — стадии заказа", () => {
             portalId: PORTAL,
             fromStageId: PENDING.id,
             toStageId: PREPARING.id,
+            stagePosition: -42,
             restock: undefined,
         });
+        // новая стадия без соседа — наверх колонки
+        expect(positions.positionFor).toHaveBeenCalledWith(
+            { portalId: PORTAL, entityDefinitionId: "def-order", stageId: PREPARING.id },
+            "record-of-order-1",
+            null
+        );
         expect(repository.update).toHaveBeenCalledWith(
             "order-1",
             expect.objectContaining({ employeeId: "emp-1", preparedAt: expect.any(Date) })
         );
+    });
+
+    it("ставит карточку под соседа в новой колонке", async () => {
+        repository.findStageInPortal.mockResolvedValue(PREPARING);
+
+        await service.moveToStage("order-1", PREPARING.id, "emp-1", PORTAL, "order-2");
+
+        expect(positions.positionFor).toHaveBeenCalledWith(
+            { portalId: PORTAL, entityDefinitionId: "def-order", stageId: PREPARING.id },
+            "record-of-order-1",
+            "record-of-order-2"
+        );
+    });
+
+    it("в той же стадии с соседом только переставляет карточку", async () => {
+        repository.findStageInPortal.mockResolvedValue(PENDING);
+
+        await service.moveToStage("order-1", PENDING.id, "emp-1", PORTAL, null);
+
+        expect(repository.setStagePosition).toHaveBeenCalledWith("record-of-order-1", -42);
+        expect(repository.compareAndSetStage).not.toHaveBeenCalled();
+        expect(repository.update).not.toHaveBeenCalled();
     });
 
     it("двигает назад между рабочими стадиями", async () => {
