@@ -35,30 +35,30 @@
 
 ## Фаза 1. Права сотрудников — `feat/crm-permissions`
 
-### TASK-730: роли клуба и каталог прав `[ ]` P0
+### TASK-730: роли клуба и каталог прав `[x]` P0 — 2026-10-17
 
-- [ ] `PortalRole` (системные `owner/admin/manager/employee` + свои), `Employee.roleId`,
+- [x] `PortalRole` (системные `owner/admin/manager/employee` + свои), `Employee.roleId`,
       `EmployeeInvitation.roleId`; enum `EmployeeRole` удалить. Миграция: роли каждому клубу, сотрудникам —
       роль по прежнему enum
-- [ ] Каталог прав `access/domain/permissions.ts`, наборы по умолчанию, полный доступ владельца и админа
+- [x] Каталог прав `access/domain/permissions.ts`, наборы по умолчанию, полный доступ владельца и админа
       вычисляется
-- [ ] Роли при основании клуба (`ClubFoundingService`)
+- [x] Роли при основании клуба (`ClubFoundingService`)
 
-### TASK-731: гвард прав на всех маршрутах CRM `[ ]` P0
+### TASK-731: гвард прав на всех маршрутах CRM `[x]` P0 — 2026-10-17
 
-- [ ] `MembershipGuard` грузит роль, в principal — `permissions`; `@RequirePermission(...)`, `PermissionGuard`
-- [ ] Права на все контроллеры CRM по таблице из AUTH_ARCHITECTURE §5.2; `AdminGuard`, `EmployeeRolesGuard`,
+- [x] `MembershipGuard` грузит роль, в principal — `permissions`; `@RequirePermission(...)`, `PermissionGuard`
+- [x] Права на все контроллеры CRM по таблице из AUTH_ARCHITECTURE §5.2; `AdminGuard`, `EmployeeRolesGuard`,
       `RequireManager/RequireAdmin/RequireEmployeeAdmin`, `MANAGER_ROLES`, `@Admin()` удалить
-- [ ] Проверки роли в сервисах (`place-staff-order`, ui-settings `forPortal`, `employees.service`) → права
+- [x] Проверки роли в сервисах (`place-staff-order`, ui-settings `forPortal`, `employees.service`) → права
       и правило «не шире своих прав»
-- [ ] e2e: матрица ролей (сотрудник не видит финансы и сканы, менеджер не трогает настройки, своя роль)
+- [x] e2e: матрица ролей (сотрудник не видит финансы и сканы, менеджер не трогает настройки, своя роль)
 
-### TASK-732: роли и права в CRM `[ ]` P0
+### TASK-732: роли и права в CRM `[x]` P0 — 2026-10-17
 
-- [ ] `me` отдаёт роль и права по клубам; `useCan`, `usePortalRole` → права
-- [ ] Меню, кнопки, разделы настроек по правам; страница без права — «Нет доступа»
-- [ ] «Настройки → Роли и права»: роли, матрица прав по разделам, своя роль, удаление роли без сотрудников
-- [ ] Выбор роли сотрудника и в приглашении — из ролей клуба
+- [x] `me` отдаёт роль и права по клубам; `useCan`, `usePortalRole` → права
+- [x] Меню, кнопки, разделы настроек по правам; страница без права — «Нет доступа»
+- [x] «Настройки → Роли и права»: роли, матрица прав по разделам, своя роль, удаление роли без сотрудников
+- [x] Выбор роли сотрудника и в приглашении — из ролей клуба
 
 ---
 

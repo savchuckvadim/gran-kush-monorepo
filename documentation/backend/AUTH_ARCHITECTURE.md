@@ -186,10 +186,11 @@ erDiagram
 | Присутствие | `presence.read` (визиты, статистика), `presence.checkin` (скан, ручной вход/выход), `qr.manage` (выпуск и отзыв QR) |
 | Смарт-процессы | `records.read`, `records.write`, `records.delete` |
 | Команда | `employees.read`, `employees.manage` (добавить, изменить, отключить, приглашения), `roles.manage` |
-| Клуб | `settings.club` (правила клуба, присутствие, оформление, публичная страница), `settings.structure` (сущности, поля, формы, воронки, статусы), `billing.manage` |
+| Клуб | `settings.club` (правила клуба, присутствие, оформление, публичная страница), `settings.structure` (сущности, поля, формы, воронки, статусы), `settings.views` (общие для клуба виды списков и канбана), `billing.manage` |
 
-Набор по умолчанию: **менеджер** — всё, кроме `finance.write`, `employees.manage`, `roles.manage`,
-`settings.*`, `billing.manage`; **сотрудник** — `members.read`, `members.create`, `orders.read`,
+Набор по умолчанию: **менеджер** — прежние границы роли: всё, кроме `members.invite`, `catalog.manage`,
+`records.delete`, `finance.write`, `employees.manage`, `roles.manage`, `settings.club`, `settings.structure`,
+`billing.manage` (общие виды `settings.views` у него есть); **сотрудник** — `members.read`, `members.create`, `orders.read`,
 `orders.create`, `presence.read`, `presence.checkin`, `records.read`. Финансы, сканы документов,
 список команды и QR у сотрудника по умолчанию закрыты.
 
