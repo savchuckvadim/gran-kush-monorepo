@@ -5,6 +5,10 @@ import type { ReactNode } from "react";
 
 import { cn } from "@workspace/ui/lib/utils";
 
+import { KANBAN_DROPPABLE } from "./kanban.types";
+import { useKanbanDrag } from "./kanban-drop-context";
+import { KanbanDropLine } from "./kanban-drop-line";
+
 export interface KanbanColumnProps {
     id: string;
     header: ReactNode;
@@ -17,15 +21,18 @@ export interface KanbanColumnProps {
 /**
  * A drop target with its own vertical scroll, so a long column does not stretch the board.
  * The column sits on a quiet well: the cards float above it, and a wall of columns reads as
- * columns rather than as one field of cards.
+ * columns rather than as one field of cards. A card dragged over it lights it up; over its empty
+ * space the line under the last card shows where the card lands.
  */
 export function KanbanColumn({ id, header, children, footer, className }: KanbanColumnProps) {
-    const { setNodeRef, isOver } = useDroppable({ id });
+    const { setNodeRef } = useDroppable({ id, data: { type: KANBAN_DROPPABLE.column } });
+    const { activeId, target } = useKanbanDrag();
+    const isTarget = activeId !== null && target?.columnId === id;
 
     return (
         <section
             data-slot="kanban-column"
-            data-over={isOver || undefined}
+            data-over={isTarget || undefined}
             className={cn(
                 "bg-muted/55 flex min-h-0 w-[min(17.5rem,85vw)] shrink-0 snap-start flex-col gap-2.5 rounded-2xl p-2.5",
                 className
@@ -36,10 +43,11 @@ export function KanbanColumn({ id, header, children, footer, className }: Kanban
                 ref={setNodeRef}
                 className={cn(
                     "flex min-h-24 flex-1 flex-col gap-2.5 overflow-y-auto rounded-xl transition-colors",
-                    isOver && "bg-accent/60"
+                    isTarget && "bg-accent/60"
                 )}
             >
                 {children}
+                {isTarget && !target.placement ? <KanbanDropLine /> : null}
                 {footer}
             </div>
         </section>

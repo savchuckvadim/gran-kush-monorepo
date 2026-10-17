@@ -4,17 +4,21 @@ export { Field, FieldInput, type FieldInputProps, type FieldProps } from "./fiel
 export { FileUpload, type FileUploadProps } from "./file-upload/file-upload";
 export { InitialsAvatar, type InitialsAvatarProps } from "./initials-avatar";
 export {
+    kanbanAfterId,
     KanbanBoard,
     type KanbanBoardProps,
     KanbanColumn,
     KanbanColumnHeader,
     type KanbanColumnHeaderProps,
     type KanbanColumnProps,
+    type KanbanDropTarget,
     KanbanDropZone,
     type KanbanDropZoneSpec,
     type KanbanDropZoneTone,
     KanbanItem,
     type KanbanItemProps,
+    type KanbanPlacement,
+    kanbanStaysPut,
 } from "./kanban";
 export { LoadMoreTrigger, type LoadMoreTriggerProps } from "./load-more";
 export { ModalDialog, type ModalDialogProps } from "./modal-dialog";

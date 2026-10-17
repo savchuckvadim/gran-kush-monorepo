@@ -4,7 +4,7 @@ import { useDroppable } from "@dnd-kit/core";
 
 import { cn } from "@workspace/ui/lib/utils";
 
-import type { KanbanDropZoneSpec, KanbanDropZoneTone } from "./kanban.types";
+import { KANBAN_DROPPABLE, type KanbanDropZoneSpec, type KanbanDropZoneTone } from "./kanban.types";
 
 const TONE: Readonly<Record<KanbanDropZoneTone, string>> = {
     success: "border-success text-success",
@@ -14,7 +14,7 @@ const TONE: Readonly<Record<KanbanDropZoneTone, string>> = {
 
 /** A labelled drop target; the dashed frame turns solid while a card hovers it. */
 export function KanbanDropZone({ id, label, tone, color }: KanbanDropZoneSpec) {
-    const { setNodeRef, isOver } = useDroppable({ id });
+    const { setNodeRef, isOver } = useDroppable({ id, data: { type: KANBAN_DROPPABLE.zone } });
 
     return (
         <div

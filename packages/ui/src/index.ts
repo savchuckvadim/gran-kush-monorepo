@@ -71,17 +71,21 @@ export {
 export { FileUpload, type FileUploadProps } from "./shared/file-upload/file-upload";
 export { InitialsAvatar, type InitialsAvatarProps } from "./shared/initials-avatar";
 export {
+    kanbanAfterId,
     KanbanBoard,
     type KanbanBoardProps,
     KanbanColumn,
     KanbanColumnHeader,
     type KanbanColumnHeaderProps,
     type KanbanColumnProps,
+    type KanbanDropTarget,
     KanbanDropZone,
     type KanbanDropZoneSpec,
     type KanbanDropZoneTone,
     KanbanItem,
     type KanbanItemProps,
+    type KanbanPlacement,
+    kanbanStaysPut,
 } from "./shared/kanban";
 export { LoadMoreTrigger, type LoadMoreTriggerProps } from "./shared/load-more";
 export { ModalDialog, type ModalDialogProps } from "./shared/modal-dialog";
