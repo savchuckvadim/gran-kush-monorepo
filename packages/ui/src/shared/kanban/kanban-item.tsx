@@ -47,7 +47,9 @@ export function KanbanItem({
             : null;
 
     return (
-        <div ref={setDropRef} data-slot="kanban-item-slot" className="relative">
+        // pb-2.5 is the gap to the next card: it belongs to this slot, so the pointer in the gap
+        // still resolves to a card, not to the column
+        <div ref={setDropRef} data-slot="kanban-item-slot" className="relative pb-2.5">
             {side === "before" ? <KanbanDropLine className="absolute inset-x-1 -top-1.5" /> : null}
             <div
                 ref={setDragRef}
@@ -65,7 +67,7 @@ export function KanbanItem({
                 {children}
             </div>
             {side === "after" ? (
-                <KanbanDropLine className="absolute inset-x-1 -bottom-1.5" />
+                <KanbanDropLine className="absolute inset-x-1 bottom-1" />
             ) : null}
         </div>
     );

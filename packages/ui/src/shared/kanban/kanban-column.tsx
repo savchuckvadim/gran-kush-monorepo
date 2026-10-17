@@ -42,7 +42,9 @@ export function KanbanColumn({ id, header, children, footer, className }: Kanban
             <div
                 ref={setNodeRef}
                 className={cn(
-                    "flex min-h-24 flex-1 flex-col gap-2.5 overflow-y-auto rounded-xl transition-colors",
+                    // the cards carry their own 10px gap (KanbanItem), so the pointer between two cards is
+                    // still over one of them; -mt/pt gives the line above the first card room to show
+                    "-mt-1.5 flex min-h-24 flex-1 flex-col overflow-y-auto rounded-xl pt-1.5 transition-colors",
                     isTarget && "bg-accent/60"
                 )}
             >

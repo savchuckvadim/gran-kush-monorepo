@@ -14,14 +14,32 @@ const priority = (collision: Collision): number => {
     return 2;
 };
 
+const columnIdOf = (collision: Collision): unknown =>
+    collision.data?.droppableContainer?.data?.current?.columnId;
+
 /**
- * What the pointer is over; without a pointer (keyboard) — the closest target. The card under the
- * pointer says where in the column the dragged one lands.
+ * What the pointer is over. The card under the pointer says where in the column the dragged one
+ * lands. Over nothing (the column header, the gap between columns, the page) there is no target
+ * and a drop is a no-op — the only way to cancel with a finger. Only a keyboard drag has no pointer
+ * and takes the closest target.
+ *
+ * Droppable rects are not clipped by the scroll of their column, so a card scrolled out of sight
+ * would still match the pointer over the column's header: a card counts only while the pointer is
+ * also over its column's visible list.
  */
 export const detectKanbanTarget: CollisionDetection = (args) => {
+    if (!args.pointerCoordinates) return closestCorners(args);
+
     const hits = pointerWithin(args);
-    if (hits.length === 0) return closestCorners(args);
-    return [...hits].sort((a, b) => priority(a) - priority(b));
+    const overColumns = new Set(
+        hits.filter((hit) => typeOf(hit) === KANBAN_DROPPABLE.column).map((hit) => String(hit.id))
+    );
+    return hits
+        .filter(
+            (hit) =>
+                typeOf(hit) !== KANBAN_DROPPABLE.item || overColumns.has(String(columnIdOf(hit)))
+        )
+        .sort((a, b) => priority(a) - priority(b));
 };
 
 /** The column and slot under the dragged card: above or below the middle of the card it covers. */
