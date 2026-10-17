@@ -6,9 +6,13 @@ import { UserAccountStatus } from "@prisma/client";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import { hash } from "bcrypt";
 
-import { hashSecretToken, issueSecretToken } from "@common/crypto/secret-token";
 import { SessionsService } from "@modules/portal/auth/sessions/application/sessions.service";
 import { ClaimedMembershipRepository } from "@modules/portal/auth/shared/domain/repositories/claimed-membership-repository.interface";
+import { AuthTokensService } from "@modules/portal/auth/tokens/application/auth-tokens.service";
+import {
+    AUTH_TOKEN_PURPOSES,
+    type ConsumeAuthTokenResult,
+} from "@modules/portal/auth/tokens/domain/auth-token";
 
 /** Which frontend the link in the email opens: CRM for employees, member portal for members. */
 export type AuthMailApp = "crm" | "member";
@@ -19,7 +23,21 @@ export interface AuthMailOptions {
 }
 
 const MEMBER_MAIL: AuthMailOptions = { app: "member" };
-const ACCOUNT_SETUP_TTL_DAYS = 7;
+
+/** Форма нового пароля принимает и сброс, и первый пароль аккаунта, заведённого клубом. */
+const PASSWORD_LINKS = [AUTH_TOKEN_PURPOSES.PasswordReset, AUTH_TOKEN_PURPOSES.AccountSetup];
+
+/** Аккаунт ссылки или ошибка с прежними текстами ответа: 404 — нет такой ссылки, 401 — истекла. */
+const userOfLink = (
+    result: ConsumeAuthTokenResult,
+    messages: { invalid: string; expired: string }
+): string => {
+    if (result.kind === "expired") throw new UnauthorizedException(messages.expired);
+    if (result.kind === "invalid" || !result.token.userId) {
+        throw new NotFoundException(messages.invalid);
+    }
+    return result.token.userId;
+};
 
 @Injectable()
 export class EmailVerificationService {
@@ -29,7 +47,8 @@ export class EmailVerificationService {
         private readonly userRepository: UserRepository,
         private readonly mailService: MailService,
         private readonly sessions: SessionsService,
-        private readonly claimedMemberships: ClaimedMembershipRepository
+        private readonly claimedMemberships: ClaimedMembershipRepository,
+        private readonly authTokens: AuthTokensService
     ) {}
 
     /**
@@ -44,13 +63,8 @@ export class EmailVerificationService {
             return;
         }
 
-        const { token, hash: tokenHash } = issueSecretToken();
-        const expiresAt = new Date();
-        expiresAt.setHours(expiresAt.getHours() + 24);
-
-        await this.userRepository.update(user.id, {
-            emailVerificationToken: tokenHash,
-            emailVerificationExpiresAt: expiresAt,
+        const { token } = await this.authTokens.issue(AUTH_TOKEN_PURPOSES.EmailVerification, {
+            userId: user.id,
         });
 
         const recipient = { name: user.displayName ?? user.email, surname: null };
@@ -93,18 +107,15 @@ export class EmailVerificationService {
         }
     }
 
-    /**
-     * Подтверждение email по токену
-     */
+    /** Подтверждение почты ссылкой из письма; ссылка гасится. */
     async verifyEmail(token: string): Promise<{ success: boolean; message: string }> {
-        const user = await this.userRepository.findByEmailVerificationToken(hashSecretToken(token));
-
+        const userId = userOfLink(
+            await this.authTokens.consume(AUTH_TOKEN_PURPOSES.EmailVerification, token),
+            { invalid: "Invalid verification token", expired: "Verification token has expired" }
+        );
+        const user = await this.userRepository.findById(userId);
         if (!user) {
             throw new NotFoundException("Invalid verification token");
-        }
-
-        if (!user.emailVerificationExpiresAt || user.emailVerificationExpiresAt < new Date()) {
-            throw new UnauthorizedException("Verification token has expired");
         }
 
         // Заблокированный аккаунт ссылка из старого письма не реанимирует
@@ -120,12 +131,7 @@ export class EmailVerificationService {
         }
 
         // Подтверждаем email и активируем пользователя
-        await this.userRepository.update(user.id, {
-            emailConfirmed: true,
-            isActive: true,
-            emailVerificationToken: null,
-            emailVerificationExpiresAt: null,
-        });
+        await this.userRepository.update(user.id, { emailConfirmed: true, isActive: true });
 
         return {
             success: true,
@@ -148,12 +154,8 @@ export class EmailVerificationService {
             return;
         }
 
-        const { token, hash: tokenHash } = issueSecretToken();
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + ACCOUNT_SETUP_TTL_DAYS);
-        await this.userRepository.update(user.id, {
-            resetPasswordToken: tokenHash,
-            resetPasswordExpiresAt: expiresAt,
+        const { token } = await this.authTokens.issue(AUTH_TOKEN_PURPOSES.AccountSetup, {
+            userId: user.id,
         });
 
         try {
@@ -189,13 +191,8 @@ export class EmailVerificationService {
             };
         }
 
-        const { token, hash: tokenHash } = issueSecretToken();
-        const expiresAt = new Date();
-        expiresAt.setHours(expiresAt.getHours() + 1); // Токен действителен 1 час
-
-        await this.userRepository.update(user.id, {
-            resetPasswordToken: tokenHash,
-            resetPasswordExpiresAt: expiresAt,
+        const { token } = await this.authTokens.issue(AUTH_TOKEN_PURPOSES.PasswordReset, {
+            userId: user.id,
         });
 
         await this.mailService.sendPasswordReset(
@@ -212,21 +209,18 @@ export class EmailVerificationService {
         };
     }
 
-    /**
-     * Сброс пароля по токену
-     */
+    /** Новый пароль по ссылке сброса или первого пароля; ссылка гасится. */
     async resetPassword(
         token: string,
         newPassword: string
     ): Promise<{ success: boolean; message: string }> {
-        const user = await this.userRepository.findByResetPasswordToken(hashSecretToken(token));
-
+        const userId = userOfLink(await this.authTokens.consume(PASSWORD_LINKS, token), {
+            invalid: "Invalid reset token",
+            expired: "Reset token has expired",
+        });
+        const user = await this.userRepository.findById(userId);
         if (!user) {
             throw new NotFoundException("Invalid reset token");
-        }
-
-        if (!user.resetPasswordExpiresAt || user.resetPasswordExpiresAt < new Date()) {
-            throw new UnauthorizedException("Reset token has expired");
         }
 
         if (user.status === UserAccountStatus.blocked) {
@@ -242,9 +236,12 @@ export class EmailVerificationService {
             status: UserAccountStatus.active,
             emailConfirmed: true,
             isActive: true,
-            resetPasswordToken: null,
-            resetPasswordExpiresAt: null,
         });
+        // Почта подтверждена и пароль задан — прочие ссылки из писем больше не нужны
+        await this.authTokens.revokeForUser(user.id, [
+            ...PASSWORD_LINKS,
+            AUTH_TOKEN_PURPOSES.EmailVerification,
+        ]);
 
         // Сброс пароля обязан выкидывать все остальные сессии: если аккаунт угнали,
         // смена пароля без этого ничего не даёт — refresh-токен злоумышленника живёт

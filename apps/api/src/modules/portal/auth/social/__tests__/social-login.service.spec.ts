@@ -72,10 +72,12 @@ const buildService = (options: {
         link: jest.fn().mockResolvedValue(undefined),
     };
     const sessions = { endAllForUser: jest.fn().mockResolvedValue(0) };
+    const authTokens = { revokeForUser: jest.fn().mockResolvedValue(undefined) };
     const service = new SocialLoginService(
         userRepository as never,
         identities as never,
-        sessions as never
+        sessions as never,
+        authTokens as never
     );
     return { service, userRepository, identities, sessions, updated };
 };

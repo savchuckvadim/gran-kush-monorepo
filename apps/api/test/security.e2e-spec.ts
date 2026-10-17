@@ -11,6 +11,7 @@ import { PrismaService } from "../src/common/prisma/prisma.service";
 import { UserDocumentRepository } from "../src/modules/account/domain/repositories/user-document-repository.interface";
 import { MailService } from "../src/modules/mail/application/services/mail.service";
 
+import { authLinks, LINKS } from "./support/auth-links";
 import { mailTokens } from "./support/mail-tokens";
 import { cabinetSession, crmSession } from "./support/sessions";
 
@@ -353,14 +354,12 @@ describe("Security (e2e)", () => {
             expect(login.status).toBe(401);
 
             // Владелец задаёт пароль по ссылке из письма — это клейм и подтверждение членства
-            const userRow = await prisma.user.findUnique({
-                where: { email },
-                select: { resetPasswordToken: true },
-            });
             const confirm = await request(app.getHttpServer())
                 .post("/cabinet/auth/password/reset/confirm")
                 .send({
-                    token: tokens.fromHash(userRow?.resetPasswordToken),
+                    token: tokens.fromHash(
+                        await authLinks(prisma).latestHash(email, LINKS.password)
+                    ),
                     newPassword: "OwnerPass123",
                 });
             expect(confirm.status).toBe(201);
@@ -520,7 +519,7 @@ describe("Security (e2e)", () => {
             const after = await prisma.user.findUniqueOrThrow({ where: { id: victim.userId } });
             expect(after.passwordHash).toBeNull();
             // Вместо пароля из формы — письмо «задайте пароль»
-            expect(after.resetPasswordToken).toBeTruthy();
+            expect(await authLinks(prisma).latestHash(victim.email, LINKS.password)).toBeTruthy();
             expect((await memberLogin(victim.email, "Attacker123")).status).toBe(401);
 
             const memberB = await as(clubB).get(`/crm/members/${res.body.memberId as string}`);
@@ -551,13 +550,11 @@ describe("Security (e2e)", () => {
             expect((await login(PASSWORD)).body.message).toBe("Email not confirmed");
 
             // Токен выписывается до отправки письма, которое в jest не рендерится
-            const { emailVerificationToken } = await prisma.user.findUniqueOrThrow({
-                where: { email },
-            });
-            expect(emailVerificationToken).toBeTruthy();
+            const verification = await authLinks(prisma).latestHash(email, LINKS.emailVerification);
+            expect(verification).toBeTruthy();
             const confirmed = await request(app.getHttpServer())
                 .post("/crm/auth/confirm-email")
-                .send({ token: tokens.fromHash(emailVerificationToken) });
+                .send({ token: tokens.fromHash(verification) });
             expect([200, 201]).toContain(confirmed.status);
             expect([200, 201]).toContain((await login(PASSWORD)).status);
         });
@@ -580,13 +577,11 @@ describe("Security (e2e)", () => {
             expect(unconfirmed.status).toBe(401);
             expect(unconfirmed.body.message).toBe("Email not confirmed");
 
-            const { emailVerificationToken } = await prisma.user.findUniqueOrThrow({
-                where: { email },
-            });
-            expect(emailVerificationToken).toBeTruthy();
+            const verification = await authLinks(prisma).latestHash(email, LINKS.emailVerification);
+            expect(verification).toBeTruthy();
             const confirmed = await request(app.getHttpServer())
                 .post("/cabinet/auth/member/confirm-email")
-                .send({ token: tokens.fromHash(emailVerificationToken) });
+                .send({ token: tokens.fromHash(verification) });
             expect(confirmed.status).toBe(201);
             expect((await memberLogin(email, "Squatter123")).status).toBe(201);
         });
@@ -1206,12 +1201,14 @@ describe("Security (e2e)", () => {
                 .post(`/public/reg-links/${link.body.token as string}/register`)
                 .send({ email, password: PASSWORD, fields: { first_name: label } });
             expect(signUp.status).toBe(201);
-            const { emailVerificationToken, id } = await prisma.user.findUniqueOrThrow({
-                where: { email },
-            });
+            const { id } = await prisma.user.findUniqueOrThrow({ where: { email } });
             const confirmed = await request(app.getHttpServer())
                 .post("/cabinet/auth/member/confirm-email")
-                .send({ token: tokens.fromHash(emailVerificationToken) });
+                .send({
+                    token: tokens.fromHash(
+                        await authLinks(prisma).latestHash(email, LINKS.emailVerification)
+                    ),
+                });
             expect([200, 201]).toContain(confirmed.status);
             return { email, userId: id };
         };
@@ -1295,8 +1292,7 @@ describe("Security (e2e)", () => {
                 .post("/cabinet/auth/password/reset")
                 .send({ email: user.email });
             expect(reset.status).toBe(201);
-            const after = await prisma.user.findUniqueOrThrow({ where: { id: user.userId } });
-            expect(after.resetPasswordToken).toBeNull();
+            expect(await authLinks(prisma).latestHash(user.email, LINKS.password)).toBeNull();
         });
 
         it("the public resend endpoint answers the same for known and unknown emails", async () => {
@@ -1308,10 +1304,7 @@ describe("Security (e2e)", () => {
                 .post(`/public/reg-links/${link.body.token as string}/register`)
                 .send({ email, password: PASSWORD, fields: { first_name: "Resend" } });
             expect(signUp.status).toBe(201);
-            await prisma.user.update({
-                where: { email },
-                data: { emailVerificationToken: null, emailVerificationExpiresAt: null },
-            });
+            await authLinks(prisma).clear(email);
 
             const resend = (target: string) =>
                 request(app.getHttpServer())
@@ -1324,10 +1317,7 @@ describe("Security (e2e)", () => {
             expect(unknown.status).toBe(201);
             expect(known.body).toEqual(unknown.body);
 
-            const { emailVerificationToken } = await prisma.user.findUniqueOrThrow({
-                where: { email },
-            });
-            expect(emailVerificationToken).toBeTruthy();
+            expect(await authLinks(prisma).latestHash(email, LINKS.emailVerification)).toBeTruthy();
         });
 
         it("resolve endpoint answers 400/404 instead of 500", async () => {

@@ -9,9 +9,10 @@ import { EmailVerificationController } from "@modules/portal/auth/shared/api/con
 import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
 import { ClaimedMembershipRepository } from "@modules/portal/auth/shared/domain/repositories/claimed-membership-repository.interface";
 import { ClaimedMembershipPrismaRepository } from "@modules/portal/auth/shared/infrastructure/repositories/claimed-membership.repository";
+import { AuthTokensModule } from "@modules/portal/auth/tokens/auth-tokens.module";
 
 @Module({
-    imports: [UsersModule, MailModule, PrismaModule],
+    imports: [UsersModule, MailModule, PrismaModule, AuthTokensModule],
     providers: [
         EmailVerificationService,
         MembershipGuard,

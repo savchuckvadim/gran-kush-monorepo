@@ -7,6 +7,8 @@ import { UserRepository } from "@users/domain/repositories/user-repository.inter
 import { SessionsService } from "@modules/portal/auth/sessions/application/sessions.service";
 import { UserIdentityRepository } from "@modules/portal/auth/social/domain/repositories/user-identity-repository.interface";
 import { GoogleProfile } from "@modules/portal/auth/social/domain/social-profile";
+import { AuthTokensService } from "@modules/portal/auth/tokens/application/auth-tokens.service";
+import { AUTH_TOKEN_PURPOSES } from "@modules/portal/auth/tokens/domain/auth-token";
 
 /** Вход в CRM через Google: аккаунт и есть ли у него клубы (без клубов CRM ведёт на «Новый клуб»). */
 export interface EmployeeSocialLogin {
@@ -27,7 +29,8 @@ export class SocialLoginService {
     constructor(
         private readonly userRepository: UserRepository,
         private readonly identities: UserIdentityRepository,
-        private readonly sessions: SessionsService
+        private readonly sessions: SessionsService,
+        private readonly authTokens: AuthTokensService
     ) {}
 
     /** Кабинет: аккаунта нет — создаём (без клуба; вступит по ссылке или регистрации). */
@@ -113,10 +116,11 @@ export class SocialLoginService {
                 status: UserAccountStatus.active,
                 isActive: true,
                 emailConfirmed: true,
-                emailVerificationToken: null,
-                emailVerificationExpiresAt: null,
                 ...(dropPassword ? { passwordHash: null } : {}),
             });
+            await this.authTokens.revokeForUser(current.id, [
+                AUTH_TOKEN_PURPOSES.EmailVerification,
+            ]);
             await this.sessions.endAllForUser(current.id, "account_claimed");
         }
         return current;

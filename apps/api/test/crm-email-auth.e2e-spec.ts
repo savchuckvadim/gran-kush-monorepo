@@ -8,6 +8,7 @@ import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { MailService } from "../src/modules/mail/application/services/mail.service";
 
+import { authLinks, LINKS } from "./support/auth-links";
 import { mailTokens } from "./support/mail-tokens";
 
 jest.setTimeout(120_000);
@@ -45,6 +46,11 @@ describe("CRM email confirmation and password reset (e2e)", () => {
     let sessionCookies = "";
 
     const findUser = () => prisma.user.findUniqueOrThrow({ where: { email } });
+    const links = () => authLinks(prisma);
+    const verificationHash = () => links().latestHash(email, LINKS.emailVerification);
+    const resetHash = () => links().latestHash(email, LINKS.password);
+    /** Ссылка сброса, которой уже сменили пароль: второй раз она не работает */
+    let usedResetToken = "";
     const me = (cookies: string) =>
         request(app.getHttpServer()).get("/crm/auth/me").set("Cookie", cookies);
 
@@ -87,12 +93,13 @@ describe("CRM email confirmation and password reset (e2e)", () => {
         it("registration leaves the email unconfirmed and sends a CRM letter in the chosen language", async () => {
             const user = await findUser();
             expect(user.emailConfirmed).toBe(false);
-            expect(user.emailVerificationToken).toBeTruthy();
+            const hash = await verificationHash();
+            expect(hash).toBeTruthy();
 
             expect(mail.sendEmployeeEmailVerification).toHaveBeenCalledWith(
                 expect.anything(),
                 expect.objectContaining({ email }),
-                tokens.fromHash(user.emailVerificationToken),
+                tokens.fromHash(hash),
                 "es"
             );
             expect(mail.sendMamberEmailVerification).not.toHaveBeenCalled();
@@ -102,20 +109,21 @@ describe("CRM email confirmation and password reset (e2e)", () => {
             expect(meRes.body.emailConfirmed).toBe(false);
         });
 
-        it("resend needs a session and issues a fresh token", async () => {
+        it("resend needs a session, issues a fresh token and the previous letter stops working", async () => {
             const anonymous = await request(app.getHttpServer())
                 .post("/crm/auth/confirm-email/resend")
                 .send({});
             expect(anonymous.status).toBe(401);
 
-            const before = (await findUser()).emailVerificationToken;
+            const before = await verificationHash();
+            const previousToken = tokens.fromHash(before);
             const res = await request(app.getHttpServer())
                 .post("/crm/auth/confirm-email/resend")
                 .set("Cookie", sessionCookies)
                 .send({ locale: "ru" });
             expect([200, 201]).toContain(res.status);
 
-            const after = (await findUser()).emailVerificationToken;
+            const after = await verificationHash();
             expect(after).toBeTruthy();
             expect(after).not.toBe(before);
             expect(mail.sendEmployeeEmailVerification).toHaveBeenLastCalledWith(
@@ -124,6 +132,10 @@ describe("CRM email confirmation and password reset (e2e)", () => {
                 tokens.fromHash(after),
                 "ru"
             );
+            const stale = await request(app.getHttpServer())
+                .post("/crm/auth/confirm-email")
+                .send({ token: previousToken });
+            expect(stale.status).toBe(404);
         });
 
         it("rejects an unknown token", async () => {
@@ -134,11 +146,9 @@ describe("CRM email confirmation and password reset (e2e)", () => {
         });
 
         it("confirms the email by the token from the letter", async () => {
-            const { emailVerificationToken } = await findUser();
-
             const res = await request(app.getHttpServer())
                 .post("/crm/auth/confirm-email")
-                .send({ token: tokens.fromHash(emailVerificationToken) });
+                .send({ token: tokens.fromHash(await verificationHash()) });
             expect([200, 201]).toContain(res.status);
             expect(res.body.success).toBe(true);
 
@@ -164,55 +174,45 @@ describe("CRM email confirmation and password reset (e2e)", () => {
                 .send({ email, locale: "en" });
             expect([200, 201]).toContain(res.status);
 
-            const { resetPasswordToken } = await findUser();
-            expect(resetPasswordToken).toBeTruthy();
+            const hash = await resetHash();
+            expect(hash).toBeTruthy();
             expect(mail.sendPasswordReset).toHaveBeenCalledWith(
                 expect.objectContaining({ email }),
                 expect.any(String),
-                tokens.fromHash(resetPasswordToken),
+                tokens.fromHash(hash),
                 "en",
                 "crm"
             );
         });
 
         it("keeps the password rule of the registration", async () => {
-            const { resetPasswordToken } = await findUser();
             const res = await request(app.getHttpServer())
                 .post("/crm/auth/password/reset/confirm")
                 .send({
-                    token: tokens.fromHash(resetPasswordToken),
+                    token: tokens.fromHash(await resetHash()),
                     newPassword: "alllowercase1",
                 });
             expect(res.status).toBe(400);
         });
 
         it("rejects an expired token", async () => {
-            const user = await findUser();
-            await prisma.user.update({
-                where: { id: user.id },
-                data: { resetPasswordExpiresAt: new Date(Date.now() - 60_000) },
-            });
+            const token = tokens.fromHash(await resetHash());
+            await links().expire(email, LINKS.password);
 
             const res = await request(app.getHttpServer())
                 .post("/crm/auth/password/reset/confirm")
-                .send({
-                    token: tokens.fromHash(user.resetPasswordToken),
-                    newPassword: NEW_PASSWORD,
-                });
+                .send({ token, newPassword: NEW_PASSWORD });
             expect(res.status).toBe(401);
 
-            await prisma.user.update({
-                where: { id: user.id },
-                data: { resetPasswordExpiresAt: new Date(Date.now() + 60 * 60_000) },
-            });
+            await links().renew(email, LINKS.password);
         });
 
         it("sets the new password and signs out every other session", async () => {
-            const { resetPasswordToken } = await findUser();
+            usedResetToken = tokens.fromHash(await resetHash());
 
             const res = await request(app.getHttpServer())
                 .post("/crm/auth/password/reset/confirm")
-                .send({ token: tokens.fromHash(resetPasswordToken), newPassword: NEW_PASSWORD });
+                .send({ token: usedResetToken, newPassword: NEW_PASSWORD });
             expect([200, 201]).toContain(res.status);
 
             const refreshed = await request(app.getHttpServer())
@@ -232,8 +232,11 @@ describe("CRM email confirmation and password reset (e2e)", () => {
         });
 
         it("the token works only once", async () => {
-            const user = await findUser();
-            expect(user.resetPasswordToken).toBeNull();
+            const again = await request(app.getHttpServer())
+                .post("/crm/auth/password/reset/confirm")
+                .send({ token: usedResetToken, newPassword: "Another123456" });
+            expect(again.status).toBe(404);
+            expect(await resetHash()).toBeNull();
         });
     });
 });

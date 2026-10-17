@@ -131,6 +131,11 @@ describe("Telegram sign-in (e2e)", () => {
         const user = await prisma.user.findUniqueOrThrow({ where: { email } });
         expect(user).toMatchObject({ emailConfirmed: true, isActive: true, passwordHash: null });
 
+        // the link from the letter works once (TASK-736)
+        const replayed = await post("/cabinet/auth/telegram/confirm", { token: link });
+        expect(replayed.body.code).toBe("telegram_link");
+        expect(await prisma.authToken.count({ where: { email, consumedAt: null } })).toBe(0);
+
         const again = await post("/cabinet/auth/telegram", widget(id));
         expect(again.body).toEqual({ status: "signed_in" });
     });

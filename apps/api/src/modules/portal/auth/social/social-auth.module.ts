@@ -22,6 +22,7 @@ import { GoogleOAuthGateway } from "@modules/portal/auth/social/domain/google-oa
 import { UserIdentityRepository } from "@modules/portal/auth/social/domain/repositories/user-identity-repository.interface";
 import { GoogleOAuthClient } from "@modules/portal/auth/social/infrastructure/google/google-oauth.client";
 import { UserIdentityPrismaRepository } from "@modules/portal/auth/social/infrastructure/repositories/user-identity.repository";
+import { AuthTokensModule } from "@modules/portal/auth/tokens/auth-tokens.module";
 import { InvitationsModule } from "@modules/portal/crm/invitations/invitations.module";
 
 @Module({
@@ -30,6 +31,7 @@ import { InvitationsModule } from "@modules/portal/crm/invitations/invitations.m
         PrismaModule,
         JwtModule,
         SharedAuthModule,
+        AuthTokensModule,
         InvitationsModule,
         MailModule,
     ],

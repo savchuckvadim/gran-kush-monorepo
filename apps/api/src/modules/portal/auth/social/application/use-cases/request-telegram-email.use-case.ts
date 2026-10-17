@@ -1,7 +1,11 @@
 import { Injectable, Logger } from "@nestjs/common";
 
+import { IdentityProvider } from "@prisma/client";
+
 import { MailService } from "@modules/mail/application/services/mail.service";
 import type { SupportedLanguage } from "@modules/mail/consts/mail.constants";
+import { AuthTokensService } from "@modules/portal/auth/tokens/application/auth-tokens.service";
+import { AUTH_TOKEN_PURPOSES } from "@modules/portal/auth/tokens/domain/auth-token";
 
 import { TelegramLoginService } from "../services/telegram-login.service";
 
@@ -18,7 +22,8 @@ export class RequestTelegramEmailUseCase {
 
     constructor(
         private readonly telegram: TelegramLoginService,
-        private readonly mail: MailService
+        private readonly mail: MailService,
+        private readonly authTokens: AuthTokensService
     ) {}
 
     async execute(command: {
@@ -28,7 +33,11 @@ export class RequestTelegramEmailUseCase {
     }): Promise<void> {
         const profile = this.telegram.readSignUpTicket(command.ticket);
         const email = command.email.trim().toLowerCase();
-        const token = this.telegram.issueEmailLink(profile, email);
+        const { token } = await this.authTokens.issue(
+            AUTH_TOKEN_PURPOSES.IdentityEmailLink,
+            { email },
+            { provider: IdentityProvider.telegram, profile }
+        );
         try {
             await this.mail.sendTelegramEmailLink({ to: email, token, language: command.language });
         } catch (error: unknown) {

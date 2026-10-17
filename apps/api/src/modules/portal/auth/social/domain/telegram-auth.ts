@@ -46,6 +46,18 @@ export const isTelegramAuthValid = (
     return fresh && a.length === b.length && timingSafeEqual(a, b);
 };
 
+const isNullableString = (value: unknown): value is string | null =>
+    value === null || typeof value === "string";
+
+/** Профиль из сохранённого шага (JSON ссылки из письма); чужая форма — `null`. */
+export const parseTelegramProfile = (value: unknown): TelegramProfile | null => {
+    if (typeof value !== "object" || value === null) return null;
+    const { telegramId, firstName, lastName, username } = value as Record<string, unknown>;
+    if (typeof telegramId !== "string" || typeof firstName !== "string") return null;
+    if (!isNullableString(lastName) || !isNullableString(username)) return null;
+    return { telegramId, firstName, lastName, username };
+};
+
 export const toTelegramProfile = (data: TelegramAuthData): TelegramProfile => ({
     telegramId: String(data.id),
     firstName: data.first_name,

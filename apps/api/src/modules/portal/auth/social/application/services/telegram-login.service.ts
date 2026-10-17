@@ -17,28 +17,21 @@ import { TelegramAuthError } from "@modules/portal/auth/social/domain/telegram-a
 const BOT_TOKEN_ENV = "TG_CLIENT_BOT_API_KEY";
 const BOT_USERNAME_ENV = "TG_CLIENT_BOT_USERNAME";
 
-/** Шаг «укажите почту» — полчаса; ссылка из письма — сутки, как подтверждение почты. */
+/** Шаг «укажите почту» открыт полчаса. */
 const SIGN_UP_TICKET_TTL = "30m" as const;
-const EMAIL_LINK_TTL = "24h" as const;
 
-const PURPOSE = { ticket: "telegram_sign_up", emailLink: "telegram_email_link" } as const;
+const TICKET_PURPOSE = "telegram_sign_up";
 
 interface TicketPayload {
-    purpose: typeof PURPOSE.ticket;
+    purpose: typeof TICKET_PURPOSE;
     profile: TelegramProfile;
-}
-
-interface EmailLinkPayload {
-    purpose: typeof PURPOSE.emailLink;
-    profile: TelegramProfile;
-    email: string;
 }
 
 /**
- * Вход через Telegram Login: проверка ответа виджета и подписанные шаги до подтверждения почты.
- * У Telegram нет email, а аккаунт PafPaf держится на почте (письма клубов, согласия), поэтому
- * новый Telegram сначала получает «билет» на шаг «укажите почту», затем ссылку в письмо. Оба —
- * подписанные JWT со своим назначением: ни один не подходит вместо другого и вместо сессии.
+ * Вход через Telegram Login: проверка ответа виджета и «билет» на шаг «укажите почту». У Telegram
+ * нет email, а аккаунт PafPaf держится на почте (письма клубов, согласия), поэтому новый Telegram
+ * сначала получает билет — подписанный JWT со своим назначением, не годный вместо сессии, — а
+ * затем одноразовую ссылку в письмо (`AuthTokensService`, `identity_email_link`).
  */
 @Injectable()
 export class TelegramLoginService {
@@ -69,26 +62,14 @@ export class TelegramLoginService {
 
     issueSignUpTicket(profile: TelegramProfile): string {
         return this.sign(
-            { purpose: PURPOSE.ticket, profile } satisfies TicketPayload,
+            { purpose: TICKET_PURPOSE, profile } satisfies TicketPayload,
             SIGN_UP_TICKET_TTL
         );
     }
 
     readSignUpTicket(ticket: string): TelegramProfile {
-        const payload = this.read<TicketPayload>(ticket, PURPOSE.ticket, "telegram_ticket");
+        const payload = this.read<TicketPayload>(ticket, TICKET_PURPOSE);
         return payload.profile;
-    }
-
-    issueEmailLink(profile: TelegramProfile, email: string): string {
-        return this.sign(
-            { purpose: PURPOSE.emailLink, profile, email } satisfies EmailLinkPayload,
-            EMAIL_LINK_TTL
-        );
-    }
-
-    readEmailLink(token: string): { profile: TelegramProfile; email: string } {
-        const payload = this.read<EmailLinkPayload>(token, PURPOSE.emailLink, "telegram_link");
-        return { profile: payload.profile, email: payload.email };
     }
 
     private botToken(): string | null {
@@ -99,18 +80,14 @@ export class TelegramLoginService {
         return this.jwtService.sign(payload, { secret: this.secret(), expiresIn });
     }
 
-    private read<T extends { purpose: string }>(
-        token: string,
-        purpose: T["purpose"],
-        failure: "telegram_ticket" | "telegram_link"
-    ): T {
+    private read<T extends { purpose: string }>(token: string, purpose: T["purpose"]): T {
         let payload: T;
         try {
             payload = this.jwtService.verify<T>(token, { secret: this.secret() });
         } catch {
-            throw new TelegramAuthError(failure);
+            throw new TelegramAuthError("telegram_ticket");
         }
-        if (payload.purpose !== purpose) throw new TelegramAuthError(failure);
+        if (payload.purpose !== purpose) throw new TelegramAuthError("telegram_ticket");
         return payload;
     }
 

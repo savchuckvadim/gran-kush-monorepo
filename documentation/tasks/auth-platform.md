@@ -91,10 +91,10 @@
 
 ## Фаза 3. Способы входа — `feat/auth-identity`
 
-### TASK-736: одноразовые токены писем `[ ]` P0
+### TASK-736: одноразовые токены писем `[x]` P0
 
-- [ ] `AuthToken` (purpose, hash, payload, срок, consumedAt); колонки токенов из `User` удалить
-- [ ] Подтверждение, сброс, account-setup, ссылка Telegram — через него, ссылка одноразовая
+- [x] `AuthToken` (purpose, hash, payload, срок, consumedAt); колонки токенов из `User` удалить
+- [x] Подтверждение, сброс, account-setup, ссылка Telegram — через него, ссылка одноразовая
 
 ### TASK-737: реестр провайдеров `[ ]` P0
 

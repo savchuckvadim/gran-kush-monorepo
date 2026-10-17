@@ -23,15 +23,8 @@ export abstract class UserRepository {
             displayName: string | null;
             isActive: boolean;
             emailConfirmed: boolean;
-            emailVerificationToken: string | null;
-            emailVerificationExpiresAt: Date | null;
-            resetPasswordToken: string | null;
-            resetPasswordExpiresAt: Date | null;
         }>
     ): Promise<User>;
 
-    /** Токены писем хранятся как SHA-256 (`hashSecretToken`): ищем по хешу, не по ссылке. */
-    abstract findByEmailVerificationToken(tokenHash: string): Promise<User | null>;
-    abstract findByResetPasswordToken(tokenHash: string): Promise<User | null>;
     abstract delete(id: string): Promise<void>;
 }

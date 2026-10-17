@@ -3,6 +3,7 @@ import { ScheduleModule } from "@nestjs/schedule";
 
 import { PrismaModule } from "@common/prisma/prisma.module";
 import { BillingModule } from "@modules/billing/billing.module";
+import { AuthTokensModule } from "@modules/portal/auth/tokens/auth-tokens.module";
 import { PresenceModule } from "@modules/portal/crm/presence/presence.module";
 
 import { AuthCronService } from "./services/auth-cron.service";
@@ -17,7 +18,7 @@ import { PresenceCronService } from "./services/presence-cron.service";
  * - PresenceCronService: авто-закрытие сессий, мониторинг присутствующих
  * - BillingCronService: истечение grace-периода подписки и приостановка портала
  * - IdempotencyCronService: уборка протухших ключей идемпотентности
- * - AuthCronService: уборка протухших и давно отозванных refresh-токенов
+ * - AuthCronService: уборка истёкших и давно отозванных сессий и ссылок из писем
  *
  * Расписание живёт в каждом процессе, поэтому каждая задача рассчитана на запуск
  * на нескольких репликах одновременно (TASK-105) — см. комментарии в сервисах.
@@ -25,7 +26,13 @@ import { PresenceCronService } from "./services/presence-cron.service";
  * Все cron-задачи используют Europe/Madrid (Испания) в качестве таймзоны.
  */
 @Module({
-    imports: [ScheduleModule.forRoot(), PrismaModule, PresenceModule, BillingModule],
+    imports: [
+        ScheduleModule.forRoot(),
+        PrismaModule,
+        PresenceModule,
+        BillingModule,
+        AuthTokensModule,
+    ],
     providers: [PresenceCronService, BillingCronService, IdempotencyCronService, AuthCronService],
 })
 export class CronModule {}

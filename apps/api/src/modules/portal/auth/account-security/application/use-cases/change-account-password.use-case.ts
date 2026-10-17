@@ -3,6 +3,8 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import * as bcrypt from "bcrypt";
 
 import { SessionsService } from "@modules/portal/auth/sessions/application/sessions.service";
+import { AuthTokensService } from "@modules/portal/auth/tokens/application/auth-tokens.service";
+import { AUTH_TOKEN_PURPOSES } from "@modules/portal/auth/tokens/domain/auth-token";
 import { BCRYPT_ROUNDS } from "@modules/users/domain/password-hashing";
 import { UserRepository } from "@modules/users/domain/repositories/user-repository.interface";
 
@@ -21,7 +23,8 @@ import { ACCOUNT_SECURITY_ERRORS } from "../../domain/account-security-errors";
 export class ChangeAccountPasswordUseCase {
     constructor(
         private readonly users: UserRepository,
-        private readonly sessions: SessionsService
+        private readonly sessions: SessionsService,
+        private readonly authTokens: AuthTokensService
     ) {}
 
     async execute(command: {
@@ -48,10 +51,12 @@ export class ChangeAccountPasswordUseCase {
 
         await this.users.update(user.id, {
             passwordHash: await bcrypt.hash(command.newPassword, BCRYPT_ROUNDS),
-            // ссылка сброса пароля из старого письма после смены не нужна
-            resetPasswordToken: null,
-            resetPasswordExpiresAt: null,
         });
+        // ссылка сброса из старого письма после смены пароля не должна его перебить
+        await this.authTokens.revokeForUser(user.id, [
+            AUTH_TOKEN_PURPOSES.PasswordReset,
+            AUTH_TOKEN_PURPOSES.AccountSetup,
+        ]);
         await this.sessions.endAllForUser(user.id, "password_changed", command.sessionId);
         return { id: user.id, email: user.email };
     }
