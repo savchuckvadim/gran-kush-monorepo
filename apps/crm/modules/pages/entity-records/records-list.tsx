@@ -1,9 +1,9 @@
 "use client";
 
+import { type ReactNode, useEffect } from "react";
 import { useTranslations } from "next-intl";
 
 import { Trash2 } from "lucide-react";
-import type { ReactNode } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@workspace/ui";
@@ -31,8 +31,6 @@ interface RecordsListProps {
     filter: RecordsFilter;
     page: number;
     onPageChange: (page: number) => void;
-    /** Waits for the funnels and for the filter fields of a link that carries conditions */
-    enabled: boolean;
     renderToolbar: (info: { total?: number; isFetching: boolean }) => ReactNode;
     canMove: boolean;
     canDelete: boolean;
@@ -48,7 +46,6 @@ export function RecordsList({
     filter,
     page,
     onPageChange,
-    enabled,
     renderToolbar,
     canMove,
     canDelete,
@@ -59,11 +56,18 @@ export function RecordsList({
     const labels = useValueLabels();
     const { mutate: move } = useMoveEntityRecord(code);
 
-    const { data, isPending, isFetching, error } = useEntityRecords(
-        code,
-        { ...filter, stageCategoryId: funnelId, limit: PAGE_SIZE, skip: (page - 1) * PAGE_SIZE },
-        enabled
-    );
+    const { data, isPending, isFetching, error } = useEntityRecords(code, {
+        ...filter,
+        stageCategoryId: funnelId,
+        limit: PAGE_SIZE,
+        skip: (page - 1) * PAGE_SIZE,
+    });
+    const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE));
+
+    // the last row of the last page was deleted, or the link remembers a page that is gone
+    useEffect(() => {
+        if (data && page > totalPages) onPageChange(totalPages);
+    }, [data, page, totalPages, onPageChange]);
 
     const changeStage = (record: EntityRecord, stageId: string) => {
         const target = stages.find((stage) => stage.id === stageId);
@@ -92,7 +96,20 @@ export function RecordsList({
         {
             key: "title",
             header: t("table.record"),
-            cell: (record) => <span className="font-medium">{recordTitle(record)}</span>,
+            // a real button: the row click alone cannot be reached from the keyboard
+            cell: (record) => (
+                <button
+                    type="button"
+                    title={t("open")}
+                    className="text-left font-medium hover:underline"
+                    onClick={(event) => {
+                        event.stopPropagation();
+                        onOpen(record);
+                    }}
+                >
+                    {recordTitle(record)}
+                </button>
+            ),
         },
         {
             key: "stage",
@@ -172,7 +189,7 @@ export function RecordsList({
             renderCardActions={deleteAction}
             pagination={{
                 page,
-                totalPages: Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE)),
+                totalPages,
                 totalCount: data?.total,
                 onPageChange,
             }}

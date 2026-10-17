@@ -34,7 +34,6 @@ export async function getOrders(params: OrdersListParams = {}): Promise<OrderPag
                 ...filterQuery(params),
                 stageId: params.stageId,
                 sortBy: params.sortBy,
-                sortOrder: params.sortOrder,
                 page: params.page ?? 1,
                 limit: params.limit ?? DEFAULT_PAGE_SIZE,
             },

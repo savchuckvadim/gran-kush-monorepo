@@ -101,7 +101,7 @@ export function EntityRecordsPage({ code }: { code: string }) {
                         : undefined
                 }
             >
-                {isFunnelsPending ? (
+                {isFunnelsPending || !filters.isReady ? (
                     <div className="flex items-center justify-center py-12">
                         <Loader2
                             className="size-6 animate-spin text-muted-foreground"
@@ -127,7 +127,6 @@ export function EntityRecordsPage({ code }: { code: string }) {
                         filter={filters.filter}
                         page={filters.page}
                         onPageChange={filters.setPage}
-                        enabled={filters.isReady && !isFunnelsPending}
                         renderToolbar={renderToolbar}
                         canMove={isManager}
                         canDelete={isAdmin}

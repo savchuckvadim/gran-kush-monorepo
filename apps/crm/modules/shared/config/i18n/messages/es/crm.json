@@ -1428,8 +1428,7 @@
                 "record": "Registro",
                 "stage": "Etapa",
                 "fields": "Campos",
-                "empty": "No hay registros",
-                "noStage": "— sin etapa —"
+                "empty": "No hay registros"
             },
             "kanban": {
                 "label": "Kanban de registros",

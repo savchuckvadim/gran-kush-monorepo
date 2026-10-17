@@ -2,6 +2,8 @@
 
 import { type QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { ApiClientError } from "@workspace/api-client/core";
+
 import {
     createEmployee,
     type CreateEmployeePayload,
@@ -28,11 +30,17 @@ export function useEmployees(filters?: EmployeeFilters) {
     });
 }
 
+/** Retries on a network failure, not on a 404: a deleted or foreign employee will not appear. */
+const MAX_RETRIES = 3;
+const retryUnlessMissing = (failureCount: number, error: Error): boolean =>
+    !(error instanceof ApiClientError && error.status === 404) && failureCount < MAX_RETRIES;
+
 export function useEmployee(id: string) {
     return useQuery({
         queryKey: employeeKeys.detail(id),
         queryFn: () => getEmployee(id),
         enabled: !!id,
+        retry: retryUnlessMissing,
     });
 }
 

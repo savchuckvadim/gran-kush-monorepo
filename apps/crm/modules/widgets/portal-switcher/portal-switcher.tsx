@@ -61,7 +61,9 @@ export function PortalSwitcher({ className }: { className?: string }) {
             trigger={
                 <Button
                     variant="ghost"
-                    className={cn("min-w-0 gap-2 pl-1.5 pr-2 font-semibold", className)}
+                    // shrink: a long club name gives way (truncate) before the buttons on its right
+                    // are pushed off a 360px phone
+                    className={cn("min-w-0 shrink gap-2 pl-1.5 pr-2 font-semibold", className)}
                 >
                     <ClubBadge
                         name={label}

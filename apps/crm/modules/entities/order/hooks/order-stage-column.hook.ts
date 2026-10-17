@@ -17,7 +17,6 @@ export function useOrderStageColumn(stageId: string, filter: OrdersFilter) {
                 ...filter,
                 stageId,
                 sortBy: "stagePosition",
-                sortOrder: "asc",
                 page: pageParam,
                 limit: COLUMN_PAGE_SIZE,
             }),

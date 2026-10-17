@@ -45,7 +45,7 @@ export function ClubSwitcher({ className }: { className?: string }) {
                 <Button
                     variant="ghost"
                     data-slot="club-switcher"
-                    className={cn("max-w-[14rem] gap-2 px-2", className)}
+                    className={cn("max-w-[14rem] min-w-0 shrink gap-2 px-2", className)}
                 >
                     {current ? (
                         <ClubBadge name={label} />

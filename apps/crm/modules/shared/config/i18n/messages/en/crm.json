@@ -1428,8 +1428,7 @@
                 "record": "Record",
                 "stage": "Stage",
                 "fields": "Fields",
-                "empty": "No records",
-                "noStage": "— no stage —"
+                "empty": "No records"
             },
             "kanban": {
                 "label": "Records kanban",
