@@ -6,10 +6,14 @@ import {
     NotFoundException,
 } from "@nestjs/common";
 
-import { EmployeeRole } from "@prisma/client";
 import { AccountOwnershipService } from "@users/application/services/account-ownership.service";
 import { AccountProvisioningService } from "@users/application/services/account-provisioning.service";
 
+import type { PortalPrincipal } from "@common/portal";
+import { PortalRolesService } from "@modules/portal/crm/access/application/services/portal-roles.service";
+import type { Permission } from "@modules/portal/crm/access/domain/permissions";
+import { effectivePermissions, isOwnerRole } from "@modules/portal/crm/access/domain/portal-role";
+import { coversPermissions } from "@modules/portal/crm/access/domain/role-assignment-policy";
 import {
     EmployeeFilters,
     EmployeeRepository,
@@ -19,11 +23,22 @@ import {
 /** Machine-readable 409 reason: the CRM answers it with a hint to send an invitation. */
 export const EMPLOYEE_CONFLICT_CODES = { accountExists: "account_exists" } as const;
 
+/** Кто меняет команду: его сотрудник и права в этом клубе. */
+export interface EmployeeActor {
+    employeeId: string;
+    permissions: readonly Permission[];
+}
+
+export const toEmployeeActor = (principal: PortalPrincipal): EmployeeActor => ({
+    employeeId: principal.membershipId,
+    permissions: principal.permissions,
+});
+
 export interface CreateEmployeeInput {
     email: string;
-    role: EmployeeRole;
+    /** Ключ роли клуба */
+    role: string;
     fields: Record<string, unknown>;
-    invitationId?: string;
 }
 
 @Injectable()
@@ -31,7 +46,8 @@ export class EmployeesService {
     constructor(
         private readonly employeeRepository: EmployeeRepository,
         private readonly accountProvisioning: AccountProvisioningService,
-        private readonly ownership: AccountOwnershipService
+        private readonly ownership: AccountOwnershipService,
+        private readonly roles: PortalRolesService
     ) {}
 
     async findAllByPortal(
@@ -63,23 +79,21 @@ export class EmployeesService {
     }
 
     /**
-     * Создание сотрудника по email: если аккаунта нет — создаётся pending_claim
-     * (пользователь клеймит его позже, установив пароль при регистрации).
-     * Аккаунт, у которого уже есть владелец, напрямую не прикрепляется: его согласие даёт
-     * только принятое приглашение (`invitationId`), где владелец доказан паролем (TASK-702).
+     * Сотрудник по email из CRM: если аккаунта нет — создаётся pending_claim (пользователь клеймит его
+     * позже, задав пароль по письму). Аккаунт, у которого уже есть владелец, напрямую не прикрепляется:
+     * его согласие даёт только принятое приглашение (TASK-702). Роль — не шире прав того, кто добавляет.
      */
     async create(
         input: CreateEmployeeInput,
-        portalId: string
+        portalId: string,
+        actor: EmployeeActor
     ): Promise<{ employee: EmployeeWithProfile; isNewUser: boolean }> {
-        if (input.role === EmployeeRole.portal_owner) {
-            throw new ForbiddenException("Cannot assign portal_owner role");
-        }
+        const role = await this.roles.requireAssignable(portalId, input.role, actor.permissions);
 
         const { user, isNewUser } = await this.accountProvisioning.ensurePendingClaimUser(
             input.email
         );
-        if (!isNewUser && !input.invitationId && this.ownership.isClaimed(user)) {
+        if (!isNewUser && this.ownership.isClaimed(user)) {
             throw new ConflictException({
                 message: "This email already has an account. Send an invitation instead",
                 code: EMPLOYEE_CONFLICT_CODES.accountExists,
@@ -89,57 +103,58 @@ export class EmployeesService {
         const employee = await this.employeeRepository.createWithProfile({
             userId: user.id,
             portalId,
-            role: input.role,
-            invitationId: input.invitationId,
+            roleId: role.id,
             fields: input.fields,
         });
 
         return { employee, isNewUser };
     }
 
-    /** Внутренний метод (онбординг портала): создать owner-моста без проверок роли. */
-    async createOwner(
-        userId: string,
-        portalId: string,
-        fields: Record<string, unknown>
+    /**
+     * Сотрудник по принятому приглашению. Роль проверена, когда приглашение выдавали; владелец
+     * аккаунта доказан при принятии.
+     */
+    async createFromInvitation(
+        input: {
+            userId: string;
+            roleId: string;
+            invitationId: string;
+            fields: Record<string, unknown>;
+        },
+        portalId: string
     ): Promise<EmployeeWithProfile> {
         return this.employeeRepository.createWithProfile({
-            userId,
+            userId: input.userId,
             portalId,
-            role: EmployeeRole.portal_owner,
-            fields,
+            roleId: input.roleId,
+            invitationId: input.invitationId,
+            fields: input.fields,
         });
     }
 
     async updateEmployee(
         id: string,
         portalId: string,
-        actorId: string,
+        actor: EmployeeActor,
         data: {
-            role?: EmployeeRole;
+            role?: string;
             isActive?: boolean;
             fields?: Record<string, unknown>;
         }
     ): Promise<EmployeeWithProfile> {
-        const target = await this.findByIdInPortal(id, portalId);
-
-        if (id === actorId) {
-            throw new BadRequestException("Cannot modify your own account via this endpoint");
-        }
-        if (target.employee.role === EmployeeRole.portal_owner) {
-            throw new ForbiddenException("Cannot modify portal owner");
-        }
-        if (data.role === EmployeeRole.portal_owner) {
-            throw new ForbiddenException("Cannot assign portal_owner role");
-        }
+        await this.requireManageable(id, portalId, actor);
+        const role =
+            data.role === undefined
+                ? undefined
+                : await this.roles.requireAssignable(portalId, data.role, actor.permissions);
 
         if (data.fields && Object.keys(data.fields).length > 0) {
             await this.employeeRepository.updateProfileFields(id, portalId, data.fields);
         }
 
-        if (data.role !== undefined || data.isActive !== undefined) {
+        if (role !== undefined || data.isActive !== undefined) {
             return this.employeeRepository.updateBridge(id, {
-                ...(data.role !== undefined ? { role: data.role } : {}),
+                ...(role !== undefined ? { roleId: role.id } : {}),
                 ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
             });
         }
@@ -150,21 +165,35 @@ export class EmployeesService {
     async deactivateEmployee(
         id: string,
         portalId: string,
-        actorId: string
+        actor: EmployeeActor
     ): Promise<EmployeeWithProfile> {
-        const target = await this.findByIdInPortal(id, portalId);
-
-        if (id === actorId) {
-            throw new BadRequestException("Cannot deactivate your own account");
-        }
-        if (target.employee.role === EmployeeRole.portal_owner) {
-            throw new ForbiddenException("Cannot deactivate portal owner");
-        }
-
+        await this.requireManageable(id, portalId, actor);
         return this.employeeRepository.updateBridge(id, { isActive: false });
     }
 
     async touchLastLogin(id: string): Promise<void> {
         await this.employeeRepository.updateBridge(id, { lastLoginAt: new Date() });
+    }
+
+    /**
+     * Коллегу можно менять, если это не ты сам, не владелец и его роль целиком в пределах твоих прав:
+     * менеджер с правом на команду не снимет и не отключит админа.
+     */
+    private async requireManageable(
+        id: string,
+        portalId: string,
+        actor: EmployeeActor
+    ): Promise<EmployeeWithProfile> {
+        const target = await this.findByIdInPortal(id, portalId);
+        if (id === actor.employeeId) {
+            throw new BadRequestException("Cannot modify your own account via this endpoint");
+        }
+        if (isOwnerRole(target.employee.role)) {
+            throw new ForbiddenException("Cannot modify portal owner");
+        }
+        if (!coversPermissions(actor.permissions, effectivePermissions(target.employee.role))) {
+            throw new ForbiddenException("This employee has permissions you do not have");
+        }
+        return target;
     }
 }

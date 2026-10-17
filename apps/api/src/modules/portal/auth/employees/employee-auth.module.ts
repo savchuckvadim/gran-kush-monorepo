@@ -12,18 +12,13 @@ import { PrismaModule } from "@common/prisma/prisma.module";
 import { JWT_DEFAULTS, JWT_ENV_KEYS } from "@modules/portal/auth/domain/constants/jwt.constants";
 import { EmployeeAuthController } from "@modules/portal/auth/employees/api/controllers/employee-auth.controller";
 import { EmployeeMobileAuthController } from "@modules/portal/auth/employees/api/controllers/employee-mobile-auth.controller";
-import { EmployeeRegistrationController } from "@modules/portal/auth/employees/api/controllers/employee-registration.controller";
 import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
-import { EmployeeRegistrationService } from "@modules/portal/auth/employees/application/services/employee-registration.service";
-import { AdminGuard } from "@modules/portal/auth/employees/infrastructure/guards/admin.guard";
 import { EmployeeJwtAuthGuard } from "@modules/portal/auth/employees/infrastructure/guards/employee-jwt-auth.guard";
 import { EmployeeJwtMobileAuthGuard } from "@modules/portal/auth/employees/infrastructure/guards/employee-jwt-mobile-auth.guard";
 import { EmployeeJwtBearerStrategy } from "@modules/portal/auth/employees/infrastructure/strategies/employee-jwt-bearer.strategy";
 import { EmployeeJwtCookieStrategy } from "@modules/portal/auth/employees/infrastructure/strategies/employee-jwt-cookie.strategy";
 import { SharedAuthModule } from "@modules/portal/auth/shared/shared-auth.module";
 import { EmployeesModule } from "@modules/portal/crm/employees/employees.module";
-
-import { EmployeeRegistrationUseCase } from "./application/use-cases/employee-registration.use-case";
 
 @Module({
     imports: [
@@ -50,27 +45,14 @@ import { EmployeeRegistrationUseCase } from "./application/use-cases/employee-re
         }),
     ],
     providers: [
-        EmployeeRegistrationUseCase,
         EmployeeAuthService,
-        EmployeeRegistrationService,
         EmployeeJwtCookieStrategy,
         EmployeeJwtBearerStrategy,
         EmployeeJwtAuthGuard,
         EmployeeJwtMobileAuthGuard,
-        AdminGuard,
         PortalCrmSubscriptionGuard,
     ],
-    controllers: [
-        EmployeeAuthController,
-        EmployeeMobileAuthController,
-        EmployeeRegistrationController,
-    ],
-    exports: [
-        EmployeeAuthService,
-        EmployeeRegistrationService,
-        EmployeeJwtAuthGuard,
-        EmployeeJwtMobileAuthGuard,
-        AdminGuard,
-    ],
+    controllers: [EmployeeAuthController, EmployeeMobileAuthController],
+    exports: [EmployeeAuthService, EmployeeJwtAuthGuard, EmployeeJwtMobileAuthGuard],
 })
 export class EmployeeAuthModule {}

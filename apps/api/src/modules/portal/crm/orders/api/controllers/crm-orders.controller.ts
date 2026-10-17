@@ -10,7 +10,9 @@ import {
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
+import { CurrentPrincipal } from "@common/decorators/auth/current-principal.decorator";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
+import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
@@ -18,9 +20,10 @@ import { type ContentLocale, RequestLocale } from "@common/i18n";
 import { IdempotencyScope, Idempotent } from "@common/idempotency";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
+import type { PortalPrincipal } from "@common/portal";
 import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
 import { CurrentEmployee } from "@modules/portal/auth/employees/api/decorators/current-employee.decorator";
-import { RequireManager } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
+import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import {
     CrmCreateOrderDto,
@@ -45,6 +48,7 @@ import { PlaceStaffOrderUseCase } from "@modules/portal/crm/orders/application/u
 @ApiTags("CRM Orders")
 @Controller("crm/orders")
 @RequireEmployeeJwt()
+@RequirePermission(PERMISSIONS.OrdersRead)
 @ApiBearerAuth()
 export class CrmOrdersController {
     constructor(
@@ -118,31 +122,32 @@ export class CrmOrdersController {
     // ─── Создать заказ за участника ──────────────────────────────────────────
 
     @Post()
+    @RequirePermission(PERMISSIONS.OrdersCreate)
     @Idempotent(IdempotencyScope.CRM_ORDER_CREATE)
     @ApiOperation({
         summary:
             "Создать заказ за участника. Любой сотрудник; цена и подарок — по позициям, " +
-            "стадию выбирает manager+. 400 — товар недоступен или кончился, стадия отмены",
+            "стадию — с правом orders.process. 400 — товар недоступен или кончился, стадия отмены",
     })
     @ApiSuccessResponse(OrderDetailDto, { status: 201 })
     @ApiErrorResponse([400, 401, 403, 404])
     async createOrder(
         @Body() dto: CrmCreateOrderDto,
-        @CurrentEmployee() employee: Employee,
+        @CurrentPrincipal() principal: PortalPrincipal,
         @PortalId() portalId: string,
         @RequestLocale() locale: ContentLocale
     ): Promise<OrderDetailDto> {
-        const order = await this.placeOrder.execute(dto, employee, portalId);
+        const order = await this.placeOrder.execute(dto, principal, portalId);
         return mapOrderToDetailDto(order, locale);
     }
 
     // ─── Перевести заказ в стадию ────────────────────────────────────────────
 
     @Patch(":id/stage")
-    @RequireManager()
+    @RequirePermission(PERMISSIONS.OrdersProcess)
     @ApiOperation({
         summary:
-            "Перевести заказ в стадию воронки или переставить карточку в колонке (afterId). Роль: manager+. 400 — чужая стадия или заказ закрыт, 409 — гонка",
+            "Перевести заказ в стадию воронки или переставить карточку в колонке (afterId). Право orders.process. 400 — чужая стадия или заказ закрыт, 409 — гонка",
     })
     @ApiSuccessResponse(OrderDetailDto)
     @ApiErrorResponse([400, 401, 403, 404, 409])
@@ -166,9 +171,10 @@ export class CrmOrdersController {
     // ─── Обновить статус заказа (совместимость) ──────────────────────────────
 
     @Patch(":id/status")
-    @RequireManager()
+    @RequirePermission(PERMISSIONS.OrdersProcess)
     @ApiOperation({
-        summary: "Обновить статус заказа (устарело: используйте PATCH :id/stage). Роль: manager+",
+        summary:
+            "Обновить статус заказа (устарело: используйте PATCH :id/stage). Право orders.process",
     })
     @ApiSuccessResponse(OrderDetailDto)
     @ApiErrorResponse([400, 401, 403, 404, 409])
@@ -192,8 +198,8 @@ export class CrmOrdersController {
     // ─── Обновить статус оплаты ──────────────────────────────────────────────
 
     @Patch(":id/payment")
-    @RequireManager()
-    @ApiOperation({ summary: "Обновить статус оплаты. Роль: manager+" })
+    @RequirePermission(PERMISSIONS.OrdersProcess)
+    @ApiOperation({ summary: "Обновить статус оплаты. Право orders.process" })
     @ApiSuccessResponse(OrderDetailDto)
     @ApiErrorResponse([400, 401, 403, 404])
     async updatePaymentStatus(

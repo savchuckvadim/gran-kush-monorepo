@@ -1,6 +1,5 @@
-import { EmployeeRole } from "@prisma/client";
-
 import { AuthPrincipalType } from "@modules/portal/auth/domain/interfaces/jwt-payload.interface";
+import type { Permission } from "@modules/portal/crm/access/domain/permissions";
 
 /**
  * Результат резолва membership (MembershipGuard):
@@ -15,9 +14,18 @@ export interface PortalPrincipal {
     membershipId: string;
     /** Профильная EntityRecord моста */
     entityRecordId: string;
-    /** Только для employee */
-    role?: EmployeeRole;
+    /** Роль сотрудника в клубе; у участника нет */
+    roleId?: string;
+    roleKey?: string;
+    /** Права роли сотрудника (у участника — пусто) */
+    permissions: readonly Permission[];
 }
+
+/** Есть ли у действующего все перечисленные права. */
+export const principalCan = (
+    principal: Pick<PortalPrincipal, "permissions">,
+    ...required: Permission[]
+): boolean => required.every((code) => principal.permissions.includes(code));
 
 declare module "express" {
     interface Request {

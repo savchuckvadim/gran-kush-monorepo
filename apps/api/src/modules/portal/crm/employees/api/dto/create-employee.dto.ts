@@ -1,9 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
-import { EmployeeRole } from "@prisma/client";
-import { IsEnum, IsObject, IsOptional } from "class-validator";
+import { IsObject, IsOptional } from "class-validator";
 
 import { IsEmailWithLowerCase } from "@common/decorators/dto/is-email-with-lower-case.decorator";
+import { IsRoleKey } from "@modules/portal/crm/access/api/dto/role-key.decorator";
 
 /**
  * Создание сотрудника по email. Если аккаунта нет — создаётся pending_claim,
@@ -14,9 +14,9 @@ export class CreateEmployeeDto {
     @IsEmailWithLowerCase()
     email: string;
 
-    @ApiProperty({ enum: EmployeeRole, example: EmployeeRole.employee })
-    @IsEnum(EmployeeRole)
-    role: EmployeeRole;
+    @ApiProperty({ type: String, example: "employee", description: "Ключ роли клуба" })
+    @IsRoleKey()
+    role: string;
 
     @ApiPropertyOptional({
         type: "object",

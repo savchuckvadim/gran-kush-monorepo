@@ -1,10 +1,13 @@
 import { Controller, Get, Query } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
+import { CurrentPrincipal } from "@common/decorators/auth/current-principal.decorator";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { type PortalPrincipal, principalCan } from "@common/portal";
 import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
+import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import { CrmSearchService } from "@modules/portal/crm/search/application/services/crm-search.service";
 
 import { CrmSearchQueryDto, CrmSearchResponseDto } from "../dto/crm-search.dto";
@@ -26,9 +29,14 @@ export class CrmSearchController {
     @ApiErrorResponse([400, 401, 402, 403])
     async search(
         @PortalId() portalId: string,
-        @Query() query: CrmSearchQueryDto
+        @Query() query: CrmSearchQueryDto,
+        @CurrentPrincipal() principal: PortalPrincipal
     ): Promise<CrmSearchResponseDto> {
-        const result = await this.crmSearch.searchAll(portalId, query.q, query.limit);
+        const scope = {
+            members: principalCan(principal, PERMISSIONS.MembersRead),
+            orders: principalCan(principal, PERMISSIONS.OrdersRead),
+        };
+        const result = await this.crmSearch.searchAll(portalId, query.q, scope, query.limit);
         return {
             members: result.members,
             products: result.products,

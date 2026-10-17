@@ -5,9 +5,10 @@ import {
     NotFoundException,
 } from "@nestjs/common";
 
-import { MANAGER_ROLES } from "@modules/portal/auth/employees";
+import type { PortalPrincipal } from "@common/portal";
+import { principalCan } from "@common/portal";
+import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import { MemberAccessService } from "@modules/portal/crm/club-policy/application/services/member-access.service";
-import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import { MembersService } from "@modules/portal/crm/members/application/services/members.service";
 import { Order } from "@modules/portal/crm/orders/domain/entity/order.entity";
 import { OrderStage } from "@modules/portal/crm/orders/domain/entity/order-stage.entity";
@@ -51,13 +52,15 @@ export class PlaceStaffOrderUseCase {
 
     async execute(
         command: PlaceStaffOrderCommand,
-        employee: Pick<Employee, "id" | "userId" | "role">,
+        staff: Pick<PortalPrincipal, "membershipId" | "userId" | "permissions">,
         portalId: string
     ): Promise<Order> {
-        if (command.stageId && !MANAGER_ROLES.includes(employee.role)) {
-            throw new ForbiddenException("Выбрать стадию нового заказа может manager и выше");
+        if (command.stageId && !principalCan(staff, PERMISSIONS.OrdersProcess)) {
+            throw new ForbiddenException(
+                "Выбрать стадию нового заказа может тот, кто ведёт заказы"
+            );
         }
-        await this.memberAccess.assertStaffMayOrderFor(employee.userId, command.memberId, portalId);
+        await this.memberAccess.assertStaffMayOrderFor(staff.userId, command.memberId, portalId);
 
         const member = await this.members.findByIdForPortal(command.memberId, portalId);
         if (!member) {
@@ -73,7 +76,7 @@ export class PlaceStaffOrderUseCase {
             memberId: command.memberId,
             items: command.items,
             notes: command.notes,
-            employeeId: employee.id,
+            employeeId: staff.membershipId,
             stageId: stage?.id,
         });
 

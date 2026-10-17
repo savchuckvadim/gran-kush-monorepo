@@ -2,6 +2,7 @@ import { Body, Controller, Get, NotFoundException, Param, Post, Query } from "@n
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
+import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
@@ -10,6 +11,7 @@ import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.in
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
 import { CurrentEmployee } from "@modules/portal/auth/employees/api/decorators/current-employee.decorator";
+import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import {
     CheckInResultDto,
@@ -44,6 +46,7 @@ export class CrmPresenceController {
     // ─── QR: подтверждение входа или выхода ──────────────────────────────────
 
     @Post("qr-scan")
+    @RequirePermission(PERMISSIONS.PresenceCheckin)
     @Idempotent(IdempotencyScope.CRM_PRESENCE_SCAN)
     @ApiOperation({
         summary: "Подтвердить вход или выход по QR на стойке",
@@ -78,6 +81,7 @@ export class CrmPresenceController {
     // ─── QR Preview (без записи) ─────────────────────────────────────────────
 
     @Post("qr-preview")
+    @RequirePermission(PERMISSIONS.PresenceCheckin)
     @ApiOperation({
         summary: "Предпросмотр QR-кода (без записи присутствия)",
         description:
@@ -96,6 +100,7 @@ export class CrmPresenceController {
     // ─── Manual Check-in ─────────────────────────────────────────────────────
 
     @Post("manual/check-in")
+    @RequirePermission(PERMISSIONS.PresenceCheckin)
     @ApiOperation({ summary: "Ручной чек-ин участника (сотрудником)" })
     @ApiSuccessResponse(PresenceSessionDto, { status: 201 })
     @ApiErrorResponse([400, 401, 403, 404])
@@ -115,6 +120,7 @@ export class CrmPresenceController {
     // ─── Manual Check-out ────────────────────────────────────────────────────
 
     @Post("manual/check-out")
+    @RequirePermission(PERMISSIONS.PresenceCheckin)
     @ApiOperation({ summary: "Ручной чек-аут участника (сотрудником)" })
     @ApiSuccessResponse(PresenceSessionDto)
     @ApiErrorResponse([400, 401, 403])
@@ -134,6 +140,7 @@ export class CrmPresenceController {
     // ─── Список сессий ───────────────────────────────────────────────────────
 
     @Get("sessions")
+    @RequirePermission(PERMISSIONS.PresenceRead)
     @ApiOperation({ summary: "Список сессий присутствия (с фильтрами)" })
     @ApiPaginatedResponse(PresenceSessionDto, {
         description: "Paginated list of presence sessions",
@@ -160,6 +167,7 @@ export class CrmPresenceController {
     // ─── Детали сессии ───────────────────────────────────────────────────────
 
     @Get("sessions/:id")
+    @RequirePermission(PERMISSIONS.PresenceRead)
     @ApiOperation({ summary: "Детали сессии присутствия" })
     @ApiSuccessResponse(PresenceSessionDto)
     @ApiErrorResponse([401, 403, 404])
@@ -177,6 +185,7 @@ export class CrmPresenceController {
     // ─── Текущие присутствующие ──────────────────────────────────────────────
 
     @Get("currently-present")
+    @RequirePermission(PERMISSIONS.PresenceRead)
     @ApiOperation({
         summary: "Список текущих присутствующих",
         description: "Все участники, которые сейчас находятся в клубе.",
@@ -197,6 +206,7 @@ export class CrmPresenceController {
     // ─── Статистика ──────────────────────────────────────────────────────────
 
     @Get("stats")
+    @RequirePermission(PERMISSIONS.PresenceRead)
     @ApiOperation({ summary: "Статистика присутствия" })
     @ApiSuccessResponse(PresenceStatsDto)
     @ApiErrorResponse([401, 403])

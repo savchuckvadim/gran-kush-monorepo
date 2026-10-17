@@ -161,7 +161,7 @@ describe("Portal registration from the product site (e2e)", () => {
 
             expect(res.status).toBe(201);
             expect(res.body.portal.name).toBe(second);
-            expect(res.body.owner.role).toBe("portal_owner");
+            expect(res.body.owner.role).toBe("owner");
             const mine = await request(app.getHttpServer())
                 .get("/crm/my-portals")
                 .set("Cookie", cookieHeader(res));

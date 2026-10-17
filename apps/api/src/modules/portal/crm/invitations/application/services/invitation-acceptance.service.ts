@@ -204,12 +204,12 @@ export class InvitationAcceptanceService {
             throw new ConflictException("User is already an employee of this portal");
         }
 
-        const { employee } = await this.employeesService.create(
+        const employee = await this.employeesService.createFromInvitation(
             {
-                email: invitation.email,
-                role: invitation.role,
-                fields: fields ?? {},
+                userId,
+                roleId: invitation.roleId,
                 invitationId: invitation.id,
+                fields: fields ?? {},
             },
             invitation.portalId
         );

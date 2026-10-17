@@ -24,7 +24,7 @@ export const TRANSACTION_INCLUDE = {
     createdByEmployee: {
         select: {
             id: true,
-            role: true,
+            role: { select: { key: true } },
         },
     },
 } satisfies Prisma.FinancialTransactionInclude;

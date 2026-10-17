@@ -1,13 +1,13 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-import { EmployeeRole } from "@prisma/client";
+import { EmployeeRoleDto } from "@modules/portal/crm/access/api/dto/portal-role.dto";
 
 export class EmployeePortalRoleDto {
     @ApiProperty({ example: "f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f", type: String })
     portalId: string;
 
-    @ApiProperty({ enum: EmployeeRole, example: EmployeeRole.manager })
-    role: EmployeeRole;
+    @ApiProperty({ type: () => EmployeeRoleDto })
+    role: EmployeeRoleDto;
 }
 
 export class EmployeeInfoDto {

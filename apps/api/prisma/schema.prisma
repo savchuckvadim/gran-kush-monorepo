@@ -76,13 +76,6 @@ enum PrincipalType {
   platform_admin
 }
 
-enum EmployeeRole {
-  portal_owner
-  admin
-  manager
-  employee
-}
-
 enum MemberJoinSource {
   self
   registration_link
@@ -200,6 +193,7 @@ model Portal {
   termsAcceptedBy       User?                  @relation("PortalTermsAcceptedBy", fields: [termsAcceptedByUserId], references: [id], onDelete: SetNull)
   members               Member[]
   employees             Employee[]
+  roles                 PortalRole[]
   entityDefinitions     EntityDefinition[]
   entityRecords         EntityRecord[]
   fieldValues           FieldValue[]
@@ -479,20 +473,21 @@ model Member {
 }
 
 model Employee {
-  id             String       @id @default(uuid())
-  userId         String       @map("user_id")
-  portalId       String       @map("portal_id")
-  entityRecordId String       @unique @map("entity_record_id")
-  role           EmployeeRole @default(employee)
-  isActive       Boolean      @default(true) @map("is_active")
-  invitationId   String?      @map("invitation_id")
-  lastLoginAt    DateTime?    @map("last_login_at")
-  createdAt      DateTime     @default(now()) @map("created_at")
-  updatedAt      DateTime     @updatedAt @map("updated_at")
+  id             String    @id @default(uuid())
+  userId         String    @map("user_id")
+  portalId       String    @map("portal_id")
+  entityRecordId String    @unique @map("entity_record_id")
+  roleId         String    @map("role_id")
+  isActive       Boolean   @default(true) @map("is_active")
+  invitationId   String?   @map("invitation_id")
+  lastLoginAt    DateTime? @map("last_login_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
   user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   portal     Portal              @relation(fields: [portalId], references: [id], onDelete: Cascade)
   profile    EntityRecord        @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
+  role       PortalRole          @relation(fields: [roleId], references: [id], onDelete: Restrict)
   invitation EmployeeInvitation? @relation(fields: [invitationId], references: [id], onDelete: SetNull)
 
   createdMembers        Member[]               @relation("MemberCreatedBy")
@@ -509,9 +504,32 @@ model Employee {
   @@unique([userId, portalId])
   @@index([portalId])
   @@index([userId])
-  @@index([role])
+  @@index([roleId])
   @@index([isActive])
   @@map("employees")
+}
+
+/// Роль сотрудника в клубе: набор кодов прав из каталога (`access/domain/permissions.ts`).
+/// Системные (owner, admin, manager, employee) создаются при основании клуба; у owner и admin права
+/// не хранятся, а вычисляются — полный доступ. Свои роли клуб заводит с ключом `custom_…`.
+model PortalRole {
+  id          String   @id @default(uuid())
+  portalId    String   @map("portal_id")
+  key         String   @db.VarChar(64)
+  /// Название своей роли; у системной null — название даёт перевод по ключу
+  name        String?  @db.VarChar(120)
+  isSystem    Boolean  @default(false) @map("is_system")
+  permissions String[] @default([])
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  portal      Portal               @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  employees   Employee[]
+  invitations EmployeeInvitation[]
+
+  @@unique([portalId, key])
+  @@index([portalId])
+  @@map("portal_roles")
 }
 
 // ========================
@@ -1132,7 +1150,7 @@ model EmployeeInvitation {
   id                  String           @id @default(uuid())
   portalId            String           @map("portal_id")
   email               String           @db.VarChar(255)
-  role                EmployeeRole     @default(employee)
+  roleId              String           @map("role_id")
   token               String           @unique @db.VarChar(64)
   status              InvitationStatus @default(pending)
   invitedByEmployeeId String?          @map("invited_by_employee_id")
@@ -1144,6 +1162,7 @@ model EmployeeInvitation {
 
   portal            Portal     @relation(fields: [portalId], references: [id], onDelete: Cascade)
   invitedByEmployee Employee?  @relation("InvitationInvitedBy", fields: [invitedByEmployeeId], references: [id], onDelete: SetNull)
+  role              PortalRole @relation(fields: [roleId], references: [id], onDelete: Restrict)
   employees         Employee[]
 
   @@index([portalId, email])

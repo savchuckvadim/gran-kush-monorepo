@@ -8,6 +8,7 @@ import {
     AuthenticatedUser,
     isAuthenticatedUser,
 } from "@modules/portal/auth/shared/domain/auth-user";
+import { effectivePermissions } from "@modules/portal/crm/access/domain/portal-role";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import { Member } from "@modules/portal/crm/members/domain/entity/member.entity";
 
@@ -52,6 +53,7 @@ export class MembershipGuard implements CanActivate {
             req.principal = this.buildPrincipal(user, pc.portalId, {
                 membershipId: member.id,
                 entityRecordId: member.entityRecordId,
+                permissions: [],
             });
             return true;
         }
@@ -62,7 +64,9 @@ export class MembershipGuard implements CanActivate {
         req.principal = this.buildPrincipal(user, pc.portalId, {
             membershipId: employee.id,
             entityRecordId: employee.entityRecordId,
-            role: employee.role,
+            roleId: employee.roleId,
+            roleKey: employee.role.key,
+            permissions: effectivePermissions(employee.role),
         });
         return true;
     }
@@ -94,6 +98,7 @@ export class MembershipGuard implements CanActivate {
     private async resolveEmployee(user: AuthenticatedUser, portalId: string): Promise<Employee> {
         const employee = await this.prisma.employee.findUnique({
             where: { userId_portalId: { userId: user.userId, portalId } },
+            include: { role: true },
         });
         if (!employee || !employee.isActive) {
             throw new ForbiddenException("No active employment in this portal");
@@ -104,7 +109,14 @@ export class MembershipGuard implements CanActivate {
             portalId: employee.portalId,
             entityRecordId: employee.entityRecordId,
             email: user.email,
-            role: employee.role,
+            roleId: employee.roleId,
+            role: {
+                id: employee.role.id,
+                key: employee.role.key,
+                name: employee.role.name,
+                isSystem: employee.role.isSystem,
+                permissions: employee.role.permissions,
+            },
             isActive: employee.isActive,
             lastLoginAt: employee.lastLoginAt ?? undefined,
             createdAt: employee.createdAt,
@@ -115,7 +127,10 @@ export class MembershipGuard implements CanActivate {
     private buildPrincipal(
         user: AuthenticatedUser,
         portalId: string,
-        membership: Pick<PortalPrincipal, "membershipId" | "entityRecordId" | "role">
+        membership: Pick<
+            PortalPrincipal,
+            "membershipId" | "entityRecordId" | "roleId" | "roleKey" | "permissions"
+        >
     ): PortalPrincipal {
         return {
             userId: user.userId,

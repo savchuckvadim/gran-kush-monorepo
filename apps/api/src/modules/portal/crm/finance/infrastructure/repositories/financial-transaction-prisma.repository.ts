@@ -419,7 +419,9 @@ export class FinancialTransactionPrismaRepository extends FinancialTransactionRe
             notes: row.notes,
             order: row.order ?? null,
             member: memberPayload,
-            createdByEmployee: row.createdByEmployee ?? null,
+            createdByEmployee: row.createdByEmployee
+                ? { id: row.createdByEmployee.id, role: row.createdByEmployee.role.key }
+                : null,
         });
     }
 }

@@ -7,6 +7,7 @@ import { CookieModule } from "@common/cookie/cookie.module";
 import { PrismaModule } from "@common/prisma/prisma.module";
 import { EmployeeAuthModule } from "@modules/portal/auth/employees/employee-auth.module";
 import { SharedAuthModule } from "@modules/portal/auth/shared/shared-auth.module";
+import { AccessModule } from "@modules/portal/crm/access/access.module";
 import { EmployeesModule } from "@modules/portal/crm/employees/employees.module";
 
 import { CabinetInvitationsController } from "./api/controllers/cabinet-invitations.controller";
@@ -22,6 +23,7 @@ import { InvitationsService } from "./application/services/invitations.service";
         PrismaModule,
         UsersModule,
         EmployeesModule,
+        AccessModule,
         EmployeeAuthModule,
         SharedAuthModule,
         MailModule,

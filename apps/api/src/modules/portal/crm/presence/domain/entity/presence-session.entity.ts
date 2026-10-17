@@ -42,6 +42,7 @@ export class PresenceSession {
     };
     employee?: {
         id: string;
+        /** Ключ роли клуба */
         role: string;
     };
 

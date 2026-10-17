@@ -1,9 +1,8 @@
-import { EmployeeRole } from "@prisma/client";
-
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 
 export interface EmployeeFilters {
-    role?: EmployeeRole;
+    /** Ключ роли клуба: owner, admin, manager, employee, custom_… */
+    roleKey?: string;
     isActive?: boolean;
 }
 
@@ -38,14 +37,14 @@ export abstract class EmployeeRepository {
     abstract createWithProfile(data: {
         userId: string;
         portalId: string;
-        role: EmployeeRole;
+        roleId: string;
         invitationId?: string;
         fields: Record<string, unknown>;
     }): Promise<EmployeeWithProfile>;
     abstract updateBridge(
         id: string,
         data: Partial<{
-            role: EmployeeRole;
+            roleId: string;
             isActive: boolean;
             lastLoginAt: Date;
         }>

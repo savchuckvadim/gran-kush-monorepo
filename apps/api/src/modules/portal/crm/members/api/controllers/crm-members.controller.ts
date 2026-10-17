@@ -12,7 +12,6 @@ import {
     Res,
     StreamableFile,
     UploadedFiles,
-    UseGuards,
     UseInterceptors,
 } from "@nestjs/common";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
@@ -27,6 +26,7 @@ import type { Response } from "express";
 import { EMAIL_THROTTLE, UPLOAD_THROTTLE } from "@common/config/throttler/throttler.config";
 import { CurrentPrincipal } from "@common/decorators/auth/current-principal.decorator";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
+import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
@@ -35,7 +35,8 @@ import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.in
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import type { PortalPrincipal } from "@common/portal";
 import { mimeForStoragePath, UPLOAD_LIMITS } from "@common/upload";
-import { Admin, AdminGuard, RequireEmployeeJwt } from "@modules/portal/auth/employees";
+import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
+import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import { FormSchemaService } from "@modules/portal/crm/entity-fields/application/services/form-schema.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 import {
@@ -57,6 +58,7 @@ import { CrmMemberFilesRequestDto } from "../dto/crm-member-documents.dto";
 @ApiTags("CRM Members Management")
 @Controller("crm/members")
 @RequireEmployeeJwt()
+@RequirePermission(PERMISSIONS.MembersRead)
 export class CrmMembersController {
     constructor(
         private readonly membersService: MembersService,
@@ -66,6 +68,7 @@ export class CrmMembersController {
     ) {}
 
     @Post()
+    @RequirePermission(PERMISSIONS.MembersCreate)
     @ApiOperation({
         summary:
             "Create member from CRM (email + dynamic fields; an existing account gets a consent email)",
@@ -82,6 +85,7 @@ export class CrmMembersController {
     }
 
     @Post(":id/consent/resend")
+    @RequirePermission(PERMISSIONS.MembersCreate)
     @HttpCode(204)
     @Throttle(EMAIL_THROTTLE)
     @ApiOperation({ summary: "Resend the consent email to the account owner (membership pending)" })
@@ -163,9 +167,8 @@ export class CrmMembersController {
     }
 
     @Patch(":id")
-    @UseGuards(AdminGuard)
-    @Admin()
-    @ApiOperation({ summary: "Update member details from CRM (Admin only)" })
+    @RequirePermission(PERMISSIONS.MembersEdit)
+    @ApiOperation({ summary: "Update member details from CRM (members.edit)" })
     @ApiSuccessResponse(CrmMemberFullDto, {
         description: "Member details",
     })
@@ -184,9 +187,8 @@ export class CrmMembersController {
     }
 
     @Patch(":id/status")
-    @UseGuards(AdminGuard)
-    @Admin()
-    @ApiOperation({ summary: "Change member lifecycle status (Admin only)" })
+    @RequirePermission(PERMISSIONS.MembersEdit)
+    @ApiOperation({ summary: "Change member lifecycle status (members.edit)" })
     @ApiSuccessResponse(CrmMemberFullDto, {
         description: "Member details with updated status",
     })
@@ -209,8 +211,7 @@ export class CrmMembersController {
     }
 
     @Patch(":id/files")
-    @UseGuards(AdminGuard)
-    @Admin()
+    @RequirePermission(PERMISSIONS.MembersEdit)
     @Throttle(UPLOAD_THROTTLE)
     @ApiOperation({ summary: "Re-upload member files from CRM (saved to member account)" })
     @ApiConsumes("multipart/form-data")
@@ -268,6 +269,7 @@ export class CrmMembersController {
     }
 
     @Get(":id/documents/:documentId/preview")
+    @RequirePermission(PERMISSIONS.MembersDocuments)
     @ApiOperation({ summary: "Preview member account document (Employee access required)" })
     @ApiSuccessResponse(StreamableFile, {
         description: "Document image",
@@ -291,6 +293,7 @@ export class CrmMembersController {
     }
 
     @Get(":id/signature/preview")
+    @RequirePermission(PERMISSIONS.MembersDocuments)
     @ApiOperation({ summary: "Preview member signature (Employee access required)" })
     @ApiSuccessResponse(StreamableFile, {
         description: "Signature image",

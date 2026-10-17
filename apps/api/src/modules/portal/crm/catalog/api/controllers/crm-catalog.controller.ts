@@ -8,11 +8,11 @@ import {
     Patch,
     Post,
     Query,
-    UseGuards,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
+import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
@@ -20,7 +20,7 @@ import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.in
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
 import { CurrentEmployee } from "@modules/portal/auth/employees/api/decorators/current-employee.decorator";
-import { RequireAdmin } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
+import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import {
     CreateMeasurementUnitDto,
     MeasurementUnitDto,
@@ -104,7 +104,7 @@ export class CrmCatalogController {
     }
 
     @Post("products")
-    @RequireAdmin()
+    @RequirePermission(PERMISSIONS.CatalogManage)
     @ApiOperation({ summary: "Создать товар (Admin)" })
     @ApiSuccessResponse(ProductDetailDto, { status: 201 })
     @ApiErrorResponse([400, 401, 403, 404, 409])
@@ -118,7 +118,7 @@ export class CrmCatalogController {
     }
 
     @Patch("products/:id")
-    @RequireAdmin()
+    @RequirePermission(PERMISSIONS.CatalogManage)
     @ApiOperation({ summary: "Обновить товар (Admin)" })
     @ApiSuccessResponse(ProductDetailDto)
     @ApiErrorResponse([400, 401, 403, 404, 409])
@@ -133,7 +133,7 @@ export class CrmCatalogController {
     }
 
     @Delete("products/:id")
-    @RequireAdmin()
+    @RequirePermission(PERMISSIONS.CatalogManage)
     @ApiOperation({ summary: "Удалить товар (Admin)" })
     @ApiErrorResponse([401, 403, 404])
     async deleteProduct(
@@ -165,7 +165,7 @@ export class CrmCatalogController {
     }
 
     @Post("categories")
-    @RequireAdmin()
+    @RequirePermission(PERMISSIONS.CatalogManage)
     @ApiOperation({ summary: "Создать категорию (Admin)" })
     @ApiSuccessResponse(ProductCategoryDto, { status: 201 })
     @ApiErrorResponse([400, 401, 403, 404, 409])
@@ -178,7 +178,7 @@ export class CrmCatalogController {
     }
 
     @Patch("categories/:id")
-    @RequireAdmin()
+    @RequirePermission(PERMISSIONS.CatalogManage)
     @ApiOperation({ summary: "Обновить категорию (Admin)" })
     @ApiSuccessResponse(ProductCategoryDto)
     @ApiErrorResponse([400, 401, 403, 404, 409])
@@ -192,7 +192,7 @@ export class CrmCatalogController {
     }
 
     @Delete("categories/:id")
-    @RequireAdmin()
+    @RequirePermission(PERMISSIONS.CatalogManage)
     @ApiOperation({ summary: "Удалить категорию (Admin)" })
     @ApiErrorResponse([401, 403, 404])
     async deleteCategory(
@@ -218,7 +218,7 @@ export class CrmCatalogController {
     }
 
     @Post("measurement-units")
-    @RequireAdmin()
+    @RequirePermission(PERMISSIONS.CatalogManage)
     @ApiOperation({ summary: "Создать единицу измерения (Admin)" })
     @ApiSuccessResponse(MeasurementUnitDto, { status: 201 })
     @ApiErrorResponse([400, 401, 403, 409])
@@ -231,7 +231,7 @@ export class CrmCatalogController {
     }
 
     @Patch("measurement-units/:id")
-    @RequireAdmin()
+    @RequirePermission(PERMISSIONS.CatalogManage)
     @ApiOperation({ summary: "Обновить единицу измерения (Admin)" })
     @ApiSuccessResponse(MeasurementUnitDto)
     @ApiErrorResponse([400, 401, 403, 404, 409])
@@ -245,7 +245,7 @@ export class CrmCatalogController {
     }
 
     @Delete("measurement-units/:id")
-    @RequireAdmin()
+    @RequirePermission(PERMISSIONS.CatalogManage)
     @ApiOperation({ summary: "Удалить единицу измерения (Admin)" })
     @ApiErrorResponse([401, 403, 404])
     async deleteMeasurementUnit(

@@ -2,9 +2,11 @@ import { Body, Controller, Delete, Get, NotFoundException, Param, Post } from "@
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
+import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
+import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import {
     QrCodeScanResultDto,
     QrCodeWithPayloadDto,
@@ -28,6 +30,7 @@ export class CrmQrCodesController {
     // ─── Сканирование QR-кода (на стойке) ────────────────────────────────────
 
     @Post("scan")
+    @RequirePermission(PERMISSIONS.PresenceCheckin)
     @ApiOperation({
         summary: "Сканировать QR-код",
         description:
@@ -46,6 +49,7 @@ export class CrmQrCodesController {
     // ─── Получить QR-код участника ───────────────────────────────────────────
 
     @Get("member/:memberId")
+    @RequirePermission(PERMISSIONS.MembersRead)
     @ApiOperation({
         summary: "Получить QR-код участника",
         description:
@@ -68,6 +72,7 @@ export class CrmQrCodesController {
     // ─── Сгенерировать / перегенерировать QR-код ─────────────────────────────
 
     @Post("generate")
+    @RequirePermission(PERMISSIONS.QrManage)
     @ApiOperation({
         summary: "Сгенерировать / перегенерировать QR-код для участника",
         description:
@@ -87,6 +92,7 @@ export class CrmQrCodesController {
     // ─── Отозвать QR-код ─────────────────────────────────────────────────────
 
     @Delete("member/:memberId")
+    @RequirePermission(PERMISSIONS.QrManage)
     @ApiOperation({
         summary: "Отозвать QR-код участника",
         description:

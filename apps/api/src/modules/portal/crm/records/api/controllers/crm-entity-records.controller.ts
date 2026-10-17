@@ -1,17 +1,26 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    Delete,
+    ForbiddenException,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Query,
+} from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { CurrentPrincipal } from "@common/decorators/auth/current-principal.decorator";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
+import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { type ContentLocale, RequestLocale } from "@common/i18n";
-import type { PortalPrincipal } from "@common/portal";
+import { type PortalPrincipal, principalCan } from "@common/portal";
 import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
-import {
-    RequireAdmin,
-    RequireManager,
-} from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
+import { entityReadPermission } from "@modules/portal/crm/access/domain/entity-read-permission";
+import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 
 import { EntityRecordsService } from "../../application/services/entity-records.service";
 import {
@@ -30,9 +39,22 @@ import {
  * Системные сущности (member/employee/order/product) здесь read-only.
  * Фильтры: `q` (текст) и `filter` (JSON-массив условий по полям).
  */
+/** Записи системной сущности здесь читаются только с правом её раздела (участники, сотрудники, заказы). */
+const assertCanReadEntity = (principal: PortalPrincipal, code: string): void => {
+    const required = entityReadPermission(code);
+    if (required && !principalCan(principal, required)) {
+        throw new ForbiddenException({
+            message: "Not enough permissions",
+            code: "missing_permission",
+            errors: [required],
+        });
+    }
+};
+
 @ApiTags("CRM Entity Records (smart processes)")
 @Controller("crm/entities/:code/records")
 @RequireEmployeeJwt()
+@RequirePermission(PERMISSIONS.RecordsRead)
 export class CrmEntityRecordsController {
     constructor(private readonly recordsService: EntityRecordsService) {}
 
@@ -44,8 +66,10 @@ export class CrmEntityRecordsController {
         @PortalId() portalId: string,
         @Param("code") code: string,
         @RequestLocale() locale: ContentLocale,
-        @Query() query: EntityRecordListQueryDto
+        @Query() query: EntityRecordListQueryDto,
+        @CurrentPrincipal() principal: PortalPrincipal
     ): Promise<EntityRecordListResponseDto> {
+        assertCanReadEntity(principal, code);
         const {
             limit = 50,
             skip = 0,
@@ -66,8 +90,10 @@ export class CrmEntityRecordsController {
     }
 
     @Post()
-    @RequireManager()
-    @ApiOperation({ summary: "Создать запись (валидация по форме crm_create). Роль: manager+" })
+    @RequirePermission(PERMISSIONS.RecordsWrite)
+    @ApiOperation({
+        summary: "Создать запись (валидация по форме crm_create). Право records.write",
+    })
     @ApiSuccessResponse(EntityRecordDto, { status: 201 })
     @ApiErrorResponse([400, 401, 403, 404])
     async create(
@@ -94,14 +120,16 @@ export class CrmEntityRecordsController {
         @PortalId() portalId: string,
         @Param("code") code: string,
         @Param("id") id: string,
-        @RequestLocale() locale: ContentLocale
+        @RequestLocale() locale: ContentLocale,
+        @CurrentPrincipal() principal: PortalPrincipal
     ): Promise<EntityRecordDto> {
+        assertCanReadEntity(principal, code);
         return this.recordsService.getById(portalId, code, id, locale);
     }
 
     @Patch(":id")
-    @RequireManager()
-    @ApiOperation({ summary: "Обновить поля/активность записи. Роль: manager+" })
+    @RequirePermission(PERMISSIONS.RecordsWrite)
+    @ApiOperation({ summary: "Обновить поля/активность записи. Право records.write" })
     @ApiSuccessResponse(EntityRecordDto)
     @ApiErrorResponse([400, 401, 403, 404])
     async update(
@@ -115,8 +143,8 @@ export class CrmEntityRecordsController {
     }
 
     @Delete(":id")
-    @RequireAdmin()
-    @ApiOperation({ summary: "Удалить запись. Роль: admin/portal_owner" })
+    @RequirePermission(PERMISSIONS.RecordsDelete)
+    @ApiOperation({ summary: "Удалить запись (право records.delete)" })
     @ApiSuccessResponse(DeleteRecordResponseDto)
     @ApiErrorResponse([401, 403, 404])
     async remove(
@@ -129,10 +157,10 @@ export class CrmEntityRecordsController {
     }
 
     @Patch(":id/stage")
-    @RequireManager()
+    @RequirePermission(PERMISSIONS.RecordsWrite)
     @ApiOperation({
         summary:
-            "Перенести карточку: стадия и место в колонке (afterId — сосед сверху). Роль: manager+",
+            "Перенести карточку: стадия и место в колонке (afterId — сосед сверху). Право records.write",
     })
     @ApiSuccessResponse(EntityRecordDto)
     @ApiErrorResponse([400, 401, 403, 404])
@@ -153,8 +181,8 @@ export class CrmEntityRecordsController {
     }
 
     @Patch(":id/status")
-    @RequireManager()
-    @ApiOperation({ summary: "Сменить статус записи. Роль: manager+" })
+    @RequirePermission(PERMISSIONS.RecordsWrite)
+    @ApiOperation({ summary: "Сменить статус записи. Право records.write" })
     @ApiSuccessResponse(EntityRecordDto)
     @ApiErrorResponse([400, 401, 403, 404])
     async setStatus(

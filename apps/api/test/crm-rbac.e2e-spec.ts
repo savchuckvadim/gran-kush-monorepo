@@ -1,7 +1,6 @@
 import { INestApplication } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 
-import { EmployeeRole } from "@prisma/client";
 import bcrypt from "bcrypt";
 import cookieParser from "cookie-parser";
 import request from "supertest";
@@ -62,7 +61,10 @@ describe("CRM role-based access (e2e)", () => {
                 .set("X-Portal-Slug", slug),
     });
 
-    const seedEmployeeAndLogin = async (role: EmployeeRole): Promise<string> => {
+    const seedEmployeeAndLogin = async (role: string): Promise<string> => {
+        const portalRole = await prisma.portalRole.findUniqueOrThrow({
+            where: { portalId_key: { portalId, key: role } },
+        });
         const employeeDefinition = await prisma.entityDefinition.findFirstOrThrow({
             where: { portalId, code: "employee" },
             select: { id: true },
@@ -79,7 +81,13 @@ describe("CRM role-based access (e2e)", () => {
             },
         });
         await prisma.employee.create({
-            data: { userId: user.id, portalId, entityRecordId: record.id, role, isActive: true },
+            data: {
+                userId: user.id,
+                portalId,
+                entityRecordId: record.id,
+                roleId: portalRole.id,
+                isActive: true,
+            },
         });
 
         const res = await request(app.getHttpServer())
@@ -115,8 +123,8 @@ describe("CRM role-based access (e2e)", () => {
         portalId = res.body.portal.id as string;
         ownerCookies = extractCookies(res);
 
-        managerCookies = await seedEmployeeAndLogin(EmployeeRole.manager);
-        employeeCookies = await seedEmployeeAndLogin(EmployeeRole.employee);
+        managerCookies = await seedEmployeeAndLogin("manager");
+        employeeCookies = await seedEmployeeAndLogin("employee");
 
         // Каталог: юнит + категория + товар (сидим напрямую, чтобы тесты не зависели от прав на создание)
         const unit = await prisma.measurementUnit.create({

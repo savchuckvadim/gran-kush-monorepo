@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-import { EmployeeRole } from "@prisma/client";
+import { EmployeeRoleDto } from "@modules/portal/crm/access/api/dto/portal-role.dto";
+import { ALL_PERMISSIONS, Permission } from "@modules/portal/crm/access/domain/permissions";
 
 export class EmployeeEmploymentDto {
     @ApiProperty({ example: "f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f", type: String })
@@ -9,8 +10,16 @@ export class EmployeeEmploymentDto {
     @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174999", type: String })
     employeeId: string;
 
-    @ApiProperty({ enum: EmployeeRole, example: EmployeeRole.manager })
-    role: EmployeeRole;
+    @ApiProperty({ type: () => EmployeeRoleDto })
+    role: EmployeeRoleDto;
+
+    @ApiProperty({
+        enum: ALL_PERMISSIONS,
+        enumName: "Permission",
+        isArray: true,
+        description: "Права роли в этом клубе — по ним CRM прячет разделы и кнопки",
+    })
+    permissions: Permission[];
 
     @ApiProperty({ example: true, type: Boolean })
     isActive: boolean;

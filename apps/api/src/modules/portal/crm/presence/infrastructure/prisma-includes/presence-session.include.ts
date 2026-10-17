@@ -19,7 +19,7 @@ export const SESSION_INCLUDE = {
     employee: {
         select: {
             id: true,
-            role: true,
+            role: { select: { key: true } },
         },
     },
 } satisfies Prisma.PresenceSessionInclude;

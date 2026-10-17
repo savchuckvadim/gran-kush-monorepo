@@ -9,7 +9,7 @@ import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.e
 import { Member } from "@modules/portal/crm/members/domain/entity/member.entity";
 
 const userWithMembershipsInclude = {
-    employees: true,
+    employees: { include: { role: true } },
     members: true,
 } as const satisfies Prisma.UserInclude;
 
@@ -133,7 +133,14 @@ export class UserPrismaRepository implements UserRepository {
                     portalId: e.portalId,
                     entityRecordId: e.entityRecordId,
                     email: user.email,
-                    role: e.role,
+                    roleId: e.roleId,
+                    role: {
+                        id: e.role.id,
+                        key: e.role.key,
+                        name: e.role.name,
+                        isSystem: e.role.isSystem,
+                        permissions: e.role.permissions,
+                    },
                     isActive: e.isActive,
                     lastLoginAt: e.lastLoginAt ?? undefined,
                     createdAt: e.createdAt,

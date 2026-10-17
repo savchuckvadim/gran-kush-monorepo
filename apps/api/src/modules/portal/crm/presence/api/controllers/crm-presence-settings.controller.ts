@@ -2,10 +2,11 @@ import { Body, Controller, Get, Patch } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
+import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
-import { RequireAdmin } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
+import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 
 import { PresenceSettingsService } from "../../application/services/presence-settings.service";
 import { PresenceSettingsDto, UpdatePresenceSettingsDto } from "../dto/presence-settings.dto";
@@ -26,7 +27,7 @@ export class CrmPresenceSettingsController {
     }
 
     @Patch()
-    @RequireAdmin()
+    @RequirePermission(PERMISSIONS.SettingsClub)
     @ApiOperation({ summary: "Изменить правила присутствия; не названные поля остаются" })
     @ApiSuccessResponse(PresenceSettingsDto)
     @ApiErrorResponse([400, 401, 403])

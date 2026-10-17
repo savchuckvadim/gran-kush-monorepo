@@ -291,7 +291,9 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
             createdAt: row.createdAt,
             updatedAt: row.updatedAt,
             member: memberPayload,
-            employee: row.employee ?? undefined,
+            employee: row.employee
+                ? { id: row.employee.id, role: row.employee.role.key }
+                : undefined,
         });
     }
 }

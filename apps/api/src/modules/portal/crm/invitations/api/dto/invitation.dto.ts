@@ -1,31 +1,30 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
-import { EmployeeRole, InvitationStatus } from "@prisma/client";
-import { IsIn, IsObject, IsOptional, IsString, Matches, MinLength } from "class-validator";
+import { InvitationStatus } from "@prisma/client";
+import { IsObject, IsOptional, IsString, Matches, MinLength } from "class-validator";
 
 import { IsEmailWithLowerCase } from "@common/decorators/dto/is-email-with-lower-case.decorator";
+import { EmployeeRoleDto } from "@modules/portal/crm/access/api/dto/portal-role.dto";
+import { IsRoleKey } from "@modules/portal/crm/access/api/dto/role-key.decorator";
 
 import {
     AcceptInvitationOutcome,
     InvitationAccountState,
 } from "../../domain/invitation-acceptance";
 
-/** Владелец у клуба один и появляется при регистрации — приглашением его не выдать (TASK-662). */
-export const INVITABLE_ROLES = [
-    EmployeeRole.admin,
-    EmployeeRole.manager,
-    EmployeeRole.employee,
-] as const;
-export type InvitableRole = (typeof INVITABLE_ROLES)[number];
-
 export class CreateInvitationDto {
     @ApiProperty({ type: String, example: "new-employee@example.com" })
     @IsEmailWithLowerCase()
     email: string;
 
-    @ApiProperty({ enum: INVITABLE_ROLES, example: EmployeeRole.employee })
-    @IsIn(INVITABLE_ROLES)
-    role: InvitableRole;
+    /** Владелец у клуба один и появляется при регистрации — приглашением его не выдать (TASK-662) */
+    @ApiProperty({
+        type: String,
+        example: "employee",
+        description: "Ключ роли клуба (кроме владельца)",
+    })
+    @IsRoleKey()
+    role: string;
 }
 
 export class InvitationDto {
@@ -35,8 +34,8 @@ export class InvitationDto {
     @ApiProperty({ type: String, example: "new-employee@example.com" })
     email: string;
 
-    @ApiProperty({ enum: EmployeeRole })
-    role: EmployeeRole;
+    @ApiProperty({ type: () => EmployeeRoleDto })
+    role: EmployeeRoleDto;
 
     @ApiProperty({ enum: InvitationStatus })
     status: InvitationStatus;
@@ -70,8 +69,8 @@ export class PublicInvitationInfoDto {
     @ApiProperty({ type: String, example: "new-employee@example.com" })
     email: string;
 
-    @ApiProperty({ enum: EmployeeRole })
-    role: EmployeeRole;
+    @ApiProperty({ type: () => EmployeeRoleDto })
+    role: EmployeeRoleDto;
 
     @ApiProperty({ type: String, example: "green-club" })
     portalSlug: string;

@@ -1,7 +1,7 @@
 import { InjectQueue } from "@nestjs/bullmq";
 import { ConflictException, Injectable } from "@nestjs/common";
 
-import { Employee, EmployeeRole, Portal, Prisma, User } from "@prisma/client";
+import { Employee, Portal, Prisma, User } from "@prisma/client";
 import { Queue } from "bullmq";
 
 import { LEGAL_TERMS_VERSION } from "@common/legal/legal-terms";
@@ -9,6 +9,7 @@ import { PrismaService } from "@common/prisma/prisma.service";
 import { isUniqueViolationOn } from "@common/prisma/unique-violation";
 import { buildJobId } from "@common/queue/job-options";
 import { BillingSettings } from "@modules/billing/application/billing-settings";
+import { createSystemRoles } from "@modules/portal/crm/access/infrastructure/portal-role-prisma.repository";
 import { ProvisionPortalFromTemplatesService } from "@modules/portal/crm/entity-fields/application/services/provision-portal-from-templates.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 import {
@@ -101,6 +102,8 @@ export class ClubFoundingService {
             trialEndsAt: this.billingSettings.trialEndFrom(new Date()),
         });
 
+        const { ownerRoleId } = await createSystemRoles(tx, portal.id);
+
         const employeeDef = await tx.entityDefinition.findUniqueOrThrow({
             where: {
                 portalId_code: { portalId: portal.id, code: ENTITY_DEFINITION_CODES.EMPLOYEE },
@@ -114,7 +117,7 @@ export class ClubFoundingService {
                 portalId: portal.id,
                 userId: ownerUserId,
                 entityRecordId: record.id,
-                role: EmployeeRole.portal_owner,
+                roleId: ownerRoleId,
                 isActive: true,
             },
             include: { user: true },

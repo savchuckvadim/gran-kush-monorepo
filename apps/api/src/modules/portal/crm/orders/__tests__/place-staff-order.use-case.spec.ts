@@ -1,7 +1,8 @@
 import { Test, TestingModule } from "@nestjs/testing";
 
-import { EmployeeRole, Prisma, StageSemantic } from "@prisma/client";
+import { Prisma, StageSemantic } from "@prisma/client";
 
+import { ALL_PERMISSIONS, PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
 import { MemberAccessService } from "@modules/portal/crm/club-policy/application/services/member-access.service";
 import { MemberLimitService } from "@modules/portal/crm/club-policy/application/services/member-limit.service";
@@ -55,8 +56,8 @@ const mockMemberAccess = { assertStaffMayOrderFor: jest.fn() };
 
 describe("PlaceStaffOrderUseCase — заказ из CRM", () => {
     let useCase: PlaceStaffOrderUseCase;
-    const admin = { id: "emp-1", userId: "user-emp-1", role: EmployeeRole.admin };
-    const employee = { ...admin, role: EmployeeRole.employee };
+    const admin = { membershipId: "emp-1", userId: "user-emp-1", permissions: ALL_PERMISSIONS };
+    const employee = { ...admin, permissions: [PERMISSIONS.OrdersCreate] };
 
     const stage = (id: string, semantic: StageSemantic): OrderStage => ({
         id,

@@ -1,17 +1,18 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
 
-import { EmployeeRole } from "@prisma/client";
-import { IsBoolean, IsEnum, IsObject, IsOptional } from "class-validator";
+import { IsBoolean, IsObject, IsOptional } from "class-validator";
+
+import { IsRoleKey } from "@modules/portal/crm/access/api/dto/role-key.decorator";
 
 export class UpdateEmployeeDto {
     @ApiPropertyOptional({
-        enum: EmployeeRole,
-        example: EmployeeRole.manager,
-        description: "Employee role (cannot be portal_owner)",
+        type: String,
+        example: "manager",
+        description: "Ключ роли клуба (кроме владельца)",
     })
     @IsOptional()
-    @IsEnum(EmployeeRole)
-    role?: EmployeeRole;
+    @IsRoleKey()
+    role?: string;
 
     @ApiPropertyOptional({ type: Boolean, example: true })
     @IsOptional()

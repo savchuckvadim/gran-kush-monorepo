@@ -5,6 +5,7 @@ import { hash } from "bcrypt";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
 import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
+import { SYSTEM_ROLE_KEYS } from "@modules/portal/crm/access/domain/portal-role";
 
 import { CreateClubDto } from "../../api/dto/create-club.dto";
 import { RegisterPortalDto } from "../../api/dto/register-portal.dto";
@@ -105,7 +106,7 @@ export class PortalRegistrationService {
                 id: club.owner.id,
                 email: club.owner.user.email,
                 name: dto.ownerName.trim(),
-                role: club.owner.role,
+                role: SYSTEM_ROLE_KEYS.Owner,
                 portalId: club.owner.portalId,
             },
             tokens,

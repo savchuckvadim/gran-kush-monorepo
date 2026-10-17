@@ -4,18 +4,19 @@ import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { Portal, Prisma } from "@prisma/client";
 
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
+import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { PrismaService } from "@common/prisma/prisma.service";
-import { Admin } from "@modules/portal/auth/employees";
-import { RequireEmployeeAdmin } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
+import { RequireEmployeeJwt } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
+import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 
 import { PortalSettingsDto, UpdatePortalSettingsDto } from "../dto/public-portals.dto";
 
 @ApiTags("CRM Portal Settings")
 @Controller("crm/settings/portal")
-@RequireEmployeeAdmin()
-@Admin()
+@RequireEmployeeJwt()
+@RequirePermission(PERMISSIONS.SettingsClub)
 export class CrmPortalSettingsController {
     constructor(private readonly prisma: PrismaService) {}
 

@@ -1,4 +1,12 @@
-import { EmployeeRole } from "@prisma/client";
+/** Роль сотрудника в клубе — как её видит сотрудник и его карточка. */
+export interface EmployeeRoleRef {
+    id: string;
+    key: string;
+    /** Название своей роли; у системной — null, название даёт перевод по ключу */
+    name: string | null;
+    isSystem: boolean;
+    permissions: string[];
+}
 
 /**
  * Domain Entity - Employee
@@ -12,7 +20,8 @@ export class Employee {
     entityRecordId: string;
     /** Из User (заполняется при загрузке с relations) */
     email: string;
-    role: EmployeeRole;
+    roleId: string;
+    role: EmployeeRoleRef;
     isActive: boolean;
     lastLoginAt?: Date;
     createdAt: Date;

@@ -77,7 +77,7 @@ export class MyPortalDto {
     @ApiProperty({ type: String })
     employeeId: string;
 
-    @ApiProperty({ example: "manager", type: String })
+    @ApiProperty({ example: "manager", type: String, description: "Ключ роли клуба" })
     role: string;
 
     @ApiProperty({ type: Boolean })

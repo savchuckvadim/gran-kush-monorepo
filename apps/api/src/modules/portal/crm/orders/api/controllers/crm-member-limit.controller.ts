@@ -2,10 +2,11 @@ import { Body, Controller, Get, Param, Patch } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
+import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
-import { RequireManager } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
+import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import {
     MonthlyLimitDto,
     UpdateMemberLimitDto,
@@ -16,6 +17,7 @@ import { MonthlyLimitStatusService } from "@modules/portal/crm/orders/applicatio
 @ApiTags("CRM Member Limit")
 @Controller("crm/members/:memberId/monthly-limit")
 @RequireEmployeeJwt()
+@RequirePermission(PERMISSIONS.MembersRead)
 export class CrmMemberLimitController {
     constructor(private readonly limits: MonthlyLimitStatusService) {}
 
@@ -31,8 +33,8 @@ export class CrmMemberLimitController {
     }
 
     @Patch()
-    @RequireManager()
-    @ApiOperation({ summary: "Личный лимит участника (manager+); null — лимит клуба" })
+    @RequirePermission(PERMISSIONS.MembersEdit)
+    @ApiOperation({ summary: "Личный лимит участника (members.edit); null — лимит клуба" })
     @ApiSuccessResponse(MonthlyLimitDto)
     @ApiErrorResponse([400, 401, 403, 404])
     async update(

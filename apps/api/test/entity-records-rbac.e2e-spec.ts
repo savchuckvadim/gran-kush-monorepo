@@ -1,7 +1,6 @@
 import { INestApplication } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 
-import { EmployeeRole } from "@prisma/client";
 import bcrypt from "bcrypt";
 import cookieParser from "cookie-parser";
 import request from "supertest";
@@ -65,10 +64,7 @@ describe("Entity records RBAC + isolation (e2e)", () => {
     });
 
     /** Заводит сотрудника с нужной ролью напрямую в БД и логинит его. */
-    const seedEmployeeAndLogin = async (
-        targetPortalId: string,
-        role: EmployeeRole
-    ): Promise<string> => {
+    const seedEmployeeAndLogin = async (targetPortalId: string, role: string): Promise<string> => {
         const employeeDefinition = await prisma.entityDefinition.findFirstOrThrow({
             where: { portalId: targetPortalId, code: "employee" },
             select: { id: true },
@@ -89,7 +85,11 @@ describe("Entity records RBAC + isolation (e2e)", () => {
                 userId: user.id,
                 portalId: targetPortalId,
                 entityRecordId: record.id,
-                role,
+                roleId: (
+                    await prisma.portalRole.findUniqueOrThrow({
+                        where: { portalId_key: { portalId: targetPortalId, key: role } },
+                    })
+                ).id,
                 isActive: true,
             },
         });
@@ -140,10 +140,10 @@ describe("Entity records RBAC + isolation (e2e)", () => {
         otherPortalId = otherOwner.id;
         otherOwnerCookies = otherOwner.cookies;
 
-        managerCookies = await seedEmployeeAndLogin(portalId, EmployeeRole.manager);
-        employeeCookies = await seedEmployeeAndLogin(portalId, EmployeeRole.employee);
+        managerCookies = await seedEmployeeAndLogin(portalId, "manager");
+        employeeCookies = await seedEmployeeAndLogin(portalId, "employee");
 
-        // Кастомная сущность + запись в каждом портале (portal_owner имеет все права)
+        // Кастомная сущность + запись в каждом портале (у владельца все права)
         for (const [pid, cookies, portalSlug] of [
             [portalId, ownerCookies, slug],
             [otherPortalId, otherOwnerCookies, otherSlug],

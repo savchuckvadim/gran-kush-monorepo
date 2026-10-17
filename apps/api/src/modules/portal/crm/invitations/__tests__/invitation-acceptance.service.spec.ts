@@ -10,7 +10,7 @@ const INVITATION = {
     id: "inv-1",
     portalId: "portal-1",
     email: "invitee@test.local",
-    role: "employee",
+    roleId: "role-employee",
     portal: { id: "portal-1", name: "club", displayName: "Club" },
 };
 
@@ -42,7 +42,7 @@ const build = (
             .mockResolvedValue({ user: account({ id: "new-user" }), created: true }),
     };
     const employeesService = {
-        create: jest.fn().mockResolvedValue({ employee: { employee: { id: "emp-1" } } }),
+        createFromInvitation: jest.fn().mockResolvedValue({ employee: { id: "emp-1" } }),
     };
     const employeeAuth = {
         generateTokens: jest.fn().mockResolvedValue({ accessToken: "a", refreshToken: "r" }),
@@ -101,7 +101,7 @@ describe("InvitationAcceptanceService — пароль", () => {
 
         expect(result.response.outcome).toBe(AcceptInvitationOutcome.password_setup_sent);
         expect(emailVerification.sendAccountSetup).toHaveBeenCalled();
-        expect(employeesService.create).not.toHaveBeenCalled();
+        expect(employeesService.createFromInvitation).not.toHaveBeenCalled();
     });
 
     it("неверный пароль существующего аккаунта — 401", async () => {
@@ -128,7 +128,7 @@ describe("InvitationAcceptanceService — пароль", () => {
 
         expect(result.response.outcome).toBe(AcceptInvitationOutcome.confirm_email_first);
         expect(result.tokens).toBeUndefined();
-        expect(employeesService.create).not.toHaveBeenCalled();
+        expect(employeesService.createFromInvitation).not.toHaveBeenCalled();
         expect(emailVerification.sendVerificationEmailToUserId).toHaveBeenCalled();
     });
 
@@ -178,7 +178,7 @@ describe("InvitationAcceptanceService — сессия и Google", () => {
         await expect(
             service.acceptWithSession("tok", "user-1", undefined, "d")
         ).rejects.toBeInstanceOf(ForbiddenException);
-        expect(employeesService.create).not.toHaveBeenCalled();
+        expect(employeesService.createFromInvitation).not.toHaveBeenCalled();
     });
 
     it("уже сотрудник клуба — 409, второй записи нет", async () => {
@@ -187,7 +187,7 @@ describe("InvitationAcceptanceService — сессия и Google", () => {
         await expect(
             service.acceptWithSession("tok", "user-1", undefined, "d")
         ).rejects.toBeInstanceOf(ConflictException);
-        expect(employeesService.create).not.toHaveBeenCalled();
+        expect(employeesService.createFromInvitation).not.toHaveBeenCalled();
     });
 
     it("адрес из Google без учёта регистра совпадает с адресом приглашения", async () => {

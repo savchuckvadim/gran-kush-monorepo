@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 
+import { AccessModule } from "@modules/portal/crm/access/access.module";
 import { CatalogModule } from "@modules/portal/crm/catalog/catalog.module";
 import { ClubPolicyModule } from "@modules/portal/crm/club-policy/club-policy.module";
 import { EmployeesModule } from "@modules/portal/crm/employees/employees.module";
@@ -23,6 +24,7 @@ import { PublicPortalModule } from "@modules/portal/public/public-portal.module"
     imports: [
         PortalContextModule,
         PortalsModule,
+        AccessModule,
         EntityFieldsModule,
         EmployeesModule,
         MembersModule,

@@ -7,17 +7,18 @@ import {
     Param,
     Patch,
     Post,
-    UseGuards,
 } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { FormPurpose } from "@prisma/client";
 
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
+import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { type ContentLocale, RequestLocale } from "@common/i18n";
-import { Admin, AdminGuard, RequireEmployeeJwt } from "@modules/portal/auth/employees";
+import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
+import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import {
     DeleteMemberFieldResponseDto,
     MemberFieldDefinitionResponseDto,
@@ -123,8 +124,7 @@ export class CrmEntityFieldsSettingsController {
     }
 
     @Post(":code/fields")
-    @UseGuards(AdminGuard)
-    @Admin()
+    @RequirePermission(PERMISSIONS.SettingsStructure)
     @ApiOperation({ summary: "Create a custom field (portal admin)" })
     @ApiSuccessResponse(MemberFieldDefinitionResponseDto)
     @ApiErrorResponse([401, 403, 400, 409])
@@ -137,8 +137,7 @@ export class CrmEntityFieldsSettingsController {
     }
 
     @Patch(":code/fields/:fieldKey")
-    @UseGuards(AdminGuard)
-    @Admin()
+    @RequirePermission(PERMISSIONS.SettingsStructure)
     @ApiOperation({ summary: "Update a non-immutable field" })
     @ApiSuccessResponse(MemberFieldDefinitionResponseDto)
     @ApiErrorResponse([401, 403, 404, 400])
@@ -152,8 +151,7 @@ export class CrmEntityFieldsSettingsController {
     }
 
     @Delete(":code/fields/:fieldKey")
-    @UseGuards(AdminGuard)
-    @Admin()
+    @RequirePermission(PERMISSIONS.SettingsStructure)
     @ApiOperation({ summary: "Delete a custom field (no system/immutable)" })
     @ApiSuccessResponse(DeleteMemberFieldResponseDto)
     @ApiErrorResponse([401, 403, 404, 400])
@@ -167,8 +165,7 @@ export class CrmEntityFieldsSettingsController {
     }
 
     @Post(":code/fields/:fieldKey/options")
-    @UseGuards(AdminGuard)
-    @Admin()
+    @RequirePermission(PERMISSIONS.SettingsStructure)
     @ApiOperation({ summary: "Add enum/select option to a field" })
     @ApiSuccessResponse(MemberFieldOptionResponseDto)
     @ApiErrorResponse([401, 403, 404, 409])
@@ -182,8 +179,7 @@ export class CrmEntityFieldsSettingsController {
     }
 
     @Patch(":code/forms/:purpose")
-    @UseGuards(AdminGuard)
-    @Admin()
+    @RequirePermission(PERMISSIONS.SettingsStructure)
     @ApiOperation({ summary: "Replace form layout items for a purpose" })
     @ApiSuccessResponse(MemberFormLayoutReplaceResponseDto)
     @ApiErrorResponse([401, 403, 404, 400])
@@ -216,8 +212,7 @@ export class CrmEntityFieldsSettingsController {
     }
 
     @Post(":code/stage-categories")
-    @UseGuards(AdminGuard)
-    @Admin()
+    @RequirePermission(PERMISSIONS.SettingsStructure)
     @ApiOperation({ summary: "Create a funnel with stages (Admin)" })
     @ApiSuccessResponse(OrderStageCategoryResponseDto)
     @ApiErrorResponse([400, 401, 403, 404])
@@ -231,8 +226,7 @@ export class CrmEntityFieldsSettingsController {
     }
 
     @Patch(":code/stage-categories/:categoryId")
-    @UseGuards(AdminGuard)
-    @Admin()
+    @RequirePermission(PERMISSIONS.SettingsStructure)
     @ApiOperation({
         summary:
             "Update funnel name/stages (Admin). Stages without id are created, missing ones deleted",
@@ -250,8 +244,7 @@ export class CrmEntityFieldsSettingsController {
     }
 
     @Delete(":code/stage-categories/:categoryId")
-    @UseGuards(AdminGuard)
-    @Admin()
+    @RequirePermission(PERMISSIONS.SettingsStructure)
     @ApiOperation({ summary: "Delete a non-system, non-default funnel (Admin)" })
     @ApiSuccessResponse(DeleteResultDto)
     @ApiErrorResponse([400, 401, 403, 404])
@@ -276,8 +269,7 @@ export class CrmEntityFieldsSettingsController {
     }
 
     @Post(":code/status-sets")
-    @UseGuards(AdminGuard)
-    @Admin()
+    @RequirePermission(PERMISSIONS.SettingsStructure)
     @ApiOperation({ summary: "Create a status set with items (Admin)" })
     @ApiSuccessResponse(StatusSetResponseDto)
     @ApiErrorResponse([400, 401, 403, 404])
@@ -290,8 +282,7 @@ export class CrmEntityFieldsSettingsController {
     }
 
     @Post(":code/status-sets/:setId/items")
-    @UseGuards(AdminGuard)
-    @Admin()
+    @RequirePermission(PERMISSIONS.SettingsStructure)
     @ApiOperation({ summary: "Add a status item to a set (Admin)" })
     @ApiSuccessResponse(StatusItemResponseDto)
     @ApiErrorResponse([400, 401, 403, 404])
@@ -305,8 +296,7 @@ export class CrmEntityFieldsSettingsController {
     }
 
     @Patch(":code/status-sets/:setId/items/:itemId")
-    @UseGuards(AdminGuard)
-    @Admin()
+    @RequirePermission(PERMISSIONS.SettingsStructure)
     @ApiOperation({ summary: "Update a status item (Admin)" })
     @ApiSuccessResponse(StatusItemResponseDto)
     @ApiErrorResponse([400, 401, 403, 404])
@@ -321,8 +311,7 @@ export class CrmEntityFieldsSettingsController {
     }
 
     @Delete(":code/status-sets/:setId/items/:itemId")
-    @UseGuards(AdminGuard)
-    @Admin()
+    @RequirePermission(PERMISSIONS.SettingsStructure)
     @ApiOperation({ summary: "Delete an unused non-system status item (Admin)" })
     @ApiSuccessResponse(DeleteResultDto)
     @ApiErrorResponse([400, 401, 403, 404])

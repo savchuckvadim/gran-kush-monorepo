@@ -8,12 +8,15 @@ import {
 
 import { MailService } from "@mail/application/services/mail.service";
 import type { SupportedLanguage } from "@mail/consts/mail.constants";
-import { EmployeeInvitation, InvitationStatus } from "@prisma/client";
+import { EmployeeInvitation, InvitationStatus, PortalRole } from "@prisma/client";
 import { AccountOwnershipService } from "@users/application/services/account-ownership.service";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 
 import { hashSecretToken, issueSecretToken } from "@common/crypto/secret-token";
 import { PrismaService } from "@common/prisma/prisma.service";
+import { toEmployeeRoleDto } from "@modules/portal/crm/access/api/mappers/portal-role.mapper";
+import { PortalRolesService } from "@modules/portal/crm/access/application/services/portal-roles.service";
+import type { EmployeeActor } from "@modules/portal/crm/employees/application/services/employees.service";
 import { PORTAL_SUMMARY_SELECT } from "@modules/portal/crm/portals/infrastructure/prisma-includes/portal-summary.select";
 
 import { CreateInvitationDto, PublicInvitationInfoDto } from "../../api/dto/invitation.dto";
@@ -21,9 +24,16 @@ import { InvitationAccountState } from "../../domain/invitation-acceptance";
 
 const INVITATION_TTL_DAYS = 7;
 
-export type InvitationWithPortal = EmployeeInvitation & {
+export type InvitationWithRole = EmployeeInvitation & { role: PortalRole };
+
+export type InvitationWithPortal = InvitationWithRole & {
     portal: { id: string; name: string; displayName: string };
 };
+
+const INVITATION_INCLUDE = {
+    portal: { select: PORTAL_SUMMARY_SELECT },
+    role: true,
+} as const;
 
 /** Приглашения сотрудников: выдача, список, отзыв и чтение по токену. Приём — `InvitationAcceptanceService`. */
 @Injectable()
@@ -34,7 +44,8 @@ export class InvitationsService {
         private readonly prisma: PrismaService,
         private readonly ownership: AccountOwnershipService,
         private readonly userRepository: UserRepository,
-        private readonly mailService: MailService
+        private readonly mailService: MailService,
+        private readonly roles: PortalRolesService
     ) {}
 
     /**
@@ -44,9 +55,12 @@ export class InvitationsService {
     async create(
         dto: CreateInvitationDto,
         portalId: string,
-        invitedByEmployeeId: string,
+        actor: EmployeeActor,
         language: SupportedLanguage
     ): Promise<{ invitation: InvitationWithPortal; token: string }> {
+        // Роль приглашения — не шире прав того, кто приглашает (TASK-731)
+        const role = await this.roles.requireAssignable(portalId, dto.role, actor.permissions);
+
         const existingEmployee = await this.prisma.employee.findFirst({
             where: { portalId, user: { email: dto.email.toLowerCase() } },
             select: { id: true },
@@ -75,12 +89,12 @@ export class InvitationsService {
             data: {
                 portalId,
                 email: dto.email.toLowerCase(),
-                role: dto.role,
+                roleId: role.id,
                 token: tokenHash,
-                invitedByEmployeeId,
+                invitedByEmployeeId: actor.employeeId,
                 expiresAt,
             },
-            include: { portal: { select: PORTAL_SUMMARY_SELECT } },
+            include: INVITATION_INCLUDE,
         });
 
         // Приглашение уже создано, ссылку админ видит в ответе: сбой очереди писем его не отменяет
@@ -101,9 +115,10 @@ export class InvitationsService {
         return { invitation, token };
     }
 
-    async listByPortal(portalId: string): Promise<EmployeeInvitation[]> {
+    async listByPortal(portalId: string): Promise<InvitationWithRole[]> {
         return this.prisma.employeeInvitation.findMany({
             where: { portalId },
+            include: { role: true },
             orderBy: { createdAt: "desc" },
         });
     }
@@ -127,7 +142,7 @@ export class InvitationsService {
     async getActiveByToken(token: string): Promise<InvitationWithPortal> {
         const invitation = await this.prisma.employeeInvitation.findUnique({
             where: { token: hashSecretToken(token) },
-            include: { portal: { select: PORTAL_SUMMARY_SELECT } },
+            include: INVITATION_INCLUDE,
         });
         if (!invitation || invitation.status !== InvitationStatus.pending) {
             throw new NotFoundException("Invitation not found or no longer active");
@@ -153,7 +168,7 @@ export class InvitationsService {
               : InvitationAccountState.passwordless;
         return {
             email: invitation.email,
-            role: invitation.role,
+            role: toEmployeeRoleDto(invitation.role),
             portalSlug: invitation.portal.name,
             portalDisplayName: invitation.portal.displayName,
             accountState,

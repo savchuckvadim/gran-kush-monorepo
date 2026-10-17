@@ -24,7 +24,7 @@ class PortalOwnerInfoDto {
     @ApiProperty({ example: "John", type: String })
     name: string;
 
-    @ApiProperty({ example: "portal_owner", type: String })
+    @ApiProperty({ example: "owner", type: String, description: "Ключ роли клуба" })
     role: string;
 }
 

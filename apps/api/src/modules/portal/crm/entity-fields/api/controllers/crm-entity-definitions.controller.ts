@@ -1,12 +1,14 @@
-import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post } from "@nestjs/common";
 import { ApiOperation, ApiProperty, ApiTags } from "@nestjs/swagger";
 
 import { IsString, Matches, MaxLength, MinLength } from "class-validator";
 
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
+import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
-import { Admin, AdminGuard, RequireEmployeeJwt } from "@modules/portal/auth/employees";
+import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
+import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import {
     EntityDefinitionsService,
     EntityDefinitionSummary,
@@ -65,8 +67,7 @@ export class CrmEntityDefinitionsController {
     }
 
     @Post()
-    @UseGuards(AdminGuard)
-    @Admin()
+    @RequirePermission(PERMISSIONS.SettingsStructure)
     @ApiOperation({
         summary: "Создать кастомную сущность (с дефолтными формами, полем title и воронкой)",
     })

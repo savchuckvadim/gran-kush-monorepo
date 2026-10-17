@@ -15,6 +15,12 @@ export interface CrmSearchResult {
     orders: OrderSearchHit[];
 }
 
+/** Какие разделы ищем: участников и заказы — только с правом их читать (TASK-731). */
+export interface CrmSearchScope {
+    members: boolean;
+    orders: boolean;
+}
+
 /** Быстрый поиск по клубу для палитры Ctrl K: участники, товары, заказы. */
 @Injectable()
 export class CrmSearchService {
@@ -23,13 +29,14 @@ export class CrmSearchService {
     async searchAll(
         portalId: string,
         query: string,
+        scope: CrmSearchScope,
         limit = DEFAULT_LIMIT
     ): Promise<CrmSearchResult> {
         const q = query.trim();
         const [members, products, orders] = await Promise.all([
-            this.search.searchMembers(portalId, q, limit),
+            scope.members ? this.search.searchMembers(portalId, q, limit) : [],
             this.search.searchProducts(portalId, q, limit),
-            this.search.searchOrders(portalId, q, limit),
+            scope.orders ? this.search.searchOrders(portalId, q, limit) : [],
         ]);
         return { members, products, orders };
     }

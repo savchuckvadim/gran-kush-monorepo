@@ -1,6 +1,6 @@
 import { ConflictException, Injectable } from "@nestjs/common";
 
-import { EmployeeRole, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
@@ -14,6 +14,7 @@ import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/const
 
 const employeeWithProfileInclude = {
     user: true,
+    role: true,
     profile: {
         include: {
             fieldValues: {
@@ -36,7 +37,14 @@ function mapRow(row: EmployeeWithProfileRow): EmployeeWithProfile {
             portalId: row.portalId,
             entityRecordId: row.entityRecordId,
             email: row.user.email,
-            role: row.role,
+            roleId: row.roleId,
+            role: {
+                id: row.role.id,
+                key: row.role.key,
+                name: row.role.name,
+                isSystem: row.role.isSystem,
+                permissions: row.role.permissions,
+            },
             isActive: row.isActive,
             lastLoginAt: row.lastLoginAt ?? undefined,
             createdAt: row.createdAt,
@@ -105,7 +113,7 @@ export class EmployeePrismaRepository implements EmployeeRepository {
     ): Prisma.EmployeeWhereInput {
         return {
             portalId,
-            ...(filters?.role !== undefined && { role: filters.role }),
+            ...(filters?.roleKey !== undefined && { role: { key: filters.roleKey } }),
             ...(filters?.isActive !== undefined && { isActive: filters.isActive }),
         };
     }
@@ -113,7 +121,7 @@ export class EmployeePrismaRepository implements EmployeeRepository {
     async createWithProfile(data: {
         userId: string;
         portalId: string;
-        role: EmployeeRole;
+        roleId: string;
         invitationId?: string;
         fields: Record<string, unknown>;
     }): Promise<EmployeeWithProfile> {
@@ -145,7 +153,7 @@ export class EmployeePrismaRepository implements EmployeeRepository {
                     userId: data.userId,
                     portalId: data.portalId,
                     entityRecordId: record.id,
-                    role: data.role,
+                    roleId: data.roleId,
                     invitationId: data.invitationId ?? null,
                 },
             });
@@ -167,7 +175,7 @@ export class EmployeePrismaRepository implements EmployeeRepository {
     async updateBridge(
         id: string,
         data: Partial<{
-            role: EmployeeRole;
+            roleId: string;
             isActive: boolean;
             lastLoginAt: Date;
         }>

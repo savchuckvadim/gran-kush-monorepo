@@ -1,4 +1,5 @@
 import { ContentLocale, resolveLabel } from "@common/i18n";
+import { toEmployeeRoleDto } from "@modules/portal/crm/access/api/mappers/portal-role.mapper";
 import { EmployeeListItemDto } from "@modules/portal/crm/employees/api/dto/employee-list.dto";
 import { EmployeeWithProfile } from "@modules/portal/crm/employees/domain/repositories/employee-repository.interface";
 
@@ -13,7 +14,7 @@ export function mapEmployeeToListDto(
         id: e.employee.id,
         userId: e.employee.userId,
         email: e.employee.email,
-        role: e.employee.role,
+        role: toEmployeeRoleDto(e.employee.role),
         isActive: e.employee.isActive,
         fields: e.fields.map((field) => ({
             fieldKey: field.fieldKey,

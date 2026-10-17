@@ -5,11 +5,12 @@ import { DEFAULT_LANGUAGE } from "@mail/consts/mail.constants";
 
 import { CurrentEmployee } from "@common/decorators/auth/current-employee.decorator";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
+import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { PortalBillingService } from "@modules/billing/application/services/portal-billing.service";
 import { RequireEmployeeJwtWithoutSubscriptionGate } from "@modules/portal/auth/employees";
-import { RequireAdmin } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
+import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 
 import { toBillingSubscriptionDto } from "../dto/billing-subscription.dto";
@@ -30,7 +31,7 @@ export class CrmBillingController {
     constructor(private readonly billing: PortalBillingService) {}
 
     @Get()
-    @RequireAdmin()
+    @RequirePermission(PERMISSIONS.BillingManage)
     @ApiOperation({ summary: "Подписка клуба и тарифы, которые можно оплатить" })
     @ApiSuccessResponse(CrmBillingOverviewDto)
     @ApiErrorResponse([400, 401, 403, 404])
@@ -49,7 +50,7 @@ export class CrmBillingController {
 
     @Post("checkout")
     @HttpCode(200)
-    @RequireAdmin()
+    @RequirePermission(PERMISSIONS.BillingManage)
     @ApiOperation({
         summary: "Страница оплаты Stripe для выбранного тарифа",
         description:
@@ -71,7 +72,7 @@ export class CrmBillingController {
 
     @Post("manage")
     @HttpCode(200)
-    @RequireAdmin()
+    @RequirePermission(PERMISSIONS.BillingManage)
     @ApiOperation({ summary: "Кабинет Stripe: карта, смена тарифа, отмена, счета" })
     @ApiSuccessResponse(BillingRedirectDto)
     @ApiErrorResponse([400, 401, 403, 404, 503])

@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
-import { EmployeeRole } from "@prisma/client";
+import { EmployeeRoleDto } from "@modules/portal/crm/access/api/dto/portal-role.dto";
 
 export class EmployeeProfileFieldDto {
     @ApiProperty({ type: String, example: "first_name" })
@@ -26,8 +26,8 @@ export class EmployeeListItemDto {
     @ApiProperty({ type: String, example: "employee@example.com" })
     email: string;
 
-    @ApiProperty({ enum: EmployeeRole, example: EmployeeRole.manager })
-    role: EmployeeRole;
+    @ApiProperty({ type: () => EmployeeRoleDto })
+    role: EmployeeRoleDto;
 
     @ApiProperty({ type: Boolean, example: true })
     isActive: boolean;

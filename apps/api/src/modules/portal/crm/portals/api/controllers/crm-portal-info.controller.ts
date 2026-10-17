@@ -2,10 +2,11 @@ import { Body, Controller, Get, Patch } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
+import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { RequireEmployeeJwtWithoutSubscriptionGate } from "@modules/portal/auth/employees";
-import { RequireAdmin } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
+import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import {
     PortalAppearanceDto,
     UpdatePortalAppearanceDto,
@@ -54,8 +55,10 @@ export class CrmPortalInfoController {
     }
 
     @Patch("appearance")
-    @RequireAdmin()
-    @ApiOperation({ summary: "Тема клуба по умолчанию для сотрудников и участников (admin)" })
+    @RequirePermission(PERMISSIONS.SettingsClub)
+    @ApiOperation({
+        summary: "Тема клуба по умолчанию для сотрудников и участников (settings.club)",
+    })
     @ApiSuccessResponse(PortalAppearanceDto)
     @ApiErrorResponse([400, 401, 403])
     async updateAppearance(

@@ -9,11 +9,14 @@ import {
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
+import { CurrentPrincipal } from "@common/decorators/auth/current-principal.decorator";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
-import { MANAGER_ROLES, RequireEmployeeJwt } from "@modules/portal/auth/employees";
+import { type PortalPrincipal, principalCan } from "@common/portal";
+import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
 import { CurrentEmployee } from "@modules/portal/auth/employees/api/decorators/current-employee.decorator";
+import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import {
     SaveUiSettingDto,
@@ -75,7 +78,7 @@ export class CrmUiSettingsController {
     @Put(":key")
     @ApiOperation({
         summary:
-            "Сохранить настройку: личную — любой сотрудник, клубную (`forPortal`) — manager+. " +
+            "Сохранить настройку: личную — любой сотрудник, клубную (`forPortal`) — с правом settings.views. " +
             "`value: null` сбрасывает её",
     })
     @ApiSuccessResponse(UiSettingDto)
@@ -84,11 +87,14 @@ export class CrmUiSettingsController {
         @Param("key") key: string,
         @Body() dto: SaveUiSettingDto,
         @CurrentEmployee() employee: Employee,
+        @CurrentPrincipal() principal: PortalPrincipal,
         @PortalId() portalId: string
     ): Promise<UiSettingDto> {
         const forPortal = dto.forPortal ?? false;
-        if (forPortal && !MANAGER_ROLES.includes(employee.role)) {
-            throw new ForbiddenException("Менять настройку клуба может manager и выше");
+        if (forPortal && !principalCan(principal, PERMISSIONS.SettingsViews)) {
+            throw new ForbiddenException(
+                "Менять общий для клуба вид может тот, у кого есть на это право"
+            );
         }
 
         const pair = await this.uiSettings.save({

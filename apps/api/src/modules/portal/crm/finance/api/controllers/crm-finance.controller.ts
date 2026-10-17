@@ -1,16 +1,8 @@
-import {
-    Body,
-    Controller,
-    Get,
-    NotFoundException,
-    Param,
-    Post,
-    Query,
-    UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Get, NotFoundException, Param, Post, Query } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
+import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
@@ -19,7 +11,7 @@ import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.in
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
 import { CurrentEmployee } from "@modules/portal/auth/employees/api/decorators/current-employee.decorator";
-import { RequireAdmin } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
+import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import {
     CreateFinancialTransactionDto,
@@ -44,6 +36,7 @@ import { FinanceService } from "@modules/portal/crm/finance/application/services
 @ApiTags("CRM Finance")
 @Controller("crm/finance")
 @RequireEmployeeJwt()
+@RequirePermission(PERMISSIONS.FinanceRead)
 @ApiBearerAuth()
 export class CrmFinanceController {
     constructor(private readonly financeService: FinanceService) {}
@@ -88,7 +81,7 @@ export class CrmFinanceController {
     }
 
     @Post("transactions")
-    @RequireAdmin()
+    @RequirePermission(PERMISSIONS.FinanceWrite)
     @Idempotent(IdempotencyScope.CRM_FINANCE_TRANSACTION_CREATE)
     @ApiOperation({
         summary: "Создать ручную транзакцию (Admin)",

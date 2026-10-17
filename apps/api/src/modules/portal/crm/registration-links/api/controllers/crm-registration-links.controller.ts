@@ -5,11 +5,12 @@ import { RegistrationLink } from "@prisma/client";
 
 import { CurrentPrincipal } from "@common/decorators/auth/current-principal.decorator";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
+import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import type { PortalPrincipal } from "@common/portal";
-import { Admin } from "@modules/portal/auth/employees";
-import { RequireEmployeeAdmin } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
+import { RequireEmployeeJwt } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
+import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 
 import {
     type RegistrationLinkListItem,
@@ -48,13 +49,13 @@ function toDto(
 
 @ApiTags("CRM Registration Links")
 @Controller("crm/settings/registration-links")
-@RequireEmployeeAdmin()
-@Admin()
+@RequireEmployeeJwt()
+@RequirePermission(PERMISSIONS.MembersInvite)
 export class CrmRegistrationLinksController {
     constructor(private readonly registrationLinksService: RegistrationLinksService) {}
 
     @Post()
-    @ApiOperation({ summary: "Создать ссылку-форму регистрации member (admin)" })
+    @ApiOperation({ summary: "Создать ссылку-форму регистрации member (members.invite)" })
     @ApiSuccessResponse(RegistrationLinkDto, { status: 201 })
     @ApiErrorResponse([400, 401, 403])
     async create(
@@ -71,7 +72,9 @@ export class CrmRegistrationLinksController {
     }
 
     @Get()
-    @ApiOperation({ summary: "Ссылки-формы портала постранично, со статусом и онлайном (admin)" })
+    @ApiOperation({
+        summary: "Ссылки-формы портала постранично, со статусом и онлайном (members.invite)",
+    })
     @ApiSuccessResponse(RegistrationLinkListResponseDto)
     @ApiErrorResponse([400, 401, 403])
     async list(
@@ -84,7 +87,7 @@ export class CrmRegistrationLinksController {
     }
 
     @Patch(":id")
-    @ApiOperation({ summary: "Обновить/деактивировать ссылку-форму (admin)" })
+    @ApiOperation({ summary: "Обновить/деактивировать ссылку-форму (members.invite)" })
     @ApiSuccessResponse(RegistrationLinkDto)
     @ApiErrorResponse([400, 401, 403, 404])
     async update(
@@ -97,7 +100,7 @@ export class CrmRegistrationLinksController {
     }
 
     @Post(":id/revoke")
-    @ApiOperation({ summary: "Отозвать ссылку-форму навсегда (admin)" })
+    @ApiOperation({ summary: "Отозвать ссылку-форму навсегда (members.invite)" })
     @ApiSuccessResponse(RegistrationLinkDto)
     @ApiErrorResponse([401, 403, 404])
     async revoke(

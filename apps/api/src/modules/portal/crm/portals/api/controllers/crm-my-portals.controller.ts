@@ -38,7 +38,7 @@ export class CrmMyPortalsController {
     async myPortals(@CurrentAuthUser() user: AuthenticatedUser): Promise<MyPortalsResponseDto> {
         const employees = await this.prisma.employee.findMany({
             where: { userId: user.userId, isActive: true },
-            include: { portal: { select: PORTAL_SUMMARY_SELECT } },
+            include: { portal: { select: PORTAL_SUMMARY_SELECT }, role: { select: { key: true } } },
             orderBy: { createdAt: "asc" },
         });
         return {
@@ -47,7 +47,7 @@ export class CrmMyPortalsController {
                 slug: e.portal.name,
                 displayName: e.portal.displayName,
                 employeeId: e.id,
-                role: e.role,
+                role: e.role.key,
                 isActive: e.isActive,
             })),
         };

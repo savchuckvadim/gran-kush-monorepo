@@ -10,6 +10,7 @@ import { EmployeeLoginDto } from "@modules/portal/auth/employees/api/dto/employe
 import { EmployeeRefreshTokenResponseDto } from "@modules/portal/auth/employees/api/dto/employee-refresh-token-response.dto";
 import { TokenIssuerService } from "@modules/portal/auth/shared/application/services/token-issuer.service";
 import { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
+import { toEmployeeRoleDto } from "@modules/portal/crm/access/api/mappers/portal-role.mapper";
 
 /**
  * Глобальная аутентификация employee-аккаунта (CRM).
@@ -58,7 +59,7 @@ export class EmployeeAuthService {
                 email: user.email,
                 portals: activeEmployments.map((e) => ({
                     portalId: e.portalId,
-                    role: e.role,
+                    role: toEmployeeRoleDto(e.role),
                 })),
             },
         };
