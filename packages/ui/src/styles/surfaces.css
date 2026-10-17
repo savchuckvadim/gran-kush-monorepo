@@ -1,0 +1,26 @@
+/* =================== Black and Sociopath: raised blocks without frames =================== */
+
+/* Both skins have no borders: blocks are told apart by fill. A card of nearly the grey of the faded
+   lettering or smiley behind the content melts into it, so every raised block carries a soft dark
+   halo — it darkens the strip around the block, and the edge reads even over the print. No outline
+   appears. `--halo` is set by the skin (lighter on Sociopath's light theme).
+
+   Tailwind composes ring-* and shadow-* from --tw-shadow, so setting it keeps the rings of cards
+   and menus and the focus rings; plain cards get theirs from --shadow-card in skins.css. */
+
+:root:is([data-skin="black"], [data-skin="sociopath"])
+    :is(
+        [data-slot="kanban-item"] > *,
+        [data-slot="dialog-content"],
+        [data-slot="popover-content"],
+        [data-slot="dropdown-menu-content"],
+        [data-slot="dropdown-menu-sub-content"],
+        [data-slot="select-content"]
+    ) {
+    --tw-shadow: var(--halo);
+}
+
+/* a dialog stands on the card's fill: on the page's own it would melt into the page */
+:root:is([data-skin="black"], [data-skin="sociopath"]) [data-slot="dialog-content"] {
+    background-color: var(--card);
+}
