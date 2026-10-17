@@ -31,7 +31,7 @@ interface RecordsListProps {
     filter: RecordsFilter;
     page: number;
     onPageChange: (page: number) => void;
-    /** Waits for the filter fields of a link that carries conditions */
+    /** Waits for the funnels and for the filter fields of a link that carries conditions */
     enabled: boolean;
     renderToolbar: (info: { total?: number; isFetching: boolean }) => ReactNode;
     canMove: boolean;
@@ -143,7 +143,7 @@ export function RecordsList({
     return (
         <EntityList<EntityRecord>
             items={data?.items ?? []}
-            loading={isPending && enabled}
+            loading={isPending}
             error={error ? t("loadError") : undefined}
             emptyState={
                 <p className="text-muted-foreground py-8 text-center text-sm">{t("table.empty")}</p>

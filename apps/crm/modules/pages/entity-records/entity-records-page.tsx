@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { ConfirmDialog, ModalDialog } from "@workspace/ui";
@@ -31,7 +32,7 @@ export function EntityRecordsPage({ code }: { code: string }) {
     const filters = useRecordFilters(code);
 
     const { data: definitions } = useEntityDefinitions();
-    const { data: funnels = [] } = useEntityStageCategories(code);
+    const { data: funnels = [], isPending: isFunnelsPending } = useEntityStageCategories(code);
     const funnel = pickFunnel(funnels, funnelId);
     const stages = useMemo(
         () => [...(funnel?.stages ?? [])].sort((a, b) => a.sortOrder - b.sortOrder),
@@ -100,7 +101,14 @@ export function EntityRecordsPage({ code }: { code: string }) {
                         : undefined
                 }
             >
-                {view === "kanban" ? (
+                {isFunnelsPending ? (
+                    <div className="flex items-center justify-center py-12">
+                        <Loader2
+                            className="size-6 animate-spin text-muted-foreground"
+                            aria-hidden="true"
+                        />
+                    </div>
+                ) : view === "kanban" ? (
                     <div className="space-y-3">
                         {renderToolbar({ isFetching: false })}
                         <RecordsKanban
@@ -119,7 +127,7 @@ export function EntityRecordsPage({ code }: { code: string }) {
                         filter={filters.filter}
                         page={filters.page}
                         onPageChange={filters.setPage}
-                        enabled={filters.isReady}
+                        enabled={filters.isReady && !isFunnelsPending}
                         renderToolbar={renderToolbar}
                         canMove={isManager}
                         canDelete={isAdmin}
