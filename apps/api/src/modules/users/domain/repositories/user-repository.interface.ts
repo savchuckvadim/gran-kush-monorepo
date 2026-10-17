@@ -30,7 +30,8 @@ export abstract class UserRepository {
         }>
     ): Promise<User>;
 
-    abstract findByEmailVerificationToken(token: string): Promise<User | null>;
-    abstract findByResetPasswordToken(token: string): Promise<User | null>;
+    /** Токены писем хранятся как SHA-256 (`hashSecretToken`): ищем по хешу, не по ссылке. */
+    abstract findByEmailVerificationToken(tokenHash: string): Promise<User | null>;
+    abstract findByResetPasswordToken(tokenHash: string): Promise<User | null>;
     abstract delete(id: string): Promise<void>;
 }

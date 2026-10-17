@@ -50,13 +50,13 @@ export class CrmInvitationsController {
         @CurrentPrincipal() principal: PortalPrincipal,
         @RequestLocale() locale: ContentLocale
     ): Promise<CreatedInvitationDto> {
-        const invitation = await this.invitationsService.create(
+        const { invitation, token } = await this.invitationsService.create(
             dto,
             portalId,
             principal.membershipId,
             locale
         );
-        return { ...toDto(invitation), token: invitation.token };
+        return { ...toDto(invitation), token };
     }
 
     @Get()

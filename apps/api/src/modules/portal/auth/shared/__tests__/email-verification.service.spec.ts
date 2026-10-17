@@ -2,6 +2,8 @@ import { UnauthorizedException } from "@nestjs/common";
 
 import { UserAccountStatus } from "@prisma/client";
 
+import { hashSecretToken } from "@common/crypto/secret-token";
+
 import { EmailVerificationService } from "../application/services/email-verification.service";
 
 type UserRow = {
@@ -153,5 +155,37 @@ describe("EmailVerificationService — resetPassword клеймит аккаун
             UnauthorizedException
         );
         expect(claimedMemberships.confirmPendingSelfJoins).not.toHaveBeenCalled();
+    });
+});
+
+describe("EmailVerificationService — токены в БД (TASK-668)", () => {
+    it("хранит только хеш токена сброса, в письмо уходит сам токен", async () => {
+        const { service, userRepository, mailService } = buildService(user());
+        await service.requestPasswordReset("user@test.local");
+
+        const [, , mailed] = mailService.sendPasswordReset.mock.calls[0] as [
+            unknown,
+            unknown,
+            string,
+        ];
+        const [, { resetPasswordToken: stored }] = userRepository.update.mock.calls[0] as [
+            string,
+            { resetPasswordToken: string },
+        ];
+        expect(stored).toBe(hashSecretToken(mailed));
+        expect(stored).not.toBe(mailed);
+    });
+
+    it("ищет ссылку по хешу", async () => {
+        const { service, userRepository } = buildService(user());
+        await service.resetPassword("reset-token", "NewPassword1");
+        await service.verifyEmail("verify-token");
+
+        expect(userRepository.findByResetPasswordToken).toHaveBeenCalledWith(
+            hashSecretToken("reset-token")
+        );
+        expect(userRepository.findByEmailVerificationToken).toHaveBeenCalledWith(
+            hashSecretToken("verify-token")
+        );
     });
 });

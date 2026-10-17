@@ -2,8 +2,8 @@ import { BadRequestException, Injectable, Logger, NotFoundException } from "@nes
 
 import { MemberConsentStatus, MemberJoinSource } from "@prisma/client";
 import { AccountOwnershipService } from "@users/application/services/account-ownership.service";
-import { randomBytes } from "crypto";
 
+import { hashSecretToken, issueSecretToken } from "@common/crypto/secret-token";
 import { MemberDocumentSharingService } from "@modules/account/application/services/member-document-sharing.service";
 import { UserDocumentRepository } from "@modules/account/domain/repositories/user-document-repository.interface";
 import { UserSignatureRepository } from "@modules/account/domain/repositories/user-signature-repository.interface";
@@ -45,19 +45,19 @@ export class MemberConsentService {
         private readonly emailVerification: EmailVerificationService
     ) {}
 
-    newToken(): string {
-        return randomBytes(32).toString("hex");
-    }
-
-    /** Письмо владельцу; его сбой не должен ронять создание участника. */
-    async sendRequest(member: MemberWithRelations, language: SupportedLanguage): Promise<void> {
-        if (!member.consentToken) {
-            return;
-        }
+    /**
+     * Письмо владельцу; его сбой не должен ронять создание участника. `token` — сам токен из
+     * `issueSecretToken`: у членства в БД только его хеш.
+     */
+    async sendRequest(
+        member: MemberWithRelations,
+        token: string,
+        language: SupportedLanguage
+    ): Promise<void> {
         try {
             await this.mailService.sendMembershipConsent({
                 to: member.user.email,
-                token: member.consentToken,
+                token,
                 portalName: member.portal.displayName,
                 language,
             });
@@ -75,8 +75,9 @@ export class MemberConsentService {
         if (member.consentStatus !== MemberConsentStatus.pending) {
             throw new BadRequestException("Membership is already confirmed");
         }
+        const consent = issueSecretToken();
         const updated = await this.memberRepository.update(member.id, {
-            consentToken: this.newToken(),
+            consentToken: consent.hash,
             consentRequestedAt: new Date(),
         });
         // Членство из клейма (самостоятельная регистрация на чужой email) подтверждает письмо
@@ -89,7 +90,7 @@ export class MemberConsentService {
             });
             return;
         }
-        await this.sendRequest(updated, language);
+        await this.sendRequest(updated, consent.token, language);
     }
 
     async getPublicInfo(token: string): Promise<PublicMemberConsentInfoDto> {
@@ -213,7 +214,7 @@ export class MemberConsentService {
     }
 
     private async getPending(token: string): Promise<MemberWithRelations> {
-        const member = await this.memberRepository.findByConsentToken(token);
+        const member = await this.memberRepository.findByConsentToken(hashSecretToken(token));
         if (!member || member.consentStatus !== MemberConsentStatus.pending) {
             throw new NotFoundException("Consent request not found");
         }

@@ -11,8 +11,8 @@ import type { SupportedLanguage } from "@mail/consts/mail.constants";
 import { EmployeeInvitation, InvitationStatus } from "@prisma/client";
 import { AccountOwnershipService } from "@users/application/services/account-ownership.service";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
-import { randomBytes } from "crypto";
 
+import { hashSecretToken, issueSecretToken } from "@common/crypto/secret-token";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { PORTAL_SUMMARY_SELECT } from "@modules/portal/crm/portals/infrastructure/prisma-includes/portal-summary.select";
 
@@ -37,12 +37,16 @@ export class InvitationsService {
         private readonly mailService: MailService
     ) {}
 
+    /**
+     * Ссылку приглашения админ видит один раз — в ответе на создание; в БД остаётся только хеш
+     * токена, поэтому `token` возвращается рядом с записью.
+     */
     async create(
         dto: CreateInvitationDto,
         portalId: string,
         invitedByEmployeeId: string,
         language: SupportedLanguage
-    ): Promise<EmployeeInvitation> {
+    ): Promise<{ invitation: InvitationWithPortal; token: string }> {
         const existingEmployee = await this.prisma.employee.findFirst({
             where: { portalId, user: { email: dto.email.toLowerCase() } },
             select: { id: true },
@@ -66,12 +70,13 @@ export class InvitationsService {
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + INVITATION_TTL_DAYS);
 
+        const { token, hash: tokenHash } = issueSecretToken();
         const invitation = await this.prisma.employeeInvitation.create({
             data: {
                 portalId,
                 email: dto.email.toLowerCase(),
                 role: dto.role,
-                token: randomBytes(24).toString("hex"),
+                token: tokenHash,
                 invitedByEmployeeId,
                 expiresAt,
             },
@@ -82,7 +87,7 @@ export class InvitationsService {
         try {
             await this.mailService.sendEmployeeInvitation({
                 to: invitation.email,
-                token: invitation.token,
+                token,
                 portalName: invitation.portal.displayName,
                 language,
             });
@@ -93,7 +98,7 @@ export class InvitationsService {
             );
         }
 
-        return invitation;
+        return { invitation, token };
     }
 
     async listByPortal(portalId: string): Promise<EmployeeInvitation[]> {
@@ -121,7 +126,7 @@ export class InvitationsService {
 
     async getActiveByToken(token: string): Promise<InvitationWithPortal> {
         const invitation = await this.prisma.employeeInvitation.findUnique({
-            where: { token },
+            where: { token: hashSecretToken(token) },
             include: { portal: { select: PORTAL_SUMMARY_SELECT } },
         });
         if (!invitation || invitation.status !== InvitationStatus.pending) {

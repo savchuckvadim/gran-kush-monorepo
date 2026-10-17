@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import request from "supertest";
 
 import { AppModule } from "../src/app.module";
+import { hashSecretToken } from "../src/common/crypto/secret-token";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { GoogleOAuthGateway } from "../src/modules/portal/auth/social/domain/google-oauth.gateway";
 import { GoogleProfile } from "../src/modules/portal/auth/social/domain/social-profile";
@@ -323,7 +324,7 @@ describe("Google sign-in (e2e)", () => {
                     })
                 ).toBe(1);
                 const invitation = await prisma.employeeInvitation.findUniqueOrThrow({
-                    where: { token },
+                    where: { token: hashSecretToken(token) },
                 });
                 expect(invitation.status).toBe("accepted");
             });

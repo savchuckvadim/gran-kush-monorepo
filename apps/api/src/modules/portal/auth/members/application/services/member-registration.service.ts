@@ -5,8 +5,8 @@ import { MemberJoinSource, UserAccountStatus } from "@prisma/client";
 import { AccountOwnershipService } from "@users/application/services/account-ownership.service";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import * as bcrypt from "bcrypt";
-import { randomBytes } from "crypto";
 
+import { issueSecretToken } from "@common/crypto/secret-token";
 import { isUniqueViolationOn } from "@common/prisma/unique-violation";
 import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
 import { UploadMemberFilesDto } from "@modules/portal/crm/members/api/dto/upload-member-files.dto";
@@ -81,7 +81,7 @@ export class MemberRegistrationService {
                     // Владение адресом не доказано: членство ждёт клейма аккаунта
                     // (подтвердится в resetPassword, когда владелец задаст пароль)
                     consent: claimByEmail
-                        ? { token: randomBytes(32).toString("hex"), requestedAt: new Date() }
+                        ? { tokenHash: issueSecretToken().hash, requestedAt: new Date() }
                         : undefined,
                 });
                 memberId = member.id;

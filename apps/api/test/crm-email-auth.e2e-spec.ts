@@ -7,6 +7,7 @@ import request from "supertest";
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { MailService } from "../src/modules/mail/application/services/mail.service";
+import { mailTokens } from "./support/mail-tokens";
 
 jest.setTimeout(120_000);
 
@@ -23,7 +24,7 @@ const cookieHeader = (res: request.Response): string => {
 /**
  * Почта владельца клуба в CRM: подтверждение после регистрации и восстановление пароля.
  * Рендер писем в jest не работает (dynamic import), поэтому MailService подменён и
- * проверяется, какое письмо и куда ушло бы; токены читаются из БД.
+ * проверяется, какое письмо и куда ушло бы. В БД у токенов только хеш: ссылку тест берёт из письма.
  */
 describe("CRM email confirmation and password reset (e2e)", () => {
     let app: INestApplication;
@@ -36,6 +37,7 @@ describe("CRM email confirmation and password reset (e2e)", () => {
         sendPortalRegistrationEmail: jest.fn().mockResolvedValue(true),
         sendEmail: jest.fn().mockResolvedValue(true),
     };
+    const tokens = mailTokens(mail);
 
     const slug = `email-auth-${suffix}`;
     const email = `owner-${slug}@test.local`;
@@ -89,7 +91,7 @@ describe("CRM email confirmation and password reset (e2e)", () => {
             expect(mail.sendEmployeeEmailVerification).toHaveBeenCalledWith(
                 expect.anything(),
                 expect.objectContaining({ email }),
-                user.emailVerificationToken,
+                tokens.fromHash(user.emailVerificationToken),
                 "es"
             );
             expect(mail.sendMamberEmailVerification).not.toHaveBeenCalled();
@@ -118,7 +120,7 @@ describe("CRM email confirmation and password reset (e2e)", () => {
             expect(mail.sendEmployeeEmailVerification).toHaveBeenLastCalledWith(
                 expect.anything(),
                 expect.anything(),
-                after,
+                tokens.fromHash(after),
                 "ru"
             );
         });
@@ -135,7 +137,7 @@ describe("CRM email confirmation and password reset (e2e)", () => {
 
             const res = await request(app.getHttpServer())
                 .post("/crm/auth/confirm-email")
-                .send({ token: emailVerificationToken });
+                .send({ token: tokens.fromHash(emailVerificationToken) });
             expect([200, 201]).toContain(res.status);
             expect(res.body.success).toBe(true);
 
@@ -166,7 +168,7 @@ describe("CRM email confirmation and password reset (e2e)", () => {
             expect(mail.sendPasswordReset).toHaveBeenCalledWith(
                 expect.objectContaining({ email }),
                 expect.any(String),
-                resetPasswordToken,
+                tokens.fromHash(resetPasswordToken),
                 "en",
                 "crm"
             );
@@ -176,7 +178,10 @@ describe("CRM email confirmation and password reset (e2e)", () => {
             const { resetPasswordToken } = await findUser();
             const res = await request(app.getHttpServer())
                 .post("/crm/auth/password/reset/confirm")
-                .send({ token: resetPasswordToken, newPassword: "alllowercase1" });
+                .send({
+                    token: tokens.fromHash(resetPasswordToken),
+                    newPassword: "alllowercase1",
+                });
             expect(res.status).toBe(400);
         });
 
@@ -189,7 +194,10 @@ describe("CRM email confirmation and password reset (e2e)", () => {
 
             const res = await request(app.getHttpServer())
                 .post("/crm/auth/password/reset/confirm")
-                .send({ token: user.resetPasswordToken, newPassword: NEW_PASSWORD });
+                .send({
+                    token: tokens.fromHash(user.resetPasswordToken),
+                    newPassword: NEW_PASSWORD,
+                });
             expect(res.status).toBe(401);
 
             await prisma.user.update({
@@ -203,7 +211,7 @@ describe("CRM email confirmation and password reset (e2e)", () => {
 
             const res = await request(app.getHttpServer())
                 .post("/crm/auth/password/reset/confirm")
-                .send({ token: resetPasswordToken, newPassword: NEW_PASSWORD });
+                .send({ token: tokens.fromHash(resetPasswordToken), newPassword: NEW_PASSWORD });
             expect([200, 201]).toContain(res.status);
 
             const refreshed = await request(app.getHttpServer())

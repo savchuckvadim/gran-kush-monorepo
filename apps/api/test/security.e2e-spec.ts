@@ -6,10 +6,13 @@ import cookieParser from "cookie-parser";
 import request from "supertest";
 
 import { AppModule } from "../src/app.module";
+import { hashSecretToken } from "../src/common/crypto/secret-token";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { UserDocumentRepository } from "../src/modules/account/domain/repositories/user-document-repository.interface";
+import { MailService } from "../src/modules/mail/application/services/mail.service";
 import { EmployeeAuthService } from "../src/modules/portal/auth/employees/application/services/employee-auth.service";
 import { MemberAuthService } from "../src/modules/portal/auth/members/application/services/member-auth.service";
+import { mailTokens } from "./support/mail-tokens";
 
 jest.setTimeout(120_000);
 
@@ -32,6 +35,8 @@ type Club = { slug: string; ownerEmail: string; cookies: string };
 describe("Security (e2e)", () => {
     let app: INestApplication;
     let prisma: PrismaService;
+    /** Токены ссылок в БД — хеши: сам токен тест берёт из письма. */
+    let tokens: ReturnType<typeof mailTokens>;
 
     const clubA: Club = {
         slug: `sec-a-${suffix}`,
@@ -87,6 +92,7 @@ describe("Security (e2e)", () => {
         app.use(cookieParser());
         await app.init();
         prisma = app.get(PrismaService);
+        tokens = mailTokens(app.get(MailService));
 
         await registerClub(clubA);
         await registerClub(clubB);
@@ -200,7 +206,7 @@ describe("Security (e2e)", () => {
                     select: { consentToken: true },
                 });
                 if (!row?.consentToken) throw new Error("consent token missing");
-                return row.consentToken;
+                return tokens.fromHash(row.consentToken);
             };
             const publicConsent = (token: string) =>
                 request(app.getHttpServer()).get(`/public/consent/${token}`);
@@ -289,13 +295,13 @@ describe("Security (e2e)", () => {
             expect(
                 (
                     await request(app.getHttpServer()).get(
-                        `/public/consent/${first?.consentToken as string}`
+                        `/public/consent/${tokens.fromHash(first?.consentToken)}`
                     )
                 ).status
             ).toBe(404);
 
             const declined = await request(app.getHttpServer())
-                .post(`/public/consent/${rotated?.consentToken as string}/decline`)
+                .post(`/public/consent/${tokens.fromHash(rotated?.consentToken)}/decline`)
                 .send({ password: PASSWORD });
             expect(declined.status).toBe(200);
             expect(await prisma.member.findUnique({ where: { id: memberId } })).toBeNull();
@@ -354,7 +360,7 @@ describe("Security (e2e)", () => {
             const confirm = await request(app.getHttpServer())
                 .post("/cabinet/auth/password/reset/confirm")
                 .send({
-                    token: userRow?.resetPasswordToken as string,
+                    token: tokens.fromHash(userRow?.resetPasswordToken),
                     newPassword: "OwnerPass123",
                 });
             expect(confirm.status).toBe(201);
@@ -551,7 +557,7 @@ describe("Security (e2e)", () => {
             expect(emailVerificationToken).toBeTruthy();
             const confirmed = await request(app.getHttpServer())
                 .post("/crm/auth/confirm-email")
-                .send({ token: emailVerificationToken });
+                .send({ token: tokens.fromHash(emailVerificationToken) });
             expect([200, 201]).toContain(confirmed.status);
             expect([200, 201]).toContain((await login(PASSWORD)).status);
         });
@@ -580,7 +586,7 @@ describe("Security (e2e)", () => {
             expect(emailVerificationToken).toBeTruthy();
             const confirmed = await request(app.getHttpServer())
                 .post("/cabinet/auth/member/confirm-email")
-                .send({ token: emailVerificationToken });
+                .send({ token: tokens.fromHash(emailVerificationToken) });
             expect(confirmed.status).toBe(201);
             expect((await memberLogin(email, "Squatter123")).status).toBe(201);
         });
@@ -723,7 +729,7 @@ describe("Security (e2e)", () => {
                 expect(res.status).toBe(403);
                 expect(await employeesOfClubB(stranger.userId)).toBe(0);
                 const invitation = await prisma.employeeInvitation.findUniqueOrThrow({
-                    where: { token },
+                    where: { token: hashSecretToken(token) },
                 });
                 expect(invitation.status).toBe("pending");
             });
@@ -768,13 +774,13 @@ describe("Security (e2e)", () => {
             expect(pending.consentStatus).toBe("pending");
 
             const info = await request(app.getHttpServer()).get(
-                `/public/consent/${pending.consentToken as string}`
+                `/public/consent/${tokens.fromHash(pending.consentToken)}`
             );
             expect(info.status).toBe(200);
             expect(info.body.requiresPassword).toBe(false);
 
             const confirmed = await request(app.getHttpServer())
-                .post(`/public/consent/${pending.consentToken as string}/confirm`)
+                .post(`/public/consent/${tokens.fromHash(pending.consentToken)}/confirm`)
                 .send({});
             expect(confirmed.status).toBe(200);
             expect((await consentRow(memberId)).consentStatus).toBe("confirmed");
@@ -787,7 +793,7 @@ describe("Security (e2e)", () => {
                 .send({ email: owner.email, fields: { first_name: "Password" } });
             expect(created.body.awaitingConsent).toBe(true);
             const memberId = created.body.memberId as string;
-            const token = (await consentRow(memberId)).consentToken as string;
+            const token = tokens.fromHash((await consentRow(memberId)).consentToken);
 
             const info = await request(app.getHttpServer()).get(`/public/consent/${token}`);
             expect(info.status).toBe(200);
@@ -866,7 +872,12 @@ describe("Security (e2e)", () => {
                 .send({});
             expect(confirmed.status).toBe(200);
             expect((await consentRow(memberId)).consentStatus).toBe("confirmed");
-            expect((await lk(owner.cookies).get("/cabinet/members/me", clubB)).status).toBe(200);
+            const me = await lk(owner.cookies).get("/cabinet/members/me", clubB);
+            expect(me.status).toBe(200);
+            // TASK-666 M9: заметки сотрудников и поля анкеты клуба в кабинет не уходят
+            expect(me.body).not.toHaveProperty("notes");
+            expect(me.body).not.toHaveProperty("fields");
+            expect(me.body).toMatchObject({ id: memberId, consentStatus: "confirmed" });
         });
 
         it("TASK-701: the QR is issued on first request, a reissue kills the old code, the scanner says why", async () => {
@@ -1206,7 +1217,7 @@ describe("Security (e2e)", () => {
             });
             const confirmed = await request(app.getHttpServer())
                 .post("/cabinet/auth/member/confirm-email")
-                .send({ token: emailVerificationToken });
+                .send({ token: tokens.fromHash(emailVerificationToken) });
             expect([200, 201]).toContain(confirmed.status);
             return { email, userId: id };
         };

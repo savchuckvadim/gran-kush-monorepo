@@ -18,6 +18,7 @@ import { MulterFile } from "@storage/domain/interfaces/storage-file.interface";
 import { AccountProvisioningService } from "@users/application/services/account-provisioning.service";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 
+import { issueSecretToken } from "@common/crypto/secret-token";
 import { ContentLocale, resolveLabel } from "@common/i18n";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { AccountFilesService } from "@modules/account/application/services/account-files.service";
@@ -195,6 +196,7 @@ export class MembersService {
             dto.email
         );
         const awaitingConsent = !isNewUser;
+        const consent = awaitingConsent ? issueSecretToken() : null;
 
         const member = await this.joinPortalService.joinPortal({
             userId: user.id,
@@ -202,13 +204,11 @@ export class MembersService {
             fields: dto.fields,
             joinSource: MemberJoinSource.crm,
             createdByEmployeeId,
-            consent: awaitingConsent
-                ? { token: this.consent.newToken(), requestedAt: new Date() }
-                : undefined,
+            consent: consent ? { tokenHash: consent.hash, requestedAt: new Date() } : undefined,
         });
 
-        if (awaitingConsent) {
-            await this.consent.sendRequest(member, locale);
+        if (consent) {
+            await this.consent.sendRequest(member, consent.token, locale);
         } else if (isNewUser) {
             // Новому аккаунту — письмо «задайте пароль»: так участник попадает в кабинет
             await this.emailVerification.sendAccountSetup(user.email, {

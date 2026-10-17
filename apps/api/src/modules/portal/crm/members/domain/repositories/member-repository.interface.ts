@@ -23,8 +23,8 @@ export abstract class MemberRepository {
     ): Promise<MemberWithRelations | null>;
     abstract findAllByUser(userId: string): Promise<MemberWithRelations[]>;
     abstract countByPortal(portalId: string): Promise<number>;
-    /** Членство, которое ждёт согласия владельца аккаунта (TASK-663); токен — из письма. */
-    abstract findByConsentToken(token: string): Promise<MemberWithRelations | null>;
+    /** Членство, которое ждёт согласия владельца аккаунта (TASK-663); хеш токена из письма. */
+    abstract findByConsentToken(tokenHash: string): Promise<MemberWithRelations | null>;
     abstract create(data: {
         userId: string;
         portalId: string;
@@ -33,7 +33,7 @@ export abstract class MemberRepository {
         joinSource?: MemberJoinSource;
         registrationLinkId?: string;
         createdByEmployeeId?: string;
-        consent?: { token: string; requestedAt: Date };
+        consent?: { tokenHash: string; requestedAt: Date };
     }): Promise<MemberWithRelations>;
     abstract update(
         id: string,

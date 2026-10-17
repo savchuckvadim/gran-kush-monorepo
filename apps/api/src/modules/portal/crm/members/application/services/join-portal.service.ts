@@ -21,8 +21,11 @@ export interface JoinPortalInput {
     purpose?: FormPurpose;
     createdByEmployeeId?: string;
     registrationLinkId?: string;
-    /** CRM завёл чужой аккаунт по email: членство ждёт согласия владельца (TASK-663). */
-    consent?: { token: string; requestedAt: Date };
+    /**
+     * CRM завёл чужой аккаунт по email: членство ждёт согласия владельца (TASK-663). Токен из
+     * письма хранится хешем (`issueSecretToken`).
+     */
+    consent?: { tokenHash: string; requestedAt: Date };
     /**
      * Какие документы аккаунта показать клубу. Только явный выбор владельца: «показать всё»
      * при вступлении больше не бывает (TASK-704). Не передают, когда вступает аккаунт,

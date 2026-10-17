@@ -8,8 +8,8 @@ import {
 
 import { MemberJoinSource, RegistrationLinkKind } from "@prisma/client";
 import { AccountProvisioningService } from "@users/application/services/account-provisioning.service";
-import { randomBytes } from "crypto";
 
+import { issueSecretToken } from "@common/crypto/secret-token";
 import { ContentLocale } from "@common/i18n";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
@@ -99,7 +99,7 @@ export class RegistrationLinkJoinService {
                 // Членство из клейма ждёт, пока владелец адреса задаст пароль по ссылке
                 // из письма (подтверждается в resetPassword); в CRM — бейдж «ждёт согласия»
                 consent: claimByEmail
-                    ? { token: randomBytes(32).toString("hex"), requestedAt: new Date() }
+                    ? { tokenHash: issueSecretToken().hash, requestedAt: new Date() }
                     : undefined,
             });
             memberId = member.id;

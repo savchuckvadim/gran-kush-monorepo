@@ -5,8 +5,8 @@ import { DEFAULT_LANGUAGE, type SupportedLanguage } from "@mail/consts/mail.cons
 import { UserAccountStatus } from "@prisma/client";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import { hash } from "bcrypt";
-import { randomBytes } from "crypto";
 
+import { hashSecretToken, issueSecretToken } from "@common/crypto/secret-token";
 import { ClaimedMembershipRepository } from "@modules/portal/auth/shared/domain/repositories/claimed-membership-repository.interface";
 import { RefreshTokenRepository } from "@modules/portal/auth/shared/domain/repositories/refresh-token-repository.interface";
 
@@ -33,20 +33,6 @@ export class EmailVerificationService {
     ) {}
 
     /**
-     * Генерация токена для подтверждения email
-     */
-    private generateVerificationToken(): string {
-        return randomBytes(32).toString("hex");
-    }
-
-    /**
-     * Генерация токена для сброса пароля
-     */
-    private generateResetToken(): string {
-        return randomBytes(32).toString("hex");
-    }
-
-    /**
      * Отправка письма подтверждения глобальному аккаунту.
      */
     async sendVerificationEmailToUserId(
@@ -58,12 +44,12 @@ export class EmailVerificationService {
             return;
         }
 
-        const token = this.generateVerificationToken();
+        const { token, hash: tokenHash } = issueSecretToken();
         const expiresAt = new Date();
         expiresAt.setHours(expiresAt.getHours() + 24);
 
         await this.userRepository.update(user.id, {
-            emailVerificationToken: token,
+            emailVerificationToken: tokenHash,
             emailVerificationExpiresAt: expiresAt,
         });
 
@@ -111,7 +97,7 @@ export class EmailVerificationService {
      * Подтверждение email по токену
      */
     async verifyEmail(token: string): Promise<{ success: boolean; message: string }> {
-        const user = await this.userRepository.findByEmailVerificationToken(token);
+        const user = await this.userRepository.findByEmailVerificationToken(hashSecretToken(token));
 
         if (!user) {
             throw new NotFoundException("Invalid verification token");
@@ -162,11 +148,11 @@ export class EmailVerificationService {
             return;
         }
 
-        const token = this.generateResetToken();
+        const { token, hash: tokenHash } = issueSecretToken();
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + ACCOUNT_SETUP_TTL_DAYS);
         await this.userRepository.update(user.id, {
-            resetPasswordToken: token,
+            resetPasswordToken: tokenHash,
             resetPasswordExpiresAt: expiresAt,
         });
 
@@ -203,12 +189,12 @@ export class EmailVerificationService {
             };
         }
 
-        const token = this.generateResetToken();
+        const { token, hash: tokenHash } = issueSecretToken();
         const expiresAt = new Date();
         expiresAt.setHours(expiresAt.getHours() + 1); // Токен действителен 1 час
 
         await this.userRepository.update(user.id, {
-            resetPasswordToken: token,
+            resetPasswordToken: tokenHash,
             resetPasswordExpiresAt: expiresAt,
         });
 
@@ -233,7 +219,7 @@ export class EmailVerificationService {
         token: string,
         newPassword: string
     ): Promise<{ success: boolean; message: string }> {
-        const user = await this.userRepository.findByResetPasswordToken(token);
+        const user = await this.userRepository.findByResetPasswordToken(hashSecretToken(token));
 
         if (!user) {
             throw new NotFoundException("Invalid reset token");

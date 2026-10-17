@@ -101,9 +101,9 @@ export class MemberPrismaRepository implements MemberRepository {
         });
     }
 
-    async findByConsentToken(token: string): Promise<MemberWithRelations | null> {
+    async findByConsentToken(tokenHash: string): Promise<MemberWithRelations | null> {
         return this.prisma.member.findUnique({
-            where: { consentToken: token },
+            where: { consentToken: tokenHash },
             include: memberWithRelationsInclude,
         });
     }
@@ -116,7 +116,7 @@ export class MemberPrismaRepository implements MemberRepository {
         joinSource?: MemberJoinSource;
         registrationLinkId?: string;
         createdByEmployeeId?: string;
-        consent?: { token: string; requestedAt: Date };
+        consent?: { tokenHash: string; requestedAt: Date };
     }): Promise<MemberWithRelations> {
         return this.prisma.$transaction(async (tx) => {
             const def = await tx.entityDefinition.findUniqueOrThrow({
@@ -147,7 +147,7 @@ export class MemberPrismaRepository implements MemberRepository {
                     ...(data.consent
                         ? {
                               consentStatus: MemberConsentStatus.pending,
-                              consentToken: data.consent.token,
+                              consentToken: data.consent.tokenHash,
                               consentRequestedAt: data.consent.requestedAt,
                           }
                         : {}),
