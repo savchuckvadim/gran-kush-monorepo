@@ -3,10 +3,6 @@ import {
     OrderStatus,
     PaymentStatus,
 } from "@modules/portal/crm/orders/domain/entity/order.entity";
-import {
-    OrderStage,
-    OrderStageSummary,
-} from "@modules/portal/crm/orders/domain/entity/order-stage.entity";
 
 // ─── Фильтры для выборки заказов ────────────────────────────────────────────
 
@@ -67,7 +63,7 @@ export interface StockLine {
 
 // ─── Данные для обновления заказа ────────────────────────────────────────────
 
-/** Стадию здесь не меняют: только {@link OrderRepository.compareAndSetStage}. */
+/** Стадию здесь не меняют: только {@link OrderStageRepository.compareAndSetStage}. */
 export interface UpdateOrderInput {
     employeeId?: string | null;
     paymentStatus?: PaymentStatus;

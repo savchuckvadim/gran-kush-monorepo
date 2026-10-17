@@ -30,8 +30,15 @@ export abstract class OrderStageRepository {
         portalId: string
     ): Promise<{ entityRecordId: string; entityDefinitionId: string } | null>;
 
-    /** Переставить карточку заказа внутри её колонки */
-    abstract setStagePosition(entityRecordId: string, stagePosition: number): Promise<void>;
+    /**
+     * Переставить карточку заказа внутри её колонки `stageId`. `false` — заказ уже не в этой
+     * стадии (его успели перенести): запись не изменена.
+     */
+    abstract setStagePosition(
+        entityRecordId: string,
+        stageId: string,
+        stagePosition: number
+    ): Promise<boolean>;
 
     /** Стадия из воронок заказов этого портала; чужая или не заказная — null */
     abstract findStageInPortal(portalId: string, stageId: string): Promise<OrderStage | null>;

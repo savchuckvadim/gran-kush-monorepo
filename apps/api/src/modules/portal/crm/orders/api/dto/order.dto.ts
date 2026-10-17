@@ -361,31 +361,6 @@ export class UpdateOrderStatusDto {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// Move Order To Stage (CRM)
-// ═══════════════════════════════════════════════════════════════════════════════
-
-export class MoveOrderStageDto {
-    @ApiProperty({
-        example: "550e8400-e29b-41d4-a716-446655440000",
-        type: String,
-        description: "Стадия из воронки заказов клуба",
-    })
-    @IsUUID()
-    stageId: string;
-
-    @ApiPropertyOptional({
-        type: String,
-        format: "uuid",
-        nullable: true,
-        description:
-            "Заказ-сосед сверху в колонке канбана: карточка встаёт сразу под ним; null — наверх. Не передан: новая стадия ставит наверх, та же — без изменений",
-    })
-    @IsOptional()
-    @IsUUID()
-    afterId?: string | null;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
 // Update Payment Status (CRM)
 // ═══════════════════════════════════════════════════════════════════════════════
 

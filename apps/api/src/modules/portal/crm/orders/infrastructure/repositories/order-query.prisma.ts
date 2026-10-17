@@ -59,18 +59,17 @@ export const buildOrderOrderBy = (
     const order = sortOrder ?? "desc";
 
     switch (sortBy) {
-        // колонка канбана: место карточки, равные — новые выше
-        case "stagePosition":
-            return [{ entityRecord: { stagePosition: order } }, { createdAt: "desc" }];
         case "orderNumber":
             return [{ orderNumber: order }];
         case "total":
             return [{ total: order }];
         case "orderedAt":
             return [{ orderedAt: order }];
+        // колонка канбана: сверху вниз, равные места — новые выше; направление не спрашиваем,
+        // как у записей смарт-процессов
+        case "stagePosition":
+            return [{ entityRecord: { stagePosition: "asc" } }, { createdAt: "desc" }];
         default:
             return [{ createdAt: order }];
     }
 };
-
-// ─── Маппинг Prisma → Domain Entity ─────────────────────────────────────

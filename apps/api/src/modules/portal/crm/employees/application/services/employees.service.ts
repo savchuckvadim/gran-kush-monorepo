@@ -16,6 +16,9 @@ import {
     EmployeeWithProfile,
 } from "@modules/portal/crm/employees/domain/repositories/employee-repository.interface";
 
+/** Machine-readable 409 reason: the CRM answers it with a hint to send an invitation. */
+export const EMPLOYEE_CONFLICT_CODES = { accountExists: "account_exists" } as const;
+
 export interface CreateEmployeeInput {
     email: string;
     role: EmployeeRole;
@@ -77,9 +80,10 @@ export class EmployeesService {
             input.email
         );
         if (!isNewUser && !input.invitationId && this.ownership.isClaimed(user)) {
-            throw new ConflictException(
-                "This email already has an account. Send an invitation instead"
-            );
+            throw new ConflictException({
+                message: "This email already has an account. Send an invitation instead",
+                code: EMPLOYEE_CONFLICT_CODES.accountExists,
+            });
         }
 
         const employee = await this.employeeRepository.createWithProfile({

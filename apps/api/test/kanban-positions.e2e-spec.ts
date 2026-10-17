@@ -49,7 +49,7 @@ describe("Smart-process kanban: funnels and card order (e2e)", () => {
     let main: Funnel;
     let sales: Funnel;
 
-    const crm = (method: "get" | "post" | "patch", url: string) =>
+    const crm = (method: "get" | "post" | "patch" | "delete", url: string) =>
         request(app.getHttpServer())[method](url).set("Cookie", cookies).set("X-Portal-Slug", slug);
 
     const createRecord = async (title: string, stageId?: string): Promise<RecordView> => {
@@ -201,5 +201,77 @@ describe("Smart-process kanban: funnels and card order (e2e)", () => {
         const order = await column(target);
         expect(order.indexOf(card.id)).toBe(order.indexOf(anchor.id) + 1);
         expect(order.indexOf(below.id)).toBe(order.indexOf(card.id) + 1);
+    });
+
+    it("rejects a stage change without stageId instead of reordering across the whole entity", async () => {
+        const record = await createRecord("no stage id", sales.stages[0].id);
+        const url = `/crm/entities/${ENTITY_CODE}/records/${record.id}/stage`;
+
+        expect((await crm("patch", url).send({})).status).toBe(400);
+        expect((await crm("patch", url).send({ afterId: null })).status).toBe(400);
+        expect((await crm("patch", url).send({ stageId: "not-a-uuid" })).status).toBe(400);
+    });
+
+    describe("records survive the removal of their stage or funnel", () => {
+        interface FullStage extends Stage {
+            name: string;
+            sortOrder: number;
+            semantic: string;
+        }
+        let temp: { id: string; stages: FullStage[] };
+
+        const stageOf = async (id: string): Promise<string | undefined> => {
+            const res = await crm("get", `/crm/entities/${ENTITY_CODE}/records/${id}`);
+            expect(res.status).toBe(200);
+            return (res.body as RecordView).stage?.id;
+        };
+
+        beforeAll(async () => {
+            const created = await crm(
+                "post",
+                `/crm/settings/entities/${ENTITY_CODE}/stage-categories`
+            ).send({
+                code: "temp",
+                name: "Временная",
+                stages: [
+                    { name: "Первая", sortOrder: 0, semantic: "NEW" },
+                    { name: "Вторая", sortOrder: 1, semantic: "IN_PROGRESS" },
+                ],
+            });
+            expect(created.status).toBe(201);
+            temp = created.body as typeof temp;
+        });
+
+        it("moves the records of a removed stage to the first kept stage of the funnel", async () => {
+            const [first, second] = temp.stages;
+            const record = await createRecord("on the second", second.id);
+
+            const res = await crm(
+                "patch",
+                `/crm/settings/entities/${ENTITY_CODE}/stage-categories/${temp.id}`
+            ).send({
+                stages: [
+                    {
+                        id: first.id,
+                        name: first.name,
+                        sortOrder: first.sortOrder,
+                        semantic: first.semantic,
+                    },
+                ],
+            });
+            expect(res.status).toBe(200);
+            expect(await stageOf(record.id)).toBe(first.id);
+        });
+
+        it("moves the records of a deleted funnel to the first stage of the default funnel", async () => {
+            const record = await createRecord("in the doomed funnel", temp.stages[0].id);
+
+            const res = await crm(
+                "delete",
+                `/crm/settings/entities/${ENTITY_CODE}/stage-categories/${temp.id}`
+            );
+            expect(res.status).toBe(200);
+            expect(await stageOf(record.id)).toBe(main.stages[0].id);
+        });
     });
 });

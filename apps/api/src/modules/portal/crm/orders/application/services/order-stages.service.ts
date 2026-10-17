@@ -29,6 +29,8 @@ import { StagePositionService } from "@modules/portal/crm/records/application/se
 
 import { OrdersService } from "./orders.service";
 
+const STAGE_RACE_MESSAGE = "Стадию заказа изменил параллельный запрос — обновите заказ";
+
 /** Что вернуть на склад при отмене заказа */
 const stockLinesOf = (order: Order): StockLine[] =>
     (order.items ?? []).map((item) => ({
@@ -72,8 +74,14 @@ export class OrderStagesService {
         if (order.stage?.id === target.id) {
             if (afterOrderId !== undefined) {
                 const card = await this.cardPlacement(order.id, target.id, portalId, afterOrderId);
-                if (card)
-                    await this.stageRepository.setStagePosition(card.entityRecordId, card.position);
+                const kept =
+                    !card ||
+                    (await this.stageRepository.setStagePosition(
+                        card.entityRecordId,
+                        target.id,
+                        card.position
+                    ));
+                if (!kept) throw new ConflictException(STAGE_RACE_MESSAGE);
             }
             return order;
         }
@@ -220,9 +228,7 @@ export class OrderStagesService {
             restock: isFailureStage(target) ? stockLinesOf(order) : undefined,
         });
         if (!won) {
-            throw new ConflictException(
-                "Стадию заказа изменил параллельный запрос — обновите заказ"
-            );
+            throw new ConflictException(STAGE_RACE_MESSAGE);
         }
 
         const update: UpdateOrderInput = {};

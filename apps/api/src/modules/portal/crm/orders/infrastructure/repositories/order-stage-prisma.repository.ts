@@ -75,11 +75,16 @@ export class OrderStagePrismaRepository extends OrderStageRepository {
             : null;
     }
 
-    async setStagePosition(entityRecordId: string, stagePosition: number): Promise<void> {
-        await this.prisma.entityRecord.update({
-            where: { id: entityRecordId },
+    async setStagePosition(
+        entityRecordId: string,
+        stageId: string,
+        stagePosition: number
+    ): Promise<boolean> {
+        const { count } = await this.prisma.entityRecord.updateMany({
+            where: { id: entityRecordId, stageId },
             data: { stagePosition },
         });
+        return count === 1;
     }
 
     // ─── Стадии воронок заказов ──────────────────────────────────────────────

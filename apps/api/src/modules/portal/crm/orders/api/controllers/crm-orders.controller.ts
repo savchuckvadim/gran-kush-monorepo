@@ -24,7 +24,6 @@ import { RequireManager } from "@modules/portal/auth/employees/api/decorators/re
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import {
     CrmCreateOrderDto,
-    MoveOrderStageDto,
     OrderDetailDto,
     OrderListDto,
     OrderListQueryDto,
@@ -33,6 +32,7 @@ import {
     UpdateOrderStatusDto,
     UpdatePaymentStatusDto,
 } from "@modules/portal/crm/orders/api/dto/order.dto";
+import { MoveOrderStageDto } from "@modules/portal/crm/orders/api/dto/order-stage.dto";
 import { mapOrderToDetailDto, mapOrderToListDto } from "@modules/portal/crm/orders/api/mappers";
 import { OrderStagesService } from "@modules/portal/crm/orders/application/services/order-stages.service";
 import { OrdersService } from "@modules/portal/crm/orders/application/services/orders.service";

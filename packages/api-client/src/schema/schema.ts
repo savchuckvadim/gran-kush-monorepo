@@ -6513,6 +6513,7 @@ export interface components {
             deleted: boolean;
         };
         SetRecordStageDto: {
+            /** Format: uuid */
             stageId: string | null;
             /**
              * Format: uuid

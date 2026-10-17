@@ -120,7 +120,10 @@ export class OrderStagesService {
                     .map((s) => s.id)
                     .filter((id): id is string => Boolean(id));
 
-                // Записи на удаляемых стадиях теряют stageId (SetNull)
+                if (!category.entityIsSystem) {
+                    await this.relocateRecords(tx, category.id, keptIds, input.stages);
+                }
+                // Записи системных сущностей на удаляемых стадиях теряют stageId (SetNull)
                 await tx.stage.deleteMany({
                     where: { stageCategoryId: category.id, id: { notIn: keptIds } },
                 });
@@ -185,7 +188,54 @@ export class OrderStagesService {
         if (category.isDefault) {
             throw new BadRequestException("Default funnel cannot be deleted");
         }
-        await this.prisma.stageCategory.delete({ where: { id: categoryId } });
+        await this.prisma.$transaction(async (tx) => {
+            if (!category.entityIsSystem) {
+                // записи удаляемой воронки уходят в первую стадию воронки по умолчанию
+                const target = await tx.stage.findFirst({
+                    where: {
+                        stageCategory: {
+                            entityDefinitionId: category.entityDefinitionId,
+                            isDefault: true,
+                        },
+                    },
+                    orderBy: { sortOrder: "asc" },
+                    select: { id: true },
+                });
+                if (target) {
+                    await tx.entityRecord.updateMany({
+                        where: { stage: { stageCategoryId: categoryId } },
+                        data: { stageId: target.id },
+                    });
+                }
+            }
+            await tx.stageCategory.delete({ where: { id: categoryId } });
+        });
+    }
+
+    /**
+     * Записи смарт-процесса не теряют стадию вместе с удалённой: список и канбан выбирают записи по
+     * стадии воронки, и запись без стадии пропала бы с экрана. Они уходят в первую из оставшихся
+     * стадий (в порядке, который клуб только что сохранил). Системные сущности так не двигаем:
+     * закрытый заказ нельзя «открыть» удалением стадии.
+     */
+    private async relocateRecords(
+        tx: Prisma.TransactionClient,
+        categoryId: string,
+        keptIds: string[],
+        stages: { id?: string; sortOrder: number }[]
+    ): Promise<void> {
+        const doomed = await tx.stage.findMany({
+            where: { stageCategoryId: categoryId, id: { notIn: keptIds } },
+            select: { id: true },
+        });
+        const firstKept = stages
+            .filter((stage) => stage.id)
+            .sort((a, b) => a.sortOrder - b.sortOrder)[0]?.id;
+        if (doomed.length === 0 || !firstKept) return;
+        await tx.entityRecord.updateMany({
+            where: { stageId: { in: doomed.map((stage) => stage.id) } },
+            data: { stageId: firstKept },
+        });
     }
 
     /** Создать воронку со стадиями для сущности (конструктор). */
@@ -226,11 +276,22 @@ export class OrderStagesService {
         }
         const category = await this.prisma.stageCategory.findFirst({
             where: { id: categoryId, portalId, entityDefinitionId: entityDef.id },
-            select: { id: true, isSystem: true, isDefault: true },
+            select: {
+                id: true,
+                isSystem: true,
+                isDefault: true,
+                entityDefinition: { select: { isSystem: true } },
+            },
         });
         if (!category) {
             throw new NotFoundException("Funnel not found");
         }
-        return category;
+        return {
+            id: category.id,
+            isSystem: category.isSystem,
+            isDefault: category.isDefault,
+            entityDefinitionId: entityDef.id,
+            entityIsSystem: category.entityDefinition.isSystem,
+        };
     }
 }

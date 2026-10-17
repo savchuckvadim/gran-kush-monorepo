@@ -11,6 +11,7 @@ import {
     IsUUID,
     Max,
     Min,
+    ValidateIf,
 } from "class-validator";
 
 import { EntityFilterDto } from "@modules/portal/crm/entity-fields/api/dto/entity-filter.dto";
@@ -188,9 +189,10 @@ export class UpdateEntityRecordDto {
 }
 
 export class SetRecordStageDto {
-    @ApiProperty({ type: String, nullable: true })
-    @IsOptional()
-    @IsString()
+    /** `null` — без стадии; поле обязательно: без него перенос шёл бы по колонкам всех стадий */
+    @ApiProperty({ type: String, format: "uuid", nullable: true })
+    @ValidateIf((_, value) => value !== null)
+    @IsUUID()
     stageId: string | null;
 
     @ApiPropertyOptional({
