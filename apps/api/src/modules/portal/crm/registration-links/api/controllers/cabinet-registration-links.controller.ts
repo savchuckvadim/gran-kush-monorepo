@@ -6,7 +6,7 @@ import { PUBLIC_TOKEN_THROTTLE } from "@common/config/throttler/throttler.config
 import { CurrentAuthUser } from "@common/decorators/auth/current-auth-user.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
-import { RequireUserJwt } from "@modules/portal/auth/members/api/decorators/require-member-jwt.decorator";
+import { CabinetSession } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 
 import { RegistrationLinkJoinService } from "../../application/services/registration-link-join.service";
@@ -18,7 +18,7 @@ import { JoinViaLinkDto, JoinViaLinkResponseDto } from "../dto/registration-link
  */
 @ApiTags("Cabinet Registration Links")
 @Controller("cabinet/reg-links")
-@RequireUserJwt()
+@CabinetSession()
 export class CabinetRegistrationLinksController {
     constructor(private readonly joinService: RegistrationLinkJoinService) {}
 

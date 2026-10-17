@@ -7,6 +7,10 @@ import request from "supertest";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 import { BillingModule } from "@modules/billing/billing.module";
+import {
+    CabinetSessionGuard,
+    CrmSessionGuard,
+} from "@modules/portal/auth/sessions/api/session.guard";
 import { PortalContextModule } from "@modules/portal/crm/portals/portal-context.module";
 
 const PLANS_URL = "/platform/billing/plans";
@@ -29,6 +33,11 @@ describe("GET /platform/billing/plans — публичный каталог та
         })
             .overrideProvider(PrismaService)
             .useValue(prismaMock)
+            // Сессии (глобальный SessionsModule) здесь не подняты; публичному маршруту они и не нужны
+            .overrideGuard(CrmSessionGuard)
+            .useValue({ canActivate: () => false })
+            .overrideGuard(CabinetSessionGuard)
+            .useValue({ canActivate: () => false })
             .compile();
 
         app = moduleRef.createNestApplication<INestApplication<Server>>();

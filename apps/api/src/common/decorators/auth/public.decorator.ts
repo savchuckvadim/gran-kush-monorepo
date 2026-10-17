@@ -6,8 +6,8 @@ import { SetMetadata } from "@nestjs/common";
 export const IS_PUBLIC_KEY = "isPublic";
 
 /**
- * Декоратор для пометки публичных эндпоинтов (не требующих аутентификации)
- * Используется вместе с guard’ами Passport (@RequireEmployeeJwt / @RequireMemberJwt и т.д.)
+ * Публичный эндпоинт: сессия не нужна. Маршрут без `@Public()` обязан стоять под `CrmSession`/`CrmAuth`/
+ * `CabinetSession`/`CabinetAuth` или гвардом платформы.
  *
  * @example
  * ```typescript

@@ -7,7 +7,7 @@ import { CurrentAuthUser } from "@common/decorators/auth/current-auth-user.decor
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { PrismaService } from "@common/prisma/prisma.service";
-import { RequireUserJwt } from "@modules/portal/auth/members/api/decorators/require-member-jwt.decorator";
+import { CabinetSession } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 import { PORTAL_SUMMARY_SELECT } from "@modules/portal/crm/portals/infrastructure/prisma-includes/portal-summary.select";
 
@@ -20,7 +20,7 @@ export class CabinetSpendingController {
     constructor(private readonly prisma: PrismaService) {}
 
     @Get()
-    @RequireUserJwt()
+    @CabinetSession()
     @ApiOperation({ summary: "Мои траты по всем клубам" })
     @ApiSuccessResponse(MySpendingResponseDto)
     @ApiErrorResponse([401])

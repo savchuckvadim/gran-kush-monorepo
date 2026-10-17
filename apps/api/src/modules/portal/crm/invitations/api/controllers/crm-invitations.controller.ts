@@ -8,7 +8,7 @@ import { ApiErrorResponse } from "@common/decorators/response/api-error-response
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { type ContentLocale, RequestLocale } from "@common/i18n";
 import type { PortalPrincipal } from "@common/portal";
-import { RequireEmployeeJwt } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
+import { CrmAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import { toEmployeeRoleDto } from "@modules/portal/crm/access/api/mappers/portal-role.mapper";
 import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import { toEmployeeActor } from "@modules/portal/crm/employees/application/services/employees.service";
@@ -39,7 +39,7 @@ function toDto(i: InvitationWithRole): InvitationDto {
 
 @ApiTags("CRM Employee Invitations")
 @Controller("crm/settings/invitations")
-@RequireEmployeeJwt()
+@CrmAuth()
 @RequirePermission(PERMISSIONS.EmployeesManage)
 export class CrmInvitationsController {
     constructor(private readonly invitationsService: InvitationsService) {}

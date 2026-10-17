@@ -3,8 +3,8 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
-import { RequireMemberJwt } from "@modules/portal/auth/members";
 import { CurrentMember } from "@modules/portal/auth/members/api/decorators/current-member.decorator";
+import { CabinetAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import { Member } from "@modules/portal/crm/members/domain/entity/member.entity";
 import { QrCodeWithPayloadDto } from "@modules/portal/crm/qr-codes/api/dto/qr-code.dto";
 import { mapQrCodeToPayloadDto } from "@modules/portal/crm/qr-codes/api/mappers";
@@ -13,7 +13,7 @@ import { QrCodesService } from "@modules/portal/crm/qr-codes/application/service
 /** QR участника в кабинете: только свой код в клубе из адреса. */
 @ApiTags("Cabinet QR Codes")
 @Controller("cabinet/qr-code")
-@RequireMemberJwt()
+@CabinetAuth()
 @ApiBearerAuth()
 export class CabinetQrCodesController {
     constructor(private readonly qrCodesService: QrCodesService) {}

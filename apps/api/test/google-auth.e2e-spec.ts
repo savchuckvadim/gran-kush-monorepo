@@ -125,7 +125,7 @@ describe("Google sign-in (e2e)", () => {
 
             expect(res.status).toBe(302);
             expect(new URL(res.headers.location).pathname).toBe("/es/join/abc123");
-            expect(cookieOf(res, "member_access_token")).toBeTruthy();
+            expect(cookieOf(res, "cabinet_access")).toBeTruthy();
             // Экземпляр куки привязки удаляется: она нужна ровно один раз
             const cleared = setCookies(res).find((c) => c.startsWith("google_oauth_flow=;"));
             expect(cleared).toBeDefined();
@@ -169,7 +169,7 @@ describe("Google sign-in (e2e)", () => {
 
             expect(res.status).toBe(302);
             expect(res.headers.location).toContain("/es/auth/login?error=google_auth");
-            expect(cookieOf(res, "member_access_token")).toBeFalsy();
+            expect(cookieOf(res, "cabinet_access")).toBeFalsy();
             expect(await prisma.user.findUnique({ where: { email: google.email } })).toBeNull();
         });
 
@@ -193,7 +193,7 @@ describe("Google sign-in (e2e)", () => {
             const res = await callback(path, first.state, second.flowCookie);
 
             expect(res.headers.location).toContain("error=google_auth");
-            expect(cookieOf(res, "member_access_token")).toBeFalsy();
+            expect(cookieOf(res, "cabinet_access")).toBeFalsy();
         });
 
         it("state кабинета не принимается на callback CRM", async () => {
@@ -217,7 +217,7 @@ describe("Google sign-in (e2e)", () => {
 
             expect(res.status).toBe(302);
             expect(new URL(res.headers.location).pathname).toBe("/es/clubs/new");
-            expect(cookieOf(res, "crm_access_token")).toBeTruthy();
+            expect(cookieOf(res, "crm_access")).toBeTruthy();
             const user = await prisma.user.findUniqueOrThrow({ where: { email: google.email } });
             expect(user.emailConfirmed).toBe(true);
             expect(user.passwordHash).toBeNull();
@@ -235,7 +235,7 @@ describe("Google sign-in (e2e)", () => {
             const location = new URL(res.headers.location);
             expect(location.pathname).toBe("/es/clubs/new");
             expect(location.searchParams.get("plan")).toBe("club-month");
-            expect(cookieOf(res, "crm_access_token")).toBeTruthy();
+            expect(cookieOf(res, "crm_access")).toBeTruthy();
         });
 
         it("владелец клуба входит и возвращается на указанную страницу", async () => {
@@ -261,7 +261,7 @@ describe("Google sign-in (e2e)", () => {
                 const res = await callback(path, state, flowCookie);
 
                 expect(new URL(res.headers.location).pathname).toBe(`/es/${slug}/crm/members`);
-                expect(cookieOf(res, "crm_access_token")).toBeTruthy();
+                expect(cookieOf(res, "crm_access")).toBeTruthy();
             } finally {
                 await prisma.portal.deleteMany({ where: { name: slug } });
             }
@@ -313,7 +313,7 @@ describe("Google sign-in (e2e)", () => {
                 const res = await callback(path, state, flowCookie);
 
                 expect(new URL(res.headers.location).pathname).toBe(`/es/${slug}/crm`);
-                expect(cookieOf(res, "crm_access_token")).toBeTruthy();
+                expect(cookieOf(res, "crm_access")).toBeTruthy();
                 const user = await prisma.user.findUniqueOrThrow({
                     where: { email: google.email },
                 });
@@ -342,7 +342,7 @@ describe("Google sign-in (e2e)", () => {
                 const location = new URL(res.headers.location);
                 expect(location.pathname).toBe(`/es/auth/invite/${token}`);
                 expect(location.searchParams.get("error")).toBe("invite_email_mismatch");
-                expect(cookieOf(res, "crm_access_token")).toBeFalsy();
+                expect(cookieOf(res, "crm_access")).toBeFalsy();
                 expect(await prisma.user.findUnique({ where: { email: google.email } })).toBeNull();
             });
 

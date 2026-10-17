@@ -17,7 +17,7 @@ import { RequirePermission } from "@common/decorators/auth/require-permission.de
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { type ContentLocale, RequestLocale } from "@common/i18n";
-import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
+import { CrmAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import {
     DeleteMemberFieldResponseDto,
@@ -54,7 +54,7 @@ import { StatusSetsService } from "@modules/portal/crm/entity-fields/application
 /** Конструктор полей/форм/стадий: универсальные маршруты по коду сущности (member/order/product/смарт-процессы). */
 @ApiTags("CRM Entity fields (settings)")
 @Controller("crm/settings/entities")
-@RequireEmployeeJwt()
+@CrmAuth()
 export class CrmEntityFieldsSettingsController {
     constructor(
         private readonly formSchema: FormSchemaService,

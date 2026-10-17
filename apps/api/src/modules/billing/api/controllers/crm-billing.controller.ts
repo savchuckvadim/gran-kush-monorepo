@@ -9,7 +9,7 @@ import { RequirePermission } from "@common/decorators/auth/require-permission.de
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { PortalBillingService } from "@modules/billing/application/services/portal-billing.service";
-import { RequireEmployeeJwtWithoutSubscriptionGate } from "@modules/portal/auth/employees";
+import { CrmAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 
@@ -25,7 +25,7 @@ import {
 @ApiTags("CRM Billing")
 @Controller("crm/billing")
 // Без subscription gate: оплатить нужно именно тогда, когда CRM уже закрыта 402
-@RequireEmployeeJwtWithoutSubscriptionGate()
+@CrmAuth({ subscription: false })
 @ApiBearerAuth()
 export class CrmBillingController {
     constructor(private readonly billing: PortalBillingService) {}

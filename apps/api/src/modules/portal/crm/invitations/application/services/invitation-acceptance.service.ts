@@ -14,7 +14,6 @@ import { User } from "@users/domain/entity/user.entity";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 
 import { PrismaService } from "@common/prisma/prisma.service";
-import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
 import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
 import { EmployeesService } from "@modules/portal/crm/employees/application/services/employees.service";
 
@@ -23,10 +22,10 @@ import { AcceptInvitationOutcome } from "../../domain/invitation-acceptance";
 
 import { InvitationsService, type InvitationWithPortal } from "./invitations.service";
 
-/** Токены не попадают в тело ответа: контроллер кладёт их в HttpOnly-куки CRM. */
+/** `sessionUserId` — аккаунт, владелец которого доказан: контроллер выдаёт ему сессию CRM. */
 export interface AcceptInvitationResult {
     response: AcceptInvitationResponseDto;
-    tokens?: { accessToken: string; refreshToken: string };
+    sessionUserId?: string;
 }
 
 /** Аккаунт, владелец которого уже доказан: паролем, подтверждённой сессией или Google. */
@@ -55,7 +54,6 @@ export class InvitationAcceptanceService {
         private readonly accountProvisioning: AccountProvisioningService,
         private readonly ownership: AccountOwnershipService,
         private readonly employeesService: EmployeesService,
-        private readonly employeeAuthService: EmployeeAuthService,
         private readonly userRepository: UserRepository,
         private readonly emailVerification: EmailVerificationService
     ) {}
@@ -64,8 +62,7 @@ export class InvitationAcceptanceService {
     async acceptWithPassword(
         token: string,
         dto: { password?: string; fields?: Record<string, unknown> },
-        language: SupportedLanguage,
-        deviceId: string
+        language: SupportedLanguage
     ): Promise<AcceptInvitationResult> {
         const invitation = await this.invitations.getActiveByToken(token);
         const portalSlug = invitation.portal.name;
@@ -102,15 +99,14 @@ export class InvitationAcceptanceService {
                 response: { outcome: AcceptInvitationOutcome.confirm_email_first, portalSlug },
             };
         }
-        return this.complete(invitation, existing, dto.fields, deviceId);
+        return this.complete(invitation, existing, dto.fields);
     }
 
     /** Открытая сессия приглашённого аккаунта (CRM или кабинет): сама сессия и есть доказательство. */
     async acceptWithSession(
         token: string,
         userId: string,
-        fields: Record<string, unknown> | undefined,
-        deviceId: string
+        fields: Record<string, unknown> | undefined
     ): Promise<AcceptInvitationResult> {
         const invitation = await this.invitations.getActiveByToken(token);
         const user = await this.userRepository.findById(userId);
@@ -118,17 +114,16 @@ export class InvitationAcceptanceService {
             throw new NotFoundException("Account not found");
         }
         await this.ownership.assertOwnerProof(user, { kind: "session", userId });
-        return this.complete(invitation, user, fields, deviceId);
+        return this.complete(invitation, user, fields);
     }
 
     /** Google подтвердил адрес: аккаунт для него только что найден или заведён. */
     async acceptWithVerifiedAccount(
         token: string,
-        account: ProvenAccount,
-        deviceId: string
+        account: ProvenAccount
     ): Promise<AcceptInvitationResult> {
         const invitation = await this.invitations.getActiveByToken(token);
-        return this.complete(invitation, account, undefined, deviceId);
+        return this.complete(invitation, account, undefined);
     }
 
     private async acceptAsNewAccount(
@@ -170,24 +165,19 @@ export class InvitationAcceptanceService {
     private async complete(
         invitation: InvitationWithPortal,
         account: ProvenAccount,
-        fields: Record<string, unknown> | undefined,
-        deviceId: string
+        fields: Record<string, unknown> | undefined
     ): Promise<AcceptInvitationResult> {
         if (account.email.trim().toLowerCase() !== invitation.email) {
             throw new ForbiddenException("This invitation was sent to another email address");
         }
         const employeeId = await this.createEmployee(invitation, account.id, fields);
-        const tokens = await this.employeeAuthService.generateTokens(
-            { id: account.id, email: account.email },
-            deviceId
-        );
         return {
             response: {
                 outcome: AcceptInvitationOutcome.accepted,
                 portalSlug: invitation.portal.name,
                 employeeId,
             },
-            tokens,
+            sessionUserId: account.id,
         };
     }
 

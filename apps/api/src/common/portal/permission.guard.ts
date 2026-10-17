@@ -9,7 +9,7 @@ import type { Permission } from "@modules/portal/crm/access/domain/permissions";
 import { principalCan } from "./portal-principal.types";
 
 /**
- * Права роли сотрудника (TASK-731). Стоит в цепочке `RequireEmployeeJwt` после `MembershipGuard`, поэтому
+ * Права роли сотрудника (TASK-731). Стоит в цепочке `CrmAuth` после `MembershipGuard`, поэтому
  * principal уже есть. Права из `@RequirePermission` на классе и на обработчике складываются: нужны все.
  * Маршрут без `@RequirePermission` открыт любому сотруднику клуба.
  */

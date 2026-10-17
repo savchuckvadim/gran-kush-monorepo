@@ -14,8 +14,8 @@ import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { type PortalPrincipal, principalCan } from "@common/portal";
-import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
 import { CurrentEmployee } from "@modules/portal/auth/employees/api/decorators/current-employee.decorator";
+import { CrmAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import {
@@ -44,7 +44,7 @@ const toDto = (pair: UiSettingPair): UiSettingDto => ({
 
 @ApiTags("CRM UI Settings")
 @Controller("crm/settings/ui")
-@RequireEmployeeJwt()
+@CrmAuth()
 @ApiBearerAuth()
 export class CrmUiSettingsController {
     constructor(private readonly uiSettings: UiSettingsService) {}

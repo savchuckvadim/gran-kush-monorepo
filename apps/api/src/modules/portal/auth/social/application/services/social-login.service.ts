@@ -4,7 +4,7 @@ import { IdentityProvider, UserAccountStatus } from "@prisma/client";
 import { User } from "@users/domain/entity/user.entity";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 
-import { RefreshTokenRepository } from "@modules/portal/auth/shared/domain/repositories/refresh-token-repository.interface";
+import { SessionsService } from "@modules/portal/auth/sessions/application/sessions.service";
 import { UserIdentityRepository } from "@modules/portal/auth/social/domain/repositories/user-identity-repository.interface";
 import { GoogleProfile } from "@modules/portal/auth/social/domain/social-profile";
 
@@ -27,7 +27,7 @@ export class SocialLoginService {
     constructor(
         private readonly userRepository: UserRepository,
         private readonly identities: UserIdentityRepository,
-        private readonly refreshTokens: RefreshTokenRepository
+        private readonly sessions: SessionsService
     ) {}
 
     /** Кабинет: аккаунта нет — создаём (без клуба; вступит по ссылке или регистрации). */
@@ -117,7 +117,7 @@ export class SocialLoginService {
                 emailVerificationExpiresAt: null,
                 ...(dropPassword ? { passwordHash: null } : {}),
             });
-            await this.refreshTokens.revokeAllForUser(current.id);
+            await this.sessions.endAllForUser(current.id, "account_claimed");
         }
         return current;
     }

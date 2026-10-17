@@ -51,15 +51,15 @@ const buildService = (row: UserRow | null) => {
         sendPasswordReset: jest.fn(),
         sendAccountSetup: jest.fn(),
     };
-    const refreshTokens = { revokeAllForUser: jest.fn().mockResolvedValue(0) };
+    const sessions = { endAllForUser: jest.fn().mockResolvedValue(0) };
     const claimedMemberships = { confirmPendingSelfJoins: jest.fn().mockResolvedValue(0) };
     const service = new EmailVerificationService(
         userRepository as never,
         mailService as never,
-        refreshTokens as never,
+        sessions as never,
         claimedMemberships as never
     );
-    return { service, userRepository, mailService, refreshTokens, claimedMemberships };
+    return { service, userRepository, mailService, sessions, claimedMemberships };
 };
 
 describe("EmailVerificationService — заблокированный аккаунт", () => {
@@ -126,7 +126,7 @@ describe("EmailVerificationService — публичный resend", () => {
 describe("EmailVerificationService — resetPassword клеймит аккаунт", () => {
     it("ставит пароль, подтверждает email и выкидывает старые сессии", async () => {
         const row = user({ passwordHash: null, status: UserAccountStatus.pending_claim });
-        const { service, userRepository, refreshTokens } = buildService(row);
+        const { service, userRepository, sessions } = buildService(row);
         const res = await service.resetPassword("reset-token", "NewPassword1");
         expect(res.success).toBe(true);
         expect(userRepository.update).toHaveBeenCalledWith(
@@ -138,7 +138,7 @@ describe("EmailVerificationService — resetPassword клеймит аккаун
                 resetPasswordToken: null,
             })
         );
-        expect(refreshTokens.revokeAllForUser).toHaveBeenCalledWith("u1");
+        expect(sessions.endAllForUser).toHaveBeenCalledWith("u1", "password_reset");
     });
 
     it("подтверждает членства, ждавшие клейма аккаунта", async () => {

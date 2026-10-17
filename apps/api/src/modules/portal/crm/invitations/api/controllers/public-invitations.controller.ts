@@ -1,16 +1,16 @@
-import { Body, Controller, Get, Headers, HttpCode, Param, Post, Res } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Param, Post, Req, Res } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 
-import type { Response } from "express";
+import type { Request, Response } from "express";
 
-import { AUTH_GLOBAL_SCOPE, resolveDeviceIdFromHeaders } from "@common/auth";
 import { PUBLIC_TOKEN_THROTTLE } from "@common/config/throttler/throttler.config";
-import { AuthCookieService } from "@common/cookie/services/auth-cookie.service";
 import { Public } from "@common/decorators/auth/public.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { type ContentLocale, RequestLocale } from "@common/i18n";
+import { SessionHttpService } from "@modules/portal/auth/sessions/api/session-http.service";
+import { SESSION_AUDIENCES } from "@modules/portal/auth/sessions/domain/auth-session";
 
 import { InvitationAcceptanceService } from "../../application/services/invitation-acceptance.service";
 import { InvitationsService } from "../../application/services/invitations.service";
@@ -27,7 +27,7 @@ export class PublicInvitationsController {
     constructor(
         private readonly invitationsService: InvitationsService,
         private readonly acceptance: InvitationAcceptanceService,
-        private readonly cookieService: AuthCookieService
+        private readonly sessionHttp: SessionHttpService
     ) {}
 
     @Get(":token")
@@ -53,13 +53,16 @@ export class PublicInvitationsController {
         @Param("token") token: string,
         @Body() dto: AcceptInvitationDto,
         @RequestLocale() locale: ContentLocale,
-        @Headers() headers: Record<string, string | string[] | undefined>,
+        @Req() request: Request,
         @Res({ passthrough: true }) response: Response
     ): Promise<AcceptInvitationResponseDto> {
-        const deviceId = resolveDeviceIdFromHeaders(headers);
-        const result = await this.acceptance.acceptWithPassword(token, dto, locale, deviceId);
-        if (result.tokens) {
-            this.cookieService.setAuthCookies(response, AUTH_GLOBAL_SCOPE.CRM, result.tokens);
+        const result = await this.acceptance.acceptWithPassword(token, dto, locale);
+        if (result.sessionUserId) {
+            await this.sessionHttp.signIn(request, response, {
+                userId: result.sessionUserId,
+                audience: SESSION_AUDIENCES.Crm,
+                method: "invitation",
+            });
         }
         return result.response;
     }

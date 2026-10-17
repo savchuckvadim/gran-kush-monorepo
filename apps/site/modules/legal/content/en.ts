@@ -212,15 +212,21 @@ export const en: LegalContent = {
                                         "Until you delete it",
                                     ],
                                     [
-                                        "crm_access_token",
-                                        "crm.paf-paf.app",
+                                        "crm_access",
+                                        "api.paf-paf.app",
                                         "Keep you logged in",
                                         "15 minutes",
                                     ],
                                     [
-                                        "crm_refresh_token",
-                                        "crm.paf-paf.app",
+                                        "crm_refresh",
+                                        "api.paf-paf.app",
                                         "Renew the session without entering the password again",
+                                        "7 days",
+                                    ],
+                                    [
+                                        "crm_session",
+                                        ".paf-paf.app",
+                                        "Tell the application that you are logged in (holds no data)",
                                         "7 days",
                                     ],
                                     [

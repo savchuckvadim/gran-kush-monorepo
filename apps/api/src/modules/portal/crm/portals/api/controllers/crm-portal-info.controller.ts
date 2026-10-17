@@ -5,7 +5,7 @@ import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
-import { RequireEmployeeJwtWithoutSubscriptionGate } from "@modules/portal/auth/employees";
+import { CrmAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import {
     PortalAppearanceDto,
@@ -17,7 +17,7 @@ import { PortalResolutionService } from "@modules/portal/crm/portals/application
 
 @ApiTags("CRM Portal")
 @Controller("crm/portal")
-@RequireEmployeeJwtWithoutSubscriptionGate()
+@CrmAuth({ subscription: false })
 @ApiBearerAuth()
 export class CrmPortalInfoController {
     constructor(

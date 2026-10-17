@@ -71,13 +71,13 @@ const buildService = (options: {
         findUserIdByProvider: jest.fn().mockResolvedValue(options.linkedUserId ?? null),
         link: jest.fn().mockResolvedValue(undefined),
     };
-    const refreshTokens = { revokeAllForUser: jest.fn().mockResolvedValue(0) };
+    const sessions = { endAllForUser: jest.fn().mockResolvedValue(0) };
     const service = new SocialLoginService(
         userRepository as never,
         identities as never,
-        refreshTokens as never
+        sessions as never
     );
-    return { service, userRepository, identities, refreshTokens, updated };
+    return { service, userRepository, identities, sessions, updated };
 };
 
 describe("SocialLoginService — вход участника через Google", () => {
@@ -116,17 +116,17 @@ describe("SocialLoginService — вход участника через Google",
     });
 
     it("подтверждённый аккаунт — просто привязка, без сброса пароля и сессий", async () => {
-        const { service, identities, refreshTokens, updated } = buildService({
+        const { service, identities, sessions, updated } = buildService({
             byEmail: user(),
         });
         await service.loginMemberWithGoogle(profile());
         expect(updated).toHaveLength(0);
-        expect(refreshTokens.revokeAllForUser).not.toHaveBeenCalled();
+        expect(sessions.endAllForUser).not.toHaveBeenCalled();
         expect(identities.link).toHaveBeenCalledWith(expect.objectContaining({ userId: "u1" }));
     });
 
     it("pending_claim клеймится: активация и отзыв сессий, членства сами не подтверждаются", async () => {
-        const { service, refreshTokens, updated } = buildService({
+        const { service, sessions, updated } = buildService({
             byEmail: user({
                 status: UserAccountStatus.pending_claim,
                 passwordHash: null,
@@ -140,7 +140,7 @@ describe("SocialLoginService — вход участника через Google",
             isActive: true,
             emailConfirmed: true,
         });
-        expect(refreshTokens.revokeAllForUser).toHaveBeenCalledWith("u1");
+        expect(sessions.endAllForUser).toHaveBeenCalledWith("u1", "account_claimed");
     });
 
     it("в identity сохраняются подтверждение email, имя и язык из профиля Google", async () => {

@@ -5,7 +5,7 @@ import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
-import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
+import { CrmAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 
 import { PresenceSettingsService } from "../../application/services/presence-settings.service";
@@ -14,7 +14,7 @@ import { PresenceSettingsDto, UpdatePresenceSettingsDto } from "../dto/presence-
 /** Присутствие по правилам клуба: часовой пояс, авто-выход забытых визитов, потолок длительности. */
 @ApiTags("CRM Presence Settings")
 @Controller("crm/settings/presence")
-@RequireEmployeeJwt()
+@CrmAuth()
 export class CrmPresenceSettingsController {
     constructor(private readonly settings: PresenceSettingsService) {}
 

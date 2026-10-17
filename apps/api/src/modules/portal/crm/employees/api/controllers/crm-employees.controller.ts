@@ -25,7 +25,7 @@ import { type ContentLocale, RequestLocale } from "@common/i18n";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import type { PortalPrincipal } from "@common/portal";
-import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
+import { CrmAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import {
     CreateEmployeeDto,
@@ -44,7 +44,7 @@ import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/const
 
 @ApiTags("CRM Employees")
 @Controller("crm/employees")
-@RequireEmployeeJwt()
+@CrmAuth()
 @RequirePermission(PERMISSIONS.EmployeesRead)
 @ApiBearerAuth()
 export class CrmEmployeesController {

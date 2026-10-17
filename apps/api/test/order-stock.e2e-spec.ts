@@ -7,8 +7,9 @@ import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
-import { MemberAuthService } from "../src/modules/portal/auth/members/application/services/member-auth.service";
 import { OrderPlacementService } from "../src/modules/portal/crm/orders/application/services/order-placement.service";
+
+import { cabinetSession } from "./support/sessions";
 
 jest.setTimeout(120_000);
 
@@ -139,10 +140,8 @@ describe("Order stock (e2e)", () => {
                 },
             })
         ).id;
-        const memberTokens = await app
-            .get(MemberAuthService)
-            .generateTokens({ id: user.id, email: user.email }, `device-stock-${suffix}`);
-        memberCookies = `member_access_token=${memberTokens.accessToken}`;
+        const memberTokens = await cabinetSession(app, user.id, `device-stock-${suffix}`);
+        memberCookies = memberTokens.cookies;
     });
 
     afterAll(async () => {

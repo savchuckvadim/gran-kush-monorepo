@@ -70,10 +70,31 @@ model UserIdentity {
   @@map("user_identities")
 }
 
-enum PrincipalType {
-  member
-  employee
-  platform_admin
+/// Приложение, в которое вошли: у каждой аудитории свои сессии и куки (AUTH_ARCHITECTURE §3)
+enum SessionAudience {
+  crm
+  cabinet
+}
+
+/// Чем вошли — для списка устройств и разбора инцидентов
+enum SignInMethod {
+  password
+  google
+  telegram
+  email_link
+  invitation
+  registration
+}
+
+enum SessionRevokeReason {
+  logout
+  sign_out_everywhere
+  revoked_by_user
+  password_changed
+  password_reset
+  account_claimed
+  reuse_detected
+  blocked
 }
 
 enum MemberJoinSource {
@@ -265,7 +286,7 @@ model User {
   members              Member[]
   employees            Employee[]
   platformAdmin        PlatformAdmin?
-  refreshTokens        RefreshToken[]
+  sessions             AuthSession[]
   documents            UserDocument[]
   signature            UserSignature?
   profile              AccountProfile?
@@ -399,34 +420,38 @@ model PlatformAdmin {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  refreshTokens RefreshToken[]
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("platform_admins")
 }
 
-model RefreshToken {
-  id              String        @id @default(uuid())
-  token           String        @unique @db.VarChar(500)
-  principalType   PrincipalType @map("principal_type")
-  userId          String?       @map("user_id")
-  platformAdminId String?       @map("platform_admin_id")
-  deviceId        String        @map("device_id") @db.VarChar(128)
-  revoked         Boolean       @default(false)
-  expiresAt       DateTime      @map("expires_at")
-  createdAt       DateTime      @default(now()) @map("created_at")
+/// Вход аккаунта в одну аудиторию на одном устройстве (AUTH_ARCHITECTURE §3). Access-токен несёт id
+/// сессии, и гвард проверяет её на каждый запрос: отзыв действует сразу. В БД — только SHA-256 токенов;
+/// прежний хеш после ротации нужен, чтобы отличить гонку двух вкладок от повтора украденного токена.
+model AuthSession {
+  id                String               @id @default(uuid())
+  userId            String               @map("user_id")
+  audience          SessionAudience
+  deviceId          String               @map("device_id") @db.VarChar(128)
+  refreshTokenHash  String               @unique @map("refresh_token_hash") @db.VarChar(64)
+  previousTokenHash String?              @map("previous_token_hash") @db.VarChar(64)
+  rotatedAt         DateTime?            @map("rotated_at")
+  signInMethod      SignInMethod         @map("sign_in_method")
+  userAgent         String?              @map("user_agent") @db.VarChar(512)
+  ipAddress         String?              @map("ip_address") @db.VarChar(64)
+  createdAt         DateTime             @default(now()) @map("created_at")
+  lastUsedAt        DateTime             @default(now()) @map("last_used_at")
+  expiresAt         DateTime             @map("expires_at")
+  revokedAt         DateTime?            @map("revoked_at")
+  revokeReason      SessionRevokeReason? @map("revoke_reason")
 
-  user          User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  platformAdmin PlatformAdmin? @relation(fields: [platformAdminId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([principalType, userId, deviceId])
-  @@unique([principalType, platformAdminId, deviceId])
+  @@unique([userId, audience, deviceId])
   @@index([userId])
-  @@index([platformAdminId])
-  @@index([token])
   @@index([expiresAt])
-  @@map("refresh_tokens")
+  @@map("auth_sessions")
 }
 
 // ========================

@@ -7,8 +7,8 @@ import { UserRepository } from "@users/domain/repositories/user-repository.inter
 import { hash } from "bcrypt";
 
 import { hashSecretToken, issueSecretToken } from "@common/crypto/secret-token";
+import { SessionsService } from "@modules/portal/auth/sessions/application/sessions.service";
 import { ClaimedMembershipRepository } from "@modules/portal/auth/shared/domain/repositories/claimed-membership-repository.interface";
-import { RefreshTokenRepository } from "@modules/portal/auth/shared/domain/repositories/refresh-token-repository.interface";
 
 /** Which frontend the link in the email opens: CRM for employees, member portal for members. */
 export type AuthMailApp = "crm" | "member";
@@ -28,7 +28,7 @@ export class EmailVerificationService {
     constructor(
         private readonly userRepository: UserRepository,
         private readonly mailService: MailService,
-        private readonly refreshTokenRepository: RefreshTokenRepository,
+        private readonly sessions: SessionsService,
         private readonly claimedMemberships: ClaimedMembershipRepository
     ) {}
 
@@ -249,7 +249,7 @@ export class EmailVerificationService {
         // Сброс пароля обязан выкидывать все остальные сессии: если аккаунт угнали,
         // смена пароля без этого ничего не даёт — refresh-токен злоумышленника живёт
         // ещё 7 дней и молча выписывает новые access-токены.
-        await this.refreshTokenRepository.revokeAllForUser(user.id);
+        await this.sessions.endAllForUser(user.id, "password_reset");
 
         // Клейм доказан этой же ссылкой: членства, созданные саморегистрацией
         // с этим email до клейма, перестают ждать подтверждения

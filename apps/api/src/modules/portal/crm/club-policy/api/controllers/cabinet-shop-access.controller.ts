@@ -5,7 +5,8 @@ import type { Member } from "@prisma/client";
 
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
-import { CurrentMember, RequireMemberJwt } from "@modules/portal/auth/members";
+import { CurrentMember } from "@modules/portal/auth/members";
+import { CabinetAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 
 import { MemberAccessService } from "../../application/services/member-access.service";
 import { ShopAccessDto } from "../dto/club-policy.dto";
@@ -13,7 +14,7 @@ import { ShopAccessDto } from "../dto/club-policy.dto";
 /** Открыт ли участнику каталог и заказ в клубе из адреса — чтобы кабинет объяснил, а не молчал. */
 @ApiTags("Cabinet Shop Access")
 @Controller("cabinet/club/shop-access")
-@RequireMemberJwt()
+@CabinetAuth()
 export class CabinetShopAccessController {
     constructor(private readonly access: MemberAccessService) {}
 

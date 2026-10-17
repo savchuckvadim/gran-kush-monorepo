@@ -10,10 +10,9 @@ import { hashSecretToken } from "../src/common/crypto/secret-token";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { UserDocumentRepository } from "../src/modules/account/domain/repositories/user-document-repository.interface";
 import { MailService } from "../src/modules/mail/application/services/mail.service";
-import { EmployeeAuthService } from "../src/modules/portal/auth/employees/application/services/employee-auth.service";
-import { MemberAuthService } from "../src/modules/portal/auth/members/application/services/member-auth.service";
 
 import { mailTokens } from "./support/mail-tokens";
+import { cabinetSession, crmSession } from "./support/sessions";
 
 jest.setTimeout(120_000);
 
@@ -640,13 +639,11 @@ describe("Security (e2e)", () => {
                 },
             });
             // Токены выписываются напрямую: настоящий вход упирается в лимит логинов (AUTH) на сьют
-            const tokens = await app
-                .get(MemberAuthService)
-                .generateTokens({ id: user.id, email }, `device-${label}-${suffix}`);
+            const tokens = await cabinetSession(app, user.id, `device-${label}-${suffix}`);
             return {
                 email,
                 userId: user.id,
-                cookies: `member_access_token=${tokens.accessToken}`,
+                cookies: tokens.cookies,
             };
         };
 
@@ -685,7 +682,7 @@ describe("Security (e2e)", () => {
                 expect(res.status).toBe(200);
                 expect(res.body.outcome).toBe("accepted");
                 const cookies = cookieHeader(res);
-                expect(cookies).toContain("crm_access_token=");
+                expect(cookies).toContain("crm_access=");
                 const me = await request(app.getHttpServer())
                     .get("/crm/auth/me")
                     .set("Cookie", cookies);
@@ -704,14 +701,12 @@ describe("Security (e2e)", () => {
                         emailConfirmed: true,
                     },
                 });
-                const tokens = await app
-                    .get(EmployeeAuthService)
-                    .generateTokens({ id: user.id, email }, `device-inv-crm-${suffix}`);
+                const tokens = await crmSession(app, user.id, `device-inv-crm-${suffix}`);
                 const token = await invite(email);
 
                 const res = await request(app.getHttpServer())
                     .post(`/crm/auth/invitations/${token}/accept`)
-                    .set("Cookie", `crm_access_token=${tokens.accessToken}`)
+                    .set("Cookie", tokens.cookies)
                     .send({});
 
                 expect(res.status).toBe(200);
@@ -746,18 +741,16 @@ describe("Security (e2e)", () => {
                         emailConfirmed: false,
                     },
                 });
-                const tokens = await app
-                    .get(EmployeeAuthService)
-                    .generateTokens({ id: user.id, email }, `device-inv-unconf-${suffix}`);
+                const tokens = await crmSession(app, user.id, `device-inv-unconf-${suffix}`);
                 const token = await invite(email);
 
                 const res = await request(app.getHttpServer())
                     .post(`/crm/auth/invitations/${token}/accept`)
-                    .set("Cookie", `crm_access_token=${tokens.accessToken}`)
+                    .set("Cookie", tokens.cookies)
                     .send({});
 
                 expect(res.status).toBe(401);
-                expect(cookieHeader(res)).not.toContain("crm_access_token=");
+                expect(cookieHeader(res)).not.toContain("crm_access=");
                 expect(await employeesOfClubB(user.id)).toBe(0);
             });
         });
@@ -1239,7 +1232,7 @@ describe("Security (e2e)", () => {
             expect(accepted.body).not.toHaveProperty("refreshToken");
 
             const cookies = cookieHeader(accepted);
-            expect(cookies).toContain("crm_access_token=");
+            expect(cookies).toContain("crm_access=");
             const me = await request(app.getHttpServer())
                 .get("/crm/auth/me")
                 .set("Cookie", cookies);
@@ -1247,7 +1240,7 @@ describe("Security (e2e)", () => {
             expect(me.body.email).toBe(user.email);
         });
 
-        it("refresh tokens are stored hashed and one device keeps one row", async () => {
+        it("refresh tokens are stored hashed and one device keeps one session", async () => {
             const user = await confirmedMember("hashed");
             const login = () =>
                 request(app.getHttpServer())
@@ -1259,21 +1252,23 @@ describe("Security (e2e)", () => {
             expect(first.status).toBe(201);
             const rawRefresh = cookieHeader(first)
                 .split("; ")
-                .find((c) => c.startsWith("member_refresh_token="))
+                .find((c) => c.startsWith("cabinet_refresh="))
                 ?.split("=")[1];
             expect(rawRefresh).toBeTruthy();
 
             // Сырой токен в БД не лежит (TASK-668) — только его хеш
             expect(
-                await prisma.refreshToken.findFirst({
-                    where: { token: decodeURIComponent(rawRefresh as string) },
+                await prisma.authSession.findFirst({
+                    where: { refreshTokenHash: decodeURIComponent(rawRefresh as string) },
                 })
             ).toBeNull();
-            expect(await prisma.refreshToken.count({ where: { userId: user.userId } })).toBe(1);
+            const sessions = () =>
+                prisma.authSession.count({ where: { userId: user.userId, audience: "cabinet" } });
+            expect(await sessions()).toBe(1);
 
-            // Повторный вход с того же устройства не плодит строк
+            // Повторный вход с того же устройства заменяет его сессию
             expect((await login()).status).toBe(201);
-            expect(await prisma.refreshToken.count({ where: { userId: user.userId } })).toBe(1);
+            expect(await sessions()).toBe(1);
 
             // Кука при этом рабочая
             const refreshed = await request(app.getHttpServer())

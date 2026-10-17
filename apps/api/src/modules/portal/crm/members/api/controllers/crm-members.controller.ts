@@ -35,7 +35,7 @@ import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.in
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import type { PortalPrincipal } from "@common/portal";
 import { mimeForStoragePath, UPLOAD_LIMITS } from "@common/upload";
-import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
+import { CrmAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import { FormSchemaService } from "@modules/portal/crm/entity-fields/application/services/form-schema.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
@@ -57,7 +57,7 @@ import { CrmMemberFilesRequestDto } from "../dto/crm-member-documents.dto";
 
 @ApiTags("CRM Members Management")
 @Controller("crm/members")
-@RequireEmployeeJwt()
+@CrmAuth()
 @RequirePermission(PERMISSIONS.MembersRead)
 export class CrmMembersController {
     constructor(

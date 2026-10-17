@@ -1,13 +1,13 @@
-import { Controller, Get, Headers, Logger, Query, Req, Res } from "@nestjs/common";
+import { Controller, Get, Logger, Query, Req, Res } from "@nestjs/common";
 import { ApiExcludeEndpoint, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 
 import type { Request, Response } from "express";
 
-import { AUTH_GLOBAL_SCOPE, resolveDeviceIdFromHeaders } from "@common/auth";
 import { AUTH_THROTTLE } from "@common/config/throttler/throttler.config";
-import { AuthCookieService } from "@common/cookie/services/auth-cookie.service";
 import { Public } from "@common/decorators/auth/public.decorator";
+import { SessionHttpService } from "@modules/portal/auth/sessions/api/session-http.service";
+import { SESSION_AUDIENCES } from "@modules/portal/auth/sessions/domain/auth-session";
 import { EmployeeGoogleSignInService } from "@modules/portal/auth/social/application/services/employee-google-sign-in.service";
 import { GoogleOAuthFlowService } from "@modules/portal/auth/social/application/services/google-oauth-flow.service";
 import {
@@ -29,7 +29,7 @@ export class EmployeeGoogleAuthController {
     constructor(
         private readonly flow: GoogleOAuthFlowService,
         private readonly signIn: EmployeeGoogleSignInService,
-        private readonly cookieService: AuthCookieService
+        private readonly sessionHttp: SessionHttpService
     ) {}
 
     @Get("start")
@@ -81,7 +81,6 @@ export class EmployeeGoogleAuthController {
         @Query("code") code: string | undefined,
         @Query("state") state: string | undefined,
         @Query("error") oauthError: string | undefined,
-        @Headers() headers: Record<string, string | string[] | undefined>,
         @Req() request: Request,
         @Res() response: Response
     ): Promise<void> {
@@ -97,13 +96,13 @@ export class EmployeeGoogleAuthController {
                 throw new GoogleFlowError("provider_error");
             }
             const profile = await this.flow.exchangeCode("crm", code, verified.binding);
-            const result = await this.signIn.complete(
-                profile,
-                verified,
-                resolveDeviceIdFromHeaders(headers)
-            );
-            if (result.tokens) {
-                this.cookieService.setAuthCookies(response, AUTH_GLOBAL_SCOPE.CRM, result.tokens);
+            const result = await this.signIn.complete(profile, verified);
+            if (result.sessionUserId) {
+                await this.sessionHttp.signIn(request, response, {
+                    userId: result.sessionUserId,
+                    audience: SESSION_AUDIENCES.Crm,
+                    method: "google",
+                });
             }
             response.redirect(result.redirect);
         } catch (error: unknown) {

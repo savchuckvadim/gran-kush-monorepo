@@ -84,12 +84,8 @@ services:
       API_PUBLIC_URL: https://api.${DOMAIN}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
-      CRM_AUTH_COOKIE_DOMAIN: .${DOMAIN}
-      MEMBER_AUTH_COOKIE_DOMAIN: .${DOMAIN}
-      MEMBER_ACCESS_COOKIE_NAME: member_access_token
-      MEMBER_REFRESH_COOKIE_NAME: member_refresh_token
-      CRM_ACCESS_COOKIE_NAME: crm_access_token
-      CRM_REFRESH_COOKIE_NAME: crm_refresh_token
+      # Session hint for the CRM/cabinet proxies; token cookies stay host-only on api.
+      AUTH_HINT_COOKIE_DOMAIN: .${DOMAIN}
       AUTH_COOKIE_SECURE: "true"
       COOKIE_SECRET: ${COOKIE_SECRET:?set COOKIE_SECRET in Dokploy → Environment}
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in Dokploy → Environment}

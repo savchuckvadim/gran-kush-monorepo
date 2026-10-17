@@ -18,6 +18,7 @@ import { ApiSuccessResponse } from "@common/decorators/response/api-success-resp
 import { type ContentLocale, RequestLocale } from "@common/i18n";
 import { RegisterMemberResponseDto } from "@modules/portal/auth/members/api/dto/register-member-response.dto";
 import { MemberRegistrationService } from "@modules/portal/auth/members/application/services/member-registration.service";
+import { CabinetSession } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import { ResendEmailConfirmationPublicDto } from "@modules/portal/auth/shared/api/dto/resend-email-confirmation.dto";
 import { ResendEmailConfirmationResponseDto } from "@modules/portal/auth/shared/api/dto/resend-email-confirmation-response.dto";
 import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
@@ -30,7 +31,6 @@ import { UploadMemberFilesResponseDto } from "@modules/portal/crm/members/api/dt
 import { MemberFilesService } from "@modules/portal/crm/members/application/services/member-files.service";
 
 import { MemberRegistrationUseCase } from "../../application/use-cases/member-registration.service";
-import { RequireUserJwt } from "../decorators/require-member-jwt.decorator";
 import {
     MemberConfirmEmailDto,
     MemberConfirmEmailResponseDto,
@@ -85,7 +85,7 @@ export class MemberRegistrationController {
     }
 
     @Post("files")
-    @RequireUserJwt()
+    @CabinetSession()
     @Throttle(UPLOAD_THROTTLE)
     @ApiOperation({ summary: "Queue account documents/signature upload" })
     @ApiSuccessResponse(UploadMemberFilesResponseDto, {

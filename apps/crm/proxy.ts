@@ -6,10 +6,9 @@ import {
     CABINET_TREE,
     isCabinetProtectedPath,
     isClubHost,
-    MEMBER_ACCESS_COOKIE,
-    MEMBER_REFRESH_COOKIE,
     resolveClubRoute,
     resolveRequestHost,
+    SESSION_HINT_COOKIES,
 } from "./modules/shared/config/club-routes";
 
 /**
@@ -21,9 +20,6 @@ const intlMiddleware = createIntlMiddleware({
     localePrefix: "always",
     localeDetection: false,
 });
-
-const CRM_ACCESS_COOKIE = "crm_access_token";
-const CRM_REFRESH_COOKIE = "crm_refresh_token";
 
 const isLocale = (value: string | undefined): value is (typeof locales)[number] =>
     !!value && (locales as readonly string[]).includes(value);
@@ -70,8 +66,7 @@ function handleClubHost(request: NextRequest, segments: string[]): NextResponse 
         return NextResponse.redirect(publicUrl(request, action.target), 308);
     }
 
-    const hasSession =
-        request.cookies.has(MEMBER_ACCESS_COOKIE) || request.cookies.has(MEMBER_REFRESH_COOKIE);
+    const hasSession = request.cookies.has(SESSION_HINT_COOKIES.cabinet);
     if (action.kind === "rewrite" && isCabinetProtectedPath(rest) && !hasSession) {
         // Мёртвая сессия сюда доходит с живой на вид кукой: страница сама получит 401 и уйдёт на вход
         const loginUrl = publicUrl(request, `/${locale}/auth/login`);
@@ -123,10 +118,9 @@ export default function proxy(request: NextRequest) {
         return NextResponse.rewrite(notFoundUrl);
     }
 
-    // Any auth cookie lets the request through to the CRM: a stale access cookie is refreshed by
-    // the client, and a dead session gets a 401 there and is sent to the login page.
-    const hasAuthCookie =
-        request.cookies.has(CRM_ACCESS_COOKIE) || request.cookies.has(CRM_REFRESH_COOKIE);
+    // The hint lets the request through to the CRM: a stale access cookie is refreshed by the
+    // client, and a dead session gets a 401 there and is sent to the login page.
+    const hasAuthCookie = request.cookies.has(SESSION_HINT_COOKIES.crm);
 
     // [locale]/[portal]/crm/*, /scan and /print (sheets to print) — protected
     if (

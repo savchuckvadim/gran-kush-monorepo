@@ -9,7 +9,7 @@ import { RequirePermission } from "@common/decorators/auth/require-permission.de
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import type { PortalPrincipal } from "@common/portal";
-import { RequireEmployeeJwt } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
+import { CrmAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 
 import {
@@ -49,7 +49,7 @@ function toDto(
 
 @ApiTags("CRM Registration Links")
 @Controller("crm/settings/registration-links")
-@RequireEmployeeJwt()
+@CrmAuth()
 @RequirePermission(PERMISSIONS.MembersInvite)
 export class CrmRegistrationLinksController {
     constructor(private readonly registrationLinksService: RegistrationLinksService) {}

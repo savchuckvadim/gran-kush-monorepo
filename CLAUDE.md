@@ -144,25 +144,32 @@ Two principal types — **Member** and **Employee** — each with web (cookies) 
 | Cabinet login   | `POST /cabinet/auth/login`   |
 | Cabinet refresh | `POST /cabinet/auth/refresh` |
 
-Cookie names: `crm_access_token`, `crm_refresh_token`, `member_access_token`, `member_refresh_token`.
-Cookies: `HttpOnly`, `SameSite=Lax`, `Secure` follows `AUTH_COOKIE_SECURE`.
+Every sign-in is an **auth session** (`auth_sessions`: account × app × device), checked on every request —
+revocation is immediate ([AUTH_ARCHITECTURE](documentation/backend/AUTH_ARCHITECTURE.md)).
+Cookies: `crm_access` / `cabinet_access` and `crm_refresh` / `cabinet_refresh` (path `/{aud}/auth`) are host-only
+on the API; `crm_session` / `cabinet_session=1` on `AUTH_HINT_COOKIE_DOMAIN` is the hint for `proxy.ts`.
+All `HttpOnly`, `SameSite=Lax`, `Secure` follows `AUTH_COOKIE_SECURE`. Refresh 401 `refresh_superseded` — another
+tab won the rotation (retry), `session_ended` — sign in again.
 
 **Mobile (Bearer `Authorization: Bearer ...`)**:
 
 - CRM: `crm/mobile/auth/*`
 - Cabinet: `cabinet/mobile/auth/*`
 
+Controllers protect routes with `@CrmSession()` / `@CrmAuth({ subscription? })` / `@CabinetSession()` /
+`@CabinetAuth()` (one guard reads Bearer or the cookie) and `@RequirePermission(...)` for club permissions.
+
 Frontend calls API with `credentials: "include"` for cookie auth.
 
 ### JWT Tokens
 
-- Access tokens: 15 minutes
-- Refresh tokens: 7 days, rotated on use
-- Stored in `tokens` (member) and `employee_tokens` (employee) tables
+- Access `{ sub, sid, typ }` with `aud`: 15 minutes; refresh: 7 days, its own secret, rotated on use
+- Only the refresh hash is stored (`auth_sessions.refresh_token_hash`)
 
 ### Employee Roles
 
-`employee` | `manager` | `admin`
+Club roles (`portal_roles`): system `owner`, `admin` (full access), `manager`, `employee` (editable
+permissions) and custom `custom_<hex>`. Permission codes — `modules/portal/crm/access/domain/permissions.ts`.
 
 ## Backend Module Structure
 
@@ -282,8 +289,9 @@ All routes are prefixed with `/{locale}`.
 | `JWT_SECRET`                            | Access token signing secret                                 |
 | `JWT_REFRESH_SECRET`                    | Refresh token signing secret                                |
 | `CORS_ORIGIN`                           | Comma-separated allowed origins                             |
-| `CRM_FRONTEND_URL`                      | CRM cookie domain base                                      |
-| `MEMBER_FRONTEND_URL`                   | Cabinet origin (club.): cookie domain base, links in emails |
+| `CRM_FRONTEND_URL`                      | CRM origin: links in emails, OAuth redirects                |
+| `MEMBER_FRONTEND_URL`                   | Cabinet origin (club.): links in emails, OAuth redirects    |
+| `AUTH_HINT_COOKIE_DOMAIN`               | Domain of the `*_session` hint cookie (`.paf-paf.app`)      |
 | `COOKIE_SECRET`                         | cookie-parser signing                                       |
 | `AUTH_COOKIE_SECURE`                    | `true` in production                                        |
 | `MAIL_HOST` / `MAIL_USER` / `MAIL_PASS` | SMTP                                                        |

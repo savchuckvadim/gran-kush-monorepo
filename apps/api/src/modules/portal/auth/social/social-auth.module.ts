@@ -5,8 +5,6 @@ import { UsersModule } from "@users/users.module";
 
 import { PrismaModule } from "@common/prisma/prisma.module";
 import { MailModule } from "@modules/mail/mail.module";
-import { EmployeeAuthModule } from "@modules/portal/auth/employees/employee-auth.module";
-import { MemberAuthModule } from "@modules/portal/auth/members/member-auth.module";
 import { SharedAuthModule } from "@modules/portal/auth/shared/shared-auth.module";
 import { EmployeeGoogleAuthController } from "@modules/portal/auth/social/api/controllers/employee-google-auth.controller";
 import { MemberGoogleAuthController } from "@modules/portal/auth/social/api/controllers/member-google-auth.controller";
@@ -32,8 +30,6 @@ import { InvitationsModule } from "@modules/portal/crm/invitations/invitations.m
         PrismaModule,
         JwtModule,
         SharedAuthModule,
-        MemberAuthModule,
-        EmployeeAuthModule,
         InvitationsModule,
         MailModule,
     ],

@@ -18,8 +18,8 @@ import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
-import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
 import { CurrentEmployee } from "@modules/portal/auth/employees/api/decorators/current-employee.decorator";
+import { CrmAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import {
     CreateMeasurementUnitDto,
@@ -57,7 +57,7 @@ import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.e
 
 @ApiTags("CRM Catalog")
 @Controller("crm/catalog")
-@RequireEmployeeJwt()
+@CrmAuth()
 @ApiBearerAuth()
 export class CrmCatalogController {
     constructor(

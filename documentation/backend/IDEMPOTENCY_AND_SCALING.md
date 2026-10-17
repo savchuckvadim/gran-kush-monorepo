@@ -198,9 +198,10 @@ presence-крона. Но `@nestjs/schedule` держит расписание *
 
 ## 6. Auth, куки и домены
 
-Как настроено: [`ConfigCookieService`](../../apps/api/src/common/cookie/services/config-cookie.service.ts)
-читает `MEMBER_AUTH_COOKIE_DOMAIN` и `CRM_AUTH_COOKIE_DOMAIN` через `getOrThrow` — **без них API
-не стартует**. Куки: `HttpOnly`, `SameSite=Lax`, `path=/`, `secure` из `AUTH_COOKIE_SECURE`.
+Как настроено: [`SessionCookiesService`](../../apps/api/src/modules/portal/auth/sessions/api/session-cookies.service.ts)
+(AUTH_ARCHITECTURE §3.4). Токены — host-only куки хоста API, refresh только на `/{aud}/auth`; подсказка
+`*_session` — на `AUTH_HINT_COOKIE_DOMAIN`. Куки: `HttpOnly`, `SameSite=Lax`, `secure` из `AUTH_COOKIE_SECURE`.
+Сессия проверяется в БД на каждом запросе, так что реплики API не держат состояния входа.
 
 Рабочая схема — всё на одном registrable-домене:
 

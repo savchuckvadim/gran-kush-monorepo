@@ -212,15 +212,21 @@ export const ru: LegalContent = {
                                         "Пока вы его не удалите",
                                     ],
                                     [
-                                        "crm_access_token",
-                                        "crm.paf-paf.app",
+                                        "crm_access",
+                                        "api.paf-paf.app",
                                         "Держать вход в приложение",
                                         "15 минут",
                                     ],
                                     [
-                                        "crm_refresh_token",
-                                        "crm.paf-paf.app",
+                                        "crm_refresh",
+                                        "api.paf-paf.app",
                                         "Продлевать вход без повторного ввода пароля",
+                                        "7 дней",
+                                    ],
+                                    [
+                                        "crm_session",
+                                        ".paf-paf.app",
+                                        "Сообщить приложению, что вход выполнен (данных не содержит)",
                                         "7 дней",
                                     ],
                                     [

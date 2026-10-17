@@ -7,8 +7,8 @@ import { ApiSuccessResponse } from "@common/decorators/response/api-success-resp
 import { PaginationDto } from "@common/paginate/dto/pagination.dto";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
-import { RequireMemberJwt } from "@modules/portal/auth/members";
 import { CurrentMember } from "@modules/portal/auth/members/api/decorators/current-member.decorator";
+import { CabinetAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import { Member } from "@modules/portal/crm/members/domain/entity/member.entity";
 import {
     MyPresenceStatusDto,
@@ -20,7 +20,7 @@ import { PresenceService } from "@modules/portal/crm/presence/application/servic
 /** Присутствие участника в клубе: свой статус и история визитов. */
 @ApiTags("Cabinet Presence")
 @Controller("cabinet/presence")
-@RequireMemberJwt()
+@CabinetAuth()
 @ApiBearerAuth()
 export class CabinetPresenceController {
     constructor(private readonly presenceService: PresenceService) {}

@@ -1,17 +1,16 @@
-import { Body, Controller, Delete, Get, Headers, HttpCode, Post, Put, Res } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Post, Put, Res } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 
 import type { Response } from "express";
 
-import { AUTH_GLOBAL_SCOPE, resolveDeviceIdFromHeaders } from "@common/auth";
 import { AUTH_THROTTLE } from "@common/config/throttler/throttler.config";
-import { AuthCookieService } from "@common/cookie/services/auth-cookie.service";
 import { CurrentAuthUser } from "@common/decorators/auth/current-auth-user.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
-import { RequireUserJwt } from "@modules/portal/auth/members/api/decorators/require-member-jwt.decorator";
-import { MemberAuthService } from "@modules/portal/auth/members/application/services/member-auth.service";
+import { CabinetSession } from "@modules/portal/auth/sessions/api/session-auth.decorators";
+import { SessionCookiesService } from "@modules/portal/auth/sessions/api/session-cookies.service";
+import { SESSION_AUDIENCES } from "@modules/portal/auth/sessions/domain/auth-session";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 import { TelegramAuthDto } from "@modules/portal/auth/social/api/dto/telegram-auth.dto";
 import { toTelegramHttpError } from "@modules/portal/auth/social/api/telegram-http-error";
@@ -29,15 +28,14 @@ import { AccountSecurityDto, ChangeAccountPasswordDto } from "../dto/account-sec
  */
 @ApiTags("Account (security)")
 @Controller("cabinet/account/security")
-@RequireUserJwt()
+@CabinetSession()
 export class CabinetAccountSecurityController {
     constructor(
         private readonly security: AccountSecurityService,
         private readonly changePassword: ChangeAccountPasswordUseCase,
         private readonly unlinkProvider: UnlinkProviderUseCase,
         private readonly linkTelegram: LinkTelegramUseCase,
-        private readonly memberAuth: MemberAuthService,
-        private readonly cookies: AuthCookieService
+        private readonly cookies: SessionCookiesService
     ) {}
 
     @Get()
@@ -53,27 +51,21 @@ export class CabinetAccountSecurityController {
     @ApiOperation({
         summary: "Задать или сменить пароль",
         description:
-            "Все сессии аккаунта (кабинет и CRM) отзываются, это устройство получает новую сессию. " +
+            "Остальные сессии аккаунта (кабинет и CRM) отзываются, текущая остаётся. " +
             "Неверный текущий пароль — 400 с code `wrong_password`.",
     })
     @ApiSuccessResponse(AccountSecurityDto)
     @ApiErrorResponse([400, 401])
     async setPassword(
         @CurrentAuthUser() user: AuthenticatedUser,
-        @Body() dto: ChangeAccountPasswordDto,
-        @Headers() headers: Record<string, string | string[] | undefined>,
-        @Res({ passthrough: true }) response: Response
+        @Body() dto: ChangeAccountPasswordDto
     ): Promise<AccountSecurityDto> {
-        const account = await this.changePassword.execute({
+        await this.changePassword.execute({
             userId: user.userId,
+            sessionId: user.sessionId,
             currentPassword: dto.currentPassword,
             newPassword: dto.newPassword,
         });
-        const tokens = await this.memberAuth.generateTokens(
-            account,
-            resolveDeviceIdFromHeaders(headers)
-        );
-        this.cookies.setAuthCookies(response, AUTH_GLOBAL_SCOPE.SITE, tokens);
         return this.security.overview(user.userId);
     }
 
@@ -137,6 +129,6 @@ export class CabinetAccountSecurityController {
         @Res({ passthrough: true }) response: Response
     ): Promise<void> {
         await this.security.signOutEverywhere(user.userId);
-        this.cookies.clearAuthCookies(response, AUTH_GLOBAL_SCOPE.SITE);
+        this.cookies.clear(response, SESSION_AUDIENCES.Cabinet);
     }
 }

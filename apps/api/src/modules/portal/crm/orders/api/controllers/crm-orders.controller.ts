@@ -21,8 +21,8 @@ import { IdempotencyScope, Idempotent } from "@common/idempotency";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
 import type { PortalPrincipal } from "@common/portal";
-import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
 import { CurrentEmployee } from "@modules/portal/auth/employees/api/decorators/current-employee.decorator";
+import { CrmAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import {
@@ -47,7 +47,7 @@ import { PlaceStaffOrderUseCase } from "@modules/portal/crm/orders/application/u
 
 @ApiTags("CRM Orders")
 @Controller("crm/orders")
-@RequireEmployeeJwt()
+@CrmAuth()
 @RequirePermission(PERMISSIONS.OrdersRead)
 @ApiBearerAuth()
 export class CrmOrdersController {

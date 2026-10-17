@@ -5,14 +5,15 @@ import type { Member } from "@prisma/client";
 
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
-import { CurrentMember, RequireMemberJwt } from "@modules/portal/auth/members";
+import { CurrentMember } from "@modules/portal/auth/members";
+import { CabinetAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import { MonthlyLimitDto } from "@modules/portal/crm/orders/api/dto/monthly-limit.dto";
 import { MonthlyLimitStatusService } from "@modules/portal/crm/orders/application/services/monthly-limit-status.service";
 
 /** Мой лимит в клубе из адреса: сколько отпущено за 30 дней и сколько ещё можно заказать. */
 @ApiTags("Cabinet Monthly Limit")
 @Controller("cabinet/club/monthly-limit")
-@RequireMemberJwt()
+@CabinetAuth()
 export class CabinetMonthlyLimitController {
     constructor(private readonly limits: MonthlyLimitStatusService) {}
 

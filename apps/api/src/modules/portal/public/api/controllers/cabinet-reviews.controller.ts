@@ -13,7 +13,7 @@ import { CurrentAuthUser } from "@common/decorators/auth/current-auth-user.decor
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { PrismaService } from "@common/prisma/prisma.service";
-import { RequireUserJwt } from "@modules/portal/auth/members/api/decorators/require-member-jwt.decorator";
+import { CabinetSession } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 
 import { CreateReviewDto, ReviewDto } from "../dto/public-portals.dto";
@@ -25,7 +25,7 @@ export class CabinetReviewsController {
     constructor(private readonly prisma: PrismaService) {}
 
     @Put("portals/:portalId")
-    @RequireUserJwt()
+    @CabinetSession()
     @ApiOperation({ summary: "Поставить/обновить оценку клубу (только member клуба)" })
     @ApiSuccessResponse(ReviewDto)
     @ApiErrorResponse([400, 401, 403, 404])
@@ -55,7 +55,7 @@ export class CabinetReviewsController {
     }
 
     @Get("portals/:portalId")
-    @RequireUserJwt()
+    @CabinetSession()
     @ApiOperation({ summary: "Моя оценка клуба" })
     @ApiSuccessResponse(ReviewDto)
     @ApiErrorResponse([401, 404])
@@ -78,7 +78,7 @@ export class CabinetReviewsController {
     }
 
     @Put("products/:productId")
-    @RequireUserJwt()
+    @CabinetSession()
     @ApiOperation({ summary: "Поставить/обновить оценку товару (только member клуба товара)" })
     @ApiSuccessResponse(ReviewDto)
     @ApiErrorResponse([400, 401, 403, 404])

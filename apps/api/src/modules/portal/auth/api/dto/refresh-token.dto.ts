@@ -1,14 +1,15 @@
-import { ApiPropertyOptional } from "@nestjs/swagger";
+import { ApiProperty } from "@nestjs/swagger";
 
-import { IsOptional, IsString } from "class-validator";
+import { IsString, MinLength } from "class-validator";
 
+/** Нативный клиент: refresh-токен в теле (веб держит его в HttpOnly-куке и тело не шлёт). */
 export class RefreshTokenDto {
-    @ApiPropertyOptional({
+    @ApiProperty({
         example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-        description: "Refresh token (optional when using HttpOnly cookie)",
+        description: "Refresh token из ответа входа или прошлого refresh",
         type: String,
     })
-    @IsOptional()
     @IsString()
-    refreshToken?: string;
+    @MinLength(1)
+    refreshToken: string;
 }

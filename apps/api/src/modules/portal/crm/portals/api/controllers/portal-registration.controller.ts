@@ -1,15 +1,15 @@
-import { Body, Controller, Headers, Post, Res } from "@nestjs/common";
+import { Body, Controller, Post, Req, Res } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 
-import type { Response } from "express";
+import type { Request, Response } from "express";
 
-import { AUTH_GLOBAL_SCOPE, resolveDeviceIdFromHeaders } from "@common/auth";
 import { SIGNUP_THROTTLE } from "@common/config/throttler/throttler.config";
-import { AuthCookieService } from "@common/cookie/services/auth-cookie.service";
 import { Public } from "@common/decorators/auth/public.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { SessionHttpService } from "@modules/portal/auth/sessions/api/session-http.service";
+import { SESSION_AUDIENCES } from "@modules/portal/auth/sessions/domain/auth-session";
 import { RegisterPortalDto } from "@modules/portal/crm/portals/api/dto/register-portal.dto";
 import { RegisterPortalResponseDto } from "@modules/portal/crm/portals/api/dto/register-portal-response.dto";
 import { PortalRegistrationService } from "@modules/portal/crm/portals/application/services/portal-registration.service";
@@ -19,7 +19,7 @@ import { PortalRegistrationService } from "@modules/portal/crm/portals/applicati
 export class PortalRegistrationController {
     constructor(
         private readonly portalRegistrationService: PortalRegistrationService,
-        private readonly cookieService: AuthCookieService
+        private readonly sessionHttp: SessionHttpService
     ) {}
 
     @Post("register")
@@ -32,12 +32,15 @@ export class PortalRegistrationController {
     @ApiErrorResponse([400, 409])
     async register(
         @Body() dto: RegisterPortalDto,
-        @Headers() headers: Record<string, string | string[] | undefined>,
+        @Req() request: Request,
         @Res({ passthrough: true }) response: Response
     ): Promise<RegisterPortalResponseDto> {
-        const deviceId = resolveDeviceIdFromHeaders(headers);
-        const result = await this.portalRegistrationService.registerPortal(dto, deviceId);
-        this.cookieService.setAuthCookies(response, AUTH_GLOBAL_SCOPE.CRM, result.tokens);
+        const result = await this.portalRegistrationService.registerPortal(dto);
+        const { deviceId } = await this.sessionHttp.signIn(request, response, {
+            userId: result.ownerUserId,
+            audience: SESSION_AUDIENCES.Crm,
+            method: "registration",
+        });
 
         return {
             portal: result.portal,

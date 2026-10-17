@@ -162,9 +162,11 @@ describe("Portal registration from the product site (e2e)", () => {
             expect(res.status).toBe(201);
             expect(res.body.portal.name).toBe(second);
             expect(res.body.owner.role).toBe("owner");
+            // сессия на аккаунт, не на клуб: новых кук нет, прежняя видит оба клуба
+            expect(res.headers["set-cookie"]).toBeUndefined();
             const mine = await request(app.getHttpServer())
                 .get("/crm/my-portals")
-                .set("Cookie", cookieHeader(res));
+                .set("Cookie", cookieHeader(first));
             expect(mine.body.portals.map((p: { slug: string }) => p.slug)).toEqual(
                 expect.arrayContaining([`reg-first-${suffix}`, second])
             );

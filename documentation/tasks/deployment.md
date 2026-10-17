@@ -172,7 +172,7 @@ Managed-сервисы (Cloud SQL) добавят ещё столько же. С
 
 **`.github/workflows/ci.yml`** — ✅ сделан (2026-08-08, push в любую ветку + workflow_dispatch).
 Нюансы, которые пришлось решить: pnpm 10 пробрасывает `--` в jest буквально → скрипт
-`test:e2e:ci`; e2e требуют `MEMBER_AUTH_COOKIE_DOMAIN`/`CRM_AUTH_COOKIE_DOMAIN`;
+`test:e2e:ci`; e2e требовали `*_AUTH_COOKIE_DOMAIN` (с 2026-10-17 их нет, см. AUTH_ARCHITECTURE §3.4);
 jest не выходит из-за Redis-хэндлов → `--forceExit`. Состав:
 
 - `pnpm install --frozen-lockfile`

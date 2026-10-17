@@ -4,7 +4,7 @@ import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { CurrentAuthUser } from "@common/decorators/auth/current-auth-user.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
-import { RequireUserJwt } from "@modules/portal/auth/members/api/decorators/require-member-jwt.decorator";
+import { CabinetSession } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 
 import { MemberConsentService } from "../../application/services/member-consent.service";
@@ -18,7 +18,7 @@ import { MemberConsentResultDto } from "../dto/member-consent.dto";
  */
 @ApiTags("Cabinet Memberships (my memberships)")
 @Controller("cabinet/memberships")
-@RequireUserJwt()
+@CabinetSession()
 export class CabinetMembershipsController {
     constructor(private readonly consent: MemberConsentService) {}
 

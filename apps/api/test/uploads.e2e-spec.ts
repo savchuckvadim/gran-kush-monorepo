@@ -7,7 +7,8 @@ import request from "supertest";
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { MiB, UPLOAD_LIMITS } from "../src/common/upload";
-import { MemberAuthService } from "../src/modules/portal/auth/members/application/services/member-auth.service";
+
+import { cabinetSession } from "./support/sessions";
 
 jest.setTimeout(120_000);
 
@@ -79,10 +80,8 @@ describe("Uploads (e2e)", () => {
             },
         });
         const userId = memberUser.id;
-        const tokens = await app
-            .get(MemberAuthService)
-            .generateTokens({ id: userId, email: memberUser.email }, `device-${suffix}`);
-        memberCookies = `member_access_token=${tokens.accessToken}`;
+        const tokens = await cabinetSession(app, userId, `device-${suffix}`);
+        memberCookies = tokens.cookies;
 
         const memberDefinition = await prisma.entityDefinition.findFirst({
             where: { portalId, code: "member" },

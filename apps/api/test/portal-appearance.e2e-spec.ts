@@ -7,7 +7,8 @@ import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
-import { MemberAuthService } from "../src/modules/portal/auth/members/application/services/member-auth.service";
+
+import { cabinetSession } from "./support/sessions";
 
 jest.setTimeout(120_000);
 
@@ -84,10 +85,8 @@ describe("Portal appearance (e2e)", () => {
                 emailConfirmed: true,
             },
         });
-        const tokens = await app
-            .get(MemberAuthService)
-            .generateTokens({ id: user.id, email }, `device-${suffix}`);
-        const cookies = `member_access_token=${tokens.accessToken}`;
+        const tokens = await cabinetSession(app, user.id, `device-${suffix}`);
+        const cookies = tokens.cookies;
         await crm("patch", "/crm/settings/club-policy").send({ joinPolicy: "approval" });
         await request(app.getHttpServer())
             .post(`/cabinet/portals/${slug}/join`)

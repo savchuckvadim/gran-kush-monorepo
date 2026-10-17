@@ -15,7 +15,7 @@ import { CurrentAuthUser } from "@common/decorators/auth/current-auth-user.decor
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { PrismaService } from "@common/prisma/prisma.service";
-import { RequireUserJwt } from "@modules/portal/auth/members/api/decorators/require-member-jwt.decorator";
+import { CabinetSession } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 import { ClubPolicyService } from "@modules/portal/crm/club-policy/application/services/club-policy.service";
 import { JoinPortalService } from "@modules/portal/crm/members/application/services/join-portal.service";
@@ -39,7 +39,7 @@ export class CabinetPortalsController {
     ) {}
 
     @Get()
-    @RequireUserJwt()
+    @CabinetSession()
     @ApiOperation({ summary: "Мои клубы (memberships текущего аккаунта)" })
     @ApiSuccessResponse(MyClubsResponseDto)
     @ApiErrorResponse([401])
@@ -64,7 +64,7 @@ export class CabinetPortalsController {
     }
 
     @Post(":slug/join")
-    @RequireUserJwt()
+    @CabinetSession()
     @ApiOperation({
         summary:
             "Заявка в клуб без ссылки — только если клуб её принимает (joinPolicy=approval): участник " +

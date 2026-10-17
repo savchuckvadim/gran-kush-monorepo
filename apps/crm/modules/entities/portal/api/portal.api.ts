@@ -1,6 +1,7 @@
 import {
     assertOpenApiOk,
     type SchemaCreateClubDto,
+    type SchemaCreatedClubResponseDto,
     type SchemaMyPortalDto,
     type SchemaMyPortalsResponseDto,
     type SchemaPortalAppearanceDto,
@@ -39,10 +40,10 @@ export async function getMyPortals(): Promise<SchemaMyPortalDto[]> {
     return portals;
 }
 
-/** One more club for the signed-in account; the session cookies are issued again. */
+/** One more club for the signed-in account; the session belongs to the account and stays the same. */
 export async function createClub(
     body: SchemaCreateClubDto
-): Promise<SchemaRegisterPortalResponseDto> {
+): Promise<SchemaCreatedClubResponseDto> {
     const response = await $api.POST("/crm/my-portals", { body });
-    return assertOpenApiOk<SchemaRegisterPortalResponseDto>(response);
+    return assertOpenApiOk<SchemaCreatedClubResponseDto>(response);
 }

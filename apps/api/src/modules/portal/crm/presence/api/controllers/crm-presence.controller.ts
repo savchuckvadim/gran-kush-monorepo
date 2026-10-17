@@ -9,8 +9,8 @@ import { ApiSuccessResponse } from "@common/decorators/response/api-success-resp
 import { IdempotencyScope, Idempotent } from "@common/idempotency";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
-import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
 import { CurrentEmployee } from "@modules/portal/auth/employees/api/decorators/current-employee.decorator";
+import { CrmAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import {
@@ -35,7 +35,7 @@ import { ConfirmDoorScanUseCase } from "@modules/portal/crm/presence/application
 
 @ApiTags("CRM Presence")
 @Controller("crm/presence")
-@RequireEmployeeJwt()
+@CrmAuth()
 @ApiBearerAuth()
 export class CrmPresenceController {
     constructor(

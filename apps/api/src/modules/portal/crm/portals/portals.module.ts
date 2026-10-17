@@ -4,7 +4,6 @@ import { Module } from "@nestjs/common";
 import { PrismaModule } from "@common/prisma/prisma.module";
 import { PORTAL_EVENTS_JOB_OPTIONS } from "@common/queue/job-options";
 import { BillingModule } from "@modules/billing/billing.module";
-import { EmployeeAuthModule } from "@modules/portal/auth/employees/employee-auth.module";
 import { SharedAuthModule } from "@modules/portal/auth/shared/shared-auth.module";
 import { ClubPolicyModule } from "@modules/portal/crm/club-policy/club-policy.module";
 import { EntityFieldsModule } from "@modules/portal/crm/entity-fields/entity-fields.module";
@@ -27,7 +26,6 @@ import { PortalAppearanceRepository } from "./domain/repositories/portal-appeara
     imports: [
         PrismaModule,
         EntityFieldsModule,
-        EmployeeAuthModule,
         SharedAuthModule,
         BillingModule,
         MembersModule,

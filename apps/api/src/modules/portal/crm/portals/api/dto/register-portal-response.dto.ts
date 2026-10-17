@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, OmitType } from "@nestjs/swagger";
 
 class RegisteredPortalDto {
     @ApiProperty({ example: "f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f", type: String })
@@ -38,7 +38,12 @@ export class RegisterPortalResponseDto {
     @ApiProperty({
         type: String,
         example: "550e8400-e29b-41d4-a716-446655440000",
-        description: "Передавайте в X-Device-Id; токены выставлены в HttpOnly cookies",
+        description: "Устройство новой сессии; токены выставлены в HttpOnly-куки",
     })
     deviceId: string;
 }
+
+/** Ещё один клуб того же аккаунта: сессия не меняется. */
+export class CreatedClubResponseDto extends OmitType(RegisterPortalResponseDto, [
+    "deviceId",
+] as const) {}

@@ -6,7 +6,8 @@ import type { Member } from "@prisma/client";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
-import { CurrentMember, RequireMemberJwt } from "@modules/portal/auth/members";
+import { CurrentMember } from "@modules/portal/auth/members";
+import { CabinetAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import {
     CabinetProductCategoryDto,
     CabinetProductDto,
@@ -26,7 +27,7 @@ import { MemberAccessService } from "@modules/portal/crm/club-policy/application
  */
 @ApiTags("Cabinet Catalog")
 @Controller("cabinet/catalog")
-@RequireMemberJwt()
+@CabinetAuth()
 @ApiBearerAuth()
 export class CabinetCatalogController {
     constructor(

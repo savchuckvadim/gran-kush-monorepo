@@ -10,6 +10,27 @@ import { ApiAuthType, REFRESH_PATH } from "./api-auth.type";
  */
 const refreshPromises = new Map<ApiAuthType, Promise<void>>();
 
+/** Код 401 API: этот refresh-токен только что обновила соседняя вкладка (AUTH_ARCHITECTURE §3.3). */
+const REFRESH_SUPERSEDED = "refresh_superseded";
+/**
+ * Сколько ждать ответа выигравшей вкладки: её Set-Cookie может прийти в браузер позже нашего 401,
+ * а повтор запроса со старой access-кукой снова получил бы 401.
+ */
+const SUPERSEDED_SETTLE_MS = 300;
+
+const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Соседняя вкладка уже обновила куки — для куки-клиента это успех, а не конец сессии. */
+const isSuperseded = async (response: Response): Promise<boolean> => {
+    if (response.status !== 401) return false;
+    try {
+        const body = (await response.clone().json()) as { code?: unknown };
+        return body.code === REFRESH_SUPERSEDED;
+    } catch {
+        return false;
+    }
+};
+
 export class ApiRefreshHelper {
     private readonly type: ApiAuthType;
     private readonly storage: ApiTokensStorage;
@@ -39,6 +60,10 @@ export class ApiRefreshHelper {
                               credentials: "include",
                           })
                         : await this.refreshWithToken();
+                if (this.authStrategy === "cookie" && (await isSuperseded(response))) {
+                    await sleep(SUPERSEDED_SETTLE_MS);
+                    return;
+                }
                 if (!response.ok) {
                     if (this.authStrategy === "token") {
                         this.storage.clearTokens();

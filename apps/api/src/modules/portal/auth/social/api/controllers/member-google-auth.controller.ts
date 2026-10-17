@@ -1,16 +1,15 @@
-import { Controller, Get, Headers, Logger, Query, Req, Res } from "@nestjs/common";
+import { Controller, Get, Logger, Query, Req, Res } from "@nestjs/common";
 import { ApiExcludeEndpoint, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 
 import type { Request, Response } from "express";
 
-import { AUTH_GLOBAL_SCOPE, resolveDeviceIdFromHeaders } from "@common/auth";
 import { AUTH_THROTTLE } from "@common/config/throttler/throttler.config";
-import { AuthCookieService } from "@common/cookie/services/auth-cookie.service";
 import { CurrentAuthUser } from "@common/decorators/auth/current-auth-user.decorator";
 import { Public } from "@common/decorators/auth/public.decorator";
-import { RequireUserJwt } from "@modules/portal/auth/members/api/decorators/require-member-jwt.decorator";
-import { MemberAuthService } from "@modules/portal/auth/members/application/services/member-auth.service";
+import { CabinetSession } from "@modules/portal/auth/sessions/api/session-auth.decorators";
+import { SessionHttpService } from "@modules/portal/auth/sessions/api/session-http.service";
+import { SESSION_AUDIENCES } from "@modules/portal/auth/sessions/domain/auth-session";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 import { GoogleOAuthFlowService } from "@modules/portal/auth/social/application/services/google-oauth-flow.service";
 import {
@@ -44,8 +43,7 @@ export class MemberGoogleAuthController {
     constructor(
         private readonly flow: GoogleOAuthFlowService,
         private readonly socialLogin: SocialLoginService,
-        private readonly memberAuthService: MemberAuthService,
-        private readonly cookieService: AuthCookieService,
+        private readonly sessionHttp: SessionHttpService,
         private readonly linkGoogle: LinkGoogleUseCase
     ) {}
 
@@ -73,7 +71,7 @@ export class MemberGoogleAuthController {
     }
 
     @Get("link")
-    @RequireUserJwt()
+    @CabinetSession()
     @Throttle(AUTH_THROTTLE)
     @ApiOperation({ summary: "Привязать Google к своему аккаунту (редирект на Google)" })
     link(
@@ -105,7 +103,6 @@ export class MemberGoogleAuthController {
         @Query("code") code: string | undefined,
         @Query("state") state: string | undefined,
         @Query("error") oauthError: string | undefined,
-        @Headers() headers: Record<string, string | string[] | undefined>,
         @Req() request: Request,
         @Res() response: Response
     ): Promise<void> {
@@ -128,12 +125,11 @@ export class MemberGoogleAuthController {
                 return;
             }
             const user = await this.socialLogin.loginMemberWithGoogle(profile);
-            const deviceId = resolveDeviceIdFromHeaders(headers);
-            const tokens = await this.memberAuthService.generateTokens(
-                { id: user.id, email: user.email },
-                deviceId
-            );
-            this.cookieService.setAuthCookies(response, AUTH_GLOBAL_SCOPE.SITE, tokens);
+            await this.sessionHttp.signIn(request, response, {
+                userId: user.id,
+                audience: SESSION_AUDIENCES.Cabinet,
+                method: "google",
+            });
             response.redirect(this.flow.successUrl("member", locale, verified.returnTo));
         } catch (error: unknown) {
             this.logFailure(error);

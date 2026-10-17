@@ -7,7 +7,7 @@ import { RequirePermission } from "@common/decorators/auth/require-permission.de
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import type { PortalPrincipal } from "@common/portal";
-import { RequireEmployeeJwt } from "@modules/portal/auth/employees/api/decorators/require-employee-jwt.decorator";
+import { CrmAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 
 import { PortalRolesService } from "../../application/services/portal-roles.service";
 import { PERMISSIONS } from "../../domain/permissions";
@@ -25,7 +25,7 @@ import { permissionCatalogDto, toPortalRoleDto } from "../mappers/portal-role.ma
  */
 @ApiTags("CRM Roles")
 @Controller("crm/settings/roles")
-@RequireEmployeeJwt()
+@CrmAuth()
 export class CrmRolesController {
     constructor(private readonly roles: PortalRolesService) {}
 

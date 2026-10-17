@@ -475,6 +475,114 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/crm/account/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Открытые сессии аккаунта в CRM и кабинете */
+        get: operations["CrmAccountSessions_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/account/sessions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Закрыть сессию на другом устройстве
+         * @description Текущая — 409 `current_session` (для неё есть выход), чужая или закрытая — 404.
+         */
+        delete: operations["CrmAccountSessions_end"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/account/sessions/sign-out-others": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Выйти на всех остальных устройствах; эта сессия остаётся */
+        post: operations["CrmAccountSessions_endOthers"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cabinet/account/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Открытые сессии аккаунта в кабинете и CRM */
+        get: operations["CabinetAccountSessions_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cabinet/account/sessions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Закрыть сессию на другом устройстве
+         * @description Текущая — 409 `current_session` (для неё есть выход), чужая или закрытая — 404.
+         */
+        delete: operations["CabinetAccountSessions_end"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cabinet/account/sessions/sign-out-others": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Выйти на всех остальных устройствах; эта сессия остаётся */
+        post: operations["CabinetAccountSessions_endOthers"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/": {
         parameters: {
             query?: never;
@@ -1187,7 +1295,7 @@ export interface paths {
         get?: never;
         /**
          * Задать или сменить пароль
-         * @description Все сессии аккаунта (кабинет и CRM) отзываются, это устройство получает новую сессию. Неверный текущий пароль — 400 с code `wrong_password`.
+         * @description Остальные сессии аккаунта (кабинет и CRM) отзываются, текущая остаётся. Неверный текущий пароль — 400 с code `wrong_password`.
          */
         put: operations["CabinetAccountSecurity_setPassword"];
         post?: never;
@@ -1259,60 +1367,6 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
-        trace?: never;
-    };
-    "/crm/employees": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Список сотрудников портала (с пагинацией и фильтрами) */
-        get: operations["CrmEmployees_listEmployees"];
-        put?: never;
-        /** Создать сотрудника (employees.manage): email + роль + динамические поля */
-        post: operations["CrmEmployees_createEmployee"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/crm/employees/form-schema": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Employee form schema by purpose (for CRM dynamic forms) */
-        get: operations["CrmEmployees_employeeFormSchema"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/crm/employees/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Детали сотрудника */
-        get: operations["CrmEmployees_getEmployee"];
-        put?: never;
-        post?: never;
-        /** Деактивировать сотрудника (employees.manage) */
-        delete: operations["CrmEmployees_deactivateEmployee"];
-        options?: never;
-        head?: never;
-        /** Обновить роль / статус / поля профиля сотрудника (employees.manage) */
-        patch: operations["CrmEmployees_updateEmployee"];
         trace?: never;
     };
     "/crm/settings/entities/member/status-items": {
@@ -1541,42 +1595,6 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
-        trace?: never;
-    };
-    "/crm/settings/roles": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Роли клуба и каталог прав */
-        get: operations["CrmRoles_list"];
-        put?: never;
-        /** Своя роль клуба */
-        post: operations["CrmRoles_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/crm/settings/roles/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Удалить свою роль без сотрудников и ждущих приглашений */
-        delete: operations["CrmRoles_delete"];
-        options?: never;
-        head?: never;
-        /** Название своей роли и права роли (кроме владельца и админа) */
-        patch: operations["CrmRoles_update"];
         trace?: never;
     };
     "/crm/members": {
@@ -1956,6 +1974,96 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/crm/employees": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список сотрудников портала (с пагинацией и фильтрами) */
+        get: operations["CrmEmployees_listEmployees"];
+        put?: never;
+        /** Создать сотрудника (employees.manage): email + роль + динамические поля */
+        post: operations["CrmEmployees_createEmployee"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/employees/form-schema": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Employee form schema by purpose (for CRM dynamic forms) */
+        get: operations["CrmEmployees_employeeFormSchema"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/employees/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Детали сотрудника */
+        get: operations["CrmEmployees_getEmployee"];
+        put?: never;
+        post?: never;
+        /** Деактивировать сотрудника (employees.manage) */
+        delete: operations["CrmEmployees_deactivateEmployee"];
+        options?: never;
+        head?: never;
+        /** Обновить роль / статус / поля профиля сотрудника (employees.manage) */
+        patch: operations["CrmEmployees_updateEmployee"];
+        trace?: never;
+    };
+    "/crm/settings/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Роли клуба и каталог прав */
+        get: operations["CrmRoles_list"];
+        put?: never;
+        /** Своя роль клуба */
+        post: operations["CrmRoles_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/settings/roles/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Удалить свою роль без сотрудников и ждущих приглашений */
+        delete: operations["CrmRoles_delete"];
+        options?: never;
+        head?: never;
+        /** Название своей роли и права роли (кроме владельца и админа) */
+        patch: operations["CrmRoles_update"];
+        trace?: never;
+    };
     "/platform/portals/register": {
         parameters: {
             query?: never;
@@ -2034,7 +2142,7 @@ export interface paths {
         /** Порталы, где текущий аккаунт — сотрудник (для переключателя) */
         get: operations["CrmMyPortals_myPortals"];
         put?: never;
-        /** Новый клуб для аккаунта сессии: аккаунт — его владелец, сессия CRM выдаётся заново HttpOnly-куками */
+        /** Новый клуб для аккаунта сессии: аккаунт — его владелец; сессия CRM та же (она на аккаунт, не на клуб) */
         post: operations["CrmMyPortals_createClub"];
         delete?: never;
         options?: never;
@@ -3628,6 +3736,36 @@ export interface components {
             status: string;
             checks: components["schemas"]["ReadinessChecksDto"];
         };
+        AccountSessionDto: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Приложение входа
+             * @enum {string}
+             */
+            audience: "crm" | "cabinet";
+            /** @enum {string} */
+            signInMethod: "password" | "google" | "telegram" | "email_link" | "invitation" | "registration";
+            /** @description User-Agent браузера или приложения */
+            userAgent: string | null;
+            ipAddress: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Последнее обновление токена
+             */
+            lastUsedAt: string;
+            /** @description Сессия этого запроса */
+            current: boolean;
+        };
+        AccountSessionsResponseDto: {
+            sessions: components["schemas"]["AccountSessionDto"][];
+        };
+        EndedSessionsResponseDto: {
+            /** @description Сколько сессий закрыто */
+            ended: number;
+        };
         EmployeeLoginDto: {
             /** @example employee@example.com */
             email: string;
@@ -3773,10 +3911,10 @@ export interface components {
         };
         RefreshTokenDto: {
             /**
-             * @description Refresh token (optional when using HttpOnly cookie)
+             * @description Refresh token из ответа входа или прошлого refresh
              * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
              */
-            refreshToken?: string;
+            refreshToken: string;
         };
         EmployeeRefreshTokenResponseDto: {
             /**
@@ -4023,105 +4161,6 @@ export interface components {
             currentPassword?: string;
             /** @example NewPassword123 */
             newPassword: string;
-        };
-        EmployeeProfileFieldDto: {
-            /** @example first_name */
-            fieldKey: string;
-            /** @example string */
-            type: string;
-            /** @example First name */
-            label: string | null;
-            /** @description Значение поля (JSON) */
-            value: Record<string, never>;
-        };
-        EmployeeListItemDto: {
-            /** @example 123e4567-e89b-12d3-a456-426614174000 */
-            id: string;
-            /** @example 123e4567-e89b-12d3-a456-426614174000 */
-            userId: string;
-            /** @example employee@example.com */
-            email: string;
-            role: components["schemas"]["EmployeeRoleDto"];
-            /** @example true */
-            isActive: boolean;
-            fields: components["schemas"]["EmployeeProfileFieldDto"][];
-            /**
-             * Format: date-time
-             * @example 2024-01-01T00:00:00.000Z
-             */
-            lastLoginAt?: string;
-            /**
-             * Format: date-time
-             * @example 2024-01-01T00:00:00.000Z
-             */
-            createdAt: string;
-            /**
-             * Format: date-time
-             * @example 2024-01-01T00:00:00.000Z
-             */
-            updatedAt: string;
-        };
-        PaginatedResponse_EmployeeListItemDto: {
-            /** @description Array of items */
-            items: components["schemas"]["EmployeeListItemDto"][];
-            /**
-             * @description Total number of items
-             * @example 100
-             */
-            total: number;
-            /**
-             * @description Current page number
-             * @example 1
-             */
-            page: number;
-            /**
-             * @description Items per page
-             * @example 10
-             */
-            limit: number;
-            /**
-             * @description Total number of pages
-             * @example 10
-             */
-            totalPages: number;
-        };
-        CreateEmployeeDto: {
-            /** @example employee@example.com */
-            email: string;
-            /**
-             * @description Ключ роли клуба
-             * @example employee
-             */
-            role: string;
-            /**
-             * @description Динамические поля профиля (fieldKey → value)
-             * @example {
-             *       "first_name": "John",
-             *       "last_name": "Doe"
-             *     }
-             */
-            fields?: {
-                [key: string]: unknown;
-            };
-        };
-        CreateEmployeeResponseDto: {
-            employeeId: string;
-            userId: string;
-            /** @description true если аккаунт создан сейчас и ждёт клейма */
-            isNewUser: boolean;
-        };
-        UpdateEmployeeDto: {
-            /**
-             * @description Ключ роли клуба (кроме владельца)
-             * @example manager
-             */
-            role?: string;
-            /** @example true */
-            isActive?: boolean;
-            /** @description Динамические поля профиля (fieldKey → value) */
-            fields?: {
-                [key: string]: unknown;
-            };
         };
         MemberLifecycleStatusItemDto: {
             /** @example 123 */
@@ -4469,43 +4508,6 @@ export interface components {
             /** @example Поставщики */
             name: string;
         };
-        PortalRoleDto: {
-            id: string;
-            /**
-             * @description owner, admin, manager, employee или custom_…
-             * @example manager
-             */
-            key: string;
-            /** @description Название своей роли; у системной — null */
-            name: string | null;
-            isSystem: boolean;
-            /** @description Права можно менять (у владельца и админа — полный доступ) */
-            isEditable: boolean;
-            /** @description Роль можно выдать сотруднику (кроме владельца) */
-            isAssignable: boolean;
-            permissions: components["schemas"]["Permission"][];
-            employeeCount: number;
-        };
-        PermissionGroupDto: {
-            /** @example members */
-            key: string;
-            permissions: components["schemas"]["Permission"][];
-        };
-        PortalRolesResponseDto: {
-            roles: components["schemas"]["PortalRoleDto"][];
-            /** @description Каталог прав по разделам — порядок экрана */
-            catalog: components["schemas"]["PermissionGroupDto"][];
-        };
-        CreatePortalRoleDto: {
-            /** @example Бармен */
-            name: string;
-            permissions: components["schemas"]["Permission"][];
-        };
-        UpdatePortalRoleDto: {
-            /** @description Только у своей роли */
-            name?: string;
-            permissions?: components["schemas"]["Permission"][];
-        };
         CrmCreateMemberDto: {
             /** @example user@example.com */
             email: string;
@@ -4846,6 +4848,142 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        EmployeeProfileFieldDto: {
+            /** @example first_name */
+            fieldKey: string;
+            /** @example string */
+            type: string;
+            /** @example First name */
+            label: string | null;
+            /** @description Значение поля (JSON) */
+            value: Record<string, never>;
+        };
+        EmployeeListItemDto: {
+            /** @example 123e4567-e89b-12d3-a456-426614174000 */
+            id: string;
+            /** @example 123e4567-e89b-12d3-a456-426614174000 */
+            userId: string;
+            /** @example employee@example.com */
+            email: string;
+            role: components["schemas"]["EmployeeRoleDto"];
+            /** @example true */
+            isActive: boolean;
+            fields: components["schemas"]["EmployeeProfileFieldDto"][];
+            /**
+             * Format: date-time
+             * @example 2024-01-01T00:00:00.000Z
+             */
+            lastLoginAt?: string;
+            /**
+             * Format: date-time
+             * @example 2024-01-01T00:00:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @example 2024-01-01T00:00:00.000Z
+             */
+            updatedAt: string;
+        };
+        PaginatedResponse_EmployeeListItemDto: {
+            /** @description Array of items */
+            items: components["schemas"]["EmployeeListItemDto"][];
+            /**
+             * @description Total number of items
+             * @example 100
+             */
+            total: number;
+            /**
+             * @description Current page number
+             * @example 1
+             */
+            page: number;
+            /**
+             * @description Items per page
+             * @example 10
+             */
+            limit: number;
+            /**
+             * @description Total number of pages
+             * @example 10
+             */
+            totalPages: number;
+        };
+        CreateEmployeeDto: {
+            /** @example employee@example.com */
+            email: string;
+            /**
+             * @description Ключ роли клуба
+             * @example employee
+             */
+            role: string;
+            /**
+             * @description Динамические поля профиля (fieldKey → value)
+             * @example {
+             *       "first_name": "John",
+             *       "last_name": "Doe"
+             *     }
+             */
+            fields?: {
+                [key: string]: unknown;
+            };
+        };
+        CreateEmployeeResponseDto: {
+            employeeId: string;
+            userId: string;
+            /** @description true если аккаунт создан сейчас и ждёт клейма */
+            isNewUser: boolean;
+        };
+        UpdateEmployeeDto: {
+            /**
+             * @description Ключ роли клуба (кроме владельца)
+             * @example manager
+             */
+            role?: string;
+            /** @example true */
+            isActive?: boolean;
+            /** @description Динамические поля профиля (fieldKey → value) */
+            fields?: {
+                [key: string]: unknown;
+            };
+        };
+        PortalRoleDto: {
+            id: string;
+            /**
+             * @description owner, admin, manager, employee или custom_…
+             * @example manager
+             */
+            key: string;
+            /** @description Название своей роли; у системной — null */
+            name: string | null;
+            isSystem: boolean;
+            /** @description Права можно менять (у владельца и админа — полный доступ) */
+            isEditable: boolean;
+            /** @description Роль можно выдать сотруднику (кроме владельца) */
+            isAssignable: boolean;
+            permissions: components["schemas"]["Permission"][];
+            employeeCount: number;
+        };
+        PermissionGroupDto: {
+            /** @example members */
+            key: string;
+            permissions: components["schemas"]["Permission"][];
+        };
+        PortalRolesResponseDto: {
+            roles: components["schemas"]["PortalRoleDto"][];
+            /** @description Каталог прав по разделам — порядок экрана */
+            catalog: components["schemas"]["PermissionGroupDto"][];
+        };
+        CreatePortalRoleDto: {
+            /** @example Бармен */
+            name: string;
+            permissions: components["schemas"]["Permission"][];
+        };
+        UpdatePortalRoleDto: {
+            /** @description Только у своей роли */
+            name?: string;
+            permissions?: components["schemas"]["Permission"][];
+        };
         RegisterPortalDto: {
             /**
              * @description Unique portal slug. Allowed chars: a-z, 0-9, dash
@@ -4909,7 +5047,7 @@ export interface components {
             portal: components["schemas"]["RegisteredPortalDto"];
             owner: components["schemas"]["PortalOwnerInfoDto"];
             /**
-             * @description Передавайте в X-Device-Id; токены выставлены в HttpOnly cookies
+             * @description Устройство новой сессии; токены выставлены в HttpOnly-куки
              * @example 550e8400-e29b-41d4-a716-446655440000
              */
             deviceId: string;
@@ -4989,6 +5127,10 @@ export interface components {
              * @example true
              */
             acceptTerms: boolean;
+        };
+        CreatedClubResponseDto: {
+            portal: components["schemas"]["RegisteredPortalDto"];
+            owner: components["schemas"]["PortalOwnerInfoDto"];
         };
         PortalSubscriptionInfoDto: {
             /**
@@ -6820,6 +6962,9 @@ export type SchemaCrmBillingManageDto = components['schemas']['CrmBillingManageD
 export type SchemaHealthResponseDto = components['schemas']['HealthResponseDto'];
 export type SchemaReadinessChecksDto = components['schemas']['ReadinessChecksDto'];
 export type SchemaReadinessResponseDto = components['schemas']['ReadinessResponseDto'];
+export type SchemaAccountSessionDto = components['schemas']['AccountSessionDto'];
+export type SchemaAccountSessionsResponseDto = components['schemas']['AccountSessionsResponseDto'];
+export type SchemaEndedSessionsResponseDto = components['schemas']['EndedSessionsResponseDto'];
 export type SchemaEmployeeLoginDto = components['schemas']['EmployeeLoginDto'];
 export type SchemaEmployeeRoleDto = components['schemas']['EmployeeRoleDto'];
 export type SchemaEmployeePortalRoleDto = components['schemas']['EmployeePortalRoleDto'];
@@ -6866,12 +7011,6 @@ export type SchemaGoogleSignInDto = components['schemas']['GoogleSignInDto'];
 export type SchemaTelegramSignInDto = components['schemas']['TelegramSignInDto'];
 export type SchemaAccountSecurityDto = components['schemas']['AccountSecurityDto'];
 export type SchemaChangeAccountPasswordDto = components['schemas']['ChangeAccountPasswordDto'];
-export type SchemaEmployeeProfileFieldDto = components['schemas']['EmployeeProfileFieldDto'];
-export type SchemaEmployeeListItemDto = components['schemas']['EmployeeListItemDto'];
-export type SchemaPaginatedResponseEmployeeListItemDto = components['schemas']['PaginatedResponse_EmployeeListItemDto'];
-export type SchemaCreateEmployeeDto = components['schemas']['CreateEmployeeDto'];
-export type SchemaCreateEmployeeResponseDto = components['schemas']['CreateEmployeeResponseDto'];
-export type SchemaUpdateEmployeeDto = components['schemas']['UpdateEmployeeDto'];
 export type SchemaMemberLifecycleStatusItemDto = components['schemas']['MemberLifecycleStatusItemDto'];
 export type SchemaFormFieldOptionSchemaDto = components['schemas']['FormFieldOptionSchemaDto'];
 export type SchemaMemberFormFieldSchemaItemDto = components['schemas']['MemberFormFieldSchemaItemDto'];
@@ -6898,11 +7037,6 @@ export type SchemaCreateStatusSetDto = components['schemas']['CreateStatusSetDto
 export type SchemaUpdateStatusItemDto = components['schemas']['UpdateStatusItemDto'];
 export type SchemaEntityDefinitionSummaryDto = components['schemas']['EntityDefinitionSummaryDto'];
 export type SchemaCreateEntityDefinitionBodyDto = components['schemas']['CreateEntityDefinitionBodyDto'];
-export type SchemaPortalRoleDto = components['schemas']['PortalRoleDto'];
-export type SchemaPermissionGroupDto = components['schemas']['PermissionGroupDto'];
-export type SchemaPortalRolesResponseDto = components['schemas']['PortalRolesResponseDto'];
-export type SchemaCreatePortalRoleDto = components['schemas']['CreatePortalRoleDto'];
-export type SchemaUpdatePortalRoleDto = components['schemas']['UpdatePortalRoleDto'];
 export type SchemaCrmCreateMemberDto = components['schemas']['CrmCreateMemberDto'];
 export type SchemaCrmCreateMemberResponseDto = components['schemas']['CrmCreateMemberResponseDto'];
 export type SchemaCrmMemberStatusDto = components['schemas']['CrmMemberStatusDto'];
@@ -6933,6 +7067,17 @@ export type SchemaAcceptInvitationDto = components['schemas']['AcceptInvitationD
 export type SchemaAcceptInvitationOutcome = components['schemas']['AcceptInvitationOutcome'];
 export type SchemaAcceptInvitationResponseDto = components['schemas']['AcceptInvitationResponseDto'];
 export type SchemaAcceptInvitationWithSessionDto = components['schemas']['AcceptInvitationWithSessionDto'];
+export type SchemaEmployeeProfileFieldDto = components['schemas']['EmployeeProfileFieldDto'];
+export type SchemaEmployeeListItemDto = components['schemas']['EmployeeListItemDto'];
+export type SchemaPaginatedResponseEmployeeListItemDto = components['schemas']['PaginatedResponse_EmployeeListItemDto'];
+export type SchemaCreateEmployeeDto = components['schemas']['CreateEmployeeDto'];
+export type SchemaCreateEmployeeResponseDto = components['schemas']['CreateEmployeeResponseDto'];
+export type SchemaUpdateEmployeeDto = components['schemas']['UpdateEmployeeDto'];
+export type SchemaPortalRoleDto = components['schemas']['PortalRoleDto'];
+export type SchemaPermissionGroupDto = components['schemas']['PermissionGroupDto'];
+export type SchemaPortalRolesResponseDto = components['schemas']['PortalRolesResponseDto'];
+export type SchemaCreatePortalRoleDto = components['schemas']['CreatePortalRoleDto'];
+export type SchemaUpdatePortalRoleDto = components['schemas']['UpdatePortalRoleDto'];
 export type SchemaRegisterPortalDto = components['schemas']['RegisterPortalDto'];
 export type SchemaRegisteredPortalDto = components['schemas']['RegisteredPortalDto'];
 export type SchemaPortalOwnerInfoDto = components['schemas']['PortalOwnerInfoDto'];
@@ -6945,6 +7090,7 @@ export type SchemaJoinPortalResponseDto = components['schemas']['JoinPortalRespo
 export type SchemaMyPortalDto = components['schemas']['MyPortalDto'];
 export type SchemaMyPortalsResponseDto = components['schemas']['MyPortalsResponseDto'];
 export type SchemaCreateClubDto = components['schemas']['CreateClubDto'];
+export type SchemaCreatedClubResponseDto = components['schemas']['CreatedClubResponseDto'];
 export type SchemaPortalSubscriptionInfoDto = components['schemas']['PortalSubscriptionInfoDto'];
 export type SchemaPortalInfoDto = components['schemas']['PortalInfoDto'];
 export type SchemaUpdatePortalAppearanceDto = components['schemas']['UpdatePortalAppearanceDto'];
@@ -8248,6 +8394,220 @@ export interface operations {
             };
         };
     };
+    CrmAccountSessions_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountSessionsResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmAccountSessions_end: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmAccountSessions_endOthers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndedSessionsResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CabinetAccountSessions_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountSessionsResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CabinetAccountSessions_end: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CabinetAccountSessions_endOthers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndedSessionsResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
     App_getHello: {
         parameters: {
             query?: never;
@@ -8323,15 +8683,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WebRefreshResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
             /** @description Unauthorized */
@@ -8799,15 +9150,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WebRefreshResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
             /** @description Unauthorized */
@@ -9906,330 +10248,6 @@ export interface operations {
             };
         };
     };
-    CrmEmployees_listEmployees: {
-        parameters: {
-            query?: {
-                page?: number;
-                limit?: number;
-                sortBy?: string;
-                sortOrder?: "asc" | "desc";
-                /** @description Ключ роли клуба */
-                role?: string;
-                isActive?: boolean;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Paginated list of employees */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse_EmployeeListItemDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    CrmEmployees_createEmployee: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateEmployeeDto"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CreateEmployeeResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    CrmEmployees_employeeFormSchema: {
-        parameters: {
-            query: {
-                purpose: "public_registration" | "crm_create" | "crm_detail" | "member_cabinet";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>;
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    CrmEmployees_getEmployee: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmployeeListItemDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    CrmEmployees_deactivateEmployee: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmployeeListItemDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    CrmEmployees_updateEmployee: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateEmployeeDto"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmployeeListItemDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
     CrmEntityFieldsSettings_memberStatusItems: {
         parameters: {
             query?: never;
@@ -11310,206 +11328,6 @@ export interface operations {
             };
             /** @description Conflict */
             409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    CrmRoles_list: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PortalRolesResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    CrmRoles_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreatePortalRoleDto"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PortalRoleDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    CrmRoles_delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    CrmRoles_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdatePortalRoleDto"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PortalRoleDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Not Found */
-            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -12786,6 +12604,530 @@ export interface operations {
             };
         };
     };
+    CrmEmployees_listEmployees: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                sortBy?: string;
+                sortOrder?: "asc" | "desc";
+                /** @description Ключ роли клуба */
+                role?: string;
+                isActive?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated list of employees */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_EmployeeListItemDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEmployees_createEmployee: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateEmployeeDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateEmployeeResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEmployees_employeeFormSchema: {
+        parameters: {
+            query: {
+                purpose: "public_registration" | "crm_create" | "crm_detail" | "member_cabinet";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEmployees_getEmployee: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeListItemDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEmployees_deactivateEmployee: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeListItemDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmEmployees_updateEmployee: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateEmployeeDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeListItemDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmRoles_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalRolesResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmRoles_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePortalRoleDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalRoleDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmRoles_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmRoles_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePortalRoleDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalRoleDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
     PortalRegistration_register: {
         parameters: {
             query?: never;
@@ -13005,7 +13347,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RegisterPortalResponseDto"];
+                    "application/json": components["schemas"]["CreatedClubResponseDto"];
                 };
             };
             /** @description Bad Request */

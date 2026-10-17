@@ -3,7 +3,6 @@ import { Injectable, Logger } from "@nestjs/common";
 import { hash } from "bcrypt";
 
 import { PrismaService } from "@common/prisma/prisma.service";
-import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
 import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
 import { SYSTEM_ROLE_KEYS } from "@modules/portal/crm/access/domain/portal-role";
 
@@ -15,7 +14,8 @@ import { ClubFoundingService, emailTakenError, type FoundedClub } from "./club-f
 export type RegisterPortalResult = {
     portal: { id: string; name: string; displayName: string; status: string };
     owner: { id: string; email: string; name: string; role: string; portalId: string };
-    tokens: { accessToken: string; refreshToken: string };
+    /** Аккаунт владельца: ему контроллер выдаёт сессию CRM. */
+    ownerUserId: string;
 };
 
 /**
@@ -30,12 +30,11 @@ export class PortalRegistrationService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly founding: ClubFoundingService,
-        private readonly employeeAuthService: EmployeeAuthService,
         private readonly emailVerificationService: EmailVerificationService
     ) {}
 
     /** A new account with a password; it signs in at once and confirms the email from a banner. */
-    async registerPortal(dto: RegisterPortalDto, deviceId: string): Promise<RegisterPortalResult> {
+    async registerPortal(dto: RegisterPortalDto): Promise<RegisterPortalResult> {
         const email = dto.email.trim().toLowerCase();
         await this.founding.assertNameFree(dto.name);
         const existingUser = await this.prisma.user.findUnique({
@@ -54,7 +53,7 @@ export class PortalRegistrationService {
             return this.founding.found(tx, user.id, dto);
         });
 
-        const result = await this.finish(club, dto, deviceId);
+        const result = await this.finish(club, dto);
         // Владелец уже внутри CRM; письмо с подтверждением можно запросить повторно из баннера,
         // поэтому сбой постановки в очередь не должен ронять уже созданный клуб.
         try {
@@ -74,26 +73,17 @@ export class PortalRegistrationService {
     /** One more club for the account of the session; the session itself proves the account. */
     async createClubForAccount(
         account: { userId: string },
-        dto: CreateClubDto,
-        deviceId: string
+        dto: CreateClubDto
     ): Promise<RegisterPortalResult> {
         await this.founding.assertNameFree(dto.name);
         const club = await this.founding.inTransaction((tx) =>
             this.founding.found(tx, account.userId, dto)
         );
-        return this.finish(club, dto, deviceId);
+        return this.finish(club, dto);
     }
 
-    /** A fresh CRM session for the owner and the club's welcome events. */
-    private async finish(
-        club: FoundedClub,
-        dto: CreateClubDto,
-        deviceId: string
-    ): Promise<RegisterPortalResult> {
-        const tokens = await this.employeeAuthService.generateTokens(
-            { id: club.owner.user.id, email: club.owner.user.email },
-            deviceId
-        );
+    /** The club's welcome events and what the controller answers with. */
+    private async finish(club: FoundedClub, dto: CreateClubDto): Promise<RegisterPortalResult> {
         await this.founding.announce(club, dto);
         return {
             portal: {
@@ -109,7 +99,7 @@ export class PortalRegistrationService {
                 role: SYSTEM_ROLE_KEYS.Owner,
                 portalId: club.owner.portalId,
             },
-            tokens,
+            ownerUserId: club.owner.user.id,
         };
     }
 }

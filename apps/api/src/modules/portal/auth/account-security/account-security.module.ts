@@ -1,6 +1,5 @@
 import { Module } from "@nestjs/common";
 
-import { MemberAuthModule } from "@modules/portal/auth/members/member-auth.module";
 import { SharedAuthModule } from "@modules/portal/auth/shared/shared-auth.module";
 import { SocialAuthModule } from "@modules/portal/auth/social/social-auth.module";
 import { UsersModule } from "@modules/users/users.module";
@@ -15,7 +14,7 @@ import { UnlinkProviderUseCase } from "./application/use-cases/unlink-provider.u
  * авторизации и Google, а `AccountModule` им недоступен — его импортирует `MembersModule`.
  */
 @Module({
-    imports: [UsersModule, SharedAuthModule, MemberAuthModule, SocialAuthModule],
+    imports: [UsersModule, SharedAuthModule, SocialAuthModule],
     controllers: [CabinetAccountSecurityController],
     providers: [AccountSecurityService, ChangeAccountPasswordUseCase, UnlinkProviderUseCase],
 })

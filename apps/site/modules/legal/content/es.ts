@@ -210,15 +210,21 @@ export const es: LegalContent = {
                                         "Hasta que lo borres",
                                     ],
                                     [
-                                        "crm_access_token",
-                                        "crm.paf-paf.app",
+                                        "crm_access",
+                                        "api.paf-paf.app",
                                         "Mantener la sesión iniciada",
                                         "15 minutos",
                                     ],
                                     [
-                                        "crm_refresh_token",
-                                        "crm.paf-paf.app",
+                                        "crm_refresh",
+                                        "api.paf-paf.app",
                                         "Renovar la sesión sin volver a introducir la contraseña",
+                                        "7 días",
+                                    ],
+                                    [
+                                        "crm_session",
+                                        ".paf-paf.app",
+                                        "Indicar a la aplicación que has iniciado sesión (no contiene datos)",
                                         "7 días",
                                     ],
                                     [

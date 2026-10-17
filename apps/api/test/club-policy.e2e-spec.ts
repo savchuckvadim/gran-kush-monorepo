@@ -7,7 +7,8 @@ import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
-import { MemberAuthService } from "../src/modules/portal/auth/members/application/services/member-auth.service";
+
+import { cabinetSession } from "./support/sessions";
 
 jest.setTimeout(120_000);
 
@@ -62,10 +63,8 @@ describe("Club policy (e2e)", () => {
                 emailConfirmed: true,
             },
         });
-        const tokens = await app
-            .get(MemberAuthService)
-            .generateTokens({ id: user.id, email }, `device-${label}-${suffix}`);
-        return { userId: user.id, cookies: `member_access_token=${tokens.accessToken}` };
+        const tokens = await cabinetSession(app, user.id, `device-${label}-${suffix}`);
+        return { userId: user.id, cookies: tokens.cookies };
     };
 
     const cabinet = (cookies: string) => ({

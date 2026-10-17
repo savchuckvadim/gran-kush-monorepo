@@ -1,6 +1,5 @@
 import { ConflictException, ForbiddenException, Injectable } from "@nestjs/common";
 
-import { EmployeeAuthService } from "@modules/portal/auth/employees/application/services/employee-auth.service";
 import { GoogleProfile } from "@modules/portal/auth/social/domain/social-profile";
 import { InvitationAcceptanceService } from "@modules/portal/crm/invitations/application/services/invitation-acceptance.service";
 import { InvitationsService } from "@modules/portal/crm/invitations/application/services/invitations.service";
@@ -9,10 +8,10 @@ import { GoogleOAuthFlowService } from "./google-oauth-flow.service";
 import type { GoogleIntent } from "./google-oauth-flow.types";
 import { SocialLoginService } from "./social-login.service";
 
-/** Куда отправить браузер и, если вход состоялся, какие токены положить в куки CRM. */
+/** Куда отправить браузер и, если вход состоялся, чей аккаунт получает сессию CRM. */
 export interface EmployeeGoogleSignInResult {
     redirect: string;
-    tokens?: { accessToken: string; refreshToken: string };
+    sessionUserId?: string;
 }
 
 /** Страница CRM «Новый клуб»: туда ведут вход без клубов и вход ради нового клуба. */
@@ -36,45 +35,42 @@ export class EmployeeGoogleSignInService {
     constructor(
         private readonly flow: GoogleOAuthFlowService,
         private readonly socialLogin: SocialLoginService,
-        private readonly employeeAuthService: EmployeeAuthService,
         private readonly invitations: InvitationsService,
         private readonly acceptance: InvitationAcceptanceService
     ) {}
 
     async complete(
         profile: GoogleProfile,
-        context: { locale: string; returnTo?: string; intent?: GoogleIntent },
-        deviceId: string
+        context: { locale: string; returnTo?: string; intent?: GoogleIntent }
     ): Promise<EmployeeGoogleSignInResult> {
         if (context.intent?.kind === "invitation") {
-            return this.acceptInvitation(profile, context.intent.token, context.locale, deviceId);
+            return this.acceptInvitation(profile, context.intent.token, context.locale);
         }
 
         const { user, hasClubs } = await this.socialLogin.loginEmployeeWithGoogle(profile);
-        const tokens = await this.employeeAuthService.generateTokens(
-            { id: user.id, email: user.email },
-            deviceId
-        );
+        const sessionUserId = user.id;
         const newClub = `${this.flow.frontendUrl("crm")}/${context.locale}${NEW_CLUB_PATH}`;
         if (context.intent?.kind === "club_signup") {
             return {
                 redirect: context.returnTo
                     ? this.flow.successUrl("crm", context.locale, context.returnTo)
                     : newClub,
-                tokens,
+                sessionUserId,
             };
         }
         if (!hasClubs) {
-            return { redirect: newClub, tokens };
+            return { redirect: newClub, sessionUserId };
         }
-        return { redirect: this.flow.successUrl("crm", context.locale, context.returnTo), tokens };
+        return {
+            redirect: this.flow.successUrl("crm", context.locale, context.returnTo),
+            sessionUserId,
+        };
     }
 
     private async acceptInvitation(
         profile: GoogleProfile,
         token: string,
-        locale: string,
-        deviceId: string
+        locale: string
     ): Promise<EmployeeGoogleSignInResult> {
         const front = this.flow.frontendUrl("crm");
         const backToInvitation = (reason: InvitationFailure) => ({
@@ -93,14 +89,10 @@ export class EmployeeGoogleSignInService {
 
         const account = await this.socialLogin.findOrCreateAccount(profile);
         try {
-            const result = await this.acceptance.acceptWithVerifiedAccount(
-                token,
-                account,
-                deviceId
-            );
+            const result = await this.acceptance.acceptWithVerifiedAccount(token, account);
             return {
                 redirect: `${front}/${locale}/${result.response.portalSlug}/crm`,
-                tokens: result.tokens,
+                sessionUserId: result.sessionUserId,
             };
         } catch (error: unknown) {
             if (error instanceof ConflictException)

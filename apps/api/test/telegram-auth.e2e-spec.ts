@@ -9,7 +9,8 @@ import request from "supertest";
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { MailService } from "../src/modules/mail/application/services/mail.service";
-import { MemberAuthService } from "../src/modules/portal/auth/members/application/services/member-auth.service";
+
+import { cabinetSession } from "./support/sessions";
 
 jest.setTimeout(120_000);
 
@@ -126,7 +127,7 @@ describe("Telegram sign-in (e2e)", () => {
 
         const confirmed = await post("/cabinet/auth/telegram/confirm", { token: link });
         expect(confirmed.body).toEqual({ status: "signed_in" });
-        expect(setCookies(confirmed).some((c) => c.startsWith("member_access_token="))).toBe(true);
+        expect(setCookies(confirmed).some((c) => c.startsWith("cabinet_access="))).toBe(true);
         const user = await prisma.user.findUniqueOrThrow({ where: { email } });
         expect(user).toMatchObject({ emailConfirmed: true, isActive: true, passwordHash: null });
 
@@ -170,10 +171,8 @@ describe("Telegram sign-in (e2e)", () => {
                 emailConfirmed: true,
             },
         });
-        const tokens = await app
-            .get(MemberAuthService)
-            .generateTokens({ id: owner.id, email: owner.email }, `device-${suffix}`);
-        const cookies = `member_access_token=${tokens.accessToken}`;
+        const tokens = await cabinetSession(app, owner.id, `device-${suffix}`);
+        const cookies = tokens.cookies;
         const linked = await post("/cabinet/account/security/telegram", widget(id), cookies);
         expect(linked.status).toBe(200);
         expect(linked.body.telegram).toEqual({ linked: true, username: `tg_${id}` });
@@ -188,7 +187,7 @@ describe("Telegram sign-in (e2e)", () => {
         const link = await signUp(id, `tg-only-${suffix}@test.local`);
         const confirmed = await post("/cabinet/auth/telegram/confirm", { token: link });
         const access = setCookies(confirmed)
-            .find((c) => c.startsWith("member_access_token="))
+            .find((c) => c.startsWith("cabinet_access="))
             ?.split(";")[0];
 
         const refused = await request(app.getHttpServer())

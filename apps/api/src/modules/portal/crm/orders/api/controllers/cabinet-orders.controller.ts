@@ -18,8 +18,8 @@ import { IdempotencyScope, Idempotent } from "@common/idempotency";
 import { PaginationDto } from "@common/paginate/dto/pagination.dto";
 import { PaginatedResult } from "@common/paginate/interfaces/paginated-result.interface";
 import { PaginationUtil } from "@common/paginate/utils/pagination.util";
-import { RequireMemberJwt } from "@modules/portal/auth/members";
 import { CurrentMember } from "@modules/portal/auth/members/api/decorators/current-member.decorator";
+import { CabinetAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import { RequireShopAccess } from "@modules/portal/crm/club-policy/api/guards/shop-access.guard";
 import { Member } from "@modules/portal/crm/members/domain/entity/member.entity";
 import {
@@ -41,7 +41,7 @@ import { PlaceCabinetOrderUseCase } from "@modules/portal/crm/orders/application
  */
 @ApiTags("Cabinet Orders")
 @Controller("cabinet/orders")
-@RequireMemberJwt()
+@CabinetAuth()
 @ApiBearerAuth()
 export class CabinetOrdersController {
     constructor(

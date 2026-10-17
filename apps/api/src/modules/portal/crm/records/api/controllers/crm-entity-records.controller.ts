@@ -18,7 +18,7 @@ import { ApiErrorResponse } from "@common/decorators/response/api-error-response
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { type ContentLocale, RequestLocale } from "@common/i18n";
 import { type PortalPrincipal, principalCan } from "@common/portal";
-import { RequireEmployeeJwt } from "@modules/portal/auth/employees";
+import { CrmAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import { entityReadPermission } from "@modules/portal/crm/access/domain/entity-read-permission";
 import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 
@@ -53,7 +53,7 @@ const assertCanReadEntity = (principal: PortalPrincipal, code: string): void => 
 
 @ApiTags("CRM Entity Records (smart processes)")
 @Controller("crm/entities/:code/records")
-@RequireEmployeeJwt()
+@CrmAuth()
 @RequirePermission(PERMISSIONS.RecordsRead)
 export class CrmEntityRecordsController {
     constructor(private readonly recordsService: EntityRecordsService) {}

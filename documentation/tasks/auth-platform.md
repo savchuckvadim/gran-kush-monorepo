@@ -64,28 +64,28 @@
 
 ## Фаза 2. Сессии — `feat/auth-sessions`
 
-### TASK-733: сессии вместо refresh-токенов `[ ]` P0
+### TASK-733: сессии вместо refresh-токенов `[x]` P0
 
-- [ ] `AuthSession` (аудитория, устройство, хеш и прежний хеш, способ входа, UA/IP, отзыв); `RefreshToken`
+- [x] `AuthSession` (аудитория, устройство, хеш и прежний хеш, способ входа, UA/IP, отзыв); `RefreshToken`
       удалить
-- [ ] Access `{ sub, sid, aud }`, refresh `{ sub, sid, aud, typ }` с проверкой подписи; `JWT_REFRESH_SECRET`
+- [x] Access `{ sub, sid, aud }`, refresh `{ sub, sid, aud, typ }` с проверкой подписи; `JWT_REFRESH_SECRET`
       обязателен
-- [ ] Ротация с окном гонки и отзывом при повторе (`reuse_detected`); api-client повторяет запрос на
+- [x] Ротация с окном гонки и отзывом при повторе (`reuse_detected`); api-client повторяет запрос на
       `refresh_superseded`
-- [ ] Гвард проверяет сессию в БД — отзыв действует сразу
+- [x] Гвард проверяет сессию в БД — отзыв действует сразу
 
-### TASK-734: куки и гварды по аудиториям `[ ]` P0
+### TASK-734: куки и гварды по аудиториям `[x]` P0
 
-- [ ] Токены — host-only на API, refresh `Path=/{aud}/auth`; подсказка `*_session` на `AUTH_HINT_COOKIE_DOMAIN`;
+- [x] Токены — host-only на API, refresh `Path=/{aud}/auth`; подсказка `*_session` на `AUTH_HINT_COOKIE_DOMAIN`;
       `proxy.ts` по подсказке; `member_*` → `cabinet_*`
-- [ ] `@CrmSession/@CrmAuth/@CabinetSession/@CabinetAuth`, единый `SessionGuard` (куки или Bearer);
+- [x] `@CrmSession/@CrmAuth/@CabinetSession/@CabinetAuth`, единый `SessionGuard` (куки или Bearer);
       мобильные варианты декораторов и мёртвые декораторы удалить
-- [ ] Env: убрать `*_AUTH_COOKIE_DOMAIN` и имена кук, добавить `AUTH_HINT_COOKIE_DOMAIN`
+- [x] Env: убрать `*_AUTH_COOKIE_DOMAIN` и имена кук, добавить `AUTH_HINT_COOKIE_DOMAIN`
       (infra/dokploy/README, api.env.example)
 
-### TASK-735: устройства в «Вход и безопасность» `[ ]` P1
+### TASK-735: устройства в «Вход и безопасность» `[x]` P1
 
-- [ ] `GET /{aud}/account/sessions`, `DELETE …/sessions/:id`, «выйти на остальных»
+- [x] `GET /{aud}/account/sessions`, `DELETE …/sessions/:id`, «выйти на остальных» (API; экран — в TASK-738)
 
 ---
 

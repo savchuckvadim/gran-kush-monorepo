@@ -193,13 +193,30 @@ multipart) не имеет значения: тип определяется п�
 - **CRM**: `EmployeeAuthController` prefix `crm/auth` — login sets **HttpOnly** cookies for access/refresh; refresh reads refresh cookie; logout clears cookies.
 - **Cabinet (member)**: `MemberAuthController` prefix `cabinet/auth` — same idea for member scope.
 
-Cookie **names** and **domain** come from `ConfigCookieService` / env:
+Every sign-in starts an **auth session** (`auth_sessions`, one per account × app × device); see
+[AUTH_ARCHITECTURE.md §3](./AUTH_ARCHITECTURE.md). Cookies are written by `SessionCookiesService`:
 
-- Defaults include `crm_access_token`, `crm_refresh_token`, `member_access_token`, `member_refresh_token`.
-- Override via `CRM_ACCESS_COOKIE_NAME`, `CRM_REFRESH_COOKIE_NAME`, `MEMBER_ACCESS_COOKIE_NAME`, `MEMBER_REFRESH_COOKIE_NAME`.
-- Cookie **domain** is derived from `CRM_FRONTEND_URL` / `MEMBER_FRONTEND_URL` (see `getDomain(scope)`).
+| Cookie | Host | Path | Holds |
+| --- | --- | --- | --- |
+| `crm_access`, `cabinet_access` | API host only | `/` | access JWT, 15 min |
+| `crm_refresh`, `cabinet_refresh` | API host only | `/crm/auth`, `/cabinet/auth` | refresh JWT, 7 days |
+| `crm_session`, `cabinet_session` | `AUTH_HINT_COOKIE_DOMAIN` | `/` | `1` — a hint for the frontends' `proxy.ts` |
 
-Cookies are **httpOnly**, **SameSite=Lax**, **path=/**, **secure** follows `AUTH_COOKIE_SECURE` / `NODE_ENV`.
+All are **HttpOnly**, **SameSite=Lax**; **Secure** follows `AUTH_COOKIE_SECURE` (by default — `NODE_ENV=production`).
+Names are fixed in code; there are no cookie-name or cookie-domain env variables any more.
+
+**Refresh** rotates the pair. 401 bodies carry a machine `code`:
+
+- `refresh_superseded` — another tab rotated this token a moment ago; cookies are kept, the client retries;
+- `session_ended` — expired, revoked, or a stale token was replayed (the session is revoked as
+  `reuse_detected`); the client signs in again.
+
+The guard checks the session row on every request, so logout, "sign out everywhere", a password change
+or a blocked account take effect at once, not when the access token expires.
+
+**Devices** (`/crm/account/sessions`, `/cabinet/account/sessions`): `GET` lists the open sessions of the
+account in both apps (`current` marks this one), `DELETE /:id` closes another device (`409 current_session`
+for this one, `404 session_not_found` for a foreign or closed one), `POST sign-out-others` closes the rest.
 
 ### Mobile / non-browser API consumers
 
@@ -210,9 +227,13 @@ Separate controllers avoid relying on cookies:
 
 These typically return tokens in JSON and use **`Authorization: Bearer`** on subsequent calls.
 
-### JWT strategies
+### Guards
 
-Passport uses **separate strategies** for bearer vs cookie (see `apps/api/src/common/auth/consts/passport-strategy-names.ts` and employee/member `infrastructure/strategies/*`). Guards pick the right strategy for web vs mobile routes.
+One `SessionGuard` per app (`CrmSessionGuard`, `CabinetSessionGuard`) reads the access token from
+`Authorization: Bearer` or the app's cookie, so web and mobile share the same routes. Controllers use the
+decorators `@CrmSession()`, `@CrmAuth({ subscription? })`, `@CabinetSession()`, `@CabinetAuth()` from
+`modules/portal/auth/sessions/api/session-auth.decorators.ts`. A token of one app is refused by the other
+(JWT `aud`), and a refresh token is refused as an access token (`typ`, separate secret).
 
 ---
 

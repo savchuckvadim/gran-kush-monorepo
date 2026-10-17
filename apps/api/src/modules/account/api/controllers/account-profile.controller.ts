@@ -13,7 +13,7 @@ import {
     type AccountProfile,
     profileToMemberFields,
 } from "@modules/account/domain/account-profile";
-import { RequireUserJwt } from "@modules/portal/auth/members/api/decorators/require-member-jwt.decorator";
+import { CabinetSession } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 
 const toDto = (profile: AccountProfile): AccountProfileDto => ({
@@ -24,7 +24,7 @@ const toDto = (profile: AccountProfile): AccountProfileDto => ({
 /** Профиль аккаунта в кабинете: ФИО, дата рождения, телефон, адрес — для анкет новых клубов. */
 @ApiTags("Account (profile)")
 @Controller("cabinet/account/profile")
-@RequireUserJwt()
+@CabinetSession()
 export class AccountProfileController {
     constructor(private readonly profiles: AccountProfileService) {}
 

@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 
 import * as bcrypt from "bcrypt";
 
-import { RefreshTokenRepository } from "@modules/portal/auth/shared/domain/repositories/refresh-token-repository.interface";
+import { SessionsService } from "@modules/portal/auth/sessions/application/sessions.service";
 import { BCRYPT_ROUNDS } from "@modules/users/domain/password-hashing";
 import { UserRepository } from "@modules/users/domain/repositories/user-repository.interface";
 
@@ -14,18 +14,20 @@ import { ACCOUNT_SECURITY_ERRORS } from "../../domain/account-security-errors";
  *   молча (`wrong_password`);
  * - пароля нет (вход только через Google) — задаётся без текущего: владение аккаунтом уже доказано
  *   входом через Google;
- * - после смены отзываются все сессии аккаунта, в кабинете и CRM: угнанная сессия не переживает
- *   смену пароля. Новую сессию для этого устройства выдаёт контроллер.
+ * - после смены отзываются все остальные сессии аккаунта, в кабинете и CRM: угнанная сессия не
+ *   переживает смену пароля, а текущая — та, что пароль и сменила, — остаётся.
  */
 @Injectable()
 export class ChangeAccountPasswordUseCase {
     constructor(
         private readonly users: UserRepository,
-        private readonly refreshTokens: RefreshTokenRepository
+        private readonly sessions: SessionsService
     ) {}
 
     async execute(command: {
         userId: string;
+        /** Сессия, из которой меняют пароль: её не отзываем */
+        sessionId: string;
         currentPassword?: string;
         newPassword: string;
     }): Promise<{ id: string; email: string }> {
@@ -50,7 +52,7 @@ export class ChangeAccountPasswordUseCase {
             resetPasswordToken: null,
             resetPasswordExpiresAt: null,
         });
-        await this.refreshTokens.revokeAllForUser(user.id);
+        await this.sessions.endAllForUser(user.id, "password_changed", command.sessionId);
         return { id: user.id, email: user.email };
     }
 }

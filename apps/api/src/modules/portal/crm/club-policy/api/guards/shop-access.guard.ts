@@ -9,6 +9,8 @@ import {
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 
+import { CabinetAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
+
 import { MemberAccessService } from "../../application/services/member-access.service";
 
 const SHOP_ACCESS_KEY = "shopAccess";
@@ -17,7 +19,7 @@ const SHOP_ACCESS_KEY = "shopAccess";
 export type ShopAccessLevel = "browse" | "order";
 
 /**
- * Applies the club's shop rules to a cabinet route. Runs after `RequireMemberJwt`, which puts the
+ * Applies the club's shop rules to a cabinet route. Runs after `CabinetAuth`, which puts the
  * member of the club from the request into `req.user`.
  */
 @Injectable()
@@ -48,6 +50,6 @@ export class ShopAccessGuard implements CanActivate {
     }
 }
 
-/** Handler-level: the controller is already under `@RequireMemberJwt()`. */
+/** Handler-level: the controller is already under `@CabinetAuth()`. */
 export const RequireShopAccess = (level: ShopAccessLevel) =>
     applyDecorators(SetMetadata(SHOP_ACCESS_KEY, level), UseGuards(ShopAccessGuard));

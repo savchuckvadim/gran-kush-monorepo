@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 
 import { IdentityProvider } from "@prisma/client";
 
-import { RefreshTokenRepository } from "@modules/portal/auth/shared/domain/repositories/refresh-token-repository.interface";
+import { SessionsService } from "@modules/portal/auth/sessions/application/sessions.service";
 import {
     type LinkedIdentity,
     UserIdentityRepository,
@@ -29,7 +29,7 @@ export class AccountSecurityService {
     constructor(
         private readonly users: UserRepository,
         private readonly identities: UserIdentityRepository,
-        private readonly refreshTokens: RefreshTokenRepository
+        private readonly sessions: SessionsService
     ) {}
 
     async signInMethods(userId: string): Promise<{ email: string } & SignInMethods> {
@@ -57,9 +57,9 @@ export class AccountSecurityService {
 
     /**
      * Снять все сессии аккаунта — кабинета и CRM, на всех устройствах: аккаунт и пароль у них
-     * общие. Access-токены живут до 15 минут, refresh после этого не обновится.
+     * общие. Отзыв действует сразу: гвард проверяет сессию на каждый запрос.
      */
     async signOutEverywhere(userId: string): Promise<void> {
-        await this.refreshTokens.revokeAllForUser(userId);
+        await this.sessions.endAllForUser(userId, "sign_out_everywhere");
     }
 }

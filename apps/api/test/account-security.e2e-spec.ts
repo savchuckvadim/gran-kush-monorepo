@@ -7,9 +7,10 @@ import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
-import { MemberAuthService } from "../src/modules/portal/auth/members/application/services/member-auth.service";
 import { GoogleOAuthGateway } from "../src/modules/portal/auth/social/domain/google-oauth.gateway";
 import { GoogleProfile } from "../src/modules/portal/auth/social/domain/social-profile";
+
+import { cabinetSession } from "./support/sessions";
 
 jest.setTimeout(120_000);
 
@@ -68,14 +69,12 @@ describe("Account security (e2e)", () => {
                 emailConfirmed: true,
             },
         });
-        const tokens = await app
-            .get(MemberAuthService)
-            .generateTokens({ id: user.id, email }, `device-${name}-${suffix}`);
+        const tokens = await cabinetSession(app, user.id, `device-${name}-${suffix}`);
         return {
             user,
             email,
             refresh: tokens.refreshToken,
-            cookies: `member_access_token=${tokens.accessToken}`,
+            cookies: tokens.cookies,
         };
     };
 
@@ -100,7 +99,7 @@ describe("Account security (e2e)", () => {
     const refresh = (token: string) =>
         request(app.getHttpServer())
             .post("/cabinet/auth/refresh")
-            .set("Cookie", `member_refresh_token=${token}`);
+            .set("Cookie", `cabinet_refresh=${token}`);
 
     /** Привязка Google: старт под сессией, «возврат» от Google тем же браузером. */
     const linkGoogle = async (cookies: string, sub: string, email: string) => {
@@ -137,8 +136,9 @@ describe("Account security (e2e)", () => {
         await app.close();
     });
 
-    it("a password needs the current one; the change revokes every session but this device's new one", async () => {
+    it("a password needs the current one; the change ends every other session and keeps this one", async () => {
         const ana = await account("ana", PASSWORD);
+        const otherDevice = await cabinetSession(app, ana.user.id);
         expect((await security(ana.cookies).get()).body).toEqual({
             email: ana.email,
             hasPassword: true,
@@ -165,8 +165,10 @@ describe("Account security (e2e)", () => {
             newPassword: NEW_PASSWORD,
         });
         expect(changed.status).toBe(200);
-        expect(cookieOf(changed, "member_refresh_token")).toBeTruthy();
-        expect((await refresh(ana.refresh)).status).toBe(401);
+        expect((await security(ana.cookies).get()).status).toBe(200);
+        expect((await refresh(ana.refresh)).status).toBe(201);
+        expect((await security(otherDevice.cookies).get()).status).toBe(401);
+        expect((await refresh(otherDevice.refreshToken)).status).toBe(401);
 
         const login = (password: string) =>
             request(app.getHttpServer())
@@ -220,20 +222,19 @@ describe("Account security (e2e)", () => {
         const set = await security(gia.cookies).password({ newPassword: NEW_PASSWORD });
         expect(set.status).toBe(200);
         expect(set.body.hasPassword).toBe(true);
-        const cookies = `member_access_token=${cookieOf(set, "member_access_token")}`;
-        expect((await security(cookies).unlink()).status).toBe(200);
+        expect((await security(gia.cookies).unlink()).status).toBe(200);
     });
 
     it("signing out everywhere revokes the sessions of the account", async () => {
         const dan = await account("dan", PASSWORD);
-        expect((await refresh(dan.refresh)).status).toBe(201);
-        const again = await prisma.refreshToken.findFirstOrThrow({
-            where: { userId: dan.user.id, revoked: false },
-            select: { token: true },
-        });
+        const rotated = await refresh(dan.refresh);
+        expect(rotated.status).toBe(201);
+        const again = cookieOf(rotated, "cabinet_refresh");
+        expect(again).toBeTruthy();
 
         const out = await security(dan.cookies).signOut();
         expect(out.status).toBe(204);
-        expect((await refresh(again.token)).status).toBe(401);
+        expect((await refresh(again as string)).status).toBe(401);
+        expect((await security(dan.cookies).get()).status).toBe(401);
     });
 });

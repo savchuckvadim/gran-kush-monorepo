@@ -7,8 +7,9 @@ import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
-import { MemberAuthService } from "../src/modules/portal/auth/members/application/services/member-auth.service";
 import { PresenceSettingsService } from "../src/modules/portal/crm/presence/application/services/presence-settings.service";
+
+import { cabinetSession } from "./support/sessions";
 
 jest.setTimeout(120_000);
 
@@ -103,13 +104,11 @@ describe("Presence settings (e2e)", () => {
                     emailConfirmed: true,
                 },
             });
-            const tokens = await app
-                .get(MemberAuthService)
-                .generateTokens({ id: user.id, email }, `device-${i}-${suffix}`);
+            const tokens = await cabinetSession(app, user.id, `device-${i}-${suffix}`);
             for (const slug of clubs) {
                 const joined = await request(app.getHttpServer())
                     .post(`/cabinet/portals/${slug}/join`)
-                    .set("Cookie", `member_access_token=${tokens.accessToken}`)
+                    .set("Cookie", tokens.cookies)
                     .send({ fields: { first_name: `Member ${i}` } })
                     .expect(201);
                 const member = await prisma.member.findUniqueOrThrow({

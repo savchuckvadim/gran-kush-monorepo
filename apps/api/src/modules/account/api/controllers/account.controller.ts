@@ -36,7 +36,7 @@ import {
     AccountDocumentsService,
     AccountDocumentView,
 } from "@modules/account/application/services/account-documents.service";
-import { RequireUserJwt } from "@modules/portal/auth/members/api/decorators/require-member-jwt.decorator";
+import { CabinetSession } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 
 /**
@@ -52,7 +52,7 @@ export class AccountController {
     ) {}
 
     @Get("documents")
-    @RequireUserJwt()
+    @CabinetSession()
     @ApiOperation({
         summary: "Мои документы: для каждого — какие клубы его видят; плюс подпись и её показ",
     })
@@ -74,7 +74,7 @@ export class AccountController {
     }
 
     @Post("documents")
-    @RequireUserJwt()
+    @CabinetSession()
     @Throttle(UPLOAD_THROTTLE)
     @ApiOperation({
         summary:
@@ -92,7 +92,7 @@ export class AccountController {
     }
 
     @Get("documents/:id/preview")
-    @RequireUserJwt()
+    @CabinetSession()
     @ApiOperation({ summary: "Предпросмотр моего документа" })
     @ApiSuccessResponse(StreamableFile, { description: "Изображение документа" })
     @ApiErrorResponse([401, 403, 404])
@@ -106,7 +106,7 @@ export class AccountController {
     }
 
     @Delete("documents/:id")
-    @RequireUserJwt()
+    @CabinetSession()
     @ApiOperation({ summary: "Удалить документ вместе со всеми его версиями и показами" })
     @ApiSuccessResponse(DeleteAccountDocumentResponseDto)
     @ApiErrorResponse([401, 403, 404])
@@ -120,7 +120,7 @@ export class AccountController {
 
     @Post("documents/:id/share")
     @HttpCode(204)
-    @RequireUserJwt()
+    @CabinetSession()
     @ApiOperation({ summary: "Показать документ клубу (членство должно быть подтверждено)" })
     @ApiErrorResponse([400, 401, 403, 404])
     async shareDocument(
@@ -133,7 +133,7 @@ export class AccountController {
 
     @Delete("documents/:id/share/:memberId")
     @HttpCode(204)
-    @RequireUserJwt()
+    @CabinetSession()
     @ApiOperation({ summary: "Перестать показывать документ клубу" })
     @ApiErrorResponse([401, 403, 404])
     async revokeDocument(
@@ -145,7 +145,7 @@ export class AccountController {
     }
 
     @Get("signature")
-    @RequireUserJwt()
+    @CabinetSession()
     @ApiOperation({ summary: "Мета моей подписи" })
     @ApiSuccessResponse(AccountSignatureDto)
     @ApiErrorResponse([401, 404])
@@ -158,7 +158,7 @@ export class AccountController {
     }
 
     @Put("signature")
-    @RequireUserJwt()
+    @CabinetSession()
     @Throttle(UPLOAD_THROTTLE)
     @ApiOperation({ summary: "Загрузить или заменить подпись (base64 data URL)" })
     @ApiSuccessResponse(AccountSignatureDto)
@@ -172,7 +172,7 @@ export class AccountController {
     }
 
     @Get("signature/preview")
-    @RequireUserJwt()
+    @CabinetSession()
     @ApiOperation({ summary: "Предпросмотр моей подписи" })
     @ApiSuccessResponse(StreamableFile, { description: "Изображение подписи" })
     @ApiErrorResponse([401, 404])
@@ -189,7 +189,7 @@ export class AccountController {
 
     @Delete("signature")
     @HttpCode(204)
-    @RequireUserJwt()
+    @CabinetSession()
     @ApiOperation({ summary: "Удалить подпись: показ клубам снимается" })
     @ApiErrorResponse([401])
     async deleteSignature(@CurrentAuthUser() user: AuthenticatedUser): Promise<void> {
@@ -198,7 +198,7 @@ export class AccountController {
 
     @Post("signature/share")
     @HttpCode(204)
-    @RequireUserJwt()
+    @CabinetSession()
     @ApiOperation({ summary: "Показать подпись клубу (членство должно быть подтверждено)" })
     @ApiErrorResponse([400, 401, 404])
     async shareSignature(
@@ -210,7 +210,7 @@ export class AccountController {
 
     @Delete("signature/share/:memberId")
     @HttpCode(204)
-    @RequireUserJwt()
+    @CabinetSession()
     @ApiOperation({ summary: "Перестать показывать подпись клубу" })
     @ApiErrorResponse([401, 404])
     async revokeSignature(

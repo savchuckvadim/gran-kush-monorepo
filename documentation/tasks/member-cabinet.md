@@ -410,8 +410,7 @@ Google находит или заводит аккаунт и всегда вы�
 
 Как проверять локально: Lax-куки не ходят между `club.localhost` и `localhost:3000` (Chrome считает их
 разными сайтами), поэтому — `club.lvh.me` и `api.lvh.me` (lvh.me всегда указывает на 127.0.0.1). API:
-`CORS_ORIGIN=http://localhost:5000,http://club.lvh.me:5000 CRM_AUTH_COOKIE_DOMAIN=lvh.me
-MEMBER_AUTH_COOKIE_DOMAIN=lvh.me node dist/main.js`; CRM: `NEXT_PUBLIC_API_URL=http://api.lvh.me:3000 pnpm dev`
+`CORS_ORIGIN=http://localhost:5000,http://club.lvh.me:5000 AUTH_HINT_COOKIE_DOMAIN=lvh.me node dist/main.js`; CRM: `NEXT_PUBLIC_API_URL=http://api.lvh.me:3000 pnpm dev`
 (`allowedDevOrigins` для `*.lvh.me` уже в `next.config.mjs`); открыть `http://club.lvh.me:5000/es`.
 
 - [ ] Proxy: ветка по хосту, rewrite в `[locale]/m`, 308 со старых путей, защита `/me` и `/{club}` по member-кукам.

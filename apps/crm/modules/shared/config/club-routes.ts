@@ -65,11 +65,11 @@ export const isReservedClubSlug = (slug: string): boolean => RESERVED.has(slug.t
 export const CABINET_TREE = "m";
 
 /**
- * Куки сессии участника. Имена по умолчанию из API (`MEMBER_ACCESS_COOKIE_NAME`,
- * `MEMBER_REFRESH_COOKIE_NAME`); общий домен кук `.paf-paf.app` делает их видимыми на club.
+ * Подсказки «есть сессия» от API (AUTH_ARCHITECTURE §3.4) на общем домене `AUTH_HINT_COOKIE_DOMAIN`.
+ * Сами токены — HttpOnly-куки хоста API, фронту они не видны; подсказка лишь избавляет от
+ * лишнего захода на защищённую страницу без входа. Мёртвую сессию всё равно отсекает API (401).
  */
-export const MEMBER_ACCESS_COOKIE = "member_access_token";
-export const MEMBER_REFRESH_COOKIE = "member_refresh_token";
+export const SESSION_HINT_COOKIES = { crm: "crm_session", cabinet: "cabinet_session" } as const;
 
 /**
  * Хост запроса. За Cloudflare и Traefik настоящий хост — в `x-forwarded-host` (первый из списка),
