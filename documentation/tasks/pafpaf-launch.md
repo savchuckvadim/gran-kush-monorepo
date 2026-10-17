@@ -164,7 +164,7 @@
   `emailConfirmed` в `GET /crm/auth/me`. Заглушка `auth/confirm-email` удалена. e2e — `test/crm-email-auth.e2e-spec.ts`.
 - Не сделано: блокировка приглашений сотрудников без подтверждённой почты (оплаты пока нет) — отдельно, если нужно.
 
-### TASK-508: «У вас уже есть клуб — завести ещё один?» `[ ]`
+### TASK-508: «У вас уже есть клуб — завести ещё один?» `[x]` — сделано в TASK-708 (member-cabinet.md), 2026-10-16
 
 - Сейчас на занятый email `POST /platform/portals/register` отвечает 409
   (`portal-registration.service.ts:56,64`).

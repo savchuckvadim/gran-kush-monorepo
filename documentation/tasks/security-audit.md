@@ -509,9 +509,9 @@ Semgrep, Trivy, ZAP по OpenAPI).
       позволял править стадию чужого клуба — теперь `updateMany({ id, stageCategoryId })`, при
       count = 0 — 404 и откат транзакции (`fix/security-662-666`, 2026-10-12; e2e
       `foreign-stage-id` — обычный тест)
-- [ ] **M2** перевыпуск QR не гасит старый: проверка не сравнивает `encryptedCode`
-      (`qr-codes.service.ts:185-217`), id тот же — старый код живёт 90 дней вопреки описанию
-      `lk-qr-codes.controller.ts:51`. Сравнивать код или версию
+- [x] **M2** перевыпуск QR не гасил старый код — закрыто в TASK-701: подпись кода считается от
+      `issuedAt`, перевыпуск меняет его, и прежний код отвечает `revoked` (e2e TASK-701 в
+      `security.e2e-spec.ts`)
 - [ ] **M3** динамические поля: `document`/`signature` принимают любой объект
       (`dynamic-payload-validator.service.ts:137-153`), `text` без лимита длины (`:161`), `url`
       без проверки схемы (`:245`), select/relation без опций принимают любую строку (`:220`),
@@ -522,13 +522,18 @@ Semgrep, Trivy, ZAP по OpenAPI).
       `dynamic-field-limits`
 - [ ] **M4** `GET /public/portals/:slug` игнорирует `isListedOnMap`
       (`public-portals.controller.ts:50`), слаги перебираются через `/crm/portals/resolve`
-- [ ] **M9** `/lk/members/me` отдаёт полную CRM-карточку, включая заметки сотрудников и все поля
-      (`lk-members.controller.ts:28`, `members.service.ts:102,139`) — отдельный DTO кабинета
-- [ ] `qr-code-prisma.repository.ts:24` и `presence-session-prisma.repository.ts:24-41`:
-      поиск записи участника без обязательного `portalId` (см. R3 в
-      [refactor-plan](refactor-plan.md))
-- [ ] Отмена заказа проверяет статус неатомарно — два параллельных cancel вернут остаток дважды
-      (`orders.service.ts:304-327`)
+- [x] **M9** `GET /cabinet/members/me` отдавал полную CRM-карточку с заметками сотрудников и всеми
+      полями анкеты. Теперь `CabinetMemberProfileDto`: поля переносятся поимённо
+      (`cabinet-member-profile.mapper.ts`), заметок и `fields` нет (`fix/cabinet-data-leaks`,
+      2026-10-17; e2e в `security.e2e-spec.ts`)
+- [x] `qr-code-prisma.repository.ts` и `presence-session-prisma.repository.ts`: поиск записи
+      участника без обязательного `portalId` (R3 в [refactor-plan](refactor-plan.md)). Теперь
+      `portalId` обязателен в `findByMemberId`/`create` QR и в `findById`/`findActiveByMemberId`/
+      `createEntry` присутствия; кабинет передаёт портал участника (`fix/cabinet-data-leaks`, 2026-10-17).
+      Без портала остался только общий счётчик присутствующих для крона
+- [x] Отмена заказа проверяла статус неатомарно — закрыто переходом на стадии: `applyStage`
+      делает compare-and-set по текущей стадии, склад возвращается в той же транзакции,
+      проигравший параллельный запрос получает 409 (`order-stages.service.ts`)
 
 ### TASK-667: лимиты, заголовки, прокси `[ ]` P1 (поглощает TASK-307)
 
@@ -545,14 +550,21 @@ Semgrep, Trivy, ZAP по OpenAPI).
 ### TASK-668: сессионные токены `[~]` P1
 
 - [x] Refresh хранится как SHA-256 (`refresh-token.repository.ts`, `audit/auth-flow`, 2026-10-14):
-      дамп таблицы не даёт готовых сессий; e2e `refresh tokens are stored hashed`. Reset и
-      verification — всё ещё открытым текстом (`email-verification.service.ts`) — хешировать
+      дамп таблицы не даёт готовых сессий; e2e `refresh tokens are stored hashed`
+- [x] Одноразовые токены писем — подтверждение почты, сброс пароля и account-setup, согласие на
+      членство, приглашение сотрудника — тоже хранятся как SHA-256 (`common/crypto/secret-token.ts`):
+      в письмо или ответ уходит сам токен, в БД — хеш, поиск по хешу. Миграция
+      `20261017150000_hash_secret_tokens` хеширует уже выданные, старые ссылки работают
+      (`fix/cabinet-data-leaks`, 2026-10-17). В e2e токен берётся из письма (`test/support/mail-tokens.ts`)
 - [x] Веб-refresh (`/crm/auth/refresh`, `/lk/auth/refresh`) больше не дублирует токены в JSON —
       только HttpOnly-куки (`WebRefreshResponseDto`); мобильные `/mobile/` оставлены с JSON
 - [ ] Повторное использование refresh не детектируется (`token-issuer.service.ts`) —
       при реплее гасить семейство/устройство. e2e `refresh-reuse`
 - [ ] Refresh-cookie `Path=/`, `Domain=.paf-paf.app` — уходит на все поддомены, включая сайт
-      Payload (`config-cookie.service.ts:70-74`): `Path` на маршрут refresh, домен точечно
+      Payload (`config-cookie.service.ts:70-74`). Просто сузить нельзя: `proxy.ts` CRM на `crm.` и
+      `club.` смотрит на refresh-куки, чтобы решить, пускать ли на страницу. Нужна другая схема
+      (флаг-кука «есть сессия» без токена для proxy и refresh-куки только на хост API) — отдельной
+      задачей
 
 ### TASK-669: рантайм, зависимости, CI `[ ]` P1
 
