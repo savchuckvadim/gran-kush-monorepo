@@ -10,6 +10,8 @@ import { orderKeys } from "../model/order-keys";
 export interface MoveOrderStageInput {
     order: MovableOrder;
     target: OrderStage;
+    /** The card it goes under in the target column; `null` — the top */
+    afterId?: string | null;
 }
 
 interface MoveContext {
@@ -24,11 +26,11 @@ export function useMoveOrderStage() {
     const queryClient = useQueryClient();
 
     return useMutation<OrderDetail, Error, MoveOrderStageInput, MoveContext>({
-        mutationFn: ({ order, target }) => moveOrderToStage(order.id, target.id),
-        onMutate: async ({ order, target }) => {
+        mutationFn: ({ order, target, afterId }) => moveOrderToStage(order.id, target.id, afterId),
+        onMutate: async ({ order, target, afterId }) => {
             await queryClient.cancelQueries({ queryKey: orderKeys.all });
             const snapshot = queryClient.getQueriesData({ queryKey: orderKeys.all });
-            applyOptimisticMove(queryClient, order, target);
+            applyOptimisticMove(queryClient, order, target, afterId ?? null);
             return { snapshot };
         },
         onError: (_error, _input, context) => {

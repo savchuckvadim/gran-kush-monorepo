@@ -43,6 +43,9 @@ export interface OrdersFilter {
 export interface OrdersListParams extends OrdersFilter {
     /** One stage: a kanban column, the list filter */
     stageId?: string;
+    /** `stagePosition` + `asc` — the order of cards in a kanban column */
+    sortBy?: "createdAt" | "stagePosition";
+    sortOrder?: "asc" | "desc";
     page?: number;
     limit?: number;
 }

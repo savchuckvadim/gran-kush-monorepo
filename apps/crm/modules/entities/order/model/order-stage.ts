@@ -1,3 +1,5 @@
+import { pickFunnel } from "@/modules/shared/lib/pick-funnel";
+
 import type { OrderFunnel, OrderFunnelStage, OrderStage } from "./order.types";
 
 type StageKind = Pick<OrderStage, "semantic" | "isTerminalSuccess" | "isTerminalFailure">;
@@ -31,14 +33,7 @@ export function splitFunnelStages(stages: readonly OrderFunnelStage[]): FunnelSt
     };
 }
 
-/** The funnel chosen in the address, else the default one. */
-export const pickFunnel = (
-    funnels: readonly OrderFunnel[],
-    funnelId?: string | null
-): OrderFunnel | undefined =>
-    funnels.find((funnel) => funnel.id === funnelId) ??
-    funnels.find((funnel) => funnel.isDefault) ??
-    funnels[0];
+export { pickFunnel };
 
 /** The funnel an order belongs to: its stage's, or the default one for an order without a stage. */
 export const funnelOfOrder = (

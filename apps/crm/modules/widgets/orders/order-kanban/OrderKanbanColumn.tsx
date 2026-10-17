@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 import { KanbanColumn, KanbanColumnHeader, KanbanItem } from "@workspace/ui";
 
@@ -13,10 +14,10 @@ import {
     useOrderStageColumn,
 } from "@/modules/entities/order";
 import { useMoneyFormat } from "@/modules/shared";
+import { KanbanColumnFooter } from "@/modules/shared/ui/KanbanColumnFooter";
 
 import type { OrderCardField } from "./card-fields";
 import { OrderKanbanCard } from "./OrderKanbanCard";
-import { OrderKanbanColumnFooter } from "./OrderKanbanColumnFooter";
 
 interface OrderKanbanColumnProps {
     stage: OrderFunnelStage;
@@ -43,6 +44,7 @@ export function OrderKanbanColumn({
     onMoveNext,
     maxTotal,
 }: OrderKanbanColumnProps) {
+    const t = useTranslations("crm.orders.kanban");
     const money = useMoneyFormat();
     const { data, isLoading, isError, hasNextPage, isFetchingNextPage, fetchNextPage } =
         useOrderStageColumn(stage.id, filter);
@@ -66,13 +68,18 @@ export function OrderKanbanColumn({
                 />
             }
             footer={
-                <OrderKanbanColumnFooter
+                <KanbanColumnFooter
                     isLoading={isLoading}
                     isError={isError}
                     isEmpty={orders.length === 0}
                     hasNextPage={hasNextPage}
                     isFetchingNextPage={isFetchingNextPage}
                     onLoadMore={loadMore}
+                    labels={{
+                        empty: t("empty"),
+                        loadError: t("loadError"),
+                        loadMore: t("loadMore"),
+                    }}
                 />
             }
         >

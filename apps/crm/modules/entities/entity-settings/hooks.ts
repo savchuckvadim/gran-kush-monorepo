@@ -24,6 +24,8 @@ import {
     deleteEntityField,
     deleteEntityStageCategory,
     deleteEntityStatusItem,
+    type FormPurpose,
+    getEntityFilterFields,
     getEntityFormSchema,
     getEntityStageCategories,
     listEntityDefinitions,
@@ -33,11 +35,11 @@ import {
     updateEntityForm,
     updateEntityStageCategory,
     updateEntityStatusItem,
-    type FormPurpose,
 } from "./api";
 
 const settingsKeys = {
     fields: (code: string) => ["entity-settings", code, "fields"] as const,
+    filterFields: (code: string) => ["entity-settings", code, "filter-fields"] as const,
     formSchema: (code: string, purpose: FormPurpose) =>
         ["entity-settings", code, "form-schema", purpose] as const,
     stages: (code: string) => ["entity-settings", code, "stage-categories"] as const,
@@ -49,6 +51,15 @@ export function useEntityFields(code: string, enabled = true) {
     return useQuery({
         queryKey: settingsKeys.fields(code),
         queryFn: () => listEntityFields(code),
+        enabled: enabled && !!code,
+    });
+}
+
+/** The fields a list of this entity can be filtered by (`showInFilters` ones stand in the bar). */
+export function useEntityFilterFields(code: string, enabled = true) {
+    return useQuery({
+        queryKey: settingsKeys.filterFields(code),
+        queryFn: () => getEntityFilterFields(code),
         enabled: enabled && !!code,
     });
 }
@@ -81,8 +92,7 @@ export function useCreateEntityField(code: string) {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (body: SchemaCreatePortalMemberFieldDto) => createEntityField(code, body),
-        onSuccess: () =>
-            queryClient.invalidateQueries({ queryKey: settingsKeys.fields(code) }),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: settingsKeys.fields(code) }),
     });
 }
 
@@ -96,8 +106,7 @@ export function useUpdateEntityField(code: string) {
             fieldKey: string;
             body: SchemaUpdatePortalMemberFieldDto;
         }) => updateEntityField(code, fieldKey, body),
-        onSuccess: () =>
-            queryClient.invalidateQueries({ queryKey: settingsKeys.fields(code) }),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: settingsKeys.fields(code) }),
     });
 }
 
@@ -105,8 +114,7 @@ export function useDeleteEntityField(code: string) {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (fieldKey: string) => deleteEntityField(code, fieldKey),
-        onSuccess: () =>
-            queryClient.invalidateQueries({ queryKey: settingsKeys.fields(code) }),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: settingsKeys.fields(code) }),
     });
 }
 
@@ -120,8 +128,7 @@ export function useAddEntityFieldOption(code: string) {
             fieldKey: string;
             body: SchemaPortalFieldOptionInputDto;
         }) => addEntityFieldOption(code, fieldKey, body),
-        onSuccess: () =>
-            queryClient.invalidateQueries({ queryKey: settingsKeys.fields(code) }),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: settingsKeys.fields(code) }),
     });
 }
 
@@ -193,8 +200,7 @@ export function useCreateStatusSet(code: string) {
     return useMutation({
         mutationFn: (body: { code: string; items: SchemaStatusItemInputDto[] }) =>
             createEntityStatusSet(code, body),
-        onSuccess: () =>
-            queryClient.invalidateQueries({ queryKey: settingsKeys.statusSets(code) }),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: settingsKeys.statusSets(code) }),
     });
 }
 
@@ -203,8 +209,7 @@ export function useAddStatusItem(code: string) {
     return useMutation({
         mutationFn: ({ setId, body }: { setId: string; body: SchemaStatusItemInputDto }) =>
             addEntityStatusItem(code, setId, body),
-        onSuccess: () =>
-            queryClient.invalidateQueries({ queryKey: settingsKeys.statusSets(code) }),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: settingsKeys.statusSets(code) }),
     });
 }
 
@@ -220,8 +225,7 @@ export function useUpdateStatusItem(code: string) {
             itemId: string;
             body: SchemaUpdateStatusItemDto;
         }) => updateEntityStatusItem(code, setId, itemId, body),
-        onSuccess: () =>
-            queryClient.invalidateQueries({ queryKey: settingsKeys.statusSets(code) }),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: settingsKeys.statusSets(code) }),
     });
 }
 
@@ -230,7 +234,6 @@ export function useDeleteStatusItem(code: string) {
     return useMutation({
         mutationFn: ({ setId, itemId }: { setId: string; itemId: string }) =>
             deleteEntityStatusItem(code, setId, itemId),
-        onSuccess: () =>
-            queryClient.invalidateQueries({ queryKey: settingsKeys.statusSets(code) }),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: settingsKeys.statusSets(code) }),
     });
 }

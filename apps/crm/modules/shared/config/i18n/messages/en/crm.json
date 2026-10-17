@@ -539,12 +539,6 @@
                 "employee": "Employee",
                 "gift": "Gift"
             },
-            "views": {
-                "label": "View",
-                "list": "List",
-                "kanban": "Kanban"
-            },
-            "funnel": "Funnel",
             "stage": {
                 "label": "Stage",
                 "noStage": "No stage",
@@ -1405,6 +1399,50 @@
                 "submit": "Create",
                 "submitting": "Creating…",
                 "created": "The smart process has been created"
+            }
+        },
+        "board": {
+            "views": {
+                "label": "View",
+                "list": "List",
+                "kanban": "Kanban"
+            },
+            "funnel": "Funnel"
+        },
+        "records": {
+            "description": "Smart-process records: a table and a kanban by funnel stage.",
+            "create": "New record",
+            "editTitle": "Record",
+            "created": "Record created",
+            "updated": "Record saved",
+            "deleted": "Record deleted",
+            "deleteTitle": "Delete the record?",
+            "deleteDescription": "The record will be deleted for good.",
+            "delete": "Delete",
+            "save": "Save",
+            "saving": "Saving…",
+            "open": "Open",
+            "searchPlaceholder": "Search records",
+            "moveError": "Could not move the record",
+            "table": {
+                "record": "Record",
+                "stage": "Stage",
+                "fields": "Fields",
+                "empty": "No records",
+                "noStage": "— no stage —"
+            },
+            "kanban": {
+                "label": "Records kanban",
+                "empty": "Empty",
+                "loadError": "Failed to load",
+                "loadMore": "More",
+                "noFunnel": "This smart process has no funnel with stages"
+            },
+            "cancel": "Cancel",
+            "loadError": "Could not load the records",
+            "values": {
+                "yes": "yes",
+                "no": "no"
             }
         }
     }

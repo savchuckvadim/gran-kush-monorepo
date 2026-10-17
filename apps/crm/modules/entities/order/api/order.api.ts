@@ -33,6 +33,8 @@ export async function getOrders(params: OrdersListParams = {}): Promise<OrderPag
             query: {
                 ...filterQuery(params),
                 stageId: params.stageId,
+                sortBy: params.sortBy,
+                sortOrder: params.sortOrder,
                 page: params.page ?? 1,
                 limit: params.limit ?? DEFAULT_PAGE_SIZE,
             },
@@ -52,11 +54,18 @@ export async function createOrder(body: CreateOrderBody): Promise<OrderDetail> {
     return assertOpenApiOk(response);
 }
 
-/** Moves an order to a funnel stage (manager and up). */
-export async function moveOrderToStage(id: string, stageId: string): Promise<OrderDetail> {
+/**
+ * Moves an order to a funnel stage (manager and up); `afterId` — the card it goes under in the
+ * column (`null` — the top). In the same stage that is a reorder.
+ */
+export async function moveOrderToStage(
+    id: string,
+    stageId: string,
+    afterId?: string | null
+): Promise<OrderDetail> {
     const response = await $api.PATCH("/crm/orders/{id}/stage", {
         params: { path: { id } },
-        body: { stageId },
+        body: { stageId, afterId },
     });
     return assertOpenApiOk(response);
 }

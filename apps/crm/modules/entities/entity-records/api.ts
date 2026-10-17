@@ -1,20 +1,30 @@
-import { assertOpenApiOk } from "@workspace/api-client/core";
 import type {
     SchemaCreateEntityRecordDto,
     SchemaEntityRecordDto,
     SchemaEntityRecordListResponseDto,
     SchemaUpdateEntityRecordDto,
 } from "@workspace/api-client/core";
+import { assertOpenApiOk } from "@workspace/api-client/core";
 
 import { $api } from "@/modules/shared";
 
 export type EntityRecord = SchemaEntityRecordDto;
 
-export interface EntityRecordListParams {
+/** What narrows a smart-process board or table: the funnel, search and field conditions. */
+export interface RecordsFilter {
+    stageCategoryId?: string;
+    q?: string;
+    /** Field conditions as the API's JSON string — stable in a query key */
+    filter?: string;
+}
+
+export interface EntityRecordListParams extends RecordsFilter {
     limit?: number;
     skip?: number;
     stageId?: string;
     statusItemId?: string;
+    /** `stagePosition` — the order of cards in a kanban column; by default the newest first */
+    sortBy?: "createdAt" | "stagePosition";
 }
 
 export async function listEntityRecords(
@@ -64,14 +74,19 @@ export async function deleteEntityRecord(code: string, id: string): Promise<void
     await assertOpenApiOk(response);
 }
 
+/**
+ * Moves a record to a stage; `afterId` — the card it goes under in the column (`null` — the
+ * top), in the same stage that is a reorder. Without it a new stage puts the card on top.
+ */
 export async function setEntityRecordStage(
     code: string,
     id: string,
-    stageId: string | null
+    stageId: string | null,
+    afterId?: string | null
 ): Promise<EntityRecord> {
     const response = await $api.PATCH("/crm/entities/{code}/records/{id}/stage", {
         params: { path: { code, id } },
-        body: { stageId },
+        body: { stageId, afterId },
     });
     return assertOpenApiOk<EntityRecord>(response);
 }

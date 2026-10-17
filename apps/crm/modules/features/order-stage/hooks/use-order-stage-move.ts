@@ -30,9 +30,9 @@ export function useOrderStageMove(): OrderStageMove {
     const [confirming, setConfirming] = useState<StageMoveRequest | null>(null);
 
     const run = useCallback(
-        ({ order, target }: StageMoveRequest) => {
+        ({ order, target, afterId }: StageMoveRequest) => {
             mutate(
-                { order, target: toOrderStage(target) },
+                { order, target: toOrderStage(target), afterId },
                 {
                     onSuccess: () => {
                         if (!isClosedStage(target)) return;
@@ -49,7 +49,13 @@ export function useOrderStageMove(): OrderStageMove {
 
     const requestMove = useCallback(
         (request: StageMoveRequest) => {
-            if (request.order.stage?.id === request.target.id) return;
+            const sameStage = request.order.stage?.id === request.target.id;
+            // the same stage is a reorder on the kanban and nothing at all on the stage bar
+            if (sameStage && request.afterId === undefined) return;
+            if (sameStage) {
+                run(request);
+                return;
+            }
             if (isClosedStage(request.target)) {
                 setConfirming(request);
                 return;

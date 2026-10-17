@@ -5,9 +5,10 @@ import { useTranslations } from "next-intl";
 
 import { useQueryClient } from "@tanstack/react-query";
 
-import { KanbanBoard } from "@workspace/ui";
+import { kanbanAfterId, KanbanBoard, type KanbanPlacement, kanbanStaysPut } from "@workspace/ui";
 
 import {
+    columnOrderIds,
     findOrderInColumns,
     type MovableOrder,
     type OrderFunnel,
@@ -67,12 +68,16 @@ export function OrdersKanban({ funnel, filters, canMove }: OrdersKanbanProps) {
     const { requestMove, confirming, confirm, dismiss, isMoving } = useOrderStageMove();
 
     const handleMove = useCallback(
-        (orderId: string, targetId: string) => {
+        (orderId: string, targetId: string, placement: KanbanPlacement | null) => {
             const order = findOrderInColumns(queryClient, orderId);
             const target = stagesById.get(targetId);
-            if (order && target) requestMove({ order, target });
+            if (!order || !target) return;
+            const ids = columnOrderIds(queryClient, target.id, filters.filter);
+            const afterId = kanbanAfterId(ids, order.id, placement);
+            if (order.stage?.id === target.id && kanbanStaysPut(ids, order.id, afterId)) return;
+            requestMove({ order, target, afterId });
         },
-        [queryClient, requestMove, stagesById]
+        [filters.filter, queryClient, requestMove, stagesById]
     );
 
     const moveNext = useCallback(

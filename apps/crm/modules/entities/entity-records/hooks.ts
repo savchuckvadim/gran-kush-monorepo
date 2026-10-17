@@ -10,19 +10,12 @@ import type {
 import {
     createEntityRecord,
     deleteEntityRecord,
+    type EntityRecordListParams,
     getEntityRecord,
     listEntityRecords,
-    setEntityRecordStage,
     updateEntityRecord,
-    type EntityRecordListParams,
 } from "./api";
-
-const recordKeys = {
-    all: (code: string) => ["entity-records", code] as const,
-    list: (code: string, params?: EntityRecordListParams) =>
-        ["entity-records", code, "list", params ?? {}] as const,
-    detail: (code: string, id: string) => ["entity-records", code, "detail", id] as const,
-};
+import { recordKeys } from "./record-keys";
 
 export function useEntityRecords(code: string, params?: EntityRecordListParams, enabled = true) {
     return useQuery({
@@ -61,15 +54,6 @@ export function useDeleteEntityRecord(code: string) {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (id: string) => deleteEntityRecord(code, id),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: recordKeys.all(code) }),
-    });
-}
-
-export function useSetEntityRecordStage(code: string) {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: ({ id, stageId }: { id: string; stageId: string | null }) =>
-            setEntityRecordStage(code, id, stageId),
         onSuccess: () => queryClient.invalidateQueries({ queryKey: recordKeys.all(code) }),
     });
 }

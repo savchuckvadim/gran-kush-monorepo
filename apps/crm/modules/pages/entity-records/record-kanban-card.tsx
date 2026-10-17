@@ -1,6 +1,6 @@
 "use client";
 
-import { type EntityRecord } from "@/modules/entities/entity-records";
+import type { EntityRecord } from "@/modules/entities/entity-records";
 
 import { recordTitle } from "./record-display";
 
@@ -16,7 +16,7 @@ export function RecordKanbanCard({ record, onOpen }: RecordKanbanCardProps) {
             {onOpen ? (
                 <button
                     type="button"
-                    className="block text-left font-medium hover:underline"
+                    className="block w-full text-left font-medium hover:underline"
                     onClick={() => onOpen(record)}
                 >
                     {recordTitle(record)}

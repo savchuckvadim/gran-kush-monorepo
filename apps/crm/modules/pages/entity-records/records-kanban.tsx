@@ -1,99 +1,103 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
+import { useTranslations } from "next-intl";
 
-import { KanbanBoard, KanbanColumn, KanbanColumnHeader, KanbanItem } from "@workspace/ui";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
-import { type EntityRecord } from "@/modules/entities/entity-records";
+import { kanbanAfterId, KanbanBoard, type KanbanPlacement, kanbanStaysPut } from "@workspace/ui";
+
+import {
+    columnRecordIds,
+    type EntityRecord,
+    findRecordInColumns,
+    type RecordsFilter,
+    type RecordStage,
+    useMoveEntityRecord,
+} from "@/modules/entities/entity-records";
 
 import { RecordKanbanCard } from "./record-kanban-card";
-import { type EntityStage } from "./stage-select";
-
-/** Column of records whose stage was removed or never set. */
-const NO_STAGE = "no-stage";
-const NEUTRAL_COLOR = "#94a3b8";
+import { RecordsKanbanColumn } from "./records-kanban-column";
+import type { EntityStage } from "./stage-select";
 
 interface RecordsKanbanProps {
-    records: EntityRecord[];
-    stages: EntityStage[];
-    onEdit: (record: EntityRecord) => void;
-    /** `""` — no stage */
-    onStageChange: (record: EntityRecord, stageId: string) => void;
+    code: string;
+    /** The stages of the chosen funnel: one column each */
+    stages: readonly EntityStage[];
+    filter: RecordsFilter;
+    /** Manager and up; others see the board without drag and drop */
+    canMove: boolean;
+    onOpen: (record: EntityRecord) => void;
 }
 
-/** Records by stage on the shared kanban board; a card is moved by dragging it to a column. */
-export function RecordsKanban({ records, stages, onEdit, onStageChange }: RecordsKanbanProps) {
-    const recordsById = useMemo(
-        () => new Map(records.map((record) => [record.id, record])),
-        [records]
-    );
+const toRecordStage = (stage: EntityStage): RecordStage => ({
+    id: stage.id,
+    stageCategoryId: stage.stageCategoryId,
+    name: stage.name,
+    color: stage.color ?? null,
+    semantic: stage.semantic,
+});
 
-    const columns = useMemo(
-        () => [
-            { id: NO_STAGE, name: "Без стадии", color: NEUTRAL_COLOR },
-            ...stages.map((stage) => ({
-                id: stage.id,
-                name: stage.name,
-                color: stage.color ?? NEUTRAL_COLOR,
-            })),
-        ],
-        [stages]
-    );
-
-    const recordsByColumn = useMemo(() => {
-        const grouped = new Map<string, EntityRecord[]>();
-        for (const record of records) {
-            const columnId = record.stage?.id ?? NO_STAGE;
-            grouped.set(columnId, [...(grouped.get(columnId) ?? []), record]);
-        }
-        return grouped;
-    }, [records]);
+/**
+ * Records of one funnel by stage on the shared kanban board. A card is dragged to another column
+ * or to a slot between cards; the new place is saved, so the order stays as the user left it.
+ */
+export function RecordsKanban({ code, stages, filter, canMove, onOpen }: RecordsKanbanProps) {
+    const t = useTranslations("crm.records");
+    const queryClient = useQueryClient();
+    const { mutate } = useMoveEntityRecord(code);
+    const stagesById = useMemo(() => new Map(stages.map((stage) => [stage.id, stage])), [stages]);
 
     const handleMove = useCallback(
-        (recordId: string, columnId: string) => {
-            const record = recordsById.get(recordId);
-            if (record) onStageChange(record, columnId === NO_STAGE ? "" : columnId);
+        (recordId: string, targetId: string, placement: KanbanPlacement | null) => {
+            const record = findRecordInColumns(queryClient, code, recordId);
+            const target = stagesById.get(targetId);
+            if (!record || !target) return;
+            const ids = columnRecordIds(queryClient, code, target.id, filter);
+            const afterId = kanbanAfterId(ids, record.id, placement);
+            if (record.stage?.id === target.id && kanbanStaysPut(ids, record.id, afterId)) return;
+            mutate(
+                { record, target: toRecordStage(target), afterId },
+                { onError: () => toast.error(t("moveError")) }
+            );
         },
-        [onStageChange, recordsById]
+        [code, filter, mutate, queryClient, stagesById, t]
     );
 
     const renderOverlay = useCallback(
         (recordId: string) => {
-            const record = recordsById.get(recordId);
+            const record = findRecordInColumns(queryClient, code, recordId);
             return record ? <RecordKanbanCard record={record} /> : null;
         },
-        [recordsById]
+        [code, queryClient]
     );
+
+    if (stages.length === 0) {
+        return (
+            <p className="py-10 text-center text-sm text-muted-foreground">
+                {t("kanban.noFunnel")}
+            </p>
+        );
+    }
 
     return (
         <KanbanBoard
-            aria-label="Канбан записей"
+            aria-label={t("kanban.label")}
             onMove={handleMove}
             renderOverlay={renderOverlay}
-            className="h-[calc(100dvh-14rem)] min-h-[24rem]"
+            className="h-[calc(100dvh-16rem)] min-h-[26rem]"
         >
-            {columns.map((column) => {
-                const columnRecords = recordsByColumn.get(column.id) ?? [];
-                return (
-                    <KanbanColumn
-                        key={column.id}
-                        id={column.id}
-                        header={
-                            <KanbanColumnHeader
-                                title={column.name}
-                                color={column.color}
-                                count={columnRecords.length}
-                            />
-                        }
-                    >
-                        {columnRecords.map((record) => (
-                            <KanbanItem key={record.id} id={record.id} columnId={column.id}>
-                                <RecordKanbanCard record={record} onOpen={onEdit} />
-                            </KanbanItem>
-                        ))}
-                    </KanbanColumn>
-                );
-            })}
+            {stages.map((stage) => (
+                <RecordsKanbanColumn
+                    key={stage.id}
+                    code={code}
+                    stage={stage}
+                    filter={filter}
+                    canMove={canMove}
+                    onOpen={onOpen}
+                />
+            ))}
         </KanbanBoard>
     );
 }

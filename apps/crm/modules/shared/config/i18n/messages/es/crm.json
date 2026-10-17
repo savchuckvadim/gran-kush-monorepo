@@ -539,12 +539,6 @@
                 "employee": "Empleado",
                 "gift": "Regalo"
             },
-            "views": {
-                "label": "Vista",
-                "list": "Lista",
-                "kanban": "Kanban"
-            },
-            "funnel": "Embudo",
             "stage": {
                 "label": "Etapa",
                 "noStage": "Sin etapa",
@@ -1405,6 +1399,50 @@
                 "submit": "Crear",
                 "submitting": "Creando…",
                 "created": "El proceso inteligente se ha creado"
+            }
+        },
+        "board": {
+            "views": {
+                "label": "Vista",
+                "list": "Lista",
+                "kanban": "Kanban"
+            },
+            "funnel": "Embudo"
+        },
+        "records": {
+            "description": "Registros del proceso: tabla y kanban por etapas del embudo.",
+            "create": "Nuevo registro",
+            "editTitle": "Registro",
+            "created": "Registro creado",
+            "updated": "Registro guardado",
+            "deleted": "Registro eliminado",
+            "deleteTitle": "¿Eliminar el registro?",
+            "deleteDescription": "El registro se eliminará definitivamente.",
+            "delete": "Eliminar",
+            "save": "Guardar",
+            "saving": "Guardando…",
+            "open": "Abrir",
+            "searchPlaceholder": "Buscar registros",
+            "moveError": "No se pudo mover el registro",
+            "table": {
+                "record": "Registro",
+                "stage": "Etapa",
+                "fields": "Campos",
+                "empty": "No hay registros",
+                "noStage": "— sin etapa —"
+            },
+            "kanban": {
+                "label": "Kanban de registros",
+                "empty": "Vacío",
+                "loadError": "No se pudo cargar",
+                "loadMore": "Más",
+                "noFunnel": "Este proceso no tiene embudo con etapas"
+            },
+            "cancel": "Cancelar",
+            "loadError": "No se pudieron cargar los registros",
+            "values": {
+                "yes": "sí",
+                "no": "no"
             }
         }
     }

@@ -5,6 +5,7 @@ import type {
     OrderDetail,
     OrderListItem,
     OrderPage,
+    OrdersFilter,
     OrderStage,
     OrderStageSummary,
 } from "./order.types";
@@ -30,6 +31,16 @@ export function findOrderInColumns(
     return undefined;
 }
 
+/** The ids of a loaded kanban column in its order — to name the card a dropped one goes under. */
+export function columnOrderIds(
+    queryClient: QueryClient,
+    stageId: string,
+    filter: OrdersFilter
+): string[] {
+    const data = queryClient.getQueryData<ColumnData>(orderKeys.column(stageId, filter));
+    return data?.pages.flatMap((page) => page.items.map((item) => item.id)) ?? [];
+}
+
 const withoutOrder = (data: ColumnData, orderId: string): ColumnData => ({
     ...data,
     pages: data.pages.map((page) => {
@@ -40,7 +51,26 @@ const withoutOrder = (data: ColumnData, orderId: string): ColumnData => ({
     }),
 });
 
-const withOrderOnTop = (data: ColumnData, order: OrderListItem): ColumnData => {
+/** Puts the order right under `afterId`; not loaded or `null` — on top of the column. */
+const withOrderAfter = (
+    data: ColumnData,
+    order: OrderListItem,
+    afterId: string | null
+): ColumnData => {
+    const pageIndex = afterId
+        ? data.pages.findIndex((page) => page.items.some((item) => item.id === afterId))
+        : -1;
+    if (pageIndex >= 0) {
+        return {
+            ...data,
+            pages: data.pages.map((page, index) => {
+                if (index !== pageIndex) return page;
+                const at = page.items.findIndex((item) => item.id === afterId) + 1;
+                const items = [...page.items.slice(0, at), order, ...page.items.slice(at)];
+                return { ...page, items, total: page.total + 1 };
+            }),
+        };
+    }
     const [first, ...rest] = data.pages;
     if (!first) return data;
     return {
@@ -50,13 +80,15 @@ const withOrderOnTop = (data: ColumnData, order: OrderListItem): ColumnData => {
 };
 
 /**
- * Shows a move before the server confirms it: the card leaves every column and lands on top of
- * the target column, the column totals shift, the open card shows the new stage.
+ * Shows a move before the server confirms it: the card leaves every column and lands in the
+ * target column under `afterId` (on top without it), the column totals shift, the open card shows
+ * the new stage. Within one column it is a reorder, and the totals stay.
  */
 export function applyOptimisticMove(
     queryClient: QueryClient,
     order: MovableOrder,
-    target: OrderStage
+    target: OrderStage,
+    afterId: string | null = null
 ): void {
     const known = findOrderInColumns(queryClient, order.id);
 
@@ -66,11 +98,12 @@ export function applyOptimisticMove(
         const isTarget = key[COLUMN_KEY_STAGE_INDEX] === target.id;
         queryClient.setQueryData<ColumnData>(
             key,
-            isTarget && known ? withOrderOnTop(next, { ...known, stage: target }) : next
+            isTarget && known ? withOrderAfter(next, { ...known, stage: target }, afterId) : next
         );
     }
 
     const fromId = order.stage?.id ?? null;
+    if (fromId === target.id) return;
     queryClient.setQueriesData<OrderStageSummary>({ queryKey: orderKeys.summaries() }, (data) =>
         data
             ? {

@@ -6,9 +6,9 @@ import { ShoppingCart } from "lucide-react";
 
 import type { OrderFunnel } from "@/modules/entities/order";
 import { NewOrderButton } from "@/modules/features";
+import { BoardViewSwitch } from "@/modules/shared/ui/BoardViewSwitch";
+import { FunnelSelect } from "@/modules/shared/ui/FunnelSelect";
 
-import { OrderFunnelSelect } from "./OrderFunnelSelect";
-import { OrdersViewSwitch } from "./OrdersViewSwitch";
 import type { OrdersView } from "./use-orders-view";
 
 interface OrdersPageHeaderProps {
@@ -39,13 +39,9 @@ export function OrdersPageHeader({
             </div>
             <div className="flex flex-wrap items-center gap-2">
                 {funnel ? (
-                    <OrderFunnelSelect
-                        funnels={funnels}
-                        value={funnel.id}
-                        onChange={onFunnelChange}
-                    />
+                    <FunnelSelect funnels={funnels} value={funnel.id} onChange={onFunnelChange} />
                 ) : null}
-                <OrdersViewSwitch value={view} onChange={onViewChange} />
+                <BoardViewSwitch value={view} onChange={onViewChange} />
                 <NewOrderButton />
             </div>
         </div>
