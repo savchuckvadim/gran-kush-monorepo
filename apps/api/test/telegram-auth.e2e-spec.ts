@@ -101,7 +101,7 @@ describe("Telegram sign-in (e2e)", () => {
 
     it("the widget is offered when the bot is configured", async () => {
         const res = await request(app.getHttpServer()).get("/cabinet/auth/telegram/config");
-        expect(res.body).toEqual({ enabled: true, botUsername: BOT_USERNAME });
+        expect(res.body).toEqual({ enabled: true, botUsername: BOT_USERNAME, botId: 123456 });
     });
 
     it("a forged or stale widget answer is refused", async () => {

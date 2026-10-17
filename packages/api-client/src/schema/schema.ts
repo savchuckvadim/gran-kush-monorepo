@@ -3954,6 +3954,11 @@ export interface components {
             enabled: boolean;
             /** @example pafpaf_bot */
             botUsername: string | null;
+            /**
+             * @description Числовой id бота — для окна входа Telegram (`Telegram.Login.auth`)
+             * @example 123456789
+             */
+            botId: number | null;
         };
         TelegramAuthDto: {
             /** @example 123456789 */

@@ -91,6 +91,7 @@
             "telegram": {
                 "title": "Entrar con Telegram",
                 "subtitle": "Un momento",
+                "button": "Continuar con Telegram",
                 "signingIn": "Entrando…",
                 "errors": {
                     "telegram_off": "El acceso con Telegram no está disponible ahora",
@@ -371,6 +372,7 @@
                     "title": "Telegram",
                     "linkedAs": "Vinculado: {username}.",
                     "noUsername": "cuenta sin nombre de usuario",
+                    "link": "Vincular Telegram",
                     "notLinked": "No vinculado. Entra con un clic.",
                     "onlyWay": "Es tu única forma de entrar: crea antes una contraseña.",
                     "unlink": "Desvincular",

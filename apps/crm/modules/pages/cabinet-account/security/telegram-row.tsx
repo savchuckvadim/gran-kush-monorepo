@@ -34,8 +34,8 @@ export function TelegramRow({ security }: { security: AccountSecurity }) {
     const { linked, username } = security.telegram;
     const last = isLastSignInMethod(security, "telegram");
 
-    const botUsername = config.data?.enabled ? config.data.botUsername : null;
-    if (!botUsername && !linked) return null;
+    const botId = config.data?.enabled ? config.data.botId : null;
+    if (!botId && !linked) return null;
 
     const description = linked
         ? t("linkedAs", { username: username ? `@${username}` : t("noUsername") })
@@ -58,10 +58,13 @@ export function TelegramRow({ security }: { security: AccountSecurity }) {
                     {t("unlink")}
                 </Button>
             ) : (
-                botUsername && (
+                botId && (
                     <TelegramLoginButton
-                        botUsername={botUsername}
+                        botId={botId}
                         locale={locale}
+                        label={t("link")}
+                        size="sm"
+                        disabled={link.isPending}
                         onAuth={(user) =>
                             link.mutate(user, { onSuccess: () => toast.success(t("linked")) })
                         }

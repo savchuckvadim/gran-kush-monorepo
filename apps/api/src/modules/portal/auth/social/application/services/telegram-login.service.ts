@@ -47,10 +47,15 @@ export class TelegramLoginService {
         private readonly jwtService: JwtService
     ) {}
 
-    /** Виджет показывается, только когда бот настроен целиком. */
-    config(): { enabled: boolean; botUsername: string | null } {
+    /**
+     * Кнопка показывается, только когда бот настроен целиком. `botId` — числовая часть токена до
+     * двоеточия: с ним фронт открывает окно входа Telegram своей кнопкой. Секретом он не является,
+     * его видно и в виджете Telegram.
+     */
+    config(): { enabled: boolean; botUsername: string | null; botId: number | null } {
         const botUsername = this.configService.get<string>(BOT_USERNAME_ENV) || null;
-        return { enabled: Boolean(this.botToken() && botUsername), botUsername };
+        const botId = Number(this.botToken()?.split(":")[0]) || null;
+        return { enabled: Boolean(botId && botUsername), botUsername, botId };
     }
 
     verify(data: TelegramAuthData, now = new Date()): TelegramProfile {

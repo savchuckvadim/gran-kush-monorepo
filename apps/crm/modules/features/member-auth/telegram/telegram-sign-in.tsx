@@ -30,14 +30,17 @@ export function TelegramSignIn({ returnTo }: { returnTo: string }) {
     const errorText = useTelegramErrorText();
     const [ticket, setTicket] = useState<string | null>(null);
 
-    const botUsername = config.data?.enabled ? config.data.botUsername : null;
-    if (!botUsername) return null;
+    const botId = config.data?.enabled ? config.data.botId : null;
+    if (!botId) return null;
 
     return (
         <div className="space-y-2">
             <TelegramLoginButton
-                botUsername={botUsername}
+                botId={botId}
                 locale={locale}
+                label={t("button")}
+                className="w-full"
+                disabled={signIn.isPending}
                 onAuth={(user) =>
                     signIn.mutate(user, {
                         onSuccess: (result) => {

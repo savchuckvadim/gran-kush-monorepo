@@ -91,6 +91,7 @@
             "telegram": {
                 "title": "Вход через Telegram",
                 "subtitle": "Один момент",
+                "button": "Войти через Telegram",
                 "signingIn": "Входим…",
                 "errors": {
                     "telegram_off": "Вход через Telegram сейчас недоступен",
@@ -371,6 +372,7 @@
                     "title": "Telegram",
                     "linkedAs": "Привязан: {username}.",
                     "noUsername": "аккаунт без имени пользователя",
+                    "link": "Привязать Telegram",
                     "notLinked": "Не привязан. Можно входить в один клик.",
                     "onlyWay": "Это единственный способ входа — сначала задайте пароль.",
                     "unlink": "Отвязать",

@@ -55,6 +55,14 @@ export class TelegramConfigDto {
 
     @ApiProperty({ type: String, nullable: true, example: "pafpaf_bot" })
     botUsername: string | null;
+
+    @ApiProperty({
+        type: Number,
+        nullable: true,
+        example: 123456789,
+        description: "Числовой id бота — для окна входа Telegram (`Telegram.Login.auth`)",
+    })
+    botId: number | null;
 }
 
 export class TelegramSignInResultDto {

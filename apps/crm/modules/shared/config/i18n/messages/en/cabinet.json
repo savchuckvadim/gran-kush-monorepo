@@ -91,6 +91,7 @@
             "telegram": {
                 "title": "Sign in with Telegram",
                 "subtitle": "One moment",
+                "button": "Continue with Telegram",
                 "signingIn": "Signing in…",
                 "errors": {
                     "telegram_off": "Telegram sign-in is unavailable right now",
@@ -371,6 +372,7 @@
                     "title": "Telegram",
                     "linkedAs": "Linked: {username}.",
                     "noUsername": "account without a username",
+                    "link": "Link Telegram",
                     "notLinked": "Not linked. Sign in with one click.",
                     "onlyWay": "This is your only way to sign in — set a password first.",
                     "unlink": "Unlink",

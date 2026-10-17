@@ -111,12 +111,14 @@ export function MemberLoginForm() {
                 {login.isPending ? t("submitting") : t("submit")}
             </Button>
 
-            <GoogleButton
-                href={googleSignInUrl("cabinet", { locale, returnTo: from })}
-                label={t("google")}
-                separator={t("or")}
-            />
-            <TelegramSignIn returnTo={from} />
+            <div className="space-y-2">
+                <GoogleButton
+                    href={googleSignInUrl("cabinet", { locale, returnTo: from })}
+                    label={t("google")}
+                    separator={t("or")}
+                />
+                <TelegramSignIn returnTo={from} />
+            </div>
 
             <p className="text-center text-sm text-muted-foreground">
                 {t("noAccount")}{" "}
