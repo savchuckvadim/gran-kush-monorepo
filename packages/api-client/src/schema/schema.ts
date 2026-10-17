@@ -1705,7 +1705,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get current member profile (Site - own data only) */
+        /** Профиль участника в этом клубе — без заметок сотрудников и полей анкеты клуба */
         get: operations["CabinetMembers_getMe"];
         put?: never;
         post?: never;
@@ -4623,6 +4623,37 @@ export interface components {
             /** Format: uuid */
             statusItemId: string;
         };
+        CabinetMemberProfileDto: {
+            /** @example 123e4567-e89b-12d3-a456-426614174000 */
+            id: string;
+            /** @example user@example.com */
+            email: string;
+            /** @example John */
+            name: string;
+            /** @example Doe */
+            surname: string | null;
+            /** @example +1234567890 */
+            phone: string | null;
+            statusItem: components["schemas"]["CrmMemberStatusDto"] | null;
+            /** @example true */
+            isActive: boolean;
+            /**
+             * @example confirmed
+             * @enum {string}
+             */
+            consentStatus: "confirmed" | "pending";
+            /** @example 2024-01-01T00:00:00.000Z */
+            createdAt: string;
+            documents: components["schemas"]["CrmMemberAccountDocumentDto"][];
+            /** @example true */
+            hasSignature: boolean;
+            /** @example 2024-01-01T00:00:00.000Z */
+            birthday: string | null;
+            /** @example 123 Main St */
+            address: string | null;
+            /** @example 1234567890 */
+            membershipNumber: string | null;
+        };
         MyMembershipDto: {
             memberId: string;
             portalId: string;
@@ -6842,6 +6873,7 @@ export type SchemaCrmMemberAccountDocumentDto = components['schemas']['CrmMember
 export type SchemaCrmMemberFullDto = components['schemas']['CrmMemberFullDto'];
 export type SchemaCrmMemberFieldsPatchDto = components['schemas']['CrmMemberFieldsPatchDto'];
 export type SchemaCrmMemberStatusPatchDto = components['schemas']['CrmMemberStatusPatchDto'];
+export type SchemaCabinetMemberProfileDto = components['schemas']['CabinetMemberProfileDto'];
 export type SchemaMyMembershipDto = components['schemas']['MyMembershipDto'];
 export type SchemaMyMembershipsResponseDto = components['schemas']['MyMembershipsResponseDto'];
 export type SchemaConfirmMyMembershipDto = components['schemas']['ConfirmMyMembershipDto'];
@@ -11860,7 +11892,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CrmMemberFullDto"];
+                    "application/json": components["schemas"]["CabinetMemberProfileDto"];
                 };
             };
             /** @description Unauthorized */
