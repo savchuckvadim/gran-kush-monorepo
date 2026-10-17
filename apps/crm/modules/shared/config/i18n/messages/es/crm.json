@@ -703,9 +703,17 @@
                     "create": "Crear categoría",
                     "creating": "Creando...",
                     "createError": "No se pudo crear la categoría",
-                    "existing": "Categorías existentes",
-                    "loading": "Cargando categorías...",
-                    "empty": "Aún no hay categorías"
+                    "empty": "Aún no hay categorías",
+                    "createTitle": "Nueva categoría",
+                    "submit": "Crear",
+                    "created": "La categoría se ha creado",
+                    "loadError": "No se pudieron cargar las categorías",
+                    "columns": {
+                        "name": "Nombre",
+                        "code": "Código",
+                        "parent": "Categoría padre",
+                        "description": "Descripción"
+                    }
                 },
                 "measurementUnits": {
                     "title": "Unidades de medida",
@@ -718,9 +726,18 @@
                     "create": "Crear unidad",
                     "creating": "Creando...",
                     "createError": "No se pudo crear la unidad de medida",
-                    "existing": "Unidades existentes",
-                    "loading": "Cargando unidades...",
-                    "empty": "Aún no hay unidades"
+                    "empty": "Aún no hay unidades",
+                    "createTitle": "Nueva unidad de medida",
+                    "submit": "Crear",
+                    "created": "La unidad se ha creado",
+                    "loadError": "No se pudieron cargar las unidades de medida",
+                    "columns": {
+                        "name": "Nombre",
+                        "code": "Código",
+                        "kind": "Tipo"
+                    },
+                    "custom": "Propia",
+                    "builtIn": "Predefinida"
                 },
                 "links": {
                     "billing": {
@@ -1232,6 +1249,86 @@
             "open": "Abrir en otra pestaña",
             "qr": "Código QR",
             "hideQr": "Ocultar QR"
+        },
+        "listPage": {
+            "create": "Crear"
+        },
+        "employees": {
+            "roles": {
+                "portal_owner": "Propietario",
+                "admin": "Administrador",
+                "manager": "Gerente",
+                "employee": "Empleado"
+            }
+        },
+        "invitations": {
+            "title": "Invitaciones de empleados",
+            "subtitle": "El empleado recibe un enlace de invitación por correo y se une al club.",
+            "loadError": "No se pudieron cargar las invitaciones",
+            "empty": "Aún no hay invitaciones",
+            "columns": {
+                "email": "Email",
+                "role": "Rol",
+                "status": "Estado",
+                "createdAt": "Enviada",
+                "expiresAt": "Válida hasta"
+            },
+            "statuses": {
+                "pending": "Pendiente",
+                "accepted": "Aceptada",
+                "revoked": "Revocada",
+                "expired": "Caducada"
+            },
+            "create": {
+                "button": "Invitar",
+                "title": "Nueva invitación",
+                "description": "El enlace se envía por correo; con él el empleado entra al club con el rol elegido.",
+                "email": "Email",
+                "role": "Rol",
+                "submit": "Invitar",
+                "submitting": "Enviando…",
+                "sent": "La invitación se ha enviado por correo",
+                "linkNotice": "El enlace se ha enviado a <strong>{email}</strong>. Si el correo no llega, pasa el enlace tú mismo: solo se muestra ahora.",
+                "done": "Listo"
+            },
+            "revoke": {
+                "button": "Revocar",
+                "confirmTitle": "¿Revocar la invitación?",
+                "confirmDescription": "El enlace para {email} dejará de funcionar.",
+                "confirm": "Revocar",
+                "cancel": "Cancelar",
+                "done": "La invitación se ha revocado",
+                "error": "No se pudo revocar la invitación"
+            }
+        },
+        "entitiesSettings": {
+            "title": "Procesos inteligentes y entidades",
+            "subtitle": "Campos, formularios y etapas de socios, pedidos y entidades propias del club.",
+            "loadError": "No se pudieron cargar las entidades",
+            "columns": {
+                "name": "Nombre",
+                "code": "Código",
+                "kind": "Tipo"
+            },
+            "system": "Del sistema",
+            "custom": "Propia",
+            "configure": "Configurar",
+            "systemNames": {
+                "member": "Socios",
+                "order": "Pedidos"
+            },
+            "create": {
+                "button": "Crear proceso inteligente",
+                "title": "Nuevo proceso inteligente",
+                "code": "Código",
+                "codePlaceholder": "vendor",
+                "codeHint": "Letras latinas en snake_case; luego no se puede cambiar.",
+                "name": "Nombre",
+                "namePlaceholder": "Proveedores",
+                "submit": "Crear",
+                "submitting": "Creando…",
+                "created": "El proceso inteligente se ha creado"
+            }
         }
     }
 }

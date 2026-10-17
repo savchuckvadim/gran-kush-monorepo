@@ -703,9 +703,17 @@
                     "create": "Create category",
                     "creating": "Creating...",
                     "createError": "Failed to create category",
-                    "existing": "Existing categories",
-                    "loading": "Loading categories...",
-                    "empty": "No categories yet"
+                    "empty": "No categories yet",
+                    "createTitle": "New category",
+                    "submit": "Create",
+                    "created": "The category has been created",
+                    "loadError": "Could not load the categories",
+                    "columns": {
+                        "name": "Name",
+                        "code": "Code",
+                        "parent": "Parent",
+                        "description": "Description"
+                    }
                 },
                 "measurementUnits": {
                     "title": "Measurement units",
@@ -718,9 +726,18 @@
                     "create": "Create unit",
                     "creating": "Creating...",
                     "createError": "Failed to create measurement unit",
-                    "existing": "Existing units",
-                    "loading": "Loading units...",
-                    "empty": "No units yet"
+                    "empty": "No units yet",
+                    "createTitle": "New unit of measurement",
+                    "submit": "Create",
+                    "created": "The unit has been created",
+                    "loadError": "Could not load the units of measurement",
+                    "columns": {
+                        "name": "Name",
+                        "code": "Code",
+                        "kind": "Type"
+                    },
+                    "custom": "Custom",
+                    "builtIn": "Built-in"
                 },
                 "links": {
                     "billing": {
@@ -1232,6 +1249,86 @@
             "open": "Open in a new tab",
             "qr": "QR code",
             "hideQr": "Hide QR"
+        },
+        "listPage": {
+            "create": "Create"
+        },
+        "employees": {
+            "roles": {
+                "portal_owner": "Owner",
+                "admin": "Admin",
+                "manager": "Manager",
+                "employee": "Employee"
+            }
+        },
+        "invitations": {
+            "title": "Employee invitations",
+            "subtitle": "The employee gets an invitation link by email and joins the club.",
+            "loadError": "Could not load the invitations",
+            "empty": "No invitations yet",
+            "columns": {
+                "email": "Email",
+                "role": "Role",
+                "status": "Status",
+                "createdAt": "Sent",
+                "expiresAt": "Valid until"
+            },
+            "statuses": {
+                "pending": "Awaiting reply",
+                "accepted": "Accepted",
+                "revoked": "Revoked",
+                "expired": "Expired"
+            },
+            "create": {
+                "button": "Invite",
+                "title": "New invitation",
+                "description": "The link goes by email; with it the employee joins the club with the chosen role.",
+                "email": "Email",
+                "role": "Role",
+                "submit": "Invite",
+                "submitting": "Sending…",
+                "sent": "The invitation has been emailed",
+                "linkNotice": "The link has been emailed to <strong>{email}</strong>. If the email does not arrive, pass the link on yourself — it is shown only now.",
+                "done": "Done"
+            },
+            "revoke": {
+                "button": "Revoke",
+                "confirmTitle": "Revoke the invitation?",
+                "confirmDescription": "The link for {email} will stop working.",
+                "confirm": "Revoke",
+                "cancel": "Cancel",
+                "done": "The invitation has been revoked",
+                "error": "Could not revoke the invitation"
+            }
+        },
+        "entitiesSettings": {
+            "title": "Smart processes and entities",
+            "subtitle": "Fields, forms and stages of members, orders and the club's own entities.",
+            "loadError": "Could not load the entities",
+            "columns": {
+                "name": "Name",
+                "code": "Code",
+                "kind": "Type"
+            },
+            "system": "System",
+            "custom": "Custom",
+            "configure": "Configure",
+            "systemNames": {
+                "member": "Members",
+                "order": "Orders"
+            },
+            "create": {
+                "button": "Create smart process",
+                "title": "New smart process",
+                "code": "Code",
+                "codePlaceholder": "vendor",
+                "codeHint": "Latin letters in snake_case; it cannot be changed later.",
+                "name": "Name",
+                "namePlaceholder": "Vendors",
+                "submit": "Create",
+                "submitting": "Creating…",
+                "created": "The smart process has been created"
+            }
         }
     }
 }

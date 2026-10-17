@@ -12,6 +12,8 @@ export const ROUTES = {
     FORGOT_PASSWORD: "/auth/forgot-password",
     /** Ссылка из письма: `?token=` */
     RESET_PASSWORD: "/auth/reset-password",
+    /** Приглашение сотрудника (вне клуба): `${ROUTES.INVITE}/${token}` */
+    INVITE: "/auth/invite",
     CRM_HOME: "/crm",
     /** Префикс раздела клиентов: list, details, new */
     CRM_MEMBER_BASE: "/crm/member",

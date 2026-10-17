@@ -1,137 +1,88 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 
-import { Loader2, Plus } from "lucide-react";
+import type { SchemaProductCategoryDto } from "@workspace/api-client/core";
 
-import { Button, Card, FieldInput, FieldSelect } from "@workspace/ui";
+import { useCategories } from "@/modules/entities/category";
+import { usePortalRole } from "@/modules/entities/portal";
+import { CreateCategoryForm } from "@/modules/features/catalog-settings";
+import { EntityList, type EntityListTableColumn } from "@/modules/shared/ui/EntityList";
+import { ListPage } from "@/modules/shared/ui/ListPage";
 
-import { useCategories, useCreateCategory } from "@/modules/entities/category";
-
-function toCategoryCode(name: string): string {
-    return (
-        name
-            .trim()
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/^-+|-+$/g, "") || "category"
-    );
-}
-
+/** Категории каталога товаров в хабе настроек: список и «Создать» с формой в диалоге. */
 export function CategoryManagementWidget() {
     const t = useTranslations("crm.sections.settings.categories");
-    const { data: categories, isLoading } = useCategories();
-    const createCategoryMutation = useCreateCategory();
+    const { isAdmin } = usePortalRole();
+    const { data, isPending, error } = useCategories();
 
-    const [name, setName] = useState("");
-    const [description, setDescription] = useState("");
-    const [parentId, setParentId] = useState("");
-
-    const sortedCategories = useMemo(
-        () => [...(categories ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
+    const categories = useMemo(
+        () => [...(data ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
+        [data]
+    );
+    const nameById = useMemo(
+        () => new Map(categories.map((category) => [category.id, category.name])),
         [categories]
     );
 
-    const handleCreate = async () => {
-        if (!name.trim()) return;
-
-        try {
-            await createCategoryMutation.mutateAsync({
-                name: name.trim(),
-                code: toCategoryCode(name),
-                description: description.trim() || undefined,
-                parentId: parentId || undefined,
-                sortOrder: (categories?.length ?? 0) + 1,
-            });
-
-            setName("");
-            setDescription("");
-            setParentId("");
-        } catch {
-            // handled by mutation state
-        }
-    };
+    const columns: EntityListTableColumn<SchemaProductCategoryDto>[] = [
+        {
+            key: "name",
+            header: t("columns.name"),
+            cell: (category) => category.name,
+            cellClassName: "font-medium",
+        },
+        {
+            key: "code",
+            header: t("columns.code"),
+            cell: (category) => <span className="font-mono text-xs">{category.code}</span>,
+        },
+        {
+            key: "parent",
+            header: t("columns.parent"),
+            cell: (category) =>
+                (category.parentId && nameById.get(category.parentId)) || t("fields.noParent"),
+        },
+        {
+            key: "description",
+            header: t("columns.description"),
+            cell: (category) => category.description || "—",
+        },
+    ];
 
     return (
-        <Card className="p-6">
-            <div className="mb-4">
-                <h2 className="text-lg font-semibold">{t("title")}</h2>
-                <p className="mt-1 text-sm text-muted-foreground">{t("description")}</p>
-            </div>
-
-            <div className="space-y-4">
-                <FieldInput
-                    label={t("fields.name")}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                />
-
-                <FieldInput
-                    label={t("fields.description")}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                />
-
-                <FieldSelect
-                    label={t("fields.parentCategory")}
-                    options={[
-                        { value: "", label: t("fields.noParent") },
-                        ...sortedCategories.map((category) => ({
-                            value: category.id,
-                            label: category.name,
-                        })),
-                    ]}
-                    value={parentId}
-                    onValueChange={setParentId}
-                />
-
-                {createCategoryMutation.isError && (
-                    <p className="text-sm text-destructive">{t("createError")}</p>
-                )}
-
-                <Button
-                    onClick={handleCreate}
-                    disabled={createCategoryMutation.isPending || !name.trim()}
-                    className="w-full sm:w-auto"
-                >
-                    {createCategoryMutation.isPending ? (
-                        <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            {t("creating")}
-                        </>
-                    ) : (
-                        <>
-                            <Plus className="mr-2 h-4 w-4" />
-                            {t("create")}
-                        </>
-                    )}
-                </Button>
-            </div>
-
-            <div className="mt-6 rounded-md border bg-muted/20 p-4">
-                <h3 className="mb-2 text-sm font-medium">{t("existing")}</h3>
-                {isLoading ? (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        {t("loading")}
-                    </div>
-                ) : sortedCategories.length > 0 ? (
-                    <ul className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
-                        {sortedCategories.map((category) => (
-                            <li
-                                key={category.id}
-                                className="rounded border bg-background px-2 py-1.5"
-                            >
-                                {category.name}
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p className="text-sm text-muted-foreground">{t("empty")}</p>
-                )}
-            </div>
-        </Card>
+        <ListPage
+            variant="section"
+            title={t("title")}
+            description={t("description")}
+            create={
+                isAdmin
+                    ? {
+                          label: t("create"),
+                          title: t("createTitle"),
+                          size: "md",
+                          form: ({ close }) => <CreateCategoryForm onCreated={close} />,
+                      }
+                    : undefined
+            }
+        >
+            <EntityList<SchemaProductCategoryDto>
+                items={categories}
+                loading={isPending}
+                error={error ? t("loadError") : undefined}
+                emptyState={
+                    <p className="py-6 text-center text-sm text-muted-foreground">{t("empty")}</p>
+                }
+                getRowKey={(category) => category.id}
+                tableColumns={columns}
+                defaultViewMode="table"
+                enableViewToggle={false}
+                enableVisibilitySettings={false}
+                reserveFilterSpace={false}
+                cardTitle={(category) => category.name}
+                defaultVisibleCardFieldKeys={["parent", "description"]}
+            />
+        </ListPage>
     );
 }
