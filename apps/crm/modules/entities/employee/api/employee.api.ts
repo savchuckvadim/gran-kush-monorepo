@@ -1,84 +1,69 @@
 import type {
+    SchemaCreateEmployeeDto,
+    SchemaCreateEmployeeResponseDto,
     SchemaEmployeeListItemDto,
     SchemaPaginatedResponseEmployeeListItemDto,
+    SchemaUpdateEmployeeDto,
 } from "@workspace/api-client/core";
+import { assertOpenApiOk } from "@workspace/api-client/core";
 
 import { $api } from "@/modules/shared";
 
+export type Employee = SchemaEmployeeListItemDto;
+export type EmployeeRole = Employee["role"];
+export type EmployeesPage = SchemaPaginatedResponseEmployeeListItemDto;
+export type CreateEmployeePayload = SchemaCreateEmployeeDto;
+export type CreatedEmployee = SchemaCreateEmployeeResponseDto;
+/** Должность и отдел — динамические поля профиля: едут внутри `fields` */
+export type UpdateEmployeePayload = SchemaUpdateEmployeeDto;
+
 export interface EmployeeFilters {
-    role?: string;
+    role?: EmployeeRole;
     isActive?: boolean;
     page?: number;
     limit?: number;
 }
 
-/** Зеркало UpdateEmployeeDto: должность и отдел — динамические поля, едут внутри fields */
-export interface UpdateEmployeePayload {
-    role?: string;
-    isActive?: boolean;
-    fields?: Record<string, unknown>;
+const DEFAULT_PAGE_SIZE = 20;
+
+export async function getEmployees(filters?: EmployeeFilters): Promise<EmployeesPage> {
+    const response = await $api.GET("/crm/employees", {
+        params: {
+            query: {
+                page: filters?.page ?? 1,
+                limit: filters?.limit ?? DEFAULT_PAGE_SIZE,
+                role: filters?.role,
+                isActive: filters?.isActive,
+            },
+        },
+    });
+    return assertOpenApiOk<EmployeesPage>(response);
 }
 
-// Endpoints are not yet regenerated in the OpenAPI schema.
-// Using fetch via $api with `as never` for the path and `as unknown as TYPE` for data.
-
-export async function getEmployees(
-    filters?: EmployeeFilters
-): Promise<SchemaPaginatedResponseEmployeeListItemDto> {
-    const query: Record<string, unknown> = {
-        page: filters?.page ?? 1,
-        limit: filters?.limit ?? 20,
-    };
-    if (filters?.role !== undefined) query.role = filters.role;
-    if (filters?.isActive !== undefined) query.isActive = filters.isActive;
-
-    const response = await $api.GET("/crm/employees" as never, {
-        params: { query },
-    } as never);
-
-    if (!response.response.ok) {
-        throw new Error(`Failed to fetch employees: ${response.response.status}`);
-    }
-
-    return response.data as unknown as SchemaPaginatedResponseEmployeeListItemDto;
+export async function getEmployee(id: string): Promise<Employee> {
+    const response = await $api.GET("/crm/employees/{id}", { params: { path: { id } } });
+    return assertOpenApiOk<Employee>(response);
 }
 
-export async function getEmployee(id: string): Promise<SchemaEmployeeListItemDto> {
-    const response = await $api.GET("/crm/employees/{id}" as never, {
+/**
+ * Сотрудник по email. Аккаунта нет — он создаётся без пароля, и сотрудник задаёт пароль сам,
+ * регистрируясь с этим адресом. Письмо API не шлёт; уже существующий аккаунт зовут приглашением (409).
+ */
+export async function createEmployee(body: CreateEmployeePayload): Promise<CreatedEmployee> {
+    const response = await $api.POST("/crm/employees", { body });
+    return assertOpenApiOk<CreatedEmployee>(response);
+}
+
+export async function updateEmployee(id: string, body: UpdateEmployeePayload): Promise<Employee> {
+    const response = await $api.PATCH("/crm/employees/{id}", {
         params: { path: { id } },
-    } as never);
-
-    if (!response.response.ok) {
-        throw new Error(`Failed to fetch employee: ${response.response.status}`);
-    }
-
-    return response.data as unknown as SchemaEmployeeListItemDto;
+        body,
+    });
+    return assertOpenApiOk<Employee>(response);
 }
 
-export async function updateEmployee(
-    id: string,
-    data: UpdateEmployeePayload
-): Promise<SchemaEmployeeListItemDto> {
-    const response = await $api.PATCH("/crm/employees/{id}" as never, {
-        params: { path: { id } },
-        body: data,
-    } as never);
-
-    if (!response.response.ok) {
-        throw new Error(`Failed to update employee: ${response.response.status}`);
-    }
-
-    return response.data as unknown as SchemaEmployeeListItemDto;
-}
-
-export async function deactivateEmployee(id: string): Promise<SchemaEmployeeListItemDto> {
-    const response = await $api.DELETE("/crm/employees/{id}" as never, {
-        params: { path: { id } },
-    } as never);
-
-    if (!response.response.ok) {
-        throw new Error(`Failed to deactivate employee: ${response.response.status}`);
-    }
-
-    return response.data as unknown as SchemaEmployeeListItemDto;
+/** Снимает доступ к CRM клуба; вернуть его — `updateEmployee(id, { isActive: true })`. */
+export async function deactivateEmployee(id: string): Promise<Employee> {
+    const response = await $api.DELETE("/crm/employees/{id}", { params: { path: { id } } });
+    return assertOpenApiOk<Employee>(response);
 }

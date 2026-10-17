@@ -254,8 +254,7 @@
                     "consentConfirmed": "Dado",
                     "consentPending": "Pendiente",
                     "extra": "Más",
-                    "notes": "Notas",
-                    "empty": "Sin indicar"
+                    "notes": "Notas"
                 },
                 "feed": {
                     "title": "Actividad",
@@ -1230,6 +1229,9 @@
             "hint": "Muestra el código en la entrada del club. ¿Lo perdiste? Pide otro: el anterior dejará de funcionar.",
             "noCode": "El socio no tiene un código válido. Emítelo en la ficha del socio.",
             "print": "Imprimir"
+        },
+        "fact": {
+            "empty": "Sin indicar"
         }
     }
 }

@@ -9,6 +9,7 @@ import type { SchemaEmployeeListItemDto } from "@workspace/api-client/core";
 import { Button, Card, FieldSelect } from "@workspace/ui";
 
 import {
+    isAssignableEmployeeRole,
     useDeactivateEmployee,
     useEmployees,
     useUpdateEmployee,
@@ -75,6 +76,7 @@ function EmployeeRow({
     }
 
     function handleRoleChange(role: string) {
+        if (!isAssignableEmployeeRole(role)) return;
         updateMutation.mutate(
             { id: employee.id, data: { role } },
             {

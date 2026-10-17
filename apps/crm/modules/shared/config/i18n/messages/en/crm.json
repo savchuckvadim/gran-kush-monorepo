@@ -254,8 +254,7 @@
                     "consentConfirmed": "Given",
                     "consentPending": "Awaiting reply",
                     "extra": "More",
-                    "notes": "Notes",
-                    "empty": "Not set"
+                    "notes": "Notes"
                 },
                 "feed": {
                     "title": "Activity",
@@ -1230,6 +1229,9 @@
             "hint": "Show the code at the club entrance. Lost it? Ask for a reissue: the old one stops working.",
             "noCode": "The member has no valid code. Issue one on the member's card.",
             "print": "Print"
+        },
+        "fact": {
+            "empty": "Not set"
         }
     }
 }

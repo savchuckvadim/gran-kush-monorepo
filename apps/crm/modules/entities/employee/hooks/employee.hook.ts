@@ -1,24 +1,47 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { type QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
+    createEmployee,
+    type CreateEmployeePayload,
     deactivateEmployee,
-    getEmployees,
+    type Employee,
     type EmployeeFilters,
-    type UpdateEmployeePayload,
+    getEmployee,
+    getEmployees,
     updateEmployee,
+    type UpdateEmployeePayload,
 } from "../api/employee.api";
+import { employeeKeys } from "../model/employee-keys";
 
-const EMPLOYEE_KEYS = {
-    all: ["employees"] as const,
-    list: (filters?: EmployeeFilters) => [...EMPLOYEE_KEYS.all, "list", filters] as const,
+/** Ответ API — уже новая карточка: кладём её в кэш сразу, списки перечитываются. */
+const applyEmployee = (queryClient: QueryClient, employee: Employee) => {
+    queryClient.setQueryData(employeeKeys.detail(employee.id), employee);
+    void queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
 };
 
 export function useEmployees(filters?: EmployeeFilters) {
     return useQuery({
-        queryKey: EMPLOYEE_KEYS.list(filters),
+        queryKey: employeeKeys.list(filters),
         queryFn: () => getEmployees(filters),
+    });
+}
+
+export function useEmployee(id: string) {
+    return useQuery({
+        queryKey: employeeKeys.detail(id),
+        queryFn: () => getEmployee(id),
+        enabled: !!id,
+    });
+}
+
+export function useCreateEmployee() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (body: CreateEmployeePayload) => createEmployee(body),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: employeeKeys.lists() }),
     });
 }
 
@@ -28,9 +51,7 @@ export function useUpdateEmployee() {
     return useMutation({
         mutationFn: ({ id, data }: { id: string; data: UpdateEmployeePayload }) =>
             updateEmployee(id, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: EMPLOYEE_KEYS.all });
-        },
+        onSuccess: (employee) => applyEmployee(queryClient, employee),
     });
 }
 
@@ -39,8 +60,6 @@ export function useDeactivateEmployee() {
 
     return useMutation({
         mutationFn: (id: string) => deactivateEmployee(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: EMPLOYEE_KEYS.all });
-        },
+        onSuccess: (employee) => applyEmployee(queryClient, employee),
     });
 }

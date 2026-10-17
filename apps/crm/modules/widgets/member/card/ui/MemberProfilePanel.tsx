@@ -5,10 +5,9 @@ import { useTranslations } from "next-intl";
 import { Card } from "@workspace/ui/components/card";
 
 import type { CrmMemberDetails } from "@/modules/entities/member";
+import { fieldValueText } from "@/modules/shared/lib/field-value-text";
 import { useDateFormat } from "@/modules/shared/lib/use-date-format";
-
-import { MemberFact } from "./MemberFact";
-import { MemberFactGroup } from "./MemberFactGroup";
+import { Fact, FactGroup } from "@/modules/shared/ui/Fact";
 
 /** Fields the hero or the groups below already show. */
 const SHOWN_FIELD_KEYS = new Set([
@@ -20,44 +19,36 @@ const SHOWN_FIELD_KEYS = new Set([
     "notes",
 ]);
 
-const fieldText = (value: unknown): string | null => {
-    if (value === null || value === undefined || value === "" || typeof value === "boolean") {
-        return null;
-    }
-    if (Array.isArray(value)) return value.map(String).join(", ");
-    return typeof value === "object" ? JSON.stringify(value) : String(value);
-};
-
 export function MemberProfilePanel({ member }: { member: CrmMemberDetails }) {
     const t = useTranslations("crm.members.card.profile");
     const date = useDateFormat();
 
     // boolean fields are the marks in the hero
     const extra = member.fields.filter(
-        (field) => !SHOWN_FIELD_KEYS.has(field.fieldKey) && fieldText(field.value) !== null
+        (field) => !SHOWN_FIELD_KEYS.has(field.fieldKey) && fieldValueText(field.value) !== null
     );
 
     return (
         <Card className="gap-5 px-4 md:px-5">
             <h2 className="text-base font-semibold">{t("title")}</h2>
 
-            <MemberFactGroup title={t("contacts")}>
-                <MemberFact label={t("email")} value={member.email} />
-                <MemberFact label={t("phone")} value={member.phone} />
-                <MemberFact label={t("address")} value={member.address} />
-            </MemberFactGroup>
+            <FactGroup title={t("contacts")}>
+                <Fact label={t("email")} value={member.email} />
+                <Fact label={t("phone")} value={member.phone} />
+                <Fact label={t("address")} value={member.address} />
+            </FactGroup>
 
-            <MemberFactGroup title={t("personal")}>
-                <MemberFact
+            <FactGroup title={t("personal")}>
+                <Fact
                     label={t("birthday")}
                     value={member.birthday ? date(member.birthday) : null}
                 />
-            </MemberFactGroup>
+            </FactGroup>
 
-            <MemberFactGroup title={t("club")}>
-                <MemberFact label={t("number")} value={member.membershipNumber} mono />
-                <MemberFact label={t("joined")} value={date(member.createdAt)} />
-                <MemberFact
+            <FactGroup title={t("club")}>
+                <Fact label={t("number")} value={member.membershipNumber} mono />
+                <Fact label={t("joined")} value={date(member.createdAt)} />
+                <Fact
                     label={t("consent")}
                     value={
                         member.consentStatus === "pending"
@@ -65,24 +56,24 @@ export function MemberProfilePanel({ member }: { member: CrmMemberDetails }) {
                             : t("consentConfirmed")
                     }
                 />
-            </MemberFactGroup>
+            </FactGroup>
 
             {extra.length > 0 && (
-                <MemberFactGroup title={t("extra")}>
+                <FactGroup title={t("extra")}>
                     {extra.map((field) => (
-                        <MemberFact
+                        <Fact
                             key={field.fieldKey}
                             label={field.label ?? field.fieldKey}
-                            value={fieldText(field.value)}
+                            value={fieldValueText(field.value)}
                         />
                     ))}
-                </MemberFactGroup>
+                </FactGroup>
             )}
 
             {member.notes && (
-                <MemberFactGroup title={t("notes")}>
+                <FactGroup title={t("notes")}>
                     <p className="text-sm whitespace-pre-line">{member.notes}</p>
-                </MemberFactGroup>
+                </FactGroup>
             )}
         </Card>
     );
