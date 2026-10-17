@@ -146,7 +146,7 @@ describe("Error contract (e2e)", () => {
             expect(res.body.errors).toContain("property foo should not exist");
         });
 
-        it.each(["/crm/employees?role=janitor", "/crm/catalog/products?isActive=maybe"])(
+        it.each(["/crm/employees?role=Not%20A%20Role", "/crm/catalog/products?isActive=maybe"])(
             "невалидное значение фильтра %s → 400, а не молчаливый пропуск",
             async (path) => {
                 const res = await crmGet(path);
