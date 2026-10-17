@@ -5,11 +5,12 @@ import { EntityFieldsModule } from "@modules/portal/crm/entity-fields/entity-fie
 
 import { CrmEntityRecordsController } from "./api/controllers/crm-entity-records.controller";
 import { EntityRecordsService } from "./application/services/entity-records.service";
+import { RecordRelationsService } from "./application/services/record-relations.service";
 
 @Module({
     imports: [PrismaModule, EntityFieldsModule],
     controllers: [CrmEntityRecordsController],
-    providers: [EntityRecordsService],
+    providers: [EntityRecordsService, RecordRelationsService],
     exports: [EntityRecordsService],
 })
 export class RecordsModule {}

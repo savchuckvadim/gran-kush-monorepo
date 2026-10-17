@@ -5,9 +5,9 @@ import {
     NotFoundException,
 } from "@nestjs/common";
 
-import { FormPurpose, PortalFieldType, Prisma } from "@prisma/client";
+import { FormPurpose, Prisma } from "@prisma/client";
 
-import { ContentLocale, resolveLabel } from "@common/i18n";
+import { ContentLocale } from "@common/i18n";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { DynamicPayloadValidatorService } from "@modules/portal/crm/entity-fields/application/services/dynamic-payload-validator.service";
 import { FieldValuesService } from "@modules/portal/crm/entity-fields/application/services/field-values.service";
@@ -18,35 +18,17 @@ import {
     searchWords,
 } from "@modules/portal/crm/entity-fields/infrastructure/entity-record-filter.builder";
 import {
-    ENTITY_RECORD_INCLUDE,
-    EntityRecordWithRelations,
-} from "@modules/portal/crm/records/infrastructure/prisma-includes/entity-record.include";
+    type EntityRecordView,
+    toEntityRecordView,
+} from "@modules/portal/crm/records/application/mappers/entity-record-view.mapper";
+import { ENTITY_RECORD_INCLUDE } from "@modules/portal/crm/records/infrastructure/prisma-includes/entity-record.include";
+
+import { RecordRelationsService } from "./record-relations.service";
 
 export interface EntityRecordListFilters extends EntityListFilter {
     stageId?: string;
     statusItemId?: string;
     isActive?: boolean;
-}
-
-type RelationFieldsMap = Map<
-    string,
-    {
-        fieldDefinitionId: string;
-        targetEntityDefinitionId: string | null;
-        targetIds: string[];
-    }
->;
-
-export interface EntityRecordView {
-    id: string;
-    entityCode: string;
-    isActive: boolean;
-    stage: { id: string; name: string; color: string | null; semantic: string } | null;
-    statusItem: { id: string; key: string; label: string; color: string | null } | null;
-    fields: { fieldKey: string; type: string; label: string | null; value: unknown }[];
-    relations: { fieldKey: string; targetRecordIds: string[] }[];
-    createdAt: string;
-    updatedAt: string;
 }
 
 /** Универсальный CRUD записей произвольных EntityDefinition (смарт-процессы). */
@@ -56,7 +38,8 @@ export class EntityRecordsService {
         private readonly prisma: PrismaService,
         private readonly validator: DynamicPayloadValidatorService,
         private readonly fieldValues: FieldValuesService,
-        private readonly recordFilter: EntityRecordFilterBuilder
+        private readonly recordFilter: EntityRecordFilterBuilder,
+        private readonly relations: RecordRelationsService
     ) {}
 
     private async getDefinition(portalId: string, code: string) {
@@ -114,7 +97,7 @@ export class EntityRecordsService {
             this.prisma.entityRecord.count({ where }),
         ]);
 
-        return { items: rows.map((r) => this.toView(code, r, locale)), total };
+        return { items: rows.map((r) => toEntityRecordView(code, r, locale)), total };
     }
 
     async getById(
@@ -142,7 +125,7 @@ export class EntityRecordsService {
         if (!row) {
             throw new NotFoundException("Record not found");
         }
-        return this.toView(code, row, locale);
+        return toEntityRecordView(code, row, locale);
     }
 
     private async getRecordOrThrow(
@@ -169,7 +152,10 @@ export class EntityRecordsService {
         const def = await this.getDefinition(portalId, code);
         this.assertMutable(def);
 
-        const { plainFields, relationFields } = await this.splitRelationFields(def.id, fields);
+        const { plainFields, relationFields } = await this.relations.splitRelationFields(
+            def.id,
+            fields
+        );
         const validated = await this.validator.validatePayload(
             portalId,
             code,
@@ -194,7 +180,7 @@ export class EntityRecordsService {
                 validated,
                 tx
             );
-            await this.replaceRelations(portalId, created.id, relationFields, tx);
+            await this.relations.replaceRelations(portalId, created.id, relationFields, tx);
             return created;
         });
 
@@ -213,7 +199,7 @@ export class EntityRecordsService {
         await this.getRecordOrThrow(portalId, def.id, recordId);
 
         if (input.fields && Object.keys(input.fields).length > 0) {
-            const { plainFields, relationFields } = await this.splitRelationFields(
+            const { plainFields, relationFields } = await this.relations.splitRelationFields(
                 def.id,
                 input.fields
             );
@@ -230,7 +216,7 @@ export class EntityRecordsService {
                     validated,
                     tx
                 );
-                await this.replaceRelations(portalId, recordId, relationFields, tx);
+                await this.relations.replaceRelations(portalId, recordId, relationFields, tx);
             });
         }
 
@@ -307,160 +293,7 @@ export class EntityRecordsService {
         return this.fetchView(portalId, code, def.id, recordId, locale);
     }
 
-    // ─── Relations (type=relation → RecordRelation с referential integrity) ──
-
-    private async splitRelationFields(
-        entityDefinitionId: string,
-        fields: Record<string, unknown>
-    ): Promise<{
-        plainFields: Record<string, unknown>;
-        relationFields: RelationFieldsMap;
-    }> {
-        const keys = Object.keys(fields);
-        const relationDefs =
-            keys.length === 0
-                ? []
-                : await this.prisma.fieldDefinition.findMany({
-                      where: {
-                          entityDefinitionId,
-                          fieldKey: { in: keys },
-                          type: PortalFieldType.relation,
-                      },
-                      select: { id: true, fieldKey: true, relationTargetEntityDefinitionId: true },
-                  });
-
-        const relationByKey = new Map(relationDefs.map((d) => [d.fieldKey, d]));
-        const plainFields: Record<string, unknown> = {};
-        const relationFields: RelationFieldsMap = new Map();
-
-        for (const [key, value] of Object.entries(fields)) {
-            const relDef = relationByKey.get(key);
-            if (!relDef) {
-                plainFields[key] = value;
-                continue;
-            }
-            const targetIds =
-                value === null || value === undefined
-                    ? []
-                    : Array.isArray(value)
-                      ? value.filter((v): v is string => typeof v === "string")
-                      : typeof value === "string"
-                        ? [value]
-                        : [];
-            relationFields.set(key, {
-                fieldDefinitionId: relDef.id,
-                targetEntityDefinitionId: relDef.relationTargetEntityDefinitionId,
-                targetIds,
-            });
-        }
-
-        return { plainFields, relationFields };
-    }
-
-    private async replaceRelations(
-        portalId: string,
-        sourceRecordId: string,
-        relationFields: RelationFieldsMap,
-        tx?: Prisma.TransactionClient
-    ): Promise<void> {
-        const db = tx ?? this.prisma;
-        for (const [fieldKey, entry] of relationFields) {
-            const { fieldDefinitionId, targetEntityDefinitionId, targetIds } = entry;
-
-            if (targetIds.length > 0) {
-                const found = await db.entityRecord.findMany({
-                    where: {
-                        id: { in: targetIds },
-                        portalId,
-                        ...(targetEntityDefinitionId
-                            ? { entityDefinitionId: targetEntityDefinitionId }
-                            : {}),
-                    },
-                    select: { id: true },
-                });
-                const foundIds = new Set(found.map((r) => r.id));
-                const missing = targetIds.find((id) => !foundIds.has(id));
-                if (missing) {
-                    throw new BadRequestException(
-                        `Relation "${fieldKey}": target record ${missing} not found`
-                    );
-                }
-            }
-
-            await db.recordRelation.deleteMany({
-                where: { fieldDefinitionId, sourceRecordId },
-            });
-            if (targetIds.length > 0) {
-                await db.recordRelation.createMany({
-                    data: targetIds.map((targetRecordId, sortOrder) => ({
-                        portalId,
-                        fieldDefinitionId,
-                        sourceRecordId,
-                        targetRecordId,
-                        sortOrder,
-                    })),
-                });
-            }
-        }
-    }
-
     // ─── Helpers ─────────────────────────────────────────────────────────────
-
-    private toView(
-        entityCode: string,
-        row: EntityRecordWithRelations,
-        locale: ContentLocale
-    ): EntityRecordView {
-        const byDef = new Map<
-            string,
-            { def: (typeof row.fieldValues)[0]["fieldDefinition"]; values: unknown[] }
-        >();
-        for (const fv of row.fieldValues) {
-            let bucket = byDef.get(fv.fieldDefinitionId);
-            if (!bucket) {
-                bucket = { def: fv.fieldDefinition, values: [] };
-                byDef.set(fv.fieldDefinitionId, bucket);
-            }
-            bucket.values.push(fv.valueJson);
-        }
-
-        const fields = [...byDef.values()]
-            .sort((a, b) => a.def.sortOrder - b.def.sortOrder)
-            .map(({ def, values }) => ({
-                fieldKey: def.fieldKey,
-                type: def.type,
-                label: resolveLabel(def, locale),
-                value: def.isMultiple ? values : (values[0] ?? null),
-            }));
-
-        const relationsByKey = new Map<string, string[]>();
-        for (const rel of row.relationsAsSource) {
-            const key = rel.fieldDefinition.fieldKey;
-            const bucket = relationsByKey.get(key) ?? [];
-            bucket.push(rel.targetRecordId);
-            relationsByKey.set(key, bucket);
-        }
-
-        return {
-            id: row.id,
-            entityCode,
-            isActive: row.isActive,
-            stage: row.stage,
-            statusItem: row.statusItem && {
-                id: row.statusItem.id,
-                key: row.statusItem.key,
-                label: resolveLabel(row.statusItem, locale),
-                color: row.statusItem.color,
-            },
-            fields,
-            relations: [...relationsByKey.entries()].map(([fieldKey, targetRecordIds]) => ({
-                fieldKey,
-                targetRecordIds,
-            })),
-            createdAt: row.createdAt.toISOString(),
-            updatedAt: row.updatedAt.toISOString(),
-        };
-    }
 
     private async resolveDefaultStageId(
         portalId: string,
