@@ -58,7 +58,10 @@ export function HeaderClock({ className }: { className?: string }) {
                       }).format(now)
                     : " "}
             </span>
-            <span className="text-muted-foreground mt-0.5 text-[0.625rem]">
+            <span
+                data-slot="header-clock-date"
+                className="text-muted-foreground mt-0.5 text-[0.625rem]"
+            >
                 {now
                     ? new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" }).format(
                           now

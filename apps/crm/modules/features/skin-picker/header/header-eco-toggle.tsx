@@ -10,7 +10,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { useSkin } from "@/modules/shared/providers/skin-provider";
 
 /** Energy saving: animations and effects off. A theme that always saves energy locks it on. */
-export function HeaderEcoToggle() {
+export function HeaderEcoToggle({ className }: { className?: string }) {
     const t = useTranslations("crm.shell.tray");
     const { eco, setEco, isEcoActive } = useSkin();
     const ecoForced = isEcoActive && !eco;
@@ -24,7 +24,7 @@ export function HeaderEcoToggle() {
             title={ecoForced ? t("ecoForced") : t("eco")}
             disabled={ecoForced}
             onClick={() => setEco(!eco)}
-            className={cn("rounded-full", isEcoActive && "text-primary")}
+            className={cn("rounded-full", isEcoActive && "text-primary", className)}
         >
             <Leaf />
         </Button>

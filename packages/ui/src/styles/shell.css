@@ -270,38 +270,6 @@
     border-radius: inherit;
 }
 
-/* =================== account capsule and card =================== */
-
-/* The capsule holds the clock and the avatar: a glass pill on the theme's own tokens, so every
-   skin gets its look without a rule of its own. The card is the account menu on desktop. */
-
-[data-slot="account-capsule"] {
-    background: color-mix(in oklab, var(--card) 55%, transparent);
-    border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
-    -webkit-backdrop-filter: blur(12px) saturate(140%);
-    backdrop-filter: blur(12px) saturate(140%);
-}
-
-[data-slot="account-capsule"]:hover,
-[data-slot="account-capsule"][data-state="open"] {
-    background: color-mix(in oklab, var(--accent) 70%, transparent);
-}
-
-[data-slot="account-card"] {
-    border-radius: calc(var(--radius) + 0.5rem);
-    background: color-mix(in oklab, var(--popover) 82%, transparent);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
-    backdrop-filter: blur(18px) saturate(160%);
-    box-shadow:
-        0 24px 60px -24px rgb(0 0 0 / 0.45),
-        0 0 0 1px color-mix(in oklab, var(--border) 70%, transparent);
-}
-
-/* skins without borders (Sociopath, Black) keep their character */
-:root:is([data-skin="sociopath"], [data-skin="black"]) [data-slot="account-capsule"] {
-    border-color: transparent;
-}
-
 /* =================== auth pages =================== */
 
 /* A lone form on the screen (sign-in, sign-up, password, invitation, sign-up by link): every
