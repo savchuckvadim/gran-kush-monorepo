@@ -684,10 +684,6 @@
             }
         },
         "sections": {
-            "employees": {
-                "title": "Empleados",
-                "description": "Empleados del portal: lista, roles, invitaciones y desactivación."
-            },
             "settings": {
                 "title": "Configuración",
                 "description": "Ajustes de CRM: entidades y campos, invitaciones, enlaces de registro.",
@@ -1179,7 +1175,8 @@
             "close": "Cerrar",
             "openPage": "Abrir como página",
             "copyLink": "Copiar enlace",
-            "copied": "Enlace copiado"
+            "copied": "Enlace copiado",
+            "employee": "Empleado"
         },
         "clubPolicy": {
             "title": "Normas del club",
@@ -1259,6 +1256,86 @@
                 "admin": "Administrador",
                 "manager": "Gerente",
                 "employee": "Empleado"
+            },
+            "title": "Empleados",
+            "subtitle": "El equipo del club: roles, puestos y acceso al CRM.",
+            "loadError": "No se pudieron cargar los empleados",
+            "empty": "Aún no hay empleados",
+            "you": "tú",
+            "columns": {
+                "name": "Nombre",
+                "email": "Email",
+                "role": "Rol",
+                "position": "Puesto",
+                "department": "Departamento",
+                "status": "Estado"
+            },
+            "status": {
+                "active": "Activo",
+                "inactive": "Inactivo"
+            },
+            "create": {
+                "button": "Añadir empleado",
+                "title": "Nuevo empleado",
+                "description": "El empleado crea su contraseña al registrarse con este email.",
+                "email": "Email",
+                "role": "Rol",
+                "firstName": "Nombre",
+                "lastName": "Apellidos",
+                "phone": "Teléfono",
+                "position": "Puesto",
+                "department": "Departamento",
+                "emailInvalid": "Introduce un email válido",
+                "firstNameRequired": "Indica el nombre",
+                "submit": "Añadir",
+                "submitting": "Añadiendo…",
+                "created": "Empleado {email} añadido",
+                "createdHint": "Creará su contraseña al registrarse con este email.",
+                "emailTaken": "Este email ya tiene una cuenta: solo puede unirse con una <link>invitación</link>."
+            },
+            "card": {
+                "back": "Empleados",
+                "loadError": "No se pudo cargar el empleado",
+                "notFound": "Empleado no encontrado",
+                "retry": "Reintentar",
+                "you": "Eres tú",
+                "profile": {
+                    "title": "Perfil",
+                    "contacts": "Contacto",
+                    "work": "Trabajo",
+                    "account": "Cuenta",
+                    "email": "Email",
+                    "phone": "Teléfono",
+                    "position": "Puesto",
+                    "department": "Departamento",
+                    "lastLogin": "Último acceso",
+                    "joined": "En el equipo desde",
+                    "extra": "Más"
+                },
+                "role": {
+                    "label": "Rol",
+                    "confirmTitle": "¿Cambiar el rol del empleado?",
+                    "confirmDescription": "{name} recibirá el rol «{role}»: sus permisos en el club cambian al momento.",
+                    "confirm": "Cambiar",
+                    "saving": "Guardando…",
+                    "cancel": "Cancelar",
+                    "changed": "Rol cambiado",
+                    "error": "No se pudo cambiar el rol"
+                },
+                "deactivate": {
+                    "button": "Desactivar",
+                    "confirmTitle": "¿Desactivar al empleado?",
+                    "confirmDescription": "{name} ya no podrá entrar al CRM del club. El acceso se puede devolver aquí mismo.",
+                    "confirm": "Desactivar",
+                    "cancel": "Cancelar",
+                    "done": "Empleado desactivado",
+                    "error": "No se pudo desactivar al empleado"
+                },
+                "reactivate": {
+                    "button": "Devolver el acceso",
+                    "done": "Acceso devuelto",
+                    "error": "No se pudo devolver el acceso"
+                }
             }
         },
         "invitations": {

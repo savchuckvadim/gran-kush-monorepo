@@ -63,6 +63,7 @@ The API resolves **portal** via **`X-Portal-Id`** / **`X-Portal-Slug`** (forward
 - `/{locale}/{portal}/crm/orders`
 - `/{locale}/{portal}/crm/attendance`
 - `/{locale}/{portal}/crm/employees`
+- `/{locale}/{portal}/crm/employees/{employeeId}` — employee card (on a wide screen it opens in the slider)
 - `/{locale}/{portal}/crm/profile`
 - `/{locale}/{portal}/scan` — QR / presence (if enabled)
 
@@ -104,6 +105,12 @@ OpenAPI-generated types in **`packages/api-client`** are the source of truth for
 - Entity-level member APIs and models should live in `entities/member`.
 - Route pages should be thin composition layers.
 - Feature logic should stay in `features/*`.
+- **List pages** (employees, invitations, smart processes, categories, units) are built from
+  `shared/ui/ListPage`: a header with the title, actions and «Create» (the create form opens in a
+  dialog: `CreateDialog` on `ModalDialog`, `form({ close })`), and `EntityList` below it with
+  columns; a row leads to the item (`openEntity` / `EntityLink` for slider entities, a link
+  otherwise). A list never shares the page with an inline create form. `variant="section"` puts
+  the same block inside another page (settings hub).
 
 ## Documentation map
 

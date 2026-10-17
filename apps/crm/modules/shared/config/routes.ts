@@ -37,6 +37,8 @@ export const ROUTES = {
     CRM_ATTENDANCE: "/crm/attendance",
     CRM_FINANCE: "/crm/finance",
     CRM_EMPLOYEES: "/crm/employees",
+    /** Префикс карточки сотрудника: `${ROUTES.CRM_EMPLOYEE_DETAILS}/${id}` */
+    CRM_EMPLOYEE_DETAILS: "/crm/employees",
     CRM_PROFILE: "/crm/profile",
     CRM_SETTINGS: "/crm/settings",
     /** Конструктор сущностей (поля/формы/стадии) */

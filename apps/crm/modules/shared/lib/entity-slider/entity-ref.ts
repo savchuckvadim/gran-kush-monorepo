@@ -1,7 +1,7 @@
 import { ROUTES } from "@/modules/shared/config/routes";
 
 /** What can open in a slider. Products and smart-process records stay pages for now. */
-export type EntityKind = "member" | "order";
+export type EntityKind = "member" | "order" | "employee";
 
 export interface EntityRef {
     kind: EntityKind;
@@ -11,10 +11,12 @@ export interface EntityRef {
 const DETAILS_ROUTE: Record<EntityKind, string> = {
     member: ROUTES.CRM_MEMBER_DETAILS,
     order: ROUTES.CRM_ORDER_DETAILS,
+    employee: ROUTES.CRM_EMPLOYEE_DETAILS,
 };
 
+/** Every kind has its page, so the list of pages is the list of kinds. */
 export const isEntityKind = (value: unknown): value is EntityKind =>
-    value === "member" || value === "order";
+    typeof value === "string" && Object.hasOwn(DETAILS_ROUTE, value);
 
 /** The entity's own page without locale and club: `useLocalizedLink` adds them. */
 export const entityPath = ({ kind, id }: EntityRef): string => `${DETAILS_ROUTE[kind]}/${id}`;

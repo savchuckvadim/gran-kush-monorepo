@@ -684,10 +684,6 @@
             }
         },
         "sections": {
-            "employees": {
-                "title": "Employees",
-                "description": "Portal employees: list, roles, invitations and deactivation."
-            },
             "settings": {
                 "title": "Settings",
                 "description": "CRM settings: entities and fields, invitations, registration links.",
@@ -1179,7 +1175,8 @@
             "close": "Close",
             "openPage": "Open as a page",
             "copyLink": "Copy link",
-            "copied": "Link copied"
+            "copied": "Link copied",
+            "employee": "Employee"
         },
         "clubPolicy": {
             "title": "Club rules",
@@ -1259,6 +1256,86 @@
                 "admin": "Admin",
                 "manager": "Manager",
                 "employee": "Employee"
+            },
+            "title": "Employees",
+            "subtitle": "The club's team: roles, positions and access to the CRM.",
+            "loadError": "Could not load the employees",
+            "empty": "No employees yet",
+            "you": "you",
+            "columns": {
+                "name": "Name",
+                "email": "Email",
+                "role": "Role",
+                "position": "Position",
+                "department": "Department",
+                "status": "Status"
+            },
+            "status": {
+                "active": "Active",
+                "inactive": "Inactive"
+            },
+            "create": {
+                "button": "Add employee",
+                "title": "New employee",
+                "description": "The employee sets a password when signing up with this email.",
+                "email": "Email",
+                "role": "Role",
+                "firstName": "First name",
+                "lastName": "Last name",
+                "phone": "Phone",
+                "position": "Position",
+                "department": "Department",
+                "emailInvalid": "Enter a valid email",
+                "firstNameRequired": "Enter the first name",
+                "submit": "Add",
+                "submitting": "Adding…",
+                "created": "Employee {email} added",
+                "createdHint": "They set a password when signing up with this email.",
+                "emailTaken": "This email already has an account: it can join only by <link>invitation</link>."
+            },
+            "card": {
+                "back": "Employees",
+                "loadError": "Could not load the employee",
+                "notFound": "Employee not found",
+                "retry": "Retry",
+                "you": "This is you",
+                "profile": {
+                    "title": "Profile",
+                    "contacts": "Contacts",
+                    "work": "Work",
+                    "account": "Account",
+                    "email": "Email",
+                    "phone": "Phone",
+                    "position": "Position",
+                    "department": "Department",
+                    "lastLogin": "Last sign-in",
+                    "joined": "On the team since",
+                    "extra": "More"
+                },
+                "role": {
+                    "label": "Role",
+                    "confirmTitle": "Change the employee's role?",
+                    "confirmDescription": "{name} gets the role «{role}» — their rights in the club change at once.",
+                    "confirm": "Change",
+                    "saving": "Saving…",
+                    "cancel": "Cancel",
+                    "changed": "Role changed",
+                    "error": "Could not change the role"
+                },
+                "deactivate": {
+                    "button": "Deactivate",
+                    "confirmTitle": "Deactivate the employee?",
+                    "confirmDescription": "{name} will no longer be able to sign in to the club's CRM. Access can be given back here.",
+                    "confirm": "Deactivate",
+                    "cancel": "Cancel",
+                    "done": "Employee deactivated",
+                    "error": "Could not deactivate the employee"
+                },
+                "reactivate": {
+                    "button": "Give access back",
+                    "done": "Access given back",
+                    "error": "Could not give access back"
+                }
             }
         },
         "invitations": {
