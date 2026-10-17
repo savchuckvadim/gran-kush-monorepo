@@ -163,7 +163,7 @@ describe("RegistrationLinkJoinService.registerViaLink — лимит испол�
             expect.objectContaining({
                 share: undefined,
                 consent: expect.objectContaining({
-                    token: expect.stringMatching(/^[0-9a-f]{64}$/) as string,
+                    tokenHash: expect.stringMatching(/^[0-9a-f]{64}$/) as string,
                     requestedAt: expect.any(Date) as Date,
                 }),
             })
