@@ -105,6 +105,9 @@ services:
       TG_CLIENT_BOT_API_KEY: ${TG_CLIENT_BOT_API_KEY:-}
       # имя бота кабинета без @: виджет «Войти через Telegram»; без него и токена кнопки нет
       TG_CLIENT_BOT_USERNAME: ${TG_CLIENT_BOT_USERNAME:-}
+      # бот входа в CRM (свой домен crm.): без токена и имени кнопки Telegram в CRM нет
+      TG_CRM_BOT_API_KEY: ${TG_CRM_BOT_API_KEY:-}
+      TG_CRM_BOT_USERNAME: ${TG_CRM_BOT_USERNAME:-}
       PLATFORM_BOOTSTRAP_ADMIN_EMAIL: ${PLATFORM_BOOTSTRAP_ADMIN_EMAIL:-}
       PLATFORM_BOOTSTRAP_ADMIN_PASSWORD: ${PLATFORM_BOOTSTRAP_ADMIN_PASSWORD:-}
       PLATFORM_BOOTSTRAP_ADMIN_NAME: ${PLATFORM_BOOTSTRAP_ADMIN_NAME:-ADMIN}

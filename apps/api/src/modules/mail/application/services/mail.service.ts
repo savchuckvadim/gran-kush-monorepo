@@ -26,6 +26,7 @@ import {
     MAIL_QUEUE_JOB_NAMES,
     MAIL_QUEUE_NAME,
 } from "../../events/mail-events.constants";
+import { AccountExistsTemplate } from "../../templates/account-exists.template";
 import { AccountSetupTemplate } from "../../templates/account-setup.template";
 import { EmailVerificationTemplate } from "../../templates/email-verification.template";
 import { EmployeeInvitationTemplate } from "../../templates/employee-invitation.template";
@@ -254,17 +255,40 @@ export class MailService {
         });
     }
 
-    /** Первый вход через Telegram: ссылка подтверждает почту и входит в кабинет. */
-    public async sendTelegramEmailLink(params: {
+    /** Регистрация на занятый адрес (TASK-665): владельцу — «аккаунт уже есть, войдите». */
+    public async sendAccountExists(params: {
         to: string;
-        token: string;
         language?: SupportedLanguage;
     }): Promise<boolean> {
         const language = params.language || DEFAULT_LANGUAGE;
         const baseUrl = this.frontendUrl("member");
         if (!baseUrl) {
             this.logger.warn(
-                `Telegram email for ${params.to} skipped: cabinet URL is not configured`
+                `Account exists email for ${params.to} skipped: cabinet URL is not configured`
+            );
+            return false;
+        }
+        const html = await render(AccountExistsTemplate({ language, baseUrl }));
+        return this.enqueue({
+            to: params.to,
+            subject: EMAIL_SUBJECTS.ACCOUNT_EXISTS[language],
+            html,
+            emailType: EmailType.ACCOUNT_EXISTS,
+        });
+    }
+
+    /** Шаг «укажите почту» после входа через Telegram: ссылка в то приложение, где входили. */
+    public async sendTelegramEmailLink(params: {
+        to: string;
+        token: string;
+        language?: SupportedLanguage;
+        app?: "crm" | "member";
+    }): Promise<boolean> {
+        const language = params.language || DEFAULT_LANGUAGE;
+        const baseUrl = this.frontendUrl(params.app ?? "member");
+        if (!baseUrl) {
+            this.logger.warn(
+                `Telegram email for ${params.to} skipped: frontend URL is not configured`
             );
             return false;
         }

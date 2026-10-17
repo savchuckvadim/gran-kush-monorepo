@@ -175,6 +175,24 @@ export class EmailVerificationService {
     }
 
     /**
+     * Регистрация на адрес, у которого уже есть аккаунт (TASK-665): владельцу — письмо «войдите».
+     * Сбой почты не меняет ответа регистрации: он одинаков для любого адреса.
+     */
+    async notifyAccountExists(email: string, language?: SupportedLanguage): Promise<void> {
+        try {
+            await this.mailService.sendAccountExists({
+                to: email,
+                language: language ?? DEFAULT_LANGUAGE,
+            });
+        } catch (error: unknown) {
+            this.logger.error(
+                "Account exists email was not queued",
+                error instanceof Error ? error.stack : String(error)
+            );
+        }
+    }
+
+    /**
      * Запрос на сброс пароля
      */
     async requestPasswordReset(

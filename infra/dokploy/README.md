@@ -129,12 +129,13 @@
 
 ## Telegram-боты
 
-Ботов два, и путать их не надо:
+Боты разные, и путать их не надо:
 
 | Бот | Переменные | Для чего |
 |-----|-----------|----------|
 | Служебный | `TG_BOT_API_KEY`, `TG_BOT_CHAT_ID` | пишет в чат команды: регистрации клубов, алерты диска от `pafpaf-janitor` |
-| Клиентский | `TG_CLIENT_BOT_API_KEY` | вход участника через Telegram и сообщения в личку; chat id не нужен — бот пишет каждому сам |
+| Клиентский | `TG_CLIENT_BOT_API_KEY`, `TG_CLIENT_BOT_USERNAME` | вход в кабинет через Telegram и сообщения в личку; chat id не нужен — бот пишет каждому сам; `/setdomain` → `club.<домен>` |
+| Вход в CRM (необязательный) | `TG_CRM_BOT_API_KEY`, `TG_CRM_BOT_USERNAME` | кнопка Telegram на входе в CRM; Telegram Login привязан к одному домену бота, поэтому `/setdomain` → `crm.<домен>` |
 
 Токен обоих — у [@BotFather](https://t.me/BotFather): `/newbot` → имя → username → в ответе `HTTP API token`.
 

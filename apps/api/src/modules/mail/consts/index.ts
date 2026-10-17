@@ -1,3 +1,4 @@
+export * from "./account-exists-email";
 export * from "./account-setup-email";
 export * from "./employee-invitation-email";
 export * from "./mail.constants";

@@ -8,8 +8,8 @@ import { getApiErrorCode, getApiErrorMessage } from "@workspace/api-client/core"
 const KNOWN = [
     "telegram_off",
     "telegram_signature",
-    "telegram_ticket",
-    "telegram_link",
+    "identity_ticket",
+    "identity_link",
     "telegram_taken",
     "telegram_other_linked",
     "account_blocked",

@@ -7,8 +7,8 @@ import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
-import { GoogleOAuthGateway } from "../src/modules/portal/auth/social/domain/google-oauth.gateway";
-import { GoogleProfile } from "../src/modules/portal/auth/social/domain/social-profile";
+import { GoogleOAuthGateway } from "../src/modules/portal/auth/identity/domain/google-oauth.gateway";
+import { GoogleProfile } from "../src/modules/portal/auth/identity/domain/google-profile";
 
 import { cabinetSession } from "./support/sessions";
 
@@ -22,6 +22,10 @@ const setCookies = (res: request.Response): string[] => {
     const raw = res.headers["set-cookie"];
     return Array.isArray(raw) ? raw : raw ? [raw] : [];
 };
+/** Способ входа Google в ответе «Вход и безопасность» */
+const googleOf = (body: { methods: { provider: string; linked?: boolean }[] }) =>
+    body.methods.find((method) => method.provider === "google");
+
 const cookieOf = (res: request.Response, name: string): string | undefined =>
     setCookies(res)
         .find((cookie) => cookie.startsWith(`${name}=`))
@@ -110,10 +114,10 @@ describe("Account security (e2e)", () => {
             .set("Cookie", cookies);
         expect(start.status).toBe(302);
         const state = new URL(start.headers.location).searchParams.get("state") ?? "";
-        const flow = cookieOf(start, "google_oauth_flow") ?? "";
+        const flow = cookieOf(start, "oauth_flow") ?? "";
         const back = await request(app.getHttpServer())
             .get(`/cabinet/auth/google/callback?code=abc&state=${encodeURIComponent(state)}`)
-            .set("Cookie", `google_oauth_flow=${flow}`);
+            .set("Cookie", `oauth_flow=${flow}`);
         expect(back.status).toBe(302);
         return new URL(back.headers.location);
     };
@@ -139,11 +143,15 @@ describe("Account security (e2e)", () => {
     it("a password needs the current one; the change ends every other session and keeps this one", async () => {
         const ana = await account("ana", PASSWORD);
         const otherDevice = await cabinetSession(app, ana.user.id);
-        expect((await security(ana.cookies).get()).body).toEqual({
-            email: ana.email,
-            hasPassword: true,
-            google: { linked: false, email: null },
-            telegram: { linked: false, username: null },
+        const overview = (await security(ana.cookies).get()).body;
+        expect(overview).toMatchObject({ email: ana.email, hasPassword: true });
+        expect(googleOf(overview)).toEqual({
+            provider: "google",
+            flow: "redirect",
+            available: true,
+            linked: false,
+            email: null,
+            username: null,
         });
 
         const missing = await security(ana.cookies).password({ newPassword: NEW_PASSWORD });
@@ -190,7 +198,7 @@ describe("Account security (e2e)", () => {
         );
         expect(result.pathname).toBe("/es/me");
         expect(result.searchParams.get("google")).toBe("linked");
-        expect((await security(bob.cookies).get()).body.google).toEqual({
+        expect(googleOf((await security(bob.cookies).get()).body)).toMatchObject({
             linked: true,
             email: `bob.g-${suffix}@test.local`,
         });
@@ -203,11 +211,11 @@ describe("Account security (e2e)", () => {
             `bob.g-${suffix}@test.local`
         );
         expect(taken.searchParams.get("google")).toBe("google_taken");
-        expect((await security(eve.cookies).get()).body.google.linked).toBe(false);
+        expect(googleOf((await security(eve.cookies).get()).body)?.linked).toBe(false);
 
         const unlinked = await security(bob.cookies).unlink();
         expect(unlinked.status).toBe(200);
-        expect(unlinked.body.google).toEqual({ linked: false, email: null });
+        expect(googleOf(unlinked.body)).toMatchObject({ linked: false, email: null });
         expect((await security(bob.cookies).unlink()).body.code).toBe("google_not_linked");
     });
 

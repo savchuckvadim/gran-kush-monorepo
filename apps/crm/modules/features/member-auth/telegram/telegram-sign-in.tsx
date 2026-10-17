@@ -6,11 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { useQueryClient } from "@tanstack/react-query";
 
-import {
-    cabinetKeys,
-    useTelegramConfig,
-    useTelegramSignIn,
-} from "@/modules/entities/cabinet-account";
+import { cabinetKeys, useTelegramBotId, useWidgetSignIn } from "@/modules/entities/cabinet-account";
 import { TelegramLoginButton } from "@/modules/shared/ui/TelegramLoginButton";
 
 import { TelegramEmailDialog } from "./telegram-email-dialog";
@@ -25,12 +21,11 @@ export function TelegramSignIn({ returnTo }: { returnTo: string }) {
     const locale = useLocale();
     const router = useRouter();
     const queryClient = useQueryClient();
-    const config = useTelegramConfig();
-    const signIn = useTelegramSignIn();
+    const botId = useTelegramBotId();
+    const signIn = useWidgetSignIn();
     const errorText = useTelegramErrorText();
     const [ticket, setTicket] = useState<string | null>(null);
 
-    const botId = config.data?.enabled ? config.data.botId : null;
     if (!botId) return null;
 
     return (
@@ -42,16 +37,21 @@ export function TelegramSignIn({ returnTo }: { returnTo: string }) {
                 className="w-full"
                 disabled={signIn.isPending}
                 onAuth={(user) =>
-                    signIn.mutate(user, {
-                        onSuccess: (result) => {
-                            if (result.status === "signed_in") {
-                                void queryClient.invalidateQueries({ queryKey: cabinetKeys.all });
-                                router.replace(returnTo);
-                            } else if (result.ticket) {
-                                setTicket(result.ticket);
-                            }
-                        },
-                    })
+                    signIn.mutate(
+                        { provider: "telegram", payload: { ...user } },
+                        {
+                            onSuccess: (result) => {
+                                if (result.status === "signed_in") {
+                                    void queryClient.invalidateQueries({
+                                        queryKey: cabinetKeys.all,
+                                    });
+                                    router.replace(returnTo);
+                                } else if (result.ticket) {
+                                    setTicket(result.ticket);
+                                }
+                            },
+                        }
+                    )
                 }
             />
             {signIn.isPending && (

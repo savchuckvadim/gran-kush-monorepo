@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 
 import { Button, FieldInput, ModalDialog } from "@workspace/ui";
 
-import { useRequestTelegramEmail } from "@/modules/entities/cabinet-account";
+import { useRequestIdentityEmail } from "@/modules/entities/cabinet-account";
 
 import { useTelegramErrorText } from "./use-telegram-error-text";
 
@@ -25,7 +25,7 @@ interface TelegramEmailDialogProps {
 export function TelegramEmailDialog({ ticket, onClose }: TelegramEmailDialogProps) {
     const t = useTranslations("cabinet.auth.telegram.email");
     const errorText = useTelegramErrorText();
-    const request = useRequestTelegramEmail();
+    const request = useRequestIdentityEmail();
     const form = useForm<{ email: string }>({ defaultValues: { email: "" } });
 
     const close = () => {

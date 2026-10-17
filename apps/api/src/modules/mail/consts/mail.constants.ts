@@ -55,6 +55,11 @@ export const EMAIL_SUBJECTS = {
         es: "Confirma tu correo para entrar con Telegram",
         en: "Confirm your email to sign in with Telegram",
     },
+    ACCOUNT_EXISTS: {
+        ru: "У вас уже есть аккаунт",
+        es: "Ya tienes una cuenta",
+        en: "You already have an account",
+    },
 } as const;
 
 /**

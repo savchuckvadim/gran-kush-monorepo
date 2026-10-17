@@ -34,6 +34,7 @@ export enum EmailType {
     EMPLOYEE_INVITATION = "employee-invitation",
     ACCOUNT_SETUP = "account-setup",
     TELEGRAM_EMAIL = "telegram-email",
+    ACCOUNT_EXISTS = "account-exists",
     OTHER = "other",
 }
 
@@ -48,5 +49,6 @@ export const EMAIL_TYPE_LABELS: Record<EmailType, string> = {
     [EmailType.EMPLOYEE_INVITATION]: "Employee Invitation",
     [EmailType.ACCOUNT_SETUP]: "Account Setup",
     [EmailType.TELEGRAM_EMAIL]: "Telegram Email Link",
+    [EmailType.ACCOUNT_EXISTS]: "Account Exists",
     [EmailType.OTHER]: "Other",
 } as const;

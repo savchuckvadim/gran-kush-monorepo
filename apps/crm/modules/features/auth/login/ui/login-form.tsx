@@ -13,7 +13,11 @@ import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
 import { useLoginForm } from "../hooks/useLoginForm";
 import { useLoginSession } from "../hooks/useLoginSession";
-import { InvalidCredentialsError, useSubmitLoginForm } from "../hooks/useSubmitLoginForm";
+import {
+    InvalidCredentialsError,
+    isTooManyAttempts,
+    useSubmitLoginForm,
+} from "../hooks/useSubmitLoginForm";
 import { resolveClubTarget } from "../lib/club-target";
 
 import { ClubPicker } from "./club-picker";
@@ -68,7 +72,9 @@ export function LoginForm() {
                 <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
                     {login.error instanceof InvalidCredentialsError
                         ? t("error")
-                        : t("genericError")}
+                        : isTooManyAttempts(login.error)
+                          ? t("tooManyAttempts")
+                          : t("genericError")}
                 </div>
             )}
             {!login.error && (urlError === "google_auth" || urlError === "google_off") && (

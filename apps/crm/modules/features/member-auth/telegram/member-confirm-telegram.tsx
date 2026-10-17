@@ -9,7 +9,7 @@ import { Loader2, XCircle } from "lucide-react";
 
 import { Button } from "@workspace/ui";
 
-import { cabinetKeys, confirmTelegramEmail } from "@/modules/entities/cabinet-account";
+import { cabinetKeys, confirmIdentityEmail } from "@/modules/entities/cabinet-account";
 import { useCabinetLinks } from "@/modules/processes/member-auth";
 import { useMountAction } from "@/modules/shared/lib/use-mount-action";
 
@@ -26,7 +26,7 @@ export function MemberConfirmTelegram({ token }: { token: string }) {
     const queryClient = useQueryClient();
     const errorText = useTelegramErrorText();
     const confirm = useMountAction(async () => {
-        await confirmTelegramEmail(token);
+        await confirmIdentityEmail(token);
         await queryClient.invalidateQueries({ queryKey: cabinetKeys.all });
         router.replace(links.home);
     });

@@ -38,6 +38,7 @@
                 "invalidEmail": "Введите корректный email",
                 "passwordRequired": "Введите пароль",
                 "invalidCredentials": "Неверный email или пароль",
+                "tooManyAttempts": "Слишком много неудачных попыток. Подождите 15 минут или войдите через Google или Telegram.",
                 "emailNotConfirmed": "Почта не подтверждена. Откройте ссылку из письма, которое мы отправили при регистрации."
             },
             "register": {
@@ -96,8 +97,8 @@
                 "errors": {
                     "telegram_off": "Вход через Telegram сейчас недоступен",
                     "telegram_signature": "Telegram не подтвердил вход. Попробуйте ещё раз.",
-                    "telegram_ticket": "Время на вход истекло. Нажмите кнопку Telegram ещё раз.",
-                    "telegram_link": "Ссылка не сработала: она устарела или уже использована. Войдите через Telegram ещё раз.",
+                    "identity_ticket": "Время на вход истекло. Нажмите кнопку Telegram ещё раз.",
+                    "identity_link": "Ссылка не сработала: она устарела или уже использована. Войдите через Telegram ещё раз.",
                     "telegram_taken": "Этот Telegram уже привязан к другому аккаунту",
                     "telegram_other_linked": "К аккаунту уже привязан другой Telegram — сначала отвяжите его",
                     "account_blocked": "Аккаунт заблокирован. Напишите в поддержку.",

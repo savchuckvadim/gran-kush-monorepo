@@ -211,38 +211,68 @@ erDiagram
 
 ### 6.1 Провайдеры
 
-Провайдер — адаптер с общим контрактом, сценарии о конкретных провайдерах не знают:
+Код — `modules/portal/auth/identity`. Провайдер — адаптер с общим контрактом, сценарии о конкретных
+провайдерах не знают:
 
 ```ts
-interface IdentityProviderAdapter {
-    id: IdentityProviderId;                    // "google" | "telegram" | …
-    flow: "redirect" | "widget";               // OAuth-редирект или виджет на странице
-    isEnabled(audience): boolean;              // ключи заданы для этой аудитории
-    publicConfig(audience): Record<string, unknown>; // что нужно фронту: { botId } и т. п.
+interface IdentityProviderBase {
+    key: IdentityProviderKey;                        // "google" | "telegram" = enum IdentityProvider в БД
+    isEnabled(audience): boolean;                    // ключи заданы для этой аудитории
+    publicConfig(audience): ProviderPublicConfig;    // что нужно кнопке: { botUsername, botId } и т. п.
 }
-// redirect: authorizationUrl(state) + exchange(code) → ExternalProfile
-// widget:   verify(payload) → ExternalProfile
+interface RedirectIdentityProvider extends IdentityProviderBase {  // Google
+    flow: "redirect";
+    authorizationUrl({ redirectUri, state, nonce, codeChallenge }): string;
+    exchange({ code, redirectUri, codeVerifier, nonce }): Promise<ExternalProfile>; // сверяет nonce
+}
+interface WidgetIdentityProvider extends IdentityProviderBase {    // Telegram
+    flow: "widget";
+    verify(audience, payload): ExternalProfile;       // проверяет подпись ответа виджета
+}
 interface ExternalProfile {
-    provider; subject; email?; emailVerified; displayName?; username?; locale?;
+    provider; subject; email | null; emailVerified; displayName; givenName; familyName; username; locale;
 }
 ```
 
-Новый провайдер = адаптер + значение в enum `IdentityProvider` + кнопка на фронте в реестре кнопок.
-Telegram настраивается на аудиторию: один бот привязан к одному домену (`/setdomain`), поэтому для CRM
-нужен свой бот, без него кнопки в CRM нет.
+`IdentityProviderRegistry` собирает адаптеры (DI-токен `IDENTITY_PROVIDERS`) и раздаёт их маршрутам по ключу:
+неизвестный ключ — 404 `identity_unknown`, не настроенный для аудитории или не того вида — 503 `{provider}_off`.
+State, кука привязки и PKCE редирект-входа — общий `OAuthRedirectFlowService` (state подписан ключом,
+производным от `JWT_SECRET`, и привязан к аудитории и провайдеру).
+
+**Новый провайдер** = адаптер в `identity/infrastructure/<provider>/`, строка в `IDENTITY_PROVIDERS`
+(`identity.module.ts`), значение в `IDENTITY_PROVIDER_KEYS` и в enum `IdentityProvider` схемы (миграция),
+адрес возврата `{API}/{aud}/auth/{provider}/callback` у провайдера и кнопка на фронте. Маршруты, сценарии,
+сессии и «Вход и безопасность» трогать не нужно.
+
+Telegram настраивается на аудиторию: Telegram Login привязан к одному домену бота (`/setdomain`), поэтому
+у кабинета бот `TG_CLIENT_BOT_*` (club.), у CRM — свой необязательный `TG_CRM_BOT_*` (crm.); без него
+кнопки Telegram в CRM нет.
 
 ### 6.2 Маршруты
 
 | Маршрут | Что делает |
 |---|---|
 | `GET /{aud}/auth/providers` | Включённые провайдеры и их публичные параметры |
-| `GET /{aud}/auth/{provider}/start?intent=…` | Редирект-провайдер: на страницу провайдера |
-| `GET /{aud}/auth/{provider}/callback` | Возврат от провайдера |
-| `POST /{aud}/auth/{provider}/verify` | Виджет-провайдер: проверка подписанного ответа |
-| `POST /{aud}/auth/identity/email` | Шаг «укажите почту» для провайдера без почты |
-| `POST /{aud}/auth/identity/confirm` | Ссылка из письма: вход и привязка |
+| `GET /{aud}/auth/{provider}/start?locale&returnTo&intent&token` | Редирект-провайдер: к провайдеру, кука `oauth_flow` на `/{aud}/auth/{provider}` |
+| `GET /{aud}/auth/{provider}/link` | То же для аккаунта сессии (`intent=link`), возврат на «Вход и безопасность» |
+| `GET /{aud}/auth/{provider}/callback` | Возврат от провайдера: сессия и редирект; отказ — `/auth/login?error={provider}_auth` |
+| `POST /{aud}/auth/{provider}/verify` `{ payload }` | Виджет: `signed_in` (куки) или `email_required` + билет |
+| `POST /{aud}/auth/identity/email` `{ ticket, email }` | Шаг «укажите почту»: одноразовая ссылка (`identity_email_link`) |
+| `POST /{aud}/auth/identity/confirm` `{ token }` | Ссылка из письма: найти/завести аккаунт, привязать, сессия |
+| `GET /{aud}/account/security` | Пароль и способы входа (`methods[]`: provider, flow, available, linked, email, username) |
+| `PUT /{aud}/account/security/password` | Задать/сменить пароль; остальные сессии отзываются |
+| `POST /{aud}/account/security/{provider}` `{ payload }` | Привязать виджет-провайдера |
+| `DELETE /{aud}/account/security/{provider}` | Отвязать; последний способ — 409 `last_sign_in_method` |
+| `POST /{aud}/account/security/sign-out-everywhere` | Отозвать все сессии аккаунта |
+| `/{aud}/account/sessions` | Устройства (§3) |
 
-Намерения (`intent`): `sign_in`, `link` (из сессии), `accept_invitation`, `club_signup`.
+Намерения (`intent`, едут в подписанном state): без намерения — вход; `link` (аккаунт из сессии на старте),
+`invitation` (CRM: принять приглашение, адрес провайдера = адрес приглашения), `club_signup` (CRM: на «Новый
+клуб»). Завершение редиректа у аудиторий своё: `CabinetIdentitySignInService`, `CrmIdentitySignInService`.
+
+Коды отказов: `{provider}_off | _signature | _unverified | _taken | _other_linked`, общие — `identity_unknown`,
+`identity_ticket`, `identity_link`, `account_blocked`, `account_gone`. Исход привязки редиректом — параметр по
+имени провайдера на странице безопасности: `?google=linked` или код отказа.
 
 ### 6.3 Общий сценарий входа
 
@@ -271,8 +301,8 @@ sequenceDiagram
 
 Почта, подтверждённая провайдером или ссылкой из письма, — доказательство владения адресом: аккаунт,
 заведённый клубом (`pending_claim`), клеймится, его неподтверждённый пароль сбрасывается, сессии
-отзываются, ждавшие клейма членства подтверждаются. Один способ на провайдера на аккаунт
-(`@@unique([userId, provider])`); чужой способ не перепривязывается.
+отзываются. Один способ на провайдера на аккаунт (`@@unique([userId, provider])`); чужой способ не
+перепривязывается.
 
 ---
 
@@ -298,13 +328,16 @@ stateless-JWT в ссылках:
 
 ## 8. Регистрация и защита от перебора
 
-- Регистрация участника на занятый email отвечает так же, как на новый («проверьте почту»), а владельцу
-  адреса уходит письмо «вы уже зарегистрированы — войдите или восстановите пароль».
+- Регистрация участника на занятый email отвечает так же, как на новый (`{ email, awaitingEmailConfirmation }`,
+  без id), а владельцу адреса уходит письмо «вы уже зарегистрированы — войдите или восстановите пароль».
+  Пароль хешируется и в этой ветке: по времени ответа адрес тоже не отличить.
 - Регистрация клуба на занятый email — 409 с предложением войти: владелец клуба входит сразу после
   регистрации (решение 2026-10-14), а одинаковый ответ этого не позволяет. Риск перебора здесь принят
   осознанно: форма B2B, под общим лимитом регистраций.
-- Вход: кроме лимита по IP, неудачные попытки считаются по email в Redis — после 10 за 15 минут вход
-  этим адресом закрыт до конца окна при любом IP.
+- Вход: кроме лимита по IP, неудачные попытки считаются по email в Redis (`PasswordSignInService`) — после
+  `LOGIN_MAX_FAILURES` (10) за `LOGIN_FAILURE_WINDOW_SECONDS` (15 минут) вход паролем этим адресом закрыт до
+  конца окна при любом IP (429 `too_many_attempts`); Google, Telegram и сброс пароля работают. Неизвестный
+  адрес сравнивается с хешем-заглушкой — время ответа одно. Redis недоступен — счётчик пропускается.
 - Ответ «почта не подтверждена» — только после верного пароля.
 
 ---

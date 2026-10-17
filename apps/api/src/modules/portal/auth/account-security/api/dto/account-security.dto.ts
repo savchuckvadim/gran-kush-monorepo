@@ -3,45 +3,54 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsOptional, IsString, MaxLength } from "class-validator";
 
 import { IsAccountPassword, PASSWORD_MAX_LENGTH } from "@common/decorators/dto/password.decorator";
+import {
+    IDENTITY_PROVIDER_KEYS,
+    type IdentityProviderKey,
+} from "@modules/portal/auth/identity/domain/identity-provider";
 
-export class GoogleSignInDto {
-    @ApiProperty({ type: Boolean })
+export class SignInMethodDto {
+    @ApiProperty({ enum: Object.values(IDENTITY_PROVIDER_KEYS) })
+    provider: IdentityProviderKey;
+
+    @ApiProperty({
+        enum: ["redirect", "widget"],
+        description:
+            "redirect — привязка через `GET /{aud}/auth/{provider}/link`; widget — `POST …/security/{provider}`",
+    })
+    flow: "redirect" | "widget";
+
+    @ApiProperty({ description: "Провайдер настроен в этом приложении: можно привязать" })
+    available: boolean;
+
+    @ApiProperty()
     linked: boolean;
 
     @ApiProperty({ type: String, nullable: true, example: "ana@gmail.com" })
     email: string | null;
-}
-
-export class TelegramSignInDto {
-    @ApiProperty({ type: Boolean })
-    linked: boolean;
 
     @ApiProperty({ type: String, nullable: true, example: "ana_lopez" })
     username: string | null;
 }
 
-/** Способы входа аккаунта: пароль, Google, Telegram. */
+/** Способы входа аккаунта: пароль и провайдеры. */
 export class AccountSecurityDto {
     @ApiProperty({ type: String, example: "ana@example.com" })
     email: string;
 
     @ApiProperty({
         type: Boolean,
-        description: "Пароль задан; Google-аккаунт может войти и без него",
+        description: "Пароль задан; аккаунт с провайдером может войти и без него",
     })
     hasPassword: boolean;
 
-    @ApiProperty({ type: () => GoogleSignInDto })
-    google: GoogleSignInDto;
-
-    @ApiProperty({ type: () => TelegramSignInDto })
-    telegram: TelegramSignInDto;
+    @ApiProperty({ type: () => [SignInMethodDto] })
+    methods: SignInMethodDto[];
 }
 
 export class ChangeAccountPasswordDto {
     @ApiPropertyOptional({
         type: String,
-        description: "Текущий пароль; не нужен, если пароля ещё нет (вход только через Google)",
+        description: "Текущий пароль; не нужен, если пароля ещё нет (вход только через провайдера)",
     })
     @IsOptional()
     @IsString()

@@ -80,3 +80,13 @@ export const UPLOAD_THROTTLE = {
         limit: envLimit("THROTTLE_UPLOAD_LIMIT", 20),
     },
 };
+
+/**
+ * Неудачные входы паролем на один адрес (TASK-667): лимит на IP подбор с разных адресов не
+ * останавливает. После `maxFailures` неудач за окно вход паролем по адресу закрыт до конца окна;
+ * Google, Telegram и сброс пароля работают, поэтому владельца так надолго не запереть.
+ */
+export const LOGIN_FAILURES = {
+    maxFailures: envLimit("LOGIN_MAX_FAILURES", 10),
+    windowSeconds: envLimit("LOGIN_FAILURE_WINDOW_SECONDS", 15 * 60),
+};

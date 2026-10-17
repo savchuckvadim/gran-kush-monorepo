@@ -6,18 +6,18 @@ import {
 
 import { $cabinetApi } from "@/modules/shared/api";
 
-/** Способы входа аккаунта: задан ли пароль, привязан ли Google. */
+import type { SignInProviderKey, WidgetPayload } from "./identity-auth.api";
+
+/** Способы входа аккаунта: задан ли пароль, какие провайдеры привязаны. */
 export type AccountSecurity = SchemaAccountSecurityDto;
+export type SignInMethod = AccountSecurity["methods"][number];
 
 export async function getAccountSecurity(): Promise<AccountSecurity> {
     const response = await $cabinetApi.GET("/cabinet/account/security");
     return assertOpenApiOk<AccountSecurity>(response);
 }
 
-/**
- * Задать или сменить пароль. Все сессии аккаунта (и в CRM) отзываются, это устройство получает
- * новую — куки ставит ответ.
- */
+/** Задать или сменить пароль. Остальные сессии аккаунта (и в CRM) отзываются, эта остаётся. */
 export async function setAccountPassword(
     body: SchemaChangeAccountPasswordDto
 ): Promise<AccountSecurity> {
@@ -25,9 +25,23 @@ export async function setAccountPassword(
     return assertOpenApiOk<AccountSecurity>(response);
 }
 
-/** Отвязать Google; без пароля API откажет (`password_required`). */
-export async function unlinkGoogle(): Promise<AccountSecurity> {
-    const response = await $cabinetApi.DELETE("/cabinet/account/security/google");
+/** Привязать виджет-провайдера (Telegram) подписанным ответом виджета. */
+export async function linkWidgetProvider(input: {
+    provider: SignInProviderKey;
+    payload: WidgetPayload;
+}): Promise<AccountSecurity> {
+    const response = await $cabinetApi.POST("/cabinet/account/security/{provider}", {
+        params: { path: { provider: input.provider } },
+        body: { payload: input.payload },
+    });
+    return assertOpenApiOk<AccountSecurity>(response);
+}
+
+/** Отвязать способ входа; последний API не снимет (`last_sign_in_method`). */
+export async function unlinkProvider(provider: SignInProviderKey): Promise<AccountSecurity> {
+    const response = await $cabinetApi.DELETE("/cabinet/account/security/{provider}", {
+        params: { path: { provider } },
+    });
     return assertOpenApiOk<AccountSecurity>(response);
 }
 

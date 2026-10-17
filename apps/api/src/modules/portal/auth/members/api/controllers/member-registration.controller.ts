@@ -68,13 +68,14 @@ export class MemberRegistrationController {
     @Public()
     @ApiOperation({
         summary:
-            "Register global member account. If portal context (X-Portal-*) is present — also joins that club.",
+            "Register global member account. If portal context (X-Portal-*) is present — also joins that club. " +
+            "The answer is the same for a taken email: its owner gets an email instead",
     })
     @ApiSuccessResponse(RegisterMemberResponseDto, {
         status: 201,
         description: "Member registered successfully",
     })
-    @ApiErrorResponse([400, 409])
+    @ApiErrorResponse([400])
     async register(
         @Body() dto: DynamicMemberRegistrationDto,
         @Req() request: Request,

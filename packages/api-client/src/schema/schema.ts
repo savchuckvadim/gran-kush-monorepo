@@ -1016,7 +1016,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Register global member account. If portal context (X-Portal-*) is present — also joins that club. */
+        /** Register global member account. If portal context (X-Portal-*) is present — also joins that club. The answer is the same for a taken email: its owner gets an email instead */
         post: operations["MemberRegistration_register"];
         delete?: never;
         options?: never;
@@ -1143,15 +1143,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/cabinet/auth/google/start": {
+    "/crm/auth/providers": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Начать вход через Google (редирект на Google) */
-        get: operations["MemberGoogleAuth_start"];
+        /** Способы входа CRM и параметры их кнопок */
+        get: operations["CrmIdentityAuth_providers"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1160,15 +1160,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/cabinet/auth/google/link": {
+    "/crm/auth/{provider}/start": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Привязать Google к своему аккаунту (редирект на Google) */
-        get: operations["MemberGoogleAuth_link"];
+        /** Начать вход у редирект-провайдера (редирект к провайдеру) */
+        get: operations["CrmIdentityAuth_start"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1177,15 +1177,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/crm/auth/google/start": {
+    "/crm/auth/{provider}/link": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Начать вход через Google (редирект на Google) */
-        get: operations["EmployeeGoogleAuth_start"];
+        /** Привязать редирект-провайдера к своему аккаунту (редирект) */
+        get: operations["CrmIdentityAuth_link"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1194,24 +1194,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/cabinet/auth/telegram/config": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Настроен ли вход через Telegram и имя бота для виджета */
-        get: operations["MemberTelegramAuth_config"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/cabinet/auth/telegram": {
+    "/crm/auth/{provider}/verify": {
         parameters: {
             query?: never;
             header?: never;
@@ -1221,17 +1204,17 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Войти через Telegram
-         * @description Привязанный Telegram входит (куки сессии). Новый — `email_required` с билетом на шаг «укажите почту». Неверная подпись — 400 `telegram_signature`.
+         * Войти через виджет провайдера
+         * @description Привязанный способ входит (куки сессии). Новый без почты — `email_required` с билетом. Неверная подпись — 400 `{provider}_signature`.
          */
-        post: operations["MemberTelegramAuth_signIn"];
+        post: operations["CrmIdentityAuth_verify"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/cabinet/auth/telegram/email": {
+    "/crm/auth/identity/email": {
         parameters: {
             query?: never;
             header?: never;
@@ -1242,16 +1225,16 @@ export interface paths {
         put?: never;
         /**
          * Шаг «укажите почту»: отправить ссылку подтверждения
-         * @description Ответ одинаковый для любого адреса. Устаревший билет — 400 `telegram_ticket`.
+         * @description Ответ одинаковый для любого адреса. Устаревший билет — 400 `identity_ticket`.
          */
-        post: operations["MemberTelegramAuth_email"];
+        post: operations["CrmIdentityAuth_email"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/cabinet/auth/telegram/confirm": {
+    "/crm/auth/identity/confirm": {
         parameters: {
             query?: never;
             header?: never;
@@ -1260,9 +1243,204 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Ссылка из письма: войти, заведя аккаунт или привязав Telegram к существующему */
-        post: operations["MemberTelegramAuth_confirm"];
+        /**
+         * Ссылка из письма: войти, заведя аккаунт или привязав способ к существующему
+         * @description Ссылка одноразовая: повтор или устаревшая — 400 `identity_link`.
+         */
+        post: operations["CrmIdentityAuth_confirm"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cabinet/auth/providers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Способы входа кабинета и параметры их кнопок */
+        get: operations["CabinetIdentityAuth_providers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cabinet/auth/{provider}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Начать вход у редирект-провайдера (редирект к провайдеру) */
+        get: operations["CabinetIdentityAuth_start"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cabinet/auth/{provider}/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Привязать редирект-провайдера к своему аккаунту (редирект) */
+        get: operations["CabinetIdentityAuth_link"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cabinet/auth/{provider}/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Войти через виджет провайдера
+         * @description Привязанный способ входит (куки сессии). Новый без почты — `email_required` с билетом. Неверная подпись — 400 `{provider}_signature`.
+         */
+        post: operations["CabinetIdentityAuth_verify"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cabinet/auth/identity/email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Шаг «укажите почту»: отправить ссылку подтверждения
+         * @description Ответ одинаковый для любого адреса. Устаревший билет — 400 `identity_ticket`.
+         */
+        post: operations["CabinetIdentityAuth_email"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cabinet/auth/identity/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ссылка из письма: войти, заведя аккаунт или привязав способ к существующему
+         * @description Ссылка одноразовая: повтор или устаревшая — 400 `identity_link`.
+         */
+        post: operations["CabinetIdentityAuth_confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/account/security": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Способы входа: задан ли пароль, какие провайдеры привязаны */
+        get: operations["CrmAccountSecurity_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/account/security/sign-out-everywhere": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Выйти на всех устройствах
+         * @description Отзывает все сессии аккаунта — в CRM и в кабинете — и снимает куки здесь.
+         */
+        post: operations["CrmAccountSecurity_signOutEverywhere"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/account/security/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Задать или сменить пароль
+         * @description Остальные сессии аккаунта (кабинет и CRM) отзываются, текущая остаётся. Неверный текущий пароль — 400 с code `wrong_password`.
+         */
+        put: operations["CrmAccountSecurity_setPassword"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/account/security/{provider}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Привязать виджет-провайдера (подписанный ответ виджета)
+         * @description Способ другого аккаунта — 409 `{provider}_taken`, неверная подпись — 400 `{provider}_signature`.
+         */
+        post: operations["CrmAccountSecurity_link"];
+        /**
+         * Отвязать способ входа
+         * @description Последний способ входа не снимается — 409 с code `last_sign_in_method`.
+         */
+        delete: operations["CrmAccountSecurity_unlink"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1275,10 +1453,30 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Способы входа: задан ли пароль, привязаны ли Google и Telegram */
+        /** Способы входа: задан ли пароль, какие провайдеры привязаны */
         get: operations["CabinetAccountSecurity_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cabinet/account/security/sign-out-everywhere": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Выйти на всех устройствах
+         * @description Отзывает все сессии аккаунта — в кабинете и в CRM — и снимает куки здесь.
+         */
+        post: operations["CabinetAccountSecurity_signOutEverywhere"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1305,7 +1503,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/cabinet/account/security/google": {
+    "/cabinet/account/security/{provider}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1314,56 +1512,16 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post?: never;
         /**
-         * Отвязать Google
+         * Привязать виджет-провайдера (подписанный ответ виджета)
+         * @description Способ другого аккаунта — 409 `{provider}_taken`, неверная подпись — 400 `{provider}_signature`.
+         */
+        post: operations["CabinetAccountSecurity_link"];
+        /**
+         * Отвязать способ входа
          * @description Последний способ входа не снимается — 409 с code `last_sign_in_method`.
          */
         delete: operations["CabinetAccountSecurity_unlink"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/cabinet/account/security/telegram": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Привязать Telegram (подписанный профиль из виджета)
-         * @description Telegram другого аккаунта — 409 `telegram_taken`, неверная подпись — 400 `telegram_signature`.
-         */
-        post: operations["CabinetAccountSecurity_linkTelegramAccount"];
-        /**
-         * Отвязать Telegram
-         * @description Последний способ входа не снимается — 409 с code `last_sign_in_method`.
-         */
-        delete: operations["CabinetAccountSecurity_unlinkTelegramAccount"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/cabinet/account/security/sign-out-everywhere": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Выйти на всех устройствах
-         * @description Отзывает все сессии аккаунта — в кабинете и в CRM — и снимает куки здесь.
-         */
-        post: operations["CabinetAccountSecurity_signOutEverywhere"];
-        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -4043,24 +4201,14 @@ export interface components {
             /** @description Документы и подпись нового аккаунта. До подтверждения почты сессии нет, поэтому файлы едут с анкетой */
             files?: components["schemas"]["UploadMemberFilesDto"];
         };
-        RegisteredUserInfoDto: {
-            /** @example 123e4567-e89b-12d3-a456-426614174000 */
-            id: string;
+        RegisterMemberResponseDto: {
             /** @example user@example.com */
             email: string;
-        };
-        RegisterMemberResponseDto: {
-            user: components["schemas"]["RegisteredUserInfoDto"];
             /**
              * @description Сессии нет: войти можно после подтверждения почты по ссылке из письма
              * @example true
              */
             awaitingEmailConfirmation: boolean;
-            /**
-             * @description Мост member, если регистрация шла в контексте портала
-             * @example 123e4567-e89b-12d3-a456-426614174999
-             */
-            memberId?: string;
         };
         UploadMemberFilesResponseDto: {
             /** @example true */
@@ -4087,77 +4235,75 @@ export interface components {
              */
             message: string;
         };
-        TelegramConfigDto: {
-            /** @description Бот настроен — показывать кнопку Telegram */
-            enabled: boolean;
-            /** @example pafpaf_bot */
-            botUsername: string | null;
+        IdentityProviderDto: {
+            /** @enum {string} */
+            key: "google" | "telegram";
             /**
-             * @description Числовой id бота — для окна входа Telegram (`Telegram.Login.auth`)
-             * @example 123456789
+             * @description redirect — кнопка ведёт на `start`; widget — окно провайдера, ответ на `verify`
+             * @enum {string}
              */
-            botId: number | null;
+            flow: "redirect" | "widget";
+            /** @description Публичные параметры кнопки: у Telegram — `botUsername`, `botId` */
+            config: {
+                [key: string]: string | number | boolean;
+            };
         };
-        TelegramAuthDto: {
-            /** @example 123456789 */
-            id: number;
-            /** @example Ana */
-            first_name: string;
-            /** @example López */
-            last_name?: string;
-            /** @example ana_lopez */
-            username?: string;
-            photo_url?: string;
-            /**
-             * @description Unix time входа в Telegram
-             * @example 1760000000
-             */
-            auth_date: number;
-            /** @description Подпись Telegram, hex */
-            hash: string;
+        IdentityProvidersResponseDto: {
+            providers: components["schemas"]["IdentityProviderDto"][];
         };
-        TelegramSignInResultDto: {
+        IdentityVerifyDto: {
+            /** @description Ответ виджета провайдера как есть (у Telegram — поля Telegram Login с `hash`) */
+            payload: {
+                [key: string]: unknown;
+            };
+        };
+        IdentitySignInResultDto: {
             /**
-             * @description email_required — Telegram ещё не привязан: нужен шаг «укажите почту»
+             * @description email_required — способ ещё не привязан и почты нет: шаг «укажите почту»
              * @enum {string}
              */
             status: "signed_in" | "email_required";
             /** @description Билет шага «укажите почту», 30 минут */
             ticket?: string;
         };
-        TelegramEmailDto: {
+        IdentityEmailDto: {
             ticket: string;
             /** @example ana@example.com */
             email: string;
         };
-        TelegramStatusDto: {
+        IdentityStatusDto: {
             /** @enum {string} */
             status: "signed_in" | "email_sent";
         };
-        TelegramConfirmDto: {
+        IdentityConfirmDto: {
             /** @description Токен из ссылки в письме */
             token: string;
         };
-        GoogleSignInDto: {
+        SignInMethodDto: {
+            /** @enum {string} */
+            provider: "google" | "telegram";
+            /**
+             * @description redirect — привязка через `GET /{aud}/auth/{provider}/link`; widget — `POST …/security/{provider}`
+             * @enum {string}
+             */
+            flow: "redirect" | "widget";
+            /** @description Провайдер настроен в этом приложении: можно привязать */
+            available: boolean;
             linked: boolean;
             /** @example ana@gmail.com */
             email: string | null;
-        };
-        TelegramSignInDto: {
-            linked: boolean;
             /** @example ana_lopez */
             username: string | null;
         };
         AccountSecurityDto: {
             /** @example ana@example.com */
             email: string;
-            /** @description Пароль задан; Google-аккаунт может войти и без него */
+            /** @description Пароль задан; аккаунт с провайдером может войти и без него */
             hasPassword: boolean;
-            google: components["schemas"]["GoogleSignInDto"];
-            telegram: components["schemas"]["TelegramSignInDto"];
+            methods: components["schemas"]["SignInMethodDto"][];
         };
         ChangeAccountPasswordDto: {
-            /** @description Текущий пароль; не нужен, если пароля ещё нет (вход только через Google) */
+            /** @description Текущий пароль; не нужен, если пароля ещё нет (вход только через провайдера) */
             currentPassword?: string;
             /** @example NewPassword123 */
             newPassword: string;
@@ -6996,19 +7142,18 @@ export type SchemaMemberAuthResponseDto = components['schemas']['MemberAuthRespo
 export type SchemaMemberRefreshTokenResponseDto = components['schemas']['MemberRefreshTokenResponseDto'];
 export type SchemaUploadMemberFilesDto = components['schemas']['UploadMemberFilesDto'];
 export type SchemaDynamicMemberRegistrationDto = components['schemas']['DynamicMemberRegistrationDto'];
-export type SchemaRegisteredUserInfoDto = components['schemas']['RegisteredUserInfoDto'];
 export type SchemaRegisterMemberResponseDto = components['schemas']['RegisterMemberResponseDto'];
 export type SchemaUploadMemberFilesResponseDto = components['schemas']['UploadMemberFilesResponseDto'];
 export type SchemaMemberConfirmEmailDto = components['schemas']['MemberConfirmEmailDto'];
 export type SchemaMemberConfirmEmailResponseDto = components['schemas']['MemberConfirmEmailResponseDto'];
-export type SchemaTelegramConfigDto = components['schemas']['TelegramConfigDto'];
-export type SchemaTelegramAuthDto = components['schemas']['TelegramAuthDto'];
-export type SchemaTelegramSignInResultDto = components['schemas']['TelegramSignInResultDto'];
-export type SchemaTelegramEmailDto = components['schemas']['TelegramEmailDto'];
-export type SchemaTelegramStatusDto = components['schemas']['TelegramStatusDto'];
-export type SchemaTelegramConfirmDto = components['schemas']['TelegramConfirmDto'];
-export type SchemaGoogleSignInDto = components['schemas']['GoogleSignInDto'];
-export type SchemaTelegramSignInDto = components['schemas']['TelegramSignInDto'];
+export type SchemaIdentityProviderDto = components['schemas']['IdentityProviderDto'];
+export type SchemaIdentityProvidersResponseDto = components['schemas']['IdentityProvidersResponseDto'];
+export type SchemaIdentityVerifyDto = components['schemas']['IdentityVerifyDto'];
+export type SchemaIdentitySignInResultDto = components['schemas']['IdentitySignInResultDto'];
+export type SchemaIdentityEmailDto = components['schemas']['IdentityEmailDto'];
+export type SchemaIdentityStatusDto = components['schemas']['IdentityStatusDto'];
+export type SchemaIdentityConfirmDto = components['schemas']['IdentityConfirmDto'];
+export type SchemaSignInMethodDto = components['schemas']['SignInMethodDto'];
 export type SchemaAccountSecurityDto = components['schemas']['AccountSecurityDto'];
 export type SchemaChangeAccountPasswordDto = components['schemas']['ChangeAccountPasswordDto'];
 export type SchemaMemberLifecycleStatusItemDto = components['schemas']['MemberLifecycleStatusItemDto'];
@@ -9484,15 +9629,6 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
         };
     };
     MemberRegistration_uploadFiles: {
@@ -9805,27 +9941,7 @@ export interface operations {
             };
         };
     };
-    MemberGoogleAuth_start: {
-        parameters: {
-            query?: {
-                /** @description Путь в кабинете, куда вернуть после входа (только относительный) */
-                returnTo?: unknown;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    MemberGoogleAuth_link: {
+    CrmIdentityAuth_providers: {
         parameters: {
             query?: never;
             header?: never;
@@ -9834,26 +9950,32 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Success */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["IdentityProvidersResponseDto"];
+                };
             };
         };
     };
-    EmployeeGoogleAuth_start: {
+    CrmIdentityAuth_start: {
         parameters: {
             query?: {
-                /** @description Токен приглашения для intent=invitation */
-                token?: unknown;
-                /** @description invitation — принять приглашение (нужен token); club_signup — завести клуб */
+                locale?: "ru" | "en" | "es";
+                /** @description Путь фронта, куда вернуть после входа (только относительный) */
+                returnTo?: string;
+                /** @description CRM: invitation — принять приглашение (нужен token); club_signup — завести клуб */
                 intent?: "invitation" | "club_signup";
-                /** @description Путь в CRM, куда вернуть после входа (только относительный) */
-                returnTo?: unknown;
+                /** @description Токен приглашения для intent=invitation */
+                token?: string;
             };
             header?: never;
-            path?: never;
+            path: {
+                provider: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -9866,7 +9988,165 @@ export interface operations {
             };
         };
     };
-    MemberTelegramAuth_config: {
+    CrmIdentityAuth_link: {
+        parameters: {
+            query?: {
+                locale?: "ru" | "en" | "es";
+            };
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CrmIdentityAuth_verify: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IdentityVerifyDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdentitySignInResultDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmIdentityAuth_email: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IdentityEmailDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdentityStatusDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmIdentityAuth_confirm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IdentityConfirmDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdentityStatusDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CabinetIdentityAuth_providers: {
         parameters: {
             query?: never;
             header?: never;
@@ -9881,21 +10161,71 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TelegramConfigDto"];
+                    "application/json": components["schemas"]["IdentityProvidersResponseDto"];
                 };
             };
         };
     };
-    MemberTelegramAuth_signIn: {
+    CabinetIdentityAuth_start: {
+        parameters: {
+            query?: {
+                locale?: "ru" | "en" | "es";
+                /** @description Путь фронта, куда вернуть после входа (только относительный) */
+                returnTo?: string;
+                /** @description CRM: invitation — принять приглашение (нужен token); club_signup — завести клуб */
+                intent?: "invitation" | "club_signup";
+                /** @description Токен приглашения для intent=invitation */
+                token?: string;
+            };
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CabinetIdentityAuth_link: {
+        parameters: {
+            query?: {
+                locale?: "ru" | "en" | "es";
+            };
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CabinetIdentityAuth_verify: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                provider: string;
+            };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TelegramAuthDto"];
+                "application/json": components["schemas"]["IdentityVerifyDto"];
             };
         };
         responses: {
@@ -9905,7 +10235,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TelegramSignInResultDto"];
+                    "application/json": components["schemas"]["IdentitySignInResultDto"];
                 };
             };
             /** @description Bad Request */
@@ -9926,9 +10256,18 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
         };
     };
-    MemberTelegramAuth_email: {
+    CabinetIdentityAuth_email: {
         parameters: {
             query?: never;
             header?: never;
@@ -9937,7 +10276,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TelegramEmailDto"];
+                "application/json": components["schemas"]["IdentityEmailDto"];
             };
         };
         responses: {
@@ -9947,7 +10286,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TelegramStatusDto"];
+                    "application/json": components["schemas"]["IdentityStatusDto"];
                 };
             };
             /** @description Bad Request */
@@ -9961,7 +10300,7 @@ export interface operations {
             };
         };
     };
-    MemberTelegramAuth_confirm: {
+    CabinetIdentityAuth_confirm: {
         parameters: {
             query?: never;
             header?: never;
@@ -9970,7 +10309,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TelegramConfirmDto"];
+                "application/json": components["schemas"]["IdentityConfirmDto"];
             };
         };
         responses: {
@@ -9980,7 +10319,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TelegramStatusDto"];
+                    "application/json": components["schemas"]["IdentityStatusDto"];
                 };
             };
             /** @description Bad Request */
@@ -9994,6 +10333,208 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmAccountSecurity_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountSecurityDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmAccountSecurity_signOutEverywhere: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmAccountSecurity_setPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeAccountPasswordDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountSecurityDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmAccountSecurity_link: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IdentityVerifyDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountSecurityDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmAccountSecurity_unlink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountSecurityDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -10030,6 +10571,26 @@ export interface operations {
                     "application/json": components["schemas"]["AccountSecurityDto"];
                 };
             };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CabinetAccountSecurity_signOutEverywhere: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -10083,63 +10644,18 @@ export interface operations {
             };
         };
     };
-    CabinetAccountSecurity_unlink: {
+    CabinetAccountSecurity_link: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AccountSecurityDto"];
-                };
+            path: {
+                provider: string;
             };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    CabinetAccountSecurity_linkTelegramAccount: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TelegramAuthDto"];
+                "application/json": components["schemas"]["IdentityVerifyDto"];
             };
         };
         responses: {
@@ -10170,6 +10686,15 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
             /** @description Conflict */
             409: {
                 headers: {
@@ -10181,11 +10706,13 @@ export interface operations {
             };
         };
     };
-    CabinetAccountSecurity_unlinkTelegramAccount: {
+    CabinetAccountSecurity_unlink: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                provider: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -10219,26 +10746,6 @@ export interface operations {
             };
             /** @description Conflict */
             409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    CabinetAccountSecurity_signOutEverywhere: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Unauthorized */
-            401: {
                 headers: {
                     [name: string]: unknown;
                 };

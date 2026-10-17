@@ -63,11 +63,15 @@ describe("Telegram sign-in (e2e)", () => {
         return cookies ? req.set("Cookie", cookies) : req;
     };
 
+    const verify = (payload: object) => post("/cabinet/auth/telegram/verify", { payload });
+    const telegramOf = (security: request.Response) =>
+        (security.body.methods as { provider: string }[]).find((m) => m.provider === "telegram");
+
     /** Новый Telegram: билет, письмо, ссылка — и вход */
     const signUp = async (id: number, email: string) => {
-        const first = await post("/cabinet/auth/telegram", widget(id));
+        const first = await verify(widget(id));
         expect(first.body).toMatchObject({ status: "email_required" });
-        const sent = await post("/cabinet/auth/telegram/email", {
+        const sent = await post("/cabinet/auth/identity/email", {
             ticket: first.body.ticket,
             email,
         });
@@ -101,18 +105,26 @@ describe("Telegram sign-in (e2e)", () => {
     });
 
     it("the widget is offered when the bot is configured", async () => {
-        const res = await request(app.getHttpServer()).get("/cabinet/auth/telegram/config");
-        expect(res.body).toEqual({ enabled: true, botUsername: BOT_USERNAME, botId: 123456 });
+        const res = await request(app.getHttpServer()).get("/cabinet/auth/providers");
+        expect(res.body.providers).toContainEqual({
+            key: "telegram",
+            flow: "widget",
+            config: { botUsername: BOT_USERNAME, botId: 123456 },
+        });
+
+        // у CRM свой бот: без него кнопки Telegram в CRM нет
+        const crm = await request(app.getHttpServer()).get("/crm/auth/providers");
+        expect(crm.body.providers.map((p: { key: string }) => p.key)).not.toContain("telegram");
     });
 
     it("a forged or stale widget answer is refused", async () => {
         const forged = { ...widget(tgId(1)), first_name: "Someone else" };
-        const res = await post("/cabinet/auth/telegram", forged);
+        const res = await verify(forged);
         expect(res.status).toBe(400);
         expect(res.body.code).toBe("telegram_signature");
 
         const stale = widget(tgId(1), { auth_date: Math.floor(Date.now() / 1000) - 2 * 3600 });
-        expect((await post("/cabinet/auth/telegram", stale)).body.code).toBe("telegram_signature");
+        expect((await verify(stale)).body.code).toBe("telegram_signature");
     });
 
     it("a new Telegram signs up through the email link, then signs in directly", async () => {
@@ -121,22 +133,22 @@ describe("Telegram sign-in (e2e)", () => {
         const link = await signUp(id, email);
 
         // the ticket is not a link and the link is not a ticket
-        expect((await post("/cabinet/auth/telegram/confirm", { token: "nope" })).body.code).toBe(
-            "telegram_link"
+        expect((await post("/cabinet/auth/identity/confirm", { token: "nope" })).body.code).toBe(
+            "identity_link"
         );
 
-        const confirmed = await post("/cabinet/auth/telegram/confirm", { token: link });
+        const confirmed = await post("/cabinet/auth/identity/confirm", { token: link });
         expect(confirmed.body).toEqual({ status: "signed_in" });
         expect(setCookies(confirmed).some((c) => c.startsWith("cabinet_access="))).toBe(true);
         const user = await prisma.user.findUniqueOrThrow({ where: { email } });
         expect(user).toMatchObject({ emailConfirmed: true, isActive: true, passwordHash: null });
 
         // the link from the letter works once (TASK-736)
-        const replayed = await post("/cabinet/auth/telegram/confirm", { token: link });
-        expect(replayed.body.code).toBe("telegram_link");
+        const replayed = await post("/cabinet/auth/identity/confirm", { token: link });
+        expect(replayed.body.code).toBe("identity_link");
         expect(await prisma.authToken.count({ where: { email, consumedAt: null } })).toBe(0);
 
-        const again = await post("/cabinet/auth/telegram", widget(id));
+        const again = await verify(widget(id));
         expect(again.body).toEqual({ status: "signed_in" });
     });
 
@@ -152,7 +164,7 @@ describe("Telegram sign-in (e2e)", () => {
             },
         });
         const link = await signUp(tgId(3), email);
-        const confirmed = await post("/cabinet/auth/telegram/confirm", { token: link });
+        const confirmed = await post("/cabinet/auth/identity/confirm", { token: link });
         expect(confirmed.status).toBe(200);
 
         const identity = await prisma.userIdentity.findFirstOrThrow({
@@ -178,11 +190,15 @@ describe("Telegram sign-in (e2e)", () => {
         });
         const tokens = await cabinetSession(app, owner.id, `device-${suffix}`);
         const cookies = tokens.cookies;
-        const linked = await post("/cabinet/account/security/telegram", widget(id), cookies);
+        const linked = await post(
+            "/cabinet/account/security/telegram",
+            { payload: widget(id) },
+            cookies
+        );
         expect(linked.status).toBe(200);
-        expect(linked.body.telegram).toEqual({ linked: true, username: `tg_${id}` });
+        expect(telegramOf(linked)).toMatchObject({ linked: true, username: `tg_${id}` });
 
-        const late = await post("/cabinet/auth/telegram/confirm", { token: link });
+        const late = await post("/cabinet/auth/identity/confirm", { token: link });
         expect(late.status).toBe(409);
         expect(late.body.code).toBe("telegram_taken");
     });
@@ -190,7 +206,7 @@ describe("Telegram sign-in (e2e)", () => {
     it("the last way to sign in can not be removed", async () => {
         const id = tgId(5);
         const link = await signUp(id, `tg-only-${suffix}@test.local`);
-        const confirmed = await post("/cabinet/auth/telegram/confirm", { token: link });
+        const confirmed = await post("/cabinet/auth/identity/confirm", { token: link });
         const access = setCookies(confirmed)
             .find((c) => c.startsWith("cabinet_access="))
             ?.split(";")[0];

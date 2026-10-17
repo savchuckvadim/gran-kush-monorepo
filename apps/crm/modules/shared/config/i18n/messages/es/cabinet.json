@@ -38,6 +38,7 @@
                 "invalidEmail": "Introduce un correo válido",
                 "passwordRequired": "Introduce tu contraseña",
                 "invalidCredentials": "Correo o contraseña incorrectos",
+                "tooManyAttempts": "Demasiados intentos fallidos. Espera 15 minutos o entra con Google o Telegram.",
                 "emailNotConfirmed": "Tu correo no está confirmado. Abre el enlace del mensaje que enviamos al registrarte."
             },
             "register": {
@@ -96,8 +97,8 @@
                 "errors": {
                     "telegram_off": "El acceso con Telegram no está disponible ahora",
                     "telegram_signature": "Telegram no confirmó el acceso. Inténtalo de nuevo.",
-                    "telegram_ticket": "Se agotó el tiempo. Pulsa de nuevo el botón de Telegram.",
-                    "telegram_link": "El enlace no funcionó: ha caducado o ya se usó. Entra de nuevo con Telegram.",
+                    "identity_ticket": "Se agotó el tiempo. Pulsa de nuevo el botón de Telegram.",
+                    "identity_link": "El enlace no funcionó: ha caducado o ya se usó. Entra de nuevo con Telegram.",
                     "telegram_taken": "Este Telegram ya está vinculado a otra cuenta",
                     "telegram_other_linked": "La cuenta ya tiene otro Telegram vinculado: desvincúlalo primero",
                     "account_blocked": "La cuenta está bloqueada. Escribe a soporte.",

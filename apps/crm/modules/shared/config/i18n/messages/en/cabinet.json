@@ -38,6 +38,7 @@
                 "invalidEmail": "Enter a valid email",
                 "passwordRequired": "Enter your password",
                 "invalidCredentials": "Wrong email or password",
+                "tooManyAttempts": "Too many failed attempts. Wait 15 minutes or sign in with Google or Telegram.",
                 "emailNotConfirmed": "Your email is not confirmed. Open the link in the email we sent when you signed up."
             },
             "register": {
@@ -96,8 +97,8 @@
                 "errors": {
                     "telegram_off": "Telegram sign-in is unavailable right now",
                     "telegram_signature": "Telegram did not confirm the sign-in. Please try again.",
-                    "telegram_ticket": "The sign-in timed out. Press the Telegram button again.",
-                    "telegram_link": "The link did not work: it has expired or was already used. Sign in with Telegram again.",
+                    "identity_ticket": "The sign-in timed out. Press the Telegram button again.",
+                    "identity_link": "The link did not work: it has expired or was already used. Sign in with Telegram again.",
                     "telegram_taken": "This Telegram is already linked to another account",
                     "telegram_other_linked": "Another Telegram is already linked to this account — unlink it first",
                     "account_blocked": "This account is blocked. Please contact support.",

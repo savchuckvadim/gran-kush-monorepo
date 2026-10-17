@@ -20,12 +20,23 @@ const refreshCalls = (fetchMock: ReturnType<typeof vi.fn>, path: string): number
 describe("token refresh of two clients", () => {
     let fetchMock: ReturnType<typeof vi.fn>;
     let failing: Set<string>;
+    /** refresh, который выиграла соседняя вкладка: 401 с кодом refresh_superseded */
+    let superseded: Set<string>;
 
     beforeEach(() => {
         failing = new Set();
+        superseded = new Set();
         fetchMock = vi.fn((input: RequestInfo | URL) => {
             const url = String(input instanceof Request ? input.url : input);
             const path = url.slice(BASE.length);
+            if (path.endsWith("/auth/refresh") && superseded.has(path)) {
+                return later(
+                    new Response(JSON.stringify({ code: "refresh_superseded" }), {
+                        status: 401,
+                        headers: { "content-type": "application/json" },
+                    })
+                );
+            }
             if (path.endsWith("/auth/refresh")) {
                 return later(new Response(null, { status: failing.has(path) ? 401 : 201 }));
             }
@@ -71,6 +82,20 @@ describe("token refresh of two clients", () => {
 
         expect(crmResult.status).toBe("rejected");
         expect(cabinetResult.status).toBe("fulfilled");
+    });
+
+    it("a refresh another tab already won counts as done for a cookie client", async () => {
+        superseded.add("/crm/auth/refresh");
+        const crm = new ApiRefreshHelper(ApiAuthType.CRM, BASE, "cookie");
+
+        await expect(crm.makeToken()).resolves.toBeUndefined();
+    });
+
+    it("an ended session is still a failed refresh", async () => {
+        failing.add("/crm/auth/refresh");
+        const crm = new ApiRefreshHelper(ApiAuthType.CRM, BASE, "cookie");
+
+        await expect(crm.makeToken()).rejects.toThrow();
     });
 
     it("after a refresh settles, the next 401 starts a new one", async () => {

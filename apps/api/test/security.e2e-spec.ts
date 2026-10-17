@@ -339,11 +339,13 @@ describe("Security (e2e)", () => {
                 .set("X-Portal-Slug", clubB.slug)
                 .send({ email, password: "Attacker123", fields: { first_name: "Impostor" } });
             expect(reg.status).toBe(201);
-            const memberId = reg.body.memberId as string;
-            const pending = await prisma.member.findUnique({
-                where: { id: memberId },
-                select: { consentStatus: true, consentToken: true },
+            // ответ не выдаёт ни аккаунт, ни членство (TASK-665): членство ищем сами
+            expect(reg.body).toEqual({ email, awaitingEmailConfirmation: true });
+            const pending = await prisma.member.findFirst({
+                where: { user: { email }, portal: { name: clubB.slug } },
+                select: { id: true, consentStatus: true, consentToken: true },
             });
+            const memberId = pending?.id as string;
             expect(pending?.consentStatus).toBe("pending");
             expect(pending?.consentToken).toBeTruthy();
 

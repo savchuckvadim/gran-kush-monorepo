@@ -1,4 +1,8 @@
 import {
+    ACCOUNT_EXISTS_EMAIL_TEXTS,
+    type AccountExistsEmailTexts,
+} from "../../consts/account-exists-email";
+import {
     ACCOUNT_SETUP_EMAIL_TEXTS,
     type AccountSetupEmailTexts,
 } from "../../consts/account-setup-email";
@@ -69,6 +73,11 @@ export const getResetPasswordEmailTexts = (
 ): ResetPasswordEmailTexts => {
     return RESET_PASSWORD_EMAIL_TEXTS[language] || RESET_PASSWORD_EMAIL_TEXTS[DEFAULT_LANGUAGE];
 };
+
+export const getAccountExistsEmailTexts = (
+    language: Language = DEFAULT_LANGUAGE
+): AccountExistsEmailTexts =>
+    ACCOUNT_EXISTS_EMAIL_TEXTS[language] || ACCOUNT_EXISTS_EMAIL_TEXTS[DEFAULT_LANGUAGE];
 
 export const getTelegramEmailTexts = (language: Language = DEFAULT_LANGUAGE): TelegramEmailTexts =>
     TELEGRAM_EMAIL_TEXTS[language] || TELEGRAM_EMAIL_TEXTS[DEFAULT_LANGUAGE];

@@ -6,11 +6,10 @@ import type { CookieOptions, Request, Response } from "express";
 import { SessionTokensService } from "../application/session-tokens.service";
 import type { SessionAudience } from "../domain/auth-session";
 
-const AUTH_COOKIE_SECURE_ENV = "AUTH_COOKIE_SECURE";
+import { isAuthCookieSecure } from "./auth-cookie-security";
+
 /** Домен куки-подсказки «есть сессия» для proxy фронтов (`.paf-paf.app`); пусто — только хост API */
 const AUTH_HINT_COOKIE_DOMAIN_ENV = "AUTH_HINT_COOKIE_DOMAIN";
-const NODE_ENV = "NODE_ENV";
-const PRODUCTION = "production";
 const HINT_VALUE = "1";
 
 /** Имена кук по аудиториям. Прежние `*_access_token` не переиспользуются: старые куки на домене просто истекут. */
@@ -39,11 +38,7 @@ export class SessionCookiesService {
         config: ConfigService,
         private readonly tokens: SessionTokensService
     ) {
-        const secureFlag = config.get<string>(AUTH_COOKIE_SECURE_ENV);
-        this.secure =
-            secureFlag === undefined
-                ? config.get<string>(NODE_ENV) === PRODUCTION
-                : secureFlag === "true";
+        this.secure = isAuthCookieSecure(config);
         this.hintDomain = config.get<string>(AUTH_HINT_COOKIE_DOMAIN_ENV) || undefined;
     }
 

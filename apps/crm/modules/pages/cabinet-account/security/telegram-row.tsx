@@ -9,15 +9,15 @@ import { Button, ConfirmDialog } from "@workspace/ui";
 
 import {
     type AccountSecurity,
-    useLinkTelegram,
-    useTelegramConfig,
-    useUnlinkTelegram,
+    useLinkWidgetProvider,
+    useTelegramBotId,
+    useUnlinkProvider,
 } from "@/modules/entities/cabinet-account";
 import { useTelegramErrorText } from "@/modules/features/member-auth";
 import { SettingRow } from "@/modules/shared/ui/SettingRow";
 import { TelegramLoginButton } from "@/modules/shared/ui/TelegramLoginButton";
 
-import { isLastSignInMethod } from "./sign-in-methods";
+import { isLastSignInMethod, methodOf } from "./sign-in-methods";
 
 /**
  * Telegram как способ входа. Привязка — кнопкой виджета прямо здесь (почта у аккаунта уже есть),
@@ -26,15 +26,16 @@ import { isLastSignInMethod } from "./sign-in-methods";
 export function TelegramRow({ security }: { security: AccountSecurity }) {
     const t = useTranslations("cabinet.account.security.telegram");
     const locale = useLocale();
-    const config = useTelegramConfig();
-    const link = useLinkTelegram();
-    const unlink = useUnlinkTelegram();
+    const botId = useTelegramBotId();
+    const link = useLinkWidgetProvider();
+    const unlink = useUnlinkProvider();
     const errorText = useTelegramErrorText();
     const [confirm, setConfirm] = useState(false);
-    const { linked, username } = security.telegram;
+    const method = methodOf(security, "telegram");
     const last = isLastSignInMethod(security, "telegram");
+    const linked = method?.linked ?? false;
+    const username = method?.username ?? null;
 
-    const botId = config.data?.enabled ? config.data.botId : null;
     if (!botId && !linked) return null;
 
     const description = linked
@@ -66,7 +67,10 @@ export function TelegramRow({ security }: { security: AccountSecurity }) {
                         size="sm"
                         disabled={link.isPending}
                         onAuth={(user) =>
-                            link.mutate(user, { onSuccess: () => toast.success(t("linked")) })
+                            link.mutate(
+                                { provider: "telegram", payload: { ...user } },
+                                { onSuccess: () => toast.success(t("linked")) }
+                            )
                         }
                     />
                 )
@@ -81,7 +85,7 @@ export function TelegramRow({ security }: { security: AccountSecurity }) {
                 tone="destructive"
                 pending={unlink.isPending}
                 onConfirm={() =>
-                    unlink.mutate(undefined, {
+                    unlink.mutate("telegram", {
                         onSuccess: () => {
                             setConfirm(false);
                             toast.success(t("unlinked"));

@@ -20,6 +20,8 @@ import { GoogleButton } from "@/modules/shared/ui/GoogleButton";
 import { TelegramSignIn } from "./telegram/telegram-sign-in";
 
 const EMAIL_NOT_CONFIRMED = "Email not confirmed";
+/** Вход паролем по адресу закрыт после серии неудач (TASK-667) */
+const TOO_MANY_REQUESTS = 429;
 
 /** Вход участника. После успеха возвращает на страницу, с которой человека увели (`?from=`). */
 export function MemberLoginForm() {
@@ -54,7 +56,9 @@ export function MemberLoginForm() {
     });
 
     const failure = login.error
-        ? login.error instanceof ApiClientError && login.error.status === 401
+        ? login.error instanceof ApiClientError && login.error.status === TOO_MANY_REQUESTS
+            ? t("tooManyAttempts")
+            : login.error instanceof ApiClientError && login.error.status === 401
             ? login.error.message === EMAIL_NOT_CONFIRMED
                 ? t("emailNotConfirmed")
                 : t("invalidCredentials")

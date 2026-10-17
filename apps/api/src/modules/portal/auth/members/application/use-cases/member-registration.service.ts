@@ -25,13 +25,6 @@ export class MemberRegistrationUseCase {
             language,
         });
 
-        return {
-            user: {
-                id: result.userId,
-                email: result.email,
-            },
-            awaitingEmailConfirmation: true,
-            memberId: result.memberId,
-        };
+        return { email: result.email, awaitingEmailConfirmation: true };
     }
 }

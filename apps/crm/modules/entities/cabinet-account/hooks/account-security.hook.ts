@@ -6,7 +6,7 @@ import {
     getAccountSecurity,
     setAccountPassword,
     signOutEverywhere,
-    unlinkGoogle,
+    unlinkProvider,
 } from "../api/account-security.api";
 
 import { cabinetKeys } from "./cabinet-account.hook";
@@ -25,10 +25,10 @@ export function useSetAccountPassword() {
     });
 }
 
-export function useUnlinkGoogle() {
+export function useUnlinkProvider() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: unlinkGoogle,
+        mutationFn: unlinkProvider,
         onSuccess: (security) => queryClient.setQueryData(securityKey, security),
     });
 }

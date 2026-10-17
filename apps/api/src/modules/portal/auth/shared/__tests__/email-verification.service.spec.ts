@@ -3,9 +3,9 @@ import { UnauthorizedException } from "@nestjs/common";
 import { UserAccountStatus } from "@prisma/client";
 
 import { hashSecretToken } from "@common/crypto/secret-token";
+import { InMemoryAuthTokenRepository } from "@modules/portal/auth/tokens/__tests__/in-memory-auth-token.repository";
 import { AuthTokensService } from "@modules/portal/auth/tokens/application/auth-tokens.service";
 import { AUTH_TOKEN_PURPOSES } from "@modules/portal/auth/tokens/domain/auth-token";
-import { InMemoryAuthTokenRepository } from "@modules/portal/auth/tokens/__tests__/in-memory-auth-token.repository";
 
 import { EmailVerificationService } from "../application/services/email-verification.service";
 

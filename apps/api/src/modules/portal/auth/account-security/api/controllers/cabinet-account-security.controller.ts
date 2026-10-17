@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Post, Put, Res } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Res } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 
@@ -8,42 +8,45 @@ import { AUTH_THROTTLE } from "@common/config/throttler/throttler.config";
 import { CurrentAuthUser } from "@common/decorators/auth/current-auth-user.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
+import { IdentityVerifyDto } from "@modules/portal/auth/identity/api/dto/identity-auth.dto";
 import { CabinetSession } from "@modules/portal/auth/sessions/api/session-auth.decorators";
-import { SessionCookiesService } from "@modules/portal/auth/sessions/api/session-cookies.service";
 import { SESSION_AUDIENCES } from "@modules/portal/auth/sessions/domain/auth-session";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
-import { TelegramAuthDto } from "@modules/portal/auth/social/api/dto/telegram-auth.dto";
-import { toTelegramHttpError } from "@modules/portal/auth/social/api/telegram-http-error";
-import { LinkTelegramUseCase } from "@modules/portal/auth/social/application/use-cases/link-telegram.use-case";
 
-import { AccountSecurityService } from "../../application/services/account-security.service";
-import { ChangeAccountPasswordUseCase } from "../../application/use-cases/change-account-password.use-case";
-import { UnlinkProviderUseCase } from "../../application/use-cases/unlink-provider.use-case";
+import { AccountSecurityHttpService } from "../account-security-http.service";
 import { AccountSecurityDto, ChangeAccountPasswordDto } from "../dto/account-security.dto";
 
 /**
- * Вход и безопасность аккаунта в кабинете (TASK-716): пароль, Google, Telegram, выход со всех
- * устройств. Привязка Google — редиректом `GET /cabinet/auth/google/link` рядом со входом через
- * Google; Telegram присылает подписанный профиль из виджета сюда.
+ * «Вход и безопасность» в кабинете (TASK-716, TASK-738): пароль, способы входа, выход со всех
+ * устройств; устройства — `/cabinet/account/sessions`. Привязка редирект-провайдера (Google) —
+ * `GET /cabinet/auth/{provider}/link`, виджета (Telegram) — `POST …/security/{provider}`.
  */
 @ApiTags("Account (security)")
 @Controller("cabinet/account/security")
 @CabinetSession()
 export class CabinetAccountSecurityController {
-    constructor(
-        private readonly security: AccountSecurityService,
-        private readonly changePassword: ChangeAccountPasswordUseCase,
-        private readonly unlinkProvider: UnlinkProviderUseCase,
-        private readonly linkTelegram: LinkTelegramUseCase,
-        private readonly cookies: SessionCookiesService
-    ) {}
+    constructor(private readonly security: AccountSecurityHttpService) {}
 
     @Get()
-    @ApiOperation({ summary: "Способы входа: задан ли пароль, привязаны ли Google и Telegram" })
+    @ApiOperation({ summary: "Способы входа: задан ли пароль, какие провайдеры привязаны" })
     @ApiSuccessResponse(AccountSecurityDto)
     @ApiErrorResponse([401])
-    async get(@CurrentAuthUser() user: AuthenticatedUser): Promise<AccountSecurityDto> {
-        return this.security.overview(user.userId);
+    get(@CurrentAuthUser() user: AuthenticatedUser): Promise<AccountSecurityDto> {
+        return this.security.overview(user);
+    }
+
+    @Post("sign-out-everywhere")
+    @HttpCode(204)
+    @ApiOperation({
+        summary: "Выйти на всех устройствах",
+        description: "Отзывает все сессии аккаунта — в кабинете и в CRM — и снимает куки здесь.",
+    })
+    @ApiErrorResponse([401])
+    signOutEverywhere(
+        @CurrentAuthUser() user: AuthenticatedUser,
+        @Res({ passthrough: true }) response: Response
+    ): Promise<void> {
+        return this.security.signOutEverywhere(user, SESSION_AUDIENCES.Cabinet, response);
     }
 
     @Put("password")
@@ -56,79 +59,42 @@ export class CabinetAccountSecurityController {
     })
     @ApiSuccessResponse(AccountSecurityDto)
     @ApiErrorResponse([400, 401])
-    async setPassword(
+    setPassword(
         @CurrentAuthUser() user: AuthenticatedUser,
         @Body() dto: ChangeAccountPasswordDto
     ): Promise<AccountSecurityDto> {
-        await this.changePassword.execute({
-            userId: user.userId,
-            sessionId: user.sessionId,
-            currentPassword: dto.currentPassword,
-            newPassword: dto.newPassword,
-        });
-        return this.security.overview(user.userId);
+        return this.security.setPassword(user, dto);
     }
 
-    @Delete("google")
-    @ApiOperation({
-        summary: "Отвязать Google",
-        description: "Последний способ входа не снимается — 409 с code `last_sign_in_method`.",
-    })
-    @ApiSuccessResponse(AccountSecurityDto)
-    @ApiErrorResponse([401, 404, 409])
-    async unlink(@CurrentAuthUser() user: AuthenticatedUser): Promise<AccountSecurityDto> {
-        await this.unlinkProvider.execute(user.userId, "google");
-        return this.security.overview(user.userId);
-    }
-
-    @Post("telegram")
+    @Post(":provider")
     @HttpCode(200)
     @Throttle(AUTH_THROTTLE)
     @ApiOperation({
-        summary: "Привязать Telegram (подписанный профиль из виджета)",
+        summary: "Привязать виджет-провайдера (подписанный ответ виджета)",
         description:
-            "Telegram другого аккаунта — 409 `telegram_taken`, неверная подпись — 400 `telegram_signature`.",
+            "Способ другого аккаунта — 409 `{provider}_taken`, неверная подпись — 400 `{provider}_signature`.",
     })
     @ApiSuccessResponse(AccountSecurityDto)
-    @ApiErrorResponse([400, 401, 409, 503])
-    async linkTelegramAccount(
+    @ApiErrorResponse([400, 401, 404, 409, 503])
+    link(
         @CurrentAuthUser() user: AuthenticatedUser,
-        @Body() dto: TelegramAuthDto
+        @Param("provider") provider: string,
+        @Body() dto: IdentityVerifyDto
     ): Promise<AccountSecurityDto> {
-        try {
-            await this.linkTelegram.execute(user.userId, dto);
-        } catch (error: unknown) {
-            throw toTelegramHttpError(error);
-        }
-        return this.security.overview(user.userId);
+        return this.security.linkWidget(user, provider, dto.payload);
     }
 
-    @Delete("telegram")
+    @Delete(":provider")
     @ApiOperation({
-        summary: "Отвязать Telegram",
+        summary: "Отвязать способ входа",
         description: "Последний способ входа не снимается — 409 с code `last_sign_in_method`.",
     })
     @ApiSuccessResponse(AccountSecurityDto)
     @ApiErrorResponse([401, 404, 409])
-    async unlinkTelegramAccount(
-        @CurrentAuthUser() user: AuthenticatedUser
-    ): Promise<AccountSecurityDto> {
-        await this.unlinkProvider.execute(user.userId, "telegram");
-        return this.security.overview(user.userId);
-    }
-
-    @Post("sign-out-everywhere")
-    @HttpCode(204)
-    @ApiOperation({
-        summary: "Выйти на всех устройствах",
-        description: "Отзывает все сессии аккаунта — в кабинете и в CRM — и снимает куки здесь.",
-    })
-    @ApiErrorResponse([401])
-    async signOutEverywhere(
+    unlink(
         @CurrentAuthUser() user: AuthenticatedUser,
-        @Res({ passthrough: true }) response: Response
-    ): Promise<void> {
-        await this.security.signOutEverywhere(user.userId);
-        this.cookies.clear(response, SESSION_AUDIENCES.Cabinet);
+        @Param("provider") provider: string
+    ): Promise<AccountSecurityDto> {
+        return this.security.unlink(user, provider);
     }
 }

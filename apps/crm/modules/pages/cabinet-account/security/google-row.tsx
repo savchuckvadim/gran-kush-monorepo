@@ -7,13 +7,13 @@ import { toast } from "sonner";
 
 import { Button, ConfirmDialog } from "@workspace/ui";
 
-import { type AccountSecurity, useUnlinkGoogle } from "@/modules/entities/cabinet-account";
+import { type AccountSecurity, useUnlinkProvider } from "@/modules/entities/cabinet-account";
 import { googleLinkUrl } from "@/modules/shared/api/google-sign-in";
 import { notifyApiError } from "@/modules/shared/lib/notify-api-error";
 import { GoogleMark } from "@/modules/shared/ui/GoogleButton";
 import { SettingRow } from "@/modules/shared/ui/SettingRow";
 
-import { isLastSignInMethod } from "./sign-in-methods";
+import { isLastSignInMethod, methodOf } from "./sign-in-methods";
 
 /**
  * Google как способ входа. Привязка — переход на Google и обратно (страница сообщит исход),
@@ -22,10 +22,12 @@ import { isLastSignInMethod } from "./sign-in-methods";
 export function GoogleRow({ security }: { security: AccountSecurity }) {
     const t = useTranslations("cabinet.account.security.google");
     const locale = useLocale();
-    const unlink = useUnlinkGoogle();
+    const unlink = useUnlinkProvider();
     const [confirm, setConfirm] = useState(false);
-    const { linked, email } = security.google;
+    const method = methodOf(security, "google");
     const last = isLastSignInMethod(security, "google");
+    if (!method) return null;
+    const { linked, email } = method;
 
     const description = linked ? t("linkedAs", { email: email ?? "" }) : t("notLinked");
 
@@ -62,7 +64,7 @@ export function GoogleRow({ security }: { security: AccountSecurity }) {
                 tone="destructive"
                 pending={unlink.isPending}
                 onConfirm={() =>
-                    unlink.mutate(undefined, {
+                    unlink.mutate("google", {
                         onSuccess: () => {
                             setConfirm(false);
                             toast.success(t("unlinked"));

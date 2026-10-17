@@ -7,8 +7,8 @@ import request from "supertest";
 import { AppModule } from "../src/app.module";
 import { hashSecretToken } from "../src/common/crypto/secret-token";
 import { PrismaService } from "../src/common/prisma/prisma.service";
-import { GoogleOAuthGateway } from "../src/modules/portal/auth/social/domain/google-oauth.gateway";
-import { GoogleProfile } from "../src/modules/portal/auth/social/domain/social-profile";
+import { GoogleOAuthGateway } from "../src/modules/portal/auth/identity/domain/google-oauth.gateway";
+import { GoogleProfile } from "../src/modules/portal/auth/identity/domain/google-profile";
 
 jest.setTimeout(120_000);
 
@@ -68,7 +68,7 @@ describe("Google sign-in (e2e)", () => {
     const start = async (path: string, query = "") => {
         const res = await request(app.getHttpServer()).get(`${path}/start?locale=es${query}`);
         expect(res.status).toBe(302);
-        const flowCookie = cookieOf(res, "google_oauth_flow");
+        const flowCookie = cookieOf(res, "oauth_flow");
         const state = new URL(res.headers.location).searchParams.get("state");
         return { res, flowCookie, state: state as string };
     };
@@ -77,7 +77,7 @@ describe("Google sign-in (e2e)", () => {
         const req = request(app.getHttpServer()).get(
             `${path}/callback?code=abc&state=${encodeURIComponent(state)}`
         );
-        return flowCookie ? req.set("Cookie", `google_oauth_flow=${flowCookie}`) : req;
+        return flowCookie ? req.set("Cookie", `oauth_flow=${flowCookie}`) : req;
     };
 
     beforeAll(async () => {
@@ -106,7 +106,7 @@ describe("Google sign-in (e2e)", () => {
             const { res, flowCookie } = await start(path);
 
             expect(res.headers.location).toContain("https://accounts.example/auth");
-            const header = setCookies(res).find((c) => c.startsWith("google_oauth_flow="));
+            const header = setCookies(res).find((c) => c.startsWith("oauth_flow="));
             expect(header).toContain("HttpOnly");
             expect(header).toContain("Path=/cabinet/auth/google");
             expect(header).toContain("SameSite=Lax");
@@ -127,7 +127,7 @@ describe("Google sign-in (e2e)", () => {
             expect(new URL(res.headers.location).pathname).toBe("/es/join/abc123");
             expect(cookieOf(res, "cabinet_access")).toBeTruthy();
             // Экземпляр куки привязки удаляется: она нужна ровно один раз
-            const cleared = setCookies(res).find((c) => c.startsWith("google_oauth_flow=;"));
+            const cleared = setCookies(res).find((c) => c.startsWith("oauth_flow=;"));
             expect(cleared).toBeDefined();
             expect(google.lastVerifier).toBe((flowCookie as string).split(".")[1]);
         });
