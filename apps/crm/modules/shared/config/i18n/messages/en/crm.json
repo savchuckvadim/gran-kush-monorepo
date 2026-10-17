@@ -1057,13 +1057,6 @@
                 "create": "Create a shared link",
                 "defaultName": "Shared link"
             },
-            "url": {
-                "copy": "Copy",
-                "copied": "Link copied",
-                "open": "Open in a new tab",
-                "qr": "QR code",
-                "hideQr": "Hide QR"
-            },
             "create": {
                 "title": "New link",
                 "name": "Name",
@@ -1232,6 +1225,13 @@
         },
         "fact": {
             "empty": "Not set"
+        },
+        "linkUrl": {
+            "copy": "Copy",
+            "copied": "Link copied",
+            "open": "Open in a new tab",
+            "qr": "QR code",
+            "hideQr": "Hide QR"
         }
     }
 }

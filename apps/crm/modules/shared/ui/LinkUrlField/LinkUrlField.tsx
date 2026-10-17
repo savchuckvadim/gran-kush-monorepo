@@ -8,9 +8,12 @@ import { toast } from "sonner";
 
 import { Button, Input, QrCodeDisplay } from "@workspace/ui";
 
-/** Ready link: select-on-click field, copy, open in a new tab and a QR to show at the desk. */
+/**
+ * Ready link: select-on-click field, copy, open in a new tab and a QR to show at the desk.
+ * Registration links and employee invitations show their links with it.
+ */
 export function LinkUrlField({ url }: { url: string }) {
-    const t = useTranslations("crm.registrationLinks.url");
+    const t = useTranslations("crm.linkUrl");
     const [showQr, setShowQr] = useState(false);
 
     const copy = async () => {

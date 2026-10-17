@@ -1057,13 +1057,6 @@
                 "create": "Crear enlace general",
                 "defaultName": "Enlace general"
             },
-            "url": {
-                "copy": "Copiar",
-                "copied": "Enlace copiado",
-                "open": "Abrir en otra pestaña",
-                "qr": "Código QR",
-                "hideQr": "Ocultar QR"
-            },
             "create": {
                 "title": "Nuevo enlace",
                 "name": "Nombre",
@@ -1232,6 +1225,13 @@
         },
         "fact": {
             "empty": "Sin indicar"
+        },
+        "linkUrl": {
+            "copy": "Copiar",
+            "copied": "Enlace copiado",
+            "open": "Abrir en otra pestaña",
+            "qr": "Código QR",
+            "hideQr": "Ocultar QR"
         }
     }
 }

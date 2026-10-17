@@ -17,8 +17,7 @@ import {
     useRevokeRegistrationLink,
     useUpdateRegistrationLink,
 } from "@/modules/entities/registration-links";
-
-import { LinkUrlField } from "./link-url-field";
+import { LinkUrlField } from "@/modules/shared/ui/LinkUrlField";
 
 const PAGE_SIZE = 10;
 const FILTERS: (RegistrationLinkStatus | "all")[] = [

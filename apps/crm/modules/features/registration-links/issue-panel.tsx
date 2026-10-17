@@ -15,8 +15,7 @@ import {
     useCreateRegistrationLink,
     useRegistrationLinks,
 } from "@/modules/entities/registration-links";
-
-import { LinkUrlField } from "./link-url-field";
+import { LinkUrlField } from "@/modules/shared/ui/LinkUrlField";
 
 const ISSUABLE_KINDS: RegistrationLinkKind[] = ["public_link", "kiosk"];
 
