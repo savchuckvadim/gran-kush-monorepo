@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { getApiErrorMessage } from "@workspace/api-client/core";
 import { Card } from "@workspace/ui";
 
-import { usePortalRole } from "@/modules/entities/portal";
+import { usePermissions } from "@/modules/entities/access";
 import { usePresenceSettings, useUpdatePresenceSettings } from "@/modules/entities/presence";
 
 import { PresenceRulesForm } from "./presence-rules-form";
@@ -19,7 +19,8 @@ import { PresenceRulesForm } from "./presence-rules-form";
  */
 export function PresenceSettingsPage() {
     const t = useTranslations("crm.presenceSettings");
-    const { isAdmin } = usePortalRole();
+    const { can } = usePermissions();
+    const canEdit = can("settings.club");
     const settings = usePresenceSettings();
     const update = useUpdatePresenceSettings();
 
@@ -40,7 +41,7 @@ export function PresenceSettingsPage() {
                 <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
             </div>
 
-            {!isAdmin && <p className="text-sm text-muted-foreground">{t("adminOnly")}</p>}
+            {!canEdit && <p className="text-sm text-muted-foreground">{t("adminOnly")}</p>}
             {update.error && (
                 <p role="alert" className="text-sm text-destructive">
                     {getApiErrorMessage(update.error)}
@@ -52,7 +53,7 @@ export function PresenceSettingsPage() {
                 <PresenceRulesForm
                     key={`${saved.timezone}|${saved.autoExitTime}|${saved.maxSessionHours}`}
                     settings={saved}
-                    disabled={!isAdmin || update.isPending}
+                    disabled={!canEdit || update.isPending}
                     onSave={(next) =>
                         update.mutate(next, { onSuccess: () => toast.success(t("saved")) })
                     }

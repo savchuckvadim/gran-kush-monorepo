@@ -12,6 +12,7 @@ import { UserDocumentRepository } from "../src/modules/account/domain/repositori
 import { MailService } from "../src/modules/mail/application/services/mail.service";
 import { EmployeeAuthService } from "../src/modules/portal/auth/employees/application/services/employee-auth.service";
 import { MemberAuthService } from "../src/modules/portal/auth/members/application/services/member-auth.service";
+
 import { mailTokens } from "./support/mail-tokens";
 
 jest.setTimeout(120_000);

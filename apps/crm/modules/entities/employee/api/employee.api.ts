@@ -10,7 +10,6 @@ import { assertOpenApiOk } from "@workspace/api-client/core";
 import { $api } from "@/modules/shared";
 
 export type Employee = SchemaEmployeeListItemDto;
-export type EmployeeRole = Employee["role"];
 export type EmployeesPage = SchemaPaginatedResponseEmployeeListItemDto;
 export type CreateEmployeePayload = SchemaCreateEmployeeDto;
 export type CreatedEmployee = SchemaCreateEmployeeResponseDto;
@@ -18,7 +17,8 @@ export type CreatedEmployee = SchemaCreateEmployeeResponseDto;
 export type UpdateEmployeePayload = SchemaUpdateEmployeeDto;
 
 export interface EmployeeFilters {
-    role?: EmployeeRole;
+    /** Ключ роли клуба */
+    role?: string;
     isActive?: boolean;
     page?: number;
     limit?: number;

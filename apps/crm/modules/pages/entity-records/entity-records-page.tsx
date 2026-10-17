@@ -8,9 +8,9 @@ import { toast } from "sonner";
 
 import { ConfirmDialog, ModalDialog } from "@workspace/ui";
 
+import { usePermissions } from "@/modules/entities/access";
 import { type EntityRecord, useDeleteEntityRecord } from "@/modules/entities/entity-records";
 import { useEntityDefinitions, useEntityStageCategories } from "@/modules/entities/entity-settings";
-import { usePortalRole } from "@/modules/entities/portal";
 import { getApiErrorMessage, pickFunnel, useBoardView } from "@/modules/shared";
 import { BoardViewSwitch } from "@/modules/shared/ui/BoardViewSwitch";
 import { ListPage } from "@/modules/shared/ui/ListPage";
@@ -27,7 +27,9 @@ import { useRecordFilters } from "./use-record-filters";
  */
 export function EntityRecordsPage({ code }: { code: string }) {
     const t = useTranslations("crm.records");
-    const { isManager, isAdmin } = usePortalRole();
+    const { can } = usePermissions();
+    const canWrite = can("records.write");
+    const canDelete = can("records.delete");
     const { view, setView, funnelId, setFunnelId } = useBoardView("crm.records.view");
     const filters = useRecordFilters(code);
 
@@ -83,7 +85,7 @@ export function EntityRecordsPage({ code }: { code: string }) {
                 description={t("description")}
                 actions={<BoardViewSwitch value={view} onChange={setView} />}
                 create={
-                    isManager
+                    canWrite
                         ? {
                               label: t("create"),
                               title: t("create"),
@@ -115,7 +117,7 @@ export function EntityRecordsPage({ code }: { code: string }) {
                             code={code}
                             stages={stages}
                             filter={filters.filter}
-                            canMove={isManager}
+                            canMove={canWrite}
                             onOpen={openRecord}
                         />
                     </div>
@@ -128,8 +130,8 @@ export function EntityRecordsPage({ code }: { code: string }) {
                         page={filters.page}
                         onPageChange={filters.setPage}
                         renderToolbar={renderToolbar}
-                        canMove={isManager}
-                        canDelete={isAdmin}
+                        canMove={canWrite}
+                        canDelete={canDelete}
                         onOpen={openRecord}
                         onDelete={setDeleting}
                     />
@@ -148,7 +150,7 @@ export function EntityRecordsPage({ code }: { code: string }) {
                         key={editing.id}
                         code={code}
                         record={editing}
-                        canEdit={isManager}
+                        canEdit={canWrite}
                         onDone={() => setIsEditOpen(false)}
                     />
                 ) : null}

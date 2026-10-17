@@ -5,7 +5,8 @@ import { useTranslations } from "next-intl";
 
 import { CreditCard, IdCard, Palette, Plus, Settings, UserRound } from "lucide-react";
 
-import { usePortalInfo, usePortalRole } from "@/modules/entities/portal";
+import { SETTINGS_PERMISSIONS, usePermissions, useRoleLabel } from "@/modules/entities/access";
+import { usePortalInfo } from "@/modules/entities/portal";
 import { SkinPickerSheet, useChangeLocale } from "@/modules/features";
 import { useAuth } from "@/modules/processes";
 import { cabinetAppUrl } from "@/modules/shared/config/app-urls";
@@ -37,7 +38,9 @@ export function AccountMenu() {
     const [isSkinsOpen, setIsSkinsOpen] = useState(false);
 
     const { data: info } = usePortalInfo();
-    const { role, isAdmin: canManage } = usePortalRole();
+    const { role, can } = usePermissions();
+    const roleLabel = useRoleLabel();
+    const canOpenSettings = SETTINGS_PERMISSIONS.some((code) => can(code));
     const email = currentUser?.email;
     // Аккаунт ещё и участник клуба: его кабинет на club. — та же персона в другой роли
     const cabinetHref = currentUser?.hasMemberships ? cabinetAppUrl(`/${locale}`) : null;
@@ -46,9 +49,7 @@ export function AccountMenu() {
         <>
             <AccountCard
                 email={email}
-                subtitle={[role && t(`roles.${role}`), info?.displayName]
-                    .filter(Boolean)
-                    .join(" · ")}
+                subtitle={[role && roleLabel(role), info?.displayName].filter(Boolean).join(" · ")}
                 logout={{
                     label: t("logout"),
                     pending: logout.isPending,
@@ -72,19 +73,19 @@ export function AccountMenu() {
                     icon={UserRound}
                     label={t("profile")}
                 />
-                {canManage && (
-                    <>
-                        <AccountTileLink
-                            href={localizedLink(ROUTES.CRM_SETTINGS)}
-                            icon={Settings}
-                            label={t("settings")}
-                        />
-                        <AccountTileLink
-                            href={localizedLink(ROUTES.CRM_SETTINGS_BILLING)}
-                            icon={CreditCard}
-                            label={t("billing")}
-                        />
-                    </>
+                {canOpenSettings && (
+                    <AccountTileLink
+                        href={localizedLink(ROUTES.CRM_SETTINGS)}
+                        icon={Settings}
+                        label={t("settings")}
+                    />
+                )}
+                {can("billing.manage") && (
+                    <AccountTileLink
+                        href={localizedLink(ROUTES.CRM_SETTINGS_BILLING)}
+                        icon={CreditCard}
+                        label={t("billing")}
+                    />
                 )}
                 {cabinetHref && (
                     <AccountTileLink href={cabinetHref} icon={IdCard} label={t("cabinet")} />

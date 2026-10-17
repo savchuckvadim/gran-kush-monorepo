@@ -5,12 +5,12 @@ import { useTranslations } from "next-intl";
 
 import { InitialsAvatar } from "@workspace/ui";
 
+import { RoleBadge } from "@/modules/entities/access";
 import {
     type Employee,
     EMPLOYEE_FIELD,
     employeeFieldText,
     employeeName,
-    EmployeeRoleBadge,
     EmployeeStatusBadge,
     useEmployees,
 } from "@/modules/entities/employee";
@@ -62,7 +62,7 @@ export function EmployeesList() {
         {
             key: "role",
             header: t("columns.role"),
-            cell: (employee) => <EmployeeRoleBadge role={employee.role} />,
+            cell: (employee) => <RoleBadge role={employee.role} />,
         },
         {
             key: "position",

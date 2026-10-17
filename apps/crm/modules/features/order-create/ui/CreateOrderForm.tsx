@@ -11,9 +11,9 @@ import { toast } from "sonner";
 import { getApiErrorMessage } from "@workspace/api-client/core";
 import { Button, Field } from "@workspace/ui";
 
+import { usePermissions } from "@/modules/entities/access";
 import { useMemberDetails } from "@/modules/entities/member";
 import { useCreateOrder, useOrderFunnels } from "@/modules/entities/order";
-import { usePortalRole } from "@/modules/entities/portal";
 import { ROUTES, useLocalizedLink, useMoneyFormat } from "@/modules/shared";
 
 import {
@@ -41,7 +41,8 @@ export function CreateOrderForm({ initialMemberId }: { initialMemberId?: string 
     const router = useRouter();
     const localizedLink = useLocalizedLink();
     const money = useMoneyFormat();
-    const { isManager } = usePortalRole();
+    const { can } = usePermissions();
+    const canChooseStage = can("orders.process");
     const funnels = useOrderFunnels();
     const createOrder = useCreateOrder();
 
@@ -77,7 +78,12 @@ export function CreateOrderForm({ initialMemberId }: { initialMemberId?: string 
         if (!member?.isActive || lines.length === 0 || lineErrors.some(Boolean)) return;
 
         createOrder.mutate(
-            toCreateOrderBody({ member, lines, notes, stageId: isManager ? stageId : undefined }),
+            toCreateOrderBody({
+                member,
+                lines,
+                notes,
+                stageId: canChooseStage ? stageId : undefined,
+            }),
             {
                 onSuccess: (order) => {
                     toast.success(t("created", { number: order.orderNumber }));
@@ -156,7 +162,7 @@ export function CreateOrderForm({ initialMemberId }: { initialMemberId?: string 
             </section>
 
             <div className="grid gap-4 md:grid-cols-2">
-                {isManager && funnels.data && funnels.data.length > 0 && (
+                {canChooseStage && funnels.data && funnels.data.length > 0 && (
                     <OrderStageSelect
                         funnels={funnels.data}
                         value={stageId}

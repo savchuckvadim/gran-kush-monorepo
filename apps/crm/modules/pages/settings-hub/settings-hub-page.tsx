@@ -9,6 +9,8 @@ import { Boxes, CreditCard, Package, Palette, UserRound, Users } from "lucide-re
 import { TooltipProvider } from "@workspace/ui";
 import { cn } from "@workspace/ui/lib/utils";
 
+import { type Permission, usePermissions } from "@/modules/entities/access";
+
 import {
     AppearancePanel,
     BillingPanel,
@@ -18,18 +20,28 @@ import {
     TeamPanel,
 } from "./panels";
 
+/** Вкладка видна, если у роли есть хотя бы одно из прав `anyOf`; `null` — у всех. */
 const TABS = [
-    { id: "members", icon: UserRound, Panel: MembersPanel },
-    { id: "team", icon: Users, Panel: TeamPanel },
-    { id: "catalog", icon: Package, Panel: CatalogPanel },
-    { id: "entities", icon: Boxes, Panel: EntitiesPanel },
-    { id: "billing", icon: CreditCard, Panel: BillingPanel },
-    { id: "appearance", icon: Palette, Panel: AppearancePanel },
-] as const;
+    {
+        id: "members",
+        icon: UserRound,
+        Panel: MembersPanel,
+        anyOf: ["settings.structure", "members.invite", "settings.club", "members.create"],
+    },
+    {
+        id: "team",
+        icon: Users,
+        Panel: TeamPanel,
+        anyOf: ["employees.read", "employees.manage", "roles.manage"],
+    },
+    { id: "catalog", icon: Package, Panel: CatalogPanel, anyOf: ["catalog.manage"] },
+    { id: "entities", icon: Boxes, Panel: EntitiesPanel, anyOf: ["settings.structure"] },
+    { id: "billing", icon: CreditCard, Panel: BillingPanel, anyOf: ["billing.manage"] },
+    { id: "appearance", icon: Palette, Panel: AppearancePanel, anyOf: null },
+] as const satisfies readonly ({ anyOf: readonly Permission[] | null } & Record<string, unknown>)[];
 
-type TabId = (typeof TABS)[number]["id"];
-
-const isTabId = (value: string | null): value is TabId => TABS.some((tab) => tab.id === value);
+type Tab = (typeof TABS)[number];
+type TabId = Tab["id"];
 
 /**
  * Настройки по категориям: вкладки справа (на телефоне — лентой сверху), слева — плитки
@@ -40,8 +52,13 @@ export function SettingsHubPage() {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+    const { can } = usePermissions();
+    const tabs: readonly Tab[] = TABS.filter(
+        (tab) => tab.anyOf === null || tab.anyOf.some((code) => can(code))
+    );
     const requested = searchParams.get("tab");
-    const current: TabId = isTabId(requested) ? requested : "members";
+    const current: TabId =
+        tabs.find((tab) => tab.id === requested)?.id ?? tabs[0]?.id ?? "appearance";
     const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
     const select = (id: TabId) => {
@@ -55,14 +72,13 @@ export function SettingsHubPage() {
         if (!keys.includes(event.key)) return;
         event.preventDefault();
         const step = event.key === "ArrowDown" || event.key === "ArrowRight" ? 1 : -1;
-        const index = TABS.findIndex((tab) => tab.id === current);
-        const next = TABS[(index + step + TABS.length) % TABS.length]?.id ?? current;
+        const index = tabs.findIndex((tab) => tab.id === current);
+        const next = tabs[(index + step + tabs.length) % tabs.length]?.id ?? current;
         select(next);
         tabRefs.current[next]?.focus();
     };
 
-    const active = TABS.find((tab) => tab.id === current) ?? TABS[0];
-    const { Panel } = active;
+    const active = tabs.find((tab) => tab.id === current) ?? tabs[0];
 
     return (
         <TooltipProvider delayDuration={250}>
@@ -80,7 +96,7 @@ export function SettingsHubPage() {
                         onKeyDown={onKeyDown}
                         className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1 [scrollbar-width:none] lg:sticky lg:top-20 lg:order-last lg:mx-0 lg:flex-col lg:self-start lg:overflow-visible lg:px-0"
                     >
-                        {TABS.map(({ id, icon: Icon }) => {
+                        {tabs.map(({ id, icon: Icon }) => {
                             const selected = id === current;
                             return (
                                 <button
@@ -128,7 +144,7 @@ export function SettingsHubPage() {
                                 {t(`tabs.${current}.description`)}
                             </p>
                         </div>
-                        <Panel />
+                        {active && <active.Panel />}
                     </section>
                 </div>
             </div>

@@ -2,21 +2,22 @@
 
 import { useTranslations } from "next-intl";
 
-import { usePortalRole } from "@/modules/entities/portal";
+import { usePermissions } from "@/modules/entities/access";
 import { CreateInvitationForm } from "@/modules/features/invitations";
 import { ListPage } from "@/modules/shared/ui/ListPage";
 import { InvitationsList } from "@/modules/widgets/invitations";
 
 export function InvitationsSettingsPage() {
     const t = useTranslations("crm.invitations");
-    const { isAdmin } = usePortalRole();
+    const { can } = usePermissions();
+    const canManage = can("employees.manage");
 
     return (
         <ListPage
             title={t("title")}
             description={t("subtitle")}
             create={
-                isAdmin
+                canManage
                     ? {
                           label: t("create.button"),
                           title: t("create.title"),

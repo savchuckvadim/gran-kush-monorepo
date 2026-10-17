@@ -8,14 +8,14 @@ import { ScanQrCode, UserPlus } from "lucide-react";
 
 import { Button } from "@workspace/ui";
 
-import { usePortalRole } from "@/modules/entities/portal";
+import { usePermissions } from "@/modules/entities/access";
 import { RegistrationLinksDialog, type RegistrationLinksTab } from "@/modules/features";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
 /**
- * The two things done at the door: hand someone a sign-up link (owners and admins — the API
- * lets only them issue links) and scan a member's QR. Both stay on phones.
+ * The two things done at the door: hand someone a sign-up link (`members.invite`) and scan a
+ * member's QR (`presence.checkin`). Each shows only to those whose role has the permission.
  */
 export function HeaderQuickActions() {
     const t = useTranslations("crm.shell.quick");
@@ -24,8 +24,9 @@ export function HeaderQuickActions() {
     const [linksOpen, setLinksOpen] = useState(false);
     const [linksTab, setLinksTab] = useState<RegistrationLinksTab>("issue");
 
-    // the API lets only owners and admins issue sign-up links
-    const { isAdmin: canIssueLinks } = usePortalRole();
+    const { can } = usePermissions();
+    const canIssueLinks = can("members.invite");
+    const canScan = can("presence.checkin");
 
     // a fresh value every time: the attendance page keys the scanner on it and opens it again
     const openScanner = () =>
@@ -56,16 +57,18 @@ export function HeaderQuickActions() {
                     />
                 </>
             )}
-            <Button
-                variant="ghost"
-                size="icon"
-                aria-label={t("scanner")}
-                title={t("scanner")}
-                onClick={openScanner}
-                className="rounded-full"
-            >
-                <ScanQrCode />
-            </Button>
+            {canScan && (
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label={t("scanner")}
+                    title={t("scanner")}
+                    onClick={openScanner}
+                    className="rounded-full"
+                >
+                    <ScanQrCode />
+                </Button>
+            )}
         </div>
     );
 }

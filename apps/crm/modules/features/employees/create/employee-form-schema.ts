@@ -2,11 +2,7 @@ import type { useTranslations } from "next-intl";
 
 import { z } from "zod";
 
-import {
-    ASSIGNABLE_EMPLOYEE_ROLES,
-    type CreateEmployeePayload,
-    EMPLOYEE_FIELD,
-} from "@/modules/entities/employee";
+import { type CreateEmployeePayload, EMPLOYEE_FIELD } from "@/modules/entities/employee";
 
 type Translate = ReturnType<typeof useTranslations>;
 
@@ -14,7 +10,8 @@ type Translate = ReturnType<typeof useTranslations>;
 export const buildEmployeeFormSchema = (t: Translate) =>
     z.object({
         email: z.string().trim().email(t("emailInvalid")),
-        role: z.enum(ASSIGNABLE_EMPLOYEE_ROLES),
+        /** Ключ роли клуба */
+        role: z.string().min(1),
         firstName: z.string().trim().min(1, t("firstNameRequired")),
         lastName: z.string().trim(),
         phone: z.string().trim(),

@@ -7,13 +7,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { Button, FieldInput, FieldSelect } from "@workspace/ui";
+import { Button, FieldInput } from "@workspace/ui";
 
-import {
-    ASSIGNABLE_EMPLOYEE_ROLES,
-    isAssignableEmployeeRole,
-    useCreateEmployee,
-} from "@/modules/entities/employee";
+import { RoleSelect } from "@/modules/entities/access";
+import { useCreateEmployee } from "@/modules/entities/employee";
 
 import { CreateEmployeeError } from "./create-employee-error";
 import {
@@ -29,7 +26,6 @@ import {
  */
 export function CreateEmployeeForm({ onCreated }: { onCreated: () => void }) {
     const t = useTranslations("crm.employees.create");
-    const tRoles = useTranslations("crm.employees.roles");
     const create = useCreateEmployee();
     const schema = useMemo(() => buildEmployeeFormSchema(t), [t]);
 
@@ -68,17 +64,11 @@ export function CreateEmployeeForm({ onCreated }: { onCreated: () => void }) {
                     name="role"
                     control={control}
                     render={({ field }) => (
-                        <FieldSelect
+                        <RoleSelect
                             label={t("role")}
                             name={field.name}
-                            options={ASSIGNABLE_EMPLOYEE_ROLES.map((role) => ({
-                                value: role,
-                                label: tRoles(role),
-                            }))}
                             value={field.value}
-                            onValueChange={(value) => {
-                                if (isAssignableEmployeeRole(value)) field.onChange(value);
-                            }}
+                            onValueChange={field.onChange}
                         />
                     )}
                 />

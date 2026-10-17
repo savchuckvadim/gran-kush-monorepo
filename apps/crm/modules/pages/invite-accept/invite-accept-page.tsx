@@ -97,7 +97,9 @@ export function InviteAcceptPage({ token }: { token: string }) {
                 <p className="mt-1 text-sm text-muted-foreground">
                     {t("subtitle", {
                         email: invitation.email,
-                        role: t(`roles.${invitation.role}`),
+                        role: invitation.role.isSystem
+                            ? t(`roles.${invitation.role.key}`)
+                            : (invitation.role.name ?? invitation.role.key),
                     })}
                 </p>
 

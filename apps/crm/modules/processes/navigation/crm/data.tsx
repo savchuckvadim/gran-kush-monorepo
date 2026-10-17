@@ -1,5 +1,14 @@
-import { CalendarCheck, Package, Settings, ShoppingBag, UserCog, Users, Wallet } from "lucide-react";
+import {
+    CalendarCheck,
+    Package,
+    Settings,
+    ShoppingBag,
+    UserCog,
+    Users,
+    Wallet,
+} from "lucide-react";
 
+import { SETTINGS_PERMISSIONS } from "@/modules/entities/access";
 import { ROUTES } from "@/modules/shared/config/routes";
 
 import { ICrmNavigation } from "./crm-navigation.interface";
@@ -11,7 +20,7 @@ export const CRM_NAVIGATION: ICrmNavigation[] = [
         url: ROUTES.CRM_MEMBERS,
         title: "Clients",
         isActive: false,
-        isAdmin: false,
+        requires: ["members.read"],
         icon: <Users />,
     },
     {
@@ -20,7 +29,6 @@ export const CRM_NAVIGATION: ICrmNavigation[] = [
         url: ROUTES.CRM_PRODUCTS,
         title: "Products",
         isActive: false,
-        isAdmin: false,
         icon: <Package />,
     },
     {
@@ -29,7 +37,7 @@ export const CRM_NAVIGATION: ICrmNavigation[] = [
         url: ROUTES.CRM_ORDERS,
         title: "Orders",
         isActive: false,
-        isAdmin: false,
+        requires: ["orders.read"],
         icon: <ShoppingBag />,
     },
     {
@@ -38,7 +46,7 @@ export const CRM_NAVIGATION: ICrmNavigation[] = [
         url: ROUTES.CRM_ATTENDANCE,
         title: "Attendance",
         isActive: false,
-        isAdmin: false,
+        requires: ["presence.read", "presence.checkin"],
         icon: <CalendarCheck />,
     },
     {
@@ -47,7 +55,7 @@ export const CRM_NAVIGATION: ICrmNavigation[] = [
         url: ROUTES.CRM_FINANCE,
         title: "Finance",
         isActive: false,
-        isAdmin: false,
+        requires: ["finance.read"],
         icon: <Wallet />,
     },
     {
@@ -56,7 +64,7 @@ export const CRM_NAVIGATION: ICrmNavigation[] = [
         url: ROUTES.CRM_EMPLOYEES,
         title: "Employees",
         isActive: false,
-        isAdmin: true,
+        requires: ["employees.read"],
         icon: <UserCog />,
     },
     {
@@ -65,7 +73,7 @@ export const CRM_NAVIGATION: ICrmNavigation[] = [
         url: ROUTES.CRM_SETTINGS,
         title: "Settings",
         isActive: false,
-        isAdmin: false,
+        requires: SETTINGS_PERMISSIONS,
         icon: <Settings />,
     },
 ];

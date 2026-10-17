@@ -6,8 +6,8 @@ import { Loader2 } from "lucide-react";
 
 import { Card } from "@workspace/ui";
 
+import { usePermissions } from "@/modules/entities/access";
 import { funnelOfOrder, useOrderDetail, useOrderFunnels } from "@/modules/entities/order";
-import { usePortalRole } from "@/modules/entities/portal";
 import { OrderStageBar } from "@/modules/features/order-stage";
 
 import { OrderDetailHeader } from "./OrderDetailHeader";
@@ -26,7 +26,8 @@ export function OrderDetail({ orderId, layout = "page" }: OrderDetailProps) {
     const t = useTranslations("crm.orders.detail");
     const { data: order, isLoading, error } = useOrderDetail(orderId);
     const { data: funnels = [] } = useOrderFunnels();
-    const { isManager } = usePortalRole();
+    const { can } = usePermissions();
+    const canProcess = can("orders.process");
 
     if (isLoading) {
         return (
@@ -52,11 +53,11 @@ export function OrderDetail({ orderId, layout = "page" }: OrderDetailProps) {
     return (
         <div className="space-y-4">
             <OrderDetailHeader order={order} showBack={layout === "page"} />
-            {funnel ? <OrderStageBar order={order} funnel={funnel} canMove={isManager} /> : null}
+            {funnel ? <OrderStageBar order={order} funnel={funnel} canMove={canProcess} /> : null}
             <div className="grid gap-4 lg:grid-cols-5">
                 <div className="space-y-4 lg:col-span-2">
                     <OrderSummaryCard order={order} />
-                    <OrderPaymentCard order={order} canEdit={isManager} />
+                    <OrderPaymentCard order={order} canEdit={canProcess} />
                 </div>
                 <OrderItemsCard items={order.items} className="lg:col-span-3" />
             </div>

@@ -1,7 +1,7 @@
 "use client";
 
+import { OWNER_ROLE_KEY, usePermissions } from "@/modules/entities/access";
 import type { Employee } from "@/modules/entities/employee";
-import { usePortalRole } from "@/modules/entities/portal";
 import { useAuth } from "@/modules/processes";
 
 export interface EmployeeAccess {
@@ -13,12 +13,14 @@ export interface EmployeeAccess {
 
 /**
  * Кто может менять сотрудника — те же правила, что у API (`PATCH`/`DELETE /crm/employees/:id`):
- * администратор открытого клуба, не себя и не владельца.
+ * право `employees.manage`, не себя и не владельца. Что роль коллеги не шире своих прав, API
+ * проверит сам и ответит понятной ошибкой.
  */
 export function useEmployeeAccess(employee: Employee): EmployeeAccess {
     const { currentUser } = useAuth();
-    const { isAdmin } = usePortalRole();
+    const { can } = usePermissions();
     const isSelf = employee.userId === currentUser?.id;
+    const isOwner = employee.role.isSystem && employee.role.key === OWNER_ROLE_KEY;
 
-    return { isSelf, canManage: isAdmin && !isSelf && employee.role !== "portal_owner" };
+    return { isSelf, canManage: can("employees.manage") && !isSelf && !isOwner };
 }

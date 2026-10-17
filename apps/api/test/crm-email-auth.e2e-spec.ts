@@ -7,6 +7,7 @@ import request from "supertest";
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { MailService } from "../src/modules/mail/application/services/mail.service";
+
 import { mailTokens } from "./support/mail-tokens";
 
 jest.setTimeout(120_000);

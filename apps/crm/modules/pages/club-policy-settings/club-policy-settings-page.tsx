@@ -7,8 +7,8 @@ import { Loader2 } from "lucide-react";
 import { getApiErrorMessage } from "@workspace/api-client/core";
 import { Card } from "@workspace/ui";
 
+import { usePermissions } from "@/modules/entities/access";
 import { useClubPolicy, useUpdateClubPolicy } from "@/modules/entities/club-policy";
-import { usePortalRole } from "@/modules/entities/portal";
 
 import { LimitDefaultRow } from "./limit-default-row";
 import { PolicyRow } from "./policy-row";
@@ -20,7 +20,8 @@ import { PolicyRow } from "./policy-row";
  */
 export function ClubPolicySettingsPage() {
     const t = useTranslations("crm.clubPolicy");
-    const { isAdmin } = usePortalRole();
+    const { can } = usePermissions();
+    const canEdit = can("settings.club");
     const policy = useClubPolicy();
     const update = useUpdateClubPolicy();
 
@@ -33,7 +34,7 @@ export function ClubPolicySettingsPage() {
     }
 
     const rules = policy.data;
-    const disabled = !isAdmin || update.isPending;
+    const disabled = !canEdit || update.isPending;
 
     return (
         <div className="space-y-6">
@@ -42,7 +43,7 @@ export function ClubPolicySettingsPage() {
                 <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
             </div>
 
-            {!isAdmin && <p className="text-sm text-muted-foreground">{t("adminOnly")}</p>}
+            {!canEdit && <p className="text-sm text-muted-foreground">{t("adminOnly")}</p>}
             {update.error && (
                 <p role="alert" className="text-sm text-destructive">
                     {getApiErrorMessage(update.error)}

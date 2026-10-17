@@ -7,6 +7,7 @@ import { Trash2 } from "lucide-react";
 
 import { Button } from "@workspace/ui";
 
+import { RoleBadge } from "@/modules/entities/access";
 import {
     type Invitation,
     InvitationStatusBadge,
@@ -19,7 +20,6 @@ import { EntityList, type EntityListTableColumn } from "@/modules/shared/ui/Enti
 /** Приглашения сотрудников клуба; ждущее ответа можно отозвать. */
 export function InvitationsList() {
     const t = useTranslations("crm.invitations");
-    const tRoles = useTranslations("crm.employees.roles");
     const date = useDateFormat();
     const { data = [], isPending, error } = useInvitations();
     const [revoking, setRevoking] = useState<Invitation | null>(null);
@@ -34,7 +34,7 @@ export function InvitationsList() {
         {
             key: "role",
             header: t("columns.role"),
-            cell: (invitation) => tRoles(invitation.role),
+            cell: (invitation) => <RoleBadge role={invitation.role} />,
         },
         {
             key: "status",

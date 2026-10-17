@@ -1,7 +1,7 @@
 import { fieldValueText } from "@/modules/shared/lib/field-value-text";
 import { personName } from "@/modules/shared/lib/person-name";
 
-import type { Employee, EmployeeRole } from "../api/employee.api";
+import type { Employee } from "../api/employee.api";
 
 /** Поля профиля, которые есть у каждого сотрудника (динамические поля сущности `employee`). */
 export const EMPLOYEE_FIELD = {
@@ -25,15 +25,3 @@ export const employeeName = (employee: Employee): string =>
         },
         employee.email
     );
-
-/** Роли, которые выдаёт администратор. Владелец — тот, кто основал клуб: его не назначают. */
-export const ASSIGNABLE_EMPLOYEE_ROLES = [
-    "employee",
-    "manager",
-    "admin",
-] as const satisfies readonly EmployeeRole[];
-
-export type AssignableEmployeeRole = (typeof ASSIGNABLE_EMPLOYEE_ROLES)[number];
-
-export const isAssignableEmployeeRole = (value: string): value is AssignableEmployeeRole =>
-    ASSIGNABLE_EMPLOYEE_ROLES.some((role) => role === value);

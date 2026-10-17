@@ -6,8 +6,8 @@ import { useTranslations } from "next-intl";
 import type { SchemaMeasurementUnitDto } from "@workspace/api-client/core";
 import { Badge } from "@workspace/ui";
 
+import { usePermissions } from "@/modules/entities/access";
 import { useMeasurementUnits } from "@/modules/entities/measurement-unit";
-import { usePortalRole } from "@/modules/entities/portal";
 import { CreateMeasurementUnitForm } from "@/modules/features/catalog-settings";
 import { EntityList, type EntityListTableColumn } from "@/modules/shared/ui/EntityList";
 import { ListPage } from "@/modules/shared/ui/ListPage";
@@ -15,7 +15,8 @@ import { ListPage } from "@/modules/shared/ui/ListPage";
 /** Единицы измерения в хабе настроек: встроенные и свои, «Создать» с формой в диалоге. */
 export function MeasurementUnitManagementWidget() {
     const t = useTranslations("crm.sections.settings.measurementUnits");
-    const { isAdmin } = usePortalRole();
+    const { can } = usePermissions();
+    const canManage = can("catalog.manage");
     const { data, isPending, error } = useMeasurementUnits();
 
     const units = useMemo(
@@ -52,7 +53,7 @@ export function MeasurementUnitManagementWidget() {
             title={t("title")}
             description={t("description")}
             create={
-                isAdmin
+                canManage
                     ? {
                           label: t("create"),
                           title: t("createTitle"),

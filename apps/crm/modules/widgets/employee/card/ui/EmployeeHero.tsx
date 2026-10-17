@@ -7,12 +7,12 @@ import { Briefcase, Mail, Phone } from "lucide-react";
 import { Badge, InitialsAvatar } from "@workspace/ui";
 import { hueOf } from "@workspace/ui/lib/color";
 
+import { RoleBadge } from "@/modules/entities/access";
 import {
     type Employee,
     EMPLOYEE_FIELD,
     employeeFieldText,
     employeeName,
-    EmployeeRoleBadge,
     EmployeeStatusBadge,
 } from "@/modules/entities/employee";
 
@@ -61,7 +61,7 @@ export function EmployeeHero({ employee, access }: EmployeeHeroProps) {
                         {name}
                     </h1>
                     <div className="flex flex-wrap items-center gap-1.5">
-                        <EmployeeRoleBadge role={employee.role} />
+                        <RoleBadge role={employee.role} />
                         <EmployeeStatusBadge isActive={employee.isActive} />
                         {access.isSelf && <Badge variant="outline">{t("you")}</Badge>}
                     </div>

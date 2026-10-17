@@ -6,13 +6,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { getApiErrorMessage } from "@workspace/api-client/core";
-import { Button, FieldInput, FieldSelect } from "@workspace/ui";
+import { Button, FieldInput } from "@workspace/ui";
 
-import {
-    ASSIGNABLE_EMPLOYEE_ROLES,
-    type AssignableEmployeeRole,
-    isAssignableEmployeeRole,
-} from "@/modules/entities/employee";
+import { RoleSelect } from "@/modules/entities/access";
 import { useCreateInvitation } from "@/modules/entities/invitations";
 import { ROUTES } from "@/modules/shared/config/routes";
 
@@ -30,12 +26,11 @@ interface CreateInvitationFormProps {
  */
 export function CreateInvitationForm({ onDone }: CreateInvitationFormProps) {
     const t = useTranslations("crm.invitations.create");
-    const tRoles = useTranslations("crm.employees.roles");
     const locale = useLocale();
     const create = useCreateInvitation();
 
     const [email, setEmail] = useState("");
-    const [role, setRole] = useState<AssignableEmployeeRole>("employee");
+    const [role, setRole] = useState("employee");
     const [created, setCreated] = useState<{ email: string; url: string } | null>(null);
 
     if (created) {
@@ -66,17 +61,7 @@ export function CreateInvitationForm({ onDone }: CreateInvitationFormProps) {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
             />
-            <FieldSelect
-                label={t("role")}
-                options={ASSIGNABLE_EMPLOYEE_ROLES.map((value) => ({
-                    value,
-                    label: tRoles(value),
-                }))}
-                value={role}
-                onValueChange={(value) => {
-                    if (isAssignableEmployeeRole(value)) setRole(value);
-                }}
-            />
+            <RoleSelect label={t("role")} value={role} onValueChange={setRole} />
             {create.error ? (
                 <p role="alert" className="text-sm text-destructive">
                     {getApiErrorMessage(create.error)}

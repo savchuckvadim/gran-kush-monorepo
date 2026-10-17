@@ -21,12 +21,6 @@
                 "profile": "My account",
                 "language": "Language",
                 "logout": "Log out",
-                "roles": {
-                    "portal_owner": "Owner",
-                    "admin": "Admin",
-                    "manager": "Manager",
-                    "employee": "Employee"
-                },
                 "settings": "Settings",
                 "billing": "Plan and payment",
                 "appearance": "Appearance",
@@ -871,10 +865,10 @@
                 "notice": "The club has its own theme — “{name}”. You picked another one.",
                 "follow": "Club theme",
                 "title": "Club theme",
-                "description": "Staff in the CRM and members in the cabinet see it until they pick their own. The admin changes it.",
+                "description": "Staff in the CRM and members in the cabinet see it until they pick their own. Changed by someone with the club settings permission.",
                 "none": "PafPaf theme",
                 "save": "Save",
-                "adminOnly": "The admin changes the club theme."
+                "adminOnly": "The club theme is changed by someone with the club settings permission."
             }
         },
         "billing": {
@@ -1046,6 +1040,11 @@
                     "metric": "auto check-out",
                     "noCap": "No visit cap",
                     "cap": "Visit cap {hours} h"
+                },
+                "roles": {
+                    "title": "Roles and permissions",
+                    "description": "What each role in the club can do",
+                    "metric": "roles"
                 }
             }
         },
@@ -1175,7 +1174,7 @@
         "clubPolicy": {
             "title": "Club rules",
             "subtitle": "How members join and order. Everything is closed by default — open what the club needs.",
-            "adminOnly": "Only a club admin can change the rules.",
+            "adminOnly": "Rules are changed by someone with the club settings permission.",
             "joinByRequest": {
                 "title": "Requests without a link",
                 "description": "A person can ask to join from the cabinet; they get the «In progress» status and the club approves them. Off — members join only by the club link or through staff."
@@ -1204,7 +1203,7 @@
         "presenceSettings": {
             "title": "Presence",
             "subtitle": "When visits that a member forgot to close on the way out get closed. Time follows the club's clock.",
-            "adminOnly": "Only a club administrator can change these rules.",
+            "adminOnly": "Rules are changed by someone with the club settings permission.",
             "timezone": {
                 "label": "Club time zone",
                 "description": "Auto check-out time follows it. It is {time} at the club now.",
@@ -1245,12 +1244,6 @@
             "create": "Create"
         },
         "employees": {
-            "roles": {
-                "portal_owner": "Owner",
-                "admin": "Admin",
-                "manager": "Manager",
-                "employee": "Employee"
-            },
             "title": "Employees",
             "subtitle": "The club's team: roles, positions and access to the CRM.",
             "loadError": "Could not load the employees",
@@ -1442,6 +1435,103 @@
             "values": {
                 "yes": "yes",
                 "no": "no"
+            }
+        },
+        "access": {
+            "roles": {
+                "owner": "Owner",
+                "admin": "Administrator",
+                "manager": "Manager",
+                "employee": "Employee"
+            },
+            "noAccess": {
+                "title": "No access",
+                "description": "Your role in this club lacks the permissions for this section. The owner or an administrator grants them."
+            },
+            "groups": {
+                "members": "Members",
+                "orders": "Orders",
+                "catalog": "Catalog",
+                "finance": "Finance",
+                "presence": "Presence",
+                "records": "Smart processes",
+                "team": "Team",
+                "club": "Club"
+            },
+            "permissions": {
+                "members": {
+                    "read": "See members and their cards",
+                    "create": "Add members",
+                    "edit": "Edit a member's profile, status and limit",
+                    "documents": "See document scans and signature",
+                    "invite": "Member registration links"
+                },
+                "orders": {
+                    "read": "See orders",
+                    "create": "Create orders",
+                    "process": "Run orders: stages, status, payment"
+                },
+                "catalog": {
+                    "manage": "Edit the catalog: products, categories, units"
+                },
+                "finance": {
+                    "read": "See finance and reports",
+                    "write": "Record transactions"
+                },
+                "presence": {
+                    "read": "See visits and statistics",
+                    "checkin": "Check members in and out, scan QR"
+                },
+                "qr": {
+                    "manage": "Issue and revoke a member's QR"
+                },
+                "records": {
+                    "read": "See records",
+                    "write": "Create and edit records",
+                    "delete": "Delete records"
+                },
+                "employees": {
+                    "read": "See the team",
+                    "manage": "Add, edit and disable employees, invite"
+                },
+                "roles": {
+                    "manage": "Set up roles and permissions"
+                },
+                "settings": {
+                    "club": "Club settings: rules, presence, appearance, public page",
+                    "structure": "Structure: entities, fields, forms, pipelines, statuses",
+                    "views": "Club-wide list and board views"
+                },
+                "billing": {
+                    "manage": "Plan and billing"
+                }
+            },
+            "rolesPage": {
+                "title": "Roles and permissions",
+                "description": "What each role in the club can do. The owner and administrators can do everything.",
+                "create": "New role",
+                "createDescription": "A custom role with the permissions you choose. You can only grant permissions you have.",
+                "nameLabel": "Name",
+                "namePlaceholder": "For example, Cashier",
+                "save": "Save",
+                "saving": "Saving…",
+                "saved": "Role permissions saved",
+                "created": "Role created",
+                "delete": "Delete role",
+                "deleteTitle": "Delete the role “{name}”?",
+                "deleteDescription": "The role is deleted only if no employee or pending invitation has it.",
+                "deleted": "Role deleted",
+                "cancel": "Cancel",
+                "fullAccess": "Full access — this role's permissions do not change",
+                "readOnly": "Roles are changed by someone with the “Set up roles and permissions” permission",
+                "custom": "Custom",
+                "employees": "{count, plural, =0 {no employees} one {# employee} other {# employees}}",
+                "errors": {
+                    "exceeds_own_permissions": "You cannot grant permissions you do not have",
+                    "role_in_use": "Employees or invitations have this role — change their role first",
+                    "role_not_editable": "This role cannot be changed",
+                    "generic": "Could not save the role"
+                }
             }
         }
     }

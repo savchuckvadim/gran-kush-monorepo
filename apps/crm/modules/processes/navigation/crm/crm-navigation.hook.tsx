@@ -5,19 +5,24 @@ import { useTranslations } from "next-intl";
 
 import { Boxes } from "lucide-react";
 
+import { usePermissions } from "@/modules/entities/access";
 import { useEntityDefinitions } from "@/modules/entities/entity-settings";
 import { ROUTES, useLocalizedLink } from "@/modules/shared";
 
 import { ICrmNavigation } from "./crm-navigation.interface";
 import { CRM_NAVIGATION } from "./data";
 
+/** Разделы CRM для меню и палитры команд — только те, на которые у роли есть права. */
 export function useCrmNavigation(): ICrmNavigation[] {
     const t = useTranslations("crm.shell");
+    const { can } = usePermissions();
+    const allowed = (item: ICrmNavigation) =>
+        !item.requires || item.requires.some((code) => can(code));
     const localizedLink = useLocalizedLink();
     const pathname = usePathname();
     const { data: definitions } = useEntityDefinitions();
 
-    const staticItems = CRM_NAVIGATION.map((item) => {
+    const staticItems = CRM_NAVIGATION.filter(allowed).map((item) => {
         const localizedUrl = localizedLink(item.url);
         const memberSectionRoot = localizedLink(ROUTES.CRM_MEMBER_BASE);
         const productSectionRoot = localizedLink(ROUTES.CRM_PRODUCT_BASE);
@@ -25,11 +30,9 @@ export function useCrmNavigation(): ICrmNavigation[] {
 
         const isActive =
             item.code === "clients"
-                ? pathname === memberSectionRoot ||
-                  pathname.startsWith(`${memberSectionRoot}/`)
+                ? pathname === memberSectionRoot || pathname.startsWith(`${memberSectionRoot}/`)
                 : item.code === "products"
-                  ? pathname === productSectionRoot ||
-                    pathname.startsWith(`${productSectionRoot}/`)
+                  ? pathname === productSectionRoot || pathname.startsWith(`${productSectionRoot}/`)
                   : item.code === "orders"
                     ? pathname === orderSectionRoot || pathname.startsWith(`${orderSectionRoot}/`)
                     : pathname === localizedUrl || pathname.startsWith(`${localizedUrl}/`);
@@ -44,7 +47,7 @@ export function useCrmNavigation(): ICrmNavigation[] {
 
     // Кастомные сущности (смарт-процессы) — между статическими разделами и настройками
     const customItems: ICrmNavigation[] = (definitions ?? [])
-        .filter((d) => !d.isSystem && d.isActive !== false && d.code)
+        .filter((d) => !d.isSystem && d.isActive !== false && d.code && can("records.read"))
         .map((d, index) => {
             const url = localizedLink(`${ROUTES.CRM_ENTITIES}/${d.code}`);
             return {
@@ -53,7 +56,7 @@ export function useCrmNavigation(): ICrmNavigation[] {
                 url,
                 title: d.name ?? d.code ?? "",
                 isActive: pathname === url || pathname.startsWith(`${url}/`),
-                isAdmin: false,
+                requires: ["records.read"] as const,
                 icon: <Boxes />,
             };
         });

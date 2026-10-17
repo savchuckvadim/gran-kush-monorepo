@@ -4,8 +4,8 @@ import { useTranslations } from "next-intl";
 
 import { Card } from "@workspace/ui/components/card";
 
+import { usePermissions } from "@/modules/entities/access";
 import { useMemberLimit } from "@/modules/entities/member-limit";
-import { usePortalRole } from "@/modules/entities/portal";
 
 import { MemberLimitForm } from "./MemberLimitForm";
 
@@ -15,7 +15,8 @@ import { MemberLimitForm } from "./MemberLimitForm";
  */
 export function MemberLimitCard({ memberId }: { memberId: string }) {
     const t = useTranslations("crm.members.card.limit");
-    const { isManager } = usePortalRole();
+    const { can } = usePermissions();
+    const canEdit = can("members.edit");
     const limit = useMemberLimit(memberId);
 
     if (!limit.data?.enabled) return null;
@@ -50,7 +51,7 @@ export function MemberLimitCard({ memberId }: { memberId: string }) {
             <p className="text-xs text-muted-foreground">
                 {personalGrams === null ? t("clubDefault") : t("personal")}
             </p>
-            {isManager && <MemberLimitForm memberId={memberId} personalGrams={personalGrams} />}
+            {canEdit && <MemberLimitForm memberId={memberId} personalGrams={personalGrams} />}
         </Card>
     );
 }

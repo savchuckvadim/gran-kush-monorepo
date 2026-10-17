@@ -45,6 +45,8 @@ export const ROUTES = {
     CRM_SETTINGS_ENTITIES: "/crm/settings/entities",
     /** Инвайты сотрудников */
     CRM_SETTINGS_INVITATIONS: "/crm/settings/invitations",
+    /** Роли клуба и права (TASK-732) */
+    CRM_SETTINGS_ROLES: "/crm/settings/roles",
     /** Ссылки-формы регистрации */
     CRM_SETTINGS_REGISTRATION_LINKS: "/crm/settings/registration-links",
     /** Подписка клуба: тариф, оплата, кабинет Stripe. Открыта и при 402 */

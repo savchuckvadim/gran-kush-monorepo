@@ -21,12 +21,6 @@
                 "profile": "Mi cuenta",
                 "language": "Idioma",
                 "logout": "Cerrar sesión",
-                "roles": {
-                    "portal_owner": "Propietario",
-                    "admin": "Administrador",
-                    "manager": "Gerente",
-                    "employee": "Empleado"
-                },
                 "settings": "Ajustes",
                 "billing": "Plan y pago",
                 "appearance": "Apariencia",
@@ -871,10 +865,10 @@
                 "notice": "El club tiene su propio tema: «{name}». Has elegido otro.",
                 "follow": "Tema del club",
                 "title": "Tema del club",
-                "description": "Lo ven el personal en el CRM y los socios en su área hasta que eligen el suyo. Lo cambia el administrador.",
+                "description": "Lo ven el personal en el CRM y los socios en su área hasta que eligen el suyo. Lo cambia quien tiene el permiso de ajustes del club.",
                 "none": "Tema PafPaf",
                 "save": "Guardar",
-                "adminOnly": "El tema del club lo cambia el administrador."
+                "adminOnly": "El tema del club lo cambia quien tiene el permiso de ajustes del club."
             }
         },
         "billing": {
@@ -1046,6 +1040,11 @@
                     "metric": "salida automática",
                     "noCap": "Sin límite de visita",
                     "cap": "Límite de visita {hours} h"
+                },
+                "roles": {
+                    "title": "Roles y permisos",
+                    "description": "Qué puede hacer cada rol del club",
+                    "metric": "roles"
                 }
             }
         },
@@ -1175,7 +1174,7 @@
         "clubPolicy": {
             "title": "Normas del club",
             "subtitle": "Cómo se unen y piden los socios. Por defecto todo está cerrado: abre lo que necesite el club.",
-            "adminOnly": "Solo un administrador del club puede cambiar las normas.",
+            "adminOnly": "Las reglas las cambia quien tiene el permiso de ajustes del club.",
             "joinByRequest": {
                 "title": "Solicitudes sin enlace",
                 "description": "Una persona puede pedir unirse desde su cuenta; queda en «En curso» y el club la aprueba. Apagado: solo con el enlace del club o a través del personal."
@@ -1204,7 +1203,7 @@
         "presenceSettings": {
             "title": "Presencia",
             "subtitle": "Cuándo se cierran las visitas que el socio olvidó cerrar al salir. La hora sigue el reloj del club.",
-            "adminOnly": "Solo un administrador del club puede cambiar estas reglas.",
+            "adminOnly": "Las reglas las cambia quien tiene el permiso de ajustes del club.",
             "timezone": {
                 "label": "Zona horaria del club",
                 "description": "La salida automática sigue esta zona. Ahora en el club son las {time}.",
@@ -1245,12 +1244,6 @@
             "create": "Crear"
         },
         "employees": {
-            "roles": {
-                "portal_owner": "Propietario",
-                "admin": "Administrador",
-                "manager": "Gerente",
-                "employee": "Empleado"
-            },
             "title": "Empleados",
             "subtitle": "El equipo del club: roles, puestos y acceso al CRM.",
             "loadError": "No se pudieron cargar los empleados",
@@ -1442,6 +1435,103 @@
             "values": {
                 "yes": "sí",
                 "no": "no"
+            }
+        },
+        "access": {
+            "roles": {
+                "owner": "Propietario",
+                "admin": "Administrador",
+                "manager": "Gerente",
+                "employee": "Empleado"
+            },
+            "noAccess": {
+                "title": "Sin acceso",
+                "description": "Tu rol en el club no tiene permisos para esta sección. Los concede el propietario o un administrador."
+            },
+            "groups": {
+                "members": "Socios",
+                "orders": "Pedidos",
+                "catalog": "Catálogo",
+                "finance": "Finanzas",
+                "presence": "Presencia",
+                "records": "Procesos",
+                "team": "Equipo",
+                "club": "Club"
+            },
+            "permissions": {
+                "members": {
+                    "read": "Ver socios y sus fichas",
+                    "create": "Añadir socios",
+                    "edit": "Editar ficha, estado y límite del socio",
+                    "documents": "Ver documentos escaneados y firma",
+                    "invite": "Enlaces de registro de socios"
+                },
+                "orders": {
+                    "read": "Ver pedidos",
+                    "create": "Crear pedidos",
+                    "process": "Gestionar pedidos: etapas, estado, pago"
+                },
+                "catalog": {
+                    "manage": "Editar el catálogo: productos, categorías, unidades"
+                },
+                "finance": {
+                    "read": "Ver finanzas e informes",
+                    "write": "Registrar operaciones"
+                },
+                "presence": {
+                    "read": "Ver visitas y estadísticas",
+                    "checkin": "Registrar entrada y salida, escanear QR"
+                },
+                "qr": {
+                    "manage": "Emitir y revocar el QR del socio"
+                },
+                "records": {
+                    "read": "Ver registros",
+                    "write": "Crear y editar registros",
+                    "delete": "Eliminar registros"
+                },
+                "employees": {
+                    "read": "Ver el equipo",
+                    "manage": "Añadir, editar y desactivar empleados, invitar"
+                },
+                "roles": {
+                    "manage": "Configurar roles y permisos"
+                },
+                "settings": {
+                    "club": "Ajustes del club: reglas, presencia, apariencia, página pública",
+                    "structure": "Estructura: entidades, campos, formularios, embudos, estados",
+                    "views": "Vistas de listas y tableros para todo el club"
+                },
+                "billing": {
+                    "manage": "Plan y pago"
+                }
+            },
+            "rolesPage": {
+                "title": "Roles y permisos",
+                "description": "Qué puede hacer cada rol del club. El propietario y los administradores pueden todo.",
+                "create": "Nuevo rol",
+                "createDescription": "Un rol propio con los permisos que elijas. Solo puedes conceder permisos que tienes.",
+                "nameLabel": "Nombre",
+                "namePlaceholder": "Por ejemplo, Cajero",
+                "save": "Guardar",
+                "saving": "Guardando…",
+                "saved": "Permisos del rol guardados",
+                "created": "Rol creado",
+                "delete": "Eliminar rol",
+                "deleteTitle": "¿Eliminar el rol «{name}»?",
+                "deleteDescription": "El rol se elimina solo si ningún empleado ni invitación pendiente lo tiene.",
+                "deleted": "Rol eliminado",
+                "cancel": "Cancelar",
+                "fullAccess": "Acceso total: los permisos de este rol no cambian",
+                "readOnly": "Los roles los cambia quien tiene el permiso «Configurar roles y permisos»",
+                "custom": "Propio",
+                "employees": "{count, plural, =0 {sin empleados} one {# empleado} other {# empleados}}",
+                "errors": {
+                    "exceeds_own_permissions": "No puedes conceder permisos que no tienes",
+                    "role_in_use": "Hay empleados o invitaciones con este rol: cámbiales el rol primero",
+                    "role_not_editable": "Este rol no se puede cambiar",
+                    "generic": "No se pudo guardar el rol"
+                }
             }
         }
     }

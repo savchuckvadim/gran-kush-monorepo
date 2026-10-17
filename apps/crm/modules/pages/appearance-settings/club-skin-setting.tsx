@@ -5,7 +5,8 @@ import { useState } from "react";
 import { getApiErrorMessage } from "@workspace/api-client/core";
 import { Button, Card, FieldSelect } from "@workspace/ui";
 
-import { usePortalInfo, usePortalRole, useUpdatePortalAppearance } from "@/modules/entities/portal";
+import { usePermissions } from "@/modules/entities/access";
+import { usePortalInfo, useUpdatePortalAppearance } from "@/modules/entities/portal";
 import { useSkinText } from "@/modules/features/skin-picker/use-skin-text";
 import { DEFAULT_SKIN, normalizeSkinId, SKINS } from "@/modules/shared/config/skins";
 
@@ -15,7 +16,8 @@ import { DEFAULT_SKIN, normalizeSkinId, SKINS } from "@/modules/shared/config/sk
  */
 export function ClubSkinSetting() {
     const text = useSkinText();
-    const { isAdmin } = usePortalRole();
+    const { can } = usePermissions();
+    const canEditClub = can("settings.club");
     const info = usePortalInfo();
     const update = useUpdatePortalAppearance();
     const saved = normalizeSkinId(info.data?.defaultSkin) ?? "";
@@ -35,7 +37,7 @@ export function ClubSkinSetting() {
             <div>
                 <h2 className="font-medium">{text.t("clubSkin.title")}</h2>
                 <p className="mt-0.5 text-sm text-muted-foreground">
-                    {isAdmin ? text.t("clubSkin.description") : text.t("clubSkin.adminOnly")}
+                    {canEditClub ? text.t("clubSkin.description") : text.t("clubSkin.adminOnly")}
                 </p>
             </div>
             <div className="flex flex-wrap items-end gap-3">
@@ -44,10 +46,10 @@ export function ClubSkinSetting() {
                         options={options}
                         value={selected}
                         onValueChange={setValue}
-                        disabled={!isAdmin || info.isLoading || update.isPending}
+                        disabled={!canEditClub || info.isLoading || update.isPending}
                     />
                 </div>
-                {isAdmin && (
+                {canEditClub && (
                     <Button
                         size="sm"
                         disabled={selected === saved || update.isPending}

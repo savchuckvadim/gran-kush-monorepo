@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import { usePortalRole } from "@/modules/entities/portal";
+import { usePermissions } from "@/modules/entities/access";
 import { CreateEmployeeForm } from "@/modules/features/employees";
 import { ListPage } from "@/modules/shared/ui/ListPage";
 import { EmployeesList } from "@/modules/widgets/employee";
@@ -10,14 +10,15 @@ import { EmployeesList } from "@/modules/widgets/employee";
 /** Сотрудники клуба: список и «Добавить сотрудника» — для администратора. */
 export function EmployeesPage() {
     const t = useTranslations("crm.employees");
-    const { isAdmin } = usePortalRole();
+    const { can } = usePermissions();
+    const canManage = can("employees.manage");
 
     return (
         <ListPage
             title={t("title")}
             description={t("subtitle")}
             create={
-                isAdmin
+                canManage
                     ? {
                           label: t("create.button"),
                           title: t("create.title"),

@@ -1,7 +1,7 @@
 "use client";
 
+import { usePermissions } from "@/modules/entities/access";
 import { pickFunnel, useOrderFunnels } from "@/modules/entities/order";
-import { usePortalRole } from "@/modules/entities/portal";
 import {
     OrdersKanban,
     OrdersList,
@@ -15,7 +15,8 @@ export function OrdersPage() {
     const { view, setView, funnelId, setFunnelId } = useOrdersView();
     const { data: funnels = [] } = useOrderFunnels();
     const funnel = pickFunnel(funnels, funnelId);
-    const { isManager } = usePortalRole();
+    const { can } = usePermissions();
+    const canProcess = can("orders.process");
     const filters = useOrderFilters(funnel?.stages ?? [], { withStage: view === "list" });
 
     return (
@@ -28,7 +29,7 @@ export function OrdersPage() {
                 onFunnelChange={setFunnelId}
             />
             {view === "kanban" && funnel ? (
-                <OrdersKanban funnel={funnel} filters={filters} canMove={isManager} />
+                <OrdersKanban funnel={funnel} filters={filters} canMove={canProcess} />
             ) : (
                 <OrdersList filters={filters} />
             )}

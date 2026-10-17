@@ -712,23 +712,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/crm/auth/employee/register": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Register new Employee (Admin only, account claimed later) */
-        post: operations["EmployeeRegistration_register"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/cabinet/auth/login": {
         parameters: {
             query?: never;
@@ -1288,7 +1271,7 @@ export interface paths {
         /** Список сотрудников портала (с пагинацией и фильтрами) */
         get: operations["CrmEmployees_listEmployees"];
         put?: never;
-        /** Создать сотрудника (admin): email + роль + динамические поля */
+        /** Создать сотрудника (employees.manage): email + роль + динамические поля */
         post: operations["CrmEmployees_createEmployee"];
         delete?: never;
         options?: never;
@@ -1324,11 +1307,11 @@ export interface paths {
         get: operations["CrmEmployees_getEmployee"];
         put?: never;
         post?: never;
-        /** Деактивировать сотрудника (admin) */
+        /** Деактивировать сотрудника (employees.manage) */
         delete: operations["CrmEmployees_deactivateEmployee"];
         options?: never;
         head?: never;
-        /** Обновить роль / статус / поля профиля сотрудника (admin) */
+        /** Обновить роль / статус / поля профиля сотрудника (employees.manage) */
         patch: operations["CrmEmployees_updateEmployee"];
         trace?: never;
     };
@@ -1560,6 +1543,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/crm/settings/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Роли клуба и каталог прав */
+        get: operations["CrmRoles_list"];
+        put?: never;
+        /** Своя роль клуба */
+        post: operations["CrmRoles_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/settings/roles/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Удалить свою роль без сотрудников и ждущих приглашений */
+        delete: operations["CrmRoles_delete"];
+        options?: never;
+        head?: never;
+        /** Название своей роли и права роли (кроме владельца и админа) */
+        patch: operations["CrmRoles_update"];
+        trace?: never;
+    };
     "/crm/members": {
         parameters: {
             query?: never;
@@ -1626,7 +1645,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Update member details from CRM (Admin only) */
+        /** Update member details from CRM (members.edit) */
         patch: operations["CrmMembers_update"];
         trace?: never;
     };
@@ -1643,7 +1662,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Change member lifecycle status (Admin only) */
+        /** Change member lifecycle status (members.edit) */
         patch: operations["CrmMembers_updateStatus"];
         trace?: never;
     };
@@ -1841,10 +1860,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Список приглашений портала (admin) */
+        /** Список приглашений портала (employees.manage) */
         get: operations["CrmInvitations_list"];
         put?: never;
-        /** Пригласить сотрудника по email (admin): ссылка уходит письмом */
+        /** Пригласить сотрудника по email (employees.manage): ссылка уходит письмом */
         post: operations["CrmInvitations_create"];
         delete?: never;
         options?: never;
@@ -1862,7 +1881,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Отозвать приглашение (admin) */
+        /** Отозвать приглашение (employees.manage) */
         delete: operations["CrmInvitations_revoke"];
         options?: never;
         head?: never;
@@ -2056,7 +2075,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Тема клуба по умолчанию для сотрудников и участников (admin) */
+        /** Тема клуба по умолчанию для сотрудников и участников (settings.club) */
         patch: operations["CrmPortalInfo_updateAppearance"];
         trace?: never;
     };
@@ -2554,7 +2573,7 @@ export interface paths {
         /** Список заказов (с фильтрами и пагинацией; `stageId` — колонка канбана) */
         get: operations["CrmOrders_listOrders"];
         put?: never;
-        /** Создать заказ за участника. Любой сотрудник; цена и подарок — по позициям, стадию выбирает manager+. 400 — товар недоступен или кончился, стадия отмены */
+        /** Создать заказ за участника. Любой сотрудник; цена и подарок — по позициям, стадию — с правом orders.process. 400 — товар недоступен или кончился, стадия отмены */
         post: operations["CrmOrders_createOrder"];
         delete?: never;
         options?: never;
@@ -2609,7 +2628,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Перевести заказ в стадию воронки или переставить карточку в колонке (afterId). Роль: manager+. 400 — чужая стадия или заказ закрыт, 409 — гонка */
+        /** Перевести заказ в стадию воронки или переставить карточку в колонке (afterId). Право orders.process. 400 — чужая стадия или заказ закрыт, 409 — гонка */
         patch: operations["CrmOrders_moveToStage"];
         trace?: never;
     };
@@ -2626,7 +2645,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Обновить статус заказа (устарело: используйте PATCH :id/stage). Роль: manager+ */
+        /** Обновить статус заказа (устарело: используйте PATCH :id/stage). Право orders.process */
         patch: operations["CrmOrders_updateStatus"];
         trace?: never;
     };
@@ -2643,7 +2662,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Обновить статус оплаты. Роль: manager+ */
+        /** Обновить статус оплаты. Право orders.process */
         patch: operations["CrmOrders_updatePaymentStatus"];
         trace?: never;
     };
@@ -2725,7 +2744,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Личный лимит участника (manager+); null — лимит клуба */
+        /** Личный лимит участника (members.edit); null — лимит клуба */
         patch: operations["CrmMemberLimit_update"];
         trace?: never;
     };
@@ -2851,10 +2870,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Ссылки-формы портала постранично, со статусом и онлайном (admin) */
+        /** Ссылки-формы портала постранично, со статусом и онлайном (members.invite) */
         get: operations["CrmRegistrationLinks_list"];
         put?: never;
-        /** Создать ссылку-форму регистрации member (admin) */
+        /** Создать ссылку-форму регистрации member (members.invite) */
         post: operations["CrmRegistrationLinks_create"];
         delete?: never;
         options?: never;
@@ -2875,7 +2894,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Обновить/деактивировать ссылку-форму (admin) */
+        /** Обновить/деактивировать ссылку-форму (members.invite) */
         patch: operations["CrmRegistrationLinks_update"];
         trace?: never;
     };
@@ -2888,7 +2907,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Отозвать ссылку-форму навсегда (admin) */
+        /** Отозвать ссылку-форму навсегда (members.invite) */
         post: operations["CrmRegistrationLinks_revoke"];
         delete?: never;
         options?: never;
@@ -2991,7 +3010,7 @@ export interface paths {
         /** Список записей сущности (пагинация, поиск, условия по полям) */
         get: operations["CrmEntityRecords_list"];
         put?: never;
-        /** Создать запись (валидация по форме crm_create). Роль: manager+ */
+        /** Создать запись (валидация по форме crm_create). Право records.write */
         post: operations["CrmEntityRecords_create"];
         delete?: never;
         options?: never;
@@ -3010,11 +3029,11 @@ export interface paths {
         get: operations["CrmEntityRecords_byId"];
         put?: never;
         post?: never;
-        /** Удалить запись. Роль: admin/portal_owner */
+        /** Удалить запись (право records.delete) */
         delete: operations["CrmEntityRecords_remove"];
         options?: never;
         head?: never;
-        /** Обновить поля/активность записи. Роль: manager+ */
+        /** Обновить поля/активность записи. Право records.write */
         patch: operations["CrmEntityRecords_update"];
         trace?: never;
     };
@@ -3031,7 +3050,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Перенести карточку: стадия и место в колонке (afterId — сосед сверху). Роль: manager+ */
+        /** Перенести карточку: стадия и место в колонке (afterId — сосед сверху). Право records.write */
         patch: operations["CrmEntityRecords_setStage"];
         trace?: never;
     };
@@ -3048,7 +3067,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Сменить статус записи. Роль: manager+ */
+        /** Сменить статус записи. Право records.write */
         patch: operations["CrmEntityRecords_setStatus"];
         trace?: never;
     };
@@ -3081,7 +3100,7 @@ export interface paths {
         };
         /** Настройка интерфейса: клубная и личная. Любой сотрудник клуба */
         get: operations["CrmUiSettings_getSetting"];
-        /** Сохранить настройку: личную — любой сотрудник, клубную (`forPortal`) — manager+. `value: null` сбрасывает её */
+        /** Сохранить настройку: личную — любой сотрудник, клубную (`forPortal`) — с правом settings.views. `value: null` сбрасывает её */
         put: operations["CrmUiSettings_saveSetting"];
         post?: never;
         delete?: never;
@@ -3615,14 +3634,17 @@ export interface components {
             /** @example password123 */
             password: string;
         };
+        EmployeeRoleDto: {
+            id: string;
+            /** @example manager */
+            key: string;
+            name: string | null;
+            isSystem: boolean;
+        };
         EmployeePortalRoleDto: {
             /** @example f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f */
             portalId: string;
-            /**
-             * @example manager
-             * @enum {string}
-             */
-            role: "portal_owner" | "admin" | "manager" | "employee";
+            role: components["schemas"]["EmployeeRoleDto"];
         };
         EmployeeInfoDto: {
             /** @example 123e4567-e89b-12d3-a456-426614174000 */
@@ -3650,16 +3672,19 @@ export interface components {
              */
             message: string;
         };
+        /**
+         * @description Права роли в этом клубе — по ним CRM прячет разделы и кнопки
+         * @enum {string}
+         */
+        Permission: "members.read" | "members.create" | "members.edit" | "members.documents" | "members.invite" | "orders.read" | "orders.create" | "orders.process" | "catalog.manage" | "finance.read" | "finance.write" | "presence.read" | "presence.checkin" | "qr.manage" | "records.read" | "records.write" | "records.delete" | "employees.read" | "employees.manage" | "roles.manage" | "settings.club" | "settings.structure" | "settings.views" | "billing.manage";
         EmployeeEmploymentDto: {
             /** @example f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f */
             portalId: string;
             /** @example 123e4567-e89b-12d3-a456-426614174999 */
             employeeId: string;
-            /**
-             * @example manager
-             * @enum {string}
-             */
-            role: "portal_owner" | "admin" | "manager" | "employee";
+            role: components["schemas"]["EmployeeRoleDto"];
+            /** @description Права роли в этом клубе — по ним CRM прячет разделы и кнопки */
+            permissions: components["schemas"]["Permission"][];
             /** @example true */
             isActive: boolean;
         };
@@ -3764,31 +3789,6 @@ export interface components {
              * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
              */
             refreshToken: string;
-        };
-        RegisterEmployeeDto: {
-            /** @example employee@example.com */
-            email: string;
-            /**
-             * @example employee
-             * @enum {string}
-             */
-            role: "portal_owner" | "admin" | "manager" | "employee";
-            /**
-             * @description Динамические поля профиля (fieldKey → value)
-             * @example {
-             *       "first_name": "John",
-             *       "last_name": "Doe"
-             *     }
-             */
-            fields?: {
-                [key: string]: unknown;
-            };
-        };
-        RegisterEmployeeResponseDto: {
-            userId: string;
-            employeeId: string;
-            /** @description true если аккаунт создан сейчас и ждёт клейма */
-            isNewUser: boolean;
         };
         MemberLoginDto: {
             /** @example user@example.com */
@@ -4041,11 +4041,7 @@ export interface components {
             userId: string;
             /** @example employee@example.com */
             email: string;
-            /**
-             * @example manager
-             * @enum {string}
-             */
-            role: "portal_owner" | "admin" | "manager" | "employee";
+            role: components["schemas"]["EmployeeRoleDto"];
             /** @example true */
             isActive: boolean;
             fields: components["schemas"]["EmployeeProfileFieldDto"][];
@@ -4093,10 +4089,10 @@ export interface components {
             /** @example employee@example.com */
             email: string;
             /**
+             * @description Ключ роли клуба
              * @example employee
-             * @enum {string}
              */
-            role: "portal_owner" | "admin" | "manager" | "employee";
+            role: string;
             /**
              * @description Динамические поля профиля (fieldKey → value)
              * @example {
@@ -4116,11 +4112,10 @@ export interface components {
         };
         UpdateEmployeeDto: {
             /**
-             * @description Employee role (cannot be portal_owner)
+             * @description Ключ роли клуба (кроме владельца)
              * @example manager
-             * @enum {string}
              */
-            role?: "portal_owner" | "admin" | "manager" | "employee";
+            role?: string;
             /** @example true */
             isActive?: boolean;
             /** @description Динамические поля профиля (fieldKey → value) */
@@ -4474,6 +4469,43 @@ export interface components {
             /** @example Поставщики */
             name: string;
         };
+        PortalRoleDto: {
+            id: string;
+            /**
+             * @description owner, admin, manager, employee или custom_…
+             * @example manager
+             */
+            key: string;
+            /** @description Название своей роли; у системной — null */
+            name: string | null;
+            isSystem: boolean;
+            /** @description Права можно менять (у владельца и админа — полный доступ) */
+            isEditable: boolean;
+            /** @description Роль можно выдать сотруднику (кроме владельца) */
+            isAssignable: boolean;
+            permissions: components["schemas"]["Permission"][];
+            employeeCount: number;
+        };
+        PermissionGroupDto: {
+            /** @example members */
+            key: string;
+            permissions: components["schemas"]["Permission"][];
+        };
+        PortalRolesResponseDto: {
+            roles: components["schemas"]["PortalRoleDto"][];
+            /** @description Каталог прав по разделам — порядок экрана */
+            catalog: components["schemas"]["PermissionGroupDto"][];
+        };
+        CreatePortalRoleDto: {
+            /** @example Бармен */
+            name: string;
+            permissions: components["schemas"]["Permission"][];
+        };
+        UpdatePortalRoleDto: {
+            /** @description Только у своей роли */
+            name?: string;
+            permissions?: components["schemas"]["Permission"][];
+        };
         CrmCreateMemberDto: {
             /** @example user@example.com */
             email: string;
@@ -4718,17 +4750,16 @@ export interface components {
             /** @example new-employee@example.com */
             email: string;
             /**
+             * @description Ключ роли клуба (кроме владельца)
              * @example employee
-             * @enum {string}
              */
-            role: "admin" | "manager" | "employee";
+            role: string;
         };
         CreatedInvitationDto: {
             id: string;
             /** @example new-employee@example.com */
             email: string;
-            /** @enum {string} */
-            role: "portal_owner" | "admin" | "manager" | "employee";
+            role: components["schemas"]["EmployeeRoleDto"];
             /** @enum {string} */
             status: "pending" | "accepted" | "revoked" | "expired";
             /** @example 2026-01-08T00:00:00.000Z */
@@ -4744,8 +4775,7 @@ export interface components {
             id: string;
             /** @example new-employee@example.com */
             email: string;
-            /** @enum {string} */
-            role: "portal_owner" | "admin" | "manager" | "employee";
+            role: components["schemas"]["EmployeeRoleDto"];
             /** @enum {string} */
             status: "pending" | "accepted" | "revoked" | "expired";
             /** @example 2026-01-08T00:00:00.000Z */
@@ -4769,8 +4799,7 @@ export interface components {
         PublicInvitationInfoDto: {
             /** @example new-employee@example.com */
             email: string;
-            /** @enum {string} */
-            role: "portal_owner" | "admin" | "manager" | "employee";
+            role: components["schemas"]["EmployeeRoleDto"];
             /** @example green-club */
             portalSlug: string;
             /** @example Green Club */
@@ -4870,7 +4899,10 @@ export interface components {
             email: string;
             /** @example John */
             name: string;
-            /** @example portal_owner */
+            /**
+             * @description Ключ роли клуба
+             * @example owner
+             */
             role: string;
         };
         RegisterPortalResponseDto: {
@@ -4919,7 +4951,10 @@ export interface components {
             /** @example Green Club */
             displayName: string;
             employeeId: string;
-            /** @example manager */
+            /**
+             * @description Ключ роли клуба
+             * @example manager
+             */
             role: string;
             isActive: boolean;
         };
@@ -6786,11 +6821,13 @@ export type SchemaHealthResponseDto = components['schemas']['HealthResponseDto']
 export type SchemaReadinessChecksDto = components['schemas']['ReadinessChecksDto'];
 export type SchemaReadinessResponseDto = components['schemas']['ReadinessResponseDto'];
 export type SchemaEmployeeLoginDto = components['schemas']['EmployeeLoginDto'];
+export type SchemaEmployeeRoleDto = components['schemas']['EmployeeRoleDto'];
 export type SchemaEmployeePortalRoleDto = components['schemas']['EmployeePortalRoleDto'];
 export type SchemaEmployeeInfoDto = components['schemas']['EmployeeInfoDto'];
 export type SchemaEmployeeWebLoginResponseDto = components['schemas']['EmployeeWebLoginResponseDto'];
 export type SchemaWebRefreshResponseDto = components['schemas']['WebRefreshResponseDto'];
 export type SchemaEmployeeLogoutResponseDto = components['schemas']['EmployeeLogoutResponseDto'];
+export type SchemaPermission = components['schemas']['Permission'];
 export type SchemaEmployeeEmploymentDto = components['schemas']['EmployeeEmploymentDto'];
 export type SchemaEmployeeMeResponseDto = components['schemas']['EmployeeMeResponseDto'];
 export type SchemaRequestPasswordResetDto = components['schemas']['RequestPasswordResetDto'];
@@ -6804,8 +6841,6 @@ export type SchemaResendEmailConfirmationDto = components['schemas']['ResendEmai
 export type SchemaEmployeeAuthResponseDto = components['schemas']['EmployeeAuthResponseDto'];
 export type SchemaRefreshTokenDto = components['schemas']['RefreshTokenDto'];
 export type SchemaEmployeeRefreshTokenResponseDto = components['schemas']['EmployeeRefreshTokenResponseDto'];
-export type SchemaRegisterEmployeeDto = components['schemas']['RegisterEmployeeDto'];
-export type SchemaRegisterEmployeeResponseDto = components['schemas']['RegisterEmployeeResponseDto'];
 export type SchemaMemberLoginDto = components['schemas']['MemberLoginDto'];
 export type SchemaMemberUserInfoDto = components['schemas']['MemberUserInfoDto'];
 export type SchemaMemberWebLoginResponseDto = components['schemas']['MemberWebLoginResponseDto'];
@@ -6863,6 +6898,11 @@ export type SchemaCreateStatusSetDto = components['schemas']['CreateStatusSetDto
 export type SchemaUpdateStatusItemDto = components['schemas']['UpdateStatusItemDto'];
 export type SchemaEntityDefinitionSummaryDto = components['schemas']['EntityDefinitionSummaryDto'];
 export type SchemaCreateEntityDefinitionBodyDto = components['schemas']['CreateEntityDefinitionBodyDto'];
+export type SchemaPortalRoleDto = components['schemas']['PortalRoleDto'];
+export type SchemaPermissionGroupDto = components['schemas']['PermissionGroupDto'];
+export type SchemaPortalRolesResponseDto = components['schemas']['PortalRolesResponseDto'];
+export type SchemaCreatePortalRoleDto = components['schemas']['CreatePortalRoleDto'];
+export type SchemaUpdatePortalRoleDto = components['schemas']['UpdatePortalRoleDto'];
 export type SchemaCrmCreateMemberDto = components['schemas']['CrmCreateMemberDto'];
 export type SchemaCrmCreateMemberResponseDto = components['schemas']['CrmCreateMemberResponseDto'];
 export type SchemaCrmMemberStatusDto = components['schemas']['CrmMemberStatusDto'];
@@ -8701,66 +8741,6 @@ export interface operations {
             };
         };
     };
-    EmployeeRegistration_register: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RegisterEmployeeDto"];
-            };
-        };
-        responses: {
-            /** @description Employee registered successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RegisterEmployeeResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
     MemberAuth_login: {
         parameters: {
             query?: never;
@@ -9933,7 +9913,8 @@ export interface operations {
                 limit?: number;
                 sortBy?: string;
                 sortOrder?: "asc" | "desc";
-                role?: "portal_owner" | "admin" | "manager" | "employee";
+                /** @description Ключ роли клуба */
+                role?: string;
                 isActive?: boolean;
             };
             header?: never;
@@ -11329,6 +11310,206 @@ export interface operations {
             };
             /** @description Conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmRoles_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalRolesResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmRoles_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePortalRoleDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalRoleDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmRoles_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmRoles_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePortalRoleDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalRoleDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

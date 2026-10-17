@@ -5,8 +5,8 @@ import { useTranslations } from "next-intl";
 
 import type { SchemaProductCategoryDto } from "@workspace/api-client/core";
 
+import { usePermissions } from "@/modules/entities/access";
 import { useCategories } from "@/modules/entities/category";
-import { usePortalRole } from "@/modules/entities/portal";
 import { CreateCategoryForm } from "@/modules/features/catalog-settings";
 import { EntityList, type EntityListTableColumn } from "@/modules/shared/ui/EntityList";
 import { ListPage } from "@/modules/shared/ui/ListPage";
@@ -14,7 +14,8 @@ import { ListPage } from "@/modules/shared/ui/ListPage";
 /** Категории каталога товаров в хабе настроек: список и «Создать» с формой в диалоге. */
 export function CategoryManagementWidget() {
     const t = useTranslations("crm.sections.settings.categories");
-    const { isAdmin } = usePortalRole();
+    const { can } = usePermissions();
+    const canManage = can("catalog.manage");
     const { data, isPending, error } = useCategories();
 
     const categories = useMemo(
@@ -57,7 +58,7 @@ export function CategoryManagementWidget() {
             title={t("title")}
             description={t("description")}
             create={
-                isAdmin
+                canManage
                     ? {
                           label: t("create"),
                           title: t("createTitle"),
