@@ -5,6 +5,7 @@ import { PassportModule } from "@nestjs/passport";
 
 import { PrismaModule } from "@common/prisma/prisma.module";
 import { JWT_DEFAULTS, JWT_ENV_KEYS } from "@modules/portal/auth/domain/constants/jwt.constants";
+import { SharedAuthModule } from "@modules/portal/auth/shared/shared-auth.module";
 
 import { PlatformPortalsController } from "./api/controllers/platform-portals.controller";
 import { PlatformReferenceDataController } from "./api/controllers/platform-reference-data.controller";
@@ -16,6 +17,7 @@ import { PlatformJwtStrategy } from "./auth/infrastructure/strategies/platform-j
 @Module({
     imports: [
         PrismaModule,
+        SharedAuthModule,
         PassportModule.register({}),
         JwtModule.registerAsync({
             imports: [ConfigModule],

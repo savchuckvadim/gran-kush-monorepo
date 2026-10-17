@@ -45,7 +45,7 @@ describe("Rate limiting (e2e)", () => {
         const statuses = await hammer(
             () =>
                 request(app.getHttpServer())
-                    .post("/auth/password/reset/request")
+                    .post("/cabinet/auth/password/reset")
                     .send({ email: `nobody-${suffix}@test.local` }),
             12
         );

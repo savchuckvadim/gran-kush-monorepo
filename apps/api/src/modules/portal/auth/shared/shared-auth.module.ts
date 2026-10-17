@@ -6,7 +6,6 @@ import { UsersModule } from "@users/users.module";
 import { MembershipGuard } from "@common/portal";
 import { PrismaModule } from "@common/prisma/prisma.module";
 import { RedisModule } from "@common/redis/redis.module";
-import { EmailVerificationController } from "@modules/portal/auth/shared/api/controllers/email-verification.controller";
 import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
 import { PasswordSignInService } from "@modules/portal/auth/shared/application/services/password-sign-in.service";
 import { ClaimedMembershipRepository } from "@modules/portal/auth/shared/domain/repositories/claimed-membership-repository.interface";
@@ -27,7 +26,6 @@ import { AuthTokensModule } from "@modules/portal/auth/tokens/auth-tokens.module
             useClass: ClaimedMembershipPrismaRepository,
         },
     ],
-    controllers: [EmailVerificationController],
     exports: [
         EmailVerificationService,
         PasswordSignInService,

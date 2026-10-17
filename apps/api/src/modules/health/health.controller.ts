@@ -6,6 +6,8 @@ import {
     ApiTags,
 } from "@nestjs/swagger";
 
+import { Public } from "@common/decorators/auth/public.decorator";
+
 import { HealthResponseDto, ReadinessResponseDto } from "./dto/health-response.dto";
 import { HealthService } from "./health.service";
 
@@ -15,6 +17,7 @@ export class HealthController {
     constructor(private readonly healthService: HealthService) {}
 
     @Get("health")
+    @Public()
     @ApiOperation({ summary: "Liveness: процесс жив, без обращения к БД" })
     @ApiOkResponse({ type: HealthResponseDto })
     getHealth(): HealthResponseDto {
@@ -22,6 +25,7 @@ export class HealthController {
     }
 
     @Get("ready")
+    @Public()
     @ApiOperation({ summary: "Readiness: Postgres и Redis доступны" })
     @ApiOkResponse({ type: ReadinessResponseDto })
     @ApiServiceUnavailableResponse({ description: "Одна из зависимостей недоступна" })

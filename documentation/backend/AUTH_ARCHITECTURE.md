@@ -109,13 +109,18 @@ stateDiagram-v2
 
 | Кука | Домен | Path | Кто читает |
 |---|---|---|---|
-| `crm_access_token`, `cabinet_access_token` | только хост API | `/` | API |
-| `crm_refresh_token`, `cabinet_refresh_token` | только хост API | `/{aud}/auth` | API: refresh и logout |
+| `crm_access`, `cabinet_access` | только хост API | `/` | API |
+| `crm_refresh`, `cabinet_refresh` | только хост API | `/{aud}/auth` | API: refresh и logout |
 | `crm_session`, `cabinet_session` | `AUTH_HINT_COOKIE_DOMAIN` (`.paf-paf.app`) | `/` | `proxy.ts` CRM: есть ли смысл пускать на закрытую страницу |
 
 Все HttpOnly, `SameSite=Lax`, `Secure` по `AUTH_COOKIE_SECURE`. Токены больше не уходят на сайт и
 другие поддомены: подсказка `*_session` содержит только `1`. Проверка сессии — всегда на API; подсказка
 лишь избавляет от лишнего рендера закрытой страницы без входа.
+
+**Подделка запроса (CSRF).** `SameSite=Lax` не различает поддомены одного сайта: форма на `paf-paf.app`
+ушла бы на `api.paf-paf.app` с куками. Поэтому `SessionOriginMiddleware` принимает изменяющий запрос с
+кукой сессии только с фронтов из `CORS_ORIGIN` или самого API (`Origin`, без него — `Referer`), иначе
+403 `origin_not_allowed`, а API принимает тело только в JSON (форма шлётся без CORS-проверки).
 
 Мобильные клиенты: те же эндпоинты под `/{aud}/mobile/auth/*`, токены в теле ответа, на защищённых
 маршрутах — `Authorization: Bearer`. Гварды принимают оба транспорта.
@@ -144,6 +149,10 @@ flowchart LR
 | `@CabinetSession()` | Вошёл в кабинет, клуб не нужен |
 | `@CabinetAuth()` | Подтверждённое членство в клубе из заголовка |
 | `@CurrentPrincipal()` | `{ userId, sessionId, audience, portalId?, membershipId?, roleId?, permissions }` |
+
+Каждый маршрут объявляет доступ явно: `test/route-auth.e2e-spec.ts` обходит все маршруты приложения и
+падает, если маршрут не `@Public()` и не под гвардом сессии или `@RequirePermission` стоит без
+`PermissionGuard`. Он же генерирует [AUTH_ROUTES.md](AUTH_ROUTES.md).
 
 Проверка роли в коде (`role === "admin"`) запрещена: только права, через гвард или
 `principal.can(P.X)` в сценарии, когда правило зависит от данных (например, стадия нового заказа).

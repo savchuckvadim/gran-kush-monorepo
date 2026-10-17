@@ -24,6 +24,7 @@ import { HealthModule } from "./modules/health/health.module";
 import { MailModule } from "./modules/mail/mail.module";
 import { PlatformModule } from "./modules/platform/platform.module";
 import { AuthModule } from "./modules/portal/auth/auth.module";
+import { SessionOriginMiddleware } from "./modules/portal/auth/sessions/api/session-origin.middleware";
 import { StorageModule } from "./modules/storage/storage.module";
 
 @Module({
@@ -64,5 +65,7 @@ import { StorageModule } from "./modules/storage/storage.module";
 export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer): void {
         configureBodyParsers(consumer);
+        // Express 5 (path-to-regexp v8): голый "*" не матчит ни один путь
+        consumer.apply(SessionOriginMiddleware).forRoutes("{*splat}");
     }
 }

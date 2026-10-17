@@ -141,8 +141,12 @@
 
 ## Фаза 5. Аудит — `audit/auth-2026-10`
 
-### TASK-742: полный аудит auth и прав `[ ]` P0
+### TASK-742: полный аудит auth и прав `[x]` P0
 
-- [ ] Матрица маршрутов × гварды × права; сценарии атак (перехват аккаунта, повтор токенов, перебор,
-      межклубный доступ); итог — в security-audit.md
-- [ ] `documentation/AUTHENTICATION.md` переписать по AUTH_ARCHITECTURE
+- [x] Матрица маршрутов × гварды × права — автоматически (`test/route-auth.e2e-spec.ts`,
+      [AUTH_ROUTES.md](../backend/AUTH_ROUTES.md)); сценарии атак и итог — security-audit.md → «Аудит auth
+      2026-10-17»: CSRF с поддомена закрыт (`SessionOriginMiddleware`, только JSON), удалён дубль `/auth/*`
+      с подтверждением по GET, api-client без localStorage, служебные маршруты размечены, вход админки — под
+      общим лимитом
+- [x] `documentation/AUTHENTICATION.md` переписан: практическое руководство поверх AUTH_ARCHITECTURE
+- [ ] Открыто: сессии для админки платформы (R1), выравнивание времени запроса сброса (R2)

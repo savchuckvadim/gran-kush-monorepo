@@ -2,14 +2,13 @@ import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 
-import * as bcrypt from "bcrypt";
-
 import { PrismaService } from "@common/prisma/prisma.service";
 import {
     JWT_DEFAULTS,
     JWT_ENV_KEYS,
     JWT_ERROR_MESSAGES,
 } from "@modules/portal/auth/domain/constants/jwt.constants";
+import { PasswordSignInService } from "@modules/portal/auth/shared/application/services/password-sign-in.service";
 
 export type PlatformAdminJwtPayload = {
     sub: string;
@@ -22,7 +21,8 @@ export class PlatformAuthService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly jwtService: JwtService,
-        private readonly configService: ConfigService
+        private readonly configService: ConfigService,
+        private readonly passwords: PasswordSignInService
     ) {}
 
     async login(
@@ -34,17 +34,9 @@ export class PlatformAuthService {
             include: { platformAdmin: true },
         });
 
-        if (
-            !user?.platformAdmin ||
-            !user.isActive ||
-            !user.platformAdmin.isActive ||
-            !user.passwordHash
-        ) {
-            throw new UnauthorizedException("Invalid credentials");
-        }
-
-        const ok = await bcrypt.compare(password, user.passwordHash);
-        if (!ok) {
+        // Пароль проверяется у любого адреса — одно время ответа и общий лимит неудач (TASK-667)
+        await this.passwords.verify(email, password, user?.passwordHash ?? null);
+        if (!user?.platformAdmin || !user.isActive || !user.platformAdmin.isActive) {
             throw new UnauthorizedException("Invalid credentials");
         }
 

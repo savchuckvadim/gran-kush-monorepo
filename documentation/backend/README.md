@@ -151,43 +151,29 @@ module-name/
 
 **Mobile / Bearer** — `EmployeeMobileAuthController` (`crm/mobile/auth`): JSON tokens + `Authorization: Bearer`.
 
-**Registration (admin-only)** — `POST /crm/auth/employee/register` under `crm/auth/employee` (requires authenticated admin in portal context).
-
 **Repositories**:
 - `EmployeesRepository`
-- `EmployeeTokensRepository`
 
-**Guards**: `EmployeeJwtAuthGuard`, `AdminGuard` (and portal match where applicable)
+**Guards**: `@CrmAuth()` (session → membership → permissions → subscription) with `@RequirePermission(...)`
 
 ### 4. Auth Module
 
-**Purpose**: Authentication and authorization
+**Purpose**: who is signed in and what they may do. Architecture — [AUTH_ARCHITECTURE.md](./AUTH_ARCHITECTURE.md),
+practical guide — [AUTHENTICATION.md](../AUTHENTICATION.md), every route with its protection —
+[AUTH_ROUTES.md](./AUTH_ROUTES.md).
 
-**Key Features**:
-- Dual authentication system (Member/Employee), plus **portal** scoping for tenant data
-- JWT generation/validation; refresh persistence in DB
-- Password reset and email verification (shared controllers under `auth`)
+**Submodules** (`modules/portal/auth/`):
+- `sessions` — `auth_sessions` (account × app × device), access/refresh JWT, refresh rotation with reuse
+  detection, cookies, `SessionGuard`, decorators `CrmSession`/`CrmAuth`/`CabinetSession`/`CabinetAuth`,
+  devices API, CSRF origin check
+- `employees`, `members` — password sign-in for the CRM and the cabinet (web and mobile), member sign-up
+- `identity` — sign-in providers registry (Google, Telegram), linking, the email step
+- `tokens` — one-time email links (`auth_tokens`)
+- `account-security` — «Sign-in and security» for both apps
+- `shared` — email confirmation and password reset, password check with the per-email limit
 
-**Transport**: **Web** uses HttpOnly cookies (`crm/auth`, `cabinet/auth`); **mobile** uses separate route prefixes and Bearer tokens — details in [HTTP_API_CONTRACT.md](./HTTP_API_CONTRACT.md).
-
-**API Endpoints (non-exhaustive)**:
-- `POST /cabinet/auth/login` - Member login (web cookies)
-- `POST /cabinet/auth/member/register` - Member registration
-- `POST /cabinet/auth/refresh` - Refresh member session
-- `POST /crm/auth/login` - Employee login (web cookies)
-- `POST /crm/auth/refresh` - Refresh employee session
-- `POST /auth/password/reset` - Request password reset
-- `POST /auth/password/reset/confirm` - Confirm password reset
-
-**Strategies / guards** (names in `apps/api/src/modules/auth/.../infrastructure`):
-- Member: local + JWT (cookie and/or bearer strategies per route)
-- Employee: local + JWT (cookie and/or bearer strategies per route)
-- `AdminGuard` — admin-only employee actions
-
-**Guards**:
-- `MemberJwtAuthGuard` — member JWT routes
-- `EmployeeJwtAuthGuard` — employee JWT routes
-- `AdminGuard` — admin role check
+**Permissions**: `modules/portal/crm/access` — club roles and permission codes; `@RequirePermission` under
+`@CrmAuth`.
 
 ### 5. Storage Module
 
@@ -376,13 +362,13 @@ The system implements two separate authentication **domains**:
 1. **Member Authentication**:
    - Web: `/cabinet/auth/*` (HttpOnly cookies for session)
    - Mobile: `/cabinet/mobile/auth` (Bearer)
-   - Refresh tokens: stored in `tokens` (member/user scope as implemented)
+   - Sessions: `auth_sessions` (audience `cabinet`)
 
 2. **Employee Authentication**:
    - Web: `/crm/auth/*` (HttpOnly cookies)
    - Mobile: `/crm/mobile/auth` (Bearer)
-   - Refresh tokens: `employee_tokens` table
-   - Guards: `EmployeeJwtAuthGuard`, `AdminGuard`, plus portal match where applicable
+   - Sessions: `auth_sessions` (audience `crm`)
+   - Guards: `@CrmSession()` / `@CrmAuth()` with `@RequirePermission(...)`
 
 ### JWT Token System
 
