@@ -38,13 +38,13 @@ export class PresenceService {
     // Queries
     // ═══════════════════════════════════════════════════════════════════════════
 
-    async findById(id: string, portalId?: string): Promise<PresenceSession | null> {
+    async findById(id: string, portalId: string): Promise<PresenceSession | null> {
         return this.sessionRepository.findById(id, portalId);
     }
 
     async findActiveByMemberId(
         memberId: string,
-        portalId?: string
+        portalId: string
     ): Promise<PresenceSession | null> {
         return this.sessionRepository.findActiveByMemberId(memberId, portalId);
     }
@@ -229,7 +229,7 @@ export class PresenceService {
      * Проверить, присутствует ли участник в клубе.
      * Используется в PresenceGuard и при создании заказа.
      */
-    async isMemberPresent(memberId: string, portalId?: string): Promise<boolean> {
+    async isMemberPresent(memberId: string, portalId: string): Promise<boolean> {
         const session = await this.sessionRepository.findActiveByMemberId(memberId, portalId);
         return session !== null;
     }

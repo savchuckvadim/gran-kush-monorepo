@@ -21,9 +21,9 @@ export class QrCodePrismaRepository extends QrCodeRepository {
         super();
     }
 
-    private async entityRecordIdForMember(memberId: string): Promise<string> {
-        const m = await this.prisma.member.findUnique({
-            where: { id: memberId },
+    private async entityRecordIdForMember(memberId: string, portalId: string): Promise<string> {
+        const m = await this.prisma.member.findFirst({
+            where: { id: memberId, portalId },
             select: { entityRecordId: true },
         });
         if (!m) {
@@ -40,8 +40,8 @@ export class QrCodePrismaRepository extends QrCodeRepository {
         return row ? this.mapToEntity(row) : null;
     }
 
-    async findByMemberId(memberId: string): Promise<QrCode | null> {
-        const entityRecordId = await this.entityRecordIdForMember(memberId);
+    async findByMemberId(memberId: string, portalId: string): Promise<QrCode | null> {
+        const entityRecordId = await this.entityRecordIdForMember(memberId, portalId);
         const row = await this.prisma.qrCode.findUnique({
             where: { entityRecordId },
             include: QR_CODE_INCLUDE,
@@ -52,10 +52,11 @@ export class QrCodePrismaRepository extends QrCodeRepository {
     async create(data: {
         id?: string;
         memberId: string;
+        portalId: string;
         issuedAt: Date;
         expiresAt: Date;
     }): Promise<QrCode> {
-        const entityRecordId = await this.entityRecordIdForMember(data.memberId);
+        const entityRecordId = await this.entityRecordIdForMember(data.memberId, data.portalId);
         const row = await this.prisma.qrCode.create({
             data: {
                 ...(data.id ? { id: data.id } : {}),

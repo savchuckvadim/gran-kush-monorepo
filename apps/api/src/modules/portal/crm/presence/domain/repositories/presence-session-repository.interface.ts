@@ -28,13 +28,13 @@ export interface PresenceStats {
 // ─── Интерфейс репозитория ──────────────────────────────────────────────────
 
 export abstract class PresenceSessionRepository {
-    /** Найти сессию по ID (при указании portalId — только в рамках портала) */
-    abstract findById(id: string, portalId?: string): Promise<PresenceSession | null>;
+    /** Найти сессию по ID в рамках портала */
+    abstract findById(id: string, portalId: string): Promise<PresenceSession | null>;
 
-    /** Найти активную (незакрытую) сессию участника (при указании portalId — участник должен принадлежать порталу) */
+    /** Найти активную (незакрытую) сессию участника этого портала */
     abstract findActiveByMemberId(
         memberId: string,
-        portalId?: string
+        portalId: string
     ): Promise<PresenceSession | null>;
 
     /** Все сессии с фильтрами, пагинацией и сортировкой */
@@ -50,7 +50,7 @@ export abstract class PresenceSessionRepository {
     abstract count(filters?: PresenceFilters): Promise<number>;
 
     /**
-     * Создать запись о входе (при указании portalId — участник должен принадлежать порталу).
+     * Создать запись о входе; участник должен принадлежать порталу.
      *
      * Идемпотентен: если параллельный запрос уже открыл сессию этому участнику,
      * возвращается она, а не создаётся вторая. Гарантия — на уровне БД.
@@ -59,7 +59,7 @@ export abstract class PresenceSessionRepository {
         memberId: string;
         employeeId?: string;
         entryMethod: string;
-        portalId?: string;
+        portalId: string;
     }): Promise<PresenceSession>;
 
     /**

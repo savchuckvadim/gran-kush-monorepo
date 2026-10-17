@@ -92,7 +92,7 @@ export class QrCodesService {
         if (!member) {
             return null;
         }
-        return this.qrCodeRepository.findByMemberId(memberId);
+        return this.qrCodeRepository.findByMemberId(memberId, portalId);
     }
 
     /** Получить QR-код по ID */
@@ -147,13 +147,18 @@ export class QrCodesService {
         const expiresAt = new Date(issuedAt);
         expiresAt.setDate(expiresAt.getDate() + this.qrCodeExpirationDays);
 
-        const existing = await this.qrCodeRepository.findByMemberId(memberId);
+        const existing = await this.qrCodeRepository.findByMemberId(memberId, portalId);
         if (existing) {
             return this.reissue(existing, issuedAt, expiresAt);
         }
 
         try {
-            const created = await this.qrCodeRepository.create({ memberId, issuedAt, expiresAt });
+            const created = await this.qrCodeRepository.create({
+                memberId,
+                portalId,
+                issuedAt,
+                expiresAt,
+            });
             this.logger.log(
                 `QR code issued for member ${memberId}, expires ${expiresAt.toISOString()}`
             );
@@ -164,7 +169,7 @@ export class QrCodesService {
             if (!isUniqueViolationOn(error, "entity_record_id")) {
                 throw error;
             }
-            const winner = await this.qrCodeRepository.findByMemberId(memberId);
+            const winner = await this.qrCodeRepository.findByMemberId(memberId, portalId);
             if (!winner) {
                 throw error;
             }
@@ -243,7 +248,7 @@ export class QrCodesService {
         if (!member) {
             throw new NotFoundException(`QR code for member "${memberId}" not found`);
         }
-        const existing = await this.qrCodeRepository.findByMemberId(memberId);
+        const existing = await this.qrCodeRepository.findByMemberId(memberId, portalId);
         if (!existing) {
             throw new NotFoundException(`QR code for member "${memberId}" not found`);
         }

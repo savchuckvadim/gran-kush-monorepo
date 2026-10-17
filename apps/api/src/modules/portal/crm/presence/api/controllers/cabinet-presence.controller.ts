@@ -35,7 +35,7 @@ export class CabinetPresenceController {
     @ApiSuccessResponse(MyPresenceStatusDto)
     @ApiErrorResponse([401, 403])
     async getMyPresenceStatus(@CurrentMember() member: Member): Promise<MyPresenceStatusDto> {
-        const session = await this.presenceService.findActiveByMemberId(member.id);
+        const session = await this.presenceService.findActiveByMemberId(member.id, member.portalId);
         return {
             isPresent: session !== null,
             currentSession: session ? mapPresenceSessionToDto(session) : null,
