@@ -1,4 +1,4 @@
-import { AuthPrincipalType } from "@modules/portal/auth/domain/interfaces/jwt-payload.interface";
+import type { AuthPrincipalType } from "@modules/portal/auth/shared/domain/auth-user";
 import type { Permission } from "@modules/portal/crm/access/domain/permissions";
 
 /**

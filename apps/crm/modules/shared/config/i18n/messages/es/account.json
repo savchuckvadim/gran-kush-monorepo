@@ -1,0 +1,98 @@
+{
+    "account": {
+        "page": {
+            "backToCrm": "Volver al CRM"
+        },
+        "security": {
+            "title": "Acceso y seguridad",
+            "hint": "Cómo entras en el CRM y en tu área: comparten la cuenta y la contraseña.",
+            "password": {
+                "title": "Contraseña",
+                "isSet": "Tienes contraseña.",
+                "notSet": "Sin contraseña: entras con Google o Telegram.",
+                "set": "Crear contraseña",
+                "change": "Cambiar contraseña",
+                "setTitle": "Crear contraseña",
+                "changeTitle": "Cambiar contraseña",
+                "description": "Al guardar, tus otros dispositivos tendrán que entrar de nuevo.",
+                "current": "Contraseña actual",
+                "new": "Nueva contraseña",
+                "confirm": "Repite la contraseña",
+                "rule": "Mínimo 8 caracteres: una minúscula, una mayúscula y un número.",
+                "required": "Obligatorio",
+                "mismatch": "Las contraseñas no coinciden",
+                "wrongCurrent": "La contraseña actual no es correcta",
+                "save": "Guardar",
+                "saving": "Guardando…",
+                "saved": "Contraseña guardada"
+            },
+            "google": {
+                "title": "Google",
+                "linkedAs": "Vinculado: {email}.",
+                "notLinked": "Sin vincular. Entra con un clic.",
+                "onlyWay": "Es tu única forma de entrar: crea antes una contraseña o vincula Telegram.",
+                "link": "Vincular Google",
+                "unlink": "Desvincular",
+                "unlinkTitle": "¿Desvincular Google?",
+                "unlinkDescription": "Ya no podrás entrar con Google.",
+                "unlinked": "Google desvinculado",
+                "cancel": "Cancelar",
+                "result": {
+                    "linked": "Google vinculado",
+                    "google_taken": "Esta cuenta de Google ya está vinculada a otra cuenta",
+                    "google_other_linked": "Ya hay otra cuenta de Google vinculada: desvincúlala primero",
+                    "google_unverified": "Google no confirmó el correo de esta cuenta",
+                    "google_off": "El acceso con Google no está disponible ahora",
+                    "failed": "No se pudo vincular Google"
+                }
+            },
+            "telegram": {
+                "title": "Telegram",
+                "linkedAs": "Vinculado: {username}.",
+                "noUsername": "cuenta sin nombre de usuario",
+                "link": "Vincular Telegram",
+                "notLinked": "No vinculado. Entra con un clic.",
+                "onlyWay": "Es tu única forma de entrar: crea antes una contraseña.",
+                "unlink": "Desvincular",
+                "unlinkTitle": "¿Desvincular Telegram?",
+                "unlinkDescription": "Ya no podrás entrar con Telegram.",
+                "unlinked": "Telegram desvinculado",
+                "linked": "Telegram vinculado",
+                "cancel": "Cancelar"
+            },
+            "signOut": {
+                "title": "Cerrar sesión en todos los dispositivos",
+                "description": "Si perdiste el móvil o entraste desde un ordenador ajeno. También cierra la CRM.",
+                "action": "Cerrar en todos",
+                "confirmTitle": "¿Cerrar sesión en todos los dispositivos?",
+                "confirmDescription": "Las sesiones se cierran en todas partes, también aquí y en la CRM. Podrás entrar de nuevo.",
+                "cancel": "Cancelar"
+            },
+            "devices": {
+                "title": "Dispositivos",
+                "hint": "Dónde está abierta la cuenta ahora.",
+                "current": "Este dispositivo",
+                "audience": {
+                    "crm": "CRM",
+                    "cabinet": "Área de socio"
+                },
+                "method": {
+                    "password": "con contraseña",
+                    "google": "con Google",
+                    "telegram": "con Telegram",
+                    "email_link": "con un enlace del correo",
+                    "invitation": "por invitación",
+                    "registration": "al registrarte"
+                },
+                "signedIn": "Entrada {method}, {date}",
+                "lastActive": "Actividad {date}",
+                "unknownDevice": "Dispositivo desconocido",
+                "end": "Cerrar sesión",
+                "ended": "Sesión cerrada en el dispositivo",
+                "endOthers": "Cerrar en los demás",
+                "endedOthers": "{count, plural, =0 {No había otros dispositivos} one {Sesión cerrada en # dispositivo} other {Sesión cerrada en # dispositivos}}",
+                "none": "No hay otros dispositivos."
+            }
+        }
+    }
+}

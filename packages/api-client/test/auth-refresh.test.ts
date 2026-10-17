@@ -52,8 +52,8 @@ describe("token refresh of two clients", () => {
     });
 
     it("parallel 401s of one client share a single refresh", async () => {
-        const first = new ApiRefreshHelper(ApiAuthType.CRM, BASE, "cookie");
-        const second = new ApiRefreshHelper(ApiAuthType.CRM, BASE, "cookie");
+        const first = new ApiRefreshHelper(ApiAuthType.CRM, BASE);
+        const second = new ApiRefreshHelper(ApiAuthType.CRM, BASE);
 
         await Promise.all([first.makeToken(), second.makeToken(), first.makeToken()]);
 
@@ -61,8 +61,8 @@ describe("token refresh of two clients", () => {
     });
 
     it("the CRM and the cabinet refresh each their own session at the same time", async () => {
-        const crm = new ApiRefreshHelper(ApiAuthType.CRM, BASE, "cookie");
-        const cabinet = new ApiRefreshHelper(ApiAuthType.CABINET, BASE, "cookie");
+        const crm = new ApiRefreshHelper(ApiAuthType.CRM, BASE);
+        const cabinet = new ApiRefreshHelper(ApiAuthType.CABINET, BASE);
 
         await Promise.all([crm.makeToken(), cabinet.makeToken()]);
 
@@ -72,8 +72,8 @@ describe("token refresh of two clients", () => {
 
     it("a failed refresh of one client does not fail the other", async () => {
         failing.add("/crm/auth/refresh");
-        const crm = new ApiRefreshHelper(ApiAuthType.CRM, BASE, "cookie");
-        const cabinet = new ApiRefreshHelper(ApiAuthType.CABINET, BASE, "cookie");
+        const crm = new ApiRefreshHelper(ApiAuthType.CRM, BASE);
+        const cabinet = new ApiRefreshHelper(ApiAuthType.CABINET, BASE);
 
         const [crmResult, cabinetResult] = await Promise.allSettled([
             crm.makeToken(),
@@ -86,21 +86,21 @@ describe("token refresh of two clients", () => {
 
     it("a refresh another tab already won counts as done for a cookie client", async () => {
         superseded.add("/crm/auth/refresh");
-        const crm = new ApiRefreshHelper(ApiAuthType.CRM, BASE, "cookie");
+        const crm = new ApiRefreshHelper(ApiAuthType.CRM, BASE);
 
         await expect(crm.makeToken()).resolves.toBeUndefined();
     });
 
     it("an ended session is still a failed refresh", async () => {
         failing.add("/crm/auth/refresh");
-        const crm = new ApiRefreshHelper(ApiAuthType.CRM, BASE, "cookie");
+        const crm = new ApiRefreshHelper(ApiAuthType.CRM, BASE);
 
         await expect(crm.makeToken()).rejects.toThrow();
     });
 
     it("after a refresh settles, the next 401 starts a new one", async () => {
         failing.add("/cabinet/auth/refresh");
-        const cabinet = new ApiRefreshHelper(ApiAuthType.CABINET, BASE, "cookie");
+        const cabinet = new ApiRefreshHelper(ApiAuthType.CABINET, BASE);
         await expect(cabinet.makeToken()).rejects.toThrow();
 
         failing.clear();
@@ -110,7 +110,7 @@ describe("token refresh of two clients", () => {
     });
 
     it("both clients retry their request after their own refresh", async () => {
-        const middleware = (type: ApiAuthType) => getAuthMiddleware(type, BASE, "cookie");
+        const middleware = (type: ApiAuthType) => getAuthMiddleware(type, BASE);
         const unauthorized = () => new Response(null, { status: 401 });
         const call = async (type: ApiAuthType, path: string) => {
             const request = new Request(`${BASE}${path}`);

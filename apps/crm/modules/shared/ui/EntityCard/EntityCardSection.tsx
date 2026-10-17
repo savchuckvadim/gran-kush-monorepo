@@ -76,10 +76,7 @@ export function EntityCardSection({
 
     return (
         <section
-            className={cn(
-                "rounded-lg border border-border/70 bg-muted/10 shadow-sm",
-                className
-            )}
+            className={cn("rounded-lg border border-border/70 bg-muted/10 shadow-sm", className)}
         >
             <div className="flex items-stretch gap-0 border-b border-border/50">
                 <button
@@ -100,7 +97,9 @@ export function EntityCardSection({
                         {title}
                     </span>
                     {badge ? (
-                        <span className="ml-1 shrink-0 text-[10px] text-muted-foreground">{badge}</span>
+                        <span className="ml-1 shrink-0 text-[10px] text-muted-foreground">
+                            {badge}
+                        </span>
                     ) : null}
                 </button>
                 {headerExtra ? (
@@ -110,10 +109,7 @@ export function EntityCardSection({
                 ) : null}
             </div>
             {expanded ? (
-                <div
-                    id={`entity-card-section-${id}`}
-                    className="space-y-0 px-2.5 py-2"
-                >
+                <div id={`entity-card-section-${id}`} className="space-y-0 px-2.5 py-2">
                     {children}
                 </div>
             ) : null}

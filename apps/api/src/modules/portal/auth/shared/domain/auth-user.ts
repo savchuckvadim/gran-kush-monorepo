@@ -1,5 +1,7 @@
-import { AuthPrincipalType } from "@modules/portal/auth/domain/interfaces/jwt-payload.interface";
 import type { SessionAudience } from "@modules/portal/auth/sessions/domain/auth-session";
+
+/** Кто вошёл в приложение: сотрудник в CRM или участник в кабинете (MembershipGuard). */
+export type AuthPrincipalType = "member" | "employee";
 
 /**
  * Аутентифицированный глобальный аккаунт (результат SessionGuard, до резолва membership).

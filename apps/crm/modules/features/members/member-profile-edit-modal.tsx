@@ -8,7 +8,11 @@ import { Pencil } from "lucide-react";
 
 import { Button, FieldInput, FieldSelect } from "@workspace/ui";
 
-import { CrmMemberDetails, useMemberStatusItems, useUpdateCrmMember } from "@/modules/entities/member";
+import {
+    CrmMemberDetails,
+    useMemberStatusItems,
+    useUpdateCrmMember,
+} from "@/modules/entities/member";
 
 interface MemberProfileEditModalProps {
     member: CrmMemberDetails;
@@ -130,14 +134,20 @@ export function MemberProfileEditModal({ member }: MemberProfileEditModalProps) 
                                 label={t("fields.name")}
                                 value={profileForm.firstName}
                                 onChange={(e) =>
-                                    setProfileForm((prev) => ({ ...prev, firstName: e.target.value }))
+                                    setProfileForm((prev) => ({
+                                        ...prev,
+                                        firstName: e.target.value,
+                                    }))
                                 }
                             />
                             <FieldInput
                                 label={t("fields.surname")}
                                 value={profileForm.lastName}
                                 onChange={(e) =>
-                                    setProfileForm((prev) => ({ ...prev, lastName: e.target.value }))
+                                    setProfileForm((prev) => ({
+                                        ...prev,
+                                        lastName: e.target.value,
+                                    }))
                                 }
                             />
                             <FieldInput
@@ -181,7 +191,11 @@ export function MemberProfileEditModal({ member }: MemberProfileEditModalProps) 
                                 onValueChange={(statusItemId) =>
                                     setProfileForm((prev) => ({ ...prev, statusItemId }))
                                 }
-                                disabled={statusQuery.isPending || statusQuery.isError || statusQuery.isLoading}
+                                disabled={
+                                    statusQuery.isPending ||
+                                    statusQuery.isError ||
+                                    statusQuery.isLoading
+                                }
                             />
                             <FieldInput
                                 label={t("fields.documentType")}

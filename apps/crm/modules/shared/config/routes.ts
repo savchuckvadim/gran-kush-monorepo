@@ -62,6 +62,8 @@ export const ROUTES = {
     LOGIN: "/auth/login",
     /** Новый клуб для вошедшего аккаунта (вне клуба: `/{locale}/clubs/new`); `?plan=` с сайта сохраняется */
     NEW_CLUB: "/clubs/new",
+    /** «Вход и безопасность» аккаунта (вне клуба); сюда же API возвращает после привязки Google */
+    ACCOUNT_SECURITY: "/account/security",
     REGISTER: "/auth/register",
 } as const;
 

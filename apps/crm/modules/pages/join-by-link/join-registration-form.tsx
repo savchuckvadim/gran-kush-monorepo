@@ -19,15 +19,15 @@ import {
 } from "@workspace/dynamic-forms";
 import { Button, Card, FieldInput } from "@workspace/ui";
 
+import { useProviderAvailable } from "@/modules/entities/account-security";
 import {
     type PublicRegistrationLinkInfo,
     registerViaLink,
 } from "@/modules/entities/registration-links";
 import { googleSignInUrl } from "@/modules/shared/api/google-sign-in";
+import { isValidPassword } from "@/modules/shared/config/password-policy";
 import { GoogleButton } from "@/modules/shared/ui/GoogleButton";
 
-/** Same rule as RegisterViaLinkDto.password on the API. */
-const PASSWORD_RULE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
 const EMAIL_RULE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const EMAIL_KEY = "__email";
 const PASSWORD_KEY = "__password";
@@ -49,6 +49,7 @@ interface JoinRegistrationFormProps {
 export function JoinRegistrationForm({ token, info, fields, onDone }: JoinRegistrationFormProps) {
     const t = useTranslations("join");
     const locale = useLocale();
+    const googleOn = useProviderAvailable("cabinet", "google");
     const kiosk = info.kind === "kiosk";
 
     const [typedEmail, setTypedEmail] = useState<string | null>(null);
@@ -81,7 +82,7 @@ export function JoinRegistrationForm({ token, info, fields, onDone }: JoinRegist
         if (!EMAIL_RULE.test(email.trim())) {
             validation[EMAIL_KEY] = t("errors.email");
         }
-        if (password && (password.length < 8 || !PASSWORD_RULE.test(password))) {
+        if (password && !isValidPassword(password)) {
             validation[PASSWORD_KEY] = t("errors.password");
         }
         setErrors(validation);
@@ -141,7 +142,7 @@ export function JoinRegistrationForm({ token, info, fields, onDone }: JoinRegist
                         {register.isPending ? t("submitting") : t("submit")}
                     </Button>
 
-                    {!kiosk && (
+                    {!kiosk && googleOn && (
                         <GoogleButton
                             href={googleSignInUrl("cabinet", {
                                 locale,

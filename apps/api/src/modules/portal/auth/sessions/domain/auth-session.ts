@@ -1,4 +1,4 @@
-import type { AuthPrincipalType } from "@modules/portal/auth/domain/interfaces/jwt-payload.interface";
+import type { AuthPrincipalType } from "@modules/portal/auth/shared/domain/auth-user";
 
 /**
  * Приложение, в которое вошли (AUTH_ARCHITECTURE §1): CRM сотрудника или кабинет участника. У каждой

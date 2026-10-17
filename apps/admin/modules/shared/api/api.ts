@@ -8,7 +8,5 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
  */
 const ADMIN_PROXY_BASE_URL = "/api";
 
-export const $api = configureApiClient<CrmPaths>(ADMIN_PROXY_BASE_URL, ApiAuthType.CRM, {
-    authStrategy: "cookie",
-});
+export const $api = configureApiClient<CrmPaths>(ADMIN_PROXY_BASE_URL, ApiAuthType.CRM);
 export { API_BASE_URL };

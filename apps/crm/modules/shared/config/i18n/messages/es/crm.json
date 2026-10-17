@@ -18,6 +18,7 @@
             },
             "account": {
                 "open": "Menú de la cuenta",
+                "security": "Acceso y seguridad",
                 "profile": "Mi cuenta",
                 "language": "Idioma",
                 "logout": "Cerrar sesión",

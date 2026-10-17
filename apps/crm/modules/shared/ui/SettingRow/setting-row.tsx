@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 interface SettingRowProps {
-    title: string;
+    title: ReactNode;
     description: string;
     /** id поля справа: название становится его подписью */
     htmlFor?: string;

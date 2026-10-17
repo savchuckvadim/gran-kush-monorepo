@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Briefcase, Palette } from "lucide-react";
 
+import { accountSecurityKeys } from "@/modules/entities/account-security";
 import { cabinetKeys, logoutMember } from "@/modules/entities/cabinet-account";
 import { SkinPickerSheet, useChangeLocale } from "@/modules/features";
 import { useCabinetLinks, useMemberAuth } from "@/modules/processes/member-auth";
@@ -42,6 +43,7 @@ export function MemberAccountMenu() {
         onSettled: () => {
             // Кэш кабинета принадлежит ушедшему аккаунту: остаться в нём нельзя
             queryClient.removeQueries({ queryKey: cabinetKeys.all });
+            queryClient.removeQueries({ queryKey: accountSecurityKeys.all("cabinet") });
             router.replace(links.login);
         },
     });

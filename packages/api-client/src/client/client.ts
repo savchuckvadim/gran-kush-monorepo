@@ -6,17 +6,15 @@ import { getIdempotencyMiddleware } from "../idempotency/idempotency.middleware"
 import { getLocaleMiddleware } from "../locale/locale.middleware";
 import { paths } from "../schema/schema";
 
-export type ApiAuthStrategy = "token" | "cookie";
-
 /**
- * Клиент API одного принципала. `P` — набор путей, которые ему можно вызывать
+ * Клиент API одного приложения (`ApiAuthType`): сессия только в HttpOnly-куках, токены в JS не
+ * попадают (AUTH_ARCHITECTURE §3.4). `P` — набор путей, которые ему можно вызывать
  * (`CrmPaths`, `CabinetPaths`); по умолчанию — весь API.
  */
 export const configureApiClient = <P extends object = paths>(
     baseurl: string,
     type: ApiAuthType,
     options?: {
-        authStrategy?: ApiAuthStrategy;
         getPortalSlug?: () => string | null;
         /** Язык интерфейса для `Accept-Language` (подписи системных полей и статусов). */
         getLocale?: () => string | null | undefined;
@@ -24,13 +22,9 @@ export const configureApiClient = <P extends object = paths>(
         idempotency?: boolean;
     }
 ): Client<P> => {
-    const authStrategy = options?.authStrategy ?? "token";
     const client = createClient<P>({
         baseUrl: baseurl,
-        fetch:
-            authStrategy === "cookie"
-                ? (request: Request) => fetch(request, { credentials: "include" })
-                : undefined,
+        fetch: (request: Request) => fetch(request, { credentials: "include" }),
     });
     // До auth-middleware: тот клонирует запрос для ретрая после 401 уже с ключом,
     // поэтому повтор идёт под тем же Idempotency-Key и с тем же языком.
@@ -40,7 +34,6 @@ export const configureApiClient = <P extends object = paths>(
     if (options?.getLocale) {
         client.use(getLocaleMiddleware(options.getLocale));
     }
-    const authMiddleware = getAuthMiddleware(type, baseurl, authStrategy, options?.getPortalSlug);
-    client.use(authMiddleware);
+    client.use(getAuthMiddleware(type, baseurl, options?.getPortalSlug));
     return client;
 };

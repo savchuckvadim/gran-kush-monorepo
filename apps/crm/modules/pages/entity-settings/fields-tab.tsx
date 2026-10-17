@@ -130,7 +130,9 @@ export function FieldsTab({ code }: { code: string }) {
                                 field.type === "single_select" || field.type === "multi_select";
                             return (
                                 <tr key={field.id} className="border-b align-top last:border-b-0">
-                                    <td className="px-3 py-2 font-mono text-xs">{field.fieldKey}</td>
+                                    <td className="px-3 py-2 font-mono text-xs">
+                                        {field.fieldKey}
+                                    </td>
                                     <td className="px-3 py-2">
                                         {getFieldDisplayLabel(field, locale)}
                                         {isSelect ? (
@@ -146,7 +148,10 @@ export function FieldsTab({ code }: { code: string }) {
                                             </div>
                                         ) : null}
                                         {isSelect && expanded === field.fieldKey ? (
-                                            <AddOptionInline code={code} fieldKey={field.fieldKey} />
+                                            <AddOptionInline
+                                                code={code}
+                                                fieldKey={field.fieldKey}
+                                            />
                                         ) : null}
                                         {isSelect ? (
                                             <button
@@ -160,9 +165,7 @@ export function FieldsTab({ code }: { code: string }) {
                                                     )
                                                 }
                                             >
-                                                {expanded === field.fieldKey
-                                                    ? "Скрыть"
-                                                    : "+ опция"}
+                                                {expanded === field.fieldKey ? "Скрыть" : "+ опция"}
                                             </button>
                                         ) : null}
                                     </td>

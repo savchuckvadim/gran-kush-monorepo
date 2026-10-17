@@ -345,9 +345,11 @@ stateless-JWT в ссылках:
 ## 9. Фронт
 
 - `proxy.ts` смотрит на `crm_session` / `cabinet_session`, а не на токены.
-- api-client: refresh по аудитории, `refresh_superseded` → повтор исходного запроса.
+- api-client только на куках (`credentials: include`), токены в JS не попадают: refresh по аудитории,
+  `refresh_superseded` → повтор исходного запроса.
 - Общие куски вместо копий CRM/кабинета: правило пароля, формы «забыли пароль» и «новый пароль»,
   подтверждение почты, плашка ошибки, безопасный `from`, «me или null на 401», провайдер-гвард сессии.
 - `SignInMethods` рисует кнопки по `GET /{aud}/auth/providers` из реестра `{ google, telegram }`.
-- «Вход и безопасность» — общий виджет в CRM и кабинете: пароль, способы входа, устройства (сессии
-  с отзывом), выход везде.
+- «Вход и безопасность» — общий виджет `widgets/account-security` в CRM (`/{язык}/account/security`) и
+  кабинете (`/{язык}/me`): пароль, способы входа, устройства (сессии с отзывом), выход везде. Приложение
+  даёт клиента (`crmAccountSecurity` / `cabinetAccountSecurity`) через `AccountSecurityContext`.

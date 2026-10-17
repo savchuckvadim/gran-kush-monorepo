@@ -12,6 +12,7 @@ import { z } from "zod";
 import { getApiErrorCode, getApiErrorMessage } from "@workspace/api-client/core";
 import { Button, FieldInput } from "@workspace/ui";
 
+import { useProviderAvailable } from "@/modules/entities/account-security";
 import { registerClub } from "@/modules/entities/portal";
 import {
     ClubFields,
@@ -22,10 +23,11 @@ import {
 } from "@/modules/features/club-founding";
 import { googleSignInUrl } from "@/modules/shared/api/google-sign-in";
 import { ROUTES } from "@/modules/shared/config/routes";
+import { passwordSchema } from "@/modules/shared/lib/password-schema";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 import { GoogleButton } from "@/modules/shared/ui/GoogleButton";
 
-import { PASSWORD_MIN_LENGTH, PASSWORD_RULE, toMailLocale } from "../lib/credentials";
+import { toMailLocale } from "../lib/credentials";
 
 /** API code of a 409 for an address that already has an account. */
 const EMAIL_TAKEN = "email_taken";
@@ -37,10 +39,10 @@ const createRegistrationSchema = (t: Translate) =>
         .object({
             ...clubFieldsShape(t),
             email: z.string().trim().email(t("errors.email")),
-            password: z
-                .string()
-                .min(PASSWORD_MIN_LENGTH, t("errors.passwordLength"))
-                .regex(PASSWORD_RULE, t("errors.passwordRule")),
+            password: passwordSchema({
+                length: t("errors.passwordLength"),
+                characters: t("errors.passwordRule"),
+            }),
             passwordConfirmation: z.string(),
         })
         .refine((data) => data.password === data.passwordConfirmation, {
@@ -58,6 +60,7 @@ type RegistrationFormData = z.infer<ReturnType<typeof createRegistrationSchema>>
 export function RegistrationForm() {
     const t = useTranslations("auth.portalRegister");
     const locale = useLocale();
+    const googleOn = useProviderAvailable("crm", "google");
     const router = useRouter();
     const localizedLink = useLocalizedLink();
     const planCode = usePlanFromUrl();
@@ -182,15 +185,17 @@ export function RegistrationForm() {
                 {isSubmitting || mutation.isPending ? t("submitting") : t("submit")}
             </Button>
 
-            <GoogleButton
-                href={googleSignInUrl("crm", {
-                    locale,
-                    intent: { kind: "club_signup" },
-                    returnTo: newClubPath,
-                })}
-                label={t("google")}
-                separator={t("or")}
-            />
+            {googleOn && (
+                <GoogleButton
+                    href={googleSignInUrl("crm", {
+                        locale,
+                        intent: { kind: "club_signup" },
+                        returnTo: newClubPath,
+                    })}
+                    label={t("google")}
+                    separator={t("or")}
+                />
+            )}
 
             <div className="text-center text-sm text-muted-foreground">
                 {t("hasAccount")}{" "}

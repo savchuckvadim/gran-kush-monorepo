@@ -6,7 +6,8 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { useQueryClient } from "@tanstack/react-query";
 
-import { cabinetKeys, useTelegramBotId, useWidgetSignIn } from "@/modules/entities/cabinet-account";
+import { useTelegramBotId } from "@/modules/entities/account-security";
+import { cabinetKeys, useWidgetSignIn } from "@/modules/entities/cabinet-account";
 import { TelegramLoginButton } from "@/modules/shared/ui/TelegramLoginButton";
 
 import { TelegramEmailDialog } from "./telegram-email-dialog";
@@ -21,7 +22,7 @@ export function TelegramSignIn({ returnTo }: { returnTo: string }) {
     const locale = useLocale();
     const router = useRouter();
     const queryClient = useQueryClient();
-    const botId = useTelegramBotId();
+    const botId = useTelegramBotId("cabinet");
     const signIn = useWidgetSignIn();
     const errorText = useTelegramErrorText();
     const [ticket, setTicket] = useState<string | null>(null);

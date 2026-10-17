@@ -59,8 +59,7 @@ export function BillingPanel() {
         return <p className="text-sm text-muted-foreground">{t("loading")}</p>;
     }
     if (overview.error) {
-        const forbidden =
-            overview.error instanceof ApiClientError && overview.error.status === 403;
+        const forbidden = overview.error instanceof ApiClientError && overview.error.status === 403;
         return (
             <Alert variant="destructive">
                 <AlertDescription>
@@ -92,9 +91,7 @@ export function BillingPanel() {
                 <Alert>
                     <AlertTitle>{t("checkoutSuccessTitle")}</AlertTitle>
                     <AlertDescription>
-                        {waitingForWebhook
-                            ? t("checkoutWaiting")
-                            : t("checkoutSuccess")}
+                        {waitingForWebhook ? t("checkoutWaiting") : t("checkoutSuccess")}
                     </AlertDescription>
                 </Alert>
             )}

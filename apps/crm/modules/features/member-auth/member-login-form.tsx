@@ -12,6 +12,7 @@ import { z } from "zod";
 import { ApiClientError, getApiErrorMessage } from "@workspace/api-client/core";
 import { Button, FieldInput } from "@workspace/ui";
 
+import { useProviderAvailable } from "@/modules/entities/account-security";
 import { cabinetKeys, loginMember } from "@/modules/entities/cabinet-account";
 import { safeReturnPath, useCabinetLinks } from "@/modules/processes/member-auth";
 import { googleSignInUrl } from "@/modules/shared/api/google-sign-in";
@@ -27,6 +28,7 @@ const TOO_MANY_REQUESTS = 429;
 export function MemberLoginForm() {
     const t = useTranslations("cabinet.auth.login");
     const locale = useLocale();
+    const googleOn = useProviderAvailable("cabinet", "google");
     const links = useCabinetLinks();
     const router = useRouter();
     const queryClient = useQueryClient();
@@ -59,10 +61,10 @@ export function MemberLoginForm() {
         ? login.error instanceof ApiClientError && login.error.status === TOO_MANY_REQUESTS
             ? t("tooManyAttempts")
             : login.error instanceof ApiClientError && login.error.status === 401
-            ? login.error.message === EMAIL_NOT_CONFIRMED
-                ? t("emailNotConfirmed")
-                : t("invalidCredentials")
-            : getApiErrorMessage(login.error)
+              ? login.error.message === EMAIL_NOT_CONFIRMED
+                  ? t("emailNotConfirmed")
+                  : t("invalidCredentials")
+              : getApiErrorMessage(login.error)
         : null;
 
     return (
@@ -116,11 +118,13 @@ export function MemberLoginForm() {
             </Button>
 
             <div className="space-y-2">
-                <GoogleButton
-                    href={googleSignInUrl("cabinet", { locale, returnTo: from })}
-                    label={t("google")}
-                    separator={t("or")}
-                />
+                {googleOn && (
+                    <GoogleButton
+                        href={googleSignInUrl("cabinet", { locale, returnTo: from })}
+                        label={t("google")}
+                        separator={t("or")}
+                    />
+                )}
                 <TelegramSignIn returnTo={from} />
             </div>
 

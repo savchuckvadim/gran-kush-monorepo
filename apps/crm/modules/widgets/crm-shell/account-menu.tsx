@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { CreditCard, IdCard, Palette, Plus, Settings, UserRound } from "lucide-react";
+import { CreditCard, IdCard, Palette, Plus, Settings, ShieldCheck, UserRound } from "lucide-react";
 
 import { SETTINGS_PERMISSIONS, usePermissions, useRoleLabel } from "@/modules/entities/access";
 import { usePortalInfo } from "@/modules/entities/portal";
@@ -72,6 +72,12 @@ export function AccountMenu() {
                     href={localizedLink(ROUTES.CRM_PROFILE)}
                     icon={UserRound}
                     label={t("profile")}
+                />
+                {/* the account is the same in every club: no portal prefix */}
+                <AccountTileLink
+                    href={`/${locale}${ROUTES.ACCOUNT_SECURITY}`}
+                    icon={ShieldCheck}
+                    label={t("security")}
                 />
                 {canOpenSettings && (
                     <AccountTileLink

@@ -1,0 +1,98 @@
+{
+    "account": {
+        "page": {
+            "backToCrm": "Back to the CRM"
+        },
+        "security": {
+            "title": "Sign-in and security",
+            "hint": "How you sign in to the CRM and the cabinet: they share the account and the password.",
+            "password": {
+                "title": "Password",
+                "isSet": "A password is set.",
+                "notSet": "No password — you sign in with Google or Telegram.",
+                "set": "Set a password",
+                "change": "Change password",
+                "setTitle": "Set a password",
+                "changeTitle": "Change password",
+                "description": "After saving, your other devices will have to sign in again.",
+                "current": "Current password",
+                "new": "New password",
+                "confirm": "Repeat the password",
+                "rule": "At least 8 characters: a lowercase and an uppercase letter, a digit.",
+                "required": "Required",
+                "mismatch": "The passwords do not match",
+                "wrongCurrent": "The current password is wrong",
+                "save": "Save",
+                "saving": "Saving…",
+                "saved": "Password saved"
+            },
+            "google": {
+                "title": "Google",
+                "linkedAs": "Linked: {email}.",
+                "notLinked": "Not linked. Sign in with one click.",
+                "onlyWay": "This is your only way to sign in — set a password or link Telegram first.",
+                "link": "Link Google",
+                "unlink": "Unlink",
+                "unlinkTitle": "Unlink Google?",
+                "unlinkDescription": "You will no longer be able to sign in with Google.",
+                "unlinked": "Google unlinked",
+                "cancel": "Cancel",
+                "result": {
+                    "linked": "Google linked",
+                    "google_taken": "This Google account is linked to another account",
+                    "google_other_linked": "Another Google account is linked — unlink it first",
+                    "google_unverified": "Google did not confirm the email of this account",
+                    "google_off": "Google sign-in is not available right now",
+                    "failed": "Could not link Google"
+                }
+            },
+            "telegram": {
+                "title": "Telegram",
+                "linkedAs": "Linked: {username}.",
+                "noUsername": "account without a username",
+                "link": "Link Telegram",
+                "notLinked": "Not linked. Sign in with one click.",
+                "onlyWay": "This is your only way to sign in — set a password first.",
+                "unlink": "Unlink",
+                "unlinkTitle": "Unlink Telegram?",
+                "unlinkDescription": "You will no longer be able to sign in with Telegram.",
+                "unlinked": "Telegram unlinked",
+                "linked": "Telegram linked",
+                "cancel": "Cancel"
+            },
+            "signOut": {
+                "title": "Sign out everywhere",
+                "description": "If your phone is lost or you signed in on someone else's computer. Signs out of the CRM too.",
+                "action": "Sign out everywhere",
+                "confirmTitle": "Sign out on all devices?",
+                "confirmDescription": "Sessions close everywhere, this device and the CRM included. You can sign in again.",
+                "cancel": "Cancel"
+            },
+            "devices": {
+                "title": "Devices",
+                "hint": "Where the account is signed in now.",
+                "current": "This device",
+                "audience": {
+                    "crm": "CRM",
+                    "cabinet": "Cabinet"
+                },
+                "method": {
+                    "password": "with a password",
+                    "google": "with Google",
+                    "telegram": "with Telegram",
+                    "email_link": "with an email link",
+                    "invitation": "by an invitation",
+                    "registration": "at sign-up"
+                },
+                "signedIn": "Signed in {method}, {date}",
+                "lastActive": "Active {date}",
+                "unknownDevice": "Unknown device",
+                "end": "Sign out",
+                "ended": "The device is signed out",
+                "endOthers": "Sign out on other devices",
+                "endedOthers": "{count, plural, =0 {There were no other devices} one {# device signed out} other {# devices signed out}}",
+                "none": "No other devices."
+            }
+        }
+    }
+}

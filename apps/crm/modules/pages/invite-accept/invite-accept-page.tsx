@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 
 import { Card } from "@workspace/ui";
 
+import { useProviderAvailable } from "@/modules/entities/account-security";
 import {
     getPublicInvitation,
     type InvitationAcceptance,
@@ -36,6 +37,7 @@ const isFor = (session: OpenSession | null, email: string): session is OpenSessi
 export function InviteAcceptPage({ token }: { token: string }) {
     const t = useTranslations("invite");
     const locale = useLocale();
+    const googleOn = useProviderAvailable("crm", "google");
     const router = useRouter();
     const params = useSearchParams();
     const [outcome, setOutcome] = useState<InvitationAcceptance | null>(null);
@@ -134,14 +136,16 @@ export function InviteAcceptPage({ token }: { token: string }) {
                                 accountState={invitation.accountState}
                                 onDone={finish}
                             />
-                            <GoogleButton
-                                href={googleSignInUrl("crm", {
-                                    locale,
-                                    intent: { kind: "invitation", token },
-                                })}
-                                label={t("google")}
-                                separator={t("or")}
-                            />
+                            {googleOn && (
+                                <GoogleButton
+                                    href={googleSignInUrl("crm", {
+                                        locale,
+                                        intent: { kind: "invitation", token },
+                                    })}
+                                    label={t("google")}
+                                    separator={t("or")}
+                                />
+                            )}
                         </>
                     )}
                 </div>

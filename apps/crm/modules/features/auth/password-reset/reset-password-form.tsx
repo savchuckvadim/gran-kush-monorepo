@@ -14,18 +14,19 @@ import { Button, FieldInput } from "@workspace/ui";
 
 import { $api } from "@/modules/shared";
 import { ROUTES } from "@/modules/shared/config/routes";
+import { passwordSchema } from "@/modules/shared/lib/password-schema";
 
-import { isDeadTokenStatus, PASSWORD_MIN_LENGTH, PASSWORD_RULE } from "../lib/credentials";
+import { isDeadTokenStatus } from "../lib/credentials";
 
 type Translate = ReturnType<typeof useTranslations>;
 
 const createSchema = (t: Translate) =>
     z
         .object({
-            newPassword: z
-                .string()
-                .min(PASSWORD_MIN_LENGTH, t("errors.passwordLength"))
-                .regex(PASSWORD_RULE, t("errors.passwordRule")),
+            newPassword: passwordSchema({
+                length: t("errors.passwordLength"),
+                characters: t("errors.passwordRule"),
+            }),
             passwordConfirmation: z.string(),
         })
         .refine((data) => data.newPassword === data.passwordConfirmation, {

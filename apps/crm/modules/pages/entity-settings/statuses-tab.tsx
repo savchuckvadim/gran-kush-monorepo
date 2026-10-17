@@ -27,7 +27,10 @@ function AddItemForm({ code, setId }: { code: string; setId: string }) {
 
     async function handleAdd() {
         try {
-            await addItem.mutateAsync({ setId, body: { key: key.trim(), label: label.trim(), color } });
+            await addItem.mutateAsync({
+                setId,
+                body: { key: key.trim(), label: label.trim(), color },
+            });
             setKey("");
             setLabel("");
             toast.success("Статус добавлен");
@@ -150,9 +153,7 @@ function StatusSetCard({ code, statusSet }: { code: string; statusSet: EntitySta
                                     type="checkbox"
                                     checked={item.isActive}
                                     disabled={statusSet.isImmutable}
-                                    onChange={(e) =>
-                                        handleToggleActive(item.id, e.target.checked)
-                                    }
+                                    onChange={(e) => handleToggleActive(item.id, e.target.checked)}
                                 />
                                 активен
                             </label>

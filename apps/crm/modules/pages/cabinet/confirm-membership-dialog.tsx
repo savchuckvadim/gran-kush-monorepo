@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 
 import { getApiErrorMessage, type SchemaMyMembershipDto } from "@workspace/api-client/core";
-import { Button, ModalDialog,Switch } from "@workspace/ui";
+import { Button, ModalDialog, Switch } from "@workspace/ui";
 
 import {
     useAccountDocuments,

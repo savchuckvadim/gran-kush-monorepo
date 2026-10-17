@@ -8,15 +8,20 @@ const isSafeReturnPath = (from: string | null, clubPrefix: string): from is stri
         from && from.startsWith(`${clubPrefix}/`) && !from.includes("//") && !from.includes("..")
     );
 
-/** «Новый клуб» outside a club, with or without `?plan=` from the product site. */
-const isNewClubPath = (from: string | null, locale: string): from is string => {
-    const page = `/${locale}${ROUTES.NEW_CLUB}`;
-    return Boolean(from && (from === page || from.startsWith(`${page}?`)) && !from.includes("//"));
-};
+/** Account pages outside a club: «Новый клуб» (with or without `?plan=` from the site), sign-in and security. */
+const ACCOUNT_PAGES = [ROUTES.NEW_CLUB, ROUTES.ACCOUNT_SECURITY];
+
+const isAccountPath = (from: string | null, locale: string): from is string =>
+    ACCOUNT_PAGES.some((route) => {
+        const page = `/${locale}${route}`;
+        return Boolean(
+            from && (from === page || from.startsWith(`${page}?`)) && !from.includes("//")
+        );
+    });
 
 /**
  * Where a signed-in user goes from the login page, or `null` when they have to pick a club:
- * «Новый клуб» if they came from there, the club from the URL if they work there, otherwise
+ * an account page outside a club if they came from there, the club from the URL if they work there, otherwise
  * their only club.
  */
 export const resolveClubTarget = (
@@ -25,7 +30,7 @@ export const resolveClubTarget = (
     urlClub: string | null,
     from: string | null
 ): string | null => {
-    if (isNewClubPath(from, locale)) return from;
+    if (isAccountPath(from, locale)) return from;
     if (urlClub) {
         if (!clubs.some((club) => club.slug === urlClub)) return null;
         const prefix = `/${locale}/${urlClub}`;

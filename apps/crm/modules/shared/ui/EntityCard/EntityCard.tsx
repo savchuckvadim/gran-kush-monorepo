@@ -77,7 +77,8 @@ export function EntityCard({
 }: EntityCardProps) {
     const hasTimeline = Boolean(timeline);
     const timelineControlled =
-        typeof timelineVisibleControlled === "boolean" && typeof onTimelineVisibleChange === "function";
+        typeof timelineVisibleControlled === "boolean" &&
+        typeof onTimelineVisibleChange === "function";
 
     const [timelineOpen, setTimelineOpenInternal] = React.useState(defaultTimelineVisible);
     const timelineHydrated = React.useRef(false);
@@ -124,8 +125,7 @@ export function EntityCard({
     const showSave = Boolean(onSave) && dirty;
 
     const timelineAsideShown =
-        timelineVisible ||
-        (!timelineVisible && timelineHiddenBehavior === "keep-column");
+        timelineVisible || (!timelineVisible && timelineHiddenBehavior === "keep-column");
 
     const handleSave = React.useCallback(() => {
         void onSave?.();
@@ -173,7 +173,9 @@ export function EntityCard({
                                     onClick={() => setTimelineVisible(!timelineVisible)}
                                     aria-pressed={timelineVisible}
                                     aria-label={
-                                        timelineVisible ? "Скрыть панель справа" : "Показать панель справа"
+                                        timelineVisible
+                                            ? "Скрыть панель справа"
+                                            : "Показать панель справа"
                                     }
                                 >
                                     {timelineVisible ? (
@@ -194,8 +196,7 @@ export function EntityCard({
                                 >
                                     {saving ? (
                                         <>
-                                            <Loader2 className="mr-1.5 size-3.5 animate-spin" />
-                                            …
+                                            <Loader2 className="mr-1.5 size-3.5 animate-spin" />…
                                         </>
                                     ) : (
                                         saveLabel

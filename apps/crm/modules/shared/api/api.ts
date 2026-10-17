@@ -11,7 +11,6 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
  * через свой `$cabinetApi` с другими куками.
  */
 export const $api = configureApiClient<CrmPaths>(API_BASE_URL, ApiAuthType.CRM, {
-    authStrategy: "cookie",
     getPortalSlug: getCrmPortalSlugForApiClient,
     getLocale: getUiLocaleForApiClient,
 });

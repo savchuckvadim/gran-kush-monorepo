@@ -247,10 +247,7 @@ export function FormsTab({ code }: { code: string }) {
                         </div>
                     ) : null}
 
-                    <Button
-                        onClick={handleSave}
-                        disabled={rows === null || updateForm.isPending}
-                    >
+                    <Button onClick={handleSave} disabled={rows === null || updateForm.isPending}>
                         {updateForm.isPending ? "Сохранение…" : "Сохранить форму"}
                     </Button>
                 </div>

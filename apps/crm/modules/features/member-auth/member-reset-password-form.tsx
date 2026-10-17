@@ -15,8 +15,7 @@ import { Button, FieldInput } from "@workspace/ui";
 
 import { confirmMemberPasswordReset } from "@/modules/entities/cabinet-account";
 import { useCabinetLinks } from "@/modules/processes/member-auth";
-
-const PASSWORD_RULE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+import { passwordSchema } from "@/modules/shared/lib/password-schema";
 
 /** Новый пароль по ссылке из письма (`?token=`). Ссылка одноразовая; сброс подтверждает и почту. */
 export function MemberResetPasswordForm() {
@@ -26,7 +25,7 @@ export function MemberResetPasswordForm() {
 
     const schema = z
         .object({
-            password: z.string().regex(PASSWORD_RULE, t("passwordRule")),
+            password: passwordSchema({ length: t("passwordRule"), characters: t("passwordRule") }),
             confirm: z.string(),
         })
         .refine((value) => value.password === value.confirm, {

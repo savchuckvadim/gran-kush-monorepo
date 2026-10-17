@@ -1,7 +1,6 @@
 import {
     assertOpenApiOk,
     type SchemaIdentityProviderDto,
-    type SchemaIdentityProvidersResponseDto,
     type SchemaIdentitySignInResultDto,
     type SchemaIdentityStatusDto,
 } from "@workspace/api-client/core";
@@ -14,12 +13,6 @@ export type SignInProviderKey = SignInProvider["key"];
 
 /** Подписанный ответ виджета провайдера — уходит в API как есть. */
 export type WidgetPayload = Record<string, unknown>;
-
-export async function getSignInProviders(): Promise<SignInProvider[]> {
-    const response = await $cabinetApi.GET("/cabinet/auth/providers");
-    const { providers } = await assertOpenApiOk<SchemaIdentityProvidersResponseDto>(response);
-    return providers;
-}
 
 /** Привязанный способ входит (куки ставит ответ); новый без почты получает билет шага почты. */
 export async function verifyWidgetSignIn(input: {
