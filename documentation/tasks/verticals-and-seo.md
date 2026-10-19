@@ -1,4 +1,4 @@
-# Несколько ниш, три сайта, SEO и коммуникации (TASK-750…792)
+# Несколько ниш, три сайта, SEO и коммуникации (TASK-750…793)
 
 Дата: 2026-10-19. Ветка `main`, HEAD `9ac688e`. Источники: обход `apps/site`, `apps/api`, `apps/crm`
 тремя агентами, Notion (проект «PafPaf — CRM для клубов», база Tasks, «CSC CRM Competitor Research»),
@@ -466,9 +466,96 @@ PWA не делаем (решение Вадима 2026-10-19). База — н�
 
 ---
 
+## F. Запуск Ink Space и Plis Plas — пошагово (TASK-793)
+
+Цель первого этапа: Ink Space живёт на `ink.space` в своём проекте Dokploy с теми же функциями, что PafPaf,
+но под своим именем, скином и без клубных разделов. Фичи студий добавляются после, каждая — за модулем
+бренда, так что PafPaf их не видит. Plis Plas поднимается тем же путём, как только куплен домен.
+
+**Бэкенд: один код, один образ, три процесса.** API собирается один раз; в каждом проекте Dokploy свой
+контейнер `<brand>-api` со своим Postgres и Redis и `BRAND=<brand>` в env. Тату и бьюти — два экземпляра
+одного образа, данных друг друга не видят; миграции одни, каждый экземпляр применяет их на старте
+(`RUN_MIGRATIONS=true`). Разъезжаться на разные репозитории не планируем: отличия — модулями.
+
+**Фронты: бренд при сборке.** `next.Dockerfile` вшивает `NEXT_PUBLIC_*`, поэтому crm/admin/site собираются
+на бренд (матрица 3 × 3 + api = 10 образов; GHA-кэш по scope `<app>-<brand>`). Перевод CRM/admin на бренд
+в рантайме (один образ) — отдельно в TASK-787, когда CI-минуты начнут мешать: сейчас только 5 мест
+`process.env.NEXT_PUBLIC_*` в CRM, но переделка не блокирует запуск.
+
+### Шаг 0 — руками, до кода (TASK-770 остаток, день 1)
+
+- [ ] Cloudflare: зона `ink.space`; записи `@`, `api`, `crm`, `app` → сервер (proxied); www → root
+- [ ] Dokploy: проект `inkspace`, Compose из git-пути `infra/dokploy/inkspace/docker-compose.yml`
+      (появится в шаге 1), Environment — по `.env.example` с новыми секретами (`openssl rand -hex 32`),
+      `DOMAIN=ink.space`, `BRAND=inkspace`, домены сервисов в Dokploy → Domains
+- [ ] Почта: identity `ink.space` у текущего EU-провайдера (SPF/DKIM/DMARC), `SMTP_FROM=no-reply@ink.space`
+      — без `MAIL_HOST` письмо подтверждения не уйдёт и студия не зарегистрируется
+- [ ] Google OAuth client «Ink Space» (можно позже: без ключей кнопка отвечает «not configured»);
+      Telegram-боты — позже
+- [ ] GitHub: секрет `DOKPLOY_COMPOSE_ID_INKSPACE` (и переименовать текущий в `…_PAFPAF`)
+
+### Шаг 1 — `feat/brand-installations` (TASK-787/788 минимум, A750/752 минимум; 3–4 дня)
+
+- [ ] `packages/brand`: `brands/{pafpaf,inkspace,plisplas}.ts` + `getBrand(code)` с валидацией; поля:
+      `code`, `name`, `domains` (site/crm/cabinet/api), `portalType`, `modules[]`, `defaultSkin`
+      (pafpaf → `pafpaf`, inkspace → `black`, plisplas → `coqueta` — скины уже есть), `mail.fromName`,
+      `legal` (April IT); `modules` сейчас: все три — `crm`, `catalog`, `orders`, `finance`, `employees`;
+      PafPaf дополнительно `presence`, `club-policy`
+- [ ] API: `BrandModule` (`BRAND` из env, падает на старте при неизвестном); `ClubFoundingService` →
+      `provisionPortal(brand.portalType)` и переименование в `PortalFoundingService`; `APP_NAME`,
+      `SMTP_FROM_NAME` — из бренда; `/health` → `{ ok, brand, version }`; гард модуля: маршруты
+      `presence`/`qr-codes`/`club-policy` отвечают 404, если модуля нет
+- [ ] CRM/admin: `NEXT_PUBLIC_BRAND` → `BrandProvider`; имя, логотип (`brand-mark.ts`), `DEFAULT_SKIN`,
+      `app-meta.ts`, manifest/иконки — из бренда; навигация и вкладки настроек фильтруют по
+      `brand.modules` (`crm-navigation.hook.tsx`, `settings-hub-page.tsx`); кабинет студий — хост `app.`
+      (`club-routes.ts`: хост кабинета из `NEXT_PUBLIC_MEMBER_URL`, не литерал `club.`)
+- [ ] Сайт: `NEXT_PUBLIC_SITE=inkspace`; `SITES` в одном месте + enum-миграция Payload (`inkspace`,
+      `plisplas`, убрать `nagual`) — TASK-761; `modules/sites/inkspace/theme.ts` = копия темы PafPaf с
+      чёрной палитрой и логотипом Ink Space (эффект чернил — TASK-762, позже); сид `home` + `precios` для
+      Ink Space es/ru/en, честный: «agenda y reservas — próximamente», без обещаний
+- [ ] Инфра: `infra/dokploy/docker-compose.template.yml` с плейсхолдером `__BRAND__` + скрипт
+      `infra/dokploy/render.mjs` → `infra/dokploy/{pafpaf,inkspace,plisplas}/docker-compose.yml`
+      (имена сервисов нельзя брать из env — они ключи YAML, а на общей `dokploy-network` должны быть
+      уникальны); `.env.example` на бренд; `next.Dockerfile` принимает `NEXT_PUBLIC_BRAND`,
+      `NEXT_PUBLIC_SITE`, `NEXT_PUBLIC_SERVER_URL`; `deploy.yml`: матрица `{crm,admin,site} × {pafpaf,
+      inkspace,plisplas}` с URL из `infra/brands.json` (один источник для CI и compose), образы
+      `<app>-<brand>:latest`; job `dokploy` перебирает `DOKPLOY_COMPOSE_ID_*`: Ink Space → Plis Plas →
+      PafPaf, после каждого `GET api.<domain>/health` с ожиданием `brand`
+- [ ] Проверки как в CI, слияние в `main` → сборка 10 образов → PafPaf передеплоится на той же версии
+      (регресс-проверка: вход, QR, заказ)
+
+### Шаг 2 — Ink Space в сети (день 5)
+
+- [ ] Deploy в Dokploy; `https://api.ink.space/health` → `brand: inkspace`; `https://ink.space` — сайт;
+      `https://crm.ink.space` — регистрация студии с сайта, письмо пришло, CRM показывает «Ink Space»,
+      скин Black, в меню нет «Посещения»; `https://app.ink.space` — кабинет клиента
+- [ ] Search Console + Bing + Plausible для `ink.space` (TASK-771), скриншот нулевой точки
+- [ ] Листинг Capterra/GetApp ES для Ink Space (TASK-774) — домену пора стареть
+
+### Шаг 3 — Plis Plas тем же путём (как только куплен домен; полдня)
+
+- [ ] Шаг 0 для домена Plis Plas; `modules/sites/plisplas/theme.ts` — розовая палитра на базе Coqueta;
+      сид контента; Dokploy-проект `plisplas`; тот же `main`, без отдельной ветки
+- [ ] Поднимать сразу, не дожидаясь записи: SEO-возраст домена и Search Console важнее полноты функций;
+      на сайте — что есть сейчас (клиенты, каталог, заказы), запись — «próximamente»
+
+### Шаг 4 — фичи студий, по одной ветке на задачу, каждая за модулем бренда
+
+1. TASK-754 услуги (`services`) → Ink Space и Plis Plas получают вкладку «Услуги», PafPaf — нет
+2. TASK-780 события (outbox) — проектирование отдельно, затем код; нужно до записи ради напоминаний
+3. TASK-755 запись v1 (`booking`) + TASK-781 уведомления → публичная страница `app.<domain>/{studio}/book`
+4. TASK-756 канбан процедур и живая очередь
+5. TASK-757 согласие для тату (`tattoo-consent`, только Ink Space); TASK-782 история портала
+6. TASK-762 эффект чернил / палитра Plis Plas, TASK-765 блоки сайта под реальные функции
+
+Правило релиза: один `main`, каждое слияние выкатывается на три инсталляции; фича видна только там, где
+модуль включён в бренде. Ломающие миграции — обратно совместимые (добавить → перенести → удалить).
+
+---
+
 ## Порядок
 
-0. E787–788 (конфиг бренда, три проекта в Dokploy) вместе с A750 — каркас инсталляций.
+0. E787–788 (конфиг бренда, три проекта в Dokploy) вместе с A750 — каркас инсталляций; пошагово — раздел F.
 1. A750–752 (тип портала, словарь, модули) → без этого ни сайты, ни студии не имеют смысла.
 2. B760–763, 766, 768 → три домена в сети с главной и ценами, аналитика, GSC. Параллельно C770–772 руками.
 3. D780–782 (события, уведомления, журнал) → нужны и клубам, и студиям, и записи; 780 — проектировать
