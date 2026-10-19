@@ -443,22 +443,24 @@ Stripe запрещает «dispensarios de cannabis y negocios relacionados»
 - [ ] Политика приватности PafPaf: Telegram как способ входа и канал уведомлений
 - [ ] e2e: регистрация без email, вступление по ссылке клуба, согласие через бота
 
-### TASK-792: мобильная стратегия — PWA сначала, одна кодовая база приложений `[ ]` P2 (уточняет TASK-582)
+### TASK-792: мобильные приложения — одна кодовая база React Native, три варианта `[ ]` P2 (уточняет TASK-582)
 
-- [ ] Сейчас: CRM и кабинет как PWA во всех трёх брендах — manifest и иконки бренда, «добавить на экран»,
-      web push (iOS ≥ 16.4 для установленных PWA), камера для QR в браузере уже работает
-- [ ] Магазины: одно Expo-приложение, варианты по `BRAND` (EAS-профили, свои bundle id, иконки, имена);
+PWA не делаем (решение Вадима 2026-10-19). База — набросок `C:\Projects\tz\sociopath\mobile` (Expo + EAS).
+
+- [ ] Одно Expo-приложение, варианты по `BRAND` (EAS-профили, свои bundle id, иконки, имена);
       описания и набор функций у вариантов разные (App Store 4.3 — против клонов)
-- [ ] Вариант PafPaf — без каталога и заказа: карта участника с QR, визиты, новости и события клуба,
-      документы, связь с клубом; каталог и заказ — только в вебе/PWA. Так сделан SmokApp: в App Store с 2015,
-      «Utilidades», 18+, описание — общение клуба с участниками, без каталога
-      ([App Store](https://apps.apple.com/es/app/smokapp/id1019889040)). Запрещено именно содействие продаже:
-      Google Play — корзина, заказ, доставка/самовывоз «regardless of legality»
-      ([Engadget](https://www.engadget.com/2019/05/29/google-play-store-policy-bans-marijuana-sale-apps/)),
-      App Store 1.4.3 — продажа, кроме лицензированных точек
-      ([Apple Guidelines](https://developer.apple.com/app-store/review/guidelines/))
-- [ ] Модули мобильного варианта — из конфига бренда (`brand.mobileModules`); тексты листинга PafPaf
-      нейтральные (asociación, socios), возрастной рейтинг 18+
+- [ ] Вариант PafPaf — с каталогом и заказом без оплаты (заказ резервирует, выдача и расчёт в клубе),
+      QR-карта, визиты, новости, документы, связь с клубом (решение Вадима 2026-10-19)
+- [ ] Риск ревью: Google Play в примерах нарушений называет корзину и заказ с самовывозом, оплата не
+      важна, «regardless of legality»
+      ([Engadget](https://www.engadget.com/2019/05/29/google-play-store-policy-bans-marijuana-sale-apps/));
+      App Store 1.4.3 — содействие продаже, кроме лицензированных точек
+      ([Apple Guidelines](https://developer.apple.com/app-store/review/guidelines/)). SmokApp давно в App
+      Store: 18+, «Utilidades», в описании — общение клуба с участниками
+      ([App Store](https://apps.apple.com/es/app/smokapp/id1019889040)). Снижение: нейтральные тексты
+      (asociación, socios, reserva), 18+, отдельный аккаунт; запасной план — флаг в `brand.mobileModules`
+      прячет каталог в сборке для стора, если ревью откажет
+- [ ] Модули мобильного варианта — из конфига бренда (`brand.mobileModules`)
 - [ ] PafPaf публиковать под отдельным аккаунтом разработчика: блок аккаунта из-за каннабиса не должен
       снять Plis Plas и Ink Space (SmokApp издаёт SL; для autónomo — уточнить, какой тип аккаунта доступен)
 
