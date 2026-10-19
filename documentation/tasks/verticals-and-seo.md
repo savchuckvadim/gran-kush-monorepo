@@ -1,4 +1,4 @@
-# Несколько ниш, три сайта, SEO и коммуникации (TASK-750…790)
+# Несколько ниш, три сайта, SEO и коммуникации (TASK-750…792)
 
 Дата: 2026-10-19. Ветка `main`, HEAD `9ac688e`. Источники: обход `apps/site`, `apps/api`, `apps/crm`
 тремя агентами, Notion (проект «PafPaf — CRM для клубов», база Tasks, «CSC CRM Competitor Research»),
@@ -419,13 +419,41 @@
       восстановление на каждую
 - [ ] Версия в `/health` и в футере CRM — видно, что все три на одной версии
 
-### TASK-790: оплата PafPaf без Stripe `[ ]` P0 — решение Вадима
+### TASK-790: PafPaf бесплатно, Stripe только у чистых брендов `[~]` P0
 
-- [ ] Stripe запрещает «dispensarios de cannabis y negocios relacionados»
-      ([Restricted Businesses](https://stripe.com/legal/restricted-businesses)); софт для клубов прямо не назван
-      — решает Stripe. Все три бренда на одном NIF: бан из-за PafPaf может задеть Plis Plas и Ink Space
-- [ ] Stripe — только Plis Plas и Ink Space; PafPaf — счёт на SEPA-перевод или Bizum + ручное продление в
-      админке (TASK-514); клубам и так бесплатно (TASK-511)
+Stripe запрещает «dispensarios de cannabis y negocios relacionados»
+([Restricted Businesses](https://stripe.com/legal/restricted-businesses)); софт для клубов прямо не назван —
+решает Stripe. Все три бренда на одном NIF: бан из-за PafPaf задел бы Plis Plas и Ink Space.
+
+- [x] Решение Вадима 2026-10-19: Stripe — только Plis Plas и Ink Space; PafPaf пока бесплатно целиком —
+      ради PR и ссылок (бейдж «Gestionado con PafPaf», TASK-774)
+- [ ] PafPaf: биллинг выключен конфигом бренда (`modules` без `billing`), гард 402 не срабатывает, на сайте
+      вместо тарифов — «Gratis»; `NEXT_PUBLIC_PLANS_PURCHASABLE` не нужен
+- [ ] Задачу «Подключить Stripe и проверить оплату за 5 €» выполнить на Plis Plas / Ink Space
+
+### TASK-791: участник PafPaf без почты — только Telegram `[ ]` P1
+
+- [ ] Регистрация и вход участника через Telegram (провайдер уже есть в реестре способов входа, TASK-737):
+      аккаунт без email, `User.email` nullable, идентичность `telegram` — основная
+- [ ] Всё, что сейчас уходит письмом участнику (подтверждение членства, согласие, одноразовые ссылки),
+      идёт сообщением бота бренда, если email нет; канал выбирается по идентичностям аккаунта
+- [ ] Телефон — по желанию, кнопкой `request_contact` в боте; документы и подпись — как сейчас
+- [ ] Восстановление доступа — повторный вход через Telegram; привязать email позже можно в «Вход и
+      безопасность»
+- [ ] Политика приватности PafPaf: Telegram как способ входа и канал уведомлений
+- [ ] e2e: регистрация без email, вступление по ссылке клуба, согласие через бота
+
+### TASK-792: мобильная стратегия — PWA сначала, одна кодовая база приложений `[ ]` P2 (уточняет TASK-582)
+
+- [ ] Сейчас: CRM и кабинет как PWA во всех трёх брендах — manifest и иконки бренда, «добавить на экран»,
+      web push (iOS ≥ 16.4 для установленных PWA), камера для QR в браузере уже работает
+- [ ] Магазины — только Plis Plas и Ink Space: одно Expo-приложение, варианты по `BRAND` (EAS-профили,
+      свои bundle id, иконки, имена), один аккаунт разработчика Apple и Google; описания и набор функций
+      у вариантов разные (App Store 4.3 — против клонов)
+- [ ] PafPaf в магазины не публикуется: Google Play запрещает приложения, через которые продаётся марихуана,
+      «regardless of legality» (корзина, заказ, выдача), App Store 1.4.3 — то же, кроме лицензированных
+      диспансеров ([Engadget](https://www.engadget.com/2019/05/29/google-play-store-policy-bans-marijuana-sale-apps/),
+      [Apple Guidelines](https://developer.apple.com/app-store/review/guidelines/)); PafPaf остаётся PWA
 
 ---
 
