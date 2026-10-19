@@ -1,4 +1,4 @@
-# Несколько ниш, три сайта, SEO и коммуникации (TASK-750…786)
+# Несколько ниш, три сайта, SEO и коммуникации (TASK-750…790)
 
 Дата: 2026-10-19. Ветка `main`, HEAD `9ac688e`. Источники: обход `apps/site`, `apps/api`, `apps/crm`
 тремя агентами, Notion (проект «PafPaf — CRM для клубов», база Tasks, «CSC CRM Competitor Research»),
@@ -15,21 +15,20 @@
 
 ## Решения Вадима (2026-10-19)
 
-1. **Одна платформа, ниша = тип портала.** Отдельных приложений по нишам нет. `PortalTypeEnum
-   { CLUB, TATTOO_STUDIO, BEAUTY_STUDIO }` уже в схеме (`apps/api/prisma/schema.prisma:24`), но никем не
-   читается — становится сквозным. Музыкальные студии — позже, отдельным значением.
-2. **Три сайта на одном движке `apps/site`**: клубы (`paf-paf.app`), тату, бьюти — свои домены, имена и
-   палитры. Дизайн PafPaf — база для всех: бьюти — более свежая, молодая, розовая и дерзкая палитра; тату —
-   вместо дыма эффект чернил/краски. Отдельные темы с нуля не делаем.
+1. **Один код — три инсталляции.** PafPaf (клубы), Plis Plas (бьюти), Ink Space (тату) — отдельные проекты
+   Dokploy на том же сервере, у каждого свои БД, Redis, аккаунты, домены и секреты. Бренд задаёт env
+   `BRAND` на деплое; из конфига бренда — тип портала, набор модулей («рутовые фичи»), словарь, тема, сайт
+   (раздел E). `PortalTypeEnum { CLUB, TATTOO_STUDIO, BEAUTY_STUDIO }` остаётся полем данных; в инсталляции
+   все порталы её типа. Музыкальные студии — позже, четвёртым брендом.
+2. **Три сайта на одном движке `apps/site`**: PafPaf (`paf-paf.app`), Ink Space (`ink.space`), Plis Plas
+   (домен купить) — продающие сайты чуть разные. Дизайн PafPaf — база для всех: Plis Plas — более свежая,
+   молодая, розовая и дерзкая палитра; Ink Space — вместо дыма эффект чернил/краски. Темы с нуля не делаем.
 3. **Nagual — только скин CRM** (`nagual` в `SKIN_IDS`). Сайта и приложения Nagual не будет; stub
    `apps/site/modules/sites/nagual` удаляется.
-3a. **Бренд-архитектура — «дом брендов» с тихим зонтиком.** Наружу три самостоятельных бренда: PafPaf —
-   только клубы; тату и бьюти — свои имена, домены, иконки, почта, без упоминания PafPaf (клиентка салона
-   не должна через бренд выходить на каннабис; Ads, Meta и Stripe смотрят на домен). Внутри — одна
-   платформа и одно юрлицо-зонтик с нейтральным именем: aviso legal, приватность, GitHub, LinkedIn,
-   «© <Зонтик> S.L.» в футере. CRM одна, вывеска по хосту: `crm.<бренд>` / `app.<бренд>` — алиасы того же
-   контейнера (как `club.paf-paf.app`), `packages/brand` подставляет имя, логотип, цвета, отправителя по
-   типу портала (TASK-751/763). TASK-770 = два имени ниш + имя зонтика + домены.
+3a. **Бренд-архитектура — «дом брендов» с тихим зонтиком.** Наружу три самостоятельных бренда без
+   упоминаний друг друга (клиентка салона не должна через бренд выходить на каннабис; Ads, Meta и Stripe
+   смотрят на домен). Зонтик — «April IT by V. Savchuk», autónomo: только aviso legal, приватность, GitHub,
+   LinkedIn и строка в футере. Отправитель писем — с домена бренда, не `april-app.ru`.
 4. **Клубы — бесплатно** (TASK-511, долгий триал) как якорь и полигон для SEO. Деньги — в тату и бьюти:
    онлайн-запись, напоминания, предоплата. Оплату на сайте не форсируем.
 5. **Тарифы**: Barrio 25 € / Club 49 € / Cadena 99 € (Calada переименован, миграция `rename_plan_barrio`).
@@ -56,16 +55,13 @@
 
 ## A. Ядро вертикалей — `feat/verticals-core`
 
-### TASK-750: тип портала сквозной `[ ]` P0
+### TASK-750: тип портала из бренда инсталляции `[ ]` P0
 
-- [ ] `CreateClubDto.type` (`vertical`), `POST /platform/portals/register` и `POST /crm/my-portals` принимают тип;
-      `ClubFoundingService.found()` → `provisionPortal(portalId, type)`; переименовать в `PortalFoundingService`
-- [ ] Регистрация в CRM: шаг «Что у вас?» (клуб / тату-студия / салон); с сайта — `?vertical=` в `crmHref`
-      (`apps/site/modules/shared/config/routes.ts`), предвыбор и скрытие шага
-- [ ] `portal-info.dto` и `me` отдают `type`; в CRM `usePortalType()` в контексте портала
-- [ ] Пресеты в одном месте: `apps/api/src/common/verticals/presets.ts` — `{ type, modules[], vocabulary,
-      templates }`; `GlobalEntityTemplate.applicablePortalTypes` и `modulesJson` начинают читаться
-- [ ] e2e: регистрация трёх типов, провижининг по типу
+- [ ] `ClubFoundingService.found()` → `provisionPortal(portalId, brand.portalType)` (конфиг TASK-787);
+      переименовать в `PortalFoundingService`; выбора ниши при регистрации нет
+- [ ] `portal-info.dto` и `me` отдают `type`; в CRM `useBrand()` / `usePortalType()`
+- [ ] `GlobalEntityTemplate.applicablePortalTypes` и `modulesJson` начинают читаться
+- [ ] e2e: провижининг для каждого бренда (матрица `BRAND`)
 
 ### TASK-751: словарь вертикали в i18n `[ ]` P0
 
@@ -78,7 +74,7 @@
 
 ### TASK-752: модули по типу портала `[ ]` P0
 
-- [ ] `modules[]` из пресета → `portal-info`; `crm-navigation.hook.tsx` и `settings-hub-page.tsx` фильтруют
+- [ ] `brand.modules[]` → `portal-info`; `crm-navigation.hook.tsx` и `settings-hub-page.tsx` фильтруют
       по модулям: `attendance`/`presence` — club; `booking`, `services` — студии; `orders`, `catalog`,
       `finance`, `employees`, `clients` — все
 - [ ] Кабинет: разделы по модулям (QR/присутствие — club; «мои записи» — студии)
@@ -156,10 +152,9 @@
 ### TASK-760: сборка и деплой трёх сайтов `[ ]` P0
 
 - [ ] `infra/docker/next.Dockerfile`: build-args `NEXT_PUBLIC_SITE`, `NEXT_PUBLIC_SERVER_URL`
-- [ ] `.github/workflows/deploy.yml`: матрица `site-club`, `site-tattoo`, `site-beauty` (образы
-      `ghcr…/site:<code>`); `infra/dokploy/docker-compose.yml`: три сервиса на одной БД `site` и одном
-      томе media, домены в Traefik; Cloudflare-зоны (TASK-770)
-- [ ] `PAYLOAD_SEED_IF_EMPTY` сидит все три сайта; `/admin` — только в club-сборке (как сейчас)
+- [ ] `.github/workflows/deploy.yml`: образы `site:<brand>` ×3 (тема вшивается alias'ом при сборке); сайт в
+      каждом проекте Dokploy (TASK-788) со своей БД `site`, томом media и Payload `/admin`
+- [ ] `PAYLOAD_SEED_IF_EMPTY` сидит свой бренд
 
 ### TASK-761: единый список сайтов, без Nagual `[ ]` P0
 
@@ -183,12 +178,12 @@
       socio/cliente, pricing.badge)
 - [ ] `og-image.tsx`, `app/icon.svg`, `favicon.ico`, `apple-icon.tsx` — из темы сайта
 - [ ] Legal: домены и имя из `sites` doc, один `PROVIDER`; партнёрская страница — только club
-- [ ] `crmHref` передаёт `?vertical=<type>`
+- [ ] `CRM_URL` / `MEMBER_URL` — из конфига бренда
 
 ### TASK-764: тарифы по сайту `[ ]` P1
 
-- [ ] `plans.site` (или `vertical`) в Payload + миграция; коды биллинга `<vertical>-<plan>-<period>`;
-      `GET /platform/billing/plans?vertical=`; сайт фильтрует по `SITE`
+- [ ] Планы живут в БД своей инсталляции (`BillingPlan` и Payload `plans`), сиды и коды — по бренду;
+      поле `site` у планов не нужно
 - [ ] Цены студий — решение Вадима (ориентир рынка: TattooNet 15 €, Booksy 35 € + 8 €/сотрудник,
       Fresha 0 € + 2,2–2,6 % с оплат)
 
@@ -228,11 +223,12 @@
 
 ## C. SEO-запуск — без кода, по [seo-playbook](../marketing/seo-playbook.md)
 
-### TASK-770: имена и домены для тату и бьюти `[ ]` P0 — решение Вадима
+### TASK-770: имена и домены для тату и бьюти `[~]` P0
 
-- [ ] Названия брендов (paf-paf — каннабис-коннотация, студиям нужны свои) + нейтральное имя зонтика
-      для юр. текстов; домены, Cloudflare-зоны, почта отправителя на доменах; `crm.`/`app.` алиасы CRM на
-      каждом домене
+- [x] Имена (2026-10-19): PafPaf — клубы, Plis Plas — бьюти, Ink Space — тату (домен `ink.space` есть);
+      зонтик — «April IT by V. Savchuk», autónomo
+- [ ] Товарные знаки в [TMview](https://www.tmdn.org/tmview/) и [OEPM](https://www.oepm.es/), классы 9 и 42
+- [ ] Домены Plis Plas (`.app` + `.es`), `inkspace.es`; Cloudflare-зоны; отправитель с SPF/DKIM/DMARC
 
 ### TASK-771: Search Console, Bing, аналитика, журнал `[ ]` P0
 
@@ -323,7 +319,9 @@
 
 ### TASK-783: Inbox — диалоги, независимые от канала `[ ]` P0 — потребитель и источник событий
 
-- [ ] Модели: `Conversation` (portalId, memberId | contactJson, channel TELEGRAM|WHATSAPP|INAPP, externalId,
+- [ ] Ступень 0 (до Inbox, один день): кнопки в карточке клиента «WhatsApp» (`wa.me/<телефон>?text=`),
+      «Telegram», «Instagram» с текстом из шаблона; нажатие — событие `contact.messaged` в истории (TASK-782)
+- [ ] Модели: `Conversation` (portalId, memberId | contactJson, channel TELEGRAM|WHATSAPP|INSTAGRAM|INAPP, externalId,
       assignedEmployeeId, lastMessageAt, unreadCount), `ConversationMessage` (direction IN|OUT, text,
       attachmentsJson, externalMessageId, status SENT|DELIVERED|READ|FAILED, authorEmployeeId)
 - [ ] Интерфейс `ChannelAdapter { send(conversation, message), parseInbound(payload) }`, реестр адаптеров;
@@ -337,17 +335,26 @@
 
 ### TASK-784: Telegram-адаптер `[ ]` P0
 
-- [ ] Бот портала: свой токен (BotFather, хранить через `ENCRYPTION_MASTER_KEY`) или общий бот PafPaf с
-      привязкой `t.me/<бот>?start=<токен>` из кабинета (проработка TASK-675)
+- [ ] Бот бренда (тот же, что для входа через Telegram, — включить вебхук сообщений) с привязкой клиента
+      по `t.me/<бот>?start=<токен>` из кабинета; диалог маршрутизируется в портал по привязке; свой бот
+      портала — опция позже (токен через `ENCRYPTION_MASTER_KEY`, проработка TASK-675)
 - [ ] Вебхук → `Conversation` по chatId; исходящие `sendMessage`/`sendPhoto`; статусы доставки
 - [ ] Уведомления TASK-781 по тому же боту; «Настройки → Интеграции» (TASK-651): подключить бота, тест
 
-### TASK-785: WhatsApp-адаптер `[ ]` P1
+### TASK-785: WhatsApp и Instagram — адаптеры Meta `[ ]` P1
 
-- [ ] WhatsApp Business Platform (Cloud API) напрямую или через BSP (360dialog, Twilio): верификация
-      бизнеса в Meta, отдельный номер, шаблоны для исходящих вне 24-часового окна (напоминания о записи —
-      utility, платно за сообщение). Актуальные тарифы: https://developers.facebook.com/docs/whatsapp/pricing
-- [ ] Включать, когда студии попросят; архитектура адаптера готова с TASK-783
+- [ ] Стать Meta Tech Provider (одно Meta-приложение на бренд, верификация бизнеса April IT, app review)
+- [ ] WhatsApp Cloud API через Embedded Signup с **coexistence**: студия подключает свой номер из
+      WhatsApp Business на телефоне и продолжает им пользоваться, переписка дублируется в CRM. Сообщения
+      из приложения бесплатны, из API — по тарифам Cloud API; окно 24 ч открывается сообщением клиента;
+      исходящие вне окна (напоминания) — шаблоны utility. Требования: приложение ≥ 2.24.17, 20 msg/s на
+      номер ([Meta: coexistence](https://developers.facebook.com/documentation/business-messaging/whatsapp/embedded-signup/onboarding-business-app-users),
+      [тарифы](https://developers.facebook.com/docs/whatsapp/pricing))
+- [ ] Instagram Direct (Instagram API with Instagram Login) тем же Meta-приложением — главный канал тату
+      и бьюти
+- [ ] Неофициальные библиотеки WhatsApp Web (Baileys, WAHA, Evolution API) не использовать: нарушают
+      условия WhatsApp, номер клиента могут заблокировать
+- [ ] Только для Plis Plas и Ink Space; в PafPaf — не подключать (риск для Meta-аккаунта)
 
 ### TASK-786: In-app канал — перенос из Sociopath `[ ]` P2 (бывш. TASK-580)
 
@@ -374,8 +381,57 @@
 
 ---
 
+## E. Инсталляция на бренд — `feat/brand-installations`
+
+### TASK-787: конфиг бренда `packages/brand` `[ ]` P0 (поглощает TASK-531)
+
+- [ ] `packages/brand/src/{pafpaf,plisplas,inkspace}.ts`: имя, домены (site/crm/club/api), скин по
+      умолчанию, логотипы, `portalType`, `modules[]`, ключ словаря i18n, отправитель писем, реквизиты
+      зонтика; схема валидации, `getBrand(process.env.BRAND)` падает на старте при ошибке
+- [ ] Рутовые фичи: PafPaf — `presence`, `club-policy`, `membership-consent`; Ink Space — `booking`,
+      `services`, `procedure-kanban`, `tattoo-consent`; Plis Plas — `booking`, `services`, `reminders`
+- [ ] Правило: в бизнес-коде нет `if (brand === …)` — только `brand.modules.includes(…)` и данные конфига
+- [ ] CRM и admin — бренд в рантайме: сервер читает `BRAND` и отдаёт конфиг в провайдер; `NEXT_PUBLIC_*`
+      — только одинаковое для всех; один образ CRM и один admin на три инсталляции
+- [ ] Сайт — бренд при сборке (тема через alias), `NEXT_PUBLIC_SITE` = бренд
+
+### TASK-788: инфра трёх инсталляций `[ ]` P0
+
+- [ ] Dokploy: проекты `pafpaf`, `plisplas`, `inkspace` — в каждом api, crm, admin, site, postgres, redis;
+      Traefik общий, маршрутизация по хосту; лимиты памяти в compose
+- [ ] Postgres и Redis — свои на проект (общий Redis смешает очереди BullMQ: имена `mail`, `member-files`
+      одинаковые)
+- [ ] Секреты разные на бренд: `JWT_SECRET`, `JWT_REFRESH_SECRET`, `COOKIE_SECRET`, `ENCRYPTION_MASTER_KEY`,
+      `PAYLOAD_SECRET`; `AUTH_HINT_COOKIE_DOMAIN` — `.paf-paf.app` / `.ink.space` / домен Plis Plas;
+      `CORS_ORIGIN`, `CRM_FRONTEND_URL`, `MEMBER_FRONTEND_URL`
+- [ ] Внешние сервисы на бренд: Google OAuth client и consent screen (имя бренда), Telegram-бот (Login
+      Widget — один домен на бота), SMTP-отправитель, Search Console
+- [ ] Общее на сервер: Dokploy, Traefik, disk-janitor (один), мониторинг (Uptime Kuma), Plausible (одна
+      инстанция, три сайта)
+- [ ] Ресурсы: замерить `docker stats`; ориентир 1,5–2 GB RAM на бренд → 8 GB впритык, 16 GB спокойно
+- [ ] Runbook переезда бренда на другой сервер: pg_dump/restore, тома media, DNS
+
+### TASK-789: релиз и бэкапы трёх инсталляций `[ ]` P0 (расширяет TASK-551)
+
+- [ ] CI: образы api ×1, crm ×1, admin ×1, site ×3; один тег релиза → деплой по очереди Ink Space →
+      Plis Plas → PafPaf, стоп при красном `/health`; миграции применяет каждый API на старте
+- [ ] Бэкапы всех баз (api и site каждого бренда) offsite по расписанию, раздельные папки, проверенное
+      восстановление на каждую
+- [ ] Версия в `/health` и в футере CRM — видно, что все три на одной версии
+
+### TASK-790: оплата PafPaf без Stripe `[ ]` P0 — решение Вадима
+
+- [ ] Stripe запрещает «dispensarios de cannabis y negocios relacionados»
+      ([Restricted Businesses](https://stripe.com/legal/restricted-businesses)); софт для клубов прямо не назван
+      — решает Stripe. Все три бренда на одном NIF: бан из-за PafPaf может задеть Plis Plas и Ink Space
+- [ ] Stripe — только Plis Plas и Ink Space; PafPaf — счёт на SEPA-перевод или Bizum + ручное продление в
+      админке (TASK-514); клубам и так бесплатно (TASK-511)
+
+---
+
 ## Порядок
 
+0. E787–788 (конфиг бренда, три проекта в Dokploy) вместе с A750 — каркас инсталляций.
 1. A750–752 (тип портала, словарь, модули) → без этого ни сайты, ни студии не имеют смысла.
 2. B760–763, 766, 768 → три домена в сети с главной и ценами, аналитика, GSC. Параллельно C770–772 руками.
 3. D780–782 (события, уведомления, журнал) → нужны и клубам, и студиям, и записи; 780 — проектировать
