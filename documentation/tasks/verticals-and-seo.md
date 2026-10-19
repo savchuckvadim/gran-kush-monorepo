@@ -447,13 +447,20 @@ Stripe запрещает «dispensarios de cannabis y negocios relacionados»
 
 - [ ] Сейчас: CRM и кабинет как PWA во всех трёх брендах — manifest и иконки бренда, «добавить на экран»,
       web push (iOS ≥ 16.4 для установленных PWA), камера для QR в браузере уже работает
-- [ ] Магазины — только Plis Plas и Ink Space: одно Expo-приложение, варианты по `BRAND` (EAS-профили,
-      свои bundle id, иконки, имена), один аккаунт разработчика Apple и Google; описания и набор функций
-      у вариантов разные (App Store 4.3 — против клонов)
-- [ ] PafPaf в магазины не публикуется: Google Play запрещает приложения, через которые продаётся марихуана,
-      «regardless of legality» (корзина, заказ, выдача), App Store 1.4.3 — то же, кроме лицензированных
-      диспансеров ([Engadget](https://www.engadget.com/2019/05/29/google-play-store-policy-bans-marijuana-sale-apps/),
-      [Apple Guidelines](https://developer.apple.com/app-store/review/guidelines/)); PafPaf остаётся PWA
+- [ ] Магазины: одно Expo-приложение, варианты по `BRAND` (EAS-профили, свои bundle id, иконки, имена);
+      описания и набор функций у вариантов разные (App Store 4.3 — против клонов)
+- [ ] Вариант PafPaf — без каталога и заказа: карта участника с QR, визиты, новости и события клуба,
+      документы, связь с клубом; каталог и заказ — только в вебе/PWA. Так сделан SmokApp: в App Store с 2015,
+      «Utilidades», 18+, описание — общение клуба с участниками, без каталога
+      ([App Store](https://apps.apple.com/es/app/smokapp/id1019889040)). Запрещено именно содействие продаже:
+      Google Play — корзина, заказ, доставка/самовывоз «regardless of legality»
+      ([Engadget](https://www.engadget.com/2019/05/29/google-play-store-policy-bans-marijuana-sale-apps/)),
+      App Store 1.4.3 — продажа, кроме лицензированных точек
+      ([Apple Guidelines](https://developer.apple.com/app-store/review/guidelines/))
+- [ ] Модули мобильного варианта — из конфига бренда (`brand.mobileModules`); тексты листинга PafPaf
+      нейтральные (asociación, socios), возрастной рейтинг 18+
+- [ ] PafPaf публиковать под отдельным аккаунтом разработчика: блок аккаунта из-за каннабиса не должен
+      снять Plis Plas и Ink Space (SmokApp издаёт SL; для autónomo — уточнить, какой тип аккаунта доступен)
 
 ---
 
