@@ -1768,6 +1768,79 @@
                     "generic": "Could not save the role"
                 }
             }
+        },
+        "timeline": {
+            "title": "History",
+            "filters": {
+                "all": "All",
+                "comments": "Comments"
+            },
+            "composer": {
+                "placeholder": "A comment for the team…",
+                "hint": "Ctrl+Enter to send. Members never see comments.",
+                "send": "Add",
+                "sending": "Adding…"
+            },
+            "pinned": "Pinned",
+            "empty": "Events and comments will appear here",
+            "loadMore": "Show more",
+            "comment": {
+                "pin": "Pin",
+                "unpin": "Unpin",
+                "edit": "Edit",
+                "delete": "Delete",
+                "save": "Save",
+                "cancel": "Cancel",
+                "edited": "edited",
+                "deleted": "Comment deleted",
+                "deleteTitle": "Delete this comment?",
+                "deleteDescription": "The comment disappears from the history for the whole team.",
+                "notAuthor": "Only the author can edit a comment"
+            },
+            "system": "System",
+            "member": "Member",
+            "today": "Today",
+            "yesterday": "Yesterday",
+            "events": {
+                "order": {
+                    "placed": "Order {orderNumber} placed",
+                    "placedFromCabinet": "Order {orderNumber} from the cabinet",
+                    "stage_changed": "Order {orderNumber}: stage “{stage}”",
+                    "cancelled": "Order {orderNumber} cancelled",
+                    "payment_changed": "Order {orderNumber}: payment — {payment}"
+                },
+                "payment": {
+                    "paid": "paid",
+                    "pending": "not paid",
+                    "refunded": "refunded"
+                },
+                "member": {
+                    "joined": "Joined the club",
+                    "consent_given": "Confirmed the club consent",
+                    "left": "Left the club",
+                    "declined": "Declined the membership",
+                    "status_changed": "Status: “{status}”",
+                    "updated": "Profile changed"
+                },
+                "presence": {
+                    "entered": "Entered the club",
+                    "left": "Left the club"
+                },
+                "employee": {
+                    "joined": "Joined the team",
+                    "access_changed": "Role or access changed",
+                    "access_closed": "CRM access closed"
+                },
+                "product": {
+                    "created": "Product added",
+                    "updated": "Product changed",
+                    "deleted": "Product deleted",
+                    "stock_order_placed": "Stock went down: order",
+                    "stock_order_cancelled": "Stock returned: order cancelled",
+                    "stock_manual": "Stock changed by hand"
+                },
+                "unknown": "Event"
+            }
         }
     }
 }

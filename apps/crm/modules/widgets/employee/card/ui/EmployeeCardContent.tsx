@@ -1,6 +1,7 @@
 "use client";
 
 import type { Employee } from "@/modules/entities/employee";
+import { EntityTimeline } from "@/modules/widgets/entity-timeline";
 
 import { useEmployeeAccess } from "../hooks/use-employee-access";
 import type { EmployeeCardLayout } from "../model/employee-card.types";
@@ -21,7 +22,13 @@ export function EmployeeCardContent({ employee, layout }: EmployeeCardContentPro
         <div data-slot="employee-card" data-layout={layout} className="flex flex-col gap-4">
             {layout === "page" && <EmployeeBackLink />}
             <EmployeeHero employee={employee} access={access} />
-            <EmployeeProfilePanel employee={employee} />
+            <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+                <EmployeeProfilePanel employee={employee} />
+                <EntityTimeline
+                    subject={{ kind: "employee", id: employee.id }}
+                    className="lg:sticky lg:top-4 lg:max-h-[calc(100dvh-8rem)]"
+                />
+            </div>
         </div>
     );
 }

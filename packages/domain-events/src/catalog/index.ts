@@ -3,6 +3,7 @@ import type { z } from "zod";
 import type { AnyEventDefinition } from "../define-event";
 import type { DomainEventEnvelope } from "../envelope";
 
+import { commentAdded, commentDeleted, commentUpdated } from "./comment.events";
 import { employeeAccessChanged, employeeJoined } from "./employee.events";
 import { financeProfileUpdated, financeTaxRatesChanged } from "./finance.events";
 import {
@@ -36,6 +37,9 @@ export const EVENT_CATALOG = {
     "finance.profile_updated": financeProfileUpdated,
     "finance.tax_rates_changed": financeTaxRatesChanged,
     "notification.created": notificationCreated,
+    "comment.added": commentAdded,
+    "comment.updated": commentUpdated,
+    "comment.deleted": commentDeleted,
     "member.joined": memberJoined,
     "member.consent_given": memberConsentGiven,
     "member.left": memberLeft,
@@ -84,6 +88,9 @@ export const publicPayloadOf = (event: DomainEventEnvelope): Record<string, unkn
 };
 
 export {
+    commentAdded,
+    commentDeleted,
+    commentUpdated,
     employeeAccessChanged,
     employeeJoined,
     financeProfileUpdated,
@@ -107,6 +114,7 @@ export {
     roleChanged,
     sessionRevoked,
 };
+export { COMMENT_SUBJECT_KINDS } from "./comment.events";
 export { MEMBER_CHANGED_PARTS, type MemberChangedPart } from "./member.events";
 export { ORDER_STAGE_SEMANTICS } from "./order.events";
 export { ROLE_CHANGED_PARTS, type RoleChangedPart } from "./role.events";

@@ -142,6 +142,61 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/crm/timeline/{kind}/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Таймлайн сущности: события и комментарии, новые сверху
+         * @description kind: member | order | employee | product | portal (лента клуба, id — клуб)
+         */
+        get: operations["CrmTimeline_page"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/timeline/{kind}/{id}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Комментарий к сущности (видит только персонал) */
+        post: operations["CrmTimeline_add"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/comments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Удалить комментарий (автор или администратор клуба) */
+        delete: operations["CrmTimeline_remove"];
+        options?: never;
+        head?: never;
+        /** Править текст (автор) или закрепить и открепить */
+        patch: operations["CrmTimeline_update"];
+        trace?: never;
+    };
     "/cabinet/account/documents": {
         parameters: {
             query?: never;
@@ -3760,6 +3815,65 @@ export interface components {
         };
         UpdateNotificationPreferencesDto: {
             telegram: boolean;
+        };
+        TimelinePersonDto: {
+            id: string;
+            name: string;
+        };
+        TimelineCommentDto: {
+            /** Format: uuid */
+            id: string;
+            /** @description null — комментарий удалён */
+            body: string | null;
+            author: components["schemas"]["TimelinePersonDto"] | null;
+            /** Format: date-time */
+            pinnedAt: string | null;
+            /** Format: date-time */
+            editedAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        TimelineActorDto: {
+            /** @example employee */
+            kind: string;
+            id: string | null;
+            name: string | null;
+        };
+        TimelineEventDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example order.stage_changed */
+            name: string;
+            /** Format: date-time */
+            occurredAt: string;
+            actor: components["schemas"]["TimelineActorDto"];
+            /** @description Поля события и `labels`: подписи стадий и статусов по id */
+            data: {
+                [key: string]: unknown;
+            };
+        };
+        TimelineEntryDto: {
+            /** @enum {string} */
+            kind: "event" | "comment";
+            id: string;
+            /** Format: date-time */
+            at: string;
+            event?: components["schemas"]["TimelineEventDto"];
+            comment?: components["schemas"]["TimelineCommentDto"];
+        };
+        TimelinePageDto: {
+            /** @description Закреплённые — на первой странице */
+            pinned: components["schemas"]["TimelineCommentDto"][];
+            entries: components["schemas"]["TimelineEntryDto"][];
+            nextCursor: string | null;
+        };
+        CreateCommentDto: {
+            body: string;
+        };
+        UpdateCommentDto: {
+            body?: string;
+            /** @description Закрепить или открепить */
+            pinned?: boolean;
         };
         SharedClubDto: {
             /** @description Членство в этом клубе (memberId) */
@@ -7513,6 +7627,14 @@ export type SchemaUnreadNotificationsDto = components['schemas']['UnreadNotifica
 export type SchemaMarkNotificationsReadDto = components['schemas']['MarkNotificationsReadDto'];
 export type SchemaNotificationPreferencesDto = components['schemas']['NotificationPreferencesDto'];
 export type SchemaUpdateNotificationPreferencesDto = components['schemas']['UpdateNotificationPreferencesDto'];
+export type SchemaTimelinePersonDto = components['schemas']['TimelinePersonDto'];
+export type SchemaTimelineCommentDto = components['schemas']['TimelineCommentDto'];
+export type SchemaTimelineActorDto = components['schemas']['TimelineActorDto'];
+export type SchemaTimelineEventDto = components['schemas']['TimelineEventDto'];
+export type SchemaTimelineEntryDto = components['schemas']['TimelineEntryDto'];
+export type SchemaTimelinePageDto = components['schemas']['TimelinePageDto'];
+export type SchemaCreateCommentDto = components['schemas']['CreateCommentDto'];
+export type SchemaUpdateCommentDto = components['schemas']['UpdateCommentDto'];
 export type SchemaSharedClubDto = components['schemas']['SharedClubDto'];
 export type SchemaAccountDocumentDto = components['schemas']['AccountDocumentDto'];
 export type SchemaAccountDocumentsResponseDto = components['schemas']['AccountDocumentsResponseDto'];
@@ -8234,6 +8356,236 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmTimeline_page: {
+        parameters: {
+            query?: {
+                /** @description Курсор следующей страницы */
+                cursor?: string;
+                limit?: number;
+                /** @description Только комментарии или события */
+                only?: "comments" | "events";
+            };
+            header?: never;
+            path: {
+                kind: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TimelinePageDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmTimeline_add: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kind: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCommentDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TimelineCommentDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmTimeline_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmTimeline_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCommentDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TimelineCommentDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

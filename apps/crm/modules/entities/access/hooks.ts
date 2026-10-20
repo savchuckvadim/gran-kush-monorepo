@@ -15,8 +15,6 @@ import { authKeys } from "@/modules/entities/auth";
 import { usePortalInfo } from "@/modules/entities/portal";
 import { useAuth } from "@/modules/processes";
 
-import { rolesKey } from "./keys";
-
 import {
     createPortalRole,
     deletePortalRole,
@@ -26,6 +24,7 @@ import {
     type PortalRole,
     updatePortalRole,
 } from "./api";
+import { rolesKey } from "./keys";
 
 export interface PermissionsState {
     /** Роль в открытом клубе; пока «me» или клуб грузятся — undefined */
@@ -33,6 +32,8 @@ export interface PermissionsState {
     permissions: ReadonlySet<Permission>;
     /** Есть ли все перечисленные права. API проверяет их ещё раз на каждом запросе */
     can: (...required: Permission[]) => boolean;
+    /** Сотрудник в открытом клубе: автор своих комментариев и действий */
+    employeeId: string | undefined;
 }
 
 /** Права сотрудника в открытом клубе — из «me» (`employments[].permissions`). */
@@ -50,7 +51,7 @@ export function usePermissions(): PermissionsState {
         [permissions]
     );
 
-    return { role: employment?.role, permissions, can };
+    return { role: employment?.role, permissions, can, employeeId: employment?.employeeId };
 }
 
 /** Название роли: у системной — перевод по ключу, у своей — имя, которое дал клуб. */

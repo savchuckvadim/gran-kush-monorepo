@@ -1768,6 +1768,79 @@
                     "generic": "No se pudo guardar el rol"
                 }
             }
+        },
+        "timeline": {
+            "title": "Historial",
+            "filters": {
+                "all": "Todo",
+                "comments": "Comentarios"
+            },
+            "composer": {
+                "placeholder": "Un comentario para el equipo…",
+                "hint": "Ctrl+Enter para enviar. Los socios no ven los comentarios.",
+                "send": "Añadir",
+                "sending": "Añadiendo…"
+            },
+            "pinned": "Fijado",
+            "empty": "Aquí aparecerán los eventos y comentarios",
+            "loadMore": "Ver más",
+            "comment": {
+                "pin": "Fijar",
+                "unpin": "Desfijar",
+                "edit": "Editar",
+                "delete": "Eliminar",
+                "save": "Guardar",
+                "cancel": "Cancelar",
+                "edited": "editado",
+                "deleted": "Comentario eliminado",
+                "deleteTitle": "¿Eliminar el comentario?",
+                "deleteDescription": "El comentario desaparece del historial para todo el equipo.",
+                "notAuthor": "Solo el autor puede editar el comentario"
+            },
+            "system": "Sistema",
+            "member": "Socio",
+            "today": "Hoy",
+            "yesterday": "Ayer",
+            "events": {
+                "order": {
+                    "placed": "Pedido {orderNumber} realizado",
+                    "placedFromCabinet": "Pedido {orderNumber} desde el área de socios",
+                    "stage_changed": "Pedido {orderNumber}: etapa «{stage}»",
+                    "cancelled": "Pedido {orderNumber} cancelado",
+                    "payment_changed": "Pedido {orderNumber}: pago — {payment}"
+                },
+                "payment": {
+                    "paid": "pagado",
+                    "pending": "sin pagar",
+                    "refunded": "devuelto"
+                },
+                "member": {
+                    "joined": "Se unió al club",
+                    "consent_given": "Confirmó el consentimiento del club",
+                    "left": "Salió del club",
+                    "declined": "Rechazó la membresía",
+                    "status_changed": "Estado: «{status}»",
+                    "updated": "Perfil modificado"
+                },
+                "presence": {
+                    "entered": "Entrada al club",
+                    "left": "Salida del club"
+                },
+                "employee": {
+                    "joined": "Se unió al equipo",
+                    "access_changed": "Rol o acceso modificado",
+                    "access_closed": "Acceso al CRM cerrado"
+                },
+                "product": {
+                    "created": "Producto añadido",
+                    "updated": "Producto modificado",
+                    "deleted": "Producto eliminado",
+                    "stock_order_placed": "Bajó el stock: pedido",
+                    "stock_order_cancelled": "Volvió el stock: pedido cancelado",
+                    "stock_manual": "Stock modificado a mano"
+                },
+                "unknown": "Evento"
+            }
         }
     }
 }

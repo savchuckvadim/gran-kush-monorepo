@@ -9,6 +9,7 @@ import { Card } from "@workspace/ui";
 import { usePermissions } from "@/modules/entities/access";
 import { funnelOfOrder, useOrderDetail, useOrderFunnels } from "@/modules/entities/order";
 import { OrderStageBar } from "@/modules/features/order-stage";
+import { EntityTimeline } from "@/modules/widgets/entity-timeline";
 
 import { OrderDetailHeader } from "./OrderDetailHeader";
 import { OrderItemsCard } from "./OrderItemsCard";
@@ -21,7 +22,7 @@ interface OrderDetailProps {
     layout?: "page" | "slider";
 }
 
-/** The order card: the stage bar across the top, details and payment on the left, items on the right. */
+/** The order card: the stage bar across the top, details and payment on the left, items and history on the right. */
 export function OrderDetail({ orderId, layout = "page" }: OrderDetailProps) {
     const t = useTranslations("crm.orders.detail");
     const { data: order, isLoading, error } = useOrderDetail(orderId);
@@ -59,7 +60,13 @@ export function OrderDetail({ orderId, layout = "page" }: OrderDetailProps) {
                     <OrderSummaryCard order={order} />
                     <OrderPaymentCard order={order} canEdit={canProcess} />
                 </div>
-                <OrderItemsCard items={order.items} className="lg:col-span-3" />
+                <div className="space-y-4 lg:col-span-3">
+                    <OrderItemsCard items={order.items} />
+                    <EntityTimeline
+                        subject={{ kind: "order", id: order.id }}
+                        className="max-h-[36rem]"
+                    />
+                </div>
             </div>
         </div>
     );

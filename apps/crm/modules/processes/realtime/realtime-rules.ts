@@ -11,6 +11,7 @@ import { orderRealtimeRules } from "@/modules/entities/order/realtime";
 import { portalModuleRealtimeRules } from "@/modules/entities/portal-modules/realtime";
 import { presenceRealtimeRules } from "@/modules/entities/presence/realtime";
 import { productRealtimeRules } from "@/modules/entities/product/realtime";
+import { timelineRealtimeRules } from "@/modules/entities/timeline/realtime";
 import type { RealtimeRule } from "@/modules/shared/realtime";
 
 /*
@@ -31,6 +32,7 @@ export const CRM_REALTIME_RULES: readonly RealtimeRule[] = [
     ...portalModuleRealtimeRules,
     ...financeRealtimeRules,
     ...notificationRealtimeRules,
+    ...timelineRealtimeRules,
 ];
 
 export const CABINET_REALTIME_RULES: readonly RealtimeRule[] = [

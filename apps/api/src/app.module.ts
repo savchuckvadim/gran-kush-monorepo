@@ -29,6 +29,7 @@ import { AuthModule } from "./modules/portal/auth/auth.module";
 import { SessionOriginMiddleware } from "./modules/portal/auth/sessions/api/session-origin.middleware";
 import { RealtimeModule } from "./modules/realtime/realtime.module";
 import { StorageModule } from "./modules/storage/storage.module";
+import { TimelineModule } from "./modules/timeline/timeline.module";
 
 @Module({
     imports: [
@@ -47,6 +48,7 @@ import { StorageModule } from "./modules/storage/storage.module";
         EventsModule,
         RealtimeModule,
         NotificationsModule,
+        TimelineModule,
         MailModule,
         EncryptionModule,
         AuthModule,

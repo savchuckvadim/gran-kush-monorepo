@@ -1768,6 +1768,79 @@
                     "generic": "Не удалось сохранить роль"
                 }
             }
+        },
+        "timeline": {
+            "title": "История",
+            "filters": {
+                "all": "Всё",
+                "comments": "Комментарии"
+            },
+            "composer": {
+                "placeholder": "Комментарий для команды…",
+                "hint": "Ctrl+Enter — отправить. Участник комментарии не видит.",
+                "send": "Добавить",
+                "sending": "Добавляем…"
+            },
+            "pinned": "Закреплено",
+            "empty": "Здесь появятся события и комментарии",
+            "loadMore": "Показать ещё",
+            "comment": {
+                "pin": "Закрепить",
+                "unpin": "Открепить",
+                "edit": "Изменить",
+                "delete": "Удалить",
+                "save": "Сохранить",
+                "cancel": "Отмена",
+                "edited": "изменено",
+                "deleted": "Комментарий удалён",
+                "deleteTitle": "Удалить комментарий?",
+                "deleteDescription": "Комментарий пропадёт из истории у всей команды.",
+                "notAuthor": "Править комментарий может только его автор"
+            },
+            "system": "Система",
+            "member": "Участник",
+            "today": "Сегодня",
+            "yesterday": "Вчера",
+            "events": {
+                "order": {
+                    "placed": "Заказ {orderNumber} оформлен",
+                    "placedFromCabinet": "Заказ {orderNumber} из кабинета",
+                    "stage_changed": "Заказ {orderNumber}: стадия «{stage}»",
+                    "cancelled": "Заказ {orderNumber} отменён",
+                    "payment_changed": "Заказ {orderNumber}: оплата — {payment}"
+                },
+                "payment": {
+                    "paid": "оплачен",
+                    "pending": "не оплачен",
+                    "refunded": "возвращён"
+                },
+                "member": {
+                    "joined": "Вступил в клуб",
+                    "consent_given": "Подтвердил согласие клуба",
+                    "left": "Вышел из клуба",
+                    "declined": "Отказался от членства",
+                    "status_changed": "Статус: «{status}»",
+                    "updated": "Профиль изменён"
+                },
+                "presence": {
+                    "entered": "Вход в клуб",
+                    "left": "Выход из клуба"
+                },
+                "employee": {
+                    "joined": "Присоединился к команде",
+                    "access_changed": "Изменены роль или доступ",
+                    "access_closed": "Доступ к CRM закрыт"
+                },
+                "product": {
+                    "created": "Товар добавлен",
+                    "updated": "Товар изменён",
+                    "deleted": "Товар удалён",
+                    "stock_order_placed": "Остаток уменьшился: заказ",
+                    "stock_order_cancelled": "Остаток вернулся: отмена заказа",
+                    "stock_manual": "Остаток изменён вручную"
+                },
+                "unknown": "Событие"
+            }
         }
     }
 }

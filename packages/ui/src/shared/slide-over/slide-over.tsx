@@ -22,7 +22,8 @@ export interface SlideOverProps {
     className?: string;
 }
 
-const MAX_WIDTH_PX = 1120;
+/** Wide enough to show a card and its timeline side by side */
+const MAX_WIDTH_PX = 1400;
 /** Each panel above is this much narrower, so the edges of the ones below stay in sight */
 const NARROWER_PER_LEVEL_PX = 64;
 

@@ -250,6 +250,7 @@ model Portal {
   dataKeys              PortalDataKey[]
   organizationProfile   OrganizationProfile?
   taxRates              TaxRate[]
+  comments              EntityComment[]
   notifications         Notification[]
 
   @@index([name])
@@ -561,6 +562,8 @@ model Employee {
   financialTransactions FinancialTransaction[] @relation("TransactionCreatedBy")
   registrationLinks     RegistrationLink[]     @relation("RegistrationLinkCreatedBy")
   sentInvitations       EmployeeInvitation[]   @relation("InvitationInvitedBy")
+  comments              EntityComment[]        @relation("CommentAuthor")
+  pinnedComments        EntityComment[]        @relation("CommentPinnedBy")
   uiSettings            UiSetting[]
   notifications         Notification[]
 
@@ -1833,4 +1836,29 @@ model NotificationPreference {
 
   @@id([userId, channel])
   @@map("notification_preferences")
+}
+
+/// Комментарий сотрудника (TASK-782): заметка в таймлайне карточки (`member`, `order`, `employee`,
+/// `product`) или пост в ленте клуба (`portal`, TASK-808). Участнику не виден. Удаление мягкое:
+/// таймлайн показывает «комментарий удалён», а не дыру
+model EntityComment {
+  id                 String    @id @default(uuid())
+  portalId           String    @map("portal_id")
+  subjectKind        String    @map("subject_kind") @db.VarChar(32)
+  subjectId          String    @map("subject_id")
+  authorEmployeeId   String?   @map("author_employee_id")
+  body               String    @db.Text
+  pinnedAt           DateTime? @map("pinned_at")
+  pinnedByEmployeeId String?   @map("pinned_by_employee_id")
+  editedAt           DateTime? @map("edited_at")
+  deletedAt          DateTime? @map("deleted_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
+
+  portal   Portal    @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  author   Employee? @relation("CommentAuthor", fields: [authorEmployeeId], references: [id], onDelete: SetNull)
+  pinnedBy Employee? @relation("CommentPinnedBy", fields: [pinnedByEmployeeId], references: [id], onDelete: SetNull)
+
+  @@index([portalId, subjectKind, subjectId, createdAt])
+  @@index([portalId, createdAt])
+  @@map("entity_comments")
 }

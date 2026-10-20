@@ -11,12 +11,6 @@ export type MemberActivity =
     | { kind: "order"; key: string; at: string; order: OrderListItem }
     | { kind: "visit"; key: string; at: string; visit: MemberVisit };
 
-export interface MemberActivityDay {
-    /** `YYYY-MM-DD` in local time */
-    day: string;
-    items: MemberActivity[];
-}
-
 interface ActivitySources {
     member: CrmMemberDetails;
     visits: readonly MemberVisit[];
@@ -56,31 +50,4 @@ export function buildMemberActivity({ member, visits, orders }: ActivitySources)
         });
     }
     return items.sort((a, b) => b.at.localeCompare(a.at));
-}
-
-const dayKey = (iso: string): string => {
-    const date = new Date(iso);
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${date.getFullYear()}-${month}-${day}`;
-};
-
-/** The feed by day, keeping the order. */
-export function groupActivityByDay(items: readonly MemberActivity[]): MemberActivityDay[] {
-    const days: MemberActivityDay[] = [];
-    for (const item of items) {
-        const day = dayKey(item.at);
-        const last = days[days.length - 1];
-        if (last?.day === day) last.items.push(item);
-        else days.push({ day, items: [item] });
-    }
-    return days;
-}
-
-/** «Сегодня», «Вчера» or nothing: the caller then prints the date. */
-export function relativeDay(day: string, now = new Date()): "today" | "yesterday" | null {
-    if (day === dayKey(now.toISOString())) return "today";
-    const yesterday = new Date(now);
-    yesterday.setDate(now.getDate() - 1);
-    return day === dayKey(yesterday.toISOString()) ? "yesterday" : null;
 }
