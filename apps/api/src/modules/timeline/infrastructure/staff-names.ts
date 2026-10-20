@@ -6,16 +6,16 @@ import {
 } from "@modules/portal/crm/entity-fields/lib/member-field-values";
 import { PROFILE_NAME_FIELD_VALUES } from "@modules/portal/crm/entity-fields/lib/profile-name.select";
 
-/** Что нужно, чтобы назвать сотрудника: имя из профиля, без имени — начало email. */
-export const STAFF_NAME_SELECT = {
+/** Что нужно, чтобы назвать сотрудника или участника: имя из профиля, без имени — начало email. */
+export const PERSON_NAME_SELECT = {
     id: true,
     user: { select: { email: true } },
     profile: { select: { fieldValues: PROFILE_NAME_FIELD_VALUES } },
 } as const;
 
-export type StaffNameRow = Prisma.EmployeeGetPayload<{ select: typeof STAFF_NAME_SELECT }>;
+export type PersonNameRow = Prisma.EmployeeGetPayload<{ select: typeof PERSON_NAME_SELECT }>;
 
-export const staffName = (row: StaffNameRow): string => {
+export const personName = (row: PersonNameRow): string => {
     const fields = buildMemberFieldMap(
         (row.profile?.fieldValues ?? []).map((value) => ({
             valueJson: value.valueJson,

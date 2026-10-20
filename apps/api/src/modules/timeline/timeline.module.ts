@@ -7,6 +7,7 @@ import { CommentsService } from "./application/comments.service";
 import { TimelineService } from "./application/timeline.service";
 import { CommentRepository, TimelineRepository } from "./domain/timeline-repository.interface";
 import { CommentPrismaRepository } from "./infrastructure/comment-prisma.repository";
+import { TimelineHydrator } from "./infrastructure/timeline-hydrator";
 import { TimelinePrismaRepository } from "./infrastructure/timeline-prisma.repository";
 
 /**
@@ -19,6 +20,7 @@ import { TimelinePrismaRepository } from "./infrastructure/timeline-prisma.repos
     providers: [
         TimelineService,
         CommentsService,
+        TimelineHydrator,
         { provide: TimelineRepository, useClass: TimelinePrismaRepository },
         { provide: CommentRepository, useClass: CommentPrismaRepository },
     ],

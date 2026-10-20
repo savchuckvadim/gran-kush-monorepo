@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
+import { COMMENT_SUBJECT_KINDS } from "@workspace/domain-events";
 import { Type } from "class-transformer";
 import {
     IsBoolean,
@@ -7,13 +8,15 @@ import {
     IsInt,
     IsOptional,
     IsString,
+    IsUUID,
     Length,
+    Matches,
     Max,
     Min,
     ValidateIf,
 } from "class-validator";
 
-import { COMMENT_BODY_MAX, TIMELINE_PAGE } from "../../domain/timeline";
+import { COMMENT_BODY_MAX, FEED_GROUPS, TIMELINE_PAGE } from "../../domain/timeline";
 
 export class TimelineQueryDto {
     @ApiPropertyOptional({ type: String, description: "Курсор следующей страницы" })
@@ -36,6 +39,40 @@ export class TimelineQueryDto {
     @IsOptional()
     @IsIn(["comments", "events"])
     only?: "comments" | "events";
+
+    @ApiPropertyOptional({
+        type: String,
+        example: "order,comment",
+        description: `Разделы ленты через запятую: ${FEED_GROUPS.join(", ")}; пусто — всё`,
+    })
+    @IsOptional()
+    @IsString()
+    @Matches(/^[a-z,]*$/)
+    groups?: string;
+
+    @ApiPropertyOptional({
+        type: String,
+        format: "uuid",
+        description: "Только события и записи этого сотрудника («только мои»)",
+    })
+    @IsOptional()
+    @IsUUID()
+    authorId?: string;
+}
+
+export class TimelineSubjectRefDto {
+    @ApiProperty({ enum: COMMENT_SUBJECT_KINDS, enumName: "TimelineSubjectKind" })
+    kind!: (typeof COMMENT_SUBJECT_KINDS)[number];
+
+    @ApiProperty({ type: String })
+    id!: string;
+
+    @ApiProperty({
+        type: String,
+        nullable: true,
+        description: "В ленте — номер заказа или имя для ссылки; в таймлайне сущности — null",
+    })
+    label!: string | null;
 }
 
 export class TimelinePersonDto {
@@ -49,6 +86,9 @@ export class TimelinePersonDto {
 export class TimelineCommentDto {
     @ApiProperty({ type: String, format: "uuid" })
     id!: string;
+
+    @ApiProperty({ type: () => TimelineSubjectRefDto, description: "К чему комментарий" })
+    subject!: TimelineSubjectRefDto;
 
     @ApiProperty({ type: String, nullable: true, description: "null — комментарий удалён" })
     body!: string | null;
@@ -89,6 +129,13 @@ export class TimelineEventDto {
 
     @ApiProperty({ type: () => TimelineActorDto })
     actor!: TimelineActorDto;
+
+    @ApiProperty({
+        type: () => TimelineSubjectRefDto,
+        nullable: true,
+        description: "О ком событие (лента)",
+    })
+    subject!: TimelineSubjectRefDto | null;
 
     @ApiProperty({
         type: "object",

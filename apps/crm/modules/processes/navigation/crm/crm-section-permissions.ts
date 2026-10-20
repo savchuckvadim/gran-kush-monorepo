@@ -10,6 +10,8 @@ export const CRM_SECTION_PERMISSIONS: readonly {
     prefix: string;
     anyOf: readonly Permission[] | null;
 }[] = [
+    // лента — всему персоналу; что в ней видно, решают права каждого события
+    { prefix: ROUTES.CRM_FEED, anyOf: null },
     { prefix: ROUTES.CRM_MEMBER_BASE, anyOf: ["members.read"] },
     { prefix: ROUTES.CRM_ORDER_NEW, anyOf: ["orders.create"] },
     { prefix: ROUTES.CRM_ORDER_BASE, anyOf: ["orders.read"] },

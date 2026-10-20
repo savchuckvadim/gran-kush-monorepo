@@ -3816,6 +3816,14 @@ export interface components {
         UpdateNotificationPreferencesDto: {
             telegram: boolean;
         };
+        /** @enum {string} */
+        TimelineSubjectKind: "member" | "order" | "employee" | "product" | "portal";
+        TimelineSubjectRefDto: {
+            kind: components["schemas"]["TimelineSubjectKind"];
+            id: string;
+            /** @description В ленте — номер заказа или имя для ссылки; в таймлайне сущности — null */
+            label: string | null;
+        };
         TimelinePersonDto: {
             id: string;
             name: string;
@@ -3823,6 +3831,8 @@ export interface components {
         TimelineCommentDto: {
             /** Format: uuid */
             id: string;
+            /** @description К чему комментарий */
+            subject: components["schemas"]["TimelineSubjectRefDto"];
             /** @description null — комментарий удалён */
             body: string | null;
             author: components["schemas"]["TimelinePersonDto"] | null;
@@ -3847,6 +3857,8 @@ export interface components {
             /** Format: date-time */
             occurredAt: string;
             actor: components["schemas"]["TimelineActorDto"];
+            /** @description О ком событие (лента) */
+            subject: components["schemas"]["TimelineSubjectRefDto"] | null;
             /** @description Поля события и `labels`: подписи стадий и статусов по id */
             data: {
                 [key: string]: unknown;
@@ -7627,6 +7639,8 @@ export type SchemaUnreadNotificationsDto = components['schemas']['UnreadNotifica
 export type SchemaMarkNotificationsReadDto = components['schemas']['MarkNotificationsReadDto'];
 export type SchemaNotificationPreferencesDto = components['schemas']['NotificationPreferencesDto'];
 export type SchemaUpdateNotificationPreferencesDto = components['schemas']['UpdateNotificationPreferencesDto'];
+export type SchemaTimelineSubjectKind = components['schemas']['TimelineSubjectKind'];
+export type SchemaTimelineSubjectRefDto = components['schemas']['TimelineSubjectRefDto'];
 export type SchemaTimelinePersonDto = components['schemas']['TimelinePersonDto'];
 export type SchemaTimelineCommentDto = components['schemas']['TimelineCommentDto'];
 export type SchemaTimelineActorDto = components['schemas']['TimelineActorDto'];
@@ -8373,6 +8387,10 @@ export interface operations {
                 limit?: number;
                 /** @description Только комментарии или события */
                 only?: "comments" | "events";
+                /** @description Разделы ленты через запятую: order, member, presence, comment, employee, product, finance; пусто — всё */
+                groups?: string;
+                /** @description Только события и записи этого сотрудника («только мои») */
+                authorId?: string;
             };
             header?: never;
             path: {

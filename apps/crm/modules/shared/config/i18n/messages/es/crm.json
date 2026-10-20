@@ -8,6 +8,7 @@
             "openMenu": "Abrir menú",
             "closeMenu": "Cerrar menú",
             "nav": {
+                "feed": "Actividad",
                 "clients": "Miembros",
                 "products": "Productos",
                 "orders": "Pedidos",
@@ -1839,7 +1840,53 @@
                     "stock_order_cancelled": "Volvió el stock: pedido cancelado",
                     "stock_manual": "Stock modificado a mano"
                 },
-                "unknown": "Evento"
+                "unknown": "Evento",
+                "portal": {
+                    "founded": "Club creado",
+                    "module_enabled": "Módulo «{module}» activado",
+                    "module_disabled": "Módulo «{module}» desactivado",
+                    "modules": {
+                        "finance": "Finanzas"
+                    }
+                },
+                "finance": {
+                    "profile_updated": "Datos fiscales de la entidad actualizados",
+                    "tax_rates_changed": "Tipos de impuesto modificados"
+                },
+                "role": {
+                    "changed": "Permisos del rol modificados"
+                }
+            }
+        },
+        "feed": {
+            "title": "Actividad",
+            "subtitle": "Todo lo que pasa en el club: pedidos, socios, visitas y notas del equipo.",
+            "composer": {
+                "placeholder": "Escribir al equipo…",
+                "hint": "Ctrl+Enter para publicar. Los socios no ven la actividad.",
+                "send": "Publicar",
+                "sending": "Publicando…"
+            },
+            "filters": {
+                "all": "Todo",
+                "order": "Pedidos",
+                "member": "Socios",
+                "presence": "Visitas",
+                "comment": "Notas del equipo",
+                "employee": "Equipo",
+                "product": "Productos",
+                "finance": "Finanzas",
+                "mine": "Solo mías"
+            },
+            "fresh": "Entradas nuevas: {count} — mostrar",
+            "loadMore": "Ver más",
+            "empty": "Todo tranquilo. Aquí aparecerán pedidos, visitas y notas del equipo.",
+            "subjects": {
+                "member": "Socio",
+                "order": "Pedido",
+                "employee": "Empleado",
+                "product": "Producto",
+                "portal": "Club"
             }
         }
     }

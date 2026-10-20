@@ -5,16 +5,22 @@ import type { EventName } from "@workspace/domain-events";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 
-import type {
-    TimelineComment,
-    TimelineCursor,
-    TimelineEvent,
-    TimelineSubject,
+import {
+    type TimelineComment,
+    type TimelineCursor,
+    type TimelineEvent,
+    type TimelineSubject,
+    type TimelineSubjectKind,
 } from "../domain/timeline";
-import { TimelineRepository } from "../domain/timeline-repository.interface";
+import {
+    type CommentQuery,
+    type EventQuery,
+    TimelineRepository,
+} from "../domain/timeline-repository.interface";
 
-import { STAFF_NAME_SELECT, staffName } from "./staff-names";
-import { toTimelineComment } from "./timeline-comment.mapper";
+import { PERSON_NAME_SELECT } from "./staff-names";
+import { type CommentRow, toTimelineComment } from "./timeline-comment.mapper";
+import { subjectKey, TimelineHydrator } from "./timeline-hydrator";
 
 /** Поля payload со стадией заказа и статусом участника: им нужны подписи клуба. */
 const STAGE_FIELDS = ["stageId", "fromStageId", "toStageId"] as const;
@@ -34,22 +40,33 @@ const idsOf = (payloads: Record<string, unknown>[], fields: readonly string[]): 
 ];
 
 /** Участник — события, где он в payload; остальные сущности — события своего агрегата. */
-const subjectFilter = (subject: TimelineSubject): Prisma.DomainEventWhereInput => {
+const eventsOfSubject = (subject: TimelineSubject): Prisma.DomainEventWhereInput => {
     if (subject.kind === "portal") return {};
     if (subject.kind === "member") return { payload: { path: ["memberId"], equals: subject.id } };
     return { aggregateKind: subject.kind, aggregateId: subject.id };
 };
 
-const commentInclude = { author: { select: STAFF_NAME_SELECT } } as const;
+/** О ком событие в ленте: заказ, участник из payload, сотрудник или товар своего агрегата. */
+const subjectOfEvent = (
+    row: DomainEventRow,
+    payload: Record<string, unknown>
+): { kind: TimelineSubjectKind; id: string } | null => {
+    if (row.aggregateKind === "order") return { kind: "order", id: row.aggregateId };
+    if (typeof payload.memberId === "string") return { kind: "member", id: payload.memberId };
+    if (row.aggregateKind === "employee" || row.aggregateKind === "product") {
+        return { kind: row.aggregateKind, id: row.aggregateId };
+    }
+    return null;
+};
 
-interface EventLabel {
-    label: string;
-    labelI18n: Prisma.JsonValue;
-}
+const commentInclude = { author: { select: PERSON_NAME_SELECT } } as const;
 
 @Injectable()
 export class TimelinePrismaRepository extends TimelineRepository {
-    constructor(private readonly prisma: PrismaService) {
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly hydrator: TimelineHydrator
+    ) {
         super();
     }
 
@@ -72,16 +89,19 @@ export class TimelinePrismaRepository extends TimelineRepository {
     async events(
         portalId: string,
         subject: TimelineSubject,
-        names: readonly EventName[],
+        query: EventQuery,
         before: TimelineCursor | null,
         limit: number
     ): Promise<TimelineEvent[]> {
-        if (!names.length) return [];
+        if (!query.names.length) return [];
         const rows = await this.prisma.domainEvent.findMany({
             where: {
                 portalId,
-                name: { in: [...names] },
-                ...subjectFilter(subject),
+                name: { in: [...query.names] },
+                ...eventsOfSubject(subject),
+                ...(query.authorEmployeeId
+                    ? { actorKind: "employee", actorId: query.authorEmployeeId }
+                    : {}),
                 ...(before
                     ? {
                           OR: [
@@ -94,20 +114,23 @@ export class TimelinePrismaRepository extends TimelineRepository {
             orderBy: [{ occurredAt: "desc" }, { id: "desc" }],
             take: limit,
         });
-        return this.hydrate(portalId, rows);
+        return this.hydrateEvents(portalId, rows, subject.kind === "portal");
     }
 
     async comments(
         portalId: string,
         subject: TimelineSubject,
+        query: CommentQuery,
         before: TimelineCursor | null,
         limit: number
     ): Promise<TimelineComment[]> {
         const rows = await this.prisma.entityComment.findMany({
             where: {
                 portalId,
-                subjectKind: subject.kind,
-                subjectId: subject.id,
+                ...(subject.kind === "portal"
+                    ? { subjectKind: { in: [...query.subjectKinds] } }
+                    : { subjectKind: subject.kind, subjectId: subject.id }),
+                ...(query.authorEmployeeId ? { authorEmployeeId: query.authorEmployeeId } : {}),
                 ...(before
                     ? {
                           OR: [
@@ -121,7 +144,7 @@ export class TimelinePrismaRepository extends TimelineRepository {
             take: limit,
             include: commentInclude,
         });
-        return rows.map(toTimelineComment);
+        return this.withSubjectLabels(portalId, rows, subject.kind === "portal");
     }
 
     async pinned(portalId: string, subject: TimelineSubject): Promise<TimelineComment[]> {
@@ -139,25 +162,58 @@ export class TimelinePrismaRepository extends TimelineRepository {
         return rows.map(toTimelineComment);
     }
 
-    /** Имена к событиям: кто сделал, стадии заказа и статусы участника — словами клуба. */
-    private async hydrate(portalId: string, rows: DomainEventRow[]): Promise<TimelineEvent[]> {
+    /** В ленте у комментария — слово для ссылки на сущность, к которой он написан. */
+    private async withSubjectLabels(
+        portalId: string,
+        rows: CommentRow[],
+        feed: boolean
+    ): Promise<TimelineComment[]> {
+        const comments = rows.map(toTimelineComment);
+        if (!feed) return comments;
+        const labels = await this.hydrator.subjectLabels(
+            portalId,
+            comments.map((comment) => comment.subject)
+        );
+        return comments.map((comment) => ({
+            ...comment,
+            subject: {
+                ...comment.subject,
+                label: labels.get(subjectKey(comment.subject.kind, comment.subject.id)) ?? null,
+            },
+        }));
+    }
+
+    /** Имена к событиям: кто сделал, стадии и статусы — словами клуба; в ленте — о ком событие. */
+    private async hydrateEvents(
+        portalId: string,
+        rows: DomainEventRow[],
+        feed: boolean
+    ): Promise<TimelineEvent[]> {
         const payloads = rows.map(payloadOf);
-        const employeeIds = [
-            ...new Set(
-                rows.flatMap((row) =>
-                    row.actorKind === "employee" && row.actorId ? [row.actorId] : []
-                )
+        const actors = rows.flatMap((row) =>
+            row.actorKind === "employee" && row.actorId ? [row.actorId] : []
+        );
+        const subjects = feed
+            ? rows.map((row, index) => subjectOfEvent(row, payloads[index] ?? {}))
+            : [];
+        const [names, labels, subjectLabels] = await Promise.all([
+            this.hydrator.staffNames(portalId, [...new Set(actors)]),
+            this.hydrator.eventLabels(
+                portalId,
+                idsOf(payloads, STAGE_FIELDS),
+                idsOf(payloads, STATUS_FIELDS)
             ),
-        ];
-        const [names, labels] = await Promise.all([
-            this.staffNames(portalId, employeeIds),
-            this.labels(portalId, idsOf(payloads, STAGE_FIELDS), idsOf(payloads, STATUS_FIELDS)),
+            this.hydrator.subjectLabels(
+                portalId,
+                subjects.filter((ref): ref is NonNullable<typeof ref> => ref !== null)
+            ),
         ]);
         return rows.map((row, index) => {
             const payload = payloads[index] ?? {};
             const own = [...STAGE_FIELDS, ...STATUS_FIELDS]
                 .map((field) => payload[field])
                 .filter((id): id is string => typeof id === "string" && labels.has(id));
+            const ref = subjects[index] ?? null;
             return {
                 id: row.id,
                 name: row.name as EventName,
@@ -167,48 +223,14 @@ export class TimelinePrismaRepository extends TimelineRepository {
                     id: row.actorId,
                     name: row.actorId ? (names.get(row.actorId) ?? null) : null,
                 },
+                subject: ref
+                    ? { ...ref, label: subjectLabels.get(subjectKey(ref.kind, ref.id)) ?? null }
+                    : null,
                 data: {
                     ...payload,
                     labels: Object.fromEntries(own.map((id) => [id, labels.get(id)])),
                 },
             };
         });
-    }
-
-    private async staffNames(portalId: string, ids: string[]): Promise<Map<string, string>> {
-        if (!ids.length) return new Map();
-        const rows = await this.prisma.employee.findMany({
-            where: { portalId, id: { in: ids } },
-            select: STAFF_NAME_SELECT,
-        });
-        return new Map(rows.map((row) => [row.id, staffName(row)]));
-    }
-
-    /** Подписи стадий заказа и статусов участника по id — только своего клуба. */
-    private async labels(
-        portalId: string,
-        stageIds: string[],
-        statusIds: string[]
-    ): Promise<Map<string, EventLabel>> {
-        const [stages, statuses] = await Promise.all([
-            stageIds.length
-                ? this.prisma.stage.findMany({
-                      where: { id: { in: stageIds }, stageCategory: { portalId } },
-                      select: { id: true, name: true, nameI18n: true },
-                  })
-                : Promise.resolve([]),
-            statusIds.length
-                ? this.prisma.statusItem.findMany({
-                      where: { id: { in: statusIds }, statusSet: { portalId } },
-                      select: { id: true, label: true, labelI18n: true },
-                  })
-                : Promise.resolve([]),
-        ]);
-        const labels = new Map<string, EventLabel>();
-        for (const stage of stages)
-            labels.set(stage.id, { label: stage.name, labelI18n: stage.nameI18n });
-        for (const status of statuses)
-            labels.set(status.id, { label: status.label, labelI18n: status.labelI18n });
-        return labels;
     }
 }

@@ -2,7 +2,17 @@
 
 import { useTranslations } from "next-intl";
 
-import { Activity, BadgeCheck, DoorOpen, Package, ShoppingBag, UserRound } from "lucide-react";
+import {
+    Activity,
+    BadgeCheck,
+    Building2,
+    DoorOpen,
+    Package,
+    ShieldCheck,
+    ShoppingBag,
+    UserRound,
+    Wallet,
+} from "lucide-react";
 import type { ReactNode } from "react";
 
 import type { TimelineEvent } from "@/modules/entities/timeline";
@@ -28,13 +38,30 @@ const LOOKS: Record<string, { icon: ReactNode; tone: string }> = {
     },
 };
 
+const MORE_LOOKS: Record<string, { icon: ReactNode; tone: string }> = {
+    portal: { icon: <Building2 aria-hidden="true" />, tone: "bg-primary/15 text-primary" },
+    finance: {
+        icon: <Wallet aria-hidden="true" />,
+        tone: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
+    },
+    role: { icon: <ShieldCheck aria-hidden="true" />, tone: "bg-muted text-foreground" },
+};
+
 const FALLBACK = { icon: <Activity aria-hidden="true" />, tone: "bg-muted text-muted-foreground" };
 
+interface TimelineEventItemProps {
+    event: TimelineEvent;
+    last: boolean;
+    /** Под текстом: о ком событие (в ленте клуба) */
+    aside?: ReactNode;
+}
+
 /** Событие шины в таймлайне: что случилось и кто сделал. */
-export function TimelineEventItem({ event, last }: { event: TimelineEvent; last: boolean }) {
+export function TimelineEventItem({ event, last, aside }: TimelineEventItemProps) {
     const t = useTranslations("crm.timeline");
     const text = useTimelineEventText();
-    const look = LOOKS[event.name.split(".")[0] ?? ""] ?? FALLBACK;
+    const group = event.name.split(".")[0] ?? "";
+    const look = LOOKS[group] ?? MORE_LOOKS[group] ?? FALLBACK;
     const actor =
         event.actor.kind === "employee"
             ? event.actor.name
@@ -45,6 +72,7 @@ export function TimelineEventItem({ event, last }: { event: TimelineEvent; last:
     return (
         <TimelineRow icon={look.icon} tone={look.tone} at={event.occurredAt} last={last}>
             <p className="text-sm">{text(event)}</p>
+            {aside}
             {actor && <p className="text-xs text-muted-foreground">{actor}</p>}
         </TimelineRow>
     );

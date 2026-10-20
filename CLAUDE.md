@@ -106,6 +106,7 @@ Platform registration (create portal + owner): `POST /platform/portals/register`
 
 ```
 /{locale}/{portal}/crm/
+/{locale}/{portal}/crm/feed          — club feed: events and team posts (first menu item)
 /{locale}/{portal}/crm/members
 /{locale}/{portal}/crm/members/{memberId}
 /{locale}/{portal}/crm/members/{memberId}/documents

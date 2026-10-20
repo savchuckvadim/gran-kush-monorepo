@@ -21,11 +21,17 @@ const cookieHeader = (res: request.Response): string => {
 };
 
 type Club = { slug: string; portalId: string; cookies: string };
+type SubjectRef = { kind: string; id: string; label: string | null };
 type Entry = {
     kind: "event" | "comment";
     id: string;
-    event?: { name: string; actor: { name: string | null }; data: Record<string, unknown> };
-    comment?: { id: string; body: string | null; pinnedAt: string | null };
+    event?: {
+        name: string;
+        actor: { name: string | null };
+        data: Record<string, unknown>;
+        subject: SubjectRef | null;
+    };
+    comment?: { id: string; body: string | null; pinnedAt: string | null; subject: SubjectRef };
 };
 type Method = "get" | "post" | "patch" | "delete";
 
@@ -266,6 +272,52 @@ describe("Timeline (e2e)", () => {
             body: "x",
         });
         expect(foreignComment.status).toBe(404);
+    });
+
+    it("лента клуба: события и записи команды с подписью предмета, фильтры, права", async () => {
+        const post = await crm(
+            clubA,
+            "post",
+            `/crm/timeline/portal/${clubA.portalId}/comments`
+        ).send({
+            body: "Сегодня закрываемся в 20:00",
+        });
+        expect(post.status).toBe(201);
+
+        const feed = await timeline(`portal/${clubA.portalId}?limit=100`);
+        const placed = feed.entries.find((entry) => entry.event?.name === "order.placed")!;
+        expect(placed.event).toMatchObject({ subject: { kind: "order", id: orderId } });
+        expect(placed.event?.subject?.label).toMatch(/^ORD-/);
+        const onOrder = feed.entries.find((entry) => entry.comment?.body === "VIP")!;
+        expect(onOrder.comment).toMatchObject({ subject: { kind: "member", id: memberId } });
+        expect(
+            feed.entries.some((entry) => entry.comment?.body === "Сегодня закрываемся в 20:00")
+        ).toBe(true);
+
+        const orders = await timeline(`portal/${clubA.portalId}?groups=order&limit=100`);
+        expect(orders.entries.every((entry) => entry.event?.name.startsWith("order."))).toBe(true);
+        const notes = await timeline(`portal/${clubA.portalId}?groups=comment&limit=100`);
+        expect(notes.entries.every((entry) => entry.kind === "comment")).toBe(true);
+        const mine = await timeline(
+            `portal/${clubA.portalId}?groups=comment&authorId=${ownerEmployeeId}&limit=100`
+        );
+        expect(mine.entries.length).toBeGreaterThan(0);
+        expect(mine.entries.every((entry) => entry.kind === "comment")).toBe(true);
+
+        // сотрудник без employees.read не видит комментариев к сотрудникам в ленте
+        await crm(clubA, "post", `/crm/timeline/employee/${ownerEmployeeId}/comments`).send({
+            body: "Отпуск с понедельника",
+        });
+        const staffFeed = await timeline(
+            `portal/${clubA.portalId}?groups=comment&limit=100`,
+            staff
+        );
+        expect(
+            staffFeed.entries.some((entry) => entry.comment?.body === "Отпуск с понедельника")
+        ).toBe(false);
+        expect((await crm(clubB, "get", `/crm/timeline/portal/${clubA.portalId}`)).status).toBe(
+            404
+        );
     });
 
     it("страницы курсором без повторов и пропусков", async () => {

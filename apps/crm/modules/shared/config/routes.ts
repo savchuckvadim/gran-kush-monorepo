@@ -16,6 +16,7 @@ export const ROUTES = {
     INVITE: "/auth/invite",
     CRM_HOME: "/crm",
     /** Префикс раздела клиентов: list, details, new */
+    CRM_FEED: "/crm/feed",
     CRM_MEMBER_BASE: "/crm/member",
     /** Список клиентов (member/list) */
     CRM_MEMBERS: "/crm/member/list",

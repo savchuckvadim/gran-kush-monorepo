@@ -1,6 +1,24 @@
 import type { EventName } from "@workspace/domain-events";
 
-import type { TimelineComment, TimelineCursor, TimelineEvent, TimelineSubject } from "./timeline";
+import type {
+    TimelineComment,
+    TimelineCursor,
+    TimelineEvent,
+    TimelineSubject,
+    TimelineSubjectKind,
+} from "./timeline";
+
+/** Какие события: видимые сотруднику имена и, для «только мои», автор. */
+export interface EventQuery {
+    names: readonly EventName[];
+    authorEmployeeId: string | null;
+}
+
+/** Какие комментарии: в ленте — к сущностям видимых видов; автор — для «только мои». */
+export interface CommentQuery {
+    subjectKinds: readonly TimelineSubjectKind[];
+    authorEmployeeId: string | null;
+}
 
 export interface NewComment {
     subject: TimelineSubject;
@@ -10,7 +28,6 @@ export interface NewComment {
 
 export interface StoredComment extends TimelineComment {
     portalId: string;
-    subject: TimelineSubject;
     authorEmployeeId: string | null;
     deleted: boolean;
 }
@@ -24,7 +41,7 @@ export abstract class TimelineRepository {
     abstract events(
         portalId: string,
         subject: TimelineSubject,
-        names: readonly EventName[],
+        query: EventQuery,
         before: TimelineCursor | null,
         limit: number
     ): Promise<TimelineEvent[]>;
@@ -32,6 +49,7 @@ export abstract class TimelineRepository {
     abstract comments(
         portalId: string,
         subject: TimelineSubject,
+        query: CommentQuery,
         before: TimelineCursor | null,
         limit: number
     ): Promise<TimelineComment[]>;

@@ -1,10 +1,12 @@
 import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 
 import { EVENT_CATALOG, type EventName } from "@workspace/domain-events";
+import { COMMENT_SUBJECT_KINDS } from "@workspace/domain-events";
 
 import type { Permission } from "@modules/portal/crm/access/domain/permissions";
 
 import {
+    COMMENT_GROUP,
     decodeCursor,
     encodeCursor,
     newerFirst,
@@ -12,7 +14,10 @@ import {
     TIMELINE_PAGE,
     type TimelineComment,
     type TimelineEntry,
+    type TimelineEvent,
+    type TimelineFilter,
     type TimelineSubject,
+    type TimelineSubjectKind,
 } from "../domain/timeline";
 import { TimelineRepository } from "../domain/timeline-repository.interface";
 
@@ -21,6 +26,15 @@ export interface TimelineViewer {
     employeeId: string;
     permissions: readonly Permission[];
 }
+
+/** Виды сущностей, таймлайн которых сотрудник видит: их комментарии попадают в ленту. */
+const readableKinds = (permissions: readonly Permission[]): TimelineSubjectKind[] =>
+    COMMENT_SUBJECT_KINDS.filter((kind) => {
+        const permission = SUBJECT_READ_PERMISSION[kind];
+        return !permission || permissions.includes(permission);
+    });
+
+const NO_FILTER: TimelineFilter = { groups: [], authorEmployeeId: null };
 
 export interface TimelinePage {
     /** Закреплённые комментарии — только на первой странице */
@@ -59,20 +73,50 @@ export class TimelineService {
         portalId: string,
         viewer: TimelineViewer,
         subject: TimelineSubject,
-        options: { cursor?: string; limit?: number; only?: "comments" | "events" }
+        options: {
+            cursor?: string;
+            limit?: number;
+            only?: "comments" | "events";
+            filter?: TimelineFilter;
+        }
     ): Promise<TimelinePage> {
         await this.assertReadable(portalId, viewer, subject);
         const limit = Math.min(options.limit ?? TIMELINE_PAGE.default, TIMELINE_PAGE.max);
         const before = decodeCursor(options.cursor);
-        const names = visibleEventNames(viewer.permissions);
+        const filter = options.filter ?? NO_FILTER;
+        const eventGroups = filter.groups.filter((group) => group !== COMMENT_GROUP);
+        const wantsComments =
+            options.only !== "events" &&
+            (!filter.groups.length || filter.groups.includes(COMMENT_GROUP));
+        const wantsEvents =
+            options.only !== "comments" && (!filter.groups.length || eventGroups.length > 0);
+        const names = visibleEventNames(viewer.permissions).filter(
+            (name) =>
+                !eventGroups.length || eventGroups.some((group) => name.startsWith(`${group}.`))
+        );
+        const author = filter.authorEmployeeId;
         const [events, comments, pinned] = await Promise.all([
-            options.only === "comments"
-                ? []
-                : this.repository.events(portalId, subject, names, before, limit + 1),
-            options.only === "events"
-                ? []
-                : this.repository.comments(portalId, subject, before, limit + 1),
-            before ? [] : this.repository.pinned(portalId, subject),
+            wantsEvents
+                ? this.repository.events(
+                      portalId,
+                      subject,
+                      { names, authorEmployeeId: author },
+                      before,
+                      limit + 1
+                  )
+                : Promise.resolve<TimelineEvent[]>([]),
+            wantsComments
+                ? this.repository.comments(
+                      portalId,
+                      subject,
+                      { subjectKinds: readableKinds(viewer.permissions), authorEmployeeId: author },
+                      before,
+                      limit + 1
+                  )
+                : Promise.resolve<TimelineComment[]>([]),
+            before
+                ? Promise.resolve<TimelineComment[]>([])
+                : this.repository.pinned(portalId, subject),
         ]);
         const merged: TimelineEntry[] = [
             ...events.map((event) => ({

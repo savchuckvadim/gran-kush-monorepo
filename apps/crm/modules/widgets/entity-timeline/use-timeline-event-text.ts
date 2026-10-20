@@ -8,6 +8,7 @@ import type { TimelineEvent } from "@/modules/entities/timeline";
 const PAYMENT_STATUSES = new Set(["paid", "pending", "refunded"]);
 const PRODUCT_CHANGES = new Set(["created", "updated", "deleted"]);
 const STOCK_REASONS = new Set(["order_placed", "order_cancelled", "manual"]);
+const MODULES = new Set(["finance"]);
 
 const text = (value: unknown): string =>
     typeof value === "string" || typeof value === "number" ? String(value) : "";
@@ -79,6 +80,20 @@ export function useTimelineEventText(): (event: TimelineEvent) => string {
                     return STOCK_REASONS.has(text(data.reason))
                         ? t(`product.stock_${text(data.reason)}`)
                         : t("unknown");
+                case "portal.founded":
+                case "finance.profile_updated":
+                case "finance.tax_rates_changed":
+                case "role.changed":
+                    return t(name);
+                case "portal.module_changed":
+                    return t(
+                        data.enabled === false ? "portal.module_disabled" : "portal.module_enabled",
+                        {
+                            module: MODULES.has(text(data.module))
+                                ? t(`portal.modules.${text(data.module)}`)
+                                : text(data.module),
+                        }
+                    );
                 default:
                     return t("unknown");
             }

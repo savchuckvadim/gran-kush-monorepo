@@ -8,6 +8,7 @@
             "openMenu": "Open menu",
             "closeMenu": "Close menu",
             "nav": {
+                "feed": "Feed",
                 "clients": "Members",
                 "products": "Products",
                 "orders": "Orders",
@@ -1839,7 +1840,53 @@
                     "stock_order_cancelled": "Stock returned: order cancelled",
                     "stock_manual": "Stock changed by hand"
                 },
-                "unknown": "Event"
+                "unknown": "Event",
+                "portal": {
+                    "founded": "Club created",
+                    "module_enabled": "Module “{module}” enabled",
+                    "module_disabled": "Module “{module}” disabled",
+                    "modules": {
+                        "finance": "Finance"
+                    }
+                },
+                "finance": {
+                    "profile_updated": "Organization details and taxes updated",
+                    "tax_rates_changed": "Tax rates changed"
+                },
+                "role": {
+                    "changed": "Role permissions changed"
+                }
+            }
+        },
+        "feed": {
+            "title": "Feed",
+            "subtitle": "Everything that happens in the club: orders, members, visits and team notes.",
+            "composer": {
+                "placeholder": "Write to the team…",
+                "hint": "Ctrl+Enter to post. Members never see the feed.",
+                "send": "Post",
+                "sending": "Posting…"
+            },
+            "filters": {
+                "all": "All",
+                "order": "Orders",
+                "member": "Members",
+                "presence": "Visits",
+                "comment": "Team notes",
+                "employee": "Team",
+                "product": "Products",
+                "finance": "Finance",
+                "mine": "Only mine"
+            },
+            "fresh": "New entries: {count} — show",
+            "loadMore": "Show more",
+            "empty": "Quiet so far. Orders, visits and team notes will appear here.",
+            "subjects": {
+                "member": "Member",
+                "order": "Order",
+                "employee": "Employee",
+                "product": "Product",
+                "portal": "Club"
             }
         }
     }

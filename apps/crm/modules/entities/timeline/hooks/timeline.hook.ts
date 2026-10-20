@@ -10,7 +10,7 @@ import {
     type TimelineSubject,
     updateComment,
 } from "../api/timeline.api";
-import { timelineKeys } from "../model/timeline-keys";
+import { feedKeys, timelineKeys } from "../model/timeline-keys";
 
 /** История сущности: события и комментарии, новые сверху, страницами по курсору. */
 export function useTimeline(subject: TimelineSubject, filter: TimelineFilter) {
@@ -22,7 +22,7 @@ export function useTimeline(subject: TimelineSubject, filter: TimelineFilter) {
     });
 }
 
-/** Любая правка комментария перечитывает таймлайн этой сущности (у всех — через realtime). */
+/** Правка комментария перечитывает таймлайн сущности и ленту (у других — через realtime). */
 const useCommentMutation = <A>(
     subject: TimelineSubject,
     mutationFn: (args: A) => Promise<unknown>
@@ -30,7 +30,11 @@ const useCommentMutation = <A>(
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn,
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: timelineKeys.subject(subject) }),
+        onSuccess: () =>
+            Promise.all([
+                queryClient.invalidateQueries({ queryKey: timelineKeys.subject(subject) }),
+                queryClient.invalidateQueries({ queryKey: feedKeys.all }),
+            ]),
     });
 };
 

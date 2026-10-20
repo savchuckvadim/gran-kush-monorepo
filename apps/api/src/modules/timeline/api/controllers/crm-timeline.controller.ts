@@ -21,7 +21,12 @@ import { CrmAuth } from "@modules/portal/auth/sessions/api/session-auth.decorato
 
 import { CommentsService } from "../../application/comments.service";
 import { TimelineService, type TimelineViewer } from "../../application/timeline.service";
-import { isTimelineSubjectKind, type TimelineSubject } from "../../domain/timeline";
+import {
+    isFeedGroup,
+    isTimelineSubjectKind,
+    type TimelineFilter,
+    type TimelineSubject,
+} from "../../domain/timeline";
 import {
     CreateCommentDto,
     TimelineCommentDto,
@@ -34,6 +39,12 @@ import { toCommentDto, toEntryDto } from "../timeline.mapper";
 const viewerOf = (principal: PortalPrincipal): TimelineViewer => ({
     employeeId: principal.membershipId,
     permissions: principal.permissions,
+});
+
+/** Разделы из строки запроса: незнакомые слова пропускаются (клиент новее сервера). */
+const filterOf = (query: TimelineQueryDto): TimelineFilter => ({
+    groups: (query.groups ?? "").split(",").filter(isFeedGroup),
+    authorEmployeeId: query.authorId ?? null,
 });
 
 const subjectOf = (kind: string, id: string): TimelineSubject => {
@@ -66,12 +77,10 @@ export class CrmTimelineController {
         @Param("id") id: string,
         @Query() query: TimelineQueryDto
     ): Promise<TimelinePageDto> {
-        const page = await this.timeline.page(
-            portalId,
-            viewerOf(principal),
-            subjectOf(kind, id),
-            query
-        );
+        const page = await this.timeline.page(portalId, viewerOf(principal), subjectOf(kind, id), {
+            ...query,
+            filter: filterOf(query),
+        });
         return {
             pinned: page.pinned.map(toCommentDto),
             entries: page.entries.map(toEntryDto),

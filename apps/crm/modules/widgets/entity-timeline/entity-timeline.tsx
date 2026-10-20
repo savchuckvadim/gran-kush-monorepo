@@ -16,10 +16,10 @@ import {
     useAddComment,
     useTimeline,
 } from "@/modules/entities/timeline";
-import { useDateFormat } from "@/modules/shared/lib/use-date-format";
 
 import { TimelineCommentItem } from "./timeline-comment-item";
-import { groupByDay, relativeDay } from "./timeline-days";
+import { TimelineDayList } from "./timeline-day-list";
+import { groupByDay } from "./timeline-days";
 import { TimelineEventItem } from "./timeline-event-item";
 import { TimelineTextForm } from "./timeline-text-form";
 
@@ -54,7 +54,6 @@ export function EntityTimeline({
     className,
 }: EntityTimelineProps) {
     const t = useTranslations("crm.timeline");
-    const date = useDateFormat();
     const [filter, setFilter] = useState<TimelineFilter>("all");
     const timeline = useTimeline(subject, filter);
     const add = useAddComment(subject);
@@ -76,11 +75,6 @@ export function EntityTimeline({
         ].sort((a, b) => b.at.localeCompare(a.at));
         return groupByDay(rows);
     }, [pages, extra, filter, hiddenEvents]);
-
-    const dayTitle = (day: string) => {
-        const relative = relativeDay(day);
-        return relative ? t(relative) : date(`${day}T12:00:00`);
-    };
 
     const renderRow = (row: Row, last: boolean) => {
         if (row.extra) return <Fragment key={row.key}>{row.extra.render(last)}</Fragment>;
@@ -149,18 +143,7 @@ export function EntityTimeline({
                 {timeline.isLoading ? null : days.length === 0 ? (
                     <p className="text-sm text-muted-foreground">{t("empty")}</p>
                 ) : (
-                    days.map(({ day, items }) => (
-                        <section key={day} className="flex flex-col gap-1">
-                            <h3 className="text-xs font-medium text-muted-foreground">
-                                {dayTitle(day)}
-                            </h3>
-                            <ol className="relative flex flex-col">
-                                {items.map((row, index) =>
-                                    renderRow(row, index === items.length - 1)
-                                )}
-                            </ol>
-                        </section>
-                    ))
+                    <TimelineDayList days={days} renderRow={renderRow} />
                 )}
                 <LoadMoreTrigger
                     onLoadMore={() => void timeline.fetchNextPage()}

@@ -15,10 +15,10 @@ import {
     type StoredComment,
 } from "../domain/timeline-repository.interface";
 
-import { STAFF_NAME_SELECT } from "./staff-names";
+import { PERSON_NAME_SELECT } from "./staff-names";
 import { toTimelineComment } from "./timeline-comment.mapper";
 
-const include = { author: { select: STAFF_NAME_SELECT } } as const;
+const include = { author: { select: PERSON_NAME_SELECT } } as const;
 
 const commentPayload = (id: string, subject: TimelineSubject) => ({
     commentId: id,
@@ -64,7 +64,6 @@ export class CommentPrismaRepository extends CommentRepository {
         return {
             ...toTimelineComment(row),
             portalId: row.portalId,
-            subject: { kind: row.subjectKind, id: row.subjectId },
             authorEmployeeId: row.authorEmployeeId,
             deleted: row.deletedAt !== null,
         };

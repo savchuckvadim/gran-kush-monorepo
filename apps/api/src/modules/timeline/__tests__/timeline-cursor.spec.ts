@@ -11,6 +11,7 @@ const comment = (id: string, at: string): TimelineEntry => ({
     at: new Date(at),
     comment: {
         id,
+        subject: { kind: "order", id: "o1", label: null },
         body: "x",
         author: null,
         pinnedAt: null,

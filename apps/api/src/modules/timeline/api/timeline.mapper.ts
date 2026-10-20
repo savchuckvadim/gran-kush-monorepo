@@ -4,6 +4,7 @@ import type { TimelineCommentDto, TimelineEntryDto } from "./dto/timeline.dto";
 
 export const toCommentDto = (comment: TimelineComment): TimelineCommentDto => ({
     id: comment.id,
+    subject: comment.subject,
     body: comment.body,
     author: comment.author,
     pinnedAt: comment.pinnedAt?.toISOString() ?? null,
@@ -28,6 +29,7 @@ export const toEntryDto = (entry: TimelineEntry): TimelineEntryDto =>
                   name: entry.event.name,
                   occurredAt: entry.event.occurredAt.toISOString(),
                   actor: entry.event.actor,
+                  subject: entry.event.subject,
                   data: entry.event.data,
               },
           };

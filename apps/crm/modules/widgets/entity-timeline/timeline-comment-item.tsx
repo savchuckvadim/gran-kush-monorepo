@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { MessageSquare } from "lucide-react";
@@ -26,10 +26,12 @@ interface TimelineCommentItemProps {
     comment: TimelineComment;
     subject: TimelineSubject;
     last: boolean;
+    /** Над карточкой: к чему комментарий (в ленте клуба) */
+    aside?: ReactNode;
 }
 
 /** Комментарий сотрудника: автор, текст, «изменено»; удалённый — отметкой без текста. */
-export function TimelineCommentItem({ comment, subject, last }: TimelineCommentItemProps) {
+export function TimelineCommentItem({ comment, subject, last, aside }: TimelineCommentItemProps) {
     const t = useTranslations("crm.timeline.comment");
     const { can, employeeId } = usePermissions();
     const [editing, setEditing] = useState(false);
@@ -48,6 +50,7 @@ export function TimelineCommentItem({ comment, subject, last }: TimelineCommentI
             at={comment.createdAt}
             last={last}
         >
+            {aside}
             <div className="rounded-xl border bg-card px-3 py-2">
                 <div className="flex items-center gap-2">
                     <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">

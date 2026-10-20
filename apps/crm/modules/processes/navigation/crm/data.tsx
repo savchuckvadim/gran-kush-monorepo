@@ -1,5 +1,6 @@
 import {
     CalendarCheck,
+    Newspaper,
     Package,
     Settings,
     ShoppingBag,
@@ -14,6 +15,14 @@ import { ROUTES } from "@/modules/shared/config/routes";
 import { ICrmNavigation } from "./crm-navigation.interface";
 
 export const CRM_NAVIGATION: ICrmNavigation[] = [
+    {
+        id: 0,
+        code: "feed",
+        url: ROUTES.CRM_FEED,
+        title: "Feed",
+        isActive: false,
+        icon: <Newspaper />,
+    },
     {
         id: 1,
         code: "clients",
