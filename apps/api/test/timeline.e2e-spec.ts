@@ -6,6 +6,7 @@ import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
+import { newProductCode } from "../src/modules/portal/crm/catalog/domain/product-code";
 
 import { crmSession } from "./support/sessions";
 
@@ -157,6 +158,7 @@ describe("Timeline (e2e)", () => {
                 entityRecordId: (await record(clubA.portalId, "product")).id,
                 categoryId: category.id,
                 measurementUnitId: unit.id,
+                code: newProductCode(),
                 name: `Timeline ${suffix}`,
                 price: 4,
                 initialQuantity: 20,

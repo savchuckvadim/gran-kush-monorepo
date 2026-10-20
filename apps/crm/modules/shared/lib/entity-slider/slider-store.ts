@@ -86,6 +86,14 @@ export const sliderStore = {
         setStack(next);
     },
 
+    /** The top panel becomes another entity: the created order takes the place of its draft. */
+    replaceTop(ref: EntityRef, href: string): void {
+        if (stack.length === 0) return;
+        const next = [...stack.slice(0, -1), { ...ref, href }];
+        writeHistory(next, href, "replace");
+        setStack(next);
+    },
+
     /** Closes the top panel. Our own history entry is left with «back», like the browser button. */
     close(): void {
         if (stack.length === 0) return;

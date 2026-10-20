@@ -7,6 +7,8 @@ import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
+import { newProductCode } from "../src/modules/portal/crm/catalog/domain/product-code";
+
 import { enablePortalModule } from "./support/portal-modules";
 
 jest.setTimeout(120_000);
@@ -157,6 +159,7 @@ describe("CRM role-based access (e2e)", () => {
                 entityRecordId: productRecord.id,
                 categoryId,
                 measurementUnitId: unitId,
+                code: newProductCode(),
                 name: `RBAC Product ${suffix}`,
                 price: 10,
                 initialQuantity: 100,

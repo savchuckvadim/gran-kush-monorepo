@@ -398,7 +398,11 @@
                 "active": "Active",
                 "inactive": "Inactive",
                 "page": "Page",
-                "confirmDelete": "Are you sure you want to delete this product?"
+                "confirmDelete": "Are you sure you want to delete this product?",
+                "colSelect": "Select",
+                "select": "Select “{name}”",
+                "printLabels": "Labels ({count})",
+                "clearSelection": "Clear selection"
             },
             "form": {
                 "createButton": "Add product",
@@ -421,7 +425,11 @@
                 "create": "Create product",
                 "createError": "Failed to create product",
                 "limitGramsPerUnit": "Limit grams per unit",
-                "limitGramsPerUnitHint": "Empty — the product does not count towards the member's limit."
+                "limitGramsPerUnitHint": "Empty — the product does not count towards the member's limit.",
+                "barcode": "Barcode",
+                "barcodeHint": "EAN/UPC from the package: the scanner finds the product without your label",
+                "isConsumable": "Consumable",
+                "isConsumableHint": "Not sold: a scan offers to write it off (gloves, bags, ink)"
             },
             "detail": {
                 "loading": "Loading...",
@@ -452,7 +460,13 @@
                 "limitGramsPerUnit": "Counts per unit",
                 "notInLimit": "Does not count",
                 "stockNote": "Reason for the stock change",
-                "stockNoteHint": "The difference goes to the stock journal as a recount"
+                "stockNoteHint": "The difference goes to the stock journal as a recount",
+                "code": "Label code",
+                "barcode": "Barcode",
+                "barcodeHint": "EAN/UPC from the package: the scanner finds the product without your label",
+                "kind": "Type",
+                "consumable": "Consumable: not sold, written off",
+                "isConsumable": "Consumable"
             },
             "audiences": {
                 "label": "Shown in the cabinet to",
@@ -638,7 +652,22 @@
                 "submit": "Create order",
                 "submitting": "Creating…",
                 "cancel": "Cancel",
-                "created": "Order {number} created"
+                "created": "Order {number} created",
+                "scan": {
+                    "label": "Code or barcode",
+                    "placeholder": "Keyboard scanner or a code by hand, then Enter",
+                    "camera": "Camera",
+                    "added": "Added: {name}",
+                    "memberPicked": "Member chosen: {name}",
+                    "memberInactive": "{name} is disabled in the club.",
+                    "refused": {
+                        "consumable": "{name} is a consumable: it is written off, not sold.",
+                        "unavailable": "{name} is withdrawn from sale.",
+                        "out_of_stock": "{name} is out of stock."
+                    },
+                    "notForOrder": "This code doesn't fit an order.",
+                    "failed": "Couldn't check the code."
+                }
             }
         },
         "finance": {
@@ -1285,7 +1314,9 @@
                     "fields": {
                         "name": "Unit name",
                         "code": "Unit code",
-                        "codePlaceholder": "e.g. G, PCS, ML"
+                        "codePlaceholder": "e.g. G, PCS, ML",
+                        "weighed": "Sold by weight",
+                        "weighedHint": "Grams, kilograms: scanning such a product asks for the quantity instead of 1"
                     },
                     "create": "Create unit",
                     "creating": "Creating...",
@@ -1298,10 +1329,12 @@
                     "columns": {
                         "name": "Name",
                         "code": "Code",
-                        "kind": "Type"
+                        "kind": "Type",
+                        "weighed": "By weight"
                     },
                     "custom": "Custom",
-                    "builtIn": "Built-in"
+                    "builtIn": "Built-in",
+                    "weighed": "Yes"
                 },
                 "links": {
                     "billing": {
@@ -1761,7 +1794,9 @@
             "openPage": "Open as a page",
             "copyLink": "Copy link",
             "copied": "Link copied",
-            "employee": "Employee"
+            "employee": "Employee",
+            "product": "Product",
+            "newOrder": "New order"
         },
         "clubPolicy": {
             "title": "Club rules",
@@ -2436,6 +2471,43 @@
             "searching": "Searching…",
             "empty": "Nothing found",
             "inStock": "In stock: {quantity} {unit}"
+        },
+        "scanner": {
+            "title": "Scanner",
+            "description": "A member code, a product label or a barcode — with the camera or by hand",
+            "manualPlaceholder": "Member code, P-code from a label or a barcode",
+            "titles": {
+                "member": "Member",
+                "product": "Product"
+            },
+            "errors": {
+                "product_not_found": "No such product in this club: another club's label or a deleted product.",
+                "unrecognized": "Code not recognised: not a member code, a label or a barcode.",
+                "forbidden": "You can't open a member by their code.",
+                "failed": "Couldn't check the code. Try again."
+            },
+            "unknownMember": "Member",
+            "actions": {
+                "newOrder": "New order",
+                "openMember": "Member card",
+                "writeOff": "Write off",
+                "openProduct": "Product card"
+            },
+            "stock": "{quantity} {unit} in stock",
+            "consumable": "Consumable",
+            "notForSale": "Not for sale right now: withdrawn or out of stock.",
+            "scanAnother": "Scan another"
+        },
+        "productLabels": {
+            "button": "Label",
+            "print": "Print",
+            "formats": {
+                "a4": "A4, 3 × 8 (70 × 37 mm)",
+                "tape": "58 mm tape"
+            },
+            "copies": "Copies of each",
+            "total": "{count, plural, one {# label} other {# labels}}",
+            "empty": "No products to print."
         }
     }
 }

@@ -25,6 +25,13 @@ export class MeasurementUnitDto {
     @ApiProperty({ example: false, type: Boolean, description: "Кастомная единица измерения" })
     isCustom: boolean;
 
+    @ApiProperty({
+        example: true,
+        type: Boolean,
+        description: "Весовая: при скане товара количество вводят (граммы), а не ставят 1",
+    })
+    isWeighed: boolean;
+
     @ApiProperty({ example: true, type: Boolean, description: "Активна ли единица" })
     isActive: boolean;
 
@@ -59,6 +66,16 @@ export class CreateMeasurementUnitDto {
     @IsOptional()
     @IsBoolean()
     isCustom?: boolean;
+
+    @ApiPropertyOptional({
+        example: false,
+        type: Boolean,
+        default: false,
+        description: "Весовая: при скане товара количество вводят (граммы), а не ставят 1",
+    })
+    @IsOptional()
+    @IsBoolean()
+    isWeighed?: boolean;
 }
 
 // ─── Update DTO ──────────────────────────────────────────────────────────────
@@ -85,6 +102,15 @@ export class UpdateMeasurementUnitDto {
     @IsOptional()
     @IsBoolean()
     isCustom?: boolean;
+
+    @ApiPropertyOptional({
+        example: false,
+        type: Boolean,
+        description: "Весовая: при скане товара количество вводят (граммы), а не ставят 1",
+    })
+    @IsOptional()
+    @IsBoolean()
+    isWeighed?: boolean;
 
     @ApiPropertyOptional({ example: true, type: Boolean })
     @IsOptional()

@@ -9,6 +9,7 @@ import { AppModule } from "../src/app.module";
 import { PublicUrlsService } from "../src/common/config/public-urls/public-urls.service";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { SessionsService } from "../src/modules/portal/auth/sessions/application/sessions.service";
+import { newProductCode } from "../src/modules/portal/crm/catalog/domain/product-code";
 
 import { cabinetSession, crmSession, type TestSession } from "./support/sessions";
 
@@ -223,6 +224,7 @@ describe("Realtime gateway (e2e)", () => {
                     entityRecordId: productRecord.id,
                     categoryId: category.id,
                     measurementUnitId: unit.id,
+                    code: newProductCode(),
                     name: `Realtime product ${suffix}`,
                     price: 10,
                     initialQuantity: 50,

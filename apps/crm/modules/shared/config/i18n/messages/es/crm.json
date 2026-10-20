@@ -398,7 +398,11 @@
                 "active": "Activo",
                 "inactive": "Inactivo",
                 "page": "Pág.",
-                "confirmDelete": "¿Estás seguro de que quieres eliminar este producto?"
+                "confirmDelete": "¿Estás seguro de que quieres eliminar este producto?",
+                "colSelect": "Seleccionar",
+                "select": "Seleccionar «{name}»",
+                "printLabels": "Etiquetas ({count})",
+                "clearSelection": "Quitar selección"
             },
             "form": {
                 "createButton": "Añadir producto",
@@ -421,7 +425,11 @@
                 "create": "Crear producto",
                 "createError": "No se pudo crear el producto",
                 "limitGramsPerUnit": "Gramos de límite por unidad",
-                "limitGramsPerUnitHint": "Vacío: el producto no cuenta para el límite del socio."
+                "limitGramsPerUnitHint": "Vacío: el producto no cuenta para el límite del socio.",
+                "barcode": "Código de barras",
+                "barcodeHint": "EAN/UPC del envase: el escáner encuentra el producto sin tu etiqueta",
+                "isConsumable": "Consumible",
+                "isConsumableHint": "No se vende: al escanearlo se propone darlo de baja (guantes, bolsas, tinta)"
             },
             "detail": {
                 "loading": "Cargando...",
@@ -452,7 +460,13 @@
                 "limitGramsPerUnit": "Cuenta por unidad",
                 "notInLimit": "No cuenta",
                 "stockNote": "Motivo del cambio de stock",
-                "stockNoteHint": "La diferencia va al diario de almacén como recuento"
+                "stockNoteHint": "La diferencia va al diario de almacén como recuento",
+                "code": "Código de etiqueta",
+                "barcode": "Código de barras",
+                "barcodeHint": "EAN/UPC del envase: el escáner encuentra el producto sin tu etiqueta",
+                "kind": "Tipo",
+                "consumable": "Consumible: no se vende, se da de baja",
+                "isConsumable": "Consumible"
             },
             "audiences": {
                 "label": "Visible en el área de socio para",
@@ -638,7 +652,22 @@
                 "submit": "Crear pedido",
                 "submitting": "Creando…",
                 "cancel": "Cancelar",
-                "created": "Pedido {number} creado"
+                "created": "Pedido {number} creado",
+                "scan": {
+                    "label": "Código o código de barras",
+                    "placeholder": "Lector de teclado o código a mano, luego Enter",
+                    "camera": "Cámara",
+                    "added": "Añadido: {name}",
+                    "memberPicked": "Socio elegido: {name}",
+                    "memberInactive": "{name} está desactivado en el club.",
+                    "refused": {
+                        "consumable": "{name} es un consumible: se da de baja, no se vende.",
+                        "unavailable": "{name} está retirado de la venta.",
+                        "out_of_stock": "{name} está agotado."
+                    },
+                    "notForOrder": "Este código no sirve para un pedido.",
+                    "failed": "No se pudo comprobar el código."
+                }
             }
         },
         "finance": {
@@ -1285,7 +1314,9 @@
                     "fields": {
                         "name": "Nombre de unidad",
                         "code": "Código de unidad",
-                        "codePlaceholder": "ej.: G, PCS, ML"
+                        "codePlaceholder": "ej.: G, PCS, ML",
+                        "weighed": "A peso",
+                        "weighedHint": "Gramos, kilos: al escanear el producto se pide la cantidad en vez de 1"
                     },
                     "create": "Crear unidad",
                     "creating": "Creando...",
@@ -1298,10 +1329,12 @@
                     "columns": {
                         "name": "Nombre",
                         "code": "Código",
-                        "kind": "Tipo"
+                        "kind": "Tipo",
+                        "weighed": "A peso"
                     },
                     "custom": "Propia",
-                    "builtIn": "Predefinida"
+                    "builtIn": "Predefinida",
+                    "weighed": "Sí"
                 },
                 "links": {
                     "billing": {
@@ -1761,7 +1794,9 @@
             "openPage": "Abrir como página",
             "copyLink": "Copiar enlace",
             "copied": "Enlace copiado",
-            "employee": "Empleado"
+            "employee": "Empleado",
+            "product": "Producto",
+            "newOrder": "Nuevo pedido"
         },
         "clubPolicy": {
             "title": "Normas del club",
@@ -2436,6 +2471,43 @@
             "searching": "Buscando…",
             "empty": "No hay nada",
             "inStock": "En stock: {quantity} {unit}"
+        },
+        "scanner": {
+            "title": "Escáner",
+            "description": "Código de socio, etiqueta de producto o código de barras — con la cámara o a mano",
+            "manualPlaceholder": "Código de socio, código P- de la etiqueta o código de barras",
+            "titles": {
+                "member": "Socio",
+                "product": "Producto"
+            },
+            "errors": {
+                "product_not_found": "Este producto no es de este club: etiqueta de otro club o producto eliminado.",
+                "unrecognized": "Código no reconocido: no es de socio, ni etiqueta, ni código de barras.",
+                "forbidden": "No tienes permiso para abrir un socio por su código.",
+                "failed": "No se pudo comprobar el código. Inténtalo de nuevo."
+            },
+            "unknownMember": "Socio",
+            "actions": {
+                "newOrder": "Nuevo pedido",
+                "openMember": "Ficha del socio",
+                "writeOff": "Dar de baja",
+                "openProduct": "Ficha del producto"
+            },
+            "stock": "{quantity} {unit} en stock",
+            "consumable": "Consumible",
+            "notForSale": "Ahora no se vende: retirado o agotado.",
+            "scanAnother": "Escanear otro"
+        },
+        "productLabels": {
+            "button": "Etiqueta",
+            "print": "Imprimir",
+            "formats": {
+                "a4": "A4, 3 × 8 (70 × 37 mm)",
+                "tape": "Rollo de 58 mm"
+            },
+            "copies": "Copias de cada uno",
+            "total": "{count, plural, one {# etiqueta} other {# etiquetas}}",
+            "empty": "No hay productos para imprimir."
         }
     }
 }

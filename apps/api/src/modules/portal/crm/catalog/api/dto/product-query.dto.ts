@@ -25,9 +25,18 @@ export class ProductFilterDto {
     isAvailable?: boolean;
 
     @ApiPropertyOptional({
+        example: false,
+        type: Boolean,
+        description: "false — без расходников (подбор товара в заказ)",
+    })
+    @IsOptional()
+    @IsQueryBoolean()
+    isConsumable?: boolean;
+
+    @ApiPropertyOptional({
         example: "Producto A",
         type: String,
-        description: "Поиск по name, sku, strain",
+        description: "Поиск по name, sku, strain, коду этикетки и штрихкоду",
     })
     @IsOptional()
     @IsString()

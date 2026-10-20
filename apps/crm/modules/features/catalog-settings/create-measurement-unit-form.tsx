@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { toast } from "sonner";
 
-import { Button, FieldInput } from "@workspace/ui";
+import { Button, FieldInput, Switch } from "@workspace/ui";
 
 import { useCreateMeasurementUnit } from "@/modules/entities/measurement-unit";
 
@@ -27,6 +27,7 @@ export function CreateMeasurementUnitForm({ onCreated }: { onCreated: () => void
     const create = useCreateMeasurementUnit();
     const [name, setName] = useState("");
     const [code, setCode] = useState("");
+    const [isWeighed, setIsWeighed] = useState(false);
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -37,6 +38,7 @@ export function CreateMeasurementUnitForm({ onCreated }: { onCreated: () => void
                 name: trimmed,
                 code: (code.trim() || toUnitCode(trimmed)).slice(0, UNIT_CODE_MAX_LENGTH),
                 isCustom: true,
+                isWeighed,
             },
             {
                 onSuccess: () => {
@@ -61,6 +63,13 @@ export function CreateMeasurementUnitForm({ onCreated }: { onCreated: () => void
                 value={code}
                 onChange={(event) => setCode(event.target.value)}
             />
+            <label className="flex items-start justify-between gap-3 text-sm">
+                <span className="space-y-0.5">
+                    <span className="block font-medium">{t("fields.weighed")}</span>
+                    <span className="block text-muted-foreground">{t("fields.weighedHint")}</span>
+                </span>
+                <Switch checked={isWeighed} onCheckedChange={setIsWeighed} />
+            </label>
             {create.isError ? (
                 <p role="alert" className="text-sm text-destructive">
                     {t("createError")}

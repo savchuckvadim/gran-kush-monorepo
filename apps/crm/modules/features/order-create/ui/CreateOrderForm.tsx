@@ -17,6 +17,7 @@ import { useCreateOrder, useOrderFunnels } from "@/modules/entities/order";
 import { ROUTES, useLocalizedLink, useMoneyFormat } from "@/modules/shared";
 
 import {
+    addScannedLine,
     draftLineError,
     type DraftMember,
     draftTotal,
@@ -27,15 +28,34 @@ import {
 } from "../model/order-draft";
 
 import { OrderDraftLineRow } from "./OrderDraftLineRow";
+import { OrderScanBar } from "./OrderScanBar";
 import { OrderStageSelect } from "./OrderStageSelect";
 import { ProductPicker } from "./ProductPicker";
+import { useDraftScan } from "./use-draft-scan";
+import { usePrefilledLines } from "./use-prefilled-lines";
+
+interface CreateOrderFormProps {
+    /** The member from the address (the member card, a scanned member QR) */
+    initialMemberId?: string;
+    /** The first line (the product card, a scanned label) */
+    initialProductId?: string;
+    /** In a slider: the created order takes the panel instead of a page change */
+    onCreated?: (order: { id: string }) => void;
+    onCancel?: () => void;
+}
 
 /**
  * A new order placed by an employee for a member: products from the catalog, own price and
- * gifts per line; managers also pick the stage. After saving, the order card opens — payment
- * and further stages are changed there.
+ * gifts per line; managers also pick the stage. A scanned member QR picks the member, a label or
+ * a barcode adds the product. After saving, the order card opens — payment and further stages are
+ * changed there.
  */
-export function CreateOrderForm({ initialMemberId }: { initialMemberId?: string }) {
+export function CreateOrderForm({
+    initialMemberId,
+    initialProductId,
+    onCreated,
+    onCancel,
+}: CreateOrderFormProps) {
     const t = useTranslations("crm.orders.create");
     const router = useRouter();
     const localizedLink = useLocalizedLink();
@@ -50,7 +70,16 @@ export function CreateOrderForm({ initialMemberId }: { initialMemberId?: string 
     const prefill = useMemberDetails(picked === undefined ? (initialMemberId ?? "") : "");
     const member = picked ?? (prefill.data ? toMemberChoice(prefill.data) : null);
 
-    const [lines, setLines] = useState<OrderDraftLine[]>([]);
+    // null — not touched yet: the product from the address (the product card, the scanner) is used
+    const prefilled = usePrefilledLines(initialProductId);
+    const [touched, setTouched] = useState<OrderDraftLine[] | null>(null);
+    const lines = touched ?? prefilled;
+    const setLines = (update: (prev: OrderDraftLine[]) => OrderDraftLine[]) =>
+        setTouched((prev) => update(prev ?? prefilled));
+    const scanHandlers = useDraftScan({
+        onMember: setPicked,
+        onProduct: (product) => setLines((prev) => addScannedLine(prev, product)),
+    });
     const [notes, setNotes] = useState("");
     const [stageId, setStageId] = useState<string>();
     const [submitted, setSubmitted] = useState(false);
@@ -86,7 +115,8 @@ export function CreateOrderForm({ initialMemberId }: { initialMemberId?: string 
             {
                 onSuccess: (order) => {
                     toast.success(t("created", { number: order.orderNumber }));
-                    router.push(localizedLink(`${ROUTES.CRM_ORDER_DETAILS}/${order.id}`));
+                    if (onCreated) onCreated(order);
+                    else router.push(localizedLink(`${ROUTES.CRM_ORDER_DETAILS}/${order.id}`));
                 },
             }
         );
@@ -126,6 +156,8 @@ export function CreateOrderForm({ initialMemberId }: { initialMemberId?: string 
                         onPick={(product) => setLines((prev) => [...prev, newDraftLine(product)])}
                     />
                 </div>
+
+                <OrderScanBar handlers={scanHandlers} disabled={busy} />
 
                 {lines.length > 0 ? (
                     <ul className="space-y-2">
@@ -187,9 +219,15 @@ export function CreateOrderForm({ initialMemberId }: { initialMemberId?: string 
                 <Button type="submit" disabled={busy}>
                     {busy ? t("submitting") : t("submit")}
                 </Button>
-                <Button variant="ghost" asChild>
-                    <Link href={localizedLink(ROUTES.CRM_ORDERS)}>{t("cancel")}</Link>
-                </Button>
+                {onCancel ? (
+                    <Button type="button" variant="ghost" onClick={onCancel}>
+                        {t("cancel")}
+                    </Button>
+                ) : (
+                    <Button variant="ghost" asChild>
+                        <Link href={localizedLink(ROUTES.CRM_ORDERS)}>{t("cancel")}</Link>
+                    </Button>
+                )}
             </div>
         </form>
     );

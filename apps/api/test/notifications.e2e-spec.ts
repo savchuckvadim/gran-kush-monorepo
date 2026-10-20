@@ -7,6 +7,7 @@ import request from "supertest";
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { OrderNotificationsConsumer } from "../src/modules/notifications/application/order-notifications.consumer";
+import { newProductCode } from "../src/modules/portal/crm/catalog/domain/product-code";
 
 import { cabinetSession, crmSession } from "./support/sessions";
 
@@ -166,6 +167,7 @@ describe("Notifications (e2e)", () => {
                     entityRecordId: (await record(clubA.portalId, "product")).id,
                     categoryId: category.id,
                     measurementUnitId: unit.id,
+                    code: newProductCode(),
                     name: `Notify ${suffix}`,
                     price: 5,
                     initialQuantity: 50,

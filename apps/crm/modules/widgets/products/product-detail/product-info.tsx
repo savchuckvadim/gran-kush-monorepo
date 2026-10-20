@@ -31,6 +31,9 @@ export function ProductInfo({ product }: { product: SchemaProductDetailDto }) {
                     value={`${product.currentQuantity} / ${product.initialQuantity} ${product.measurementUnit?.code ?? ""}`}
                 />
                 <InfoRow label={t("sku")} value={product.sku ?? "—"} />
+                <InfoRow label={t("code")} value={product.code} />
+                <InfoRow label={t("barcode")} value={product.barcode ?? "—"} />
+                {product.isConsumable && <InfoRow label={t("kind")} value={t("consumable")} />}
                 <InfoRow
                     label={t("status")}
                     value={product.isActive ? t("active") : t("inactive")}

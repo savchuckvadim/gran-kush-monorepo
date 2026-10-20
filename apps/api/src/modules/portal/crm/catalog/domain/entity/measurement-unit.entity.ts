@@ -7,6 +7,8 @@ export class MeasurementUnit {
     name: string;
     description?: string | null;
     isCustom: boolean;
+    /** Весовая: при скане товара количество вводят, а не ставят 1 */
+    isWeighed: boolean;
     isActive: boolean;
     createdAt: Date;
     updatedAt: Date;

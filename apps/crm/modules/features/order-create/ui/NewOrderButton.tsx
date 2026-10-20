@@ -1,15 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 import { Plus } from "lucide-react";
 
 import { Button } from "@workspace/ui";
 
-import { ROUTES, useLocalizedLink } from "@/modules/shared";
+import { newOrderRef } from "@/modules/shared/lib/entity-slider";
+import { EntityLink } from "@/modules/shared/ui/EntityLink";
 
-/** Opens the new order form; with `memberId` the member is already chosen. */
+/**
+ * Opens the new order form — in a slider over the page on a wide screen, as its page on a phone;
+ * with `memberId` the member is already chosen.
+ */
 export function NewOrderButton({
     memberId,
     size = "default",
@@ -20,15 +23,14 @@ export function NewOrderButton({
     variant?: "default" | "outline";
 }) {
     const t = useTranslations("crm.orders.create");
-    const localizedLink = useLocalizedLink();
-    const query = memberId ? `?memberId=${encodeURIComponent(memberId)}` : "";
+    const ref = newOrderRef({ memberId });
 
     return (
         <Button asChild size={size} variant={variant}>
-            <Link href={localizedLink(`${ROUTES.CRM_ORDER_NEW}${query}`)}>
+            <EntityLink kind={ref.kind} id={ref.id}>
                 <Plus aria-hidden="true" />
                 {t("button")}
-            </Link>
+            </EntityLink>
         </Button>
     );
 }

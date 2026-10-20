@@ -14,8 +14,7 @@ import {
     useConfirmDoorScan,
     useQrPreview,
 } from "@/modules/entities/presence";
-
-import { normalizeScannedPayload } from "./normalize-scanned-payload";
+import { normalizeScannedPayload } from "@/modules/entities/scan";
 
 export type ScanStep = "scan" | "preview" | "result";
 

@@ -1,3 +1,5 @@
+import type { SchemaProductListDto } from "@workspace/api-client/core";
+
 import type { MemberChoice } from "@/modules/entities/member";
 import type { CreateOrderBody } from "@/modules/entities/order";
 
@@ -9,7 +11,20 @@ export interface DraftProduct {
     price: number;
     currentQuantity: number;
     unitCode?: string;
+    /** Весовой (граммы): при скане количество вводят, а не ставят 1 */
+    isWeighed?: boolean;
 }
+
+/** A product as the catalog or the scanner returns it. */
+export const toDraftProduct = (product: SchemaProductListDto): DraftProduct => ({
+    id: product.id,
+    name: product.name,
+    sku: product.sku,
+    price: product.price,
+    currentQuantity: product.currentQuantity,
+    unitCode: product.measurementUnit?.code || undefined,
+    isWeighed: product.measurementUnit?.isWeighed ?? false,
+});
 
 /** A line being typed: numbers stay strings so that "", "0," or "1.5" can be edited freely. */
 export interface OrderDraftLine {
@@ -18,6 +33,8 @@ export interface OrderDraftLine {
     quantity: string;
     unitPrice: string;
     isGift: boolean;
+    /** Added by a scan of a weighed product: the cursor goes to the quantity */
+    focusQuantity?: boolean;
 }
 
 /** The member the order is placed for. */
@@ -47,6 +64,35 @@ export const newDraftLine = (product: DraftProduct): OrderDraftLine => ({
     unitPrice: String(product.price),
     isGift: false,
 });
+
+/** Why a scanned product cannot go into the order; `undefined` — it can. */
+export type ScanRefusal = "consumable" | "unavailable" | "out_of_stock";
+
+export const scanRefusal = (product: SchemaProductListDto): ScanRefusal | undefined => {
+    if (product.isConsumable) return "consumable";
+    if (!product.isActive || !product.isAvailable) return "unavailable";
+    if (product.currentQuantity <= 0) return "out_of_stock";
+    return undefined;
+};
+
+/**
+ * A scan adds the product: a piece product already in the order gets one more (the same label
+ * scanned twice is two pieces); a weighed one gets its own line with the quantity left to type.
+ */
+export const addScannedLine = (
+    lines: readonly OrderDraftLine[],
+    product: DraftProduct
+): OrderDraftLine[] => {
+    const same = product.isWeighed
+        ? undefined
+        : lines.find((line) => line.product.id === product.id && !line.isGift);
+    if (same) {
+        const quantity = String((lineQuantity(same) || 0) + 1);
+        return lines.map((line) => (line === same ? { ...line, quantity } : line));
+    }
+    const line = newDraftLine(product);
+    return [...lines, product.isWeighed ? { ...line, quantity: "", focusQuantity: true } : line];
+};
 
 export const lineQuantity = (line: OrderDraftLine): number => parse(line.quantity);
 

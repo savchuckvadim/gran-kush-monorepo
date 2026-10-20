@@ -8,7 +8,7 @@ import { Badge } from "@workspace/ui";
 
 import { usePermissions } from "@/modules/entities/access";
 import { useMeasurementUnits } from "@/modules/entities/measurement-unit";
-import { CreateMeasurementUnitForm } from "@/modules/features/catalog-settings";
+import { CreateMeasurementUnitForm, UnitWeighedSwitch } from "@/modules/features/catalog-settings";
 import { EntityList, type EntityListTableColumn } from "@/modules/shared/ui/EntityList";
 import { ListPage } from "@/modules/shared/ui/ListPage";
 
@@ -45,6 +45,12 @@ export function MeasurementUnitManagementWidget() {
                 </Badge>
             ),
         },
+        {
+            key: "weighed",
+            header: t("columns.weighed"),
+            cell: (unit) =>
+                canManage ? <UnitWeighedSwitch unit={unit} /> : unit.isWeighed ? t("weighed") : "—",
+        },
     ];
 
     return (
@@ -77,7 +83,7 @@ export function MeasurementUnitManagementWidget() {
                 enableVisibilitySettings={false}
                 reserveFilterSpace={false}
                 cardTitle={(unit) => unit.name}
-                defaultVisibleCardFieldKeys={["code", "kind"]}
+                defaultVisibleCardFieldKeys={["code", "kind", "weighed"]}
             />
         </ListPage>
     );

@@ -21,7 +21,7 @@ import { useProducts } from "@/modules/entities/product";
 import { useDebouncedValue, useMoneyFormat } from "@/modules/shared";
 import { PICKER_COMMAND_CLASS } from "@/modules/shared/ui/picker-command-class";
 
-import type { DraftProduct } from "../model/order-draft";
+import { type DraftProduct, toDraftProduct } from "../model/order-draft";
 
 import { PICKER_DEBOUNCE_MS } from "./picker-command";
 
@@ -41,7 +41,7 @@ export function ProductPicker({
     const [query, setQuery] = useState("");
     const search = useDebouncedValue(query.trim(), PICKER_DEBOUNCE_MS);
     const products = useProducts(
-        { search: search || undefined, isActive: true, limit: RESULTS },
+        { search: search || undefined, isActive: true, isConsumable: false, limit: RESULTS },
         { enabled: open, keepPrevious: true }
     );
     const items = products.data?.items ?? [];
@@ -85,14 +85,7 @@ export function ProductPicker({
                                     value={product.id}
                                     disabled={!inStock}
                                     onSelect={() => {
-                                        onPick({
-                                            id: product.id,
-                                            name: product.name,
-                                            sku: product.sku,
-                                            price: product.price,
-                                            currentQuantity: product.currentQuantity,
-                                            unitCode: unit || undefined,
-                                        });
+                                        onPick(toDraftProduct(product));
                                         setOpen(false);
                                         setQuery("");
                                     }}

@@ -20,6 +20,8 @@ interface ScanInputStepProps {
     cameraKey: number;
     /** Код из адреса (`/scan?code=…`): сразу во вкладке ручного ввода */
     initialCode?: string;
+    /** Подсказка поля: у стойки — код участника, у общего сканера — любой код */
+    manualPlaceholder?: string;
 }
 
 const TAB_CLASS =
@@ -32,6 +34,7 @@ export function ScanInputStep({
     error,
     cameraKey,
     initialCode,
+    manualPlaceholder,
 }: ScanInputStepProps) {
     const t = useTranslations("crm.attendance.scanner");
     const [tab, setTab] = useState<ScanTab>(initialCode ? "manual" : "camera");
@@ -79,7 +82,15 @@ export function ScanInputStep({
                         <textarea
                             value={manualCode}
                             onChange={(event) => setManualCode(event.target.value)}
-                            placeholder={t("manualPlaceholder")}
+                            onKeyDown={(event) => {
+                                // сканер-клавиатура заканчивает код Enter: проверить его и освободить поле под следующий
+                                if (event.key !== "Enter" || event.shiftKey) return;
+                                event.preventDefault();
+                                if (!manualCode.trim() || reading) return;
+                                onRead(manualCode);
+                                setManualCode("");
+                            }}
+                            placeholder={manualPlaceholder ?? t("manualPlaceholder")}
                             className="min-h-[80px] w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                             disabled={reading}
                         />

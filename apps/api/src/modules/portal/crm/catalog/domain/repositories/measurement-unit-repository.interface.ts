@@ -17,6 +17,7 @@ export abstract class MeasurementUnitRepository {
             name: string;
             description?: string;
             isCustom?: boolean;
+            isWeighed?: boolean;
         }
     ): Promise<MeasurementUnit>;
     /** Возвращает `null`, если единицы с таким id в этом портале нет. */
@@ -28,6 +29,7 @@ export abstract class MeasurementUnitRepository {
             name: string;
             description: string | null;
             isCustom: boolean;
+            isWeighed: boolean;
             isActive: boolean;
         }>
     ): Promise<MeasurementUnit | null>;

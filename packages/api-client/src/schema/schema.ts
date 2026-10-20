@@ -3625,6 +3625,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/crm/scan/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Что прочитал сканер: участник, товар клуба или неизвестный код
+         * @description Этикетка `P-<код>` и штрихкод ищутся только в клубе запроса. Код входа участника возвращает предпросмотр стойки и требует presence.checkin, orders.create или members.read. Ничего не записывает.
+         */
+        post: operations["CrmScan_resolve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/crm/settings/registration-links": {
         parameters: {
             query?: never;
@@ -6020,6 +6040,11 @@ export interface components {
              */
             isCustom: boolean;
             /**
+             * @description Весовая: при скане товара количество вводят (граммы), а не ставят 1
+             * @example true
+             */
+            isWeighed: boolean;
+            /**
              * @description Активна ли единица
              * @example true
              */
@@ -6041,6 +6066,18 @@ export interface components {
             name: string;
             /** @example SKU-001 */
             sku?: string | null;
+            /**
+             * @description Код QR-этикетки: в QR — ссылка на сканер CRM с `P-<код>`
+             * @example K7M2Q9XA
+             */
+            code: string;
+            /** @example 8412345678905 */
+            barcode: string | null;
+            /**
+             * @description Расходник: не продаётся, списывается по скану
+             * @example false
+             */
+            isConsumable: boolean;
             /** @example 15.5 */
             price: number;
             /** @example 100 */
@@ -6113,6 +6150,18 @@ export interface components {
             name: string;
             /** @example SKU-001 */
             sku?: string | null;
+            /**
+             * @description Код QR-этикетки: в QR — ссылка на сканер CRM с `P-<код>`
+             * @example K7M2Q9XA
+             */
+            code: string;
+            /** @example 8412345678905 */
+            barcode: string | null;
+            /**
+             * @description Расходник: не продаётся, списывается по скану
+             * @example false
+             */
+            isConsumable: boolean;
             /** @example 15.5 */
             price: number;
             /** @example 100 */
@@ -6175,6 +6224,16 @@ export interface components {
             /** @example SKU-001 */
             sku?: string;
             /**
+             * @description Штрихкод упаковки (EAN/UPC); уникален в клубе
+             * @example 8412345678905
+             */
+            barcode?: string;
+            /**
+             * @description Расходник: не продаётся, списывается по скану
+             * @example false
+             */
+            isConsumable?: boolean;
+            /**
              * @description Цена за единицу
              * @example 15.5
              */
@@ -6223,6 +6282,16 @@ export interface components {
             description?: string | null;
             /** @example SKU-001 */
             sku?: string | null;
+            /**
+             * @description Штрихкод упаковки (EAN/UPC); уникален в клубе, null — убрать
+             * @example 8412345678905
+             */
+            barcode?: string | null;
+            /**
+             * @description Расходник: не продаётся, списывается по скану
+             * @example false
+             */
+            isConsumable?: boolean;
             /** @example 15.5 */
             price?: number;
             /** @example 1000 */
@@ -6344,6 +6413,12 @@ export interface components {
              * @example false
              */
             isCustom: boolean;
+            /**
+             * @description Весовая: при скане товара количество вводят (граммы), а не ставят 1
+             * @default false
+             * @example false
+             */
+            isWeighed: boolean;
         };
         UpdateMeasurementUnitDto: {
             /** @example g */
@@ -6354,6 +6429,11 @@ export interface components {
             description?: string | null;
             /** @example false */
             isCustom?: boolean;
+            /**
+             * @description Весовая: при скане товара количество вводят (граммы), а не ставят 1
+             * @example false
+             */
+            isWeighed?: boolean;
             /** @example true */
             isActive?: boolean;
         };
@@ -7869,6 +7949,29 @@ export interface components {
             /** @description Самые прибыльные сверху, убыточные снизу */
             byProduct: components["schemas"]["MarginRowDto"][];
         };
+        ResolveScanDto: {
+            /**
+             * @description Прочитанный код: `P-<код>` этикетки, код входа участника или штрихкод
+             * @example P-K7M2Q9XA
+             */
+            code: string;
+        };
+        /** @enum {string} */
+        ScanKind: "member" | "product" | "unknown";
+        /**
+         * @description product_not_found — код товара не из этого клуба; unrecognized — не код
+         * @enum {string}
+         */
+        ScanUnknownReason: "product_not_found" | "unrecognized";
+        ScanResolutionDto: {
+            kind: components["schemas"]["ScanKind"];
+            /** @description Код входа участника: предпросмотр стойки (без записи присутствия) */
+            member?: components["schemas"]["QrPreviewResultDto"];
+            /** @description Товар клуба по коду этикетки или штрихкоду */
+            product?: components["schemas"]["ProductListDto"];
+            /** @description product_not_found — код товара не из этого клуба; unrecognized — не код */
+            reason?: components["schemas"]["ScanUnknownReason"];
+        };
         RegistrationLinkPrefillDto: {
             /** @example socio@example.com */
             email?: string;
@@ -8567,6 +8670,10 @@ export type SchemaManualStockMoveReason = components['schemas']['ManualStockMove
 export type SchemaManualStockMoveDto = components['schemas']['ManualStockMoveDto'];
 export type SchemaMarginRowDto = components['schemas']['MarginRowDto'];
 export type SchemaMarginReportDto = components['schemas']['MarginReportDto'];
+export type SchemaResolveScanDto = components['schemas']['ResolveScanDto'];
+export type SchemaScanKind = components['schemas']['ScanKind'];
+export type SchemaScanUnknownReason = components['schemas']['ScanUnknownReason'];
+export type SchemaScanResolutionDto = components['schemas']['ScanResolutionDto'];
 export type SchemaRegistrationLinkPrefillDto = components['schemas']['RegistrationLinkPrefillDto'];
 export type SchemaCreateRegistrationLinkDto = components['schemas']['CreateRegistrationLinkDto'];
 export type SchemaRegistrationLinkCreatedByDto = components['schemas']['RegistrationLinkCreatedByDto'];
@@ -15837,7 +15944,9 @@ export interface operations {
                 categoryId?: string;
                 isActive?: boolean;
                 isAvailable?: boolean;
-                /** @description Поиск по name, sku, strain */
+                /** @description false — без расходников (подбор товара в заказ) */
+                isConsumable?: boolean;
+                /** @description Поиск по name, sku, strain, коду этикетки и штрихкоду */
                 search?: string;
                 /** @description Минимальная цена */
                 minPrice?: number;
@@ -20395,6 +20504,57 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MarginReportDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmScan_resolve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveScanDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScanResolutionDto"];
                 };
             };
             /** @description Bad Request */

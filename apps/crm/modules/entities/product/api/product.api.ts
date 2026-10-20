@@ -14,6 +14,8 @@ import { $api } from "@/modules/shared";
 export interface ProductsFilter {
     categoryId?: string;
     isActive?: boolean;
+    /** false — без расходников: их не продают */
+    isConsumable?: boolean;
     search?: string;
     page?: number;
     limit?: number;
@@ -30,6 +32,7 @@ export async function getProducts(
             query: {
                 categoryId: filters?.categoryId,
                 isActive: filters?.isActive,
+                isConsumable: filters?.isConsumable,
                 search: filters?.search,
                 page: filters?.page ?? 1,
                 limit: filters?.limit ?? 20,

@@ -6,6 +6,8 @@ import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
+import { newProductCode } from "../src/modules/portal/crm/catalog/domain/product-code";
+
 import { enablePortalModule } from "./support/portal-modules";
 
 jest.setTimeout(120_000);
@@ -508,6 +510,7 @@ describe("Cross-portal isolation (e2e)", () => {
                     entityRecordId: record.id,
                     categoryId: category.id,
                     measurementUnitId: unit.id,
+                    code: newProductCode(),
                     name: `Isolation Product ${suffix}`,
                     price: 10,
                     initialQuantity: 100,

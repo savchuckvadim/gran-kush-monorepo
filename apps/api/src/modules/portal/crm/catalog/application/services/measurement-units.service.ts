@@ -26,6 +26,7 @@ export class MeasurementUnitsService {
             name: string;
             description?: string;
             isCustom?: boolean;
+            isWeighed?: boolean;
         }
     ): Promise<MeasurementUnit> {
         // Код уникален внутри портала: занятый соседним клубом код больше не мешает.
@@ -44,6 +45,7 @@ export class MeasurementUnitsService {
             name: string;
             description: string | null;
             isCustom: boolean;
+            isWeighed: boolean;
             isActive: boolean;
         }>
     ): Promise<MeasurementUnit> {

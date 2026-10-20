@@ -1,34 +1,56 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { Edit2, Package, Trash2 } from "lucide-react";
+import { Edit2, Package, Trash2, X } from "lucide-react";
 
 import type { SchemaProductListDto } from "@workspace/api-client/core";
 import { Button, Card } from "@workspace/ui";
 
 import { useDeleteProduct, useProducts } from "@/modules/entities/product";
+import { LABEL_LIMITS, ProductLabelsButton } from "@/modules/features/product-labels";
 import { EntityList, type EntityListTableColumn } from "@/modules/shared";
-import { ROUTES } from "@/modules/shared/config/routes";
-import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
+import { useOpenEntity } from "@/modules/shared/lib/entity-slider";
+import { EntityLink } from "@/modules/shared/ui/EntityLink";
 
+/** Каталог: товары клуба; отмеченные галочкой печатаются листом QR-этикеток. */
 export function ProductsTable() {
     const t = useTranslations("crm.products.list");
-    const router = useRouter();
-    const toAppPath = useLocalizedLink();
+    const openEntity = useOpenEntity();
     const [page, setPage] = useState(1);
+    const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
     const { data, isLoading, error } = useProducts({ page, limit: 20 });
     const deleteMutation = useDeleteProduct();
 
     const products = data?.items ?? [];
     const totalPages = data?.totalPages ?? 1;
 
-    const productPath = (id: string) => toAppPath(`${ROUTES.CRM_PRODUCT_DETAILS}/${id}`);
+    const openProduct = (id: string) => openEntity({ kind: "product", id });
+    const toggle = (id: string) =>
+        setSelected((prev) => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else if (next.size < LABEL_LIMITS.products) next.add(id);
+            return next;
+        });
 
     const tableColumns = [
+        {
+            key: "select",
+            header: <span className="sr-only">{t("colSelect")}</span>,
+            headClassName: "w-8",
+            cell: (product: SchemaProductListDto) => (
+                <input
+                    type="checkbox"
+                    className="size-4"
+                    checked={selected.has(product.id)}
+                    aria-label={t("select", { name: product.name })}
+                    onClick={(event) => event.stopPropagation()}
+                    onChange={() => toggle(product.id)}
+                />
+            ),
+        },
         {
             key: "product",
             header: t("colProduct"),
@@ -103,7 +125,19 @@ export function ProductsTable() {
     };
 
     return (
-        <Card className="p-4">
+        <Card className="space-y-3 p-4">
+            {selected.size > 0 && (
+                <div className="flex flex-wrap items-center gap-2">
+                    <ProductLabelsButton
+                        productIds={[...selected]}
+                        label={t("printLabels", { count: selected.size })}
+                    />
+                    <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>
+                        <X aria-hidden="true" />
+                        {t("clearSelection")}
+                    </Button>
+                </div>
+            )}
             <EntityList<SchemaProductListDto>
                 items={products}
                 loading={isLoading}
@@ -118,17 +152,17 @@ export function ProductsTable() {
                 viewModeStorageKey="crm-products-list"
                 reserveFilterSpace={false}
                 isRowClickable
-                onRowClick={(p) => router.push(productPath(p.id))}
-                cardTitle={(p) => tableColumns[0]?.cell(p)}
+                onRowClick={(p) => openProduct(p.id)}
+                cardTitle={(p) => tableColumns[1]?.cell(p)}
                 defaultVisibleCardFieldKeys={["category", "price", "stock", "status"]}
                 isCardClickable
-                onCardClick={(p) => router.push(productPath(p.id))}
+                onCardClick={(p) => openProduct(p.id)}
                 renderRowActions={(product) => (
                     <>
                         <Button variant="ghost" size="sm" asChild>
-                            <Link href={productPath(product.id)}>
+                            <EntityLink kind="product" id={product.id}>
                                 <Edit2 className="h-3.5 w-3.5" />
-                            </Link>
+                            </EntityLink>
                         </Button>
                         <Button
                             variant="ghost"

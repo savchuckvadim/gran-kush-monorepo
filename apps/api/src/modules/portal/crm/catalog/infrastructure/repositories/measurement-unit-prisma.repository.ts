@@ -41,6 +41,7 @@ export class MeasurementUnitPrismaRepository implements MeasurementUnitRepositor
             name: string;
             description?: string;
             isCustom?: boolean;
+            isWeighed?: boolean;
         }
     ): Promise<MeasurementUnit> {
         const unit = await this.prisma.measurementUnit.create({ data: { ...data, portalId } });
@@ -55,6 +56,7 @@ export class MeasurementUnitPrismaRepository implements MeasurementUnitRepositor
             name: string;
             description: string | null;
             isCustom: boolean;
+            isWeighed: boolean;
             isActive: boolean;
         }>
     ): Promise<MeasurementUnit | null> {
@@ -82,6 +84,7 @@ export class MeasurementUnitPrismaRepository implements MeasurementUnitRepositor
         name: string;
         description: string | null;
         isCustom: boolean;
+        isWeighed: boolean;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
@@ -92,6 +95,7 @@ export class MeasurementUnitPrismaRepository implements MeasurementUnitRepositor
             name: raw.name,
             description: raw.description,
             isCustom: raw.isCustom,
+            isWeighed: raw.isWeighed,
             isActive: raw.isActive,
             createdAt: raw.createdAt,
             updatedAt: raw.updatedAt,

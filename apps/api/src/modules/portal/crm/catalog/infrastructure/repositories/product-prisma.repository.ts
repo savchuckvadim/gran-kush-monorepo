@@ -5,12 +5,18 @@ import { Prisma, ProductAudience } from "@prisma/client";
 type Decimal = Prisma.Decimal;
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { isUniqueViolationOn } from "@common/prisma/unique-violation";
 import { DomainEventPublisher, type EventsOf, type NewDomainEvent } from "@modules/events";
 import { MeasurementUnit } from "@modules/portal/crm/catalog/domain/entity/measurement-unit.entity";
 import { Product } from "@modules/portal/crm/catalog/domain/entity/product.entity";
 import { ProductCategory } from "@modules/portal/crm/catalog/domain/entity/product-category.entity";
 import { ProductImage } from "@modules/portal/crm/catalog/domain/entity/product-image.entity";
 import {
+    newProductCode,
+    PRODUCT_CODE_ATTEMPTS,
+} from "@modules/portal/crm/catalog/domain/product-code";
+import {
+    type NewProductData,
     ProductFilters,
     ProductRepository,
 } from "@modules/portal/crm/catalog/domain/repositories/product-repository.interface";
@@ -43,6 +49,22 @@ export class ProductPrismaRepository implements ProductRepository {
         return raw ? this.mapToEntity(raw) : null;
     }
 
+    async findByCode(code: string, portalId: string): Promise<Product | null> {
+        const raw = await this.prisma.product.findFirst({
+            where: { code, portalId },
+            include: PRODUCT_INCLUDE,
+        });
+        return raw ? this.mapToEntity(raw) : null;
+    }
+
+    async findByBarcode(barcode: string, portalId: string): Promise<Product | null> {
+        const raw = await this.prisma.product.findFirst({
+            where: { barcode, portalId },
+            include: PRODUCT_INCLUDE,
+        });
+        return raw ? this.mapToEntity(raw) : null;
+    }
+
     async findAll(
         portalId: string,
         filters?: ProductFilters,
@@ -63,7 +85,13 @@ export class ProductPrismaRepository implements ProductRepository {
     }
 
     async findActive(portalId: string, audiences?: ProductAudience[]): Promise<Product[]> {
-        const where: Prisma.ProductWhereInput = { portalId, isActive: true, isAvailable: true };
+        // расходник не продаётся: в витрине его нет
+        const where: Prisma.ProductWhereInput = {
+            portalId,
+            isActive: true,
+            isAvailable: true,
+            isConsumable: false,
+        };
         if (audiences) {
             where.OR = [{ audiences: { isEmpty: true } }, { audiences: { hasSome: audiences } }];
         }
@@ -80,28 +108,25 @@ export class ProductPrismaRepository implements ProductRepository {
         return this.prisma.product.count({ where });
     }
 
-    async create(
-        data: {
-            portalId: string;
-            categoryId: string;
-            measurementUnitId: string;
-            name: string;
-            description?: string;
-            sku?: string;
-            price: Decimal;
-            initialQuantity: Decimal;
-            currentQuantity: Decimal;
-            minQuantity?: Decimal;
-            imageUrl?: string;
-            thc?: Decimal;
-            cbd?: Decimal;
-            strain?: string;
-            audiences?: ProductAudience[];
-            limitGramsPerUnit?: Decimal;
-            taxRateId?: string | null;
-            priceIncludesTax?: boolean | null;
-            createdBy?: string;
-        },
+    /**
+     * Код этикетки выпадает случайно; если он уже занят в клубе (уникальный индекс), берётся
+     * другой. Индекс штрихкода тоже содержит «code» в имени — его нарушение не повторяется.
+     */
+    async create(data: NewProductData, events?: EventsOf<Product>): Promise<Product> {
+        for (let attempt = 1; ; attempt++) {
+            try {
+                return await this.createWithCode(data, newProductCode(), events);
+            } catch (error) {
+                const codeTaken =
+                    isUniqueViolationOn(error, "code") && !isUniqueViolationOn(error, "barcode");
+                if (!codeTaken || attempt >= PRODUCT_CODE_ATTEMPTS) throw error;
+            }
+        }
+    }
+
+    private createWithCode(
+        data: NewProductData,
+        code: string,
         events?: EventsOf<Product>
     ): Promise<Product> {
         return this.prisma.$transaction(async (tx) => {
@@ -120,7 +145,7 @@ export class ProductPrismaRepository implements ProductRepository {
                 },
             });
             const raw = await tx.product.create({
-                data: { ...data, entityRecordId: record.id },
+                data: { ...data, code, entityRecordId: record.id },
                 include: PRODUCT_INCLUDE,
             });
             const product = this.mapToEntity(raw);
@@ -137,6 +162,8 @@ export class ProductPrismaRepository implements ProductRepository {
             name: string;
             description: string | null;
             sku: string | null;
+            barcode: string | null;
+            isConsumable: boolean;
             price: Decimal;
             initialQuantity: Decimal;
             currentQuantity: Decimal;
@@ -183,11 +210,14 @@ export class ProductPrismaRepository implements ProductRepository {
         if (filters.categoryId) where.categoryId = filters.categoryId;
         if (filters.isActive !== undefined) where.isActive = filters.isActive;
         if (filters.isAvailable !== undefined) where.isAvailable = filters.isAvailable;
+        if (filters.isConsumable !== undefined) where.isConsumable = filters.isConsumable;
 
         if (filters.search) {
             where.OR = [
                 { name: { contains: filters.search, mode: "insensitive" } },
                 { sku: { contains: filters.search, mode: "insensitive" } },
+                { code: { contains: filters.search, mode: "insensitive" } },
+                { barcode: { contains: filters.search } },
                 { strain: { contains: filters.search, mode: "insensitive" } },
             ];
         }
@@ -215,6 +245,9 @@ export class ProductPrismaRepository implements ProductRepository {
             name: raw.name,
             description: raw.description,
             sku: raw.sku,
+            code: raw.code,
+            barcode: raw.barcode,
+            isConsumable: raw.isConsumable,
             price: raw.price,
             initialQuantity: raw.initialQuantity,
             currentQuantity: raw.currentQuantity,

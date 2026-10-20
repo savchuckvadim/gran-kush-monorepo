@@ -36,6 +36,23 @@ export class ProductListDto {
     @ApiPropertyOptional({ example: "SKU-001", type: String, nullable: true })
     sku?: string | null;
 
+    @ApiProperty({
+        example: "K7M2Q9XA",
+        type: String,
+        description: "Код QR-этикетки: в QR — ссылка на сканер CRM с `P-<код>`",
+    })
+    code: string;
+
+    @ApiProperty({ example: "8412345678905", type: String, nullable: true })
+    barcode: string | null;
+
+    @ApiProperty({
+        example: false,
+        type: Boolean,
+        description: "Расходник: не продаётся, списывается по скану",
+    })
+    isConsumable: boolean;
+
     @ApiProperty({ example: 15.5, type: Number })
     price: number;
 

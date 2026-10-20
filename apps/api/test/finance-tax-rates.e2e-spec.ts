@@ -6,6 +6,7 @@ import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
+import { newProductCode } from "../src/modules/portal/crm/catalog/domain/product-code";
 
 import { cabinetSession, crmSession } from "./support/sessions";
 
@@ -108,6 +109,7 @@ describe("Finance tax rates (e2e)", () => {
                 entityRecordId: record.id,
                 categoryId: category.id,
                 measurementUnitId: unit.id,
+                code: newProductCode(),
                 name: `${name} ${suffix}`,
                 price,
                 initialQuantity: 100,

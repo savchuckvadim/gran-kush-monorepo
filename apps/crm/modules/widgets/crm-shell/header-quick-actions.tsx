@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { ScanQrCode, UserPlus } from "lucide-react";
@@ -10,27 +9,22 @@ import { Button } from "@workspace/ui";
 
 import { usePermissions } from "@/modules/entities/access";
 import { RegistrationLinksDialog, type RegistrationLinksTab } from "@/modules/features";
-import { ROUTES } from "@/modules/shared/config/routes";
-import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
+import { scannerStore } from "@/modules/shared/lib/scan";
+import { SCANNER_PERMISSIONS } from "@/modules/widgets/scanner";
 
 /**
- * The two things done at the door: hand someone a sign-up link (`members.invite`) and scan a
- * member's QR (`presence.checkin`). Each shows only to those whose role has the permission.
+ * The two things done at the door: hand someone a sign-up link (`members.invite`) and the scanner
+ * — a member's QR, a product label or a barcode, on any page (`SCANNER_PERMISSIONS`). Each shows
+ * only to those whose role has a permission for it.
  */
 export function HeaderQuickActions() {
     const t = useTranslations("crm.shell.quick");
-    const router = useRouter();
-    const localizedLink = useLocalizedLink();
     const [linksOpen, setLinksOpen] = useState(false);
     const [linksTab, setLinksTab] = useState<RegistrationLinksTab>("issue");
 
     const { can } = usePermissions();
     const canIssueLinks = can("members.invite");
-    const canScan = can("presence.checkin");
-
-    // a fresh value every time: the attendance page keys the scanner on it and opens it again
-    const openScanner = () =>
-        router.push(localizedLink(`${ROUTES.CRM_ATTENDANCE}?scanner=${Date.now()}`));
+    const canScan = SCANNER_PERMISSIONS.some((code) => can(code));
 
     return (
         <div className="flex items-center">
@@ -63,7 +57,7 @@ export function HeaderQuickActions() {
                     size="icon"
                     aria-label={t("scanner")}
                     title={t("scanner")}
-                    onClick={openScanner}
+                    onClick={() => scannerStore.open()}
                     className="rounded-full"
                 >
                     <ScanQrCode />

@@ -104,6 +104,13 @@ export function CreateProductDialog() {
                     onChange={(e) => handleChange("sku", e.target.value)}
                 />
 
+                <FieldInput
+                    label={t("barcode")}
+                    helperText={t("barcodeHint")}
+                    value={form.barcode ?? ""}
+                    onChange={(e) => handleChange("barcode", e.target.value)}
+                />
+
                 <FieldSelect
                     label={t("category")}
                     placeholder={t("selectCategory")}
@@ -202,6 +209,19 @@ export function CreateProductDialog() {
                     value={form.audiences ?? []}
                     onChange={(audiences) => setForm((prev) => ({ ...prev, audiences }))}
                 />
+
+                <label className="flex items-start gap-2 text-sm">
+                    <input
+                        type="checkbox"
+                        className="mt-0.5"
+                        checked={form.isConsumable ?? false}
+                        onChange={(e) => handleChange("isConsumable", e.target.checked)}
+                    />
+                    <span>
+                        <span className="block font-medium">{t("isConsumable")}</span>
+                        <span className="block text-muted-foreground">{t("isConsumableHint")}</span>
+                    </span>
+                </label>
 
                 {createMutation.isError && (
                     <p className="text-sm text-destructive">{t("createError")}</p>

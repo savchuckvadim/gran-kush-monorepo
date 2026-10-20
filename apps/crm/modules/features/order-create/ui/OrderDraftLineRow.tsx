@@ -74,6 +74,7 @@ export function OrderDraftLineRow({
                     value={line.quantity}
                     disabled={disabled}
                     error={quantityError}
+                    autoFocus={line.focusQuantity}
                     onChange={(event) => onChange({ quantity: event.target.value })}
                 />
                 <FieldInput

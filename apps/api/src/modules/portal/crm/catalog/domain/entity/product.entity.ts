@@ -19,6 +19,12 @@ export class Product {
     name: string;
     description?: string | null;
     sku?: string | null;
+    /** Код QR-этикетки (TASK-807): уникален в клубе, выдаётся при создании */
+    code: string;
+    /** Штрихкод с упаковки поставщика; уникален в клубе */
+    barcode?: string | null;
+    /** Расходник: скан со стойки предлагает списание, а не заказ */
+    isConsumable: boolean;
 
     // Цена и количество
     price: Decimal;

@@ -33,11 +33,9 @@ import {
     ProductCategoryTreeDto,
     UpdateProductCategoryDto,
 } from "@modules/portal/crm/catalog/api/dto/product-category.dto";
-import {
-    CreateProductDto,
-    UpdateProductDto,
-} from "@modules/portal/crm/catalog/api/dto/product-input.dto";
+import { CreateProductDto } from "@modules/portal/crm/catalog/api/dto/product-input.dto";
 import { ProductListQueryDto } from "@modules/portal/crm/catalog/api/dto/product-query.dto";
+import { UpdateProductDto } from "@modules/portal/crm/catalog/api/dto/product-update.dto";
 import {
     mapCategoryToDto,
     mapCategoryToTreeDto,

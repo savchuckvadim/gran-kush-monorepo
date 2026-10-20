@@ -25,6 +25,8 @@ export const ROUTES = {
     CRM_MEMBER_NEW: "/crm/member/new",
     /** Лист с QR участника для печати, вне оболочки CRM: `${ROUTES.PRINT_MEMBER_QR}/${memberId}` */
     PRINT_MEMBER_QR: "/print/member-qr",
+    /** Лист QR-этикеток товаров: `?ids=…&format=a4|tape` */
+    PRINT_PRODUCT_LABELS: "/print/product-labels",
     CRM_PRODUCT_BASE: "/crm/product",
     /** Список товаров */
     CRM_PRODUCTS: "/crm/product/list",

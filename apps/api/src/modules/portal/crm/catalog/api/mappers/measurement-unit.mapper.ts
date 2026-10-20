@@ -11,6 +11,7 @@ export function mapMeasurementUnitToDto(u: MeasurementUnit): MeasurementUnitDto 
         name: u.name,
         description: u.description,
         isCustom: u.isCustom,
+        isWeighed: u.isWeighed,
         isActive: u.isActive,
         createdAt: u.createdAt.toISOString(),
         updatedAt: u.updatedAt.toISOString(),

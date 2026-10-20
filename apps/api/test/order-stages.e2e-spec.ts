@@ -6,6 +6,7 @@ import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
+import { newProductCode } from "../src/modules/portal/crm/catalog/domain/product-code";
 
 jest.setTimeout(120_000);
 
@@ -146,6 +147,7 @@ describe("Order stages (e2e)", () => {
                 entityRecordId: productRecord.id,
                 categoryId: category.id,
                 measurementUnitId: unit.id,
+                code: newProductCode(),
                 name: `Stage product ${suffix}`,
                 price: 10,
                 initialQuantity: STOCK,

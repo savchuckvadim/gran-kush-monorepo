@@ -3,6 +3,7 @@ import type { INestApplication } from "@nestjs/common";
 import request from "supertest";
 
 import { PrismaService } from "../../src/common/prisma/prisma.service";
+import { newProductCode } from "../../src/modules/portal/crm/catalog/domain/product-code";
 
 import { crmSession } from "./sessions";
 
@@ -133,6 +134,7 @@ export const financeFixtures = (app: INestApplication, prefix: string, suffix: s
                 entityRecordId: record.id,
                 categoryId: category.id,
                 measurementUnitId: unit.id,
+                code: newProductCode(),
                 name: `${name} ${suffix}`,
                 price,
                 initialQuantity: 100,

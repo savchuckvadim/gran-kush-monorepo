@@ -65,7 +65,8 @@ The API resolves **portal** via **`X-Portal-Id`** / **`X-Portal-Slug`** (forward
 - `/{locale}/{portal}/crm/employees`
 - `/{locale}/{portal}/crm/employees/{employeeId}` — employee card (on a wide screen it opens in the slider)
 - `/{locale}/{portal}/crm/profile`
-- `/{locale}/{portal}/scan` — QR / presence (if enabled)
+- `/{locale}/{portal}/scan` — QR links: a member code opens the door scanner (attendance), a product label `P-<code>` opens the CRM scanner on the product
+- `/{locale}/{portal}/print/product-labels?ids=…&format=a4|tape` — QR label sheet (outside the CRM shell)
 
 **Before portal** (onboarding):
 
@@ -111,6 +112,12 @@ OpenAPI-generated types in **`packages/api-client`** are the source of truth for
   columns; a row leads to the item (`openEntity` / `EntityLink` for slider entities, a link
   otherwise). A list never shares the page with an inline create form. `variant="section"` puts
   the same block inside another page (settings hub).
+- **Scanner** (TASK-807) — one per CRM shell (`widgets/scanner`), opened through `scannerStore` by
+  the header button, the order draft or `?scanCode=` in the address. The code goes to
+  `POST /crm/scan/resolve`; a screen that takes scanned codes (the order draft) registers handlers
+  with `useScanHandlers` (`shared/lib/scan`) while it is mounted, like realtime rules. Unhandled
+  codes get the scanner’s own card: a member (door check-in, new order, card) or a product (new
+  order, write-off, card). Products and new orders open in the entity slider (`product`, `newOrder`).
 
 ## Documentation map
 

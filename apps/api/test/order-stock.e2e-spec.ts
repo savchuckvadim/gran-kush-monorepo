@@ -7,6 +7,7 @@ import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
+import { newProductCode } from "../src/modules/portal/crm/catalog/domain/product-code";
 import { OrderPlacementService } from "../src/modules/portal/crm/orders/application/services/order-placement.service";
 
 import { cabinetSession } from "./support/sessions";
@@ -55,6 +56,7 @@ describe("Order stock (e2e)", () => {
                 entityRecordId: record.id,
                 categoryId,
                 measurementUnitId: unitId,
+                code: newProductCode(),
                 name,
                 price: 10,
                 initialQuantity: stock,

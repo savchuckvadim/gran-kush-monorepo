@@ -4,7 +4,8 @@
  * /scan — публичная страница для QR-ссылок (Option B).
  *
  * Сценарии:
- * - Любой вход -> редирект на /[locale]/[portal]/crm/attendance?scan=CODE
+ * - Код участника -> /[locale]/[portal]/crm/attendance?scan=CODE (стойка)
+ * - Этикетка товара (`P-…`) -> /[locale]/[portal]/crm/product/list?scanCode=CODE (общий сканер)
  * - Дальше protected-route auth guard сам решает: пускать в CRM или отправлять на login
  */
 
@@ -14,6 +15,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
 import { defaultLocale, locales } from "@/i18n";
+import { isProductLabelCode, SCAN_CODE_PARAM } from "@/modules/entities/scan";
 
 export function ScanRedirectClient() {
     const pathname = usePathname();
@@ -51,14 +53,21 @@ export function ScanRedirectClient() {
             return;
         }
 
-        const attendancePath = portalSlug
-            ? `/${resolvedLocale}/${portalSlug}/crm/attendance`
-            : `/${resolvedLocale}/crm/attendance`;
+        const crmPath = portalSlug
+            ? `/${resolvedLocale}/${portalSlug}/crm`
+            : `/${resolvedLocale}/crm`;
+        const attendancePath = `${crmPath}/attendance`;
         if (!code) {
             router.replace(attendancePath);
             return;
         }
 
+        if (isProductLabelCode(code)) {
+            router.replace(
+                `${crmPath}/product/list?${SCAN_CODE_PARAM}=${encodeURIComponent(code)}`
+            );
+            return;
+        }
         router.replace(`${attendancePath}?scan=${encodeURIComponent(code)}`);
     }, [pathname, router, searchParams]);
 

@@ -12,6 +12,7 @@ import { DomainEventPublisher, OnDomainEvent } from "../src/modules/events";
 import type { DeliverJobData } from "../src/modules/events/infrastructure/deliver-job";
 import { DomainEventsProcessor } from "../src/modules/events/infrastructure/domain-events.processor";
 import { OutboxRelayService } from "../src/modules/events/infrastructure/outbox-relay.service";
+import { newProductCode } from "../src/modules/portal/crm/catalog/domain/product-code";
 
 jest.setTimeout(120_000);
 
@@ -120,6 +121,7 @@ describe("Domain events (e2e)", () => {
                     entityRecordId: productRecord.id,
                     categoryId: category.id,
                     measurementUnitId: unit.id,
+                    code: newProductCode(),
                     name: `Event product ${suffix}`,
                     price: 10,
                     initialQuantity: STOCK,

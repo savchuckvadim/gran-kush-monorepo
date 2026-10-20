@@ -143,6 +143,11 @@ export class OrderPlacementService {
             if (!product.isActive || !product.isAvailable) {
                 throw new BadRequestException(`Товар "${product.name}" недоступен для заказа`);
             }
+            if (product.isConsumable) {
+                throw new BadRequestException(
+                    `Товар "${product.name}" — расходник: его списывают со склада, а не продают`
+                );
+            }
             if (product.currentQuantity.lessThan(new Prisma.Decimal(item.quantity))) {
                 throw new BadRequestException(
                     `Недостаточно товара "${product.name}". ` +

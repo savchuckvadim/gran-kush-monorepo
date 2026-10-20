@@ -1394,6 +1394,8 @@ model MeasurementUnit {
   name        String   @db.VarChar(255)
   description String?  @db.Text
   isCustom    Boolean  @default(false) @map("is_custom")
+  /// Весовая (граммы, килограммы): при скане товара количество вводят, а не ставят 1 (TASK-807)
+  isWeighed   Boolean  @default(false) @map("is_weighed")
   isActive    Boolean  @default(true) @map("is_active")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -1445,6 +1447,12 @@ model Product {
   name              String            @db.VarChar(255)
   description       String?           @db.Text
   sku               String?           @db.VarChar(100)
+  /// Код для QR-этикетки (TASK-807): короткий, уникальный в клубе, выдаётся при создании
+  code              String            @db.VarChar(16)
+  /// Штрихкод производителя (EAN/UPC), если на упаковке уже есть свой
+  barcode           String?           @db.VarChar(64)
+  /// Расходник: не продаётся, списывается по скану (перчатки, краска, пакеты)
+  isConsumable      Boolean           @default(false) @map("is_consumable")
   price             Decimal           @db.Decimal(10, 2)
   initialQuantity   Decimal           @map("initial_quantity") @db.Decimal(10, 3)
   currentQuantity   Decimal           @map("current_quantity") @db.Decimal(10, 3)
@@ -1484,6 +1492,8 @@ model Product {
   updatedByEmployee Employee?       @relation("ProductUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
 
   @@unique([portalId, sku])
+  @@unique([portalId, code])
+  @@unique([portalId, barcode])
   @@index([portalId])
   @@index([categoryId])
   @@index([measurementUnitId])

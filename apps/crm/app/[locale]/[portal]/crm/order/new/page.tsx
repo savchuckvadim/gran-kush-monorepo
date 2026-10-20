@@ -5,10 +5,10 @@ import { CreateOrderForm } from "@/modules/features";
 export default async function CrmOrderNewPage({
     searchParams,
 }: {
-    searchParams: Promise<{ memberId?: string | string[] }>;
+    searchParams: Promise<{ memberId?: string | string[]; productId?: string | string[] }>;
 }) {
     const t = await getTranslations("crm.orders.create");
-    const { memberId } = await searchParams;
+    const { memberId, productId } = await searchParams;
 
     return (
         <div className="space-y-4">
@@ -19,6 +19,7 @@ export default async function CrmOrderNewPage({
                 </p>
                 <CreateOrderForm
                     initialMemberId={typeof memberId === "string" ? memberId : undefined}
+                    initialProductId={typeof productId === "string" ? productId : undefined}
                 />
             </div>
         </div>
