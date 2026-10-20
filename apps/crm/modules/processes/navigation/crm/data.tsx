@@ -56,6 +56,7 @@ export const CRM_NAVIGATION: ICrmNavigation[] = [
         title: "Finance",
         isActive: false,
         requires: ["finance.read"],
+        module: "finance",
         icon: <Wallet />,
     },
     {

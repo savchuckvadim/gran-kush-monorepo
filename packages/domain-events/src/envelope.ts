@@ -7,6 +7,7 @@ export type ActorKind = (typeof ACTOR_KINDS)[number];
 /** What the event is about. One aggregate — one ordering guarantee (by `occurredAt`). */
 export const AGGREGATE_KINDS = [
     "portal",
+    "organization",
     "member",
     "order",
     "product",

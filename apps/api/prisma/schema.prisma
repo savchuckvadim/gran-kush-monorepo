@@ -246,6 +246,9 @@ model Portal {
   policy                ClubPolicy?
   presenceSettings      PresenceSettings?
   domainEvents          DomainEvent[]
+  modules               PortalModule[]
+  dataKeys              PortalDataKey[]
+  organizationProfile   OrganizationProfile?
 
   @@index([name])
   @@index([status])
@@ -1639,4 +1642,89 @@ model DomainEventDelivery {
   @@id([eventId, consumer])
   @@index([deliveredAt])
   @@map("domain_event_deliveries")
+}
+
+// ========================
+// Portal modules and data keys
+// ========================
+
+/// Подключённые модули портала (TASK-796): строка есть — модуль включён. Что за модули, кому
+/// доступны и что делают при включении — каталог в коде (`portal-modules/domain`).
+model PortalModule {
+  portalId            String   @map("portal_id")
+  code                String   @db.VarChar(40)
+  enabledAt           DateTime @default(now()) @map("enabled_at")
+  enabledByEmployeeId String?  @map("enabled_by_employee_id")
+
+  portal Portal @relation(fields: [portalId], references: [id], onDelete: Cascade)
+
+  @@id([portalId, code])
+  @@map("portal_modules")
+}
+
+/// Ключ данных портала (envelope): случайный ключ AES-256 на портал и цель, завёрнутый ключом,
+/// выведенным из ENCRYPTION_MASTER_KEY. Ротация — новая версия; шифротекст помнит свою.
+model PortalDataKey {
+  portalId   String   @map("portal_id")
+  purpose    String   @db.VarChar(40)
+  version    Int      @default(1)
+  wrappedKey String   @map("wrapped_key") @db.Text
+  kekVersion Int      @default(1) @map("kek_version")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  portal Portal @relation(fields: [portalId], references: [id], onDelete: Cascade)
+
+  @@id([portalId, purpose, version])
+  @@map("portal_data_keys")
+}
+
+// ========================
+// Finance: organization
+// ========================
+
+/// Форма организации: asociación (клуб), autónomo (мастер или студия ИП), SL, другое.
+enum LegalForm {
+  association
+  self_employed
+  limited_company
+  other
+}
+
+/// Режим IVA: общий, освобождённый (только не облагаемые операции), recargo de equivalencia.
+enum VatRegime {
+  general
+  exempt
+  equivalence_surcharge
+}
+
+/// Налог на прибыль: IS частично освобождённой ассоциации (art. 9.3 LIS), IS общества, IRPF
+/// autónomo — estimación directa simplificada, normal или objetiva (módulos).
+enum IncomeTaxRegime {
+  corporate_partially_exempt
+  corporate
+  irpf_direct_simplified
+  irpf_direct_normal
+  irpf_objective
+}
+
+/// Организация портала для учёта и документов (TASK-796). Налоговые настройки — открыто: по ним
+/// считаются отчёты; реквизиты (название, NIF, адрес, IBAN, контакты, gestor) — шифром ключа портала.
+model OrganizationProfile {
+  portalId             String          @id @map("portal_id")
+  legalForm            LegalForm       @map("legal_form")
+  country              String          @default("ES") @db.VarChar(2)
+  currency             String          @default("EUR") @db.VarChar(3)
+  vatRegime            VatRegime       @map("vat_regime")
+  incomeTaxRegime      IncomeTaxRegime @map("income_tax_regime")
+  /// Цены в каталоге — с налогом (по умолчанию) или без: товар и услуга могут переопределить
+  pricesIncludeTax     Boolean         @default(true) @map("prices_include_tax")
+  fiscalYearStartMonth Int             @default(1) @map("fiscal_year_start_month")
+  identity             String          @db.Text
+  createdAt            DateTime        @default(now()) @map("created_at")
+  updatedAt            DateTime        @updatedAt @map("updated_at")
+  updatedByEmployeeId  String?         @map("updated_by_employee_id")
+
+  portal Portal @relation(fields: [portalId], references: [id], onDelete: Cascade)
+
+  @@map("organization_profiles")
 }

@@ -13,6 +13,7 @@ import {
 } from "@modules/portal/crm/portals/api/dto/portal-appearance.dto";
 import { PortalInfoDto } from "@modules/portal/crm/portals/api/dto/portal-info.dto";
 import { PortalAppearanceService } from "@modules/portal/crm/portals/application/services/portal-appearance.service";
+import { PortalModulesService } from "@modules/portal/crm/portal-modules/application/portal-modules.service";
 import { PortalResolutionService } from "@modules/portal/crm/portals/application/services/portal-resolution.service";
 
 @ApiTags("CRM Portal")
@@ -22,7 +23,8 @@ import { PortalResolutionService } from "@modules/portal/crm/portals/application
 export class CrmPortalInfoController {
     constructor(
         private readonly portalResolution: PortalResolutionService,
-        private readonly appearance: PortalAppearanceService
+        private readonly appearance: PortalAppearanceService,
+        private readonly modules: PortalModulesService
     ) {}
 
     @Get("info")
@@ -34,12 +36,16 @@ export class CrmPortalInfoController {
     @ApiSuccessResponse(PortalInfoDto)
     @ApiErrorResponse([400, 401, 403, 404])
     async getPortalInfo(@PortalId() portalId: string): Promise<PortalInfoDto> {
-        const portal = await this.portalResolution.getInfoById(portalId);
+        const [portal, modules] = await Promise.all([
+            this.portalResolution.getInfoById(portalId),
+            this.modules.enabledCodes(portalId),
+        ]);
         return {
             portalId: portal.id,
             name: portal.name,
             displayName: portal.displayName,
             type: portal.type,
+            modules,
             status: portal.status,
             defaultSkin: portal.defaultSkin,
             subscription: portal.subscription

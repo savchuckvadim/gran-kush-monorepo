@@ -4,6 +4,7 @@ import type { AnyEventDefinition } from "../define-event";
 import type { DomainEventEnvelope } from "../envelope";
 
 import { employeeAccessChanged, employeeJoined } from "./employee.events";
+import { financeProfileUpdated } from "./finance.events";
 import {
     memberConsentGiven,
     memberJoined,
@@ -17,7 +18,7 @@ import {
     orderPlaced,
     orderStageChanged,
 } from "./order.events";
-import { portalFounded } from "./portal.events";
+import { portalFounded, portalModuleChanged } from "./portal.events";
 import { presenceEntered, presenceLeft } from "./presence.events";
 import { productChanged, productStockChanged } from "./product.events";
 import { roleChanged } from "./role.events";
@@ -30,6 +31,8 @@ import { sessionRevoked } from "./session.events";
  */
 export const EVENT_CATALOG = {
     "portal.founded": portalFounded,
+    "portal.module_changed": portalModuleChanged,
+    "finance.profile_updated": financeProfileUpdated,
     "member.joined": memberJoined,
     "member.consent_given": memberConsentGiven,
     "member.left": memberLeft,
@@ -80,6 +83,7 @@ export const publicPayloadOf = (event: DomainEventEnvelope): Record<string, unkn
 export {
     employeeAccessChanged,
     employeeJoined,
+    financeProfileUpdated,
     memberConsentGiven,
     memberJoined,
     memberLeft,
@@ -90,6 +94,7 @@ export {
     orderPlaced,
     orderStageChanged,
     portalFounded,
+    portalModuleChanged,
     presenceEntered,
     presenceLeft,
     productChanged,

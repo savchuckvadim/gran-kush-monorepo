@@ -3,11 +3,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { usePortal } from "@/modules/processes";
 
 import { getPortalInfo, updatePortalAppearance } from "../api";
+import { portalInfoKeys } from "../model/portal-info-keys";
 
-export const portalInfoKeys = {
-    all: ["crm-portal-info"] as const,
-    detail: (portalSlug: string | null) => [...portalInfoKeys.all, portalSlug] as const,
-} as const;
+export { portalInfoKeys };
 
 export function usePortalInfo() {
     const { portalSlug, hasPortal } = usePortal();

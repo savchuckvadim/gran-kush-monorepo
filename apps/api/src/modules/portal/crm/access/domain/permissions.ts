@@ -22,6 +22,8 @@ export const PERMISSIONS = {
 
     FinanceRead: "finance.read",
     FinanceWrite: "finance.write",
+    /** Профиль организации, налоги и счета, закрытие периода, экспорт для gestor */
+    FinanceAdmin: "finance.admin",
 
     PresenceRead: "presence.read",
     /** Скан QR на входе, ручной вход и выход */
@@ -66,7 +68,10 @@ export const PERMISSION_GROUPS: readonly { key: string; permissions: readonly Pe
         permissions: [PERMISSIONS.OrdersRead, PERMISSIONS.OrdersCreate, PERMISSIONS.OrdersProcess],
     },
     { key: "catalog", permissions: [PERMISSIONS.CatalogManage] },
-    { key: "finance", permissions: [PERMISSIONS.FinanceRead, PERMISSIONS.FinanceWrite] },
+    {
+        key: "finance",
+        permissions: [PERMISSIONS.FinanceRead, PERMISSIONS.FinanceWrite, PERMISSIONS.FinanceAdmin],
+    },
     {
         key: "presence",
         permissions: [PERMISSIONS.PresenceRead, PERMISSIONS.PresenceCheckin, PERMISSIONS.QrManage],

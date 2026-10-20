@@ -670,6 +670,154 @@
                     "adjustment": "Ajuste",
                     "manual": "Manual"
                 }
+            },
+            "module": {
+                "title": "Finanzas",
+                "subtitle": "Ingresos y gastos, impuestos en España e informes para tu gestor. El módulo se activa por separado en cada club.",
+                "features": {
+                    "ledger": {
+                        "title": "Ingresos y gastos",
+                        "text": "Las ventas de los pedidos se registran solas; los gastos se añaden a mano."
+                    },
+                    "import": {
+                        "title": "Carga desde hoja de cálculo",
+                        "text": "Nóminas y gastos desde Excel o CSV con una plantilla lista."
+                    },
+                    "taxes": {
+                        "title": "Impuestos en España",
+                        "text": "IVA e impuesto sobre beneficios según la forma jurídica: asociación, autónomo, SL."
+                    },
+                    "reports": {
+                        "title": "Informes",
+                        "text": "Totales del periodo, libros registro y exportación para el gestor."
+                    }
+                },
+                "enable": "Activar finanzas",
+                "enabling": "Activando…",
+                "enabled": "Módulo de finanzas activado",
+                "ownerOnly": "El propietario o un administrador del club puede activar el módulo.",
+                "unavailable": "El módulo de finanzas no está disponible para este tipo de club.",
+                "switchTitle": "Módulo de finanzas",
+                "switchHint": "Activado en este club. Si lo desactivas, los registros y los datos se conservan.",
+                "disable": "Desactivar módulo",
+                "disabling": "Desactivando…",
+                "disabled": "Módulo de finanzas desactivado",
+                "disableTitle": "¿Desactivar finanzas?",
+                "disableDescription": "La sección desaparece del menú para todo el equipo. Los registros y los datos se conservan y vuelven al activarlo de nuevo.",
+                "cancel": "Cancelar"
+            },
+            "setup": {
+                "title": "Configurar finanzas",
+                "subtitle": "Cuéntanos sobre la entidad del club: los impuestos y los informes dependen de su forma jurídica. Ya hemos puesto los valores habituales para tu tipo de club; revísalos y completa los datos.",
+                "submit": "Guardar y empezar"
+            },
+            "dashboard": {
+                "settings": "Entidad e impuestos"
+            },
+            "settings": {
+                "title": "Entidad e impuestos",
+                "subtitle": "Forma jurídica, regímenes fiscales y datos con los que se calculan los impuestos y se preparan los informes.",
+                "back": "Volver a finanzas",
+                "submit": "Guardar"
+            },
+            "profile": {
+                "readOnly": "Solo el personal con el permiso «Configurar finanzas» puede cambiar estos datos.",
+                "saving": "Guardando…",
+                "saved": "Datos de la entidad guardados",
+                "sections": {
+                    "tax": "Forma jurídica e impuestos",
+                    "identity": "Datos fiscales",
+                    "gestor": "Gestor"
+                },
+                "sectionHints": {
+                    "tax": "Los impuestos, las declaraciones y los libros registro dependen de la forma jurídica.",
+                    "identity": "Aparecen en facturas e informes. Se guardan cifrados.",
+                    "gestor": "El gestor o la gestoría que recibe los informes. Opcional."
+                },
+                "legalForm": {
+                    "label": "Forma jurídica",
+                    "options": {
+                        "association": "Asociación sin ánimo de lucro",
+                        "self_employed": "Autónomo",
+                        "limited_company": "Sociedad Limitada (SL)",
+                        "other": "Otra"
+                    },
+                    "hint": {
+                        "association": "Las cuotas de los socios suelen quedar fuera del Impuesto sobre Sociedades; declaración anual, modelo 200.",
+                        "self_employed": "IRPF: pagos fraccionados trimestrales con el modelo 130 (131 en módulos) y la declaración anual, modelo 100.",
+                        "limited_company": "Impuesto sobre Sociedades: modelo 200 anual y pagos fraccionados con el modelo 202.",
+                        "other": "Elige los regímenes fiscales a mano o consúltalo con tu gestor."
+                    }
+                },
+                "incomeTax": {
+                    "label": "Impuesto sobre beneficios",
+                    "options": {
+                        "corporate_partially_exempt": "IS — entidad parcialmente exenta",
+                        "corporate": "IS — régimen general",
+                        "irpf_direct_simplified": "IRPF — estimación directa simplificada",
+                        "irpf_direct_normal": "IRPF — estimación directa normal",
+                        "irpf_objective": "IRPF — módulos (estimación objetiva)"
+                    },
+                    "hint": {
+                        "corporate_partially_exempt": "Para asociaciones: tributa solo la actividad económica, no las cuotas de los socios.",
+                        "corporate": "Tributa todo el beneficio de la entidad.",
+                        "irpf_direct_simplified": "Ingresos menos gastos; cifra de negocios de hasta 600.000 € al año.",
+                        "irpf_direct_normal": "Ingresos menos gastos con contabilidad completa; obligatoria por encima de 600.000 €.",
+                        "irpf_objective": "Se tributa por signos e índices de la actividad (superficie, personal), no por el beneficio."
+                    }
+                },
+                "vat": {
+                    "label": "IVA",
+                    "options": {
+                        "general": "Régimen general",
+                        "exempt": "Exento de IVA",
+                        "equivalence_surcharge": "Recargo de equivalencia"
+                    },
+                    "hint": {
+                        "general": "IVA repercutido menos IVA soportado: modelo 303 trimestral y resumen anual 390.",
+                        "exempt": "La actividad está exenta de IVA (art. 20 LIVA): no se repercute ni se deduce.",
+                        "equivalence_surcharge": "Comercio minorista de autónomo: el proveedor cobra el recargo y no se presenta el modelo 303 por esta actividad."
+                    }
+                },
+                "fiscalYear": {
+                    "label": "Inicio del ejercicio",
+                    "hint": "Normalmente enero. Una asociación o una SL puede empezar el ejercicio en otro mes según sus estatutos.",
+                    "calendarOnly": "Para un autónomo el ejercicio siempre coincide con el año natural."
+                },
+                "pricesIncludeTax": {
+                    "label": "Los precios incluyen impuestos",
+                    "hint": "El precio del producto es el final para el comprador, con el IVA incluido. Podrás cambiarlo en productos y servicios concretos."
+                },
+                "fields": {
+                    "legalName": "Razón social",
+                    "tradeName": "Nombre comercial",
+                    "taxId": "NIF / CIF",
+                    "iban": "IBAN",
+                    "addressLine": "Dirección",
+                    "postalCode": "Código postal",
+                    "city": "Ciudad",
+                    "province": "Provincia",
+                    "email": "Email",
+                    "phone": "Teléfono",
+                    "gestorName": "Gestor o asesor",
+                    "gestorEmail": "Email del gestor",
+                    "gestorPhone": "Teléfono del gestor"
+                },
+                "taxIdHint": {
+                    "association": "El CIF de una asociación empieza por G, por ejemplo G12345678.",
+                    "self_employed": "Tu NIF (DNI con letra) o NIE, por ejemplo 12345678Z o X1234567L.",
+                    "limited_company": "El CIF de una sociedad empieza por B (A en una SA), por ejemplo B12345678.",
+                    "other": "NIF, NIE o CIF de la entidad."
+                },
+                "errors": {
+                    "required": "Rellena este campo",
+                    "tooLong": "El valor es demasiado largo",
+                    "email": "Email no válido",
+                    "invalid_tax_id": "El número no supera la comprobación del dígito de control",
+                    "tax_id_kind_mismatch": "El número no corresponde a la forma jurídica",
+                    "invalid_iban": "El IBAN no es válido",
+                    "tax_regime_mismatch": "El régimen no corresponde a la forma jurídica"
+                }
             }
         },
         "sections": {
@@ -947,6 +1095,10 @@
                     "title": "Entidades",
                     "description": "Tus listas y procesos"
                 },
+                "modules": {
+                    "title": "Módulos",
+                    "description": "Finanzas y otras secciones"
+                },
                 "billing": {
                     "title": "Suscripción",
                     "description": "Plan, pago, facturas"
@@ -1046,6 +1198,14 @@
                     "title": "Roles y permisos",
                     "description": "Qué puede hacer cada rol del club",
                     "metric": "roles"
+                },
+                "modules": {
+                    "on": "Activado",
+                    "off": "Sin activar",
+                    "finance": {
+                        "title": "Finanzas",
+                        "description": "Ingresos y gastos, impuestos en España e informes para el gestor."
+                    }
                 }
             }
         },
@@ -1477,7 +1637,8 @@
                 },
                 "finance": {
                     "read": "Ver finanzas e informes",
-                    "write": "Registrar operaciones"
+                    "write": "Registrar operaciones",
+                    "admin": "Configurar finanzas: entidad e impuestos"
                 },
                 "presence": {
                     "read": "Ver visitas y estadísticas",

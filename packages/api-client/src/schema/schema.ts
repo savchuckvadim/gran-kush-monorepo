@@ -583,6 +583,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/crm/portal/modules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Модули клуба: какие доступны его типу и какие включены */
+        get: operations["CrmPortalModules_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/portal/modules/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Включить или выключить модуль (settings.club). Данные модуля при выключении не удаляются */
+        put: operations["CrmPortalModules_set"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/": {
         parameters: {
             query?: never;
@@ -1069,74 +1103,6 @@ export interface paths {
         put?: never;
         /** Confirm email */
         post: operations["MemberRegistration_confirmEmail"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/verify/{token}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Verify email by token (GET redirect from email link) */
-        get: operations["EmailVerification_verifyEmailGet"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/verify": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Verify email by token (POST) */
-        post: operations["EmailVerification_verifyEmailPost"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/password/reset/request": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Request password reset (send email with reset link) */
-        post: operations["EmailVerification_requestPasswordReset"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/password/reset": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Reset password using token from email */
-        post: operations["EmailVerification_resetPassword"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3129,6 +3095,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/crm/finance/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Профиль организации: форма, налоги, реквизиты. До сохранения — пресет типа клуба */
+        get: operations["CrmFinanceProfile_get"];
+        /**
+         * Сохранить профиль организации (finance.admin)
+         * @description Проверяет NIF/NIE/CIF по контрольному знаку и форме организации, IBAN — по mod 97. Коды 400: invalid_tax_id, tax_id_kind_mismatch, invalid_iban, tax_regime_mismatch
+         */
+        put: operations["CrmFinanceProfile_save"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/crm/settings/registration-links": {
         parameters: {
             query?: never;
@@ -3924,6 +3911,21 @@ export interface components {
             /** @description Сколько сессий закрыто */
             ended: number;
         };
+        PortalModuleDto: {
+            /**
+             * @example finance
+             * @enum {string}
+             */
+            code: "finance";
+            /** @description Модуль предусмотрен для типа портала */
+            available: boolean;
+            enabled: boolean;
+            /** Format: date-time */
+            enabledAt: string | null;
+        };
+        SetPortalModuleDto: {
+            enabled: boolean;
+        };
         EmployeeLoginDto: {
             /** @example employee@example.com */
             email: string;
@@ -3972,7 +3974,7 @@ export interface components {
          * @description Права роли в этом клубе — по ним CRM прячет разделы и кнопки
          * @enum {string}
          */
-        Permission: "members.read" | "members.create" | "members.edit" | "members.documents" | "members.invite" | "orders.read" | "orders.create" | "orders.process" | "catalog.manage" | "finance.read" | "finance.write" | "presence.read" | "presence.checkin" | "qr.manage" | "records.read" | "records.write" | "records.delete" | "employees.read" | "employees.manage" | "roles.manage" | "settings.club" | "settings.structure" | "settings.views" | "billing.manage";
+        Permission: "members.read" | "members.create" | "members.edit" | "members.documents" | "members.invite" | "orders.read" | "orders.create" | "orders.process" | "catalog.manage" | "finance.read" | "finance.write" | "finance.admin" | "presence.read" | "presence.checkin" | "qr.manage" | "records.read" | "records.write" | "records.delete" | "employees.read" | "employees.manage" | "roles.manage" | "settings.club" | "settings.structure" | "settings.views" | "billing.manage";
         EmployeeEmploymentDto: {
             /** @example f5f0c2f1-c877-4f13-8b6a-5b5b7c8f9c1f */
             portalId: string;
@@ -5311,6 +5313,13 @@ export interface components {
             displayName: string;
             /** @enum {string} */
             type: "CLUB" | "TATTOO_STUDIO" | "BEAUTY_STUDIO";
+            /**
+             * @description Включённые подключаемые модули (TASK-796): меню CRM показывает их разделы
+             * @example [
+             *       "finance"
+             *     ]
+             */
+            modules: string[];
             /** @enum {string} */
             status: "active" | "suspended" | "archived";
             /** @description Тема клуба по умолчанию (id темы CRM); null — тема PafPaf */
@@ -6679,6 +6688,74 @@ export interface components {
             /** @example 8 */
             count: number;
         };
+        /** @enum {string} */
+        LegalForm: "association" | "self_employed" | "limited_company" | "other";
+        /** @enum {string} */
+        VatRegime: "general" | "exempt" | "equivalence_surcharge";
+        /** @enum {string} */
+        IncomeTaxRegime: "corporate_partially_exempt" | "corporate" | "irpf_direct_simplified" | "irpf_direct_normal" | "irpf_objective";
+        OrganizationProfileDto: {
+            legalForm: components["schemas"]["LegalForm"];
+            vatRegime: components["schemas"]["VatRegime"];
+            incomeTaxRegime: components["schemas"]["IncomeTaxRegime"];
+            /** @description Цены каталога по умолчанию включают налог */
+            pricesIncludeTax: boolean;
+            /** @example 1 */
+            fiscalYearStartMonth: number;
+            /** @example Asociación Cannábica Sol */
+            legalName?: string | null;
+            /** @example PafPaf Sol */
+            tradeName?: string | null;
+            /** @example G12345674 */
+            taxId?: string | null;
+            addressLine?: string | null;
+            /** @example 08001 */
+            postalCode?: string | null;
+            city?: string | null;
+            province?: string | null;
+            /** @example ES9121000418450200051332 */
+            iban?: string | null;
+            email?: string | null;
+            phone?: string | null;
+            gestorName?: string | null;
+            gestorEmail?: string | null;
+            gestorPhone?: string | null;
+            /** @description Профиль сохранён; false — пресет типа портала */
+            configured: boolean;
+            /** @example ES */
+            country: string;
+            /** @example EUR */
+            currency: string;
+            /** Format: date-time */
+            updatedAt: string | null;
+        };
+        UpdateOrganizationProfileDto: {
+            legalForm: components["schemas"]["LegalForm"];
+            vatRegime: components["schemas"]["VatRegime"];
+            incomeTaxRegime: components["schemas"]["IncomeTaxRegime"];
+            /** @description Цены каталога по умолчанию включают налог */
+            pricesIncludeTax: boolean;
+            /** @example 1 */
+            fiscalYearStartMonth: number;
+            /** @example Asociación Cannábica Sol */
+            legalName?: string | null;
+            /** @example PafPaf Sol */
+            tradeName?: string | null;
+            /** @example G12345674 */
+            taxId?: string | null;
+            addressLine?: string | null;
+            /** @example 08001 */
+            postalCode?: string | null;
+            city?: string | null;
+            province?: string | null;
+            /** @example ES9121000418450200051332 */
+            iban?: string | null;
+            email?: string | null;
+            phone?: string | null;
+            gestorName?: string | null;
+            gestorEmail?: string | null;
+            gestorPhone?: string | null;
+        };
         RegistrationLinkPrefillDto: {
             /** @example socio@example.com */
             email?: string;
@@ -7111,6 +7188,8 @@ export type SchemaReadinessResponseDto = components['schemas']['ReadinessRespons
 export type SchemaAccountSessionDto = components['schemas']['AccountSessionDto'];
 export type SchemaAccountSessionsResponseDto = components['schemas']['AccountSessionsResponseDto'];
 export type SchemaEndedSessionsResponseDto = components['schemas']['EndedSessionsResponseDto'];
+export type SchemaPortalModuleDto = components['schemas']['PortalModuleDto'];
+export type SchemaSetPortalModuleDto = components['schemas']['SetPortalModuleDto'];
 export type SchemaEmployeeLoginDto = components['schemas']['EmployeeLoginDto'];
 export type SchemaEmployeeRoleDto = components['schemas']['EmployeeRoleDto'];
 export type SchemaEmployeePortalRoleDto = components['schemas']['EmployeePortalRoleDto'];
@@ -7312,6 +7391,11 @@ export type SchemaCreateFinancialTransactionDto = components['schemas']['CreateF
 export type SchemaTransactionSummaryDto = components['schemas']['TransactionSummaryDto'];
 export type SchemaTransactionGroupedByTypeDto = components['schemas']['TransactionGroupedByTypeDto'];
 export type SchemaTransactionGroupedByDateDto = components['schemas']['TransactionGroupedByDateDto'];
+export type SchemaLegalForm = components['schemas']['LegalForm'];
+export type SchemaVatRegime = components['schemas']['VatRegime'];
+export type SchemaIncomeTaxRegime = components['schemas']['IncomeTaxRegime'];
+export type SchemaOrganizationProfileDto = components['schemas']['OrganizationProfileDto'];
+export type SchemaUpdateOrganizationProfileDto = components['schemas']['UpdateOrganizationProfileDto'];
 export type SchemaRegistrationLinkPrefillDto = components['schemas']['RegistrationLinkPrefillDto'];
 export type SchemaCreateRegistrationLinkDto = components['schemas']['CreateRegistrationLinkDto'];
 export type SchemaRegistrationLinkCreatedByDto = components['schemas']['RegistrationLinkCreatedByDto'];
@@ -8753,6 +8837,97 @@ export interface operations {
             };
         };
     };
+    CrmPortalModules_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalModuleDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmPortalModules_set: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetPortalModuleDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalModuleDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
     App_getHello: {
         parameters: {
             query?: never;
@@ -9726,190 +9901,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MemberConfirmEmailResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    EmailVerification_verifyEmailGet: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                token: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Email verified successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["VerifyEmailResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    EmailVerification_verifyEmailPost: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["VerifyEmailDto"];
-            };
-        };
-        responses: {
-            /** @description Email verified successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["VerifyEmailResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    EmailVerification_requestPasswordReset: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RequestPasswordResetDto"];
-            };
-        };
-        responses: {
-            /** @description Password reset email sent (if email exists) */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PasswordResetResponseDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    EmailVerification_resetPassword: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ResetPasswordDto"];
-            };
-        };
-        responses: {
-            /** @description Password reset successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PasswordResetResponseDto"];
                 };
             };
             /** @description Bad Request */
@@ -16872,6 +16863,95 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TransactionGroupedByDateDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmFinanceProfile_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganizationProfileDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmFinanceProfile_save: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateOrganizationProfileDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganizationProfileDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
             /** @description Unauthorized */

@@ -8,6 +8,7 @@ import request from "supertest";
 import { AppModule } from "../src/app.module";
 import { IdempotencyScope, IdempotencyService } from "../src/common/idempotency";
 import { PrismaService } from "../src/common/prisma/prisma.service";
+import { enablePortalModule } from "./support/portal-modules";
 
 jest.setTimeout(120_000);
 
@@ -57,6 +58,7 @@ describe("Idempotency-Key (e2e)", () => {
         expect(res.status).toBe(201);
 
         const portalId = res.body.portal.id as string;
+        await enablePortalModule(prisma, portalId, "finance");
         const employee = await prisma.employee.findFirst({
             where: { portalId },
             select: { id: true },

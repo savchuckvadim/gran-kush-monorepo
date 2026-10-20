@@ -10,6 +10,7 @@ import { InvitationsModule } from "@modules/portal/crm/invitations/invitations.m
 import { MembersModule } from "@modules/portal/crm/members/members.module";
 import { OrdersModule } from "@modules/portal/crm/orders/orders.module";
 import { PortalContextModule } from "@modules/portal/crm/portals/portal-context.module";
+import { PortalModulesModule } from "@modules/portal/crm/portal-modules/portal-modules.module";
 import { PortalsModule } from "@modules/portal/crm/portals/portals.module";
 import { PresenceModule } from "@modules/portal/crm/presence/presence.module";
 import { QrCodesModule } from "@modules/portal/crm/qr-codes/qr-codes.module";
@@ -24,6 +25,7 @@ import { PublicPortalModule } from "@modules/portal/public/public-portal.module"
     imports: [
         PortalContextModule,
         PortalsModule,
+        PortalModulesModule,
         AccessModule,
         EntityFieldsModule,
         EmployeesModule,

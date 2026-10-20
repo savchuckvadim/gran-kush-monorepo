@@ -28,6 +28,7 @@ const MANAGER_EXCLUDED: ReadonlySet<Permission> = new Set([
     PERMISSIONS.CatalogManage,
     PERMISSIONS.RecordsDelete,
     PERMISSIONS.FinanceWrite,
+    PERMISSIONS.FinanceAdmin,
     PERMISSIONS.EmployeesManage,
     PERMISSIONS.RolesManage,
     PERMISSIONS.SettingsClub,

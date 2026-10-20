@@ -7,6 +7,7 @@ import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/common/prisma/prisma.service";
+import { enablePortalModule } from "./support/portal-modules";
 
 jest.setTimeout(120_000);
 
@@ -122,6 +123,7 @@ describe("CRM role-based access (e2e)", () => {
         expect(res.status).toBe(201);
         portalId = res.body.portal.id as string;
         ownerCookies = extractCookies(res);
+        await enablePortalModule(prisma, portalId, "finance");
 
         managerCookies = await seedEmployeeAndLogin("manager");
         employeeCookies = await seedEmployeeAndLogin("employee");

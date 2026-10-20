@@ -36,6 +36,7 @@ export const ROUTES = {
     CRM_ORDER_NEW: "/crm/order/new",
     CRM_ATTENDANCE: "/crm/attendance",
     CRM_FINANCE: "/crm/finance",
+    CRM_FINANCE_SETTINGS: "/crm/finance/settings",
     CRM_EMPLOYEES: "/crm/employees",
     /** Префикс карточки сотрудника: `${ROUTES.CRM_EMPLOYEE_DETAILS}/${id}` */
     CRM_EMPLOYEE_DETAILS: "/crm/employees",

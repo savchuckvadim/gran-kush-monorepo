@@ -157,8 +157,10 @@ tab won the rotation (retry), `session_ended` — sign in again.
 - CRM: `crm/mobile/auth/*`
 - Cabinet: `cabinet/mobile/auth/*`
 
-Controllers protect routes with `@CrmSession()` / `@CrmAuth({ subscription? })` / `@CabinetSession()` /
+Controllers protect routes with `@CrmSession()` / `@CrmAuth({ subscription?, module? })` / `@CabinetSession()` /
 `@CabinetAuth()` (one guard reads Bearer or the cookie) and `@RequirePermission(...)` for club permissions.
+`module: "finance"` closes a route while the club has the module off (403 `module_disabled`); modules are
+rows of `portal_modules`, the catalog is `portal/crm/portal-modules/domain/portal-module.catalog.ts`.
 
 Frontend calls API with `credentials: "include"` for cookie auth.
 

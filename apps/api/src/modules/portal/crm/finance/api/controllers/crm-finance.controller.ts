@@ -35,7 +35,7 @@ import { FinanceService } from "@modules/portal/crm/finance/application/services
 
 @ApiTags("CRM Finance")
 @Controller("crm/finance")
-@CrmAuth()
+@CrmAuth({ module: "finance" })
 @RequirePermission(PERMISSIONS.FinanceRead)
 @ApiBearerAuth()
 export class CrmFinanceController {

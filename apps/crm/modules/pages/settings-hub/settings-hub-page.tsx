@@ -4,7 +4,7 @@ import { type KeyboardEvent, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { Boxes, CreditCard, Package, Palette, UserRound, Users } from "lucide-react";
+import { Blocks, Boxes, CreditCard, Package, Palette, UserRound, Users } from "lucide-react";
 
 import { TooltipProvider } from "@workspace/ui";
 import { cn } from "@workspace/ui/lib/utils";
@@ -17,6 +17,7 @@ import {
     CatalogPanel,
     EntitiesPanel,
     MembersPanel,
+    ModulesPanel,
     TeamPanel,
 } from "./panels";
 
@@ -36,6 +37,7 @@ const TABS = [
     },
     { id: "catalog", icon: Package, Panel: CatalogPanel, anyOf: ["catalog.manage"] },
     { id: "entities", icon: Boxes, Panel: EntitiesPanel, anyOf: ["settings.structure"] },
+    { id: "modules", icon: Blocks, Panel: ModulesPanel, anyOf: ["settings.club"] },
     { id: "billing", icon: CreditCard, Panel: BillingPanel, anyOf: ["billing.manage"] },
     { id: "appearance", icon: Palette, Panel: AppearancePanel, anyOf: null },
 ] as const satisfies readonly ({ anyOf: readonly Permission[] | null } & Record<string, unknown>)[];

@@ -4,6 +4,8 @@ import { ApiBearerAuth, ApiCookieAuth } from "@nestjs/swagger";
 import { PortalCrmSubscriptionGuard } from "@common/guards/portal-crm-subscription.guard";
 import { MembershipGuard } from "@common/portal/membership.guard";
 import { PermissionGuard } from "@common/portal/permission.guard";
+import { PortalModuleGuard, RequirePortalModule } from "@common/portal/portal-module.guard";
+import type { PortalModuleCode } from "@modules/portal/crm/portal-modules/domain/portal-module.catalog";
 
 import { CabinetSessionGuard, CrmSessionGuard } from "./session.guard";
 import { SESSION_COOKIE_NAMES } from "./session-cookies.service";
@@ -23,16 +25,19 @@ export const CrmSession = () =>
 
 /**
  * Сотрудник клуба из запроса и его права (`@RequirePermission`); `subscription: false` — маршрут
- * отвечает и клубу с истёкшей подпиской (биллинг, сведения о клубе).
+ * отвечает и клубу с истёкшей подпиской (биллинг, сведения о клубе); `module` — маршрут подключаемого
+ * модуля (TASK-796): при выключенном модуле — 403 `module_disabled`, после проверки прав.
  */
-export const CrmAuth = (options: { subscription?: boolean } = {}) =>
+export const CrmAuth = (options: { subscription?: boolean; module?: PortalModuleCode } = {}) =>
     applyDecorators(
         UseGuards(
             CrmSessionGuard,
             MembershipGuard,
             PermissionGuard,
-            ...(options.subscription === false ? [] : [PortalCrmSubscriptionGuard])
+            ...(options.subscription === false ? [] : [PortalCrmSubscriptionGuard]),
+            ...(options.module ? [PortalModuleGuard] : [])
         ),
+        ...(options.module ? [RequirePortalModule(options.module)] : []),
         ApiCookieAuth(SESSION_COOKIE_NAMES.crm.access),
         ApiBearerAuth()
     );

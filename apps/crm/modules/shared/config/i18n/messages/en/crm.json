@@ -670,6 +670,154 @@
                     "adjustment": "Adjustment",
                     "manual": "Manual"
                 }
+            },
+            "module": {
+                "title": "Finance",
+                "subtitle": "Income and expense records, Spanish taxes and reports for your gestor. The module is enabled separately for each club.",
+                "features": {
+                    "ledger": {
+                        "title": "Income and expenses",
+                        "text": "Sales from orders are recorded automatically; expenses are added by hand."
+                    },
+                    "import": {
+                        "title": "Spreadsheet upload",
+                        "text": "Salaries and costs from Excel or CSV using a ready-made template."
+                    },
+                    "taxes": {
+                        "title": "Spanish taxes",
+                        "text": "VAT (IVA) and income tax by legal form: asociación, autónomo, SL."
+                    },
+                    "reports": {
+                        "title": "Reports",
+                        "text": "Period totals, record books and an export for your gestor."
+                    }
+                },
+                "enable": "Enable finance",
+                "enabling": "Enabling…",
+                "enabled": "Finance module enabled",
+                "ownerOnly": "The club owner or an administrator can enable the module.",
+                "unavailable": "The finance module is not available for this type of club.",
+                "switchTitle": "Finance module",
+                "switchHint": "Enabled for this club. If you disable it, records and details are kept.",
+                "disable": "Disable module",
+                "disabling": "Disabling…",
+                "disabled": "Finance module disabled",
+                "disableTitle": "Disable finance?",
+                "disableDescription": "The section disappears from the menu for all staff. Records and details are kept and come back when you enable it again.",
+                "cancel": "Cancel"
+            },
+            "setup": {
+                "title": "Set up finance",
+                "subtitle": "Tell us about the club’s legal entity: taxes and reports depend on its form. Usual values for your type of club are already filled in, so check them and add the details.",
+                "submit": "Save and start bookkeeping"
+            },
+            "dashboard": {
+                "settings": "Organization and taxes"
+            },
+            "settings": {
+                "title": "Organization and taxes",
+                "subtitle": "Legal form, tax regimes and details used to calculate taxes and prepare reports.",
+                "back": "Back to finance",
+                "submit": "Save"
+            },
+            "profile": {
+                "readOnly": "Only staff with the “Configure finance” permission can change these details.",
+                "saving": "Saving…",
+                "saved": "Organization details saved",
+                "sections": {
+                    "tax": "Legal form and taxes",
+                    "identity": "Details",
+                    "gestor": "Gestor"
+                },
+                "sectionHints": {
+                    "tax": "Taxes, returns and record books depend on the legal form.",
+                    "identity": "Used on invoices and reports. Stored encrypted.",
+                    "gestor": "The accountant or gestoría that receives your reports. Optional."
+                },
+                "legalForm": {
+                    "label": "Legal form",
+                    "options": {
+                        "association": "Asociación (non-profit association)",
+                        "self_employed": "Autónomo (self-employed)",
+                        "limited_company": "Sociedad Limitada (SL)",
+                        "other": "Other"
+                    },
+                    "hint": {
+                        "association": "Membership fees are usually outside corporate tax; the annual corporate tax return is form 200.",
+                        "self_employed": "Personal income tax (IRPF): quarterly prepayments on form 130 (131 under módulos) and the annual return, form 100.",
+                        "limited_company": "Corporate tax: annual form 200 and prepayments on form 202.",
+                        "other": "Choose the tax regimes manually or check with your gestor."
+                    }
+                },
+                "incomeTax": {
+                    "label": "Income tax",
+                    "options": {
+                        "corporate_partially_exempt": "Corporate tax — partially exempt entity",
+                        "corporate": "Corporate tax — general regime",
+                        "irpf_direct_simplified": "IRPF — estimación directa simplificada",
+                        "irpf_direct_normal": "IRPF — estimación directa normal",
+                        "irpf_objective": "IRPF — módulos (estimación objetiva)"
+                    },
+                    "hint": {
+                        "corporate_partially_exempt": "For associations: only economic activity is taxed, members’ fees are not.",
+                        "corporate": "All of the entity’s profit is taxed.",
+                        "irpf_direct_simplified": "Income minus expenses; turnover up to €600,000 a year.",
+                        "irpf_direct_normal": "Income minus expenses with full bookkeeping; required above €600,000 turnover.",
+                        "irpf_objective": "Tax based on business indicators such as floor space and staff, not on profit."
+                    }
+                },
+                "vat": {
+                    "label": "VAT (IVA)",
+                    "options": {
+                        "general": "General regime",
+                        "exempt": "VAT exempt",
+                        "equivalence_surcharge": "Recargo de equivalencia"
+                    },
+                    "hint": {
+                        "general": "VAT on sales minus VAT on purchases: quarterly form 303 and annual form 390.",
+                        "exempt": "The activity is VAT exempt (art. 20 LIVA): no VAT is charged or deducted.",
+                        "equivalence_surcharge": "Retail by an autónomo: the supplier charges the surcharge and no form 303 is filed for this activity."
+                    }
+                },
+                "fiscalYear": {
+                    "label": "Fiscal year starts in",
+                    "hint": "Usually January. An association or SL may start its year in another month under its statutes.",
+                    "calendarOnly": "For an autónomo the fiscal year is always the calendar year."
+                },
+                "pricesIncludeTax": {
+                    "label": "Prices include tax",
+                    "hint": "A product price is the final price for the buyer, with VAT included. You will be able to change this for individual products and services."
+                },
+                "fields": {
+                    "legalName": "Legal name",
+                    "tradeName": "Trade name",
+                    "taxId": "NIF / CIF",
+                    "iban": "IBAN",
+                    "addressLine": "Address",
+                    "postalCode": "Postal code",
+                    "city": "City",
+                    "province": "Province",
+                    "email": "Email",
+                    "phone": "Phone",
+                    "gestorName": "Gestor or accountant",
+                    "gestorEmail": "Gestor email",
+                    "gestorPhone": "Gestor phone"
+                },
+                "taxIdHint": {
+                    "association": "An association’s CIF starts with G, for example G12345678.",
+                    "self_employed": "Your NIF (DNI with its letter) or NIE, for example 12345678Z or X1234567L.",
+                    "limited_company": "A company’s CIF starts with B (A for an SA), for example B12345678.",
+                    "other": "The organization’s NIF, NIE or CIF."
+                },
+                "errors": {
+                    "required": "Fill in this field",
+                    "tooLong": "The value is too long",
+                    "email": "Invalid email",
+                    "invalid_tax_id": "The number fails the check digit",
+                    "tax_id_kind_mismatch": "The number does not match the legal form",
+                    "invalid_iban": "The IBAN fails validation",
+                    "tax_regime_mismatch": "The regime does not match the legal form"
+                }
             }
         },
         "sections": {
@@ -947,6 +1095,10 @@
                     "title": "Entities",
                     "description": "Your own lists and processes"
                 },
+                "modules": {
+                    "title": "Modules",
+                    "description": "Finance and other sections"
+                },
                 "billing": {
                     "title": "Subscription",
                     "description": "Plan, payment, invoices"
@@ -1046,6 +1198,14 @@
                     "title": "Roles and permissions",
                     "description": "What each role in the club can do",
                     "metric": "roles"
+                },
+                "modules": {
+                    "on": "Enabled",
+                    "off": "Not enabled",
+                    "finance": {
+                        "title": "Finance",
+                        "description": "Income and expenses, Spanish taxes and reports for your gestor."
+                    }
                 }
             }
         },
@@ -1477,7 +1637,8 @@
                 },
                 "finance": {
                     "read": "See finance and reports",
-                    "write": "Record transactions"
+                    "write": "Record transactions",
+                    "admin": "Configure finance: organization and taxes"
                 },
                 "presence": {
                     "read": "See visits and statistics",

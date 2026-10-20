@@ -42,6 +42,13 @@ export class PortalInfoDto {
     @ApiProperty({ enum: PortalTypeEnum })
     type!: PortalTypeEnum;
 
+    @ApiProperty({
+        type: [String],
+        description: "Включённые подключаемые модули (TASK-796): меню CRM показывает их разделы",
+        example: ["finance"],
+    })
+    modules!: string[];
+
     @ApiProperty({ enum: PortalStatus })
     status!: PortalStatus;
 

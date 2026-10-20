@@ -97,6 +97,33 @@ export class EncryptionService {
         return crypto.createHmac("sha256", this.keyFor(purpose)).update(data).digest();
     }
 
+    /**
+     * Завернуть ключ данных (envelope): AES-256-GCM ключом, выведенным из мастер-ключа для цели
+     * `purpose`. Мастер-ключ из сервиса не выходит; ротация мастер-ключа — перезаворачивание ключей
+     * данных, сами данные не трогаются.
+     */
+    wrapKey(purpose: string, key: Buffer): string {
+        const iv = crypto.randomBytes(this.ivLength);
+        const cipher = crypto.createCipheriv(this.algorithm, this.keyFor(purpose), iv, {
+            authTagLength: this.authTagLength,
+        });
+        const wrapped = Buffer.concat([cipher.update(key), cipher.final()]);
+        return [iv, cipher.getAuthTag(), wrapped]
+            .map((part) => part.toString("base64url"))
+            .join(".");
+    }
+
+    unwrapKey(purpose: string, wrapped: string): Buffer {
+        const parts = wrapped.split(".");
+        if (parts.length !== 3) throw new Error("Invalid wrapped key format");
+        const [iv, tag, data] = parts.map((part) => Buffer.from(part, "base64url"));
+        const decipher = crypto.createDecipheriv(this.algorithm, this.keyFor(purpose), iv, {
+            authTagLength: this.authTagLength,
+        });
+        decipher.setAuthTag(tag);
+        return Buffer.concat([decipher.update(data), decipher.final()]);
+    }
+
     private keyFor(purpose: string): Buffer {
         let key = this.purposeKeys.get(purpose);
         if (!key) {

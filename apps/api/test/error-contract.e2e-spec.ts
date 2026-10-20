@@ -6,6 +6,8 @@ import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { MiB } from "../src/common/upload";
+import { PrismaService } from "../src/common/prisma/prisma.service";
+import { enablePortalModule } from "./support/portal-modules";
 
 jest.setTimeout(120_000);
 
@@ -50,6 +52,11 @@ describe("Error contract (e2e)", () => {
             });
         expect(portalRes.status).toBe(201);
         employeeCookies = extractCookies(portalRes);
+        await enablePortalModule(
+            app.get(PrismaService),
+            portalRes.body.portal.id as string,
+            "finance"
+        );
     });
 
     afterAll(async () => {

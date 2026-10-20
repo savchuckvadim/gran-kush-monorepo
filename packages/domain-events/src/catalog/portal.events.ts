@@ -21,3 +21,18 @@ export const portalFounded = defineEvent({
     publicPayload: [],
     description: "A club was founded by an account that became its owner",
 });
+
+/** A pluggable module (finance, later booking) was switched on or off: menus follow it. */
+export const portalModuleChanged = defineEvent({
+    name: "portal.module_changed",
+    version: 1,
+    scope: "portal",
+    aggregate: "portal",
+    payload: z.object({
+        module: z.string().min(1),
+        enabled: z.boolean(),
+    }),
+    audience: { staff: { permission: null } },
+    publicPayload: ["module", "enabled"],
+    description: "A portal module was enabled or disabled",
+});

@@ -28,7 +28,7 @@ Holded) — [finance-requirements](finance-requirements.md). Уточнение 
 **Серверное envelope-шифрование, а не end-to-end** (вариант «попроще», Вадим 2026-10-20).
 
 - У портала свой ключ данных (DEK, 32 байта), завёрнутый мастер-ключом (`ENCRYPTION_MASTER_KEY`, KEK);
-  хранится в `portal_keys (portal_id, purpose='finance', wrapped_dek, kek_version)`. Ротация KEK —
+  хранится в `portal_data_keys (portal_id, purpose, version, wrapped_key, kek_version)`. Ротация KEK —
   перезавернуть DEK, данные не трогаем; ротация DEK — фоновая перешифровка портала.
 - Шифруются поля, по которым не фильтруем: сумма, базы и суммы налога, контрагент (имя, NIF), описание,
   заметки, IBAN реквизитов, вложения (чеки, фактуры — шифруются перед записью в storage). В открытом
@@ -92,18 +92,31 @@ Verifactu 2027, возможно 2028).
 
 ## Задачи
 
-### TASK-796: организация и фискальный профиль `[ ]` P0
+### TASK-796: организация и фискальный профиль `[x]` P0
 
-- [ ] `OrganizationProfile`: юридическое имя, форма (asociación / autónomo / SL / другое), NIF/CIF,
-      адрес регистрации, страна, IBAN (шифр.), контакт gestor, фискальный год, валюта, логотип для
-      документов; `taxRegime` (IVA general / exento / no sujeto / recargo), `irpfRegime` (none /
-      directa simplificada / directa normal), `withholdingDefault` (% удержания у профессионалов)
-- [ ] Пресет по типу портала (`PortalTypeEnum`): клуб → asociación + IVA exento; студии → autónomo +
-      IVA general; владелец меняет
-- [ ] Настройки CRM: раздел «Организация и налоги» в `settings-hub` (права `finance.admin`);
-      валидация NIF/CIF (контрольная цифра), IBAN
-- [ ] Реквизиты в документах: фактуры (TASK-801), consentimiento (TASK-757), письма участникам
-- [ ] e2e: права, пресеты по типу портала, валидация
+Сделано 2026-10-20.
+
+- [x] Подключаемые модули портала: `portal_modules (portal_id, code)`, каталог в коде
+      (`portal-module.catalog.ts`, пока `finance`), `CrmAuth({ module: "finance" })` → 403
+      `module_disabled`, событие `portal.module_changed`, `modules[]` в сведениях о клубе. Включает и
+      выключает `settings.club`, данные при выключении остаются; клубам с проводками миграция включила модуль
+- [x] Ключ портала: `portal_data_keys (portal_id, purpose, version)` — DEK, завёрнутый ключом из
+      `ENCRYPTION_MASTER_KEY` (HKDF по цели); `PortalCipherService` — строка `pc1.<версия>.<iv>.<tag>.<шифр>`,
+      AAD `portal|purpose|context`, blind index (HMAC) для поиска по NIF
+- [x] `OrganizationProfile`: форма (asociación / autónomo / SL / другое), IVA (general / exento /
+      recargo de equivalencia), налог на прибыль (IS частично освобождённой / IS / IRPF directa
+      simplificada / normal / módulos), «цены с налогом», начало года (у autónomo всегда январь, art. 12
+      LIRPF), ES / EUR; реквизиты (название, NIF/CIF, адрес, IBAN, контакты, gestor) — одним шифром
+- [x] Пресет по типу портала до первого сохранения: клуб → asociación + IS частично освобождённой, студии →
+      autónomo + estimación directa simplificada; IVA по умолчанию general (exento клуб выбирает с gestor)
+- [x] Проверки API с кодом поля: NIF/NIE/CIF по контрольному знаку и форме (ассоциация — G, SL — B или A,
+      autónomo — NIF/NIE), IBAN (mod 97), режим налога по форме; право `finance.admin` (owner, admin)
+- [x] CRM: «Финансы» — предложение подключить → шаг настройки с пресетом → учёт; `/crm/finance/settings`
+      «Организация и налоги» (без `finance.admin` — чтение) и отключение модуля; вкладка «Модули» в
+      настройках; меню и формы обновляются по событиям
+- [x] e2e `finance-organization`: модуль и права, пресеты, шифр в базе, изоляция клубов, autónomo
+- [ ] Перенесено: реквизиты в документах — TASK-801 (фактуры) и TASK-757 (consentimiento); логотип для
+      документов — TASK-801; `withholdingDefault` — TASK-805
 
 ### TASK-797: налог в товарах, услугах и заказах `[ ]` P0
 
@@ -119,8 +132,8 @@ Verifactu 2027, возможно 2028).
 
 ### TASK-798: издержки и доходы — реестр проводок с импортом таблицей `[ ]` P0
 
-- [ ] `portal_keys` + `FinanceCipherService` (DEK на портал, envelope над `EncryptionService`);
-      шифрованные поля как `bytea` + `scheme`, `key_version`
+- [x] Ключ портала и шифр — в TASK-796 (`portal_data_keys`, `PortalCipherService`); поля проводок —
+      строка `pc1.…` с версией ключа внутри, суммы тоже шифром
 - [ ] Модели `FinanceCategory` (пресет категорий с кодами PGC для клуба и для студии), `Counterparty`,
       `LedgerEntry`, `FinancePeriod`; миграция данных из `FinancialTransaction` (с шифрованием), старые
       эндпоинты отвечают из новой модели до переключения CRM

@@ -336,17 +336,23 @@ describe("Domain events (e2e)", () => {
             attemptsMade: 1,
             opts: { attempts: 5 },
         } as unknown as Job<DeliverJobData>;
+        // воркер приложения доставляет это же событие параллельно: ждём его отметки, иначе обе
+        // доставки увидят «ещё не доставлено» (гарантия — at-least-once, потребители идемпотентны)
+        const deliveryKey = { eventId: event.id, consumer: ProbeConsumer.name };
+        for (let i = 0; i < 50; i++) {
+            const row = await prisma.domainEventDelivery.findUnique({
+                where: { eventId_consumer: deliveryKey },
+            });
+            if (row?.deliveredAt) break;
+            await new Promise((resolve) => setTimeout(resolve, 100));
+        }
         const processor = app.get(DomainEventsProcessor);
         const probe = app.get(ProbeConsumer);
-        const before = probe.received.filter((id) => id === event.id).length;
 
         await processor.process(job);
         await processor.process(job);
 
-        expect(probe.received.filter((id) => id === event.id).length).toBeLessThanOrEqual(1);
-        expect(before + 1).toBeGreaterThanOrEqual(
-            probe.received.filter((id) => id === event.id).length
-        );
+        expect(probe.received.filter((id) => id === event.id)).toHaveLength(1);
         const delivery = await prisma.domainEventDelivery.findUniqueOrThrow({
             where: { eventId_consumer: { eventId: event.id, consumer: ProbeConsumer.name } },
         });
