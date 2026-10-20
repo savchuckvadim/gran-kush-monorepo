@@ -94,9 +94,20 @@ describe("decodeDataUrl / validateDataUrl", () => {
         ["без префикса", PNG.toString("base64")],
         ["не base64", "data:image/png;base64,not base64!!"],
         ["без полезной нагрузки", "data:image/png;base64,"],
+        ["только =", "data:image/png;base64,=="],
+        ["= в середине", "data:image/png;base64,AA==AA"],
         ["url-encoded вместо base64", "data:image/png,%89PNG"],
+        ["две запятые", "data:image/png;base64,AAAA,AAAA"],
     ])("отклоняет %s", (_, url) => {
         expect(() => decodeDataUrl(url)).toThrow(BadRequestException);
+    });
+
+    it("файл в несколько мегабайт разбирается без переполнения стека и режется по лимиту", () => {
+        const big = Buffer.concat([PNG, Buffer.alloc(UPLOAD_LIMITS.documentBytes + 1)]);
+        const url = dataUrl("image/png", big);
+
+        expect(decodeDataUrl(url).length).toBe(big.length);
+        expect(() => validateDataUrl(url, "document")).toThrow(/exceeds/);
     });
 });
 

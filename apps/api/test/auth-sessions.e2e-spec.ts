@@ -121,6 +121,31 @@ describe("Auth sessions (e2e)", () => {
         expect(responses.find((r) => r.status === 401)?.body.code).toBe("refresh_superseded");
     });
 
+    it("many tabs refreshing at once: one new pair of cookies, the rest wait and reuse it", async () => {
+        const TABS = 8;
+        const issued = cookieHeader(await login());
+
+        const responses = await Promise.all(Array.from({ length: TABS }, () => refresh(issued)));
+        const winners = responses.filter((r) => r.status === 201);
+        const losers = responses.filter((r) => r.status === 401);
+
+        expect(winners).toHaveLength(1);
+        expect(losers).toHaveLength(TABS - 1);
+        for (const loser of losers) {
+            expect(loser.body.code).toBe("refresh_superseded");
+            // the losing tabs keep their cookies: the browser already holds the winner's pair
+            expect(setCookies(loser)).toHaveLength(0);
+        }
+        // every tab then speaks with the single new pair from the shared cookie jar
+        const next = cookieHeader(winners[0]);
+        expect((await me(next)).status).toBe(200);
+        expect((await refresh(next)).status).toBe(201);
+        const row = await prisma.authSession.findFirst({
+            where: { userId: ownerId, revokedAt: { not: null } },
+        });
+        expect(row).toBeNull();
+    });
+
     it("a refresh token replayed after the grace window ends the whole session", async () => {
         const session = await crmSession(app, ownerId);
         const rotated = await refresh(session.refreshCookie);

@@ -406,18 +406,44 @@ describe("Realtime gateway (e2e)", () => {
     });
 
     describe("разрыв соединения", () => {
-        it("отзыв сессии рвёт её сокет", async () => {
+        it("отзыв сессии рвёт все её сокеты — каждую вкладку", async () => {
             const session = await cabinetSession(
                 app,
                 (await prisma.member.findUniqueOrThrow({ where: { id: memberId } })).userId
             );
-            const socket = connect("cabinet", { token: session.accessToken, portal: clubA.slug });
-            await connected(socket);
-            const closed = disconnectedByServer(socket);
+            const tabs = [1, 2, 3].map(() =>
+                connect("cabinet", { token: session.accessToken, portal: clubA.slug })
+            );
+            await Promise.all(tabs.map(connected));
+            const closed = tabs.map((socket) => disconnectedByServer(socket));
 
             await app.get(SessionsService).end(session.sessionId, "logout");
 
-            expect(await closed).toBe("io server disconnect");
+            expect(await Promise.all(closed)).toEqual(
+                Array(tabs.length).fill("io server disconnect")
+            );
+        });
+
+        it("другая сессия того же человека остаётся на связи", async () => {
+            const userId = (await prisma.member.findUniqueOrThrow({ where: { id: memberId } }))
+                .userId;
+            const phone = await cabinetSession(app, userId);
+            const laptop = await cabinetSession(app, userId);
+            const phoneSocket = connect("cabinet", {
+                token: phone.accessToken,
+                portal: clubA.slug,
+            });
+            const laptopSocket = connect("cabinet", {
+                token: laptop.accessToken,
+                portal: clubA.slug,
+            });
+            await Promise.all([connected(phoneSocket), connected(laptopSocket)]);
+            const laptopClosed = disconnectedByServer(laptopSocket, SILENCE_MS);
+
+            await app.get(SessionsService).end(phone.sessionId, "logout");
+
+            expect(await disconnectedByServer(phoneSocket)).toBe("io server disconnect");
+            expect(await laptopClosed).toBeNull();
         });
 
         it("новые права роли — сотрудник переподключается с ними", async () => {

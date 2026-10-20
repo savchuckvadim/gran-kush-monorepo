@@ -54,22 +54,44 @@ export const validateUpload = (buffer: Buffer, kind: UploadKind): ValidatedUploa
     return { buffer, mime, extension: EXTENSION_BY_MIME[mime] };
 };
 
-const DATA_URL =
-    /^data:(?<mime>[\w.+-]+\/[\w.+-]+)(?:;[\w-]+=[\w-]+)*;base64,(?<payload>[A-Za-z0-9+/]+={0,2})$/u;
+/** Заголовок до запятой: `data:<mime>[;param=value]*;base64` */
+const DATA_URL_HEADER = /^data:(?<mime>[\w.+-]+\/[\w.+-]+)(?:;[\w-]+=[\w-]+)*;base64$/u;
+
+const isBase64Char = (code: number): boolean =>
+    (code >= 48 && code <= 57) || // 0-9
+    (code >= 65 && code <= 90) || // A-Z
+    (code >= 97 && code <= 122) || // a-z
+    code === 43 || // +
+    code === 47; // /
 
 /**
- * `data:<mime>;base64,<payload>` → байты. Заявленный `<mime>` отбрасывается: см. `validateUpload`.
- * Полезная нагрузка проверяется как base64 целиком — `Buffer.from(…, "base64")` молча
- * пропускает посторонние символы, и мусор превращался бы в «файл».
+ * Полезная нагрузка проверяется посимвольно, а не регулярным выражением: на строке в несколько
+ * мегабайт регулярка переполняла стек V8 («Maximum call stack size exceeded» на Linux в CI,
+ * 2026-10-20), и файл чуть больше лимита отвечал 500 вместо 400. Разрешены только символы base64
+ * и до двух `=` в конце — `Buffer.from(…, "base64")` молча пропускает посторонние символы, и
+ * мусор превращался бы в «файл».
  */
+const isBase64Payload = (payload: string): boolean => {
+    let end = payload.length;
+    while (end > 0 && end > payload.length - 2 && payload.charCodeAt(end - 1) === 61) end -= 1; // =
+    if (end === 0) return false;
+    for (let i = 0; i < end; i += 1) {
+        if (!isBase64Char(payload.charCodeAt(i))) return false;
+    }
+    return true;
+};
+
+/** `data:<mime>;base64,<payload>` → байты. Заявленный `<mime>` отбрасывается: см. `validateUpload`. */
 export const decodeDataUrl = (dataUrl: string): Buffer => {
-    const match = DATA_URL.exec(dataUrl);
-    if (!match?.groups?.payload) {
+    const comma = dataUrl.indexOf(",");
+    const header = comma === -1 ? "" : dataUrl.slice(0, comma);
+    const payload = comma === -1 ? "" : dataUrl.slice(comma + 1);
+    if (!DATA_URL_HEADER.test(header) || !isBase64Payload(payload)) {
         throw new BadRequestException(
             "Invalid file format. Expected data URL with base64 payload."
         );
     }
-    return Buffer.from(match.groups.payload, "base64");
+    return Buffer.from(payload, "base64");
 };
 
 export const validateDataUrl = (dataUrl: string, kind: UploadKind): ValidatedUpload =>
