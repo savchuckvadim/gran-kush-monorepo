@@ -42,6 +42,7 @@ export class OrderStagePrismaRepository extends OrderStageRepository {
         toStageId: string;
         stagePosition?: number;
         restock?: readonly StockLine[];
+        restockedBy?: string | null;
         events?: readonly NewDomainEvent[];
     }): Promise<boolean> {
         const order = await this.prisma.order.findFirst({
@@ -56,7 +57,12 @@ export class OrderStagePrismaRepository extends OrderStageRepository {
                 data: { stageId: input.toStageId, stagePosition: input.stagePosition },
             });
             if (count !== 1) return false;
-            if (input.restock?.length) await returnStock(tx, input.portalId, input.restock);
+            if (input.restock?.length) {
+                await returnStock(tx, input.portalId, input.restock, {
+                    orderId: input.orderId,
+                    employeeId: input.restockedBy ?? null,
+                });
+            }
             if (input.events?.length) await this.events.publishMany(tx, input.events);
             return true;
         });

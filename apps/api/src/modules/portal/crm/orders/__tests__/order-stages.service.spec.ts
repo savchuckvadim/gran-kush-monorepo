@@ -38,6 +38,7 @@ describe("OrderStagesService — стадии заказа", () => {
             toStageId: PREPARING.id,
             stagePosition: -42,
             restock: undefined,
+            restockedBy: "emp-1",
             events: [
                 {
                     name: "order.stage_changed",
@@ -115,12 +116,13 @@ describe("OrderStagesService — стадии заказа", () => {
 
         await service.moveToStage("order-1", CANCELLED.id, "emp-1", PORTAL);
 
-        // возврат на склад уходит в ту же транзакцию, что и смена стадии
+        // возврат на склад уходит в ту же транзакцию, что и смена стадии; в журнале — кто вернул
         expect(repository.compareAndSetStage).toHaveBeenCalledTimes(1);
         expect(repository.compareAndSetStage).toHaveBeenCalledWith(
             expect.objectContaining({
                 toStageId: CANCELLED.id,
                 restock: [{ productId: "product-1", quantity: 2 }],
+                restockedBy: "emp-1",
             })
         );
         expect(repository.update).toHaveBeenCalledWith(
@@ -207,10 +209,12 @@ describe("OrderStagesService — стадии заказа", () => {
         await service.cancelOrderByMember("order-1", "member-1", PORTAL, "передумал");
 
         expect(repository.findFunnelStages).toHaveBeenCalledWith(PORTAL, FUNNEL);
+        // отмена из кабинета: товар вернул участник, сотрудника в журнале нет
         expect(repository.compareAndSetStage).toHaveBeenCalledWith(
             expect.objectContaining({
                 toStageId: CANCELLED.id,
                 restock: [{ productId: "product-1", quantity: 2 }],
+                restockedBy: null,
             })
         );
     });

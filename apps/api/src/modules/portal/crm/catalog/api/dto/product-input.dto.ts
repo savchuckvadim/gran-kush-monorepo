@@ -180,11 +180,26 @@ export class UpdateProductDto {
     @Min(0)
     initialQuantity?: number;
 
-    @ApiPropertyOptional({ example: 500.0, type: Number })
+    @ApiPropertyOptional({
+        example: 500.0,
+        type: Number,
+        description:
+            "Новый остаток: разница записывается движением «пересчёт» с причиной stockNote",
+    })
     @IsOptional()
     @IsNumber({ maxDecimalPlaces: 3 })
     @Min(0)
     currentQuantity?: number;
+
+    @ApiPropertyOptional({
+        type: String,
+        example: "Инвентаризация",
+        description: "Причина правки остатка",
+    })
+    @IsOptional()
+    @IsString()
+    @MaxLength(500)
+    stockNote?: string;
 
     @ApiPropertyOptional({ example: 10.0, type: Number, nullable: true })
     @IsOptional()

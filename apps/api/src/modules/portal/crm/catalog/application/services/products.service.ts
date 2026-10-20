@@ -11,6 +11,7 @@ import {
     ProductRepository,
 } from "@modules/portal/crm/catalog/domain/repositories/product-repository.interface";
 import { TaxRatesService } from "@modules/portal/crm/finance/application/services/tax-rates.service";
+import { StockService } from "@modules/portal/crm/stock/application/services/stock.service";
 
 import { productChangedEvents } from "../events/product-events";
 
@@ -22,7 +23,8 @@ export class ProductsService {
         private readonly productRepository: ProductRepository,
         private readonly categoryRepository: ProductCategoryRepository,
         private readonly unitRepository: MeasurementUnitRepository,
-        private readonly taxRates: TaxRatesService
+        private readonly taxRates: TaxRatesService,
+        private readonly stock: StockService
     ) {}
 
     async findById(id: string, portalId: string): Promise<Product | null> {
@@ -155,6 +157,8 @@ export class ProductsService {
             limitGramsPerUnit: number | null;
             taxRateId: string | null;
             priceIncludesTax: boolean | null;
+            /** Причина правки остатка (TASK-804): без неё остаток не меняется */
+            stockNote: string;
         }>,
         portalId: string,
         employeeId: string
@@ -199,8 +203,6 @@ export class ProductsService {
         if (dto.price !== undefined) data.price = new Prisma.Decimal(dto.price);
         if (dto.initialQuantity !== undefined)
             data.initialQuantity = new Prisma.Decimal(dto.initialQuantity);
-        if (dto.currentQuantity !== undefined)
-            data.currentQuantity = new Prisma.Decimal(dto.currentQuantity);
         if (dto.minQuantity !== undefined)
             data.minQuantity =
                 dto.minQuantity !== null ? new Prisma.Decimal(dto.minQuantity) : null;
@@ -217,11 +219,23 @@ export class ProductsService {
         if (dto.taxRateId !== undefined) data.taxRateId = dto.taxRateId;
         if (dto.priceIncludesTax !== undefined) data.priceIncludesTax = dto.priceIncludesTax;
 
+        // остаток правится только движением склада с причиной: журнал остаётся полным
+        if (dto.currentQuantity !== undefined) {
+            const delta = dto.currentQuantity - Number(product.currentQuantity);
+            if (delta !== 0) {
+                await this.stock.moveManually(portalId, employeeId, {
+                    productId: id,
+                    reason: "recount",
+                    quantity: delta,
+                    note: dto.stockNote ?? "",
+                });
+            }
+        }
         return this.productRepository.update(
             id,
             data,
             productChangedEvents(portalId, id, "updated", employeeId, {
-                stockChanged: dto.currentQuantity !== undefined || dto.isAvailable !== undefined,
+                stockChanged: dto.isAvailable !== undefined,
             })
         );
     }

@@ -45,6 +45,8 @@ export class OrderItem {
     taxTreatment?: TaxTreatment | null;
     netAmount?: Decimal | null;
     taxAmount?: Decimal | null;
+    /** Себестоимость единицы на момент заказа (TASK-804); пусто — поставок товара не было */
+    unitCost?: Decimal | null;
 
     // Примечания
     notes?: string | null;

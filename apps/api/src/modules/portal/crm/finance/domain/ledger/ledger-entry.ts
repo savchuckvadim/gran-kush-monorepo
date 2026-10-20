@@ -51,6 +51,7 @@ export const LEDGER_SOURCES = {
     orderSale: "order_sale",
     import: "import",
     reversal: "reversal",
+    purchase: "purchase",
     legacy: "legacy",
 } as const;
 export type LedgerSource = (typeof LEDGER_SOURCES)[keyof typeof LEDGER_SOURCES];
@@ -110,9 +111,11 @@ export const reversedSecret = (secret: LedgerSecret): LedgerSecret => ({
 export const normalizeDocumentNumber = (raw: string): string =>
     raw.toUpperCase().replace(/[^A-Z0-9]/g, "");
 
-/** Проводки из заказа и сторно ведёт система: их меняет заказ, а не правка в учёте. */
+/** Проводки из заказа, поставки и сторно ведёт система: их меняет источник, а не правка в учёте. */
 export const isSystemEntry = (entry: Pick<LedgerEntry, "sourceType">): boolean =>
-    entry.sourceType === LEDGER_SOURCES.orderSale || entry.sourceType === LEDGER_SOURCES.reversal;
+    entry.sourceType === LEDGER_SOURCES.orderSale ||
+    entry.sourceType === LEDGER_SOURCES.purchase ||
+    entry.sourceType === LEDGER_SOURCES.reversal;
 
 /** Коды отказа для CRM: подсветить поле или действие, а не показывать текст API. */
 export const LEDGER_ERRORS = {

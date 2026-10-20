@@ -15,6 +15,7 @@ import { useProductDetail, useUpdateProduct } from "@/modules/entities/product";
 import { AudiencePicker, ProductTaxFields } from "@/modules/features/products";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
+import { ProductStockCard } from "@/modules/widgets/stock";
 
 import { ProductInfo } from "./product-info";
 
@@ -58,16 +59,19 @@ export function ProductDetailCard({ productId }: ProductDetailCardProps) {
     }, [product]);
 
     const handleSave = useCallback(async () => {
+        // остаток меняется только движением склада с причиной: неизменённый остаток не шлём
+        const { currentQuantity, stockNote, ...rest } = form;
+        const stockChanged = currentQuantity !== Number(product?.currentQuantity ?? 0);
         try {
             await updateMutation.mutateAsync({
                 id: productId,
-                data: form,
+                data: stockChanged ? { ...rest, currentQuantity, stockNote } : rest,
             });
             setIsEditing(false);
         } catch {
             // Ошибка обрабатывается в mutation state
         }
-    }, [updateMutation, productId, form]);
+    }, [updateMutation, productId, form, product]);
 
     const handleChange = useCallback(
         (field: keyof SchemaUpdateProductDto, value: string | number | boolean) => {
@@ -197,6 +201,15 @@ export function ProductDetailCard({ productId }: ProductDetailCardProps) {
                                 }
                             />
                         </div>
+                        {form.currentQuantity !== Number(product.currentQuantity) && (
+                            <FieldInput
+                                label={t("stockNote")}
+                                helperText={t("stockNoteHint")}
+                                required
+                                value={form.stockNote ?? ""}
+                                onChange={(e) => handleChange("stockNote", e.target.value)}
+                            />
+                        )}
 
                         <ProductTaxFields
                             value={{
@@ -278,6 +291,16 @@ export function ProductDetailCard({ productId }: ProductDetailCardProps) {
                     <ProductInfo product={product} />
                 )}
             </Card>
+            {!isEditing && (
+                <ProductStockCard
+                    product={{
+                        id: product.id,
+                        name: product.name,
+                        currentQuantity: Number(product.currentQuantity),
+                        unitCode: product.measurementUnit?.code ?? "",
+                    }}
+                />
+            )}
         </div>
     );
 }

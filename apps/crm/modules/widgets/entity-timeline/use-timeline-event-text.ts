@@ -7,7 +7,15 @@ import type { TimelineEvent } from "@/modules/entities/timeline";
 
 const PAYMENT_STATUSES = new Set(["paid", "pending", "refunded"]);
 const PRODUCT_CHANGES = new Set(["created", "updated", "deleted"]);
-const STOCK_REASONS = new Set(["order_placed", "order_cancelled", "manual"]);
+const STOCK_REASONS = new Set([
+    "order_placed",
+    "order_cancelled",
+    "manual",
+    "purchase",
+    "write_off",
+    "recount",
+    "gift",
+]);
 const MODULES = new Set(["finance"]);
 const LEDGER_SOURCES = new Set(["manual", "order_sale", "import", "reversal", "legacy"]);
 const LEDGER_DIRECTIONS = new Set(["income", "expense", "transfer"]);

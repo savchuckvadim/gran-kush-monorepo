@@ -450,7 +450,9 @@
                 "cbd": "CBD",
                 "strain": "Strain",
                 "limitGramsPerUnit": "Counts per unit",
-                "notInLimit": "Does not count"
+                "notInLimit": "Does not count",
+                "stockNote": "Reason for the stock change",
+                "stockNoteHint": "The difference goes to the stock journal as a recount"
             },
             "audiences": {
                 "label": "Shown in the cabinet to",
@@ -846,7 +848,8 @@
                 "entries": "Entries",
                 "expenses": "Expenses",
                 "counterparties": "Counterparties",
-                "periods": "Months"
+                "periods": "Months",
+                "stock": "Stock"
             },
             "actions": {
                 "income": "Income",
@@ -2192,7 +2195,11 @@
                     "deleted": "Product deleted",
                     "stock_order_placed": "Stock went down: order",
                     "stock_order_cancelled": "Stock returned: order cancelled",
-                    "stock_manual": "Stock changed by hand"
+                    "stock_manual": "Stock changed by hand",
+                    "stock_purchase": "Purchase: stock went up",
+                    "stock_write_off": "Written off from stock",
+                    "stock_recount": "Stock recounted",
+                    "stock_gift": "Gift: stock went down"
                 },
                 "unknown": "Event",
                 "portal": {
@@ -2274,6 +2281,161 @@
             "searching": "Searching…",
             "empty": "Nobody found",
             "inactive": "inactive"
+        },
+        "stock": {
+            "actions": {
+                "purchase": "Purchase",
+                "move": "Write-off"
+            },
+            "sections": {
+                "purchases": "Purchases",
+                "moves": "Moves",
+                "margin": "Margin"
+            },
+            "reasons": {
+                "purchase": "Purchase",
+                "order_placed": "Order",
+                "order_cancelled": "Order returned",
+                "write_off": "Write-off",
+                "recount": "Recount",
+                "gift": "Gift",
+                "initial": "Opening stock"
+            },
+            "errors": {
+                "stock_quantity_positive": "The quantity must be above zero",
+                "stock_insufficient": "Not that much in stock",
+                "stock_product_not_found": "Product not found",
+                "stock_note_required": "Give a reason"
+            },
+            "purchase": {
+                "title": "Goods purchase",
+                "hint": "The stock receipt and the expense in the ledger are recorded together. The product cost becomes a weighted average.",
+                "fields": {
+                    "product": "Product",
+                    "quantity": "Quantity, {unit}",
+                    "unitCost": "Unit price, €",
+                    "counterparty": "Supplier",
+                    "receivedOn": "Received on",
+                    "quantityPlain": "Quantity"
+                },
+                "unitCostHint": "Without VAT",
+                "total": "Purchase total without tax: {total}",
+                "counterpartyHint": "Optional: needed when there is a supplier invoice",
+                "noCounterparty": "No supplier",
+                "cancel": "Cancel",
+                "save": "Receive",
+                "saving": "Receiving…",
+                "done": "Received, stock {quantity}",
+                "doneWithLedger": "Received, stock {quantity}; the expense went to the ledger",
+                "errors": {
+                    "product": "Choose a product",
+                    "quantity": "A quantity above zero",
+                    "cost": "A price of zero or more",
+                    "date": "Set a date"
+                }
+            },
+            "move": {
+                "title": "Write-off or recount",
+                "hint": "Stock changes only with a reason: it stays in the stock journal.",
+                "fields": {
+                    "product": "Product",
+                    "reason": "Reason",
+                    "quantity": "Quantity to write off, {unit}",
+                    "newQuantity": "New stock, {unit}",
+                    "note": "Explanation",
+                    "quantityPlain": "Quantity to write off",
+                    "newQuantityPlain": "New stock"
+                },
+                "reasons": {
+                    "write_off": "Write-off (damage, spoilage)",
+                    "gift": "Gift",
+                    "recount": "Recount after inventory"
+                },
+                "reasonHint": {
+                    "write_off": "Expense at the average cost",
+                    "gift": "Given away: left the stock, no revenue",
+                    "recount": "Enter what is really there"
+                },
+                "current": "In stock now: {quantity} {unit}",
+                "notePlaceholder": "Dried out, written off",
+                "cancel": "Cancel",
+                "save": "Record",
+                "saving": "Recording…",
+                "done": "Recorded, stock {balance} {unit}",
+                "errors": {
+                    "product": "Choose a product",
+                    "quantity": "A quantity above zero",
+                    "note": "Give a reason",
+                    "tooLong": "Too long"
+                }
+            },
+            "moves": {
+                "title": "Stock moves",
+                "hint": "Every stock change: orders, purchases, write-offs. A row opens its order.",
+                "empty": "No moves yet",
+                "system": "System",
+                "columns": {
+                    "when": "When",
+                    "reason": "What",
+                    "quantity": "Qty",
+                    "unitCost": "Cost",
+                    "balance": "Stock",
+                    "who": "Who",
+                    "product": "Product"
+                },
+                "total": "{count, plural, one {# move} other {# moves}}"
+            },
+            "purchases": {
+                "title": "Purchases",
+                "hint": "What was bought and at what price; a purchase with an entry opens its expense in the ledger.",
+                "empty": "No purchases in the period",
+                "columns": {
+                    "date": "Date",
+                    "product": "Product",
+                    "quantity": "Qty",
+                    "unitCost": "Price",
+                    "total": "Total",
+                    "counterparty": "Supplier"
+                },
+                "total": "{count, plural, one {# purchase} other {# purchases}}"
+            },
+            "margin": {
+                "revenue": "Revenue",
+                "revenueHint": "Without tax, paid orders",
+                "cost": "Cost of sales",
+                "marginLabel": "Margin",
+                "percent": "{value} % of revenue",
+                "unknown": "Without cost",
+                "unknownHint": "Sales of products that never had a purchase",
+                "byProduct": "By product",
+                "byProductHint": "Most profitable on top, loss-making at the bottom: what eats the margin.",
+                "empty": "No sales in the period",
+                "noCost": "no cost",
+                "columns": {
+                    "product": "Product",
+                    "quantity": "Sold",
+                    "revenue": "Revenue",
+                    "cost": "Cost",
+                    "margin": "Margin"
+                }
+            },
+            "product": {
+                "title": "Stock",
+                "hint": "Stock and average cost from purchases; write-offs and recounts need a reason.",
+                "purchase": "Purchase",
+                "move": "Write-off",
+                "figures": "Now",
+                "quantity": "In stock",
+                "averageCost": "Average cost",
+                "stockValue": "Stock value"
+            }
+        },
+        "productSelect": {
+            "placeholder": "Choose a product",
+            "search": "Name or SKU…",
+            "searching": "Searching…",
+            "empty": "Nothing found",
+            "inStock": "In stock: {quantity} {unit}"
         }
     }
 }

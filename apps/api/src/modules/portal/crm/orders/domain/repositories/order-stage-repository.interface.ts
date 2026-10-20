@@ -24,6 +24,8 @@ export abstract class OrderStageRepository {
         /** Место карточки в новой колонке канбана (`records/domain/stage-position.ts`) */
         stagePosition?: number;
         restock?: readonly StockLine[];
+        /** Кто вернул товар на склад (журнал движений); отмена из кабинета — без сотрудника */
+        restockedBy?: string | null;
         events?: readonly NewDomainEvent[];
     }): Promise<boolean>;
 

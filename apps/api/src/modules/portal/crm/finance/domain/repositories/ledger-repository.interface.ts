@@ -1,6 +1,6 @@
 import type { FinanceAccount, LedgerDirection, LedgerDocumentType } from "@prisma/client";
 
-import type { EventsOf, NewDomainEvent } from "@modules/events";
+import type { EventsOf, NewDomainEvent, OutboxTransaction } from "@modules/events";
 
 import {
     type LedgerEntry,
@@ -116,6 +116,17 @@ export abstract class LedgerRepository {
         entries: readonly NewLedgerEntry[],
         events: EventsOf<number>
     ): Promise<number>;
+
+    /**
+     * Проводка внутри чужой транзакции (поставка товара пишет склад и расход вместе): те же
+     * проверки месяца, события пишет вызывающий в ту же транзакцию.
+     */
+    abstract createIn(
+        tx: OutboxTransaction,
+        portalId: string,
+        entry: NewLedgerEntry,
+        events: readonly NewDomainEvent[]
+    ): Promise<void>;
 
     abstract update(
         portalId: string,

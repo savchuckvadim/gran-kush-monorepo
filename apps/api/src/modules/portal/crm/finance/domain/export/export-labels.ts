@@ -35,6 +35,7 @@ export const SOURCE_WORDS: Record<LedgerSource, string> = {
     [LEDGER_SOURCES.orderSale]: "pedido",
     [LEDGER_SOURCES.import]: "importación",
     [LEDGER_SOURCES.reversal]: "rectificación",
+    [LEDGER_SOURCES.purchase]: "compra",
     [LEDGER_SOURCES.legacy]: "histórico",
 };
 

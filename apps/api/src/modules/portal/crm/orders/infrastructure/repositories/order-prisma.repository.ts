@@ -99,8 +99,6 @@ export class OrderPrismaRepository extends OrderRepository {
                     since: limitWindowStart(new Date()),
                 });
             }
-            await reserveStock(tx, member.portalId, data.items);
-
             const orderDef = await tx.entityDefinition.findUniqueOrThrow({
                 where: {
                     portalId_code: {
@@ -160,6 +158,17 @@ export class OrderPrismaRepository extends OrderRepository {
                 },
                 include: ORDER_INCLUDE,
             });
+            const costs = await reserveStock(tx, member.portalId, data.items, {
+                orderId: row.id,
+                employeeId: data.employeeId ?? null,
+            });
+            for (const item of row.items) {
+                const unitCost = costs.get(item.productId) ?? null;
+                if (unitCost !== null) {
+                    await tx.orderItem.update({ where: { id: item.id }, data: { unitCost } });
+                    item.unitCost = unitCost;
+                }
+            }
             const order = toOrderEntity(row);
             if (events) await this.events.publishMany(tx, events(order));
             return order;

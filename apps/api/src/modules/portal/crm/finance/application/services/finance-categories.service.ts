@@ -40,6 +40,10 @@ export class FinanceCategoriesService {
         return this.repository.list(portalId, { includeArchived });
     }
 
+    findByCode(portalId: string, code: string): Promise<FinanceCategory | null> {
+        return this.repository.findByCode(portalId, code);
+    }
+
     async findActive(portalId: string, id: string): Promise<FinanceCategory | null> {
         const category = await this.repository.findById(portalId, id);
         return category && !category.archivedAt ? category : null;

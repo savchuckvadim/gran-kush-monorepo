@@ -256,6 +256,8 @@ model Portal {
   counterparties        Counterparty[]
   ledgerEntries         LedgerEntry[]
   financePeriods        FinancePeriod[]
+  stockMoves            StockMove[]
+  purchases             Purchase[]
 
   @@index([name])
   @@index([status])
@@ -574,6 +576,8 @@ model Employee {
   ledgerEntries         LedgerEntry[]          @relation("LedgerEntryCreatedBy")
   voidedLedgerEntries   LedgerEntry[]          @relation("LedgerEntryVoidedBy")
   closedFinancePeriods  FinancePeriod[]        @relation("FinancePeriodClosedBy")
+  stockMoves            StockMove[]            @relation("StockMoveEmployee")
+  purchases             Purchase[]             @relation("PurchaseEmployee")
 
   @@unique([userId, portalId])
   @@index([portalId])
@@ -1459,6 +1463,8 @@ model Product {
   taxRateId         String?           @map("tax_rate_id")
   /// Цена с налогом или без (налог сверху); пусто — как в профиле организации
   priceIncludesTax  Boolean?          @map("price_includes_tax")
+  /// Средняя себестоимость единицы без налога (TASK-804); пусто — поставок ещё не было
+  averageCost       Decimal?          @map("average_cost") @db.Decimal(10, 4)
   createdAt         DateTime          @default(now()) @map("created_at")
   updatedAt         DateTime          @updatedAt @map("updated_at")
   createdBy         String?           @map("created_by")
@@ -1472,6 +1478,8 @@ model Product {
   images            ProductImage[]
   orderItems        OrderItem[]
   reviews           ProductReview[]
+  stockMoves        StockMove[]
+  purchases         Purchase[]
   createdByEmployee Employee?       @relation("ProductCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
   updatedByEmployee Employee?       @relation("ProductUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
 
@@ -1544,6 +1552,7 @@ model Order {
   employee     Employee?              @relation("OrderEmployee", fields: [employeeId], references: [id], onDelete: SetNull)
   items        OrderItem[]
   transactions FinancialTransaction[]
+  stockMoves   StockMove[]
 
   @@unique([portalId, orderNumber])
   @@index([portalId])
@@ -1572,6 +1581,8 @@ model OrderItem {
   taxTreatment TaxTreatment? @map("tax_treatment")
   netAmount    Decimal?      @map("net_amount") @db.Decimal(10, 2)
   taxAmount    Decimal?      @map("tax_amount") @db.Decimal(10, 2)
+  /// Себестоимость единицы на момент заказа (TASK-804); пусто — поставок не было
+  unitCost     Decimal?      @map("unit_cost") @db.Decimal(10, 4)
   notes        String?       @db.Text
   createdAt    DateTime      @default(now()) @map("created_at")
   updatedAt    DateTime      @updatedAt @map("updated_at")
@@ -1965,9 +1976,10 @@ model Counterparty {
   createdAt  DateTime         @default(now()) @map("created_at")
   updatedAt  DateTime         @updatedAt @map("updated_at")
 
-  portal  Portal        @relation(fields: [portalId], references: [id], onDelete: Cascade)
-  member  Member?       @relation(fields: [memberId], references: [id], onDelete: SetNull)
-  entries LedgerEntry[]
+  portal    Portal        @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  member    Member?       @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  entries   LedgerEntry[]
+  purchases Purchase[]
 
   @@unique([portalId, memberId])
   @@unique([portalId, nifIndex])
@@ -2016,6 +2028,7 @@ model LedgerEntry {
   reversal     LedgerEntry?     @relation("LedgerReversal")
   createdBy    Employee?        @relation("LedgerEntryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   voidedBy     Employee?        @relation("LedgerEntryVoidedBy", fields: [voidedById], references: [id], onDelete: SetNull)
+  purchase     Purchase?
 
   @@unique([portalId, sourceType, sourceId])
   @@index([portalId, occurredOn])
@@ -2041,4 +2054,82 @@ model FinancePeriod {
 
   @@unique([portalId, year, month])
   @@map("finance_periods")
+}
+
+// ========================
+// Stock moves and cost (TASK-804)
+// ========================
+
+/// Почему остаток изменился: поставка, заказ забрал или вернул, списание руками (брак, пересчёт,
+/// подарок) или первый остаток при заведении товара
+enum StockMoveReason {
+  purchase
+  order_placed
+  order_cancelled
+  write_off
+  recount
+  gift
+  initial
+
+  @@map("stock_move_reason")
+}
+
+/// Движение склада: сколько пришло (плюс) или ушло (минус) и по какой себестоимости единицы.
+/// Поставка — приход с ценой закупки; списание и продажа — по средней себестоимости товара на тот
+/// момент. Журнал нужен для маржи и для инвентаря (Ley 1/2002: инвентарь имущества ассоциации)
+model StockMove {
+  id           String          @id @default(uuid())
+  portalId     String          @map("portal_id")
+  productId    String          @map("product_id")
+  reason       StockMoveReason
+  /// Количество в единицах товара: приход со знаком плюс, расход — минус
+  quantity     Decimal         @db.Decimal(10, 3)
+  /// Себестоимость единицы в евро на момент движения
+  unitCost     Decimal         @map("unit_cost") @db.Decimal(10, 4)
+  /// Остаток после движения — так журнал читается без пересчёта
+  balanceAfter Decimal         @map("balance_after") @db.Decimal(10, 3)
+  orderId      String?         @map("order_id")
+  purchaseId   String?         @map("purchase_id")
+  /// Причина списания или пересчёта словами
+  note         String?         @db.VarChar(500)
+  employeeId   String?         @map("employee_id")
+  occurredAt   DateTime        @default(now()) @map("occurred_at")
+
+  portal   Portal    @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  product  Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  order    Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  purchase Purchase? @relation(fields: [purchaseId], references: [id], onDelete: SetNull)
+  employee Employee? @relation("StockMoveEmployee", fields: [employeeId], references: [id], onDelete: SetNull)
+
+  @@index([portalId, productId, occurredAt])
+  @@index([portalId, occurredAt])
+  @@map("stock_moves")
+}
+
+/// Поставка товара: приход на склад и расход в учёте одной транзакцией. Цена за единицу —
+/// база без IVA; себестоимость товара после поставки — средневзвешенная
+model Purchase {
+  id             String   @id @default(uuid())
+  portalId       String   @map("portal_id")
+  productId      String   @map("product_id")
+  quantity       Decimal  @db.Decimal(10, 3)
+  /// Цена закупки единицы без налога, евро
+  unitCost       Decimal  @map("unit_cost") @db.Decimal(10, 4)
+  /// Проводка расхода в реестре (пусто — финансы были выключены)
+  ledgerEntryId  String?  @unique @map("ledger_entry_id")
+  counterpartyId String?  @map("counterparty_id")
+  receivedOn     DateTime @map("received_on") @db.Date
+  employeeId     String?  @map("employee_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  portal       Portal        @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  product      Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  ledgerEntry  LedgerEntry?  @relation(fields: [ledgerEntryId], references: [id], onDelete: SetNull)
+  counterparty Counterparty? @relation(fields: [counterpartyId], references: [id], onDelete: SetNull)
+  employee     Employee?     @relation("PurchaseEmployee", fields: [employeeId], references: [id], onDelete: SetNull)
+  moves        StockMove[]
+
+  @@index([portalId, receivedOn])
+  @@index([portalId, productId])
+  @@map("purchases")
 }

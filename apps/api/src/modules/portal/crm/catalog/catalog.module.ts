@@ -14,9 +14,10 @@ import { ProductCategoryPrismaRepository } from "@modules/portal/crm/catalog/inf
 import { ProductPrismaRepository } from "@modules/portal/crm/catalog/infrastructure/repositories/product-prisma.repository";
 import { ClubPolicyModule } from "@modules/portal/crm/club-policy/club-policy.module";
 import { FinanceModule } from "@modules/portal/crm/finance/finance.module";
+import { StockModule } from "@modules/portal/crm/stock/stock.module";
 
 @Module({
-    imports: [PrismaModule, ClubPolicyModule, FinanceModule],
+    imports: [PrismaModule, ClubPolicyModule, FinanceModule, StockModule],
     providers: [
         // Services
         ProductsService,

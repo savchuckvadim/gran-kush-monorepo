@@ -11,16 +11,18 @@ interface LedgerPagerProps {
     totalPages: number;
     total: number;
     onPage: (page: number) => void;
+    /** Подпись счётчика («3 поставки»); по умолчанию — проводки */
+    countLabel?: string;
 }
 
 /** Листание реестра: страница из скольких и сколько проводок всего. */
-export function LedgerPager({ page, totalPages, total, onPage }: LedgerPagerProps) {
+export function LedgerPager({ page, totalPages, total, onPage, countLabel }: LedgerPagerProps) {
     const t = useTranslations("crm.finance.ledger");
-    if (totalPages <= 1)
-        return <p className="text-xs text-muted-foreground">{t("total", { count: total })}</p>;
+    const count = countLabel ?? t("total", { count: total });
+    if (totalPages <= 1) return <p className="text-xs text-muted-foreground">{count}</p>;
     return (
         <div className="flex items-center justify-between gap-2">
-            <span className="text-xs text-muted-foreground">{t("total", { count: total })}</span>
+            <span className="text-xs text-muted-foreground">{count}</span>
             <div className="flex items-center gap-1">
                 <Button
                     variant="ghost"

@@ -3552,6 +3552,79 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/crm/stock/products/{productId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Остаток и средняя себестоимость товара */
+        get: operations["CrmStock_state"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/stock/moves": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Журнал движений склада: новые сверху */
+        get: operations["CrmStock_moves"];
+        put?: never;
+        /** Списание, подарок или пересчёт — с причиной */
+        post: operations["CrmStock_move"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/stock/purchases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Поставки за период */
+        get: operations["CrmStock_purchases"];
+        put?: never;
+        /**
+         * Поставка: приход на склад и расход в учёте одной транзакцией
+         * @description Контрагент не обязателен. 409 period_closed — месяц учёта закрыт
+         */
+        post: operations["CrmStock_receive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/margin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Маржа периода по товарам: выручка без налога минус себестоимость продаж */
+        get: operations["CrmMargin_report"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/crm/settings/registration-links": {
         parameters: {
             query?: never;
@@ -6154,8 +6227,16 @@ export interface components {
             price?: number;
             /** @example 1000 */
             initialQuantity?: number;
-            /** @example 500 */
+            /**
+             * @description Новый остаток: разница записывается движением «пересчёт» с причиной stockNote
+             * @example 500
+             */
             currentQuantity?: number;
+            /**
+             * @description Причина правки остатка
+             * @example Инвентаризация
+             */
+            stockNote?: string;
             /** @example 10 */
             minQuantity?: number | null;
             /** @example /storage/products/img.jpg */
@@ -6789,6 +6870,11 @@ export interface components {
              * @example 6.73
              */
             taxAmount: number | null;
+            /**
+             * @description Себестоимость единицы на момент заказа (TASK-804); null — поставок не было
+             * @example 4.5
+             */
+            unitCost: number | null;
             product: components["schemas"]["OrderItemProductDto"];
         };
         OrderDetailDto: {
@@ -7221,7 +7307,7 @@ export interface components {
         /** @enum {string} */
         LedgerDocumentType: "invoice_received" | "invoice_issued" | "receipt" | "none";
         /** @enum {string} */
-        LedgerSource: "manual" | "order_sale" | "import" | "reversal" | "legacy";
+        LedgerSource: "manual" | "order_sale" | "import" | "reversal" | "purchase" | "legacy";
         LedgerLineDto: {
             /** @example 21 */
             percent: number;
@@ -7587,6 +7673,201 @@ export interface components {
             closedByName: string | null;
             /** @description Прошедший открытый месяц — его можно закрыть */
             closable: boolean;
+        };
+        StockStateDto: {
+            /** Format: uuid */
+            productId: string;
+            /** @description Единиц товара, до трёх знаков */
+            currentQuantity: number;
+            /** @description Средняя себестоимость единицы; null — поставок не было */
+            averageCost: number | null;
+            /** @description Остаток по себестоимости */
+            stockValue: number | null;
+        };
+        /** @enum {string} */
+        StockMoveReason: "purchase" | "order_placed" | "order_cancelled" | "write_off" | "recount" | "gift" | "initial";
+        StockMoveDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            productId: string;
+            productName: string;
+            reason: components["schemas"]["StockMoveReason"];
+            /** @description Приход — плюс, расход — минус */
+            quantity: number;
+            /** @description Себестоимость единицы на момент движения */
+            unitCost: number;
+            /** @description Единиц товара, до трёх знаков */
+            balanceAfter: number;
+            /** Format: uuid */
+            orderId: string | null;
+            /** Format: uuid */
+            purchaseId: string | null;
+            note: string | null;
+            /** @description Кто записал; система — null */
+            employeeName: string | null;
+            /** Format: date-time */
+            occurredAt: string;
+        };
+        PaginatedResponse_StockMoveDto: {
+            /** @description Array of items */
+            items: components["schemas"]["StockMoveDto"][];
+            /**
+             * @description Total number of items
+             * @example 100
+             */
+            total: number;
+            /**
+             * @description Current page number
+             * @example 1
+             */
+            page: number;
+            /**
+             * @description Items per page
+             * @example 10
+             */
+            limit: number;
+            /**
+             * @description Total number of pages
+             * @example 10
+             */
+            totalPages: number;
+        };
+        PurchaseDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            productId: string;
+            productName: string;
+            /** @description Единиц товара, до трёх знаков */
+            quantity: number;
+            /** @description Цена закупки единицы без налога */
+            unitCost: number;
+            /** @description Сумма поставки без налога */
+            total: number;
+            /** Format: uuid */
+            counterpartyId: string | null;
+            counterpartyName: string | null;
+            /**
+             * Format: uuid
+             * @description Проводка расхода в учёте
+             */
+            ledgerEntryId: string | null;
+            /** @example 2026-10-05 */
+            receivedOn: string;
+            employeeName: string | null;
+        };
+        PaginatedResponse_PurchaseDto: {
+            /** @description Array of items */
+            items: components["schemas"]["PurchaseDto"][];
+            /**
+             * @description Total number of items
+             * @example 100
+             */
+            total: number;
+            /**
+             * @description Current page number
+             * @example 1
+             */
+            page: number;
+            /**
+             * @description Items per page
+             * @example 10
+             */
+            limit: number;
+            /**
+             * @description Total number of pages
+             * @example 10
+             */
+            totalPages: number;
+        };
+        ReceivePurchaseDto: {
+            /** Format: uuid */
+            productId: string;
+            /**
+             * @description Единиц товара, до трёх знаков
+             * @example 100
+             */
+            quantity: number;
+            /**
+             * @description Цена закупки единицы без налога
+             * @example 4.5
+             */
+            unitCost: number;
+            /**
+             * Format: uuid
+             * @description Поставщик, если есть фактура
+             */
+            counterpartyId?: string | null;
+            /**
+             * @description Дата прихода
+             * @example 2026-10-05
+             */
+            receivedOn: string;
+        };
+        ReceivedPurchaseDto: {
+            /** Format: uuid */
+            purchaseId: string;
+            move: components["schemas"]["StockMoveDto"];
+            /**
+             * Format: uuid
+             * @description Проводка расхода; null — финансы выключены
+             */
+            ledgerEntryId: string | null;
+            stock: components["schemas"]["StockStateDto"];
+        };
+        /**
+         * @description write_off — брак, gift — подарок, recount — пересчёт
+         * @enum {string}
+         */
+        ManualStockMoveReason: "write_off" | "recount" | "gift";
+        ManualStockMoveDto: {
+            /** Format: uuid */
+            productId: string;
+            /** @description write_off — брак, gift — подарок, recount — пересчёт */
+            reason: components["schemas"]["ManualStockMoveReason"];
+            /**
+             * @description Сколько списать; у пересчёта — разница со знаком
+             * @example 2
+             */
+            quantity: number;
+            /**
+             * @description Причина обязательна
+             * @example Пересохло, списано
+             */
+            note: string;
+        };
+        MarginRowDto: {
+            /** Format: uuid */
+            productId: string;
+            productName: string;
+            /** Format: uuid */
+            categoryId: string;
+            categoryName: string;
+            /** @description Продано единиц */
+            quantity: number;
+            /** @description Выручка без налога */
+            revenue: number;
+            /** @description Себестоимость проданного; null — поставок не было */
+            cost: number | null;
+            /** @description Евро */
+            margin: number | null;
+            /** @description Маржа в процентах от выручки */
+            marginPercent: number | null;
+        };
+        MarginReportDto: {
+            from: string;
+            to: string;
+            /** @description Выручка строк с известной себестоимостью */
+            revenue: number;
+            /** @description Евро */
+            cost: number;
+            /** @description Евро */
+            margin: number;
+            /** @description Выручка строк без себестоимости — маржа неизвестна */
+            revenueWithoutCost: number;
+            /** @description Самые прибыльные сверху, убыточные снизу */
+            byProduct: components["schemas"]["MarginRowDto"][];
         };
         RegistrationLinkPrefillDto: {
             /** @example socio@example.com */
@@ -8274,6 +8555,18 @@ export type SchemaCategoryTotalsDto = components['schemas']['CategoryTotalsDto']
 export type SchemaAccountBalanceDto = components['schemas']['AccountBalanceDto'];
 export type SchemaFinanceOverviewDto = components['schemas']['FinanceOverviewDto'];
 export type SchemaFinancePeriodDto = components['schemas']['FinancePeriodDto'];
+export type SchemaStockStateDto = components['schemas']['StockStateDto'];
+export type SchemaStockMoveReason = components['schemas']['StockMoveReason'];
+export type SchemaStockMoveDto = components['schemas']['StockMoveDto'];
+export type SchemaPaginatedResponseStockMoveDto = components['schemas']['PaginatedResponse_StockMoveDto'];
+export type SchemaPurchaseDto = components['schemas']['PurchaseDto'];
+export type SchemaPaginatedResponsePurchaseDto = components['schemas']['PaginatedResponse_PurchaseDto'];
+export type SchemaReceivePurchaseDto = components['schemas']['ReceivePurchaseDto'];
+export type SchemaReceivedPurchaseDto = components['schemas']['ReceivedPurchaseDto'];
+export type SchemaManualStockMoveReason = components['schemas']['ManualStockMoveReason'];
+export type SchemaManualStockMoveDto = components['schemas']['ManualStockMoveDto'];
+export type SchemaMarginRowDto = components['schemas']['MarginRowDto'];
+export type SchemaMarginReportDto = components['schemas']['MarginReportDto'];
 export type SchemaRegistrationLinkPrefillDto = components['schemas']['RegistrationLinkPrefillDto'];
 export type SchemaCreateRegistrationLinkDto = components['schemas']['CreateRegistrationLinkDto'];
 export type SchemaRegistrationLinkCreatedByDto = components['schemas']['RegistrationLinkCreatedByDto'];
@@ -19819,6 +20112,311 @@ export interface operations {
             };
             /** @description Conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmStock_state: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                productId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StockStateDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmStock_moves: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                productId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_StockMoveDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmStock_move: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ManualStockMoveDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StockMoveDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmStock_purchases: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                productId?: string;
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_PurchaseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmStock_receive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReceivePurchaseDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceivedPurchaseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmMargin_report: {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MarginReportDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

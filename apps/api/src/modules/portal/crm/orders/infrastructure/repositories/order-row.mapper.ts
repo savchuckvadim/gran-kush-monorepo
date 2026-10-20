@@ -106,6 +106,7 @@ export const toOrderEntity = (row: OrderWithRelations): Order => {
                     taxTreatment: item.taxTreatment,
                     netAmount: item.netAmount,
                     taxAmount: item.taxAmount,
+                    unitCost: item.unitCost,
                     notes: item.notes,
                     createdAt: item.createdAt,
                     updatedAt: item.updatedAt,

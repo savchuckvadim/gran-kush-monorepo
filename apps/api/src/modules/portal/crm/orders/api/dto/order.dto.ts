@@ -139,6 +139,14 @@ export class OrderItemDto {
     @ApiProperty({ type: Number, nullable: true, example: 6.73, description: "Налог строки" })
     taxAmount: number | null;
 
+    @ApiProperty({
+        type: Number,
+        nullable: true,
+        example: 4.5,
+        description: "Себестоимость единицы на момент заказа (TASK-804); null — поставок не было",
+    })
+    unitCost: number | null;
+
     @ApiProperty({ type: () => OrderItemProductDto })
     product: OrderItemProductDto;
 }

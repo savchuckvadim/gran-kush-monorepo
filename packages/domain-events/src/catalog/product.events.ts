@@ -26,12 +26,20 @@ export const productStockChanged = defineEvent({
     aggregate: "product",
     payload: z.object({
         productId: z.string().min(1),
-        reason: z.enum(["order_placed", "order_cancelled", "manual"]),
+        reason: z.enum([
+            "order_placed",
+            "order_cancelled",
+            "manual",
+            "purchase",
+            "write_off",
+            "recount",
+            "gift",
+        ]),
         orderId: z.string().min(1).nullable(),
     }),
     audience: { staff: STAFF, members: true },
     /** Members only learn that availability may have changed, never why. */
     publicPayload: ["productId"],
     description:
-        "Stock of a product moved: an order took it, a cancellation returned it, staff edited it",
+        "Stock of a product moved: an order took it, a cancellation returned it, a purchase arrived, staff wrote it off or edited it",
 });

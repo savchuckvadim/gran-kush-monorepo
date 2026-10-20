@@ -3,7 +3,12 @@ import { Injectable } from "@nestjs/common";
 import { LedgerEntryStatus, type Prisma } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
-import { DomainEventPublisher, type EventsOf, type NewDomainEvent } from "@modules/events";
+import {
+    DomainEventPublisher,
+    type EventsOf,
+    type NewDomainEvent,
+    type OutboxTransaction,
+} from "@modules/events";
 
 import { monthOf } from "../../domain/ledger/finance-period";
 import type { LedgerEntry, LedgerSource } from "../../domain/ledger/ledger-entry";
@@ -19,6 +24,7 @@ import {
 
 import { LedgerCodec } from "./ledger-codec";
 import { holdOpenMonths, lockOrderLedger } from "./ledger-locks";
+import { LedgerLookup } from "./ledger-lookup";
 import {
     fromDbDate,
     LEDGER_ENTRY_SELECT,
@@ -29,21 +35,36 @@ import {
     toLedgerEntry,
 } from "./ledger-rows";
 
-/** Дубль документа — среди проведённых и не отменённых сторно проводок. */
-const LIVE_DOCUMENT = {
-    status: LedgerEntryStatus.posted,
-    reversalOfId: null,
-    reversal: { is: null },
-} satisfies Prisma.LedgerEntryWhereInput;
-
 @Injectable()
 export class LedgerPrismaRepository extends LedgerRepository {
     constructor(
         private readonly prisma: PrismaService,
         private readonly events: DomainEventPublisher,
-        private readonly codec: LedgerCodec
+        private readonly codec: LedgerCodec,
+        private readonly lookup: LedgerLookup
     ) {
         super();
+    }
+
+    findDocument(
+        portalId: string,
+        counterpartyId: string,
+        documentNumber: string,
+        exceptId: string | null
+    ): Promise<string | null> {
+        return this.lookup.findDocument(portalId, counterpartyId, documentNumber, exceptId);
+    }
+
+    existingDocuments(portalId: string, keys: readonly DocumentKey[]): Promise<Set<string>> {
+        return this.lookup.existingDocuments(portalId, keys);
+    }
+
+    existingSources(
+        portalId: string,
+        sourceType: LedgerSource,
+        sourceIds: readonly string[]
+    ): Promise<Set<string>> {
+        return this.lookup.existingSources(portalId, sourceType, sourceIds);
     }
 
     async findById(portalId: string, id: string): Promise<LedgerEntry | null> {
@@ -90,71 +111,6 @@ export class LedgerPrismaRepository extends LedgerRepository {
         return this.openAll(portalId, rows);
     }
 
-    async findDocument(
-        portalId: string,
-        counterpartyId: string,
-        documentNumber: string,
-        exceptId: string | null
-    ): Promise<string | null> {
-        const documentIndex = await this.codec.documentIndex(portalId, documentNumber);
-        const row = await this.prisma.ledgerEntry.findFirst({
-            where: {
-                portalId,
-                counterpartyId,
-                documentIndex,
-                ...LIVE_DOCUMENT,
-                ...(exceptId ? { id: { not: exceptId } } : {}),
-            },
-            select: { id: true },
-        });
-        return row?.id ?? null;
-    }
-
-    async existingDocuments(portalId: string, keys: readonly DocumentKey[]): Promise<Set<string>> {
-        if (keys.length === 0) return new Set();
-        const indexed = await Promise.all(
-            keys.map(async (key) => ({
-                key,
-                index: await this.codec.documentIndex(portalId, key.documentNumber),
-            }))
-        );
-        const rows = await this.prisma.ledgerEntry.findMany({
-            where: {
-                portalId,
-                ...LIVE_DOCUMENT,
-                OR: indexed.map(({ key, index }) => ({
-                    counterpartyId: key.counterpartyId,
-                    documentIndex: index,
-                    occurredOn: toDbDate(key.occurredOn),
-                })),
-            },
-            select: { counterpartyId: true, documentIndex: true, occurredOn: true },
-        });
-        const found = new Set(
-            rows.map((r) => `${r.counterpartyId}|${r.documentIndex}|${fromDbDate(r.occurredOn)}`)
-        );
-        return new Set(
-            indexed
-                .filter(({ key, index }) =>
-                    found.has(`${key.counterpartyId}|${index}|${key.occurredOn}`)
-                )
-                .map(({ key }) => documentKeyOf(key))
-        );
-    }
-
-    async existingSources(
-        portalId: string,
-        sourceType: LedgerSource,
-        sourceIds: readonly string[]
-    ): Promise<Set<string>> {
-        if (sourceIds.length === 0) return new Set();
-        const rows = await this.prisma.ledgerEntry.findMany({
-            where: { portalId, sourceType, sourceId: { in: [...sourceIds] } },
-            select: { sourceId: true },
-        });
-        return new Set(rows.flatMap((row) => (row.sourceId ? [row.sourceId] : [])));
-    }
-
     async create(
         portalId: string,
         entries: readonly NewLedgerEntry[],
@@ -171,6 +127,18 @@ export class LedgerPrismaRepository extends LedgerRepository {
             await this.events.publishMany(tx, events(count));
             return count;
         });
+    }
+
+    async createIn(
+        tx: OutboxTransaction,
+        portalId: string,
+        entry: NewLedgerEntry,
+        events: readonly NewDomainEvent[]
+    ): Promise<void> {
+        const data = await this.toRow(portalId, entry);
+        await holdOpenMonths(tx, portalId, [monthOf(entry.occurredOn)]);
+        await tx.ledgerEntry.create({ data });
+        await this.events.publishMany(tx, events);
     }
 
     async update(

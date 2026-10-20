@@ -72,6 +72,7 @@ export function mapOrderToDetailDto(o: Order, locale: ContentLocale): OrderDetai
                 taxTreatment: item.taxTreatment ?? null,
                 netAmount: numberOrNull(item.netAmount),
                 taxAmount: numberOrNull(item.taxAmount),
+                unitCost: numberOrNull(item.unitCost),
                 notes: item.notes,
                 product: item.product ?? {
                     id: item.productId,

@@ -39,7 +39,14 @@ export const financeTaxRatesChanged = defineEvent({
 });
 
 /** Where a ledger entry came from; with the source id it is the idempotency key. */
-export const LEDGER_SOURCE_KINDS = ["manual", "order_sale", "import", "reversal", "legacy"] as const;
+export const LEDGER_SOURCE_KINDS = [
+    "manual",
+    "order_sale",
+    "import",
+    "reversal",
+    "purchase",
+    "legacy",
+] as const;
 
 const PERIOD = z.string().regex(/^[0-9]{4}-[0-9]{2}$/);
 

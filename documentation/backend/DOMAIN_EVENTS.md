@@ -134,3 +134,7 @@ Ledger (TASK-798): `OrderLedgerConsumer` reconciles the state of the order with 
 per-order lock, so redelivery and any event order give the same entries: a paid, not cancelled order
 has one sale; a refund or a cancellation adds a reversal. Ledger events carry ids, the month and the
 source only: amounts and counterparties are encrypted at rest and never travel in events.
+
+Stock (TASK-804): `product.stock_changed` now also carries the reasons `purchase`, `write_off`,
+`recount` and `gift`; every move is a row of `stock_moves` written in the same transaction as the
+product update, so the journal and the stock never disagree.

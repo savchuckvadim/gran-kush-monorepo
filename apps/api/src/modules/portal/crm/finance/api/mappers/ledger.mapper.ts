@@ -11,6 +11,7 @@ const editModeOf = (entry: LedgerEntryView): EntryEditMode => {
     if (entry.status === LedgerEntryStatus.void || entry.reversedById) return "none";
     if (entry.sourceType === LEDGER_SOURCES.reversal) return "notes";
     if (entry.sourceType === LEDGER_SOURCES.orderSale) return "classification";
+    if (entry.sourceType === LEDGER_SOURCES.purchase) return "classification";
     return "full";
 };
 

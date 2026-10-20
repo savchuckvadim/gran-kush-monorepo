@@ -24,6 +24,7 @@ import { LedgerEntriesService } from "./application/services/ledger-entries.serv
 import { LedgerEntryInputService } from "./application/services/ledger-entry-input.service";
 import { LedgerTemplateService } from "./application/services/ledger-template.service";
 import { OrganizationProfileService } from "./application/services/organization-profile.service";
+import { PurchaseLedgerService } from "./application/services/purchase-ledger.service";
 import { TaxPolicyService } from "./application/services/tax-policy.service";
 import { TaxRatesService } from "./application/services/tax-rates.service";
 import { CancelEntryUseCase } from "./application/use-cases/cancel-entry.use-case";
@@ -48,6 +49,7 @@ import { LedgerSpreadsheet } from "./domain/repositories/ledger-spreadsheet.inte
 import { OrganizationProfileRepository } from "./domain/repositories/organization-profile-repository.interface";
 import { TaxRateRepository } from "./domain/repositories/tax-rate-repository.interface";
 import { LedgerCodec } from "./infrastructure/ledger/ledger-codec";
+import { LedgerLookup } from "./infrastructure/ledger/ledger-lookup";
 import { LedgerPrismaRepository } from "./infrastructure/ledger/ledger-prisma.repository";
 import { LegacyTransactionPrismaSource } from "./infrastructure/legacy/legacy-transaction-prisma.source";
 import { CounterpartyPrismaRepository } from "./infrastructure/repositories/counterparty-prisma.repository";
@@ -85,6 +87,7 @@ import { ExcelJsSpreadsheet } from "./infrastructure/spreadsheet/exceljs-spreads
         LedgerTemplateService,
         FinancePeriodsService,
         FinanceOverviewService,
+        PurchaseLedgerService,
         RecordEntryUseCase,
         CorrectEntryUseCase,
         ReclassifyEntryUseCase,
@@ -95,6 +98,7 @@ import { ExcelJsSpreadsheet } from "./infrastructure/spreadsheet/exceljs-spreads
         OrderLedgerConsumer,
         LegacyLedgerMigration,
         LedgerCodec,
+        LedgerLookup,
         { provide: OrganizationProfileRepository, useClass: OrganizationProfilePrismaRepository },
         { provide: TaxRateRepository, useClass: TaxRatePrismaRepository },
         { provide: LedgerRepository, useClass: LedgerPrismaRepository },
@@ -118,6 +122,12 @@ import { ExcelJsSpreadsheet } from "./infrastructure/spreadsheet/exceljs-spreads
         CrmCounterpartiesController,
         CrmFinancePeriodsController,
     ],
-    exports: [TaxPolicyService, TaxRatesService],
+    exports: [
+        TaxPolicyService,
+        TaxRatesService,
+        PurchaseLedgerService,
+        CounterpartiesService,
+        FinanceDirectory,
+    ],
 })
 export class FinanceModule {}

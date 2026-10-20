@@ -244,6 +244,7 @@ export class OrderStagesService {
             toStageId: target.id,
             stagePosition: extra.stagePosition,
             restock,
+            restockedBy: extra.actor.kind === "employee" ? extra.actor.id : null,
             events: orderStageChangedEvents(portalId, order, target, extra.actor, restock),
         });
         if (!won) {

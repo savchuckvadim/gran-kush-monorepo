@@ -14,11 +14,13 @@ import {
     monthRange,
     PeriodsPanel,
 } from "@/modules/widgets/finance";
+import { StockPanel } from "@/modules/widgets/stock";
 
 export const FINANCE_TABS = [
     "overview",
     "entries",
     "expenses",
+    "stock",
     "counterparties",
     "periods",
 ] as const;
@@ -34,12 +36,15 @@ interface FinanceTabsProps {
     expenses: LedgerFilterState;
     onExpenses: (filter: LedgerFilterState) => void;
     onOpen: (entry: LedgerEntry) => void;
+    /** Открыть проводку по id (поставка → расход в учёте) */
+    onOpenEntryId: (entryId: string) => void;
 }
 
 /** Разделы учёта; переход из обзора, контрагента или месяца открывает реестр с фильтром. */
 export function FinanceTabs(props: FinanceTabsProps) {
     const t = useTranslations("crm.finance.tabs");
     const { tab, onTab, month, onMonth, entries, onEntries, expenses, onExpenses, onOpen } = props;
+    const { onOpenEntryId } = props;
     const showEntries = (filter: Partial<LedgerFilterState>) => {
         onEntries({ month: "", ...filter });
         onTab("entries");
@@ -75,6 +80,9 @@ export function FinanceTabs(props: FinanceTabsProps) {
                     onOpen={onOpen}
                     fixedDirection
                 />
+            </TabsContent>
+            <TabsContent value="stock">
+                <StockPanel range={monthRange(month)} onOpenEntry={onOpenEntryId} />
             </TabsContent>
             <TabsContent value="counterparties">
                 <CounterpartiesPanel

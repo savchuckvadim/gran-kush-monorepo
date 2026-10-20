@@ -72,6 +72,7 @@ export function FinanceDashboard({ profile }: { profile: OrganizationProfile }) 
                 expenses={expenses}
                 onExpenses={setExpenses}
                 onOpen={(entry) => setOpenEntryId(entry.id)}
+                onOpenEntryId={setOpenEntryId}
             />
 
             <LedgerEntryPanel

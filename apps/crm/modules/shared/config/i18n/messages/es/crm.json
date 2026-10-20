@@ -450,7 +450,9 @@
                 "cbd": "CBD",
                 "strain": "Variedad",
                 "limitGramsPerUnit": "Cuenta por unidad",
-                "notInLimit": "No cuenta"
+                "notInLimit": "No cuenta",
+                "stockNote": "Motivo del cambio de stock",
+                "stockNoteHint": "La diferencia va al diario de almacén como recuento"
             },
             "audiences": {
                 "label": "Visible en el área de socio para",
@@ -846,7 +848,8 @@
                 "entries": "Movimientos",
                 "expenses": "Gastos",
                 "counterparties": "Contrapartes",
-                "periods": "Meses"
+                "periods": "Meses",
+                "stock": "Almacén"
             },
             "actions": {
                 "income": "Ingreso",
@@ -2192,7 +2195,11 @@
                     "deleted": "Producto eliminado",
                     "stock_order_placed": "Bajó el stock: pedido",
                     "stock_order_cancelled": "Volvió el stock: pedido cancelado",
-                    "stock_manual": "Stock modificado a mano"
+                    "stock_manual": "Stock modificado a mano",
+                    "stock_purchase": "Compra: subió el stock",
+                    "stock_write_off": "Baja de almacén",
+                    "stock_recount": "Recuento de stock",
+                    "stock_gift": "Regalo: bajó el stock"
                 },
                 "unknown": "Evento",
                 "portal": {
@@ -2274,6 +2281,161 @@
             "searching": "Buscando…",
             "empty": "No hay nadie",
             "inactive": "inactivo"
+        },
+        "stock": {
+            "actions": {
+                "purchase": "Compra",
+                "move": "Baja"
+            },
+            "sections": {
+                "purchases": "Compras",
+                "moves": "Movimientos",
+                "margin": "Margen"
+            },
+            "reasons": {
+                "purchase": "Compra",
+                "order_placed": "Pedido",
+                "order_cancelled": "Pedido devuelto",
+                "write_off": "Baja",
+                "recount": "Recuento",
+                "gift": "Regalo",
+                "initial": "Stock inicial"
+            },
+            "errors": {
+                "stock_quantity_positive": "La cantidad debe ser mayor que cero",
+                "stock_insufficient": "No hay tanto en stock",
+                "stock_product_not_found": "Producto no encontrado",
+                "stock_note_required": "Indica el motivo"
+            },
+            "purchase": {
+                "title": "Compra de mercancía",
+                "hint": "La entrada en stock y el gasto en contabilidad se registran juntos. El coste del producto pasa a ser la media ponderada.",
+                "fields": {
+                    "product": "Producto",
+                    "quantity": "Cantidad, {unit}",
+                    "unitCost": "Precio por unidad, €",
+                    "counterparty": "Proveedor",
+                    "receivedOn": "Fecha de recepción",
+                    "quantityPlain": "Cantidad"
+                },
+                "unitCostHint": "Sin IVA",
+                "total": "Total de la compra sin impuestos: {total}",
+                "counterpartyHint": "Opcional: hace falta si hay factura del proveedor",
+                "noCounterparty": "Sin proveedor",
+                "cancel": "Cancelar",
+                "save": "Recibir",
+                "saving": "Recibiendo…",
+                "done": "Recibido, stock {quantity}",
+                "doneWithLedger": "Recibido, stock {quantity}; el gasto se registró en contabilidad",
+                "errors": {
+                    "product": "Elige un producto",
+                    "quantity": "Una cantidad mayor que cero",
+                    "cost": "Un precio de cero o más",
+                    "date": "Indica una fecha"
+                }
+            },
+            "move": {
+                "title": "Baja o recuento",
+                "hint": "El stock solo cambia con un motivo: queda en el diario de almacén.",
+                "fields": {
+                    "product": "Producto",
+                    "reason": "Motivo",
+                    "quantity": "Cantidad a dar de baja, {unit}",
+                    "newQuantity": "Stock nuevo, {unit}",
+                    "note": "Explicación",
+                    "quantityPlain": "Cantidad a dar de baja",
+                    "newQuantityPlain": "Stock nuevo"
+                },
+                "reasons": {
+                    "write_off": "Baja (rotura, deterioro)",
+                    "gift": "Regalo",
+                    "recount": "Recuento tras inventario"
+                },
+                "reasonHint": {
+                    "write_off": "Gasto al coste medio",
+                    "gift": "Regalado: salió del stock, sin ingreso",
+                    "recount": "Indica cuánto hay en realidad"
+                },
+                "current": "Ahora en stock: {quantity} {unit}",
+                "notePlaceholder": "Se secó, dado de baja",
+                "cancel": "Cancelar",
+                "save": "Registrar",
+                "saving": "Registrando…",
+                "done": "Registrado, stock {balance} {unit}",
+                "errors": {
+                    "product": "Elige un producto",
+                    "quantity": "Una cantidad mayor que cero",
+                    "note": "Indica el motivo",
+                    "tooLong": "Demasiado largo"
+                }
+            },
+            "moves": {
+                "title": "Movimientos de almacén",
+                "hint": "Cada cambio de stock: pedidos, compras, bajas. La fila abre su pedido.",
+                "empty": "Aún no hay movimientos",
+                "system": "Sistema",
+                "columns": {
+                    "when": "Cuándo",
+                    "reason": "Qué",
+                    "quantity": "Cant.",
+                    "unitCost": "Coste",
+                    "balance": "Stock",
+                    "who": "Quién",
+                    "product": "Producto"
+                },
+                "total": "{count, plural, one {# movimiento} other {# movimientos}}"
+            },
+            "purchases": {
+                "title": "Compras",
+                "hint": "Qué se compró y a qué precio; una compra con asiento abre su gasto en contabilidad.",
+                "empty": "No hay compras en el periodo",
+                "columns": {
+                    "date": "Fecha",
+                    "product": "Producto",
+                    "quantity": "Cant.",
+                    "unitCost": "Precio",
+                    "total": "Total",
+                    "counterparty": "Proveedor"
+                },
+                "total": "{count, plural, one {# compra} other {# compras}}"
+            },
+            "margin": {
+                "revenue": "Ingresos",
+                "revenueHint": "Sin impuestos, pedidos cobrados",
+                "cost": "Coste de ventas",
+                "marginLabel": "Margen",
+                "percent": "{value} % de los ingresos",
+                "unknown": "Sin coste",
+                "unknownHint": "Ventas de productos que nunca tuvieron compra",
+                "byProduct": "Por producto",
+                "byProductHint": "Los más rentables arriba, los que pierden abajo: lo que se come el margen.",
+                "empty": "No hay ventas en el periodo",
+                "noCost": "sin coste",
+                "columns": {
+                    "product": "Producto",
+                    "quantity": "Vendido",
+                    "revenue": "Ingresos",
+                    "cost": "Coste",
+                    "margin": "Margen"
+                }
+            },
+            "product": {
+                "title": "Almacén",
+                "hint": "Stock y coste medio según las compras; bajas y recuentos con motivo.",
+                "purchase": "Compra",
+                "move": "Baja",
+                "figures": "Ahora",
+                "quantity": "En stock",
+                "averageCost": "Coste medio",
+                "stockValue": "Valor del stock"
+            }
+        },
+        "productSelect": {
+            "placeholder": "Elige un producto",
+            "search": "Nombre o referencia…",
+            "searching": "Buscando…",
+            "empty": "No hay nada",
+            "inStock": "En stock: {quantity} {unit}"
         }
     }
 }

@@ -6,6 +6,7 @@ import { ClubPolicyModule } from "@modules/portal/crm/club-policy/club-policy.mo
 import { EmployeesModule } from "@modules/portal/crm/employees/employees.module";
 import { EntityFieldsModule } from "@modules/portal/crm/entity-fields/entity-fields.module";
 import { FinanceModule } from "@modules/portal/crm/finance/finance.module";
+import { StockModule } from "@modules/portal/crm/stock/stock.module";
 import { InvitationsModule } from "@modules/portal/crm/invitations/invitations.module";
 import { MembersModule } from "@modules/portal/crm/members/members.module";
 import { OrdersModule } from "@modules/portal/crm/orders/orders.module";
@@ -35,6 +36,7 @@ import { PublicPortalModule } from "@modules/portal/public/public-portal.module"
         PresenceModule,
         OrdersModule,
         FinanceModule,
+        StockModule,
         InvitationsModule,
         RegistrationLinksModule,
         RecordsModule,
