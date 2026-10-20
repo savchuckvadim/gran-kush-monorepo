@@ -3,6 +3,7 @@ import { ConflictException, Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { DomainEventPublisher, type EventsOf } from "@modules/events";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 import {
     EmployeeFilters,
@@ -65,7 +66,8 @@ function mapRow(row: EmployeeWithProfileRow): EmployeeWithProfile {
 export class EmployeePrismaRepository implements EmployeeRepository {
     constructor(
         private readonly prisma: PrismaService,
-        private readonly fieldValues: FieldValuesService
+        private readonly fieldValues: FieldValuesService,
+        private readonly events: DomainEventPublisher
     ) {}
 
     async findByIdForPortal(id: string, portalId: string): Promise<EmployeeWithProfile | null> {
@@ -118,13 +120,16 @@ export class EmployeePrismaRepository implements EmployeeRepository {
         };
     }
 
-    async createWithProfile(data: {
-        userId: string;
-        portalId: string;
-        roleId: string;
-        invitationId?: string;
-        fields: Record<string, unknown>;
-    }): Promise<EmployeeWithProfile> {
+    async createWithProfile(
+        data: {
+            userId: string;
+            portalId: string;
+            roleId: string;
+            invitationId?: string;
+            fields: Record<string, unknown>;
+        },
+        events?: EventsOf<EmployeeWithProfile>
+    ): Promise<EmployeeWithProfile> {
         const existing = await this.prisma.employee.findUnique({
             where: { userId_portalId: { userId: data.userId, portalId: data.portalId } },
             select: { id: true },
@@ -133,7 +138,7 @@ export class EmployeePrismaRepository implements EmployeeRepository {
             throw new ConflictException("User is already an employee of this portal");
         }
 
-        const row = await this.prisma.$transaction(async (tx) => {
+        return this.prisma.$transaction(async (tx) => {
             const def = await tx.entityDefinition.findUniqueOrThrow({
                 where: {
                     portalId_code: {
@@ -164,12 +169,15 @@ export class EmployeePrismaRepository implements EmployeeRepository {
                 data.fields,
                 tx
             );
-            return tx.employee.findUniqueOrThrow({
-                where: { id: employee.id },
-                include: employeeWithProfileInclude,
-            });
+            const created = mapRow(
+                await tx.employee.findUniqueOrThrow({
+                    where: { id: employee.id },
+                    include: employeeWithProfileInclude,
+                })
+            );
+            if (events) await this.events.publishMany(tx, events(created));
+            return created;
         });
-        return mapRow(row);
     }
 
     async updateBridge(
@@ -178,14 +186,29 @@ export class EmployeePrismaRepository implements EmployeeRepository {
             roleId: string;
             isActive: boolean;
             lastLoginAt: Date;
-        }>
+        }>,
+        events?: EventsOf<EmployeeWithProfile>
     ): Promise<EmployeeWithProfile> {
-        const row = await this.prisma.employee.update({
-            where: { id },
-            data,
-            include: employeeWithProfileInclude,
+        if (!events) {
+            return mapRow(
+                await this.prisma.employee.update({
+                    where: { id },
+                    data,
+                    include: employeeWithProfileInclude,
+                })
+            );
+        }
+        return this.prisma.$transaction(async (tx) => {
+            const updated = mapRow(
+                await tx.employee.update({
+                    where: { id },
+                    data,
+                    include: employeeWithProfileInclude,
+                })
+            );
+            await this.events.publishMany(tx, events(updated));
+            return updated;
         });
-        return mapRow(row);
     }
 
     async updateProfileFields(

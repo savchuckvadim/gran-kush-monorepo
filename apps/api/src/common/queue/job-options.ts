@@ -36,13 +36,15 @@ export const MAIL_JOB_OPTIONS: DefaultJobOptions = {
 };
 
 /**
- * События портала. Обработчик рассылает уведомления во внешние сервисы (Telegram, почта),
- * поэтому повторы нужны, но их немного: событие не критично к минутам доставки.
+ * Доменные события (TASK-780). Одна задача — одна пара «событие × потребитель». Потребитель
+ * идемпотентен (таблица доставок), поэтому повторов много: письмо, Telegram или сокет могут
+ * быть недоступны минутами, а событие терять нельзя. Исчерпавшие попытки остаются в failed
+ * неделю — это и есть dead-letter: по ним срабатывает алерт в Telegram.
  */
-export const PORTAL_EVENTS_JOB_OPTIONS: DefaultJobOptions = {
-    attempts: 3,
-    backoff: { type: "exponential", delay: 15_000 },
-    removeOnComplete: { age: HOUR, count: 500 },
+export const DOMAIN_EVENTS_JOB_OPTIONS: DefaultJobOptions = {
+    attempts: 5,
+    backoff: { type: "exponential", delay: 5_000 },
+    removeOnComplete: { age: HOUR, count: 5_000 },
     removeOnFail: { age: 7 * DAY },
 };
 

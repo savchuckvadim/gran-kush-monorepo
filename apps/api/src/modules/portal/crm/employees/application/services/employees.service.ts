@@ -10,6 +10,7 @@ import { AccountOwnershipService } from "@users/application/services/account-own
 import { AccountProvisioningService } from "@users/application/services/account-provisioning.service";
 
 import type { PortalPrincipal } from "@common/portal";
+import { employeeActor, userActor } from "@modules/events";
 import { PortalRolesService } from "@modules/portal/crm/access/application/services/portal-roles.service";
 import type { Permission } from "@modules/portal/crm/access/domain/permissions";
 import { effectivePermissions, isOwnerRole } from "@modules/portal/crm/access/domain/portal-role";
@@ -19,6 +20,8 @@ import {
     EmployeeRepository,
     EmployeeWithProfile,
 } from "@modules/portal/crm/employees/domain/repositories/employee-repository.interface";
+
+import { employeeAccessChangedEvent, employeeJoinedEvent } from "../events/employee-events";
 
 /** Machine-readable 409 reason: the CRM answers it with a hint to send an invitation. */
 export const EMPLOYEE_CONFLICT_CODES = { accountExists: "account_exists" } as const;
@@ -100,12 +103,10 @@ export class EmployeesService {
             });
         }
 
-        const employee = await this.employeeRepository.createWithProfile({
-            userId: user.id,
-            portalId,
-            roleId: role.id,
-            fields: input.fields,
-        });
+        const employee = await this.employeeRepository.createWithProfile(
+            { userId: user.id, portalId, roleId: role.id, fields: input.fields },
+            (created) => [employeeJoinedEvent(created.employee, employeeActor(actor.employeeId))]
+        );
 
         return { employee, isNewUser };
     }
@@ -123,13 +124,16 @@ export class EmployeesService {
         },
         portalId: string
     ): Promise<EmployeeWithProfile> {
-        return this.employeeRepository.createWithProfile({
-            userId: input.userId,
-            portalId,
-            roleId: input.roleId,
-            invitationId: input.invitationId,
-            fields: input.fields,
-        });
+        return this.employeeRepository.createWithProfile(
+            {
+                userId: input.userId,
+                portalId,
+                roleId: input.roleId,
+                invitationId: input.invitationId,
+                fields: input.fields,
+            },
+            (created) => [employeeJoinedEvent(created.employee, userActor(input.userId))]
+        );
     }
 
     async updateEmployee(
@@ -153,10 +157,14 @@ export class EmployeesService {
         }
 
         if (role !== undefined || data.isActive !== undefined) {
-            return this.employeeRepository.updateBridge(id, {
-                ...(role !== undefined ? { roleId: role.id } : {}),
-                ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
-            });
+            return this.employeeRepository.updateBridge(
+                id,
+                {
+                    ...(role !== undefined ? { roleId: role.id } : {}),
+                    ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
+                },
+                (updated) => [employeeAccessChangedEvent(updated.employee, actor.employeeId)]
+            );
         }
 
         return this.findByIdInPortal(id, portalId);
@@ -168,7 +176,9 @@ export class EmployeesService {
         actor: EmployeeActor
     ): Promise<EmployeeWithProfile> {
         await this.requireManageable(id, portalId, actor);
-        return this.employeeRepository.updateBridge(id, { isActive: false });
+        return this.employeeRepository.updateBridge(id, { isActive: false }, (updated) => [
+            employeeAccessChangedEvent(updated.employee, actor.employeeId),
+        ]);
     }
 
     async touchLastLogin(id: string): Promise<void> {

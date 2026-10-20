@@ -15,31 +15,31 @@
 
 ## 1. Карта инфраструктуры
 
-| Файл | Назначение |
-|------|------------|
-| [`infra/compose/docker-compose.dev.yml`](../infra/compose/docker-compose.dev.yml) | dev: только Postgres + Redis, приложения запускаются на хосте |
-| [`infra/compose/docker-compose.prod.yml`](../infra/compose/docker-compose.prod.yml) | прод: полный стек — postgres, redis, api, crm, web, admin, nginx |
-| [`infra/compose/docker-compose.deploy.yml`](../infra/compose/docker-compose.deploy.yml) | оверлей: брать готовые образы из ghcr.io вместо сборки на сервере |
-| [`infra/compose/docker-compose.tls.yml`](../infra/compose/docker-compose.tls.yml) | оверлей: публикует `:443` и монтирует сертификат в nginx |
-| [`infra/compose/.env.example`](../infra/compose/.env.example) | переменные самого compose (домены, пароль БД, публичные URL) |
-| [`infra/compose/env/api.env.example`](../infra/compose/env/api.env.example) | рантайм-секреты контейнера API |
-| [`infra/docker/api.Dockerfile`](../infra/docker/api.Dockerfile) | образ NestJS API |
-| [`infra/docker/next.Dockerfile`](../infra/docker/next.Dockerfile) | общий образ для трёх Next-приложений (аргумент `APP`) |
-| [`infra/docker/api-entrypoint.sh`](../infra/docker/api-entrypoint.sh) | миграции (+опционально сид) → старт API |
-| [`infra/docker/nginx/templates/default.conf.template`](../infra/docker/nginx/templates/default.conf.template) | маршрутизация по `Host`, HTTP `:80` |
-| [`infra/docker/nginx/tls/tls.conf.template`](../infra/docker/nginx/tls/tls.conf.template) | те же хосты на `:443`, подключается оверлеем |
-| [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) | lint, typecheck, unit, e2e на каждый push |
-| [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) | сборка образов → ghcr.io → SSH-деплой → smoke-проверка |
+| Файл                                                                                                          | Назначение                                                        |
+| ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| [`infra/compose/docker-compose.dev.yml`](../infra/compose/docker-compose.dev.yml)                             | dev: только Postgres + Redis, приложения запускаются на хосте     |
+| [`infra/compose/docker-compose.prod.yml`](../infra/compose/docker-compose.prod.yml)                           | прод: полный стек — postgres, redis, api, crm, web, admin, nginx  |
+| [`infra/compose/docker-compose.deploy.yml`](../infra/compose/docker-compose.deploy.yml)                       | оверлей: брать готовые образы из ghcr.io вместо сборки на сервере |
+| [`infra/compose/docker-compose.tls.yml`](../infra/compose/docker-compose.tls.yml)                             | оверлей: публикует `:443` и монтирует сертификат в nginx          |
+| [`infra/compose/.env.example`](../infra/compose/.env.example)                                                 | переменные самого compose (домены, пароль БД, публичные URL)      |
+| [`infra/compose/env/api.env.example`](../infra/compose/env/api.env.example)                                   | рантайм-секреты контейнера API                                    |
+| [`infra/docker/api.Dockerfile`](../infra/docker/api.Dockerfile)                                               | образ NestJS API                                                  |
+| [`infra/docker/next.Dockerfile`](../infra/docker/next.Dockerfile)                                             | общий образ для трёх Next-приложений (аргумент `APP`)             |
+| [`infra/docker/api-entrypoint.sh`](../infra/docker/api-entrypoint.sh)                                         | миграции (+опционально сид) → старт API                           |
+| [`infra/docker/nginx/templates/default.conf.template`](../infra/docker/nginx/templates/default.conf.template) | маршрутизация по `Host`, HTTP `:80`                               |
+| [`infra/docker/nginx/tls/tls.conf.template`](../infra/docker/nginx/tls/tls.conf.template)                     | те же хосты на `:443`, подключается оверлеем                      |
+| [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)                                                     | lint, typecheck, unit, e2e на каждый push                         |
+| [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml)                                             | сборка образов → ghcr.io → SSH-деплой → smoke-проверка            |
 
 Наружу опубликован только nginx (`:80`). Всё остальное общается внутри docker-сети,
 Postgres и Redis портов на хост не пробрасывают.
 
-| Домен (переменная) | Сервис |
-|--------------------|--------|
-| `API_HOST` | `api:3000` |
-| `CRM_HOST` | `crm:5000` |
-| `WEB_HOST` | `web:5001` — личный кабинет участника |
-| `ADMIN_HOST` | `admin:5002` |
+| Домен (переменная) | Сервис                                |
+| ------------------ | ------------------------------------- |
+| `API_HOST`         | `api:3000`                            |
+| `CRM_HOST`         | `crm:5000`                            |
+| `WEB_HOST`         | `web:5001` — личный кабинет участника |
+| `ADMIN_HOST`       | `admin:5002`                          |
 
 Папка `docker/` в корне репозитория — легаси от прежней схемы, на неё не ссылается ни один
 workflow и ни один compose-файл. Актуальна только `infra/`.
@@ -101,14 +101,14 @@ docker compose -f infra/compose/docker-compose.prod.yml exec api pnpm prisma:see
 
 ### Что нельзя потерять
 
-| Переменная | Последствия потери |
-|------------|--------------------|
-| `ENCRYPTION_MASTER_KEY` | зашифрованные данные в БД не расшифровать, ключ невосстановим |
-| `JWT_SECRET` / `JWT_REFRESH_SECRET` | смена разлогинит всех разом |
-| `COOKIE_SECRET` | подписанные куки станут невалидными |
-| `POSTGRES_PASSWORD` | доступ к тому с данными |
+| Переменная                          | Последствия потери                                            |
+| ----------------------------------- | ------------------------------------------------------------- |
+| `ENCRYPTION_MASTER_KEY`             | зашифрованные данные в БД не расшифровать, ключ невосстановим |
+| `JWT_SECRET` / `JWT_REFRESH_SECRET` | смена разлогинит всех разом                                   |
+| `COOKIE_SECRET`                     | подписанные куки станут невалидными                           |
+| `POSTGRES_PASSWORD`                 | доступ к тому с данными                                       |
 
-### NEXT_PUBLIC_* — это build-time
+### NEXT*PUBLIC*\* — это build-time
 
 `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_CRM_URL`, `NEXT_PUBLIC_MAIN_SITE_URL` вшиваются в браузерные
 бандлы **на этапе сборки** образа, а не читаются в рантайме. Отсюда два следствия:
@@ -150,11 +150,11 @@ docker compose -f infra/compose/docker-compose.prod.yml exec api pnpm prisma:see
 
 Кредов ровно три вида, и создавать руками надо только один.
 
-| Что | Где берётся | Куда кладётся |
-|-----|-------------|---------------|
-| `GITHUB_TOKEN` | **Нигде.** Actions выдаёт автоматически на каждый запуск | Уже используется в `deploy.yml` для пуша в ghcr.io. Работает за счёт `permissions: packages: write` на build-джобе — настраивать нечего |
-| **PAT с `read:packages`** | Создаётся руками на github.com, см. ниже | **На сервере**, разово: `docker login ghcr.io`. Без него сервер не вытянет приватные образы |
-| SSH-пара для деплоя | Генерируется локально `ssh-keygen` | Публичная половина — в `authorized_keys` на сервере, приватная — в секрет `SSH_PRIVATE_KEY` |
+| Что                       | Где берётся                                              | Куда кладётся                                                                                                                           |
+| ------------------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `GITHUB_TOKEN`            | **Нигде.** Actions выдаёт автоматически на каждый запуск | Уже используется в `deploy.yml` для пуша в ghcr.io. Работает за счёт `permissions: packages: write` на build-джобе — настраивать нечего |
+| **PAT с `read:packages`** | Создаётся руками на github.com, см. ниже                 | **На сервере**, разово: `docker login ghcr.io`. Без него сервер не вытянет приватные образы                                             |
+| SSH-пара для деплоя       | Генерируется локально `ssh-keygen`                       | Публичная половина — в `authorized_keys` на сервере, приватная — в секрет `SSH_PRIVATE_KEY`                                             |
 
 #### Где именно создаётся PAT
 
@@ -193,20 +193,20 @@ ssh-keygen -t ed25519 -f deploy_key -N ""
 
 **Secrets** (Settings → Secrets and variables → Actions → Secrets):
 
-| Секрет | Назначение |
-|--------|------------|
-| `SSH_HOST` | адрес сервера |
-| `SSH_USER` | пользователь для деплоя |
+| Секрет            | Назначение                                 |
+| ----------------- | ------------------------------------------ |
+| `SSH_HOST`        | адрес сервера                              |
+| `SSH_USER`        | пользователь для деплоя                    |
 | `SSH_PRIVATE_KEY` | **отдельный** deploy-ключ, не персональный |
 
 **Variables** (там же, вкладка Variables):
 
-| Переменная | Назначение |
-|------------|------------|
-| `NEXT_PUBLIC_API_URL` | вшивается в бандлы фронтов |
-| `NEXT_PUBLIC_CRM_URL` | то же |
-| `NEXT_PUBLIC_MAIN_SITE_URL` | то же |
-| `SMOKE_CHECK_URL` | например `https://api.домен/health`; пустое значение — шаг пропускается |
+| Переменная                  | Назначение                                                              |
+| --------------------------- | ----------------------------------------------------------------------- |
+| `NEXT_PUBLIC_API_URL`       | вшивается в бандлы фронтов                                              |
+| `NEXT_PUBLIC_CRM_URL`       | то же                                                                   |
+| `NEXT_PUBLIC_MAIN_SITE_URL` | то же                                                                   |
+| `SMOKE_CHECK_URL`           | например `https://api.домен/health`; пустое значение — шаг пропускается |
 
 ### Требования к серверу
 
@@ -276,16 +276,16 @@ CD подключает оверлей автоматически, если на
 
 ## 7. Сторонние сервисы и ключи
 
-| Сервис | Переменные | Обязателен | Комментарий |
-|--------|-----------|-----------|-------------|
-| PostgreSQL | `POSTGRES_*` → `DATABASE_URL` | да | в compose это контейнер с томом `postgres_data` |
-| Redis | `REDIS_URL` | да | очереди BullMQ (`mail`, `member-files`, `portal-events`), том `redis_data` |
-| AWS S3 | `AWS_REGION`, `AWS_BUCKET_NAME`, `AWS_ACCESS_KEY`, `AWS_SECRET_KEY` | да, если нужны файлы | все загрузки идут только в S3; без настройки API отвечает `502 S3 storage is not configured` |
-| SMTP | `MAIL_HOST`, `MAIL_PORT`, `MAIL_LOGIN`, `MAIL_PASSWORD` | да | письма подтверждения и приглашений, через очередь `mail` |
-| Telegram (служебный) | `TG_BOT_API_KEY`, `TG_BOT_CHAT_ID` | нет | регистрации клубов и алерты диска в чат команды |
-| Telegram (клиентский) | `TG_CLIENT_BOT_API_KEY` | нет | вход участника через Telegram и сообщения в личку; chat id не нужен |
-| Google OAuth | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | нет | «Войти через Google» в CRM и кабинете; пусто = кнопка отвечает «не настроено» |
-| ghcr.io | PAT с `read:packages` на сервере | да при деплое образами | пуш из Actions выполняет `GITHUB_TOKEN` |
+| Сервис                | Переменные                                                          | Обязателен             | Комментарий                                                                                  |
+| --------------------- | ------------------------------------------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------- |
+| PostgreSQL            | `POSTGRES_*` → `DATABASE_URL`                                       | да                     | в compose это контейнер с томом `postgres_data`                                              |
+| Redis                 | `REDIS_URL`                                                         | да                     | очереди BullMQ (`mail`, `member-files`, `domain-events`), том `redis_data`                   |
+| AWS S3                | `AWS_REGION`, `AWS_BUCKET_NAME`, `AWS_ACCESS_KEY`, `AWS_SECRET_KEY` | да, если нужны файлы   | все загрузки идут только в S3; без настройки API отвечает `502 S3 storage is not configured` |
+| SMTP                  | `MAIL_HOST`, `MAIL_PORT`, `MAIL_LOGIN`, `MAIL_PASSWORD`             | да                     | письма подтверждения и приглашений, через очередь `mail`                                     |
+| Telegram (служебный)  | `TG_BOT_API_KEY`, `TG_BOT_CHAT_ID`                                  | нет                    | регистрации клубов и алерты диска в чат команды                                              |
+| Telegram (клиентский) | `TG_CLIENT_BOT_API_KEY`                                             | нет                    | вход участника через Telegram и сообщения в личку; chat id не нужен                          |
+| Google OAuth          | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`                          | нет                    | «Войти через Google» в CRM и кабинете; пусто = кнопка отвечает «не настроено»                |
+| ghcr.io               | PAT с `read:packages` на сервере                                    | да при деплое образами | пуш из Actions выполняет `GITHUB_TOKEN`                                                      |
 
 Локального дискового хранилища у приложения нет — контейнеры остаются stateless,
 тома нужны только базам.
@@ -294,16 +294,16 @@ CD подключает оверлей автоматически, если на
 
 ## 8. Балансировка и реплики
 
-| Компонент | Несколько реплик | Что учесть |
-|-----------|------------------|------------|
-| `web`, `crm`, `admin` | да | stateless, Next standalone. ISR-кэш у каждой реплики свой — при `revalidate` ответы реплик могут расходиться |
-| `api` — HTTP | да | JWT в куках, сессии в БД, файлы в S3 → sticky sessions **не нужны** |
-| `api` — воркеры BullMQ | да | очередь общая в Redis, задачи разбираются конкурентно, дублей не будет |
-| `api` — задачи `@Cron` | **нет** | см. ниже |
-| `api` — миграции при старте | **нет** | см. ниже |
-| Postgres | нет (в текущем compose) | одна инстанция; для HA нужен managed-кластер или репликация вне compose |
-| Redis | нет (в текущем compose) | одна инстанция; потеря Redis означает потерю невыполненных задач очередей |
-| nginx | одна | при нескольких нодах балансировку и TLS выносить выше |
+| Компонент                   | Несколько реплик        | Что учесть                                                                                                   |
+| --------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `web`, `crm`, `admin`       | да                      | stateless, Next standalone. ISR-кэш у каждой реплики свой — при `revalidate` ответы реплик могут расходиться |
+| `api` — HTTP                | да                      | JWT в куках, сессии в БД, файлы в S3 → sticky sessions **не нужны**                                          |
+| `api` — воркеры BullMQ      | да                      | очередь общая в Redis, задачи разбираются конкурентно, дублей не будет                                       |
+| `api` — задачи `@Cron`      | **нет**                 | см. ниже                                                                                                     |
+| `api` — миграции при старте | **нет**                 | см. ниже                                                                                                     |
+| Postgres                    | нет (в текущем compose) | одна инстанция; для HA нужен managed-кластер или репликация вне compose                                      |
+| Redis                       | нет (в текущем compose) | одна инстанция; потеря Redis означает потерю невыполненных задач очередей                                    |
+| nginx                       | одна                    | при нескольких нодах балансировку и TLS выносить выше                                                        |
 
 ### Две вещи, которые сломаются при `--scale api=N`
 

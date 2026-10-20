@@ -2,6 +2,7 @@ import { Prisma, ProductAudience } from "@prisma/client";
 
 type Decimal = Prisma.Decimal;
 
+import type { EventsOf, NewDomainEvent } from "@modules/events";
 import { Product } from "@modules/portal/crm/catalog/domain/entity/product.entity";
 
 export interface ProductFilters {
@@ -27,25 +28,29 @@ export abstract class ProductRepository {
     /** Активные и доступные; `audiences` — только товары, видимые участнику этих аудиторий. */
     abstract findActive(portalId: string, audiences?: ProductAudience[]): Promise<Product[]>;
     abstract count(portalId: string, filters?: ProductFilters): Promise<number>;
-    abstract create(data: {
-        portalId: string;
-        categoryId: string;
-        measurementUnitId: string;
-        name: string;
-        description?: string;
-        sku?: string;
-        price: Decimal;
-        initialQuantity: Decimal;
-        currentQuantity: Decimal;
-        minQuantity?: Decimal;
-        imageUrl?: string;
-        thc?: Decimal;
-        cbd?: Decimal;
-        strain?: string;
-        audiences?: ProductAudience[];
-        limitGramsPerUnit?: Decimal;
-        createdBy?: string;
-    }): Promise<Product>;
+    abstract create(
+        data: {
+            portalId: string;
+            categoryId: string;
+            measurementUnitId: string;
+            name: string;
+            description?: string;
+            sku?: string;
+            price: Decimal;
+            initialQuantity: Decimal;
+            currentQuantity: Decimal;
+            minQuantity?: Decimal;
+            imageUrl?: string;
+            thc?: Decimal;
+            cbd?: Decimal;
+            strain?: string;
+            audiences?: ProductAudience[];
+            limitGramsPerUnit?: Decimal;
+            createdBy?: string;
+        },
+        /** События пишутся в outbox той же транзакцией, что и товар (TASK-780) */
+        events?: EventsOf<Product>
+    ): Promise<Product>;
     abstract update(
         id: string,
         data: Partial<{
@@ -67,7 +72,8 @@ export abstract class ProductRepository {
             audiences: ProductAudience[];
             limitGramsPerUnit: Decimal | null;
             updatedBy: string;
-        }>
+        }>,
+        events?: readonly NewDomainEvent[]
     ): Promise<Product>;
-    abstract delete(id: string): Promise<void>;
+    abstract delete(id: string, events?: readonly NewDomainEvent[]): Promise<void>;
 }

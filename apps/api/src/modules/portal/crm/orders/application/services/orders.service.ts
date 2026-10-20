@@ -16,6 +16,8 @@ import {
     OrderRepository,
 } from "@modules/portal/crm/orders/domain/repositories/order-repository.interface";
 
+import { orderPaymentChangedEvent } from "../events/order-events";
+
 /**
  * Машина состояний оплаты — только вперёд. Нужна не ради строгости, а потому что
  * поздно доставленный вебхук с `pending` иначе откатит уже наступившее `paid`.
@@ -105,6 +107,7 @@ export class OrdersService {
             from: current,
             to: newPaymentStatus,
             employeeId,
+            events: [orderPaymentChangedEvent(portalId, order, newPaymentStatus, employeeId)],
         });
         if (!won) {
             // Ноль обновлённых строк — статус увели из-под нас. Отдаём 409, чтобы

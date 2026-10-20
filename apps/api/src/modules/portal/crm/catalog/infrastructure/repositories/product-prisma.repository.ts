@@ -5,6 +5,7 @@ import { Prisma, ProductAudience } from "@prisma/client";
 type Decimal = Prisma.Decimal;
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { DomainEventPublisher, type EventsOf, type NewDomainEvent } from "@modules/events";
 import { MeasurementUnit } from "@modules/portal/crm/catalog/domain/entity/measurement-unit.entity";
 import { Product } from "@modules/portal/crm/catalog/domain/entity/product.entity";
 import { ProductCategory } from "@modules/portal/crm/catalog/domain/entity/product-category.entity";
@@ -21,7 +22,10 @@ import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/const
 
 @Injectable()
 export class ProductPrismaRepository implements ProductRepository {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly events: DomainEventPublisher
+    ) {}
 
     async findById(id: string, portalId: string): Promise<Product | null> {
         const raw = await this.prisma.product.findFirst({
@@ -76,26 +80,29 @@ export class ProductPrismaRepository implements ProductRepository {
         return this.prisma.product.count({ where });
     }
 
-    async create(data: {
-        portalId: string;
-        categoryId: string;
-        measurementUnitId: string;
-        name: string;
-        description?: string;
-        sku?: string;
-        price: Decimal;
-        initialQuantity: Decimal;
-        currentQuantity: Decimal;
-        minQuantity?: Decimal;
-        imageUrl?: string;
-        thc?: Decimal;
-        cbd?: Decimal;
-        strain?: string;
-        audiences?: ProductAudience[];
-        limitGramsPerUnit?: Decimal;
-        createdBy?: string;
-    }): Promise<Product> {
-        const raw = await this.prisma.$transaction(async (tx) => {
+    async create(
+        data: {
+            portalId: string;
+            categoryId: string;
+            measurementUnitId: string;
+            name: string;
+            description?: string;
+            sku?: string;
+            price: Decimal;
+            initialQuantity: Decimal;
+            currentQuantity: Decimal;
+            minQuantity?: Decimal;
+            imageUrl?: string;
+            thc?: Decimal;
+            cbd?: Decimal;
+            strain?: string;
+            audiences?: ProductAudience[];
+            limitGramsPerUnit?: Decimal;
+            createdBy?: string;
+        },
+        events?: EventsOf<Product>
+    ): Promise<Product> {
+        return this.prisma.$transaction(async (tx) => {
             const productDef = await tx.entityDefinition.findUniqueOrThrow({
                 where: {
                     portalId_code: {
@@ -110,12 +117,14 @@ export class ProductPrismaRepository implements ProductRepository {
                     entityDefinitionId: productDef.id,
                 },
             });
-            return tx.product.create({
+            const raw = await tx.product.create({
                 data: { ...data, entityRecordId: record.id },
                 include: PRODUCT_INCLUDE,
             });
+            const product = this.mapToEntity(raw);
+            if (events) await this.events.publishMany(tx, events(product));
+            return product;
         });
-        return this.mapToEntity(raw);
     }
 
     async update(
@@ -139,18 +148,25 @@ export class ProductPrismaRepository implements ProductRepository {
             audiences: ProductAudience[];
             limitGramsPerUnit: Decimal | null;
             updatedBy: string;
-        }>
+        }>,
+        events?: readonly NewDomainEvent[]
     ): Promise<Product> {
-        const raw = await this.prisma.product.update({
-            where: { id },
-            data,
-            include: PRODUCT_INCLUDE,
+        return this.prisma.$transaction(async (tx) => {
+            const raw = await tx.product.update({
+                where: { id },
+                data,
+                include: PRODUCT_INCLUDE,
+            });
+            if (events?.length) await this.events.publishMany(tx, events);
+            return this.mapToEntity(raw);
         });
-        return this.mapToEntity(raw);
     }
 
-    async delete(id: string): Promise<void> {
-        await this.prisma.product.delete({ where: { id } });
+    async delete(id: string, events?: readonly NewDomainEvent[]): Promise<void> {
+        await this.prisma.$transaction(async (tx) => {
+            await tx.product.delete({ where: { id } });
+            if (events?.length) await this.events.publishMany(tx, events);
+        });
     }
 
     // ─────────────────────────────────── private ───────────────────────────────────

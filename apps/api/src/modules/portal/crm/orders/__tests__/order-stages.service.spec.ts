@@ -38,6 +38,23 @@ describe("OrderStagesService — стадии заказа", () => {
             toStageId: PREPARING.id,
             stagePosition: -42,
             restock: undefined,
+            events: [
+                {
+                    name: "order.stage_changed",
+                    portalId: PORTAL,
+                    actor: { kind: "employee", id: "emp-1" },
+                    aggregateId: "order-1",
+                    payload: {
+                        orderId: "order-1",
+                        orderNumber: "ORD-20261013-0001",
+                        memberId: "member-1",
+                        fromStageId: PENDING.id,
+                        toStageId: PREPARING.id,
+                        toStageSemantic: PREPARING.semantic,
+                        employeeId: "emp-1",
+                    },
+                },
+            ],
         });
         // новая стадия без соседа — наверх колонки
         expect(positions.positionFor).toHaveBeenCalledWith(
@@ -147,6 +164,43 @@ describe("OrderStagesService — стадии заказа", () => {
         await expect(
             service.updateStatus("order-1", OrderStatus.PREPARING, "emp-1", PORTAL)
         ).rejects.toMatchObject({ status: 400 });
+    });
+
+    it("отмена — ещё и order.cancelled и движение склада, автор — сотрудник", async () => {
+        repository.findStageInPortal.mockResolvedValue(CANCELLED);
+
+        await service.moveToStage("order-1", CANCELLED.id, "emp-1", PORTAL);
+
+        const [{ events }] = repository.compareAndSetStage.mock.calls[0] as [
+            { events: { name: string; payload: Record<string, unknown> }[] },
+        ];
+        expect(events.map((event) => event.name)).toEqual([
+            "order.stage_changed",
+            "order.cancelled",
+            "product.stock_changed",
+        ]);
+        expect(events[1]?.payload).toMatchObject({ cancelledBy: "staff" });
+        expect(events[2]?.payload).toEqual({
+            productId: "product-1",
+            reason: "order_cancelled",
+            orderId: "order-1",
+        });
+    });
+
+    it("отмена участником — автор события участник", async () => {
+        await service.cancelOrderByMember("order-1", "member-1", PORTAL, "передумал");
+
+        expect(repository.compareAndSetStage).toHaveBeenCalledWith(
+            expect.objectContaining({
+                events: expect.arrayContaining([
+                    expect.objectContaining({
+                        name: "order.cancelled",
+                        actor: { kind: "member", id: "member-1" },
+                        payload: expect.objectContaining({ cancelledBy: "member" }),
+                    }),
+                ]),
+            })
+        );
     });
 
     it("участник отменяет только новый заказ — в первую стадию отказа его воронки", async () => {

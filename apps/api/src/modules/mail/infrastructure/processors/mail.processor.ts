@@ -1,15 +1,9 @@
-import { InjectQueue, OnWorkerEvent, Processor, WorkerHost } from "@nestjs/bullmq";
+import { OnWorkerEvent, Processor, WorkerHost } from "@nestjs/bullmq";
 import { Injectable, Logger } from "@nestjs/common";
 
-import { Job, Queue } from "bullmq";
+import { Job } from "bullmq";
 
-import { buildJobId } from "@common/queue/job-options";
 import { TelegramService } from "@common/telegram/telegram.service";
-import {
-    PORTAL_EVENTS_JOB_NAMES,
-    PORTAL_EVENTS_QUEUE_NAME,
-    type PortalRegistrationEmailConfirmedPayload,
-} from "@modules/portal/crm/portals/events/portal-events.constants";
 
 import { MailService } from "../../application/services/mail.service";
 import { EmailType, MAIL_QUEUE_NAME, MAIL_WORKER_EVENTS } from "../../events/mail-events.constants";
@@ -35,8 +29,7 @@ export class MailProcessor extends WorkerHost {
 
     constructor(
         private readonly mailService: MailService,
-        private readonly telegramService: TelegramService,
-        @InjectQueue(PORTAL_EVENTS_QUEUE_NAME) private readonly portalEventsQueue: Queue
+        private readonly telegramService: TelegramService
     ) {
         super();
     }
@@ -59,7 +52,7 @@ export class MailProcessor extends WorkerHost {
 
     @OnWorkerEvent(MAIL_WORKER_EVENTS.COMPLETED)
     async onCompleted(job: Job<SendEmailJobData>) {
-        const { to, subject, emailType, context } = job.data;
+        const { subject, emailType } = job.data;
 
         // Check if this is an email verification job
         if (emailType === EmailType.VERIFICATION) {
@@ -69,50 +62,6 @@ export class MailProcessor extends WorkerHost {
             } catch (error) {
                 this.logger.error(
                     `❌ Failed to send Telegram notification: ${error instanceof Error ? error.message : String(error)}`
-                );
-            }
-        }
-
-        if (emailType === EmailType.PORTAL_REGISTRATION) {
-            try {
-                const ctx: Record<string, unknown> = { ...(context ?? {}) };
-                const str = (k: string): string => {
-                    const v = ctx[k];
-                    return typeof v === "string" ? v : "";
-                };
-                const langRaw = ctx.language;
-                const payload: PortalRegistrationEmailConfirmedPayload = {
-                    portalId: str("portalId"),
-                    portalSlug: str("portalSlug"),
-                    portalDisplayName: str("portalDisplayName"),
-                    ownerId: str("ownerId"),
-                    ownerEmail: str("ownerEmail") || to[0] || "",
-                    ownerName: str("ownerName"),
-                    language:
-                        typeof langRaw === "string"
-                            ? (langRaw as PortalRegistrationEmailConfirmedPayload["language"])
-                            : undefined,
-                    emailSentAt: new Date().toISOString(),
-                };
-
-                // Само письмо теперь повторяется при сбое SMTP (TASK-111), поэтому событие
-                // «письмо отправлено» дедуплицируется по порталу — иначе каждая повторная
-                // отправка порождала бы ещё одно событие.
-                await this.portalEventsQueue.add(
-                    PORTAL_EVENTS_JOB_NAMES.PORTAL_REGISTRATION_EMAIL_CONFIRMED,
-                    payload,
-                    {
-                        jobId: buildJobId(
-                            PORTAL_EVENTS_JOB_NAMES.PORTAL_REGISTRATION_EMAIL_CONFIRMED,
-                            payload.portalId
-                        ),
-                    }
-                );
-            } catch (error) {
-                this.logger.error(
-                    `❌ Failed to dispatch PortalRegistrationEmailConfirmed: ${
-                        error instanceof Error ? error.message : String(error)
-                    }`
                 );
             }
         }

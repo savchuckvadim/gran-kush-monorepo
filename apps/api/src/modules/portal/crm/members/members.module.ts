@@ -14,6 +14,7 @@ import { CrmMembersController } from "@modules/portal/crm/members/api/controller
 import { PublicMemberConsentController } from "@modules/portal/crm/members/api/controllers/public-member-consent.controller";
 import { JoinPortalService } from "@modules/portal/crm/members/application/services/join-portal.service";
 import { MemberConsentService } from "@modules/portal/crm/members/application/services/member-consent.service";
+import { MemberEditingService } from "@modules/portal/crm/members/application/services/member-editing.service";
 import { MemberFilesService } from "@modules/portal/crm/members/application/services/member-files.service";
 import { MembersService } from "@modules/portal/crm/members/application/services/members.service";
 import { MemberRepository } from "@modules/portal/crm/members/domain/repositories/member-repository.interface";
@@ -41,6 +42,7 @@ import { UsersModule } from "@modules/users";
         MembersService,
         JoinPortalService,
         MemberConsentService,
+        MemberEditingService,
         MemberFilesService,
         MemberFilesProcessor,
         {

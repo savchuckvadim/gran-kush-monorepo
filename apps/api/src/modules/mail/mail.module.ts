@@ -3,9 +3,8 @@ import { Global, Module } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
 import { getMailTransportConfig } from "@common/config/mail/mailer.config";
-import { MAIL_JOB_OPTIONS, PORTAL_EVENTS_JOB_OPTIONS } from "@common/queue/job-options";
+import { MAIL_JOB_OPTIONS } from "@common/queue/job-options";
 import { TelegramModule } from "@common/telegram/telegram.module";
-import { PORTAL_EVENTS_QUEUE_NAME } from "@modules/portal/crm/portals/events/portal-events.constants";
 
 import { MailService } from "./application/services/mail.service";
 import { MAIL_TRANSPORT } from "./domain/mail-transport.interface";
@@ -22,10 +21,6 @@ import { SmtpMailTransport } from "./infrastructure/transport/smtp-mail.transpor
         BullModule.registerQueue({
             name: MAIL_QUEUE_NAME,
             defaultJobOptions: MAIL_JOB_OPTIONS,
-        }),
-        BullModule.registerQueue({
-            name: PORTAL_EVENTS_QUEUE_NAME,
-            defaultJobOptions: PORTAL_EVENTS_JOB_OPTIONS,
         }),
     ],
     providers: [

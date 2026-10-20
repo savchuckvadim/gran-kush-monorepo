@@ -72,16 +72,19 @@ module-name/
 **Purpose**: Base user authentication and management
 
 **Key Features**:
+
 - User creation and management
 - Email uniqueness validation
 - Password hashing (bcrypt)
 - User activation/deactivation
 
 **Domain Model**:
+
 - `User` - Minimal authentication model
-  - `id`, `email`, `passwordHash`, `isActive`
+    - `id`, `email`, `passwordHash`, `isActive`
 
 **API Endpoints**:
+
 - `POST /users` - Create user
 - `GET /users/:id` - Get user by ID
 - `PATCH /users/:id` - Update user
@@ -95,6 +98,7 @@ module-name/
 **Field-driven profile (portal fields, forms, statuses):** see [MEMBER_AND_ENTITY_FIELDS.md](./MEMBER_AND_ENTITY_FIELDS.md).
 
 **Key Features**:
+
 - Member registration
 - Profile management
 - Document upload and management
@@ -104,12 +108,14 @@ module-name/
 - Member-Document relationships
 
 **Domain Model**:
+
 - `Member` - Core row: `userId`, `portalId`, `membershipNumber`, `statusItemId` (FK to `status_items`), `isActive`; profile attributes live in `field_values` keyed by `portal_field_definitions`
-  - Relations: `User`, `FieldValue[]`, `IdentityDocument[]`, `Signature`, `MemberMjStatus[]`, `MemberDocument[]`
-  - Consent (TASK-663): `consentStatus` (`confirmed` | `pending`), `consentToken`, `consentRequestedAt`, `consentConfirmedAt`, `signatureShared`. A club that adds an **existing** account by email gets a `pending` membership: the owner confirms it from the email (`/{locale}/consent/{token}` in the CRM, password required) or declines (membership deleted). `GET /cabinet/portals` hides `pending` memberships.
+    - Relations: `User`, `FieldValue[]`, `IdentityDocument[]`, `Signature`, `MemberMjStatus[]`, `MemberDocument[]`
+    - Consent (TASK-663): `consentStatus` (`confirmed` | `pending`), `consentToken`, `consentRequestedAt`, `consentConfirmedAt`, `signatureShared`. A club that adds an **existing** account by email gets a `pending` membership: the owner confirms it from the email (`/{locale}/consent/{token}` in the CRM, password required) or declines (membership deleted). `GET /cabinet/portals` hides `pending` memberships.
 - `MemberDocumentShare` (`member_document_shares`) - which account documents a membership may see. Documents and the signature belong to the account; the CRM lists, previews and replaces only what is shared with that membership (`MemberDocumentShareRepository`, `AccountFilesService.replace*({ share })`). Self-initiated joins (cabinet, registration link, kiosk) share everything; a CRM-created membership gets only what the club uploads itself or what the owner selects when confirming.
 
 **API Endpoints**:
+
 - `POST /cabinet/auth/member/register` - Register new member account (portal-scoped; `PortalId` from context)
 - `GET /public/consent/:token`, `POST /public/consent/:token/confirm`, `POST /public/consent/:token/decline` - membership consent of an existing account (public, `PUBLIC_TOKEN_THROTTLE`, token valid 14 days)
 - `POST /crm/members/:id/consent/resend` - send the consent email again (`EMAIL_THROTTLE`)
@@ -119,6 +125,7 @@ module-name/
 - **Mobile:** `cabinet/mobile/auth` — Bearer-based flows parallel to web
 
 **Repositories**:
+
 - `MembersRepository`
 - `IdentityDocumentsRepository`
 - `SignaturesRepository`
@@ -132,18 +139,21 @@ module-name/
 **Purpose**: Employee management and CRM access
 
 **Key Features**:
+
 - Employee registration
 - Role-based access control (employee, manager, admin)
 - Employee authentication
 - Department and position management
 
 **Domain Model**:
+
 - `Employee` - Extended user with employee-specific data
-  - Personal info: `name`, `surname`, `phone`
-  - Work info: `role`, `position`, `department`
-  - Status: `isActive`, `lastLoginAt`
+    - Personal info: `name`, `surname`, `phone`
+    - Work info: `role`, `position`, `department`
+    - Status: `isActive`, `lastLoginAt`
 
 **API Endpoints (web, HttpOnly cookies)** — see `EmployeeAuthController` (`crm/auth`):
+
 - `POST /crm/auth/login` — sets access/refresh cookies; response body is profile-shaped (tokens are not returned in JSON for web)
 - `POST /crm/auth/refresh` — reads refresh cookie, rotates cookies
 - `POST /crm/auth/logout` — clears cookies
@@ -152,6 +162,7 @@ module-name/
 **Mobile / Bearer** — `EmployeeMobileAuthController` (`crm/mobile/auth`): JSON tokens + `Authorization: Bearer`.
 
 **Repositories**:
+
 - `EmployeesRepository`
 
 **Guards**: `@CrmAuth()` (session → membership → permissions → subscription) with `@RequirePermission(...)`
@@ -163,6 +174,7 @@ practical guide — [AUTHENTICATION.md](../AUTHENTICATION.md), every route with 
 [AUTH_ROUTES.md](./AUTH_ROUTES.md).
 
 **Submodules** (`modules/portal/auth/`):
+
 - `sessions` — `auth_sessions` (account × app × device), access/refresh JWT, refresh rotation with reuse
   detection, cookies, `SessionGuard`, decorators `CrmSession`/`CrmAuth`/`CabinetSession`/`CabinetAuth`,
   devices API, CSRF origin check
@@ -180,16 +192,19 @@ practical guide — [AUTHENTICATION.md](../AUTHENTICATION.md), every route with 
 **Purpose**: File storage and management
 
 **Key Features**:
+
 - Public and private storage types
 - File category management
 - User-scoped file access
 - File validation and security
 
 **Storage Types**:
+
 - `PUBLIC` - Publicly accessible files
 - `PRIVATE` - Authentication-required files
 
 **File Categories**:
+
 - `member-document` - Member documents
 - `member-signature` - Digital signatures
 - `product-image` - Product images
@@ -198,6 +213,7 @@ practical guide — [AUTHENTICATION.md](../AUTHENTICATION.md), every route with 
 - `other` - Other files
 
 **API Endpoints**:
+
 - `POST /storage/upload` - Upload file (Member)
 - `POST /storage/employee/upload` - Upload file (Employee)
 - `GET /storage/:id` - Get file metadata
@@ -211,6 +227,7 @@ practical guide — [AUTHENTICATION.md](../AUTHENTICATION.md), every route with 
 **Purpose**: Email sending and template management
 
 **Key Features**:
+
 - Queue-based email sending (BullMQ)
 - Email templates (React components)
 - Email verification
@@ -218,31 +235,36 @@ practical guide — [AUTHENTICATION.md](../AUTHENTICATION.md), every route with 
 - Mass email campaigns (planned)
 
 **Email Templates**:
+
 - `email-verification.template.tsx` - Email verification
 - `reset-password.template.tsx` - Password reset
 - `restriction-lifted.template.tsx` - Restriction notifications
 - `test.template.tsx` - Testing template
 
 **Queue Processing**:
+
 - `MailProcessor` - Processes email queue jobs
 - Async email sending to prevent blocking
 
 **API Endpoints**:
+
 - `POST /mail/send` - Send email (admin)
 
-
 Email verification & password reset are handled in the **Auth module**:
+
 - `GET /auth/verify/:token`
 - `POST /auth/verify`
 - `POST /auth/password/reset/request`
 - `POST /auth/password/reset`
 
 **Queue-based flow (event-like)**:
+
 - Email sending is queued into the `mail` BullMQ queue.
 - Job name: `send-email` (see `MAIL_QUEUE_JOB_NAMES.SEND_EMAIL`).
 - After completion, `MailProcessor` checks `emailType` and triggers:
-  - Telegram notification for verification emails
-  - follow-up `portal-events` job for portal-registration email
+    - Telegram notification for verification emails
+- The welcome letter of a new club is a consumer of the `portal.founded` domain event
+  ([DOMAIN_EVENTS](./DOMAIN_EVENTS.md)).
 
 ### 7. Billing Module
 
@@ -254,6 +276,7 @@ land with the chosen provider. Until then `PaymentEventsService.ingest` rejects 
 there is nothing to verify the signature with (fail-closed by design).
 
 **Key pieces** (`apps/api/src/modules/billing`):
+
 - `GET /platform/billing/plans` — `PlatformBillingPlansController` → `BillingPlansService` →
   `BillingPlanRepository.findActivePlansForCatalog`. Public catalog of active plans for the product
   site; contract in [HTTP_API_CONTRACT.md](./HTTP_API_CONTRACT.md#platform-onboarding).
@@ -283,6 +306,7 @@ See [tasks/scaling-roadmap.md](../tasks/scaling-roadmap.md) — TASK-101, TASK-1
 **Purpose**: Database access and ORM
 
 **Features**:
+
 - Type-safe database queries
 - Connection pooling
 - Migration management
@@ -295,21 +319,24 @@ See [tasks/scaling-roadmap.md](../tasks/scaling-roadmap.md) — TASK-101, TASK-1
 **Purpose**: Async job processing with BullMQ
 
 **Features**:
+
 - Redis-backed queues (BullMQ)
 - Job processing in worker(s)
 - Retry logic available via BullMQ job options (per `queue.add(...)`)
 - Job monitoring
 
 **Queues**:
+
 - `mail` - Email sending queue
 - `member-files` - Async member documents/signature processing queue
-- `portal-events` - Platform/portal registration flow (welcome email + admin notifications)
+- `domain-events` - Delivery of domain events to `@OnDomainEvent` consumers ([DOMAIN_EVENTS](./DOMAIN_EVENTS.md))
 
 ### Redis Module
 
 **Purpose**: Redis client infrastructure used by BullMQ queues
 
 **Features**:
+
 - Current code uses Redis as the BullMQ backend connection.
 - App-level caching/rate-limiting/session storage is not implemented via `RedisService` in the visible code.
 
@@ -320,6 +347,7 @@ See [tasks/scaling-roadmap.md](../tasks/scaling-roadmap.md) — TASK-101, TASK-1
 **Purpose**: Telegram bot integration
 
 **Features**:
+
 - Notification sending
 - Bot commands
 - Integration with system events
@@ -360,15 +388,15 @@ Platform onboarding: **`POST /platform/portals/register`** creates a portal and 
 The system implements two separate authentication **domains**:
 
 1. **Member Authentication**:
-   - Web: `/cabinet/auth/*` (HttpOnly cookies for session)
-   - Mobile: `/cabinet/mobile/auth` (Bearer)
-   - Sessions: `auth_sessions` (audience `cabinet`)
+    - Web: `/cabinet/auth/*` (HttpOnly cookies for session)
+    - Mobile: `/cabinet/mobile/auth` (Bearer)
+    - Sessions: `auth_sessions` (audience `cabinet`)
 
 2. **Employee Authentication**:
-   - Web: `/crm/auth/*` (HttpOnly cookies)
-   - Mobile: `/crm/mobile/auth` (Bearer)
-   - Sessions: `auth_sessions` (audience `crm`)
-   - Guards: `@CrmSession()` / `@CrmAuth()` with `@RequirePermission(...)`
+    - Web: `/crm/auth/*` (HttpOnly cookies)
+    - Mobile: `/crm/mobile/auth` (Bearer)
+    - Sessions: `auth_sessions` (audience `crm`)
+    - Guards: `@CrmSession()` / `@CrmAuth()` with `@RequirePermission(...)`
 
 ### JWT Token System
 
@@ -380,6 +408,7 @@ The system implements two separate authentication **domains**:
 ### Role-Based Access Control
 
 **Employee Roles**:
+
 - `employee` - Basic employee access
 - `manager` - Manager-level access
 - `admin` - Full administrative access
@@ -391,17 +420,20 @@ The system implements two separate authentication **domains**:
 **Purpose**: Async operation processing
 
 **Benefits**:
+
 - Non-blocking operations
 - Retry logic via BullMQ job options / worker configuration
 - Job monitoring
 - Scalability
 
 **Current Queues**:
+
 - `mail` - Email sending
 - `member-files` - Async member documents/signature processing
-- `portal-events` - Portal registration notifications and follow-up events
+- `domain-events` - Domain event delivery (welcome letter, platform alert; realtime and notifications next)
 
 **Future Queues**:
+
 - Notification sending
 - Report generation
 - Data synchronization
@@ -409,6 +441,7 @@ The system implements two separate authentication **domains**:
 ### Redis / Queue Infrastructure
 
 **Usage**:
+
 - BullMQ backend storage for queue state (via Redis client)
 
 ### Database Optimization
@@ -426,6 +459,7 @@ The system implements two separate authentication **domains**:
 - **OpenAPI JSON** (codegen): `GET /docs-json`
 
 **Features**:
+
 - Interactive API explorer
 - Request/response schemas
 - Authentication testing
@@ -437,8 +471,8 @@ Every failure is normalized by **`GlobalExceptionFilter`** (`APP_FILTER` in `App
 
 ```json
 {
-  "message": "Human-readable message",
-  "errors": []
+    "message": "Human-readable message",
+    "errors": []
 }
 ```
 
@@ -516,12 +550,14 @@ BOOTSTRAP_ADMIN_FORCE_PASSWORD_RESET=false
 ```
 
 Optional fields:
+
 - `BOOTSTRAP_ADMIN_SURNAME`
 - `BOOTSTRAP_ADMIN_PHONE`
 - `BOOTSTRAP_ADMIN_POSITION`
 - `BOOTSTRAP_ADMIN_DEPARTMENT`
 
 How it works:
+
 - `BOOTSTRAP_ADMIN_ENABLED=true` means seed is allowed to create/update bootstrap admin.
 - Seed is idempotent: it upserts `User` by email and `Employee` by `userId`.
 - `Employee.role` is always set to `admin`.
@@ -553,6 +589,7 @@ pnpm prisma generate
 ### Environment Variables
 
 Required environment variables:
+
 - `DATABASE_URL` - PostgreSQL connection string
 - `REDIS_URL` - Redis connection string
 - `JWT_SECRET` - JWT signing secret

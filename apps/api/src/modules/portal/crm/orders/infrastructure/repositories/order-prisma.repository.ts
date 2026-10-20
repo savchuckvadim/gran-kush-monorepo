@@ -3,6 +3,7 @@ import { Injectable } from "@nestjs/common";
 import { Prisma, StageSemantic } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { DomainEventPublisher, type EventsOf, type NewDomainEvent } from "@modules/events";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 import { Order, PaymentStatus } from "@modules/portal/crm/orders/domain/entity/order.entity";
 import { limitWindowStart, roundGrams } from "@modules/portal/crm/orders/domain/monthly-limit";
@@ -21,7 +22,10 @@ import { reserveStock } from "./order-stock.prisma";
 
 @Injectable()
 export class OrderPrismaRepository extends OrderRepository {
-    constructor(private readonly prisma: PrismaService) {
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly events: DomainEventPublisher
+    ) {
         super();
     }
 
@@ -75,7 +79,7 @@ export class OrderPrismaRepository extends OrderRepository {
 
     // ─── Создание заказа (транзакционно: склад + EntityRecord + Order) ───────
 
-    async create(data: CreateOrderInput): Promise<Order> {
+    async create(data: CreateOrderInput, events?: EventsOf<Order>): Promise<Order> {
         const member = await this.prisma.member.findUnique({
             where: { id: data.memberId },
             select: { id: true, portalId: true },
@@ -84,7 +88,7 @@ export class OrderPrismaRepository extends OrderRepository {
             throw new Error(`Member ${data.memberId} not found for order create`);
         }
 
-        const row = await this.prisma.$transaction(async (tx) => {
+        return this.prisma.$transaction(async (tx) => {
             if (data.monthlyLimitGrams != null) {
                 await enforceMonthlyLimit(tx, {
                     memberId: member.id,
@@ -119,7 +123,7 @@ export class OrderPrismaRepository extends OrderRepository {
                 },
             });
 
-            return tx.order.create({
+            const row = await tx.order.create({
                 data: {
                     portalId: member.portalId,
                     entityRecordId: record.id,
@@ -145,9 +149,10 @@ export class OrderPrismaRepository extends OrderRepository {
                 },
                 include: ORDER_INCLUDE,
             });
+            const order = toOrderEntity(row);
+            if (events) await this.events.publishMany(tx, events(order));
+            return order;
         });
-
-        return toOrderEntity(row);
     }
 
     async sumLimitUsage(memberId: string, since: Date): Promise<number> {
@@ -167,19 +172,24 @@ export class OrderPrismaRepository extends OrderRepository {
         from: PaymentStatus;
         to: PaymentStatus;
         employeeId?: string;
+        events?: readonly NewDomainEvent[];
     }): Promise<boolean> {
-        const result = await this.prisma.order.updateMany({
-            where: {
-                id: input.orderId,
-                portalId: input.portalId,
-                paymentStatus: input.from,
-            },
-            data: {
-                paymentStatus: input.to,
-                ...(input.employeeId ? { employeeId: input.employeeId } : {}),
-            },
+        return this.prisma.$transaction(async (tx) => {
+            const result = await tx.order.updateMany({
+                where: {
+                    id: input.orderId,
+                    portalId: input.portalId,
+                    paymentStatus: input.from,
+                },
+                data: {
+                    paymentStatus: input.to,
+                    ...(input.employeeId ? { employeeId: input.employeeId } : {}),
+                },
+            });
+            if (result.count !== 1) return false;
+            if (input.events?.length) await this.events.publishMany(tx, input.events);
+            return true;
         });
-        return result.count === 1;
     }
 
     // ─── Обновление заказа ───────────────────────────────────────────────────

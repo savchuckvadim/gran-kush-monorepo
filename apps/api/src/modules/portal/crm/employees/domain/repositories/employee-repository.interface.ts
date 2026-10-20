@@ -1,3 +1,4 @@
+import type { EventsOf } from "@modules/events";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
 
 export interface EmployeeFilters {
@@ -21,6 +22,7 @@ export interface EmployeeWithProfile {
     fields: EmployeeProfileField[];
 }
 
+/** `events` у записывающих методов пишутся в outbox той же транзакцией (TASK-780). */
 export abstract class EmployeeRepository {
     abstract findByIdForPortal(id: string, portalId: string): Promise<EmployeeWithProfile | null>;
     abstract findByUserAndPortal(
@@ -34,20 +36,24 @@ export abstract class EmployeeRepository {
         skip?: number
     ): Promise<EmployeeWithProfile[]>;
     abstract countByPortal(portalId: string, filters?: EmployeeFilters): Promise<number>;
-    abstract createWithProfile(data: {
-        userId: string;
-        portalId: string;
-        roleId: string;
-        invitationId?: string;
-        fields: Record<string, unknown>;
-    }): Promise<EmployeeWithProfile>;
+    abstract createWithProfile(
+        data: {
+            userId: string;
+            portalId: string;
+            roleId: string;
+            invitationId?: string;
+            fields: Record<string, unknown>;
+        },
+        events?: EventsOf<EmployeeWithProfile>
+    ): Promise<EmployeeWithProfile>;
     abstract updateBridge(
         id: string,
         data: Partial<{
             roleId: string;
             isActive: boolean;
             lastLoginAt: Date;
-        }>
+        }>,
+        events?: EventsOf<EmployeeWithProfile>
     ): Promise<EmployeeWithProfile>;
     abstract updateProfileFields(
         id: string,

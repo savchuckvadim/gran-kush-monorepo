@@ -25,7 +25,7 @@
    молодая, розовая и дерзкая палитра; Ink Space — вместо дыма эффект чернил/краски. Темы с нуля не делаем.
 3. **Nagual — только скин CRM** (`nagual` в `SKIN_IDS`). Сайта и приложения Nagual не будет; stub
    `apps/site/modules/sites/nagual` удаляется.
-3a. **Бренд-архитектура — «дом брендов» с тихим зонтиком.** Наружу три самостоятельных бренда без
+   3a. **Бренд-архитектура — «дом брендов» с тихим зонтиком.** Наружу три самостоятельных бренда без
    упоминаний друг друга (клиентка салона не должна через бренд выходить на каннабис; Ads, Meta и Stripe
    смотрят на домен). Зонтик — «April IT by V. Savchuk», autónomo: только aviso legal, приватность, GitHub,
    LinkedIn и строка в футере. Отправитель писем — с домена бренда, не `april-app.ru`.
@@ -42,14 +42,14 @@
 
 ## Коротко: что уже есть и чего нет
 
-| Есть | Нет |
-|---|---|
-| `Portal.type`, шаблоны полей с `applicablePortalTypes`, `provisionPortal(portalId, type)` | Выбор ниши при регистрации; CRM не знает тип портала |
-| EAV-сущности, воронки/стадии, канбан, формы, `UiSetting`, `PortalRole` | Переключение разделов по типу портала |
-| i18n ru/en/es, ~2 250 строк на локаль | Словарь: «socio/club/member» в сотнях строк, без переменных |
-| Документы, подпись, consent-флоу участника | Услуги (без склада), запись/календарь/расписание |
-| Telegram-вход, Telegram-алерты админу | Диалоги с клиентами, уведомления, журнал действий |
-| Сайт: pages/sites/plans, sitemap+hreflang, canonical, OG, JSON-LD, robots | Сайт выбирается при сборке, а Dockerfile/CI не передают `NEXT_PUBLIC_SITE`; тарифы без `site`; тексты/OG/иконки — PafPaf; аналитики нет; блога нет |
+| Есть                                                                                      | Нет                                                                                                                                                |
+| ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Portal.type`, шаблоны полей с `applicablePortalTypes`, `provisionPortal(portalId, type)` | Выбор ниши при регистрации; CRM не знает тип портала                                                                                               |
+| EAV-сущности, воронки/стадии, канбан, формы, `UiSetting`, `PortalRole`                    | Переключение разделов по типу портала                                                                                                              |
+| i18n ru/en/es, ~2 250 строк на локаль                                                     | Словарь: «socio/club/member» в сотнях строк, без переменных                                                                                        |
+| Документы, подпись, consent-флоу участника                                                | Услуги (без склада), запись/календарь/расписание                                                                                                   |
+| Telegram-вход, Telegram-алерты админу                                                     | Диалоги с клиентами, уведомления, журнал действий                                                                                                  |
+| Сайт: pages/sites/plans, sitemap+hreflang, canonical, OG, JSON-LD, robots                 | Сайт выбирается при сборке, а Dockerfile/CI не передают `NEXT_PUBLIC_SITE`; тарифы без `site`; тексты/OG/иконки — PafPaf; аналитики нет; блога нет |
 
 ---
 
@@ -116,7 +116,7 @@
       продолжается, стадии со временем); фактические `arrivedAt`, `startedAt`, `finishedAt`; кнопки
       «клиент пришёл», «начал», «+15 мин», «закончил» — одно нажатие с телефона
 - [ ] Расчёт задержки: ожидаемый конец текущей процедуры = `max(plannedEnd, startedAt + duration +
-      extensions)`; для каждой следующей записи мастера `expectedStartAt` и `delayMinutes`; пересчёт при
+    extensions)`; для каждой следующей записи мастера `expectedStartAt` и `delayMinutes`; пересчёт при
       каждом переходе стадии и по таймеру; событие `appointment.delay_changed` при изменении больше порога
       (настройка портала, по умолчанию 10 мин)
 - [ ] Кабинет клиента: «Ваша запись в 16:00 — начнётся вовремя / с задержкой ~15 мин, мастер ещё с
@@ -262,17 +262,21 @@
 Принцип: **одна шина событий CRM**, всё остальное — её потребители. Уведомления, история портала, интеграции,
 будущие вебхуки и ИИ читают одни и те же события; ни один сервис не шлёт письмо и не пишет журнал сам.
 
+Дизайн до кода (2026-10-20) — [events-realtime](events-realtime.md): контракт в `packages/domain-events`,
+outbox, relay, потребители, плюс realtime-шлюз socket.io (TASK-794) и реестр инвалидации на фронте
+(TASK-795), которых здесь не было. Финансы — [finance-accounting](finance-accounting.md) (TASK-796…803).
+
 ### TASK-780: доменные события CRM — шина с outbox `[ ]` P0 — продумать до кода
 
 - [ ] **Контракт события**: `{ id: uuid, name: 'order.stage_changed', version: 1, portalId, occurredAt,
-      actor: { kind: EMPLOYEE|MEMBER|SYSTEM, id }, aggregate: { kind, id }, payload }`; имена
+    actor: { kind: EMPLOYEE|MEMBER|SYSTEM, id }, aggregate: { kind, id }, payload }`; имена
       `<aggregate>.<past_tense>`; payload типизирован, без Prisma-типов; события — часть публичного
       контракта (документ `documentation/backend/DOMAIN_EVENTS.md` с каталогом)
 - [ ] **Каталог** `apps/api/src/common/events/catalog.ts`: типы payload по имени, описание, «кому
       интересно» (член/сотрудник/система) — из него же строятся типы уведомлений и фильтры журнала.
       v1: `portal.founded`, `member.joined / consent_pending / consent_given / left`, `document.uploaded /
-      shared`, `order.placed / stage_changed / cancelled`, `appointment.requested / confirmed / rescheduled /
-      cancelled / started / finished / delay_changed`, `employee.invited / joined`, `presence.entered / left`,
+    shared`, `order.placed / stage_changed / cancelled`, `appointment.requested / confirmed / rescheduled /
+    cancelled / started / finished / delay_changed`, `employee.invited / joined`, `presence.entered / left`,
       `subscription.changed`
 - [ ] **Публикация — transactional outbox**: use-case пишет событие в таблицу `domain_events` в той же
       транзакции Prisma, что и изменение (`EventPublisher.publish(tx, event)`); никаких in-process
@@ -518,7 +522,7 @@ PWA не делаем (решение Вадима 2026-10-19). База — н�
       (имена сервисов нельзя брать из env — они ключи YAML, а на общей `dokploy-network` должны быть
       уникальны); `.env.example` на бренд; `next.Dockerfile` принимает `NEXT_PUBLIC_BRAND`,
       `NEXT_PUBLIC_SITE`, `NEXT_PUBLIC_SERVER_URL`; `deploy.yml`: матрица `{crm,admin,site} × {pafpaf,
-      inkspace,plisplas}` с URL из `infra/brands.json` (один источник для CI и compose), образы
+    inkspace,plisplas}` с URL из `infra/brands.json` (один источник для CI и compose), образы
       `<app>-<brand>:latest`; job `dokploy` перебирает `DOKPLOY_COMPOSE_ID_*`: Ink Space → Plis Plas →
       PafPaf, после каждого `GET api.<domain>/health` с ожиданием `brand`
 - [ ] Проверки как в CI, слияние в `main` → сборка 10 образов → PafPaf передеплоится на той же версии

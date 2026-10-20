@@ -11,6 +11,8 @@ import {
     ProductRepository,
 } from "@modules/portal/crm/catalog/domain/repositories/product-repository.interface";
 
+import { productChangedEvents } from "../events/product-events";
+
 @Injectable()
 export class ProductsService {
     private readonly logger = new Logger(ProductsService.name);
@@ -95,29 +97,32 @@ export class ProductsService {
             }
         }
 
-        return this.productRepository.create({
-            portalId,
-            categoryId: dto.categoryId,
-            measurementUnitId: dto.measurementUnitId,
-            name: dto.name,
-            description: dto.description,
-            sku: dto.sku,
-            price: new Prisma.Decimal(dto.price),
-            initialQuantity: new Prisma.Decimal(dto.initialQuantity),
-            currentQuantity: new Prisma.Decimal(dto.initialQuantity),
-            minQuantity:
-                dto.minQuantity !== undefined ? new Prisma.Decimal(dto.minQuantity) : undefined,
-            imageUrl: dto.imageUrl,
-            thc: dto.thc !== undefined ? new Prisma.Decimal(dto.thc) : undefined,
-            cbd: dto.cbd !== undefined ? new Prisma.Decimal(dto.cbd) : undefined,
-            strain: dto.strain,
-            audiences: dto.audiences,
-            limitGramsPerUnit:
-                dto.limitGramsPerUnit != null
-                    ? new Prisma.Decimal(dto.limitGramsPerUnit)
-                    : undefined,
-            createdBy: employeeId,
-        });
+        return this.productRepository.create(
+            {
+                portalId,
+                categoryId: dto.categoryId,
+                measurementUnitId: dto.measurementUnitId,
+                name: dto.name,
+                description: dto.description,
+                sku: dto.sku,
+                price: new Prisma.Decimal(dto.price),
+                initialQuantity: new Prisma.Decimal(dto.initialQuantity),
+                currentQuantity: new Prisma.Decimal(dto.initialQuantity),
+                minQuantity:
+                    dto.minQuantity !== undefined ? new Prisma.Decimal(dto.minQuantity) : undefined,
+                imageUrl: dto.imageUrl,
+                thc: dto.thc !== undefined ? new Prisma.Decimal(dto.thc) : undefined,
+                cbd: dto.cbd !== undefined ? new Prisma.Decimal(dto.cbd) : undefined,
+                strain: dto.strain,
+                audiences: dto.audiences,
+                limitGramsPerUnit:
+                    dto.limitGramsPerUnit != null
+                        ? new Prisma.Decimal(dto.limitGramsPerUnit)
+                        : undefined,
+                createdBy: employeeId,
+            },
+            (product) => productChangedEvents(portalId, product.id, "created", employeeId)
+        );
     }
 
     async update(
@@ -197,14 +202,23 @@ export class ProductsService {
             data.limitGramsPerUnit =
                 dto.limitGramsPerUnit !== null ? new Prisma.Decimal(dto.limitGramsPerUnit) : null;
 
-        return this.productRepository.update(id, data);
+        return this.productRepository.update(
+            id,
+            data,
+            productChangedEvents(portalId, id, "updated", employeeId, {
+                stockChanged: dto.currentQuantity !== undefined || dto.isAvailable !== undefined,
+            })
+        );
     }
 
-    async delete(id: string, portalId: string): Promise<void> {
+    async delete(id: string, portalId: string, employeeId: string): Promise<void> {
         const product = await this.productRepository.findById(id, portalId);
         if (!product) {
             throw new NotFoundException("Product not found");
         }
-        return this.productRepository.delete(id);
+        return this.productRepository.delete(
+            id,
+            productChangedEvents(portalId, id, "deleted", employeeId)
+        );
     }
 }

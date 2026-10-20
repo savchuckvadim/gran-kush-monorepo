@@ -3,7 +3,9 @@ import { Injectable } from "@nestjs/common";
 import { Prisma, UserAccountStatus } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { DomainEventPublisher } from "@modules/events";
 
+import { sessionRevokedEvents } from "../application/session-events";
 import type {
     AuthSession,
     SessionAccount,
@@ -33,7 +35,10 @@ const toSession = (row: SessionRow): AuthSession => ({
 
 @Injectable()
 export class AuthSessionPrismaRepository extends AuthSessionRepository {
-    constructor(private readonly prisma: PrismaService) {
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly events: DomainEventPublisher
+    ) {
         super();
     }
 
@@ -101,18 +106,15 @@ export class AuthSessionPrismaRepository extends AuthSessionRepository {
     }
 
     async revoke(id: string, reason: SessionRevokeReason): Promise<void> {
-        await this.prisma.authSession.updateMany({
-            where: { id, revokedAt: null },
-            data: { revokedAt: new Date(), revokeReason: reason },
-        });
+        await this.revokeWhere({ id, revokedAt: null }, reason);
     }
 
     async revokeOwned(id: string, userId: string, reason: SessionRevokeReason): Promise<boolean> {
-        const { count } = await this.prisma.authSession.updateMany({
-            where: { id, userId, revokedAt: null, expiresAt: { gt: new Date() } },
-            data: { revokedAt: new Date(), revokeReason: reason },
-        });
-        return count === 1;
+        const revoked = await this.revokeWhere(
+            { id, userId, revokedAt: null, expiresAt: { gt: new Date() } },
+            reason
+        );
+        return revoked === 1;
     }
 
     async revokeAllForUser(
@@ -120,15 +122,32 @@ export class AuthSessionPrismaRepository extends AuthSessionRepository {
         reason: SessionRevokeReason,
         exceptSessionId?: string
     ): Promise<number> {
-        const { count } = await this.prisma.authSession.updateMany({
-            where: {
+        return this.revokeWhere(
+            {
                 userId,
                 revokedAt: null,
                 ...(exceptSessionId ? { id: { not: exceptSessionId } } : {}),
             },
-            data: { revokedAt: new Date(), revokeReason: reason },
+            reason
+        );
+    }
+
+    /** Отзыв и его события `session.revoked` — одной транзакцией; возвращает число отозванных. */
+    private async revokeWhere(
+        where: Prisma.AuthSessionWhereInput,
+        reason: SessionRevokeReason
+    ): Promise<number> {
+        return this.prisma.$transaction(async (tx) => {
+            const revoked = await tx.authSession.updateManyAndReturn({
+                where,
+                data: { revokedAt: new Date(), revokeReason: reason },
+                select: { id: true, userId: true, audience: true },
+            });
+            if (revoked.length > 0) {
+                await this.events.publishMany(tx, sessionRevokedEvents(revoked, reason));
+            }
+            return revoked.length;
         });
-        return count;
     }
 
     async listActiveForUser(userId: string, now: Date): Promise<AuthSession[]> {

@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { DomainEventPublisher, type NewDomainEvent } from "@modules/events";
 import type {
     OrderStage,
     OrderStageSummary,
@@ -20,7 +21,10 @@ import { returnStock } from "./order-stock.prisma";
 
 @Injectable()
 export class OrderStagePrismaRepository extends OrderStageRepository {
-    constructor(private readonly prisma: PrismaService) {
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly events: DomainEventPublisher
+    ) {
         super();
     }
 
@@ -38,6 +42,7 @@ export class OrderStagePrismaRepository extends OrderStageRepository {
         toStageId: string;
         stagePosition?: number;
         restock?: readonly StockLine[];
+        events?: readonly NewDomainEvent[];
     }): Promise<boolean> {
         const order = await this.prisma.order.findFirst({
             where: { id: input.orderId, portalId: input.portalId },
@@ -52,6 +57,7 @@ export class OrderStagePrismaRepository extends OrderStageRepository {
             });
             if (count !== 1) return false;
             if (input.restock?.length) await returnStock(tx, input.portalId, input.restock);
+            if (input.events?.length) await this.events.publishMany(tx, input.events);
             return true;
         });
     }

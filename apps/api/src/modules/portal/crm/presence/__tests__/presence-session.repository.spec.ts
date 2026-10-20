@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import type { DomainEventPublisher } from "@modules/events";
 import { PresenceSessionPrismaRepository } from "@modules/portal/crm/presence/infrastructure/repositories/presence-session-prisma.repository";
 
 const ENTITY_RECORD_ID = "er-1";
@@ -42,10 +43,17 @@ describe("PresenceSessionPrismaRepository — одна открытая сесс
                 findUniqueOrThrow: jest.fn(),
                 updateMany: jest.fn(),
             },
+            // транзакция на моке — тот же клиент: проверяем запросы, а не изоляцию
+            $transaction: jest.fn(<T>(run: (tx: unknown) => Promise<T>) => run(prisma)),
         };
+        const events = { publishMany: jest.fn().mockResolvedValue([]) };
         return {
             prisma,
-            repo: new PresenceSessionPrismaRepository(prisma as unknown as PrismaService),
+            events,
+            repo: new PresenceSessionPrismaRepository(
+                prisma as unknown as PrismaService,
+                events as unknown as DomainEventPublisher
+            ),
         };
     };
 
@@ -136,5 +144,43 @@ describe("PresenceSessionPrismaRepository — одна открытая сесс
 
         expect(await repo.closeOpenSession("s-1", { exitMethod: "qr" })).toBeNull();
         expect(prisma.presenceSession.findUniqueOrThrow).not.toHaveBeenCalled();
+    });
+
+    it("событие входа пишется в транзакции новой сессии, а при гонке — нет", async () => {
+        const { prisma, events, repo } = build();
+        const builder = jest.fn().mockReturnValue([{ name: "presence.entered" }]);
+        prisma.presenceSession.create.mockResolvedValue(sessionRow());
+
+        await repo.createEntry(
+            { memberId: MEMBER_ID, entryMethod: "qr", portalId: PORTAL_ID },
+            builder
+        );
+        expect(builder).toHaveBeenCalledWith(expect.objectContaining({ id: "s-1" }));
+        expect(events.publishMany).toHaveBeenCalledWith(prisma, [{ name: "presence.entered" }]);
+
+        events.publishMany.mockClear();
+        prisma.presenceSession.create.mockRejectedValue(uniqueViolation());
+        prisma.presenceSession.findFirst.mockResolvedValue(sessionRow({ id: "s-existing" }));
+        await repo.createEntry(
+            { memberId: MEMBER_ID, entryMethod: "qr", portalId: PORTAL_ID },
+            builder
+        );
+        expect(events.publishMany).not.toHaveBeenCalled();
+    });
+
+    it("событие выхода — только когда выход записан этим вызовом", async () => {
+        const { prisma, events, repo } = build();
+        const builder = jest.fn().mockReturnValue([{ name: "presence.left" }]);
+        prisma.presenceSession.updateMany.mockResolvedValue({ count: 0 });
+
+        await repo.closeOpenSession("s-1", { exitMethod: "qr" }, builder);
+        expect(events.publishMany).not.toHaveBeenCalled();
+
+        prisma.presenceSession.updateMany.mockResolvedValue({ count: 1 });
+        prisma.presenceSession.findUniqueOrThrow.mockResolvedValue(
+            sessionRow({ exitedAt: new Date(), exitMethod: "qr", activeEntityRecordId: null })
+        );
+        await repo.closeOpenSession("s-1", { exitMethod: "qr" }, builder);
+        expect(events.publishMany).toHaveBeenCalledWith(prisma, [{ name: "presence.left" }]);
     });
 });

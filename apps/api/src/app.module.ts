@@ -20,6 +20,7 @@ import { BillingModule } from "./modules/billing/billing.module";
 import { CrmModule } from "./modules/crm/crm.module";
 import { CronModule } from "./modules/cron/cron.module";
 import { EncryptionModule } from "./modules/encryption/encryption.module";
+import { EventsModule } from "./modules/events/events.module";
 import { HealthModule } from "./modules/health/health.module";
 import { MailModule } from "./modules/mail/mail.module";
 import { PlatformModule } from "./modules/platform/platform.module";
@@ -41,6 +42,7 @@ import { StorageModule } from "./modules/storage/storage.module";
         IdempotencyModule,
         QueueModule,
         TelegramModule,
+        EventsModule,
         MailModule,
         EncryptionModule,
         AuthModule,

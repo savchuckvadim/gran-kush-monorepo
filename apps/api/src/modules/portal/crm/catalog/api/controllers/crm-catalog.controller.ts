@@ -138,9 +138,10 @@ export class CrmCatalogController {
     @ApiErrorResponse([401, 403, 404])
     async deleteProduct(
         @Param("id") id: string,
+        @CurrentEmployee() employee: Employee,
         @PortalId() portalId: string
     ): Promise<{ message: string }> {
-        await this.productsService.delete(id, portalId);
+        await this.productsService.delete(id, portalId, employee.id);
         return { message: "Product deleted successfully" };
     }
 

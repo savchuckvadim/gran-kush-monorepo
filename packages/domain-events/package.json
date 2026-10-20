@@ -1,0 +1,36 @@
+{
+    "name": "@workspace/domain-events",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Domain event contract shared by the API, the CRM, the member cabinet and the mobile app",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+        }
+    },
+    "files": ["dist"],
+    "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "postinstall": "tsc -p tsconfig.json",
+        "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
+        "check-types": "tsc -p tsconfig.json --noEmit",
+        "lint": "eslint . --max-warnings 0",
+        "lint:fix": "eslint . --fix",
+        "test": "vitest run"
+    },
+    "dependencies": {
+        "zod": "^3.25.76"
+    },
+    "devDependencies": {
+        "@workspace/eslint-config": "workspace:*",
+        "@workspace/prettier-config": "workspace:*",
+        "@workspace/typescript-config": "workspace:*",
+        "eslint": "^9.39.2",
+        "prettier": "^3.8.1",
+        "typescript": "^5.9.3",
+        "vitest": "3.2.4"
+    }
+}

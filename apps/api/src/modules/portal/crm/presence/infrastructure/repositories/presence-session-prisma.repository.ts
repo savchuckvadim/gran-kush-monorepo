@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 import { isUniqueViolationOn } from "@common/prisma/unique-violation";
+import { DomainEventPublisher, type EventsOf } from "@modules/events";
 import {
     buildMemberFieldMap,
     getMemberDisplayNameParts,
@@ -21,7 +22,10 @@ import { SESSION_INCLUDE } from "@modules/portal/crm/presence/infrastructure/pri
 
 @Injectable()
 export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
-    constructor(private readonly prisma: PrismaService) {
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly events: DomainEventPublisher
+    ) {
         super();
     }
 
@@ -83,25 +87,32 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
         return this.prisma.presenceSession.count({ where });
     }
 
-    async createEntry(data: {
-        memberId: string;
-        employeeId?: string;
-        entryMethod: string;
-        portalId: string;
-    }): Promise<PresenceSession> {
+    async createEntry(
+        data: {
+            memberId: string;
+            employeeId?: string;
+            entryMethod: string;
+            portalId: string;
+        },
+        events?: EventsOf<PresenceSession>
+    ): Promise<PresenceSession> {
         const entityRecordId = await this.entityRecordIdForMember(data.memberId, data.portalId);
 
         try {
-            const row = await this.prisma.presenceSession.create({
-                data: {
-                    entityRecordId,
-                    activeEntityRecordId: entityRecordId,
-                    employeeId: data.employeeId,
-                    entryMethod: data.entryMethod,
-                },
-                include: SESSION_INCLUDE,
+            return await this.prisma.$transaction(async (tx) => {
+                const row = await tx.presenceSession.create({
+                    data: {
+                        entityRecordId,
+                        activeEntityRecordId: entityRecordId,
+                        employeeId: data.employeeId,
+                        entryMethod: data.entryMethod,
+                    },
+                    include: SESSION_INCLUDE,
+                });
+                const session = this.mapToEntity(row);
+                if (events) await this.events.publishMany(tx, events(session));
+                return session;
             });
-            return this.mapToEntity(row);
         } catch (error) {
             if (!this.isOpenSessionConflict(error)) {
                 throw error;
@@ -123,26 +134,31 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
 
     async closeOpenSession(
         id: string,
-        data: { exitMethod: string; employeeId?: string }
+        data: { exitMethod: string; employeeId?: string },
+        events?: EventsOf<PresenceSession>
     ): Promise<PresenceSession | null> {
-        // Условие exitedAt: null проверяет сам UPDATE: два одновременных выхода закрывают
-        // сессию один раз, второй получает ноль строк и узнаёт, что участник уже вышел
-        const { count } = await this.prisma.presenceSession.updateMany({
-            where: { id, exitedAt: null },
-            data: {
-                exitedAt: new Date(),
-                exitMethod: data.exitMethod,
-                // Снимаем маркер — иначе участник не сможет войти снова.
-                activeEntityRecordId: null,
-                ...(data.employeeId && { employeeId: data.employeeId }),
-            },
+        return this.prisma.$transaction(async (tx) => {
+            // Условие exitedAt: null проверяет сам UPDATE: два одновременных выхода закрывают
+            // сессию один раз, второй получает ноль строк и узнаёт, что участник уже вышел
+            const { count } = await tx.presenceSession.updateMany({
+                where: { id, exitedAt: null },
+                data: {
+                    exitedAt: new Date(),
+                    exitMethod: data.exitMethod,
+                    // Снимаем маркер — иначе участник не сможет войти снова.
+                    activeEntityRecordId: null,
+                    ...(data.employeeId && { employeeId: data.employeeId }),
+                },
+            });
+            if (count === 0) return null;
+            const row = await tx.presenceSession.findUniqueOrThrow({
+                where: { id },
+                include: SESSION_INCLUDE,
+            });
+            const session = this.mapToEntity(row);
+            if (events) await this.events.publishMany(tx, events(session));
+            return session;
         });
-        if (count === 0) return null;
-        const row = await this.prisma.presenceSession.findUniqueOrThrow({
-            where: { id },
-            include: SESSION_INCLUDE,
-        });
-        return this.mapToEntity(row);
     }
 
     /** Нарушение уникальности маркера открытой сессии. */

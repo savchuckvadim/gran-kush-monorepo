@@ -15,6 +15,8 @@ import {
     OrderRepository,
 } from "@modules/portal/crm/orders/domain/repositories/order-repository.interface";
 
+import { orderPlacedEvents } from "../events/order-events";
+
 /** Сколько раз подбирать свободный номер заказа, прежде чем сдаться */
 const ORDER_NUMBER_MAX_ATTEMPTS = 5;
 
@@ -174,7 +176,9 @@ export class OrderPlacementService {
         for (let attempt = 1; attempt <= ORDER_NUMBER_MAX_ATTEMPTS; attempt++) {
             const orderNumber = await this.generateOrderNumber(portalId);
             try {
-                return await this.orderRepository.create({ ...input, orderNumber });
+                return await this.orderRepository.create({ ...input, orderNumber }, (order) =>
+                    orderPlacedEvents(portalId, order)
+                );
             } catch (error) {
                 if (attempt === ORDER_NUMBER_MAX_ATTEMPTS || !isOrderNumberConflict(error)) {
                     throw error;

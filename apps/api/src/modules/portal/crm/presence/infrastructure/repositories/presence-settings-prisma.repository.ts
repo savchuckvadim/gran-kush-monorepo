@@ -1,16 +1,23 @@
 import { Injectable } from "@nestjs/common";
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { DomainEventPublisher, type EventsOf } from "@modules/events";
 
 import { ExitMethod } from "../../domain/entity/presence-session.entity";
 import { DEFAULT_PRESENCE_SETTINGS, type PresenceSettings } from "../../domain/presence-settings";
-import { PresenceSettingsRepository } from "../../domain/repositories/presence-settings-repository.interface";
+import {
+    ClosedPresenceSession,
+    PresenceSettingsRepository,
+} from "../../domain/repositories/presence-settings-repository.interface";
 
 const SELECT = { timezone: true, autoExitTime: true, maxSessionHours: true } as const;
 
 @Injectable()
 export class PresenceSettingsPrismaRepository implements PresenceSettingsRepository {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly events: DomainEventPublisher
+    ) {}
 
     async find(portalId: string): Promise<PresenceSettings | null> {
         return this.prisma.presenceSettings.findUnique({ where: { portalId }, select: SELECT });
@@ -35,9 +42,15 @@ export class PresenceSettingsPrismaRepository implements PresenceSettingsReposit
      *               пропускает NULL); визит без сработавшего правила не трогается.
      * Условие exited_at IS NULL повторено в самом UPDATE: параллельный выход не переписывается.
      */
-    async closeDueSessions(now: Date): Promise<number> {
+    async closeDueSessions(
+        now: Date,
+        events?: EventsOf<readonly ClosedPresenceSession[]>
+    ): Promise<number> {
         const d = DEFAULT_PRESENCE_SETTINGS;
-        return this.prisma.$executeRaw`
+        return this.prisma.$transaction(async (tx) => {
+            const closed = await tx.$queryRaw<
+                { session_id: string; portal_id: string; member_id: string }[]
+            >`
             WITH clock AS (
                 SELECT (${now.toISOString()}::timestamptz AT TIME ZONE 'UTC') AS now_utc
             ),
@@ -73,6 +86,8 @@ export class PresenceSettingsPrismaRepository implements PresenceSettingsReposit
             due AS (
                 SELECT
                     ps.id,
+                    er.portal_id,
+                    m.id AS member_id,
                     LEAST(
                         CASE WHEN ps.entered_at < k.cutoff THEN k.cutoff END,
                         CASE
@@ -84,6 +99,7 @@ export class PresenceSettingsPrismaRepository implements PresenceSettingsReposit
                     k.now_utc
                 FROM presence_sessions ps
                 JOIN entity_records er ON er.id = ps.entity_record_id
+                JOIN members m ON m.entity_record_id = ps.entity_record_id
                 JOIN cutoffs k ON k.portal_id = er.portal_id
                 WHERE ps.exited_at IS NULL
             )
@@ -94,6 +110,17 @@ export class PresenceSettingsPrismaRepository implements PresenceSettingsReposit
                 updated_at = due.now_utc
             FROM due
             WHERE p.id = due.id AND due.exit_at IS NOT NULL AND p.exited_at IS NULL
+            RETURNING p.id AS session_id, due.portal_id, due.member_id
         `;
+            const sessions = closed.map((row) => ({
+                sessionId: row.session_id,
+                portalId: row.portal_id,
+                memberId: row.member_id,
+            }));
+            if (events && sessions.length > 0) {
+                await this.events.publishMany(tx, events(sessions));
+            }
+            return sessions.length;
+        });
     }
 }

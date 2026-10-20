@@ -1,24 +1,18 @@
-import { InjectQueue } from "@nestjs/bullmq";
 import { ConflictException, Injectable } from "@nestjs/common";
 
 import { Employee, Portal, Prisma, User } from "@prisma/client";
-import { Queue } from "bullmq";
 
 import { LEGAL_TERMS_VERSION } from "@common/legal/legal-terms";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { isUniqueViolationOn } from "@common/prisma/unique-violation";
-import { buildJobId } from "@common/queue/job-options";
 import { BillingSettings } from "@modules/billing/application/billing-settings";
+import { DomainEventPublisher } from "@modules/events";
 import { createSystemRoles } from "@modules/portal/crm/access/infrastructure/portal-role-prisma.repository";
 import { ProvisionPortalFromTemplatesService } from "@modules/portal/crm/entity-fields/application/services/provision-portal-from-templates.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
-import {
-    PORTAL_EVENTS_JOB_NAMES,
-    PORTAL_EVENTS_QUEUE_NAME,
-    type PortalRegistrationInitPayload,
-} from "@modules/portal/crm/portals/events/portal-events.constants";
 
 import { CreateClubDto } from "../../api/dto/create-club.dto";
+import { clubFoundedEvents } from "../events/club-founded-events";
 
 /** Machine-readable 409 reasons: the registration form answers them with a hint, not just the text. */
 export const CLUB_CONFLICT_CODES = { emailTaken: "email_taken", slugTaken: "slug_taken" } as const;
@@ -52,7 +46,7 @@ export class ClubFoundingService {
         private readonly prisma: PrismaService,
         private readonly provisionFromTemplates: ProvisionPortalFromTemplatesService,
         private readonly billingSettings: BillingSettings,
-        @InjectQueue(PORTAL_EVENTS_QUEUE_NAME) private readonly portalEventsQueue: Queue
+        private readonly events: DomainEventPublisher
     ) {}
 
     /** 409 before the transaction for the common case; the unique index covers the race. */
@@ -81,7 +75,11 @@ export class ClubFoundingService {
         }
     }
 
-    /** The club, its entities and statuses from templates, and the account as its owner. */
+    /**
+     * The club, its entities and statuses from templates, and the account as its owner. The
+     * `portal.founded` event is written in the same transaction: its consumers send the welcome
+     * letter and the platform alert once, even when the request is retried.
+     */
     async found(
         tx: Prisma.TransactionClient,
         ownerUserId: string,
@@ -147,30 +145,8 @@ export class ClubFoundingService {
             }
         }
 
-        return { portal, owner };
-    }
-
-    /**
-     * Welcome letter and the platform notification, processed by PortalEventsProcessor. The job id
-     * is fixed per portal: a club is founded once, and a retried request or a second replica must
-     * not send a second notification.
-     */
-    async announce(club: FoundedClub, dto: CreateClubDto): Promise<void> {
-        const payload: PortalRegistrationInitPayload = {
-            portalId: club.portal.id,
-            portalSlug: club.portal.name,
-            portalDisplayName: club.portal.displayName,
-            ownerId: club.owner.id,
-            ownerEmail: club.owner.user.email,
-            ownerName: dto.ownerName.trim(),
-            language: dto.locale,
-        };
-        await this.portalEventsQueue.add(
-            PORTAL_EVENTS_JOB_NAMES.PORTAL_REGISTRATION_INIT,
-            payload,
-            {
-                jobId: buildJobId(PORTAL_EVENTS_JOB_NAMES.PORTAL_REGISTRATION_INIT, club.portal.id),
-            }
-        );
+        const club = { portal, owner };
+        await this.events.publishMany(tx, clubFoundedEvents(club, dto));
+        return club;
     }
 }

@@ -1,3 +1,4 @@
+import type { EventsOf, NewDomainEvent } from "@modules/events";
 import {
     Order,
     OrderStatus,
@@ -102,8 +103,9 @@ export abstract class OrderRepository {
      * Создать заказ с позициями и списать товар со склада в одной транзакции. Остаток
      * проверяет само списание, поэтому параллельные заказы не продадут больше, чем есть.
      * Не хватило товара — {@link InsufficientStockError}, и не записано ничего.
+     * `events` пишутся в outbox той же транзакцией, когда номер и id уже выданы.
      */
-    abstract create(data: CreateOrderInput): Promise<Order>;
+    abstract create(data: CreateOrderInput, events?: EventsOf<Order>): Promise<Order>;
 
     /** Обновить заказ (без позиций и без стадии) */
     abstract update(id: string, data: UpdateOrderInput): Promise<Order>;
@@ -111,7 +113,7 @@ export abstract class OrderRepository {
     /**
      * Перевести статус оплаты только если он всё ещё равен `from` (compare-and-set).
      * Возвращает `false`, если строку успел изменить кто-то другой — это ожидаемый
-     * исход параллельного запроса, а не ошибка.
+     * исход параллельного запроса, а не ошибка. `events` пишутся, только если переход выигран.
      */
     abstract compareAndSetPaymentStatus(input: {
         orderId: string;
@@ -119,6 +121,7 @@ export abstract class OrderRepository {
         from: PaymentStatus;
         to: PaymentStatus;
         employeeId?: string;
+        events?: readonly NewDomainEvent[];
     }): Promise<boolean>;
 
     /**

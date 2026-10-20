@@ -2,6 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 
 import { DEFAULT_PRESENCE_SETTINGS, type PresenceSettings } from "../../domain/presence-settings";
 import { PresenceSettingsRepository } from "../../domain/repositories/presence-settings-repository.interface";
+import { autoExitEvents } from "../events/presence-events";
 
 /** Правила присутствия клуба и авто-выход забытых визитов по ним. */
 @Injectable()
@@ -36,7 +37,7 @@ export class PresenceSettingsService {
      * закрываются только наступившие: клубы в разных часовых поясах получают авто-выход в своё время.
      */
     async closeDueSessions(now = new Date()): Promise<number> {
-        const closed = await this.repository.closeDueSessions(now);
+        const closed = await this.repository.closeDueSessions(now, autoExitEvents);
         if (closed > 0) this.logger.log(`⏰ Авто-выход: закрыто визитов — ${closed}`);
         return closed;
     }

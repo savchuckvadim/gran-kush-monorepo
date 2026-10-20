@@ -1,3 +1,4 @@
+import type { EventsOf } from "@modules/events";
 import { PresenceSession } from "@modules/portal/crm/presence/domain/entity/presence-session.entity";
 
 // ─── Фильтры ────────────────────────────────────────────────────────────────
@@ -53,25 +54,31 @@ export abstract class PresenceSessionRepository {
      * Создать запись о входе; участник должен принадлежать порталу.
      *
      * Идемпотентен: если параллельный запрос уже открыл сессию этому участнику,
-     * возвращается она, а не создаётся вторая. Гарантия — на уровне БД.
+     * возвращается она, а не создаётся вторая. Гарантия — на уровне БД. `events` пишутся только
+     * для новой сессии и в её транзакции.
      */
-    abstract createEntry(data: {
-        memberId: string;
-        employeeId?: string;
-        entryMethod: string;
-        portalId: string;
-    }): Promise<PresenceSession>;
+    abstract createEntry(
+        data: {
+            memberId: string;
+            employeeId?: string;
+            entryMethod: string;
+            portalId: string;
+        },
+        events?: EventsOf<PresenceSession>
+    ): Promise<PresenceSession>;
 
     /**
      * Закрыть сессию (выход), только если она ещё открыта; `null` — её уже закрыли
      * (параллельный скан, сотрудник, крон): чужое время выхода не переписывается.
+     * `events` пишутся только если выход записан этим вызовом.
      */
     abstract closeOpenSession(
         id: string,
         data: {
             exitMethod: string;
             employeeId?: string;
-        }
+        },
+        events?: EventsOf<PresenceSession>
     ): Promise<PresenceSession | null>;
 
     /** Текущее количество присутствующих (при указании portalId — только в рамках портала) */

@@ -44,6 +44,7 @@ import {
     CrmCreateMemberResponseDto,
 } from "@modules/portal/crm/members/api/dto/dynamic-member.dto";
 import { MemberConsentService } from "@modules/portal/crm/members/application/services/member-consent.service";
+import { MemberEditingService } from "@modules/portal/crm/members/application/services/member-editing.service";
 import { MembersService } from "@modules/portal/crm/members/application/services/members.service";
 
 import {
@@ -62,6 +63,7 @@ import { CrmMemberFilesRequestDto } from "../dto/crm-member-documents.dto";
 export class CrmMembersController {
     constructor(
         private readonly membersService: MembersService,
+        private readonly memberEditing: MemberEditingService,
         private readonly memberConsent: MemberConsentService,
         private readonly storageService: StorageService,
         private readonly formSchema: FormSchemaService
@@ -177,12 +179,10 @@ export class CrmMembersController {
         @Param("id") id: string,
         @Body() dto: CrmMemberFieldsPatchDto,
         @PortalId() portalId: string,
+        @CurrentPrincipal() principal: PortalPrincipal,
         @RequestLocale() locale: ContentLocale
     ): Promise<CrmMemberFullDto> {
-        const updated = await this.membersService.updateCrmMember(id, portalId, dto);
-        if (!updated) {
-            throw new NotFoundException("Member not found");
-        }
+        const updated = await this.memberEditing.edit(id, portalId, dto, principal.membershipId);
         return this.membersService.toCrmMemberFullDto(updated, locale);
     }
 
@@ -197,16 +197,15 @@ export class CrmMembersController {
         @Param("id") id: string,
         @Body() dto: CrmMemberStatusPatchDto,
         @PortalId() portalId: string,
+        @CurrentPrincipal() principal: PortalPrincipal,
         @RequestLocale() locale: ContentLocale
     ): Promise<CrmMemberFullDto> {
-        const updated = await this.membersService.updateMemberStatus(
+        const updated = await this.memberEditing.changeStatus(
             id,
             portalId,
-            dto.statusItemId
+            dto.statusItemId,
+            principal.membershipId
         );
-        if (!updated) {
-            throw new NotFoundException("Member not found");
-        }
         return this.membersService.toCrmMemberFullDto(updated, locale);
     }
 

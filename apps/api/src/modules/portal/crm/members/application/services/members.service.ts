@@ -20,14 +20,12 @@ import { UserRepository } from "@users/domain/repositories/user-repository.inter
 
 import { issueSecretToken } from "@common/crypto/secret-token";
 import { ContentLocale, resolveLabel } from "@common/i18n";
-import { PrismaService } from "@common/prisma/prisma.service";
 import { AccountFilesService } from "@modules/account/application/services/account-files.service";
 import { DocumentAccessLogService } from "@modules/account/application/services/document-access-log.service";
 import { MemberDocumentShareRepository } from "@modules/account/domain/repositories/member-document-share-repository.interface";
 import { UserDocumentRepository } from "@modules/account/domain/repositories/user-document-repository.interface";
 import { UserSignatureRepository } from "@modules/account/domain/repositories/user-signature-repository.interface";
 import { EmailVerificationService } from "@modules/portal/auth/shared/application/services/email-verification.service";
-import { DynamicPayloadValidatorService } from "@modules/portal/crm/entity-fields/application/services/dynamic-payload-validator.service";
 import { FieldValuesService } from "@modules/portal/crm/entity-fields/application/services/field-values.service";
 import { MEMBER_FIELD_KEYS } from "@modules/portal/crm/entity-fields/constants/member-field-keys";
 import {
@@ -40,7 +38,6 @@ import {
     CrmMemberAccountDocumentDto,
     CrmMemberDto,
     CrmMemberDynamicFieldDto,
-    CrmMemberFieldsPatchDto,
     CrmMemberFullDto,
     CrmMemberStatusDto,
 } from "@modules/portal/crm/members/api/dto/crm-member.dto";
@@ -63,8 +60,6 @@ export class MembersService {
         private readonly userSignatureRepository: UserSignatureRepository,
         private readonly accountFiles: AccountFilesService,
         private readonly joinPortalService: JoinPortalService,
-        private readonly prisma: PrismaService,
-        private readonly dynamicValidator: DynamicPayloadValidatorService,
         private readonly fieldValues: FieldValuesService,
         private readonly shares: MemberDocumentShareRepository,
         private readonly consent: MemberConsentService,
@@ -240,82 +235,6 @@ export class MembersService {
 
     async countByPortal(portalId: string): Promise<number> {
         return this.memberRepository.countByPortal(portalId);
-    }
-
-    async updateCrmMember(memberId: string, portalId: string, dto: CrmMemberFieldsPatchDto) {
-        const member = await this.memberRepository.findByIdForPortal(memberId, portalId);
-        if (!member) {
-            throw new NotFoundException("Member not found");
-        }
-
-        if (dto.fields && Object.keys(dto.fields).length > 0) {
-            const validated = await this.dynamicValidator.validateMemberPartialUpdate(
-                portalId,
-                dto.fields
-            );
-            await this.fieldValues.upsertMemberFieldValues(portalId, memberId, validated);
-        }
-
-        if (dto.statusItemId !== undefined) {
-            await this.assertMemberStatusItemInPortal(portalId, dto.statusItemId);
-            await this.prisma.entityRecord.update({
-                where: { id: member.entityRecordId },
-                data: { statusItemId: dto.statusItemId },
-            });
-        }
-
-        const updatePayload: Partial<{
-            isActive: boolean;
-            membershipNumber: string | null;
-        }> = {};
-
-        if (dto.isActive !== undefined) {
-            updatePayload.isActive = dto.isActive;
-        }
-        if (dto.membershipNumber !== undefined) {
-            updatePayload.membershipNumber = dto.membershipNumber;
-        }
-
-        if (Object.keys(updatePayload).length > 0) {
-            await this.memberRepository.update(memberId, updatePayload);
-        }
-
-        return this.memberRepository.findByIdForPortal(memberId, portalId);
-    }
-
-    /** Статус должен принадлежать набору member_lifecycle этого портала. */
-    private async assertMemberStatusItemInPortal(
-        portalId: string,
-        statusItemId: string
-    ): Promise<void> {
-        const item = await this.prisma.statusItem.findFirst({
-            where: {
-                id: statusItemId,
-                isActive: true,
-                statusSet: { portalId, code: "member_lifecycle" },
-            },
-            select: { id: true },
-        });
-        if (!item) {
-            throw new BadRequestException("Unknown member status for this portal");
-        }
-    }
-
-    /** CRM: смена lifecycle-статуса участника. */
-    async updateMemberStatus(memberId: string, portalId: string, statusItemId: string) {
-        const member = await this.memberRepository.findByIdForPortal(memberId, portalId);
-        if (!member) {
-            throw new NotFoundException("Member not found");
-        }
-
-        await this.assertMemberStatusItemInPortal(portalId, statusItemId);
-
-        await this.prisma.entityRecord.update({
-            where: { id: member.entityRecordId },
-            data: { statusItemId },
-        });
-
-        return this.memberRepository.findByIdForPortal(memberId, portalId);
     }
 
     /** CRM: загрузка документов/подписи member — файлы сохраняются в его аккаунт (User). */

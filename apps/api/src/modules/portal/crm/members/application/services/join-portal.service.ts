@@ -8,10 +8,11 @@ import {
     ShareSelection,
 } from "@modules/account/application/services/member-document-sharing.service";
 import { DynamicPayloadValidatorService } from "@modules/portal/crm/entity-fields/application/services/dynamic-payload-validator.service";
-import { FieldValuesService } from "@modules/portal/crm/entity-fields/application/services/field-values.service";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 import { MemberWithRelations } from "@modules/portal/crm/members/domain/entity/member.entity";
 import { MemberRepository } from "@modules/portal/crm/members/domain/repositories/member-repository.interface";
+
+import { memberJoinedEvent } from "../events/member-events";
 
 export interface JoinPortalInput {
     userId: string;
@@ -50,7 +51,6 @@ export class JoinPortalService {
         private readonly memberRepository: MemberRepository,
         private readonly prisma: PrismaService,
         private readonly dynamicValidator: DynamicPayloadValidatorService,
-        private readonly fieldValues: FieldValuesService,
         private readonly sharing: MemberDocumentSharingService
     ) {}
 
@@ -82,17 +82,22 @@ export class JoinPortalService {
 
         const statusItemId = await this.resolveDefaultMemberStatusItemId(input.portalId);
 
-        const member = await this.memberRepository.create({
-            userId: input.userId,
-            portalId: input.portalId,
-            statusItemId,
-            joinSource: input.joinSource,
-            createdByEmployeeId: input.createdByEmployeeId,
-            registrationLinkId: input.registrationLinkId,
-            consent: input.consent,
-        });
+        // анкета и событие вступления — в транзакции членства: кабинет и CRM узнают о
+        // вступлении, когда анкета уже записана
+        const member = await this.memberRepository.create(
+            {
+                userId: input.userId,
+                portalId: input.portalId,
+                statusItemId,
+                joinSource: input.joinSource,
+                createdByEmployeeId: input.createdByEmployeeId,
+                registrationLinkId: input.registrationLinkId,
+                consent: input.consent,
+                fields: validatedFields,
+            },
+            (created) => [memberJoinedEvent(created)]
+        );
 
-        await this.fieldValues.upsertMemberFieldValues(input.portalId, member.id, validatedFields);
         if (input.share && (input.share.documentIds?.length || input.share.signature)) {
             await this.sharing.shareSelected({
                 userId: input.userId,

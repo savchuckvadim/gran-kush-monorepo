@@ -1,3 +1,4 @@
+import type { NewDomainEvent } from "@modules/events";
 import type {
     OrderStage,
     OrderStageSummary,
@@ -12,7 +13,8 @@ export abstract class OrderStageRepository {
     /**
      * Перевести заказ в стадию, только если он всё ещё стоит в `fromStageId` (compare-and-set).
      * `false` — стадию успел сменить параллельный запрос: двойная отмена не вернёт товар дважды.
-     * `restock` возвращается на склад в той же транзакции и только если переход выигран.
+     * `restock` возвращается на склад, `events` пишутся в outbox — в той же транзакции и только
+     * если переход выигран.
      */
     abstract compareAndSetStage(input: {
         orderId: string;
@@ -22,6 +24,7 @@ export abstract class OrderStageRepository {
         /** Место карточки в новой колонке канбана (`records/domain/stage-position.ts`) */
         stagePosition?: number;
         restock?: readonly StockLine[];
+        events?: readonly NewDomainEvent[];
     }): Promise<boolean>;
 
     /** Запись заказа, на которой живут стадия и место карточки; чужой заказ — null */

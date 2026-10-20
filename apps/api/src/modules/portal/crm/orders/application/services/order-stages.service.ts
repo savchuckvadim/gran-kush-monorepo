@@ -6,6 +6,9 @@ import {
     NotFoundException,
 } from "@nestjs/common";
 
+import type { EventActor } from "@workspace/domain-events";
+
+import { employeeActor, memberActor } from "@modules/events";
 import { Order, OrderStatus } from "@modules/portal/crm/orders/domain/entity/order.entity";
 import {
     OrderStage,
@@ -26,6 +29,8 @@ import {
 } from "@modules/portal/crm/orders/domain/repositories/order-repository.interface";
 import { OrderStageRepository } from "@modules/portal/crm/orders/domain/repositories/order-stage-repository.interface";
 import { StagePositionService } from "@modules/portal/crm/records/application/services/stage-position.service";
+
+import { orderStageChangedEvents } from "../events/order-events";
 
 import { OrdersService } from "./orders.service";
 
@@ -87,6 +92,7 @@ export class OrderStagesService {
         }
         const card = await this.cardPlacement(order.id, target.id, portalId, afterOrderId ?? null);
         return this.applyStage(order, target, portalId, {
+            actor: employeeActor(employeeId),
             employeeId,
             stagePosition: card?.position,
         });
@@ -132,7 +138,11 @@ export class OrderStagesService {
         if (!target) {
             throw new BadRequestException(`В воронке заказа нет стадии для статуса "${newStatus}"`);
         }
-        return this.applyStage(order, target, portalId, { employeeId, adminNotes });
+        return this.applyStage(order, target, portalId, {
+            actor: employeeActor(employeeId),
+            employeeId,
+            adminNotes,
+        });
     }
 
     /** Стадии воронки, в которой стоит заказ (или воронки по умолчанию, если стадии нет), по порядку. */
@@ -191,6 +201,7 @@ export class OrderStagesService {
         // заметки сотрудников остаются: отметка участника дописывается к ним
         const note = reason ? `Отменено участником: ${reason}` : "Отменено участником";
         const updated = await this.applyStage(order, cancelStage, portalId, {
+            actor: memberActor(memberId),
             adminNotes: order.adminNotes ? `${order.adminNotes}\n${note}` : note,
         });
 
@@ -207,7 +218,13 @@ export class OrderStagesService {
         order: Order,
         target: OrderStage,
         portalId: string,
-        extra: { employeeId?: string; adminNotes?: string; stagePosition?: number }
+        extra: {
+            /** Кто двигает заказ — автор события перехода */
+            actor: EventActor;
+            employeeId?: string;
+            adminNotes?: string;
+            stagePosition?: number;
+        }
     ): Promise<Order> {
         const current = order.stage ?? null;
         if (current?.id === target.id) {
@@ -218,14 +235,16 @@ export class OrderStagesService {
             throw new BadRequestException("Заказ закрыт: его стадию больше нельзя менять");
         }
 
-        // отмена возвращает товар на склад в одной транзакции со сменой стадии
+        // отмена возвращает товар на склад, события пишутся — в одной транзакции со сменой стадии
+        const restock = isFailureStage(target) ? stockLinesOf(order) : undefined;
         const won = await this.stageRepository.compareAndSetStage({
             orderId: order.id,
             portalId,
             fromStageId: current?.id ?? null,
             toStageId: target.id,
             stagePosition: extra.stagePosition,
-            restock: isFailureStage(target) ? stockLinesOf(order) : undefined,
+            restock,
+            events: orderStageChangedEvents(portalId, order, target, extra.actor, restock),
         });
         if (!won) {
             throw new ConflictException(STAGE_RACE_MESSAGE);

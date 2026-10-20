@@ -20,6 +20,7 @@ import {
     MemberConsentResultDto,
     PublicMemberConsentInfoDto,
 } from "../../api/dto/member-consent.dto";
+import { memberConsentGivenEvent, memberLeftEvent } from "../events/member-events";
 
 const CONSENT_TTL_MS = 14 * 24 * 60 * 60 * 1000;
 
@@ -123,7 +124,9 @@ export class MemberConsentService {
     async decline(token: string, dto: DeclineMemberConsentDto): Promise<MemberConsentResultDto> {
         const member = await this.getPending(token);
         await this.verifyOwner(member, dto.password);
-        await this.memberRepository.deleteWithProfile(member.id);
+        await this.memberRepository.deleteWithProfile(member.id, [
+            memberLeftEvent(member, "declined"),
+        ]);
         return { portalSlug: member.portal.name };
     }
 
@@ -164,7 +167,9 @@ export class MemberConsentService {
     async declineMine(userId: string, memberId: string): Promise<MemberConsentResultDto> {
         const member = await this.getMinePending(userId, memberId);
         await this.ownership.assertOwnerProof(member.user, { kind: "session", userId });
-        await this.memberRepository.deleteWithProfile(member.id);
+        await this.memberRepository.deleteWithProfile(member.id, [
+            memberLeftEvent(member, "declined"),
+        ]);
         return { portalSlug: member.portal.name };
     }
 
@@ -177,7 +182,9 @@ export class MemberConsentService {
         if (!member) {
             throw new NotFoundException("Membership not found");
         }
-        await this.memberRepository.update(member.id, { isActive: false });
+        await this.memberRepository.update(member.id, { isActive: false }, [
+            memberLeftEvent(member, "left"),
+        ]);
         await this.sharing.revokeAll({
             userId,
             memberId: member.id,
@@ -194,11 +201,15 @@ export class MemberConsentService {
         // Сначала проверяем выбор: ошибка в нём не должна оставить членство подтверждённым
         await this.sharing.assertSelectable(member.userId, selection);
 
-        await this.memberRepository.update(member.id, {
-            consentStatus: MemberConsentStatus.confirmed,
-            consentToken: null,
-            consentConfirmedAt: new Date(),
-        });
+        await this.memberRepository.update(
+            member.id,
+            {
+                consentStatus: MemberConsentStatus.confirmed,
+                consentToken: null,
+                consentConfirmedAt: new Date(),
+            },
+            [memberConsentGivenEvent(member)]
+        );
         await this.sharing.shareSelected({
             userId: member.userId,
             memberId: member.id,

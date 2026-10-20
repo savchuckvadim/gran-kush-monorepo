@@ -37,6 +37,10 @@ export abstract class AuthSessionRepository {
         next: { refreshTokenHash: string; expiresAt: Date; at: Date }
     ): Promise<boolean>;
 
+    /*
+     * Каждый отзыв пишет событие `session.revoked` в той же транзакции: realtime-шлюз рвёт
+     * сокеты отозванной сессии сразу (TASK-794).
+     */
     abstract revoke(id: string, reason: SessionRevokeReason): Promise<void>;
 
     /** Отзыв из списка устройств: только своей и ещё живой сессии; `false` — такой нет. */

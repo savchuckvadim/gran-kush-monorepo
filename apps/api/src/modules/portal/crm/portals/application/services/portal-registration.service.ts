@@ -53,7 +53,7 @@ export class PortalRegistrationService {
             return this.founding.found(tx, user.id, dto);
         });
 
-        const result = await this.finish(club, dto);
+        const result = this.finish(club, dto);
         // Владелец уже внутри CRM; письмо с подтверждением можно запросить повторно из баннера,
         // поэтому сбой постановки в очередь не должен ронять уже созданный клуб.
         try {
@@ -82,9 +82,8 @@ export class PortalRegistrationService {
         return this.finish(club, dto);
     }
 
-    /** The club's welcome events and what the controller answers with. */
-    private async finish(club: FoundedClub, dto: CreateClubDto): Promise<RegisterPortalResult> {
-        await this.founding.announce(club, dto);
+    /** What the controller answers with; the welcome letter follows the `portal.founded` event. */
+    private finish(club: FoundedClub, dto: CreateClubDto): RegisterPortalResult {
         return {
             portal: {
                 id: club.portal.id,

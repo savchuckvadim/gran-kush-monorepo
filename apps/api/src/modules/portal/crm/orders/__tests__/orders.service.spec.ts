@@ -49,6 +49,15 @@ describe("OrdersService — переход статуса оплаты", () => {
             from: PaymentStatus.PENDING,
             to: PaymentStatus.PAID,
             employeeId: "emp-1",
+            // событие оплаты пишется в транзакции перехода; суммы в нём нет
+            events: [
+                expect.objectContaining({
+                    name: "order.payment_changed",
+                    portalId: PORTAL_A,
+                    actor: { kind: "employee", id: "emp-1" },
+                    payload: expect.objectContaining({ from: "pending", to: "paid" }),
+                }),
+            ],
         });
         expect(mockOrderRepository.update).not.toHaveBeenCalled();
     });

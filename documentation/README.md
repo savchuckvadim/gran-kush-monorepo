@@ -19,6 +19,8 @@ Unified documentation for the platform split into three product areas:
 
 - [CRM Documentation](./crm/README.md)
 - Covers current CRM routes, member operations, employee auth integration, and implementation tasks
+- [Events, realtime, notifications](./tasks/events-realtime.md) — domain events with outbox, socket.io gateway, query invalidation registry (TASK-780, 794, 795, 781)
+- [Finance and accounting](./tasks/finance-accounting.md) — organization profile, taxes on products, encrypted ledger, reports and declarations, budgets (TASK-796…803)
 - [Flexible CRM domain tasks (fields, statuses, settings, inventory, integrations)](./crm/FLEXIBLE_CRM_DOMAIN_TASKS.md) — roadmap: dynamic fields/statuses, portal settings, products, stock ledger, finance snapshots, attendance heatmap, external club site embeds
 
 ### 3) Backend
@@ -71,9 +73,9 @@ Unified documentation for the platform split into three product areas:
 - Each area (`site`, `crm`, `backend`) must have one index `README.md`.
 - Detailed topics should be split into dedicated module/task files and linked from area README.
 - Use explicit labels:
-  - **Implemented** for current behavior
-  - **Planned** for future scope
+    - **Implemented** for current behavior
+    - **Planned** for future scope
 - Keep endpoints synchronized with backend source of truth:
-  - member web: `/cabinet/auth/*`, mobile: `/cabinet/mobile/auth/*`
-  - employee web: `/crm/auth/*`, mobile: `/crm/mobile/auth/*`
-  - platform (onboarding): `/platform/portals/*`
+    - member web: `/cabinet/auth/*`, mobile: `/cabinet/mobile/auth/*`
+    - employee web: `/crm/auth/*`, mobile: `/crm/mobile/auth/*`
+    - platform (onboarding): `/platform/portals/*`

@@ -66,7 +66,8 @@ pnpm --filter api prisma:studio           # prisma studio
 - **NestJS 11** — DDD + Clean Architecture
 - **Prisma 7** (with `@prisma/adapter-pg`) — ORM, migrations
 - **PostgreSQL** — primary database
-- **Redis + BullMQ** — async queues (`mail`, `member-files`, `portal-events`)
+- **Redis + BullMQ** — async queues (`mail`, `member-files`, `domain-events`)
+- **Domain events** — transactional outbox + `@OnDomainEvent` consumers, contract in `@workspace/domain-events` ([DOMAIN_EVENTS](documentation/backend/DOMAIN_EVENTS.md))
 - **Passport + JWT** — dual auth (Member / Employee)
 - **class-validator + class-transformer** — DTO validation
 - **@nestjs/swagger** — OpenAPI (`GET /docs`, `GET /docs-json`)
@@ -282,22 +283,22 @@ All routes are prefixed with `/{locale}`.
 
 ### API (`apps/api/.env`)
 
-| Variable                                | Purpose                                                     |
-| --------------------------------------- | ----------------------------------------------------------- |
-| `DATABASE_URL`                          | PostgreSQL connection string                                |
-| `REDIS_URL`                             | Redis connection string                                     |
-| `JWT_SECRET`                            | Access token signing secret                                 |
-| `JWT_REFRESH_SECRET`                    | Refresh token signing secret                                |
-| `CORS_ORIGIN`                           | Comma-separated allowed origins                             |
-| `CRM_FRONTEND_URL`                      | CRM origin: links in emails, OAuth redirects                |
-| `MEMBER_FRONTEND_URL`                   | Cabinet origin (club.): links in emails, OAuth redirects    |
-| `AUTH_HINT_COOKIE_DOMAIN`               | Domain of the `*_session` hint cookie (`.paf-paf.app`)      |
-| `COOKIE_SECRET`                         | cookie-parser signing                                       |
-| `AUTH_COOKIE_SECURE`                    | `true` in production                                        |
-| `MAIL_HOST` / `MAIL_USER` / `MAIL_PASS` | SMTP                                                        |
-| `BOOTSTRAP_ADMIN_ENABLED`               | Enable root-admin seed                                      |
-| `BOOTSTRAP_ADMIN_EMAIL`                 | Root admin email                                            |
-| `BOOTSTRAP_ADMIN_PASSWORD`              | Root admin password                                         |
+| Variable                                | Purpose                                                  |
+| --------------------------------------- | -------------------------------------------------------- |
+| `DATABASE_URL`                          | PostgreSQL connection string                             |
+| `REDIS_URL`                             | Redis connection string                                  |
+| `JWT_SECRET`                            | Access token signing secret                              |
+| `JWT_REFRESH_SECRET`                    | Refresh token signing secret                             |
+| `CORS_ORIGIN`                           | Comma-separated allowed origins                          |
+| `CRM_FRONTEND_URL`                      | CRM origin: links in emails, OAuth redirects             |
+| `MEMBER_FRONTEND_URL`                   | Cabinet origin (club.): links in emails, OAuth redirects |
+| `AUTH_HINT_COOKIE_DOMAIN`               | Domain of the `*_session` hint cookie (`.paf-paf.app`)   |
+| `COOKIE_SECRET`                         | cookie-parser signing                                    |
+| `AUTH_COOKIE_SECURE`                    | `true` in production                                     |
+| `MAIL_HOST` / `MAIL_USER` / `MAIL_PASS` | SMTP                                                     |
+| `BOOTSTRAP_ADMIN_ENABLED`               | Enable root-admin seed                                   |
+| `BOOTSTRAP_ADMIN_EMAIL`                 | Root admin email                                         |
+| `BOOTSTRAP_ADMIN_PASSWORD`              | Root admin password                                      |
 
 ### CRM (`apps/crm/.env.local`)
 
@@ -307,11 +308,17 @@ All routes are prefixed with `/{locale}`.
 
 ## Queue System (BullMQ)
 
-| Queue           | Purpose                                            |
-| --------------- | -------------------------------------------------- |
-| `mail`          | Email sending (Nodemailer + React Email templates) |
-| `member-files`  | Async member document/signature processing         |
-| `portal-events` | Portal registration notifications                  |
+| Queue           | Purpose                                                       |
+| --------------- | ------------------------------------------------------------- |
+| `mail`          | Email sending (Nodemailer + React Email templates)            |
+| `member-files`  | Async member document/signature processing                    |
+| `domain-events` | Delivery of domain events to consumers (one job per consumer) |
+
+**Domain events.** Anything another part of the system must learn about (realtime, notifications,
+journal, letters) is a domain event written in the transaction of the change: repositories take
+`events` and call `DomainEventPublisher.publishMany(tx, …)`. `portalId` is part of every club event.
+Payloads carry ids and statuses only — no money, no personal data. Details:
+[DOMAIN_EVENTS](documentation/backend/DOMAIN_EVENTS.md).
 
 ## TypeScript Conventions
 
@@ -358,3 +365,4 @@ All routes are prefixed with `/{locale}`.
 - [Authentication](documentation/AUTHENTICATION.md) — dual auth model detail
 - [Storage](documentation/STORAGE.md) — private/public file storage
 - [Multi-tenant plan](documentation/crm/MULTITENANT_NEXTJS_AUTH_PLAYBOOK.md) — portal scoping strategy
+- [Domain events](documentation/backend/DOMAIN_EVENTS.md) — outbox, catalog, consumers, how to add an event

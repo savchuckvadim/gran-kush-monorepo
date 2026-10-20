@@ -24,6 +24,8 @@ import {
     QrScanErrorCode,
 } from "@modules/portal/crm/qr-codes/domain/qr-scan-error";
 
+import { presenceEnteredEvent, presenceLeftEvent } from "../events/presence-events";
+
 @Injectable()
 export class PresenceService {
     private readonly logger = new Logger(PresenceService.name);
@@ -103,12 +105,10 @@ export class PresenceService {
             throw new BadRequestException(`Участник уже отмечен на вход (сессия ${existing.id})`);
         }
 
-        const session = await this.sessionRepository.createEntry({
-            memberId,
-            employeeId,
-            entryMethod: EntryMethod.MANUAL_EMPLOYEE,
-            portalId,
-        });
+        const session = await this.sessionRepository.createEntry(
+            { memberId, employeeId, entryMethod: EntryMethod.MANUAL_EMPLOYEE, portalId },
+            (created) => [presenceEnteredEvent(portalId, created, employeeId)]
+        );
 
         this.logger.log(`🚪 Вход (ручной): участник ${memberId}, сотрудник ${employeeId}`);
 
@@ -135,10 +135,11 @@ export class PresenceService {
             );
         }
 
-        const session = await this.sessionRepository.closeOpenSession(activeSession.id, {
-            exitMethod: ExitMethod.MANUAL_EMPLOYEE,
-            employeeId,
-        });
+        const session = await this.sessionRepository.closeOpenSession(
+            activeSession.id,
+            { exitMethod: ExitMethod.MANUAL_EMPLOYEE, employeeId },
+            (left) => [presenceLeftEvent(portalId, left, employeeId)]
+        );
         if (!session) {
             throw new ConflictException({
                 message: "The member is not in the club",

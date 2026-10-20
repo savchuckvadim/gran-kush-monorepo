@@ -9,6 +9,7 @@ import {
 } from "../../domain/entity/presence-session.entity";
 import { NOT_PRESENT } from "../../domain/presence-errors";
 import { PresenceSessionRepository } from "../../domain/repositories/presence-session-repository.interface";
+import { presenceEnteredEvent, presenceLeftEvent } from "../events/presence-events";
 
 export type DoorAction = "entry" | "exit";
 
@@ -58,21 +59,20 @@ export class ConfirmDoorScanUseCase {
 
         if (action === "entry") {
             if (open) return { action, session: open, repeated: true };
-            const session = await this.sessions.createEntry({
-                memberId,
-                employeeId,
-                entryMethod: EntryMethod.QR,
-                portalId,
-            });
+            const session = await this.sessions.createEntry(
+                { memberId, employeeId, entryMethod: EntryMethod.QR, portalId },
+                (created) => [presenceEnteredEvent(portalId, created, employeeId)]
+            );
             this.logger.log(`🚪 Вход (QR): участник ${memberId}, сотрудник ${employeeId}`);
             return { action, session, repeated: false };
         }
 
         const closed = open
-            ? await this.sessions.closeOpenSession(open.id, {
-                  exitMethod: ExitMethod.QR,
-                  employeeId,
-              })
+            ? await this.sessions.closeOpenSession(
+                  open.id,
+                  { exitMethod: ExitMethod.QR, employeeId },
+                  (left) => [presenceLeftEvent(portalId, left, employeeId)]
+              )
             : null;
         if (!closed) {
             throw new ConflictException({
