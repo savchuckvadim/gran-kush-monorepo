@@ -458,6 +458,17 @@
                 "medical": "Medical",
                 "mj": "MJ",
                 "recreation": "Recreational"
+            },
+            "tax": {
+                "label": "Tax",
+                "rate": "Tax rate",
+                "rateDefault": "Club default: {rate}",
+                "rateNone": "Club default",
+                "priceMode": "Price",
+                "priceModeHint": "“Without tax” adds the tax on top, so the buyer pays more than the price.",
+                "priceFollow": "As in club settings",
+                "priceIncluded": "Tax included",
+                "priceExcluded": "Without tax, tax on top"
             }
         },
         "orders": {
@@ -532,7 +543,15 @@
                 },
                 "back": "Back to orders",
                 "employee": "Employee",
-                "gift": "Gift"
+                "gift": "Gift",
+                "net": "Net",
+                "tax": "Tax",
+                "taxLine": "VAT {percent} %: {amount}",
+                "taxTreatment": {
+                    "taxable": "Taxable",
+                    "exempt": "VAT exempt",
+                    "not_subject": "Outside VAT"
+                }
             },
             "stage": {
                 "label": "Stage",
@@ -817,6 +836,60 @@
                     "tax_id_kind_mismatch": "The number does not match the legal form",
                     "invalid_iban": "The IBAN fails validation",
                     "tax_regime_mismatch": "The regime does not match the legal form"
+                }
+            },
+            "taxRates": {
+                "title": "Tax rates",
+                "hint": "Products without their own rate use the default rate. An order keeps the rate it was sold with.",
+                "add": "Add rate",
+                "default": "Default",
+                "makeDefault": "Make default",
+                "edit": "Edit",
+                "archive": "Archive",
+                "archived": "Rate archived",
+                "defaultChanged": "Default rate changed",
+                "created": "Rate added",
+                "updated": "Rate saved",
+                "cancel": "Cancel",
+                "save": "Save",
+                "saving": "Saving…",
+                "createTitle": "New rate",
+                "editTitle": "Tax rate",
+                "dialogHint": "Only taxable operations need a percentage; exempt and not subject ones carry no tax.",
+                "archiveTitle": "Archive this rate?",
+                "archiveDescription": "“{name}” leaves the list of rates. Past orders keep their tax.",
+                "fields": {
+                    "name": "Name",
+                    "namePlaceholder": "For example, VAT 5 %",
+                    "percent": "Percentage",
+                    "treatment": "Treatment"
+                },
+                "treatment": {
+                    "taxable": "Taxable",
+                    "exempt": "Exempt (exenta)",
+                    "not_subject": "Not subject (no sujeta)"
+                },
+                "treatmentHint": {
+                    "taxable": "Tax at the rate: included in the price or added on top.",
+                    "exempt": "Exempt operations (art. 20 LIVA): no VAT is charged.",
+                    "not_subject": "Outside VAT, for example association membership fees."
+                },
+                "presets": {
+                    "es_general": "VAT general 21 %",
+                    "es_reduced": "VAT reduced 10 %",
+                    "es_super_reduced": "VAT super-reduced 4 %",
+                    "es_zero": "VAT 0 %",
+                    "es_exempt": "VAT exempt",
+                    "es_not_subject": "Not subject to VAT"
+                },
+                "errors": {
+                    "required": "Enter a name",
+                    "tooLong": "The name is too long",
+                    "percent": "A percentage from 0 to 100, up to two decimals",
+                    "tax_rate_in_use": "Products use this rate. Change their rate first",
+                    "tax_rate_is_default": "This is the default rate. Choose another default first",
+                    "tax_rate_archived": "The rate is archived",
+                    "tax_rate_name_required": "A custom rate needs a name"
                 }
             }
         },

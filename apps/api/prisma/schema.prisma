@@ -249,6 +249,7 @@ model Portal {
   modules               PortalModule[]
   dataKeys              PortalDataKey[]
   organizationProfile   OrganizationProfile?
+  taxRates              TaxRate[]
 
   @@index([name])
   @@index([status])
@@ -1439,6 +1440,10 @@ model Product {
   audiences         ProductAudience[] @default([])
   /// Сколько граммов лимита участника занимает единица товара; пусто — товар в лимит не входит
   limitGramsPerUnit Decimal?          @map("limit_grams_per_unit") @db.Decimal(10, 3)
+  /// Ставка налога (TASK-797); пусто — ставка клуба по умолчанию
+  taxRateId         String?           @map("tax_rate_id")
+  /// Цена с налогом или без (налог сверху); пусто — как в профиле организации
+  priceIncludesTax  Boolean?          @map("price_includes_tax")
   createdAt         DateTime          @default(now()) @map("created_at")
   updatedAt         DateTime          @updatedAt @map("updated_at")
   createdBy         String?           @map("created_by")
@@ -1448,6 +1453,7 @@ model Product {
   entityRecord      EntityRecord    @relation(fields: [entityRecordId], references: [id], onDelete: Cascade)
   category          ProductCategory @relation(fields: [categoryId], references: [id])
   measurementUnit   MeasurementUnit @relation(fields: [measurementUnitId], references: [id])
+  taxRate           TaxRate?        @relation(fields: [taxRateId], references: [id], onDelete: SetNull)
   images            ProductImage[]
   orderItems        OrderItem[]
   reviews           ProductReview[]
@@ -1458,6 +1464,7 @@ model Product {
   @@index([portalId])
   @@index([categoryId])
   @@index([measurementUnitId])
+  @@index([taxRateId])
   @@index([sku])
   @@index([isActive])
   @@index([isAvailable])
@@ -1502,6 +1509,9 @@ model Order {
   subtotal       Decimal   @db.Decimal(10, 2)
   discount       Decimal   @default(0) @db.Decimal(10, 2)
   total          Decimal   @db.Decimal(10, 2)
+  /// База и налог заказа — суммы снимков строк (TASK-797); пусто — заказ без разбивки
+  netTotal       Decimal?  @map("net_total") @db.Decimal(10, 2)
+  taxTotal       Decimal?  @map("tax_total") @db.Decimal(10, 2)
   orderedAt      DateTime  @default(now()) @map("ordered_at")
   confirmedAt    DateTime? @map("confirmed_at")
   preparedAt     DateTime? @map("prepared_at")
@@ -1531,19 +1541,25 @@ model Order {
 }
 
 model OrderItem {
-  id         String   @id @default(uuid())
-  orderId    String   @map("order_id")
-  productId  String   @map("product_id")
-  quantity   Decimal  @db.Decimal(10, 3)
-  unitPrice  Decimal  @map("unit_price") @db.Decimal(10, 2)
-  totalPrice Decimal  @map("total_price") @db.Decimal(10, 2)
+  id           String        @id @default(uuid())
+  orderId      String        @map("order_id")
+  productId    String        @map("product_id")
+  quantity     Decimal       @db.Decimal(10, 3)
+  unitPrice    Decimal       @map("unit_price") @db.Decimal(10, 2)
+  totalPrice   Decimal       @map("total_price") @db.Decimal(10, 2)
   /// подарок: товар списан со склада, но в сумму заказа не входит (total_price = 0)
-  isGift     Boolean  @default(false) @map("is_gift")
+  isGift       Boolean       @default(false) @map("is_gift")
   /// граммы лимита участника на момент заказа (количество × граммы на единицу); подарок тоже входит
-  limitGrams Decimal  @default(0) @map("limit_grams") @db.Decimal(10, 3)
-  notes      String?  @db.Text
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  limitGrams   Decimal       @default(0) @map("limit_grams") @db.Decimal(10, 3)
+  /// Снимок налога строки на момент заказа (TASK-797): total_price = net_amount + tax_amount.
+  /// Пусто — заказ без разбивки: финансы клуба были выключены
+  taxPercent   Decimal?      @map("tax_percent") @db.Decimal(5, 2)
+  taxTreatment TaxTreatment? @map("tax_treatment")
+  netAmount    Decimal?      @map("net_amount") @db.Decimal(10, 2)
+  taxAmount    Decimal?      @map("tax_amount") @db.Decimal(10, 2)
+  notes        String?       @db.Text
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
 
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id])
@@ -1727,4 +1743,40 @@ model OrganizationProfile {
   portal Portal @relation(fields: [portalId], references: [id], onDelete: Cascade)
 
   @@map("organization_profiles")
+}
+
+/// Как операция относится к налогу: облагается по ставке, освобождена (exenta, art. 20 LIVA)
+/// или вне налога (no sujeta: членские взносы ассоциации). В 303 они попадают в разные клетки
+enum TaxTreatment {
+  taxable
+  exempt
+  not_subject
+
+  @@map("tax_treatment")
+}
+
+/// Ставка налога клуба (TASK-797). Пресет Испании появляется при подключении финансов; подпись
+/// пресета переводит CRM по `presetCode`, у своей ставки — `name`. Ставки не удаляются, а
+/// архивируются: заказы хранят снимок, товар на архивную ставку не ссылается
+model TaxRate {
+  id         String       @id @default(uuid())
+  portalId   String       @map("portal_id")
+  presetCode String?      @map("preset_code") @db.VarChar(40)
+  name       String?      @db.VarChar(80)
+  /// Процент: 21.00; у exempt и not_subject — 0
+  percent    Decimal      @db.Decimal(5, 2)
+  treatment  TaxTreatment @default(taxable)
+  /// Одна ставка по умолчанию на клуб — меняется одним UPDATE в репозитории
+  isDefault  Boolean      @default(false) @map("is_default")
+  sortOrder  Int          @default(0) @map("sort_order")
+  archivedAt DateTime?    @map("archived_at")
+  createdAt  DateTime     @default(now()) @map("created_at")
+  updatedAt  DateTime     @updatedAt @map("updated_at")
+
+  portal   Portal    @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  products Product[]
+
+  @@unique([portalId, presetCode])
+  @@index([portalId])
+  @@map("tax_rates")
 }

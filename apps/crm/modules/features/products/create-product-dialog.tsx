@@ -13,6 +13,7 @@ import { useMeasurementUnits } from "@/modules/entities/measurement-unit";
 import { useCreateProduct } from "@/modules/entities/product";
 
 import { AudiencePicker } from "./audience-picker";
+import { ProductTaxFields } from "./product-tax-fields";
 
 const INITIAL_FORM: SchemaCreateProductDto = {
     name: "",
@@ -187,6 +188,14 @@ export function CreateProductDialog() {
                             limitGramsPerUnit: e.target.value ? Number(e.target.value) : undefined,
                         }))
                     }
+                />
+
+                <ProductTaxFields
+                    value={{
+                        taxRateId: form.taxRateId ?? null,
+                        priceIncludesTax: form.priceIncludesTax ?? null,
+                    }}
+                    onChange={(tax) => setForm((prev) => ({ ...prev, ...tax }))}
                 />
 
                 <AudiencePicker

@@ -5,6 +5,8 @@ import { Prisma } from "@prisma/client";
 import { isUniqueViolationOn } from "@common/prisma/unique-violation";
 import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
 import { MemberLimitService } from "@modules/portal/crm/club-policy/application/services/member-limit.service";
+import { TaxPolicyService } from "@modules/portal/crm/finance/application/services/tax-policy.service";
+import { splitLineTax, sumLineTaxes } from "@modules/portal/crm/finance/domain/tax/tax-split";
 import { Order, PaymentStatus } from "@modules/portal/crm/orders/domain/entity/order.entity";
 import { InsufficientStockError } from "@modules/portal/crm/orders/domain/errors/insufficient-stock.error";
 import { MonthlyLimitExceededError } from "@modules/portal/crm/orders/domain/errors/monthly-limit-exceeded.error";
@@ -53,6 +55,8 @@ export interface PlaceOrderInput {
 /** Позиция, проверенная по каталогу; имя — для понятной ошибки, если товар кончится */
 interface ResolvedOrderItem extends CreateOrderItemInput {
     name: string;
+    taxRateId: string | null;
+    priceIncludesTax: boolean | null;
 }
 
 /**
@@ -68,14 +72,16 @@ export class OrderPlacementService {
     constructor(
         private readonly orderRepository: OrderRepository,
         private readonly productsService: ProductsService,
-        private readonly memberLimits: MemberLimitService
+        private readonly memberLimits: MemberLimitService,
+        private readonly taxPolicy: TaxPolicyService
     ) {}
 
     async place(portalId: string, input: PlaceOrderInput): Promise<Order> {
         const { memberId, employeeId } = input;
         const resolvedItems = await this.resolveOrderItems(input.items, portalId);
+        const taxed = await this.applyTaxes(portalId, resolvedItems);
 
-        const subtotal = +resolvedItems.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2);
+        const subtotal = +taxed.items.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2);
         const discount = 0; // скидок в продукте пока нет
         const total = subtotal - discount;
         const { limitGrams } = await this.memberLimits.settingsOf(memberId, portalId);
@@ -89,8 +95,10 @@ export class OrderPlacementService {
                 subtotal,
                 discount,
                 total,
+                netTotal: taxed.netTotal,
+                taxTotal: taxed.taxTotal,
                 notes: input.notes,
-                items: resolvedItems,
+                items: taxed.items,
                 stageId: input.stageId,
                 monthlyLimitGrams: limitGrams,
             });
@@ -156,10 +164,56 @@ export class OrderPlacementService {
                     item.quantity,
                     product.limitGramsPerUnit != null ? Number(product.limitGramsPerUnit) : null
                 ),
+                taxRateId: product.taxRateId ?? null,
+                priceIncludesTax: product.priceIncludesTax ?? null,
             });
         }
 
         return resolved;
+    }
+
+    /**
+     * Налог строк по правилам клуба (TASK-797): снимок ставки в строке, база и налог — в заказе.
+     * У товара «без налога» налог добавляется сверху, итог строки больше цены × количество.
+     * Финансы клуба выключены — заказ без разбивки, суммы как раньше.
+     */
+    private async applyTaxes(
+        portalId: string,
+        items: readonly ResolvedOrderItem[]
+    ): Promise<{ items: ResolvedOrderItem[]; netTotal: number | null; taxTotal: number | null }> {
+        const rules = await this.taxPolicy.rulesFor(
+            portalId,
+            items.map((item) => ({
+                id: item.productId,
+                taxRateId: item.taxRateId,
+                priceIncludesTax: item.priceIncludesTax,
+            }))
+        );
+        if (!rules) return { items: [...items], netTotal: null, taxTotal: null };
+
+        const taxed = items.map((item) => {
+            const rule = rules.get(item.productId);
+            if (!rule) return item;
+            const line = splitLineTax(item.totalPrice, rule);
+            return {
+                ...item,
+                totalPrice: line.gross,
+                tax: {
+                    percent: rule.percent,
+                    treatment: rule.treatment,
+                    net: line.net,
+                    tax: line.tax,
+                },
+            };
+        });
+        const totals = sumLineTaxes(
+            taxed.map((item) => ({
+                net: item.tax?.net ?? item.totalPrice,
+                tax: item.tax?.tax ?? 0,
+                gross: item.totalPrice,
+            }))
+        );
+        return { items: taxed, netTotal: totals.net, taxTotal: totals.tax };
     }
 
     /**

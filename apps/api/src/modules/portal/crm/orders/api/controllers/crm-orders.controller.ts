@@ -25,16 +25,17 @@ import { CurrentEmployee } from "@modules/portal/auth/employees/api/decorators/c
 import { CrmAuth } from "@modules/portal/auth/sessions/api/session-auth.decorators";
 import { PERMISSIONS } from "@modules/portal/crm/access/domain/permissions";
 import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
+import { OrderDetailDto, OrderListDto } from "@modules/portal/crm/orders/api/dto/order.dto";
 import {
     CrmCreateOrderDto,
-    OrderDetailDto,
-    OrderListDto,
+    UpdateOrderStatusDto,
+    UpdatePaymentStatusDto,
+} from "@modules/portal/crm/orders/api/dto/order-input.dto";
+import {
     OrderListQueryDto,
     OrderStageSummaryDto,
     OrderStageSummaryQueryDto,
-    UpdateOrderStatusDto,
-    UpdatePaymentStatusDto,
-} from "@modules/portal/crm/orders/api/dto/order.dto";
+} from "@modules/portal/crm/orders/api/dto/order-query.dto";
 import { MoveOrderStageDto } from "@modules/portal/crm/orders/api/dto/order-stage.dto";
 import { mapOrderToDetailDto, mapOrderToListDto } from "@modules/portal/crm/orders/api/mappers";
 import { OrderStagesService } from "@modules/portal/crm/orders/application/services/order-stages.service";

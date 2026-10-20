@@ -3116,6 +3116,62 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/crm/finance/tax-rates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ставки налога клуба: сначала пресет, потом свои */
+        get: operations["CrmTaxRates_list"];
+        put?: never;
+        /** Своя ставка (finance.admin); у exempt и not_subject процент 0 */
+        post: operations["CrmTaxRates_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/tax-rates/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * В архив (finance.admin)
+         * @description 409 tax_rate_is_default — ставка по умолчанию; 409 tax_rate_in_use — у товаров
+         */
+        delete: operations["CrmTaxRates_archive"];
+        options?: never;
+        head?: never;
+        /** Изменить ставку: подпись, процент, режим (finance.admin) */
+        patch: operations["CrmTaxRates_update"];
+        trace?: never;
+    };
+    "/crm/finance/tax-rates/{id}/default": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Сделать ставкой по умолчанию: ею облагаются товары без своей ставки */
+        put: operations["CrmTaxRates_makeDefault"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/crm/settings/registration-links": {
         parameters: {
             query?: never;
@@ -5433,6 +5489,13 @@ export interface components {
              * @example 1
              */
             limitGramsPerUnit?: number | null;
+            /**
+             * Format: uuid
+             * @description Ставка налога; null — ставка клуба по умолчанию
+             */
+            taxRateId: string | null;
+            /** @description Цена с налогом; null — как в профиле организации */
+            priceIncludesTax: boolean | null;
             /** @example 2026-03-16T12:00:00.000Z */
             createdAt: string;
         };
@@ -5498,6 +5561,13 @@ export interface components {
              * @example 1
              */
             limitGramsPerUnit?: number | null;
+            /**
+             * Format: uuid
+             * @description Ставка налога; null — ставка клуба по умолчанию
+             */
+            taxRateId: string | null;
+            /** @description Цена с налогом; null — как в профиле организации */
+            priceIncludesTax: boolean | null;
             /** @example 2026-03-16T12:00:00.000Z */
             createdAt: string;
             /** @example Descripción del producto */
@@ -5563,6 +5633,13 @@ export interface components {
              * @example 1
              */
             limitGramsPerUnit?: number;
+            /**
+             * Format: uuid
+             * @description Ставка налога клуба (TASK-797); пусто — ставка по умолчанию
+             */
+            taxRateId?: string | null;
+            /** @description true — цена с налогом, false — налог сверху; пусто — как в профиле организации */
+            priceIncludesTax?: boolean | null;
         };
         UpdateProductDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
@@ -5602,6 +5679,13 @@ export interface components {
              * @example 1
              */
             limitGramsPerUnit?: number | null;
+            /**
+             * Format: uuid
+             * @description Ставка налога клуба (TASK-797); пусто — ставка по умолчанию
+             */
+            taxRateId?: string | null;
+            /** @description true — цена с налогом, false — налог сверху; пусто — как в профиле организации */
+            priceIncludesTax?: boolean | null;
         };
         ProductCategoryTreeDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
@@ -6084,6 +6168,16 @@ export interface components {
             /** @example 38.75 */
             total: number;
             /**
+             * @description База заказа — сумма баз строк; null — заказ без разбивки
+             * @example 32.02
+             */
+            netTotal: number | null;
+            /**
+             * @description Налог заказа
+             * @example 6.73
+             */
+            taxTotal: number | null;
+            /**
              * @description Количество позиций в заказе
              * @example 3
              */
@@ -6133,6 +6227,8 @@ export interface components {
         OrderStageSummaryDto: {
             stages: components["schemas"]["OrderStageSummaryItemDto"][];
         };
+        /** @enum {string} */
+        TaxTreatment: "taxable" | "exempt" | "not_subject";
         OrderItemMeasurementUnitDto: {
             /** @example 550e8400-e29b-41d4-a716-446655440000 */
             id: string;
@@ -6179,6 +6275,22 @@ export interface components {
             isGift: boolean;
             /** @example Подарочная упаковка */
             notes?: string | null;
+            /**
+             * @description Ставка налога на момент заказа (TASK-797); null — заказ без разбивки
+             * @example 21
+             */
+            taxPercent: number | null;
+            taxTreatment: components["schemas"]["TaxTreatment"] | null;
+            /**
+             * @description База строки
+             * @example 32.02
+             */
+            netAmount: number | null;
+            /**
+             * @description Налог строки
+             * @example 6.73
+             */
+            taxAmount: number | null;
             product: components["schemas"]["OrderItemProductDto"];
         };
         OrderDetailDto: {
@@ -6204,6 +6316,16 @@ export interface components {
             discount: number;
             /** @example 38.75 */
             total: number;
+            /**
+             * @description База заказа — сумма баз строк; null — заказ без разбивки
+             * @example 32.02
+             */
+            netTotal: number | null;
+            /**
+             * @description Налог заказа
+             * @example 6.73
+             */
+            taxTotal: number | null;
             /**
              * @description Количество позиций в заказе
              * @example 3
@@ -6395,6 +6517,16 @@ export interface components {
             subtotal: number;
             /** @example 0 */
             discount: number;
+            /**
+             * @description База заказа (TASK-797); null — заказ без разбивки налога
+             * @example 32.02
+             */
+            netTotal: number | null;
+            /**
+             * @description Налог в заказе
+             * @example 6.73
+             */
+            taxTotal: number | null;
             /** @example Recogeré a las 18:00 */
             notes?: string | null;
             items: components["schemas"]["CabinetOrderItemDto"][];
@@ -6755,6 +6887,42 @@ export interface components {
             gestorName?: string | null;
             gestorEmail?: string | null;
             gestorPhone?: string | null;
+        };
+        TaxRateDto: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Код пресета: подпись переводит CRM. У своей ставки — null
+             * @example es_general
+             */
+            presetCode: string | null;
+            /** @example null */
+            name: string | null;
+            /** @example 21 */
+            percent: number;
+            /**
+             * @description taxable — по ставке; exempt — exenta (art. 20 LIVA); not_subject — no sujeta
+             * @example taxable
+             */
+            treatment: components["schemas"]["TaxTreatment"];
+            isDefault: boolean;
+            /** Format: date-time */
+            archivedAt: string | null;
+        };
+        CreateTaxRateDto: {
+            /** @example IVA 5 % */
+            name: string;
+            /** @example 5 */
+            percent: number;
+            /** @description taxable — по ставке; exempt — exenta (art. 20 LIVA); not_subject — no sujeta */
+            treatment: components["schemas"]["TaxTreatment"];
+        };
+        UpdateTaxRateDto: {
+            /** @description Своя подпись; null у пресета — вернуть подпись по коду */
+            name?: string | null;
+            percent?: number;
+            /** @description taxable — по ставке; exempt — exenta (art. 20 LIVA); not_subject — no sujeta */
+            treatment?: components["schemas"]["TaxTreatment"];
         };
         RegistrationLinkPrefillDto: {
             /** @example socio@example.com */
@@ -7362,6 +7530,7 @@ export type SchemaOrderListDto = components['schemas']['OrderListDto'];
 export type SchemaPaginatedResponseOrderListDto = components['schemas']['PaginatedResponse_OrderListDto'];
 export type SchemaOrderStageSummaryItemDto = components['schemas']['OrderStageSummaryItemDto'];
 export type SchemaOrderStageSummaryDto = components['schemas']['OrderStageSummaryDto'];
+export type SchemaTaxTreatment = components['schemas']['TaxTreatment'];
 export type SchemaOrderItemMeasurementUnitDto = components['schemas']['OrderItemMeasurementUnitDto'];
 export type SchemaOrderItemProductDto = components['schemas']['OrderItemProductDto'];
 export type SchemaOrderItemDto = components['schemas']['OrderItemDto'];
@@ -7396,6 +7565,9 @@ export type SchemaVatRegime = components['schemas']['VatRegime'];
 export type SchemaIncomeTaxRegime = components['schemas']['IncomeTaxRegime'];
 export type SchemaOrganizationProfileDto = components['schemas']['OrganizationProfileDto'];
 export type SchemaUpdateOrganizationProfileDto = components['schemas']['UpdateOrganizationProfileDto'];
+export type SchemaTaxRateDto = components['schemas']['TaxRateDto'];
+export type SchemaCreateTaxRateDto = components['schemas']['CreateTaxRateDto'];
+export type SchemaUpdateTaxRateDto = components['schemas']['UpdateTaxRateDto'];
 export type SchemaRegistrationLinkPrefillDto = components['schemas']['RegistrationLinkPrefillDto'];
 export type SchemaCreateRegistrationLinkDto = components['schemas']['CreateRegistrationLinkDto'];
 export type SchemaRegistrationLinkCreatedByDto = components['schemas']['RegistrationLinkCreatedByDto'];
@@ -16965,6 +17137,267 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmTaxRates_list: {
+        parameters: {
+            query?: {
+                /** @description Вместе с архивными */
+                includeArchived?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaxRateDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmTaxRates_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTaxRateDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaxRateDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmTaxRates_archive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmTaxRates_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTaxRateDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaxRateDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmTaxRates_makeDefault: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import type { SchemaProductDetailDto } from "@workspace/api-client/core";
 
 import { InfoRow } from "./info-row";
+import { ProductTaxInfo } from "./product-tax-info";
 
 /** Карточка товара в режиме просмотра: склад, цена, состав и кому товар виден в кабинете. */
 export function ProductInfo({ product }: { product: SchemaProductDetailDto }) {
@@ -24,6 +25,7 @@ export function ProductInfo({ product }: { product: SchemaProductDetailDto }) {
                     value={product.measurementUnit?.name ?? "—"}
                 />
                 <InfoRow label={t("price")} value={`€${product.price}`} />
+                <ProductTaxInfo product={product} />
                 <InfoRow
                     label={t("stock")}
                     value={`${product.currentQuantity} / ${product.initialQuantity} ${product.measurementUnit?.code ?? ""}`}

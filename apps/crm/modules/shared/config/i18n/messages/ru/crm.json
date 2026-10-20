@@ -458,6 +458,17 @@
                 "medical": "Медицинское",
                 "mj": "MJ",
                 "recreation": "Рекреационное"
+            },
+            "tax": {
+                "label": "Налог",
+                "rate": "Ставка налога",
+                "rateDefault": "Как у клуба: {rate}",
+                "rateNone": "Как у клуба",
+                "priceMode": "Цена",
+                "priceModeHint": "«Без налога» — налог добавится сверху, покупатель заплатит больше цены.",
+                "priceFollow": "Как в настройках клуба",
+                "priceIncluded": "С налогом",
+                "priceExcluded": "Без налога, налог сверху"
             }
         },
         "orders": {
@@ -532,7 +543,15 @@
                 },
                 "back": "К заказам",
                 "employee": "Сотрудник",
-                "gift": "Подарок"
+                "gift": "Подарок",
+                "net": "База",
+                "tax": "Налог",
+                "taxLine": "IVA {percent} %: {amount}",
+                "taxTreatment": {
+                    "taxable": "Облагается",
+                    "exempt": "Без IVA (exenta)",
+                    "not_subject": "Вне IVA"
+                }
             },
             "stage": {
                 "label": "Стадия",
@@ -817,6 +836,60 @@
                     "tax_id_kind_mismatch": "Номер не подходит к форме организации",
                     "invalid_iban": "IBAN не проходит проверку",
                     "tax_regime_mismatch": "Режим не подходит к форме организации"
+                }
+            },
+            "taxRates": {
+                "title": "Ставки налога",
+                "hint": "Ставкой по умолчанию облагаются товары без своей ставки. Заказ запоминает ставку на момент продажи.",
+                "add": "Добавить ставку",
+                "default": "По умолчанию",
+                "makeDefault": "Сделать основной",
+                "edit": "Изменить",
+                "archive": "В архив",
+                "archived": "Ставка убрана в архив",
+                "defaultChanged": "Ставка по умолчанию изменена",
+                "created": "Ставка добавлена",
+                "updated": "Ставка сохранена",
+                "cancel": "Отмена",
+                "save": "Сохранить",
+                "saving": "Сохраняем…",
+                "createTitle": "Новая ставка",
+                "editTitle": "Ставка налога",
+                "dialogHint": "Процент нужен только облагаемым операциям; у exenta и no sujeta налога нет.",
+                "archiveTitle": "Убрать ставку в архив?",
+                "archiveDescription": "«{name}» пропадёт из списка ставок. Прошлые заказы сохранят свой налог.",
+                "fields": {
+                    "name": "Название",
+                    "namePlaceholder": "Например, IVA 5 %",
+                    "percent": "Процент",
+                    "treatment": "Режим"
+                },
+                "treatment": {
+                    "taxable": "Облагается",
+                    "exempt": "Освобождено (exenta)",
+                    "not_subject": "Вне налога (no sujeta)"
+                },
+                "treatmentHint": {
+                    "taxable": "Налог по ставке: входит в цену или добавляется сверху.",
+                    "exempt": "Освобождённые операции (art. 20 LIVA): IVA не начисляется.",
+                    "not_subject": "Вне IVA, например членские взносы ассоциации."
+                },
+                "presets": {
+                    "es_general": "IVA general 21 %",
+                    "es_reduced": "IVA reducido 10 %",
+                    "es_super_reduced": "IVA superreducido 4 %",
+                    "es_zero": "IVA 0 %",
+                    "es_exempt": "Exento de IVA",
+                    "es_not_subject": "No sujeto a IVA"
+                },
+                "errors": {
+                    "required": "Укажите название",
+                    "tooLong": "Слишком длинное название",
+                    "percent": "Процент от 0 до 100, до сотых",
+                    "tax_rate_in_use": "Ставкой пользуются товары — сначала смените им ставку",
+                    "tax_rate_is_default": "Это ставка по умолчанию — сначала выберите другую",
+                    "tax_rate_archived": "Ставка в архиве",
+                    "tax_rate_name_required": "У своей ставки должно быть название"
                 }
             }
         },

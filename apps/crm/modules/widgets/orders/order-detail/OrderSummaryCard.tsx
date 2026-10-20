@@ -13,7 +13,7 @@ interface OrderSummaryCardProps {
     order: OrderDetail;
 }
 
-/** Who ordered, who handles it, the amounts and the notes. */
+/** Who ordered, who handles it, the amounts (net and tax when the club keeps finance) and the notes. */
 export function OrderSummaryCard({ order }: OrderSummaryCardProps) {
     const t = useTranslations("crm.orders.detail");
     const money = useMoneyFormat();
@@ -32,6 +32,12 @@ export function OrderSummaryCard({ order }: OrderSummaryCardProps) {
                 {employee ? <OrderInfoRow label={t("employee")}>{employee}</OrderInfoRow> : null}
                 <OrderInfoRow label={t("subtotal")}>{money(order.subtotal)}</OrderInfoRow>
                 <OrderInfoRow label={t("discount")}>{money(order.discount)}</OrderInfoRow>
+                {order.taxTotal !== null && order.netTotal !== null ? (
+                    <>
+                        <OrderInfoRow label={t("net")}>{money(order.netTotal)}</OrderInfoRow>
+                        <OrderInfoRow label={t("tax")}>{money(order.taxTotal)}</OrderInfoRow>
+                    </>
+                ) : null}
                 <OrderInfoRow label={t("total")}>
                     <span className="text-base">{money(order.total)}</span>
                 </OrderInfoRow>

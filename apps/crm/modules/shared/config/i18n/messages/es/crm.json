@@ -458,6 +458,17 @@
                 "medical": "Medicinal",
                 "mj": "MJ",
                 "recreation": "Recreativo"
+            },
+            "tax": {
+                "label": "Impuesto",
+                "rate": "Tipo de impuesto",
+                "rateDefault": "El del club: {rate}",
+                "rateNone": "El del club",
+                "priceMode": "Precio",
+                "priceModeHint": "«Sin impuesto» añade el impuesto aparte: el comprador paga más que el precio.",
+                "priceFollow": "Según los ajustes del club",
+                "priceIncluded": "Impuesto incluido",
+                "priceExcluded": "Sin impuesto, se añade aparte"
             }
         },
         "orders": {
@@ -532,7 +543,15 @@
                 },
                 "back": "A pedidos",
                 "employee": "Empleado",
-                "gift": "Regalo"
+                "gift": "Regalo",
+                "net": "Base",
+                "tax": "Impuesto",
+                "taxLine": "IVA {percent} %: {amount}",
+                "taxTreatment": {
+                    "taxable": "Sujeta",
+                    "exempt": "Exenta de IVA",
+                    "not_subject": "No sujeta"
+                }
             },
             "stage": {
                 "label": "Etapa",
@@ -817,6 +836,60 @@
                     "tax_id_kind_mismatch": "El número no corresponde a la forma jurídica",
                     "invalid_iban": "El IBAN no es válido",
                     "tax_regime_mismatch": "El régimen no corresponde a la forma jurídica"
+                }
+            },
+            "taxRates": {
+                "title": "Tipos de impuesto",
+                "hint": "Los productos sin tipo propio usan el tipo por defecto. El pedido guarda el tipo con el que se vendió.",
+                "add": "Añadir tipo",
+                "default": "Por defecto",
+                "makeDefault": "Usar por defecto",
+                "edit": "Editar",
+                "archive": "Archivar",
+                "archived": "Tipo archivado",
+                "defaultChanged": "Tipo por defecto cambiado",
+                "created": "Tipo añadido",
+                "updated": "Tipo guardado",
+                "cancel": "Cancelar",
+                "save": "Guardar",
+                "saving": "Guardando…",
+                "createTitle": "Nuevo tipo",
+                "editTitle": "Tipo de impuesto",
+                "dialogHint": "Solo las operaciones sujetas llevan porcentaje; las exentas y no sujetas no llevan impuesto.",
+                "archiveTitle": "¿Archivar este tipo?",
+                "archiveDescription": "«{name}» sale de la lista de tipos. Los pedidos anteriores conservan su impuesto.",
+                "fields": {
+                    "name": "Nombre",
+                    "namePlaceholder": "Por ejemplo, IVA 5 %",
+                    "percent": "Porcentaje",
+                    "treatment": "Tratamiento"
+                },
+                "treatment": {
+                    "taxable": "Sujeta",
+                    "exempt": "Exenta",
+                    "not_subject": "No sujeta"
+                },
+                "treatmentHint": {
+                    "taxable": "Impuesto según el tipo: incluido en el precio o añadido aparte.",
+                    "exempt": "Operaciones exentas (art. 20 LIVA): no se repercute IVA.",
+                    "not_subject": "Fuera del IVA, por ejemplo las cuotas de los socios."
+                },
+                "presets": {
+                    "es_general": "IVA general 21 %",
+                    "es_reduced": "IVA reducido 10 %",
+                    "es_super_reduced": "IVA superreducido 4 %",
+                    "es_zero": "IVA 0 %",
+                    "es_exempt": "Exento de IVA",
+                    "es_not_subject": "No sujeto a IVA"
+                },
+                "errors": {
+                    "required": "Indica un nombre",
+                    "tooLong": "El nombre es demasiado largo",
+                    "percent": "Un porcentaje de 0 a 100, con dos decimales como máximo",
+                    "tax_rate_in_use": "Hay productos con este tipo. Cámbiales el tipo primero",
+                    "tax_rate_is_default": "Es el tipo por defecto. Elige otro por defecto primero",
+                    "tax_rate_archived": "El tipo está archivado",
+                    "tax_rate_name_required": "Un tipo propio necesita nombre"
                 }
             }
         },

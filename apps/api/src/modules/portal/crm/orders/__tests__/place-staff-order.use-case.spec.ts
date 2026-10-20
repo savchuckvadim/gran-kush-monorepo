@@ -6,8 +6,9 @@ import { ALL_PERMISSIONS, PERMISSIONS } from "@modules/portal/crm/access/domain/
 import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
 import { MemberAccessService } from "@modules/portal/crm/club-policy/application/services/member-access.service";
 import { MemberLimitService } from "@modules/portal/crm/club-policy/application/services/member-limit.service";
+import { TaxPolicyService } from "@modules/portal/crm/finance/application/services/tax-policy.service";
 import { MembersService } from "@modules/portal/crm/members/application/services/members.service";
-import { CrmCreateOrderDto } from "@modules/portal/crm/orders/api/dto/order.dto";
+import { CrmCreateOrderDto } from "@modules/portal/crm/orders/api/dto/order-input.dto";
 import { OrderPlacementService } from "@modules/portal/crm/orders/application/services/order-placement.service";
 import { PlaceStaffOrderUseCase } from "@modules/portal/crm/orders/application/use-cases/place-staff-order.use-case";
 import { Order } from "@modules/portal/crm/orders/domain/entity/order.entity";
@@ -109,6 +110,11 @@ describe("PlaceStaffOrderUseCase — заказ из CRM", () => {
                 { provide: OrderStageRepository, useValue: mockOrderRepository },
                 { provide: ProductsService, useValue: mockProductsService },
                 { provide: MemberLimitService, useValue: mockMemberLimits },
+                // финансы клуба выключены: заказ без разбивки налога
+                {
+                    provide: TaxPolicyService,
+                    useValue: { rulesFor: jest.fn().mockResolvedValue(null) },
+                },
                 { provide: MembersService, useValue: mockMembersService },
                 { provide: MemberAccessService, useValue: mockMemberAccess },
             ],

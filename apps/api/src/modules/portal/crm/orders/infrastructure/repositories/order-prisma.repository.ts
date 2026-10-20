@@ -134,6 +134,8 @@ export class OrderPrismaRepository extends OrderRepository {
                     subtotal: new Prisma.Decimal(data.subtotal),
                     discount: new Prisma.Decimal(data.discount),
                     total: new Prisma.Decimal(data.total),
+                    netTotal: data.netTotal != null ? new Prisma.Decimal(data.netTotal) : null,
+                    taxTotal: data.taxTotal != null ? new Prisma.Decimal(data.taxTotal) : null,
                     notes: data.notes,
                     items: {
                         create: data.items.map((item) => ({
@@ -144,6 +146,15 @@ export class OrderPrismaRepository extends OrderRepository {
                             isGift: item.isGift ?? false,
                             notes: item.notes,
                             limitGrams: new Prisma.Decimal(item.limitGrams),
+                            taxPercent:
+                                item.tax?.percent != null
+                                    ? new Prisma.Decimal(item.tax?.percent)
+                                    : null,
+                            taxTreatment: item.tax?.treatment ?? null,
+                            netAmount:
+                                item.tax?.net != null ? new Prisma.Decimal(item.tax?.net) : null,
+                            taxAmount:
+                                item.tax?.tax != null ? new Prisma.Decimal(item.tax?.tax) : null,
                         })),
                     },
                 },

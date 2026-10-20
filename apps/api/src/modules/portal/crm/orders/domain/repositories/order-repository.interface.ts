@@ -1,3 +1,5 @@
+import type { TaxTreatment } from "@prisma/client";
+
 import type { EventsOf, NewDomainEvent } from "@modules/events";
 import {
     Order,
@@ -35,6 +37,15 @@ export interface CreateOrderItemInput {
     notes?: string;
     /** Граммы лимита участника, которые занимает позиция (`monthly-limit.ts`) */
     limitGrams: number;
+    /** Снимок налога строки; нет — заказ без разбивки (финансы клуба выключены) */
+    tax?: OrderItemTaxSnapshot;
+}
+
+export interface OrderItemTaxSnapshot {
+    percent: number;
+    treatment: TaxTreatment;
+    net: number;
+    tax: number;
 }
 
 // ─── Данные для создания заказа ──────────────────────────────────────────────
@@ -48,6 +59,9 @@ export interface CreateOrderInput {
     subtotal: number;
     discount: number;
     total: number;
+    /** База и налог заказа — суммы снимков строк; null — без разбивки */
+    netTotal?: number | null;
+    taxTotal?: number | null;
     notes?: string;
     items: CreateOrderItemInput[];
     /** Стадия воронки; без неё — первая рабочая стадия воронки по умолчанию */

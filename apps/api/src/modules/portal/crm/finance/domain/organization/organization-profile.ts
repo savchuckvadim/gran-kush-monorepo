@@ -94,6 +94,9 @@ export const INCOME_TAX_REGIMES_BY_FORM: Record<LegalForm, readonly IncomeTaxReg
     [LegalForm.other]: Object.values(IncomeTaxRegime),
 };
 
+/** Цены каталога по умолчанию — с налогом: так их показывает касса и витрина. */
+export const PRICES_INCLUDE_TAX_BY_DEFAULT = true;
+
 /** Первый режим списка — по умолчанию для формы. */
 export const defaultIncomeTaxRegime = (form: LegalForm): IncomeTaxRegime =>
     INCOME_TAX_REGIMES_BY_FORM[form][0];
@@ -112,7 +115,7 @@ export const presetForPortalType = (type: PortalTypeEnum): OrganizationTaxSettin
         currency: "EUR",
         vatRegime: VatRegime.general,
         incomeTaxRegime: defaultIncomeTaxRegime(legalForm),
-        pricesIncludeTax: true,
+        pricesIncludeTax: PRICES_INCLUDE_TAX_BY_DEFAULT,
         fiscalYearStartMonth: 1,
     };
 };

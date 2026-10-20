@@ -26,7 +26,7 @@ import {
     CabinetOrderDetailDto,
     CabinetOrderListDto,
 } from "@modules/portal/crm/orders/api/dto/cabinet-order.dto";
-import { CancelOrderDto, CreateOrderDto } from "@modules/portal/crm/orders/api/dto/order.dto";
+import { CancelOrderDto, CreateOrderDto } from "@modules/portal/crm/orders/api/dto/order-input.dto";
 import {
     mapOrderToCabinetDetailDto,
     mapOrderToCabinetListDto,

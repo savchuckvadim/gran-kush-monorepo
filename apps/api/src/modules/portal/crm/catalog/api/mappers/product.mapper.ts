@@ -41,6 +41,8 @@ export function mapProductToListDto(p: Product): ProductListDto {
             : undefined,
         audiences: p.audiences,
         limitGramsPerUnit: p.limitGramsPerUnit != null ? Number(p.limitGramsPerUnit) : null,
+        taxRateId: p.taxRateId ?? null,
+        priceIncludesTax: p.priceIncludesTax ?? null,
         createdAt: p.createdAt.toISOString(),
     };
 }

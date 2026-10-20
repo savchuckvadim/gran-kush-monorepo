@@ -12,7 +12,7 @@ import { Button, Card, FieldInput, FieldSelect } from "@workspace/ui";
 import { useCategories } from "@/modules/entities/category";
 import { useMeasurementUnits } from "@/modules/entities/measurement-unit";
 import { useProductDetail, useUpdateProduct } from "@/modules/entities/product";
-import { AudiencePicker } from "@/modules/features/products";
+import { AudiencePicker, ProductTaxFields } from "@/modules/features/products";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
@@ -51,6 +51,8 @@ export function ProductDetailCard({ productId }: ProductDetailCardProps) {
             strain: product.strain ?? undefined,
             audiences: product.audiences,
             limitGramsPerUnit: product.limitGramsPerUnit,
+            taxRateId: product.taxRateId,
+            priceIncludesTax: product.priceIncludesTax,
         });
         setIsEditing(true);
     }, [product]);
@@ -195,6 +197,14 @@ export function ProductDetailCard({ productId }: ProductDetailCardProps) {
                                 }
                             />
                         </div>
+
+                        <ProductTaxFields
+                            value={{
+                                taxRateId: form.taxRateId ?? null,
+                                priceIncludesTax: form.priceIncludesTax ?? null,
+                            }}
+                            onChange={(tax) => setForm((prev) => ({ ...prev, ...tax }))}
+                        />
 
                         <div className="grid grid-cols-3 gap-4">
                             <FieldInput

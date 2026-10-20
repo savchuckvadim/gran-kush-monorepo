@@ -44,6 +44,11 @@ export class Product {
     /** Граммы лимита участника на единицу товара; пусто — товар в лимит не входит */
     limitGramsPerUnit?: Decimal | null;
 
+    /** Ставка налога (TASK-797); пусто — ставка клуба по умолчанию */
+    taxRateId?: string | null;
+    /** Цена с налогом; пусто — как в профиле организации */
+    priceIncludesTax?: boolean | null;
+
     createdAt: Date;
     updatedAt: Date;
     createdBy?: string | null;

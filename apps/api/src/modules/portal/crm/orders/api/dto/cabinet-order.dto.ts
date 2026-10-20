@@ -92,6 +92,17 @@ export class CabinetOrderDetailDto extends CabinetOrderListDto {
     @ApiProperty({ example: 0, type: Number })
     discount: number;
 
+    @ApiProperty({
+        type: Number,
+        nullable: true,
+        example: 32.02,
+        description: "База заказа (TASK-797); null — заказ без разбивки налога",
+    })
+    netTotal: number | null;
+
+    @ApiProperty({ type: Number, nullable: true, example: 6.73, description: "Налог в заказе" })
+    taxTotal: number | null;
+
     @ApiPropertyOptional({ example: "Recogeré a las 18:00", type: String, nullable: true })
     notes: string | null;
 

@@ -1,7 +1,7 @@
 import { plainToInstance } from "class-transformer";
 import { IsOptional, validateSync } from "class-validator";
 
-import { ProductFilterDto } from "@modules/portal/crm/catalog/api/dto/product.dto";
+import { ProductFilterDto } from "@modules/portal/crm/catalog/api/dto/product-query.dto";
 
 import { IsQueryBoolean } from "../query-boolean.decorator";
 

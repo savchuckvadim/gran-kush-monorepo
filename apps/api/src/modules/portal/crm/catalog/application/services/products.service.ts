@@ -10,6 +10,7 @@ import {
     ProductFilters,
     ProductRepository,
 } from "@modules/portal/crm/catalog/domain/repositories/product-repository.interface";
+import { TaxRatesService } from "@modules/portal/crm/finance/application/services/tax-rates.service";
 
 import { productChangedEvents } from "../events/product-events";
 
@@ -20,7 +21,8 @@ export class ProductsService {
     constructor(
         private readonly productRepository: ProductRepository,
         private readonly categoryRepository: ProductCategoryRepository,
-        private readonly unitRepository: MeasurementUnitRepository
+        private readonly unitRepository: MeasurementUnitRepository,
+        private readonly taxRates: TaxRatesService
     ) {}
 
     async findById(id: string, portalId: string): Promise<Product | null> {
@@ -74,6 +76,8 @@ export class ProductsService {
             strain?: string;
             audiences?: ProductAudience[];
             limitGramsPerUnit?: number | null;
+            taxRateId?: string | null;
+            priceIncludesTax?: boolean | null;
         },
         portalId: string,
         employeeId: string
@@ -96,6 +100,8 @@ export class ProductsService {
                 throw new ConflictException(`Product with SKU "${dto.sku}" already exists`);
             }
         }
+        // ставка — только своего клуба и не архивная
+        if (dto.taxRateId) await this.taxRates.usable(portalId, dto.taxRateId);
 
         return this.productRepository.create(
             {
@@ -119,6 +125,8 @@ export class ProductsService {
                     dto.limitGramsPerUnit != null
                         ? new Prisma.Decimal(dto.limitGramsPerUnit)
                         : undefined,
+                taxRateId: dto.taxRateId ?? null,
+                priceIncludesTax: dto.priceIncludesTax ?? null,
                 createdBy: employeeId,
             },
             (product) => productChangedEvents(portalId, product.id, "created", employeeId)
@@ -145,6 +153,8 @@ export class ProductsService {
             strain: string | null;
             audiences: ProductAudience[];
             limitGramsPerUnit: number | null;
+            taxRateId: string | null;
+            priceIncludesTax: boolean | null;
         }>,
         portalId: string,
         employeeId: string
@@ -176,6 +186,9 @@ export class ProductsService {
                 throw new ConflictException(`Product with SKU "${dto.sku}" already exists`);
             }
         }
+        if (dto.taxRateId && dto.taxRateId !== product.taxRateId) {
+            await this.taxRates.usable(portalId, dto.taxRateId);
+        }
 
         const data: Record<string, unknown> = { updatedBy: employeeId };
         if (dto.categoryId !== undefined) data.categoryId = dto.categoryId;
@@ -201,6 +214,8 @@ export class ProductsService {
         if (dto.limitGramsPerUnit !== undefined)
             data.limitGramsPerUnit =
                 dto.limitGramsPerUnit !== null ? new Prisma.Decimal(dto.limitGramsPerUnit) : null;
+        if (dto.taxRateId !== undefined) data.taxRateId = dto.taxRateId;
+        if (dto.priceIncludesTax !== undefined) data.priceIncludesTax = dto.priceIncludesTax;
 
         return this.productRepository.update(
             id,

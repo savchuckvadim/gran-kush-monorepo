@@ -19,3 +19,21 @@ export const financeProfileUpdated = defineEvent({
     publicPayload: [],
     description: "The organization profile used for accounting and documents was saved",
 });
+
+/**
+ * A tax rate of the club was added, changed, archived or became the default. Product forms of the
+ * staff reload the rates; members reload the shop, because prices "plus tax" depend on the rate.
+ */
+export const financeTaxRatesChanged = defineEvent({
+    name: "finance.tax_rates_changed",
+    version: 1,
+    scope: "portal",
+    aggregate: "organization",
+    payload: z.object({
+        taxRateId: z.string().min(1),
+        change: z.enum(["created", "updated", "archived", "default_changed"]),
+    }),
+    audience: { staff: { permission: null }, members: true },
+    publicPayload: [],
+    description: "A tax rate of the club was added, changed, archived or became the default",
+});

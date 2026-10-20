@@ -5,13 +5,11 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { Controller, type UseFormReturn, useWatch } from "react-hook-form";
 
-import { Field, Switch } from "@workspace/ui";
+import { Field, FieldSelect, Switch } from "@workspace/ui";
 
 import { INCOME_TAX_REGIMES_BY_FORM, LEGAL_FORMS, VAT_REGIMES } from "@/modules/entities/finance";
 
 import type { OrganizationProfileValues } from "../model/organization-profile-schema";
-
-import { OptionSelect } from "./option-select";
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => String(i + 1));
 
@@ -55,6 +53,8 @@ export function OrganizationTaxFields({ form, disabled }: OrganizationTaxFieldsP
     }, [form, regimes, calendarYear]);
 
     const incomeTaxError = form.formState.errors.incomeTaxRegime?.message;
+    const options = (codes: readonly string[], label: (code: string) => string) =>
+        codes.map((code) => ({ value: code, label: label(code) }));
 
     return (
         <div className="grid gap-4 sm:grid-cols-2">
@@ -62,14 +62,13 @@ export function OrganizationTaxFields({ form, disabled }: OrganizationTaxFieldsP
                 control={form.control}
                 name="legalForm"
                 render={({ field }) => (
-                    <OptionSelect
+                    <FieldSelect
                         id="org-legal-form"
                         label={t("legalForm.label")}
                         helperText={t(`legalForm.hint.${field.value}`)}
                         value={field.value}
-                        options={LEGAL_FORMS}
-                        optionLabel={(option) => t(`legalForm.options.${option}`)}
-                        onChange={field.onChange}
+                        options={options(LEGAL_FORMS, (code) => t(`legalForm.options.${code}`))}
+                        onValueChange={field.onChange}
                         disabled={disabled}
                     />
                 )}
@@ -78,14 +77,13 @@ export function OrganizationTaxFields({ form, disabled }: OrganizationTaxFieldsP
                 control={form.control}
                 name="incomeTaxRegime"
                 render={({ field }) => (
-                    <OptionSelect
+                    <FieldSelect
                         id="org-income-tax"
                         label={t("incomeTax.label")}
                         helperText={t(`incomeTax.hint.${field.value}`)}
                         value={field.value}
-                        options={regimes}
-                        optionLabel={(option) => t(`incomeTax.options.${option}`)}
-                        onChange={field.onChange}
+                        options={options(regimes, (code) => t(`incomeTax.options.${code}`))}
+                        onValueChange={field.onChange}
                         error={incomeTaxError ? t(`errors.${incomeTaxError}`) : undefined}
                         disabled={disabled}
                     />
@@ -95,14 +93,13 @@ export function OrganizationTaxFields({ form, disabled }: OrganizationTaxFieldsP
                 control={form.control}
                 name="vatRegime"
                 render={({ field }) => (
-                    <OptionSelect
+                    <FieldSelect
                         id="org-vat"
                         label={t("vat.label")}
                         helperText={t(`vat.hint.${field.value}`)}
                         value={field.value}
-                        options={VAT_REGIMES}
-                        optionLabel={(option) => t(`vat.options.${option}`)}
-                        onChange={field.onChange}
+                        options={options(VAT_REGIMES, (code) => t(`vat.options.${code}`))}
+                        onValueChange={field.onChange}
                         disabled={disabled}
                     />
                 )}
@@ -111,16 +108,15 @@ export function OrganizationTaxFields({ form, disabled }: OrganizationTaxFieldsP
                 control={form.control}
                 name="fiscalYearStartMonth"
                 render={({ field }) => (
-                    <OptionSelect
+                    <FieldSelect
                         id="org-fiscal-year"
                         label={t("fiscalYear.label")}
                         helperText={
                             calendarYear ? t("fiscalYear.calendarOnly") : t("fiscalYear.hint")
                         }
                         value={String(field.value)}
-                        options={MONTHS}
-                        optionLabel={monthName}
-                        onChange={(month) => field.onChange(Number(month))}
+                        options={options(MONTHS, monthName)}
+                        onValueChange={(month) => field.onChange(Number(month))}
                         disabled={disabled || calendarYear}
                     />
                 )}

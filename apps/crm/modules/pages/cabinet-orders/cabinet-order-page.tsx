@@ -87,6 +87,12 @@ export function CabinetOrderPage({ slug, orderId }: { slug: string; orderId: str
                             <dt>{t("total")}</dt>
                             <dd className="tabular-nums">{money(data.total)}</dd>
                         </div>
+                        {data.taxTotal !== null && data.taxTotal > 0 && (
+                            <div className="flex justify-between gap-3 text-muted-foreground">
+                                <dt>{t("taxIncluded")}</dt>
+                                <dd className="tabular-nums">{money(data.taxTotal)}</dd>
+                            </div>
+                        )}
                     </dl>
 
                     {data.notes && (

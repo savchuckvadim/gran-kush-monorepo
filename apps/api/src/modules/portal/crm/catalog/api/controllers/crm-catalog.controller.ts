@@ -26,19 +26,18 @@ import {
     MeasurementUnitDto,
     UpdateMeasurementUnitDto,
 } from "@modules/portal/crm/catalog/api/dto/measurement-unit.dto";
-import {
-    CreateProductDto,
-    ProductDetailDto,
-    ProductListDto,
-    ProductListQueryDto,
-    UpdateProductDto,
-} from "@modules/portal/crm/catalog/api/dto/product.dto";
+import { ProductDetailDto, ProductListDto } from "@modules/portal/crm/catalog/api/dto/product.dto";
 import {
     CreateProductCategoryDto,
     ProductCategoryDto,
     ProductCategoryTreeDto,
     UpdateProductCategoryDto,
 } from "@modules/portal/crm/catalog/api/dto/product-category.dto";
+import {
+    CreateProductDto,
+    UpdateProductDto,
+} from "@modules/portal/crm/catalog/api/dto/product-input.dto";
+import { ProductListQueryDto } from "@modules/portal/crm/catalog/api/dto/product-query.dto";
 import {
     mapCategoryToDto,
     mapCategoryToTreeDto,

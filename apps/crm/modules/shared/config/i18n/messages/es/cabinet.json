@@ -309,7 +309,8 @@
             "cancelText": "El club aún no ha empezado a prepararlo. Al cancelarlo, los productos vuelven a la tienda.",
             "cancelConfirm": "Cancelar pedido",
             "keep": "No cancelar",
-            "stagesLabel": "Etapas del pedido"
+            "stagesLabel": "Etapas del pedido",
+            "taxIncluded": "Impuestos incluidos"
         },
         "account": {
             "title": "Cuenta",

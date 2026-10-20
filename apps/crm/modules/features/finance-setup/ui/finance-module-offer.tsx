@@ -29,7 +29,7 @@ export function FinanceModuleOffer() {
     const canEnable = can("settings.club");
 
     return (
-        <Card padding="lg" className="max-w-3xl space-y-6">
+        <Card padding="lg" className="max-w-3xl" contentClassName="space-y-6 px-0">
             <div className="flex items-start gap-3">
                 <BookOpenCheck className="mt-1 size-6 shrink-0 text-primary" aria-hidden="true" />
                 <div>

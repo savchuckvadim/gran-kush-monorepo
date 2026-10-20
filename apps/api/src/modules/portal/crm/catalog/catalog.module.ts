@@ -13,9 +13,10 @@ import { MeasurementUnitPrismaRepository } from "@modules/portal/crm/catalog/inf
 import { ProductCategoryPrismaRepository } from "@modules/portal/crm/catalog/infrastructure/repositories/product-category-prisma.repository";
 import { ProductPrismaRepository } from "@modules/portal/crm/catalog/infrastructure/repositories/product-prisma.repository";
 import { ClubPolicyModule } from "@modules/portal/crm/club-policy/club-policy.module";
+import { FinanceModule } from "@modules/portal/crm/finance/finance.module";
 
 @Module({
-    imports: [PrismaModule, ClubPolicyModule],
+    imports: [PrismaModule, ClubPolicyModule, FinanceModule],
     providers: [
         // Services
         ProductsService,

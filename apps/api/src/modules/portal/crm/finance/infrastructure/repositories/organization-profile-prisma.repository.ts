@@ -57,6 +57,22 @@ export class OrganizationProfilePrismaRepository extends OrganizationProfileRepo
         };
     }
 
+    async findTaxSettings(portalId: string): Promise<OrganizationTaxSettings | null> {
+        const row = await this.prisma.organizationProfile.findUnique({
+            where: { portalId },
+            select: {
+                legalForm: true,
+                country: true,
+                currency: true,
+                vatRegime: true,
+                incomeTaxRegime: true,
+                pricesIncludeTax: true,
+                fiscalYearStartMonth: true,
+            },
+        });
+        return row;
+    }
+
     async save(
         portalId: string,
         profile: OrganizationTaxSettings & { identity: OrganizationIdentity },

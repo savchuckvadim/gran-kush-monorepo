@@ -13,6 +13,8 @@ import {
 import { validateOrganization } from "../../domain/organization/organization-validation";
 import { OrganizationProfileRepository } from "../../domain/repositories/organization-profile-repository.interface";
 
+import { TaxRatesService } from "./tax-rates.service";
+
 export interface OrganizationProfileView {
     /** Профиль сохранён; `false` — показан пресет типа портала, реквизиты пустые */
     configured: boolean;
@@ -27,10 +29,14 @@ export type OrganizationProfileInput = Omit<OrganizationTaxSettings, "country" |
  * Профиль организации (TASK-796): форма, налоговые режимы и реквизиты для учёта и документов.
  * До первого сохранения отдаётся пресет по типу портала (клуб — asociación, студии — autónomo).
  * Страна и валюта пока одна — ES / EUR; другие страны ЕС — пресетами, без смены модели.
+ * Смена режима IVA меняет и ставку по умолчанию: освобождённой организации — exenta, иначе general.
  */
 @Injectable()
 export class OrganizationProfileService {
-    constructor(private readonly repository: OrganizationProfileRepository) {}
+    constructor(
+        private readonly repository: OrganizationProfileRepository,
+        private readonly taxRates: TaxRatesService
+    ) {}
 
     async get(portalId: string): Promise<OrganizationProfileView> {
         const saved = await this.repository.find(portalId);
@@ -63,7 +69,8 @@ export class OrganizationProfileService {
             fiscalYearStartMonth: fiscalYearStartFor(input.legalForm, input.fiscalYearStartMonth),
             identity: checked.identity,
         };
-        return this.repository.save(portalId, profile, employeeId, [
+        const before = await this.repository.findTaxSettings(portalId);
+        const saved = await this.repository.save(portalId, profile, employeeId, [
             {
                 name: "finance.profile_updated",
                 portalId,
@@ -76,5 +83,9 @@ export class OrganizationProfileService {
                 },
             },
         ]);
+        if (before?.vatRegime !== saved.vatRegime) {
+            await this.taxRates.useRegimeDefault(portalId, saved.vatRegime, employeeId);
+        }
+        return saved;
     }
 }

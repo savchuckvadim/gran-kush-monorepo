@@ -113,7 +113,7 @@ export function OrganizationProfileForm({
         <form onSubmit={submit} className="max-w-3xl space-y-4" noValidate>
             {!canEdit && <p className="text-sm text-muted-foreground">{t("readOnly")}</p>}
             {sections.map((section) => (
-                <Card key={section.id} padding="md" className="space-y-4">
+                <Card key={section.id} padding="md" contentClassName="space-y-4 px-0">
                     <div>
                         <h2 className="font-semibold">{t(`sections.${section.id}`)}</h2>
                         <p className="mt-0.5 text-sm text-muted-foreground">

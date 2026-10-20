@@ -15,12 +15,21 @@ export const mapCategoryToCabinetDto = (c: ProductCategory): CabinetProductCateg
     name: c.name,
 });
 
-export function mapProductToCabinetDto(p: Product): CabinetProductDto {
+/** Налоговые поля товара для расчёта цены покупателя (`TaxPolicyService.grossPrices`). */
+export const productPriceTaxInput = (p: Product) => ({
+    id: p.id,
+    price: Number(p.price),
+    taxRateId: p.taxRateId ?? null,
+    priceIncludesTax: p.priceIncludesTax ?? null,
+});
+
+/** `price` — цена для участника, с налогом; без неё — цена каталога. */
+export function mapProductToCabinetDto(p: Product, price = Number(p.price)): CabinetProductDto {
     return {
         id: p.id,
         name: p.name,
         description: p.description ?? null,
-        price: Number(p.price),
+        price,
         imageUrl: p.imageUrl ?? null,
         category: p.category ? mapCategoryToCabinetDto(p.category) : null,
         unit: p.measurementUnit

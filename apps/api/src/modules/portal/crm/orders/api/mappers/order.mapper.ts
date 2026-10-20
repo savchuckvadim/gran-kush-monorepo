@@ -7,6 +7,9 @@ import {
 import { Order } from "@modules/portal/crm/orders/domain/entity/order.entity";
 import { OrderStage } from "@modules/portal/crm/orders/domain/entity/order-stage.entity";
 
+const numberOrNull = (value: { toString(): string } | null | undefined): number | null =>
+    value == null ? null : Number(value);
+
 /** Стадия с названием на языке запроса: перевод системного названия или слово клуба. */
 export function mapOrderStageToDto(stage: OrderStage, locale: ContentLocale): OrderStageDto {
     return {
@@ -34,6 +37,8 @@ export function mapOrderToListDto(o: Order, locale: ContentLocale): OrderListDto
         subtotal: Number(o.subtotal),
         discount: Number(o.discount),
         total: Number(o.total),
+        netTotal: numberOrNull(o.netTotal),
+        taxTotal: numberOrNull(o.taxTotal),
         itemsCount: o.items?.length ?? 0,
         orderedAt: o.orderedAt.toISOString(),
         member: o.member ?? { id: o.memberId, name: "—" },
@@ -63,6 +68,10 @@ export function mapOrderToDetailDto(o: Order, locale: ContentLocale): OrderDetai
                 unitPrice: Number(item.unitPrice),
                 totalPrice: Number(item.totalPrice),
                 isGift: item.isGift,
+                taxPercent: numberOrNull(item.taxPercent),
+                taxTreatment: item.taxTreatment ?? null,
+                netAmount: numberOrNull(item.netAmount),
+                taxAmount: numberOrNull(item.taxAmount),
                 notes: item.notes,
                 product: item.product ?? {
                     id: item.productId,

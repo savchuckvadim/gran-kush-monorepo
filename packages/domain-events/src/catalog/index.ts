@@ -4,7 +4,7 @@ import type { AnyEventDefinition } from "../define-event";
 import type { DomainEventEnvelope } from "../envelope";
 
 import { employeeAccessChanged, employeeJoined } from "./employee.events";
-import { financeProfileUpdated } from "./finance.events";
+import { financeProfileUpdated, financeTaxRatesChanged } from "./finance.events";
 import {
     memberConsentGiven,
     memberJoined,
@@ -33,6 +33,7 @@ export const EVENT_CATALOG = {
     "portal.founded": portalFounded,
     "portal.module_changed": portalModuleChanged,
     "finance.profile_updated": financeProfileUpdated,
+    "finance.tax_rates_changed": financeTaxRatesChanged,
     "member.joined": memberJoined,
     "member.consent_given": memberConsentGiven,
     "member.left": memberLeft,
@@ -84,6 +85,7 @@ export {
     employeeAccessChanged,
     employeeJoined,
     financeProfileUpdated,
+    financeTaxRatesChanged,
     memberConsentGiven,
     memberJoined,
     memberLeft,

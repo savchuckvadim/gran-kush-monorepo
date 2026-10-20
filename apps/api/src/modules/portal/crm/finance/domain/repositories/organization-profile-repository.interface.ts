@@ -14,6 +14,9 @@ export abstract class OrganizationProfileRepository {
 
     abstract find(portalId: string): Promise<OrganizationProfile | null>;
 
+    /** Только налоговые настройки, без расшифровки реквизитов (для заказов и ставок). */
+    abstract findTaxSettings(portalId: string): Promise<OrganizationTaxSettings | null>;
+
     /** Создать или заменить профиль; `events` — в той же транзакции. */
     abstract save(
         portalId: string,

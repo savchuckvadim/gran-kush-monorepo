@@ -13,10 +13,11 @@ import {
     FinanceModuleSwitch,
     OrganizationProfileForm,
 } from "@/modules/features/finance-setup";
+import { TaxRatesCard } from "@/modules/features/tax-rates";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
-/** Организация и налоги клуба; ниже — отключение модуля для владельца. */
+/** Организация, налоговые режимы и ставки клуба; ниже — отключение модуля для владельца. */
 export function FinanceSettingsPage() {
     const t = useTranslations("crm.finance.settings");
     const { can } = usePermissions();
@@ -43,6 +44,7 @@ export function FinanceSettingsPage() {
                         canEdit={can("finance.admin")}
                         submitLabel={t("submit")}
                     />
+                    <TaxRatesCard />
                     <FinanceModuleSwitch />
                 </div>
             )}

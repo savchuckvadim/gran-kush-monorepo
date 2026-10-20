@@ -46,6 +46,8 @@ export abstract class ProductRepository {
             strain?: string;
             audiences?: ProductAudience[];
             limitGramsPerUnit?: Decimal;
+            taxRateId?: string | null;
+            priceIncludesTax?: boolean | null;
             createdBy?: string;
         },
         /** События пишутся в outbox той же транзакцией, что и товар (TASK-780) */
@@ -71,6 +73,8 @@ export abstract class ProductRepository {
             strain: string | null;
             audiences: ProductAudience[];
             limitGramsPerUnit: Decimal | null;
+            taxRateId: string | null;
+            priceIncludesTax: boolean | null;
             updatedBy: string;
         }>,
         events?: readonly NewDomainEvent[]

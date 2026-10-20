@@ -15,15 +15,18 @@ import {
 import {
     mapCategoryToCabinetDto,
     mapProductToCabinetDto,
+    productPriceTaxInput,
 } from "@modules/portal/crm/catalog/api/mappers";
 import { ProductCategoriesService } from "@modules/portal/crm/catalog/application/services/product-categories.service";
 import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
 import { RequireShopAccess } from "@modules/portal/crm/club-policy/api/guards/shop-access.guard";
 import { MemberAccessService } from "@modules/portal/crm/club-policy/application/services/member-access.service";
+import { TaxPolicyService } from "@modules/portal/crm/finance/application/services/tax-policy.service";
 
 /**
  * Витрина клуба для его участников: открыта по правилам клуба (`RequireShopAccess`). Отдаёт
  * только активные и доступные товары, видимые аудиториям участника, и без складских данных клуба.
+ * Цена — та, что заплатит участник: с налогом (TASK-797).
  */
 @ApiTags("Cabinet Catalog")
 @Controller("cabinet/catalog")
@@ -33,7 +36,8 @@ export class CabinetCatalogController {
     constructor(
         private readonly productsService: ProductsService,
         private readonly categoriesService: ProductCategoriesService,
-        private readonly access: MemberAccessService
+        private readonly access: MemberAccessService,
+        private readonly taxPolicy: TaxPolicyService
     ) {}
 
     @Get("products")
@@ -44,7 +48,11 @@ export class CabinetCatalogController {
     async getProducts(@CurrentMember() member: Member): Promise<CabinetProductDto[]> {
         const audiences = await this.access.audiencesOf(member.id, member.portalId);
         const products = await this.productsService.findActive(member.portalId, audiences);
-        return products.map(mapProductToCabinetDto);
+        const prices = await this.taxPolicy.grossPrices(
+            member.portalId,
+            products.map(productPriceTaxInput)
+        );
+        return products.map((product) => mapProductToCabinetDto(product, prices.get(product.id)));
     }
 
     @Get("products/:id")
@@ -61,7 +69,10 @@ export class CabinetCatalogController {
         if (!product) {
             throw new NotFoundException("Product not found or not available");
         }
-        return mapProductToCabinetDto(product);
+        const prices = await this.taxPolicy.grossPrices(member.portalId, [
+            productPriceTaxInput(product),
+        ]);
+        return mapProductToCabinetDto(product, prices.get(product.id));
     }
 
     @Get("categories")

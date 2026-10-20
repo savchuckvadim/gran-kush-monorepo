@@ -5,6 +5,7 @@ import { Prisma } from "@prisma/client";
 
 import { ProductsService } from "@modules/portal/crm/catalog/application/services/products.service";
 import { MemberLimitService } from "@modules/portal/crm/club-policy/application/services/member-limit.service";
+import { TaxPolicyService } from "@modules/portal/crm/finance/application/services/tax-policy.service";
 import { OrderPlacementService } from "@modules/portal/crm/orders/application/services/order-placement.service";
 import { Order } from "@modules/portal/crm/orders/domain/entity/order.entity";
 import { InsufficientStockError } from "@modules/portal/crm/orders/domain/errors/insufficient-stock.error";
@@ -78,6 +79,11 @@ describe("OrderPlacementService — номер заказа", () => {
                 { provide: OrderRepository, useValue: mockOrderRepository },
                 { provide: ProductsService, useValue: mockProductsService },
                 { provide: MemberLimitService, useValue: mockMemberLimits },
+                // финансы клуба выключены: заказ без разбивки налога
+                {
+                    provide: TaxPolicyService,
+                    useValue: { rulesFor: jest.fn().mockResolvedValue(null) },
+                },
             ],
         }).compile();
 

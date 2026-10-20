@@ -309,7 +309,8 @@
             "cancelText": "The club has not started on it yet. Once cancelled, the products go back to the shop.",
             "cancelConfirm": "Cancel order",
             "keep": "Keep it",
-            "stagesLabel": "Order stages"
+            "stagesLabel": "Order stages",
+            "taxIncluded": "Tax included"
         },
         "account": {
             "title": "Account",

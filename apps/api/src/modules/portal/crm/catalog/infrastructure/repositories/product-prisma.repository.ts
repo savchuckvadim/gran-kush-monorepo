@@ -98,6 +98,8 @@ export class ProductPrismaRepository implements ProductRepository {
             strain?: string;
             audiences?: ProductAudience[];
             limitGramsPerUnit?: Decimal;
+            taxRateId?: string | null;
+            priceIncludesTax?: boolean | null;
             createdBy?: string;
         },
         events?: EventsOf<Product>
@@ -147,6 +149,8 @@ export class ProductPrismaRepository implements ProductRepository {
             strain: string | null;
             audiences: ProductAudience[];
             limitGramsPerUnit: Decimal | null;
+            taxRateId: string | null;
+            priceIncludesTax: boolean | null;
             updatedBy: string;
         }>,
         events?: readonly NewDomainEvent[]
@@ -223,6 +227,8 @@ export class ProductPrismaRepository implements ProductRepository {
             strain: raw.strain,
             audiences: raw.audiences,
             limitGramsPerUnit: raw.limitGramsPerUnit,
+            taxRateId: raw.taxRateId,
+            priceIncludesTax: raw.priceIncludesTax,
             createdAt: raw.createdAt,
             updatedAt: raw.updatedAt,
             createdBy: raw.createdBy,

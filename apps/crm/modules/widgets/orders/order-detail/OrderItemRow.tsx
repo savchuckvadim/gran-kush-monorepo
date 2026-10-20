@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { Gift } from "lucide-react";
 
@@ -16,6 +16,18 @@ interface OrderItemRowProps {
 export function OrderItemRow({ item }: OrderItemRowProps) {
     const t = useTranslations("crm.orders.detail");
     const money = useMoneyFormat();
+    const locale = useLocale();
+    const tax =
+        item.taxAmount === null || item.taxTreatment === null
+            ? null
+            : item.taxTreatment === "taxable"
+              ? t("taxLine", {
+                    percent: new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(
+                        item.taxPercent ?? 0
+                    ),
+                    amount: money(item.taxAmount),
+                })
+              : t(`taxTreatment.${item.taxTreatment}`);
 
     return (
         <tr className="border-b last:border-b-0">
@@ -34,6 +46,9 @@ export function OrderItemRow({ item }: OrderItemRowProps) {
             <td className="px-3 py-2 text-right font-mono tabular-nums">{money(item.unitPrice)}</td>
             <td className="px-3 py-2 text-right font-mono tabular-nums">
                 {money(item.totalPrice)}
+                {tax ? (
+                    <span className="block font-sans text-xs text-muted-foreground">{tax}</span>
+                ) : null}
             </td>
         </tr>
     );

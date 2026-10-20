@@ -38,7 +38,7 @@ Rules for payloads: identifiers, statuses and names of things only. **No money**
 Catalog v1: `portal.founded`, `member.joined / consent_given / left / status_changed / updated`,
 `order.placed / stage_changed / cancelled / payment_changed`, `product.changed / stock_changed`,
 `presence.entered / left`, `employee.joined / access_changed`, `role.changed`, `session.revoked`,
-`portal.module_changed`, `finance.profile_updated`.
+`portal.module_changed`, `finance.profile_updated`, `finance.tax_rates_changed`.
 
 ## Multi-tenancy
 

@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, TaxTreatment } from "@prisma/client";
 
 import type { OrderStage } from "./order-stage.entity";
 
@@ -39,6 +39,12 @@ export class OrderItem {
     totalPrice: Decimal;
     /** Подарок: со склада списан, в сумму не входит */
     isGift: boolean;
+
+    /** Снимок налога (TASK-797): totalPrice = netAmount + taxAmount; пусто — заказ без разбивки */
+    taxPercent?: Decimal | null;
+    taxTreatment?: TaxTreatment | null;
+    netAmount?: Decimal | null;
+    taxAmount?: Decimal | null;
 
     // Примечания
     notes?: string | null;
@@ -83,6 +89,9 @@ export class Order {
     subtotal: Decimal;
     discount: Decimal;
     total: Decimal;
+    /** База и налог заказа (TASK-797); пусто — заказ без разбивки */
+    netTotal?: Decimal | null;
+    taxTotal?: Decimal | null;
 
     // Жизненный цикл
     orderedAt: Date;

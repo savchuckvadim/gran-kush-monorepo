@@ -43,6 +43,8 @@ export function mapOrderToCabinetDetailDto(
         funnel: funnel.map((stage) => toCabinetStage(stage, locale)),
         subtotal: Number(o.subtotal),
         discount: Number(o.discount),
+        netTotal: o.netTotal != null ? Number(o.netTotal) : null,
+        taxTotal: o.taxTotal != null ? Number(o.taxTotal) : null,
         notes: o.notes ?? null,
         items:
             o.items?.map((item) => ({
