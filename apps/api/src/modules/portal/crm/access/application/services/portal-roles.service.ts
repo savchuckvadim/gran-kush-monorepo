@@ -6,7 +6,10 @@ import {
     NotFoundException,
 } from "@nestjs/common";
 
+import type { RoleChangedPart } from "@workspace/domain-events";
 import { randomBytes } from "crypto";
+
+import { employeeActor } from "@modules/events";
 
 import { isPermission, Permission } from "../../domain/permissions";
 import {
@@ -84,8 +87,9 @@ export class PortalRolesService {
         id: string,
         portalId: string,
         data: { name?: string; permissions?: string[] },
-        actorPermissions: readonly Permission[]
+        actor: { employeeId: string; permissions: readonly Permission[] }
     ): Promise<PortalRoleWithUsage> {
+        const actorPermissions = actor.permissions;
         const role = await this.requireRole(id, portalId);
         if (!isEditableRole(role) || (role.isSystem && data.name !== undefined)) {
             throw new ForbiddenException({
@@ -100,10 +104,28 @@ export class PortalRolesService {
         if (permissions) {
             this.assertCovers(actorPermissions, permissions);
         }
-        await this.roles.update(role.id, {
-            ...(data.name !== undefined ? { name: data.name.trim() } : {}),
-            ...(permissions ? { permissions } : {}),
-        });
+        const changed: RoleChangedPart[] = [
+            ...(data.name !== undefined ? (["name"] as const) : []),
+            ...(permissions ? (["permissions"] as const) : []),
+        ];
+        await this.roles.update(
+            role.id,
+            {
+                ...(data.name !== undefined ? { name: data.name.trim() } : {}),
+                ...(permissions ? { permissions } : {}),
+            },
+            changed.length
+                ? [
+                      {
+                          name: "role.changed",
+                          portalId,
+                          actor: employeeActor(actor.employeeId),
+                          aggregateId: role.id,
+                          payload: { roleId: role.id, changed },
+                      },
+                  ]
+                : []
+        );
         const updated = await this.roles.findWithUsage(role.id, portalId);
         if (!updated) {
             throw new NotFoundException("Role not found");

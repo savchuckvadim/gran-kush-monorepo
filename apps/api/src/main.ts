@@ -8,6 +8,7 @@ import { setCorsConfig } from "@common/config/cors/cors.config";
 
 import { AppModule } from "./app.module";
 import { getSwaggerConfig } from "./common/config/swagger/swagger.config";
+import { RealtimeIoAdapter } from "./modules/realtime/infrastructure/realtime-io.adapter";
 
 async function bootstrap() {
     // Парсеры тела регистрирует AppModule с разными потолками для маршрутов загрузки
@@ -28,6 +29,11 @@ async function bootstrap() {
     const configService = app.get(ConfigService);
 
     app.use(cookieParser(configService.get<string>("COOKIE_SECRET") || undefined));
+
+    // Realtime на нескольких инстансах: события и разрывы соединений — через Redis
+    const realtime = new RealtimeIoAdapter(app);
+    await realtime.connectToRedis(configService);
+    app.useWebSocketAdapter(realtime);
     // Настройка CORS
     setCorsConfig(configService, app);
 

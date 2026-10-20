@@ -320,6 +320,10 @@ journal, letters) is a domain event written in the transaction of the change: re
 Payloads carry ids and statuses only — no money, no personal data. Details:
 [DOMAIN_EVENTS](documentation/backend/DOMAIN_EVENTS.md).
 
+**Realtime.** socket.io namespaces `/crm` and `/cabinet` deliver those events to the fronts; a page
+refetches its queries by the rules in `entities/<x>/realtime.ts`. A new screen that must stay live
+needs a rule there, not polling. Details: [REALTIME](documentation/backend/REALTIME.md).
+
 ## TypeScript Conventions
 
 - `strict: true` in all packages — `any` requires explicit justification
@@ -366,3 +370,4 @@ Payloads carry ids and statuses only — no money, no personal data. Details:
 - [Storage](documentation/STORAGE.md) — private/public file storage
 - [Multi-tenant plan](documentation/crm/MULTITENANT_NEXTJS_AUTH_PLAYBOOK.md) — portal scoping strategy
 - [Domain events](documentation/backend/DOMAIN_EVENTS.md) — outbox, catalog, consumers, how to add an event
+- [Realtime](documentation/backend/REALTIME.md) — socket.io gateway, rooms, client rules

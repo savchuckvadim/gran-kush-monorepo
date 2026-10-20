@@ -11,7 +11,10 @@
         "back": "Atrás",
         "next": "Siguiente",
         "required": "Campo obligatorio",
-        "allRightsReserved": "Todos los derechos reservados"
+        "allRightsReserved": "Todos los derechos reservados",
+        "realtime": {
+            "offline": "Sin conexión con el servidor: los datos se actualizan cada medio minuto"
+        }
     },
     "meta": {
         "crm": "PafPaf CRM",

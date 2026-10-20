@@ -1,3 +1,5 @@
+import type { NewDomainEvent } from "@modules/events";
+
 import type { PortalRole } from "./portal-role";
 
 export interface PortalRoleWithUsage extends PortalRole {
@@ -14,9 +16,11 @@ export abstract class PortalRoleRepository {
         portalId: string,
         data: { key: string; name: string; permissions: string[] }
     ): Promise<PortalRole>;
+    /** `events` пишутся в outbox той же транзакцией, что и роль (TASK-780). */
     abstract update(
         id: string,
-        data: Partial<{ name: string; permissions: string[] }>
+        data: Partial<{ name: string; permissions: string[] }>,
+        events?: readonly NewDomainEvent[]
     ): Promise<PortalRole>;
     /** Роль, назначенная сотрудникам или ждущему приглашению, не удаляется: `false`. */
     abstract deleteUnused(id: string, portalId: string): Promise<boolean>;

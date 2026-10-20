@@ -5,25 +5,16 @@ import type { NextFunction, Request, Response } from "express";
 
 import { PublicUrlsService } from "@common/config/public-urls/public-urls.service";
 
+import { allowedOrigins, originOf } from "./allowed-origins";
 import { SESSION_COOKIE_NAMES } from "./session-cookies.service";
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
-const CORS_ORIGIN_ENV = "CORS_ORIGIN";
 export const ORIGIN_NOT_ALLOWED = "origin_not_allowed";
 
 const SESSION_COOKIES = Object.values(SESSION_COOKIE_NAMES).flatMap((names) => [
     names.access,
     names.refresh,
 ]);
-
-const originOf = (url: string | undefined): string | null => {
-    if (!url) return null;
-    try {
-        return new URL(url).origin;
-    } catch {
-        return null;
-    }
-};
 
 /**
  * Защита от подделки запроса (CSRF) для входа на куках (AUTH_ARCHITECTURE §3.4). `SameSite=Lax`
@@ -39,13 +30,7 @@ export class SessionOriginMiddleware implements NestMiddleware {
     private readonly allowed: Set<string>;
 
     constructor(config: ConfigService, urls: PublicUrlsService) {
-        const fronts = (config.get<string>(CORS_ORIGIN_ENV) ?? "")
-            .split(",")
-            .map((origin) => originOf(origin.trim()))
-            .filter((origin): origin is string => origin !== null);
-        this.allowed = new Set(
-            [...fronts, originOf(urls.api)].filter((origin): origin is string => origin !== null)
-        );
+        this.allowed = allowedOrigins(config, urls);
     }
 
     use(request: Request, _response: Response, next: NextFunction): void {

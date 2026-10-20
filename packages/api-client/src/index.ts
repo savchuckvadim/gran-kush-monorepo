@@ -1,3 +1,4 @@
+export { ApiRefreshHelper } from "./auth/api-auth.refresh-helper";
 export { ApiAuthType } from "./auth/api-auth.type";
 export * from "./client/client";
 export * from "./errors/api-error";

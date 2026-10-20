@@ -20,6 +20,7 @@ import {
 import { portalFounded } from "./portal.events";
 import { presenceEntered, presenceLeft } from "./presence.events";
 import { productChanged, productStockChanged } from "./product.events";
+import { roleChanged } from "./role.events";
 import { sessionRevoked } from "./session.events";
 
 /**
@@ -44,6 +45,7 @@ export const EVENT_CATALOG = {
     "presence.left": presenceLeft,
     "employee.joined": employeeJoined,
     "employee.access_changed": employeeAccessChanged,
+    "role.changed": roleChanged,
     "session.revoked": sessionRevoked,
 } as const;
 
@@ -92,8 +94,10 @@ export {
     presenceLeft,
     productChanged,
     productStockChanged,
+    roleChanged,
     sessionRevoked,
 };
 export { MEMBER_CHANGED_PARTS, type MemberChangedPart } from "./member.events";
 export { ORDER_STAGE_SEMANTICS } from "./order.events";
+export { ROLE_CHANGED_PARTS, type RoleChangedPart } from "./role.events";
 export { SESSION_AUDIENCES } from "./session.events";

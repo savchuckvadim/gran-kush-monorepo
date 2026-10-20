@@ -11,7 +11,10 @@
         "back": "Back",
         "next": "Next",
         "required": "Required field",
-        "allRightsReserved": "All rights reserved"
+        "allRightsReserved": "All rights reserved",
+        "realtime": {
+            "offline": "No connection to the server: data refreshes every half a minute"
+        }
     },
     "meta": {
         "crm": "PafPaf CRM",

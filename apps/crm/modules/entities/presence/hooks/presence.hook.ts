@@ -16,7 +16,7 @@ import {
     previewQrCodeScan,
 } from "../api/presence.api";
 
-const PRESENCE_KEYS = {
+export const PRESENCE_KEYS = {
     all: ["presence"] as const,
     sessions: (filters?: PresenceSessionsFilter) =>
         [...PRESENCE_KEYS.all, "sessions", filters] as const,

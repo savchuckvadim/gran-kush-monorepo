@@ -37,7 +37,7 @@ Rules for payloads: identifiers, statuses and names of things only. **No money**
 
 Catalog v1: `portal.founded`, `member.joined / consent_given / left / status_changed / updated`,
 `order.placed / stage_changed / cancelled / payment_changed`, `product.changed / stock_changed`,
-`presence.entered / left`, `employee.joined / access_changed`, `session.revoked`.
+`presence.entered / left`, `employee.joined / access_changed`, `role.changed`, `session.revoked`.
 
 ## Multi-tenancy
 
@@ -115,9 +115,10 @@ fails independently (the welcome letter and the Telegram alert are two consumers
 
 ## Consumers today
 
-| Consumer                | Events           | Module    |
-| ----------------------- | ---------------- | --------- |
-| `WelcomeLetterConsumer` | `portal.founded` | `portals` |
-| `PlatformAlertConsumer` | `portal.founded` | `portals` |
+| Consumer                | Events           | Module                                 |
+| ----------------------- | ---------------- | -------------------------------------- |
+| `WelcomeLetterConsumer` | `portal.founded` | `portals`                              |
+| `PlatformAlertConsumer` | `portal.founded` | `portals`                              |
+| `RealtimeConsumer`      | every event      | `realtime` ([REALTIME](./REALTIME.md)) |
 
-Realtime (TASK-794/795) and notifications (TASK-781) are the next consumers.
+Notifications (TASK-781) are the next consumer.

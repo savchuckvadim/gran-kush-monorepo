@@ -1,6 +1,5 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common";
 
-import { MemberConsentStatus } from "@prisma/client";
 import type { Request } from "express";
 
 import { PrismaService } from "@common/prisma/prisma.service";
@@ -9,9 +8,8 @@ import {
     isAuthenticatedUser,
 } from "@modules/portal/auth/shared/domain/auth-user";
 import { effectivePermissions } from "@modules/portal/crm/access/domain/portal-role";
-import { Employee } from "@modules/portal/crm/employees/domain/entity/employee.entity";
-import { Member } from "@modules/portal/crm/members/domain/entity/member.entity";
 
+import { findActiveEmployee, findActiveMember } from "./portal-membership";
 import { PortalPrincipal } from "./portal-principal.types";
 
 /**
@@ -47,7 +45,7 @@ export class MembershipGuard implements CanActivate {
         }
 
         if (user.principalType === "member") {
-            const member = await this.resolveMember(user, pc.portalId);
+            const member = await findActiveMember(this.prisma, user.userId, pc.portalId);
             req.authUser = user;
             req.user = member;
             req.principal = this.buildPrincipal(user, pc.portalId, {
@@ -58,7 +56,7 @@ export class MembershipGuard implements CanActivate {
             return true;
         }
 
-        const employee = await this.resolveEmployee(user, pc.portalId);
+        const employee = await findActiveEmployee(this.prisma, user, pc.portalId);
         req.authUser = user;
         req.user = employee;
         req.principal = this.buildPrincipal(user, pc.portalId, {
@@ -69,59 +67,6 @@ export class MembershipGuard implements CanActivate {
             permissions: effectivePermissions(employee.role),
         });
         return true;
-    }
-
-    private async resolveMember(user: AuthenticatedUser, portalId: string): Promise<Member> {
-        const member = await this.prisma.member.findUnique({
-            where: { userId_portalId: { userId: user.userId, portalId } },
-        });
-        if (!member || !member.isActive) {
-            throw new ForbiddenException("No active membership in this portal");
-        }
-        if (member.consentStatus !== MemberConsentStatus.confirmed) {
-            throw new ForbiddenException("Membership is awaiting your confirmation");
-        }
-        return new Member({
-            id: member.id,
-            userId: member.userId,
-            portalId: member.portalId,
-            entityRecordId: member.entityRecordId,
-            membershipNumber: member.membershipNumber ?? undefined,
-            isActive: member.isActive,
-            joinSource: member.joinSource,
-            claimedAt: member.claimedAt ?? undefined,
-            createdAt: member.createdAt,
-            updatedAt: member.updatedAt,
-        });
-    }
-
-    private async resolveEmployee(user: AuthenticatedUser, portalId: string): Promise<Employee> {
-        const employee = await this.prisma.employee.findUnique({
-            where: { userId_portalId: { userId: user.userId, portalId } },
-            include: { role: true },
-        });
-        if (!employee || !employee.isActive) {
-            throw new ForbiddenException("No active employment in this portal");
-        }
-        return new Employee({
-            id: employee.id,
-            userId: employee.userId,
-            portalId: employee.portalId,
-            entityRecordId: employee.entityRecordId,
-            email: user.email,
-            roleId: employee.roleId,
-            role: {
-                id: employee.role.id,
-                key: employee.role.key,
-                name: employee.role.name,
-                isSystem: employee.role.isSystem,
-                permissions: employee.role.permissions,
-            },
-            isActive: employee.isActive,
-            lastLoginAt: employee.lastLoginAt ?? undefined,
-            createdAt: employee.createdAt,
-            updatedAt: employee.updatedAt,
-        });
     }
 
     private buildPrincipal(

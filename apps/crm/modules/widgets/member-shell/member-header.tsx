@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import { HeaderAppearance } from "@/modules/features";
+import { RealtimeStatusIndicator } from "@/modules/shared/realtime";
 import { AppHeader } from "@/modules/shared/ui/shell";
 
 import { ClubSwitcher } from "./club-switcher";
@@ -17,6 +18,7 @@ export function MemberHeader() {
             start={<ClubSwitcher />}
             end={
                 <>
+                    <RealtimeStatusIndicator />
                     <HeaderAppearance />
                     <MemberAccountMenu />
                 </>

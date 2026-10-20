@@ -178,21 +178,31 @@ buildJobId("evt", id)`), ставит `dispatched_at`. Несколько инс
 - [ ] Не покрыто событиями: перестановка карточки внутри колонки канбана, документы участника,
       права роли (`role.changed`, нужно шлюзу TASK-794), записи EAV (`record.updated`, TASK-782)
 
-### TASK-794: realtime-шлюз `[ ]` P0
+### TASK-794: realtime-шлюз `[x]` P0 — `feat/realtime` (2026-10-20), [REALTIME](../backend/REALTIME.md)
 
-- [ ] socket.io gateway `/crm`, `/cabinet`, auth по сессии, комнаты, Redis-adapter
-- [ ] `RealtimeConsumer`: аудитория и урезанный payload по каталогу; `session.revoked` → разрыв;
-      `role.changed` → пересбор комнат
-- [ ] Конфиг и лимиты, `/health`, CORS; проверка через Traefik + Cloudflare на проде
-- [ ] e2e gateway (список выше)
+- [x] socket.io `/crm`, `/cabinet` только по WebSocket, рукопожатие по сессии (кука или Bearer) и
+      членству (общие `findActiveEmployee` / `findActiveMember` с MembershipGuard), Redis-адаптер в main.ts
+- [x] Origin для соединения на куке — фронт своего приложения (`audienceOrigins`), кука одного
+      приложения не читается в неймспейсе другого
+- [x] `RealtimeConsumer`: комнаты `portal:<id>:…` по аудитории каталога, участнику — `publicPayload`;
+      разрыв при `session.revoked`, `employee.access_changed`, `role.changed` (новое событие),
+      `member.left`, отключении участника; срок access-токена закрывает соединение
+- [x] e2e `realtime.e2e-spec.ts` (11): отказы рукопожатия, права, чужой клуб, чужой заказ, публичные
+      поля, разрыв при отзыве сессии и смене прав роли; unit на правила комнат
+- [ ] Проверка через Traefik + Cloudflare на проде (`wss://api.<домен>/socket.io`); лимит соединений
+      на сессию; число соединений в `/health`
 
-### TASK-795: realtime на фронте `[ ]` P0
+### TASK-795: realtime на фронте `[x]` P0 — `feat/realtime` (2026-10-20)
 
-- [ ] `shared/realtime`: провайдер, хуки, индикатор связи, refresh при `unauthorized`
-- [ ] Реестр правил для `order`, `cabinet-order`, `cabinet-shop`, `cabinet-club`, `member`,
-      `membership`, `product`, `presence`, `employee`, `access`
-- [ ] Снять опрос магазина; fallback-опрос при разрыве
-- [ ] Пять кейсов приёмки руками (Chrome, две сессии: CRM + кабинет)
+- [x] `shared/realtime`: `RealtimeConnection`, провайдер, `useRealtimeEvent`, `useRealtimeStatus`,
+      значок «нет связи» в шапках CRM и кабинета, refresh тем же помощником, что у API-клиента
+- [x] Правила `entities/<x>/realtime.ts` для `order`, `member`, `product`, `presence`, `employee`,
+      `access`, `cabinet-order`, `cabinet-shop`, `cabinet-club`, `membership`; списки — в
+      `processes/realtime/realtime-rules.ts`
+- [x] Опрос магазина (30 с) снят; без связи активные запросы перечитываются раз в 30 с
+- [x] Живая проверка (headless Chrome, стенд на lvh.me): участника отметили на входе — витрина
+      открылась за 0,6 с; заказ сотрудника появился в кабинете за 0,3 с, смена стадии — за 0,3 с;
+      заказ участника из кабинета появился в списке CRM за 0,3 с
 
 ### TASK-781: уведомления `[ ]` P0 — по verticals-and-seo, уточнения
 

@@ -30,6 +30,8 @@ export interface SessionTokens {
 export interface VerifiedSessionToken {
     userId: string;
     sessionId: string;
+    /** Когда токен истекает (`exp`): realtime-соединение закрывается в этот момент */
+    expiresAt: Date | null;
 }
 
 const DEFAULT_ACCESS_TTL_MS = 15 * 60_000;
@@ -117,12 +119,15 @@ export class SessionTokensService {
         secret: string
     ): Promise<VerifiedSessionToken | null> {
         try {
-            const payload = await this.jwt.verifyAsync<Partial<SessionJwtPayload>>(token, {
-                secret,
-                audience,
-            });
+            const payload = await this.jwt.verifyAsync<
+                Partial<SessionJwtPayload> & { exp?: number }
+            >(token, { secret, audience });
             if (payload.typ !== type || !payload.sub || !payload.sid) return null;
-            return { userId: payload.sub, sessionId: payload.sid };
+            return {
+                userId: payload.sub,
+                sessionId: payload.sid,
+                expiresAt: typeof payload.exp === "number" ? new Date(payload.exp * 1000) : null,
+            };
         } catch {
             return null;
         }

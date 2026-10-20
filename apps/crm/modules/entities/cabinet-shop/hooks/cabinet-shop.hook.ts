@@ -9,14 +9,20 @@ import {
     getShopProducts,
 } from "../api/cabinet-shop.api";
 
-const shopKey = (slug: string, part: string) => [...cabinetKeys.club(slug), "shop", part] as const;
+/** Всё о витрине клуба; с `part` — один её запрос. */
+export const cabinetShopKey = (slug: string, part?: string) =>
+    part
+        ? ([...cabinetKeys.club(slug), "shop", part] as const)
+        : ([...cabinetKeys.club(slug), "shop"] as const);
 
-/** Открытый визит меняет доступ на стойке, а не здесь: перепроверяем, пока страница открыта. */
+/**
+ * Доступ меняет открытый визит на стойке: его приносят события `presence.*` (realtime,
+ * `cabinet-shop/realtime.ts`), без связи — запасной таймер RealtimeProvider.
+ */
 export function useShopAccess(slug: string) {
     return useQuery({
-        queryKey: shopKey(slug, "access"),
+        queryKey: cabinetShopKey(slug, "access"),
         queryFn: getShopAccess,
-        refetchInterval: 30_000,
         retry: false,
     });
 }
@@ -24,7 +30,7 @@ export function useShopAccess(slug: string) {
 /** Лимит меняется с каждым заказом: после оформления его сбрасывает инвалидация клуба. */
 export function useMyMonthlyLimit(slug: string, enabled: boolean) {
     return useQuery({
-        queryKey: shopKey(slug, "monthly-limit"),
+        queryKey: cabinetShopKey(slug, "monthly-limit"),
         queryFn: getMyMonthlyLimit,
         enabled,
         retry: false,
@@ -33,7 +39,7 @@ export function useMyMonthlyLimit(slug: string, enabled: boolean) {
 
 export function useShopProducts(slug: string, enabled: boolean) {
     return useQuery({
-        queryKey: shopKey(slug, "products"),
+        queryKey: cabinetShopKey(slug, "products"),
         queryFn: getShopProducts,
         enabled,
         staleTime: 30_000,
@@ -43,7 +49,7 @@ export function useShopProducts(slug: string, enabled: boolean) {
 
 export function useShopCategories(slug: string, enabled: boolean) {
     return useQuery({
-        queryKey: shopKey(slug, "categories"),
+        queryKey: cabinetShopKey(slug, "categories"),
         queryFn: getShopCategories,
         enabled,
         staleTime: 5 * 60_000,

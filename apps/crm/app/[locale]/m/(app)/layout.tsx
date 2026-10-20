@@ -1,4 +1,5 @@
 import { MemberAuthProvider } from "@/modules/processes/member-auth";
+import { CabinetRealtime } from "@/modules/processes/realtime";
 import { AppMessagesProvider } from "@/modules/shared/providers/app-messages-provider";
 import { SidebarProvider } from "@/modules/shared/ui/Sidebar";
 import { MemberShell } from "@/modules/widgets/member-shell";
@@ -10,9 +11,11 @@ export default function CabinetLayout({ children }: { children: React.ReactNode 
     return (
         <AppMessagesProvider>
             <MemberAuthProvider>
-                <SidebarProvider>
-                    <MemberShell>{children}</MemberShell>
-                </SidebarProvider>
+                <CabinetRealtime>
+                    <SidebarProvider>
+                        <MemberShell>{children}</MemberShell>
+                    </SidebarProvider>
+                </CabinetRealtime>
             </MemberAuthProvider>
         </AppMessagesProvider>
     );

@@ -19,6 +19,7 @@ Unified documentation for the platform split into three product areas:
 
 - [CRM Documentation](./crm/README.md)
 - Covers current CRM routes, member operations, employee auth integration, and implementation tasks
+- [Realtime](./backend/REALTIME.md) — how the CRM and the cabinet stay live; [Domain events](./backend/DOMAIN_EVENTS.md)
 - [Events, realtime, notifications](./tasks/events-realtime.md) — domain events with outbox, socket.io gateway, query invalidation registry (TASK-780, 794, 795, 781)
 - [Finance and accounting](./tasks/finance-accounting.md) — organization profile, taxes on products, encrypted ledger, reports and declarations, budgets (TASK-796…803)
 - [Flexible CRM domain tasks (fields, statuses, settings, inventory, integrations)](./crm/FLEXIBLE_CRM_DOMAIN_TASKS.md) — roadmap: dynamic fields/statuses, portal settings, products, stock ledger, finance snapshots, attendance heatmap, external club site embeds

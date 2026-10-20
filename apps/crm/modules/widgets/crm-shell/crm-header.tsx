@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import { HeaderAppearance } from "@/modules/features";
+import { RealtimeStatusIndicator } from "@/modules/shared/realtime";
 import { AppHeader } from "@/modules/shared/ui/shell";
 import { PortalSwitcher } from "@/modules/widgets/portal-switcher";
 
@@ -23,6 +24,7 @@ export function CrmHeader() {
             start={<PortalSwitcher />}
             end={
                 <>
+                    <RealtimeStatusIndicator />
                     <SearchTrigger />
                     <HeaderQuickActions />
                     <HeaderAppearance />

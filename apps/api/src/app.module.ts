@@ -26,6 +26,7 @@ import { MailModule } from "./modules/mail/mail.module";
 import { PlatformModule } from "./modules/platform/platform.module";
 import { AuthModule } from "./modules/portal/auth/auth.module";
 import { SessionOriginMiddleware } from "./modules/portal/auth/sessions/api/session-origin.middleware";
+import { RealtimeModule } from "./modules/realtime/realtime.module";
 import { StorageModule } from "./modules/storage/storage.module";
 
 @Module({
@@ -43,6 +44,7 @@ import { StorageModule } from "./modules/storage/storage.module";
         QueueModule,
         TelegramModule,
         EventsModule,
+        RealtimeModule,
         MailModule,
         EncryptionModule,
         AuthModule,

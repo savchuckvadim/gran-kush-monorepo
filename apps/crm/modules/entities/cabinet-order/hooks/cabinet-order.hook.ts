@@ -8,14 +8,14 @@ import { cancelMyOrder, getMyOrder, listMyOrders, placeMyOrder } from "../api/ca
 
 const PAGE_SIZE = 20;
 
-const ordersKey = (slug: string) => [...cabinetKeys.club(slug), "orders"] as const;
+export const cabinetOrdersKey = (slug: string) => [...cabinetKeys.club(slug), "orders"] as const;
 
 /** Стадию двигает клуб: пока страница открыта, список и заказ перечитываются сами. */
 const STAGE_POLL_MS = 30_000;
 
 export function useMyOrders(slug: string) {
     return useInfiniteQuery({
-        queryKey: [...ordersKey(slug), "list"],
+        queryKey: [...cabinetOrdersKey(slug), "list"],
         queryFn: ({ pageParam }) => listMyOrders(pageParam, PAGE_SIZE),
         initialPageParam: 1,
         getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
@@ -26,7 +26,7 @@ export function useMyOrders(slug: string) {
 
 export function useMyOrder(slug: string, id: string) {
     return useQuery({
-        queryKey: [...ordersKey(slug), "detail", id],
+        queryKey: [...cabinetOrdersKey(slug), "detail", id],
         queryFn: () => getMyOrder(id),
         refetchInterval: STAGE_POLL_MS,
         retry: false,

@@ -111,6 +111,7 @@ export class SessionsService {
             isActive: account.isActive,
             sessionId: session.id,
             audience,
+            accessExpiresAt: verified.expiresAt ?? undefined,
         };
     }
 

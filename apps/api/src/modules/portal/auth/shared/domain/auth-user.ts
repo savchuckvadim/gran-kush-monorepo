@@ -18,6 +18,8 @@ export interface AuthenticatedUser {
     /** Сессия запроса: «выйти на остальных», список устройств */
     sessionId: string;
     audience: SessionAudience;
+    /** Срок access-токена запроса; есть только у входа по токену сессии */
+    accessExpiresAt?: Date;
 }
 
 export const isAuthenticatedUser = (value: unknown): value is AuthenticatedUser =>

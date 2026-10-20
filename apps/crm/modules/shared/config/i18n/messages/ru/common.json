@@ -11,7 +11,10 @@
         "back": "Назад",
         "next": "Далее",
         "required": "Обязательное поле",
-        "allRightsReserved": "Все права защищены"
+        "allRightsReserved": "Все права защищены",
+        "realtime": {
+            "offline": "Нет связи с сервером: данные обновляются раз в полминуты"
+        }
     },
     "meta": {
         "crm": "PafPaf CRM",

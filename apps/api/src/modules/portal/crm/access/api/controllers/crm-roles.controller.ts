@@ -63,7 +63,12 @@ export class CrmRolesController {
         @Param("id") id: string,
         @Body() dto: UpdatePortalRoleDto
     ): Promise<PortalRoleDto> {
-        return toPortalRoleDto(await this.roles.update(id, portalId, dto, principal.permissions));
+        return toPortalRoleDto(
+            await this.roles.update(id, portalId, dto, {
+                employeeId: principal.membershipId,
+                permissions: principal.permissions,
+            })
+        );
     }
 
     @Delete(":id")

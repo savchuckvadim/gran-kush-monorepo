@@ -15,6 +15,8 @@ import { authKeys } from "@/modules/entities/auth";
 import { usePortalInfo } from "@/modules/entities/portal";
 import { useAuth } from "@/modules/processes";
 
+import { rolesKey } from "./keys";
+
 import {
     createPortalRole,
     deletePortalRole,
@@ -24,8 +26,6 @@ import {
     type PortalRole,
     updatePortalRole,
 } from "./api";
-
-const rolesKey = ["portal-roles"] as const;
 
 export interface PermissionsState {
     /** Роль в открытом клубе; пока «me» или клуб грузятся — undefined */

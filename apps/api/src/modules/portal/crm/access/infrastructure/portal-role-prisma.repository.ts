@@ -3,6 +3,7 @@ import { Injectable } from "@nestjs/common";
 import { InvitationStatus, Prisma } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { DomainEventPublisher, type NewDomainEvent } from "@modules/events";
 
 import { PortalRole, SYSTEM_ROLE_KEYS, SYSTEM_ROLES } from "../domain/portal-role";
 import {
@@ -55,7 +56,10 @@ export const createSystemRoles = async (
 
 @Injectable()
 export class PortalRolePrismaRepository extends PortalRoleRepository {
-    constructor(private readonly prisma: PrismaService) {
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly events: DomainEventPublisher
+    ) {
         super();
     }
 
@@ -102,10 +106,14 @@ export class PortalRolePrismaRepository extends PortalRoleRepository {
 
     async update(
         id: string,
-        data: Partial<{ name: string; permissions: string[] }>
+        data: Partial<{ name: string; permissions: string[] }>,
+        events?: readonly NewDomainEvent[]
     ): Promise<PortalRole> {
-        const row = await this.prisma.portalRole.update({ where: { id }, data });
-        return toRole(row);
+        return this.prisma.$transaction(async (tx) => {
+            const row = await tx.portalRole.update({ where: { id }, data });
+            if (events?.length) await this.events.publishMany(tx, events);
+            return toRole(row);
+        });
     }
 
     async deleteUnused(id: string, portalId: string): Promise<boolean> {

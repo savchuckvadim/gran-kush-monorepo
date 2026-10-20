@@ -15,7 +15,7 @@ import {
 
 // ─── Query keys ──────────────────────────────────────────────────────────────
 
-const PRODUCT_KEYS = {
+export const PRODUCT_KEYS = {
     all: ["products"] as const,
     list: (filters?: ProductsFilter) => [...PRODUCT_KEYS.all, "list", filters] as const,
     detail: (id: string) => [...PRODUCT_KEYS.all, "detail", id] as const,

@@ -12,6 +12,7 @@ export const AGGREGATE_KINDS = [
     "product",
     "presence_session",
     "employee",
+    "role",
     "session",
 ] as const;
 export type AggregateKind = (typeof AGGREGATE_KINDS)[number];
