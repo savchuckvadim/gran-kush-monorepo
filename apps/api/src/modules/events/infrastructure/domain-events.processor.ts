@@ -79,11 +79,18 @@ export class DomainEventsProcessor extends WorkerHost {
                 `${exhausted ? ", последняя" : ""}): ${error.message}`
         );
         if (exhausted) {
-            void this.telegram.sendMessage(
-                `⚠️ Событие ${event.name} не доставлено потребителю ${consumer} после ` +
-                    `${job.attemptsMade} попыток\nid: ${event.id}\nportal: ${event.portalId ?? "—"}\n` +
-                    `${error.message}`
-            );
+            // алерт не должен ронять воркер: недоступный Telegram — только строка в логе
+            this.telegram
+                .sendMessage(
+                    `⚠️ Событие ${event.name} не доставлено потребителю ${consumer} после ` +
+                        `${job.attemptsMade} попыток\nid: ${event.id}\nportal: ${event.portalId ?? "—"}\n` +
+                        `${error.message}`
+                )
+                .catch((alertError: unknown) =>
+                    this.logger.error(
+                        `Алерт о недоставленном событии не отправлен: ${alertError instanceof Error ? alertError.message : String(alertError)}`
+                    )
+                );
         }
     }
 }
