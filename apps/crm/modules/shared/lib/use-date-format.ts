@@ -55,3 +55,15 @@ export function useTimeFormat(): (iso: string) => string {
         return (iso: string) => formatter.format(new Date(iso));
     }, [locale]);
 }
+
+/**
+ * Календарная дата `YYYY-MM-DD` (дата операции в учёте) без сдвига часовым поясом браузера:
+ * «5 окт. 2026 г.» в любом поясе.
+ */
+export function useCalendarDateFormat(): DateFormat {
+    const locale = useLocale();
+    return useMemo(() => {
+        const formatter = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "UTC" });
+        return (date: string) => formatter.format(new Date(`${date}T00:00:00.000Z`));
+    }, [locale]);
+}

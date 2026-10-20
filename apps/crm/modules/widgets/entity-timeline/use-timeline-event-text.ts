@@ -9,6 +9,9 @@ const PAYMENT_STATUSES = new Set(["paid", "pending", "refunded"]);
 const PRODUCT_CHANGES = new Set(["created", "updated", "deleted"]);
 const STOCK_REASONS = new Set(["order_placed", "order_cancelled", "manual"]);
 const MODULES = new Set(["finance"]);
+const LEDGER_SOURCES = new Set(["manual", "order_sale", "import", "reversal", "legacy"]);
+const LEDGER_DIRECTIONS = new Set(["income", "expense", "transfer"]);
+const LEDGER_BOOKS = new Set(["entries", "purchases", "sales"]);
 
 const text = (value: unknown): string =>
     typeof value === "string" || typeof value === "number" ? String(value) : "";
@@ -83,8 +86,32 @@ export function useTimelineEventText(): (event: TimelineEvent) => string {
                 case "portal.founded":
                 case "finance.profile_updated":
                 case "finance.tax_rates_changed":
+                case "finance.entry_updated":
+                case "finance.entry_voided":
+                case "finance.categories_changed":
+                case "finance.counterparties_changed":
                 case "role.changed":
                     return t(name);
+                case "finance.entry_recorded": {
+                    const source = LEDGER_SOURCES.has(text(data.source))
+                        ? text(data.source)
+                        : "manual";
+                    const direction = LEDGER_DIRECTIONS.has(text(data.direction))
+                        ? t(`finance.directions.${text(data.direction)}`)
+                        : "";
+                    return t(`finance.entry_recorded.${source}`, { direction });
+                }
+                case "finance.entries_imported":
+                    return t("finance.entries_imported", { count: Number(data.count) || 0 });
+                case "finance.period_closed":
+                case "finance.period_reopened":
+                    return t(name, { period: text(data.period) });
+                case "finance.accessed":
+                    return t("finance.accessed", {
+                        book: LEDGER_BOOKS.has(text(data.book))
+                            ? t(`finance.books.${text(data.book)}`)
+                            : text(data.book),
+                    });
                 case "portal.module_changed":
                     return t(
                         data.enabled === false ? "portal.module_disabled" : "portal.module_enabled",

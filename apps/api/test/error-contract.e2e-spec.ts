@@ -137,7 +137,7 @@ describe("Error contract (e2e)", () => {
         it.each([
             "/crm/orders?page=1&limit=5&status=pending",
             "/crm/presence/sessions?page=1&limit=5&isActive=false",
-            "/crm/finance/transactions?page=1&limit=5&direction=income",
+            "/crm/finance/entries?page=1&limit=5&direction=income",
             "/crm/catalog/products?page=1&limit=5&search=kush&isActive=false",
             "/crm/employees?page=1&limit=5&role=admin&isActive=true",
         ])("%s → 200", async (path) => {

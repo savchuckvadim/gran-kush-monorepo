@@ -38,7 +38,8 @@ Rules for payloads: identifiers, statuses and names of things only. **No money**
 Catalog v1: `portal.founded`, `member.joined / consent_given / left / status_changed / updated`,
 `order.placed / stage_changed / cancelled / payment_changed`, `product.changed / stock_changed`,
 `presence.entered / left`, `employee.joined / access_changed`, `role.changed`, `session.revoked`,
-`portal.module_changed`, `finance.profile_updated`, `finance.tax_rates_changed`, `notification.created`, `comment.added / updated / deleted`.
+`portal.module_changed`, `finance.profile_updated`, `finance.tax_rates_changed`, `notification.created`, `comment.added / updated / deleted`,
+`finance.entry_recorded / entry_updated / entry_voided / entries_imported / period_closed / period_reopened / categories_changed / counterparties_changed / accessed`.
 
 ## Multi-tenancy
 
@@ -123,7 +124,13 @@ fails independently (the welcome letter and the Telegram alert are two consumers
 | `RealtimeConsumer`      | every event      | `realtime` ([REALTIME](./REALTIME.md)) |
 | `OrderNotificationsConsumer` | `order.placed`, `order.cancelled`, `order.stage_changed` | `notifications` |
 | `TelegramNotificationsConsumer` | `notification.created` | `notifications` |
+| `OrderLedgerConsumer` | `order.payment_changed`, `order.stage_changed` | `finance` |
 
 Notifications (TASK-781): rules turn events into personal notifications (`notifications` table,
 one per event and recipient); each notification is the `notification.created` event for the bell and
 the toast, and Telegram sends it as a separate consumer, so a Telegram failure retries only the send.
+
+Ledger (TASK-798): `OrderLedgerConsumer` reconciles the state of the order with its sale entries under a
+per-order lock, so redelivery and any event order give the same entries: a paid, not cancelled order
+has one sale; a refund or a cancellation adds a reversal. Ledger events carry ids, the month and the
+source only: amounts and counterparties are encrypted at rest and never travel in events.

@@ -130,9 +130,7 @@ describe("Finance module and organization profile (e2e)", () => {
         const profile = await crm(clubA, "get", "/crm/finance/profile");
         expect(profile.status).toBe(403);
         expect(profile.body.code).toBe("module_disabled");
-        expect((await crm(clubA, "get", "/crm/finance/transactions")).body.code).toBe(
-            "module_disabled"
-        );
+        expect((await crm(clubA, "get", "/crm/finance/entries")).body.code).toBe("module_disabled");
         expect((await crm(clubA, "get", "/crm/portal/info")).body.modules).toEqual([]);
     });
 

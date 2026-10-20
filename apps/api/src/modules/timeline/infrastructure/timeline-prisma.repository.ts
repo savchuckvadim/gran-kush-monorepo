@@ -4,6 +4,7 @@ import type { DomainEvent as DomainEventRow, Prisma } from "@prisma/client";
 import type { EventName } from "@workspace/domain-events";
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { PERSON_NAME_SELECT } from "@modules/portal/crm/entity-fields/lib/person-name";
 
 import {
     type TimelineComment,
@@ -18,7 +19,6 @@ import {
     TimelineRepository,
 } from "../domain/timeline-repository.interface";
 
-import { PERSON_NAME_SELECT } from "./staff-names";
 import { type CommentRow, toTimelineComment } from "./timeline-comment.mapper";
 import { subjectKey, TimelineHydrator } from "./timeline-hydrator";
 

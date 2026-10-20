@@ -603,10 +603,6 @@
                 "title": "New order",
                 "description": "An order for a club member: catalog products, your own price and gifts per line. Stock is written off right away.",
                 "member": "Member",
-                "memberPlaceholder": "Choose a member",
-                "memberSearch": "Name, email or number…",
-                "memberEmpty": "No one found",
-                "memberInactive": "inactive",
                 "memberRequired": "Choose a member",
                 "memberInactiveError": "The member is inactive — an order cannot be placed for them",
                 "searching": "Searching…",
@@ -646,51 +642,6 @@
         "finance": {
             "title": "Finance",
             "subtitle": "Financial reports, transactions and analytics",
-            "summary": {
-                "loading": "Loading...",
-                "period": "Current month",
-                "totalIncome": "Total income",
-                "totalExpense": "Total expense",
-                "netBalance": "Net balance"
-            },
-            "transactions": {
-                "title": "Transactions",
-                "loading": "Loading...",
-                "error": "Loading error",
-                "empty": "No transactions",
-                "all": "All",
-                "income": "Income",
-                "expense": "Expense",
-                "colDate": "Date",
-                "colType": "Type",
-                "colDirection": "Direction",
-                "colAmount": "Amount",
-                "colMethod": "Method",
-                "colDescription": "Description",
-                "page": "Page",
-                "type": {
-                    "order_payment": "Order payment",
-                    "refund": "Refund",
-                    "adjustment": "Adjustment",
-                    "manual": "Manual"
-                },
-                "method": {
-                    "cash": "Cash",
-                    "card": "Card",
-                    "crypto": "Crypto"
-                }
-            },
-            "reports": {
-                "loading": "Loading...",
-                "byTypeTitle": "By type",
-                "transactions": "transactions",
-                "type": {
-                    "order_payment": "Order payment",
-                    "refund": "Refund",
-                    "adjustment": "Adjustment",
-                    "manual": "Manual"
-                }
-            },
             "module": {
                 "title": "Finance",
                 "subtitle": "Income and expense records, Spanish taxes and reports for your gestor. The module is enabled separately for each club.",
@@ -730,9 +681,6 @@
                 "title": "Set up finance",
                 "subtitle": "Tell us about the club’s legal entity: taxes and reports depend on its form. Usual values for your type of club are already filled in, so check them and add the details.",
                 "submit": "Save and start bookkeeping"
-            },
-            "dashboard": {
-                "settings": "Organization and taxes"
             },
             "settings": {
                 "title": "Organization and taxes",
@@ -892,6 +840,412 @@
                     "tax_rate_archived": "The rate is archived",
                     "tax_rate_name_required": "A custom rate needs a name"
                 }
+            },
+            "tabs": {
+                "overview": "Overview",
+                "entries": "Entries",
+                "expenses": "Expenses",
+                "counterparties": "Counterparties",
+                "periods": "Months"
+            },
+            "actions": {
+                "income": "Income",
+                "expense": "Expense",
+                "import": "Upload spreadsheet",
+                "export": "Export",
+                "settings": "Settings"
+            },
+            "directions": {
+                "income": "Income",
+                "expense": "Expense",
+                "transfer": "Transfer"
+            },
+            "accounts": {
+                "cash": "Cash",
+                "bank": "Bank",
+                "card": "Card"
+            },
+            "documentTypes": {
+                "none": "No document",
+                "receipt": "Receipt",
+                "invoice_received": "Invoice received",
+                "invoice_issued": "Invoice issued"
+            },
+            "sources": {
+                "manual": "Manual",
+                "order_sale": "Order payment",
+                "import": "Spreadsheet upload",
+                "reversal": "Reversal",
+                "legacy": "Moved from the old ledger"
+            },
+            "overview": {
+                "income": "Income",
+                "expense": "Expenses",
+                "count": "{count, plural, one {# entry} other {# entries}}",
+                "result": "Result",
+                "resultHint": "Income minus expenses, tax excluded",
+                "vat": "VAT to pay",
+                "vatHint": "sales {charged} · purchases {paid}",
+                "accountsTitle": "Accounts",
+                "accountsHint": "Balance at month end over all entries",
+                "top": {
+                    "income": "Where the money comes from",
+                    "expense": "Where the money goes"
+                },
+                "empty": "No entries this month",
+                "error": "Could not load the overview"
+            },
+            "ledger": {
+                "month": "Month",
+                "allMonths": "All months",
+                "closedMonth": "closed",
+                "direction": "Direction",
+                "allDirections": "All directions",
+                "category": "Category",
+                "allCategories": "All categories",
+                "account": "Account",
+                "allAccounts": "All accounts",
+                "counterparty": "Counterparty",
+                "clearCounterparty": "Clear the counterparty filter",
+                "columns": {
+                    "date": "Date",
+                    "what": "What and with whom",
+                    "category": "Category",
+                    "account": "Account",
+                    "amount": "Amount"
+                },
+                "empty": "No entries",
+                "error": "Could not load entries",
+                "total": "{count, plural, one {# entry} other {# entries}}",
+                "page": "{page} of {pages}",
+                "previous": "Previous",
+                "next": "Next",
+                "orderSale": "Order {number}",
+                "noDescription": "No description",
+                "reversalOf": "Reversal: {title}",
+                "reversal": "Reversal",
+                "hasAttachment": "Has an attachment"
+            },
+            "entry": {
+                "loading": "Entry…",
+                "what": "Operation",
+                "date": "Date",
+                "category": "Category",
+                "account": "Account",
+                "counterparty": "Counterparty",
+                "document": "Document and source",
+                "documentLabel": "Document",
+                "documentDate": "Document date",
+                "paidOn": "Paid on",
+                "source": "Source",
+                "author": "Recorded by",
+                "system": "System",
+                "recordedAt": "Recorded at",
+                "openOrder": "Open order {number}",
+                "openReversed": "Reversed entry",
+                "openReversal": "Reversal of this entry",
+                "rate": "Rate",
+                "net": "Base",
+                "tax": "Tax",
+                "total": "Document total",
+                "withholding": "IRPF withholding {percent} %",
+                "payable": "Moved through the account",
+                "noBreakdown": "No tax breakdown",
+                "treatments": {
+                    "exempt": "Exempt",
+                    "not_subject": "Not subject"
+                },
+                "noAttachment": "No receipt or invoice attached",
+                "download": "Download",
+                "attach": "Attach",
+                "replace": "Replace",
+                "removeAttachment": "Remove the attachment",
+                "attached": "File attached",
+                "classifyHint": "The order keeps the amounts: here you change the category, account and notes",
+                "notesHint": "A reversal mirrors the reversed entry: only a note can be added",
+                "notes": "Notes",
+                "saveClassification": "Save",
+                "saved": "Saved",
+                "cancelEntry": "Cancel entry",
+                "cancelTitle": "Cancel this entry?",
+                "cancelOpen": "The entry leaves the month totals but stays in the history.",
+                "cancelClosed": "The month is closed: a reversal is recorded with today's date, the entry itself stays.",
+                "reverse": "Record a reversal",
+                "keep": "Keep",
+                "voided": "Entry cancelled",
+                "reversed": "Reversal recorded",
+                "edit": "Edit",
+                "close": "Close",
+                "voidBadge": "Cancelled",
+                "reversalBadge": "Reversal",
+                "reversedBadge": "Reversed"
+            },
+            "entryForm": {
+                "createTitle": {
+                    "income": "New income",
+                    "expense": "New expense",
+                    "transfer": "Transfer between accounts"
+                },
+                "editTitle": "Edit entry",
+                "hint": "Amounts are stored encrypted; reports show the base, the tax and the amount to pay.",
+                "fields": {
+                    "date": "Operation date",
+                    "category": "Category",
+                    "account": "Account",
+                    "fromAccount": "From",
+                    "toAccount": "To",
+                    "description": "Description",
+                    "amount": "Amount, €",
+                    "taxRate": "Tax",
+                    "withholding": "IRPF withholding, %",
+                    "counterparty": "Counterparty",
+                    "member": "Or a club member",
+                    "documentType": "Document",
+                    "documentNumber": "Document number",
+                    "documentDate": "Document date",
+                    "paidOn": "Payment date",
+                    "notes": "Notes"
+                },
+                "categoryPlaceholder": "Choose a category",
+                "descriptionPlaceholder": {
+                    "income": "October fees",
+                    "expense": "Premises rent",
+                    "transfer": "Cash deposited at the bank"
+                },
+                "includesTax": "Amount includes tax",
+                "excludesTax": "Amount without tax (base)",
+                "taxDefault": "Default — {rate}",
+                "noTax": "no tax",
+                "withholdingHint": "A professional (gestor, lawyer) — usually 15 %",
+                "preview": "Base {net} · tax {tax} · IRPF {withholding} · to pay {payable}",
+                "noCounterparty": "No counterparty",
+                "deletedMember": "Deleted member",
+                "clearMember": "Remove the member",
+                "cancel": "Cancel",
+                "save": "Record",
+                "saving": "Recording…",
+                "created": "Entry recorded",
+                "updated": "Entry saved",
+                "duplicateTitle": "Looks like a duplicate",
+                "duplicateDescription": "This counterparty already has an entry with this document number. Record another one?",
+                "duplicateConfirm": "Record anyway",
+                "errors": {
+                    "required": "Fill in the field",
+                    "date": "Set a date",
+                    "amount": "An amount above zero, to the cent",
+                    "percent": "From 0 to 100",
+                    "tooLong": "Too long",
+                    "sameAccount": "A transfer goes between two different accounts"
+                }
+            },
+            "import": {
+                "title": "Spreadsheet upload",
+                "hint": "Download the example, fill it in and upload the file: every row is checked first, then the valid ones are recorded.",
+                "templateLabel": "Example:",
+                "template": {
+                    "xlsx": "Excel (.xlsx)",
+                    "csv": "CSV"
+                },
+                "noFile": "No file chosen — xlsx or csv",
+                "pickFile": "Choose a file",
+                "otherFile": "Another file",
+                "checking": "Checking rows…",
+                "summary": "To record: {create} · duplicates: {duplicate} · with errors: {error}",
+                "row": "row {row}",
+                "status": {
+                    "create": "Will be recorded",
+                    "duplicate": "Duplicate",
+                    "error": "Error"
+                },
+                "issues": {
+                    "required": "empty",
+                    "invalid": "cannot read the value",
+                    "unknown_category": "no such category — codes are on the «categorias» sheet",
+                    "category_direction": "category of the other side: income or expense",
+                    "tax_mismatch": "VAT does not match the base and rate",
+                    "total_mismatch": "the total does not match: base + VAT − IRPF",
+                    "period_closed": "the month is closed",
+                    "duplicate": "already there: same counterparty, number and date",
+                    "already_imported": "this row of this file is already uploaded"
+                },
+                "commit": "{count, plural, =0 {Nothing to record} one {Record # row} other {Record # rows}}",
+                "close": "Close",
+                "done": "{count, plural, one {# entry recorded} other {# entries recorded}}"
+            },
+            "export": {
+                "title": "Export for the gestor",
+                "hint": "Entries (they can be uploaded back) or the books of Orden HAC/773/2019. Every export goes to the club journal.",
+                "book": "What to export",
+                "books": {
+                    "entries": "Entries",
+                    "purchases": "Purchases book (compras y gastos)",
+                    "sales": "Sales book (ventas e ingresos)"
+                },
+                "bookHint": {
+                    "entries": "All entries of the period, cancelled ones included",
+                    "purchases": "Expenses with reception numbers, VAT rates and withholdings",
+                    "sales": "Income with VAT rates and withholdings"
+                },
+                "from": "From",
+                "to": "To",
+                "format": "Format",
+                "formats": {
+                    "xlsx": "Excel (.xlsx)",
+                    "csv": "CSV for Spanish Excel"
+                },
+                "cancel": "Cancel",
+                "download": "Download",
+                "preparing": "Preparing the file…"
+            },
+            "counterparties": {
+                "title": "Counterparties",
+                "hint": "Suppliers, customers and authorities; a club member appears on their own once income is recorded for them. Names and tax ids are stored encrypted.",
+                "add": "Add counterparty",
+                "empty": "No counterparties yet",
+                "kinds": {
+                    "supplier": "Supplier",
+                    "customer": "Customer",
+                    "member": "Member",
+                    "employee": "Employee",
+                    "authority": "Authority"
+                },
+                "entries": "{count, plural, =0 {No entries} one {# entry} other {# entries}}",
+                "deletedMember": "Deleted member",
+                "edit": "Edit",
+                "archive": "Archive",
+                "archiveTitle": "Archive «{name}»?",
+                "archiveHint": "Entries stay; new ones cannot use it.",
+                "archived": "Counterparty archived",
+                "cancel": "Cancel",
+                "createTitle": "New counterparty",
+                "editTitle": "Counterparty",
+                "dialogHint": "A Spanish tax id is checked by its control character; a foreign one goes with its EU country prefix.",
+                "fields": {
+                    "kind": "Who it is",
+                    "name": "Name",
+                    "nif": "NIF / NIE / CIF",
+                    "country": "Country",
+                    "notes": "Notes"
+                },
+                "nifHint": "Needed for invoices, books and form 347",
+                "save": "Save",
+                "saving": "Saving…",
+                "created": "Counterparty added",
+                "updated": "Counterparty saved",
+                "errors": {
+                    "required": "Fill in the field",
+                    "tooLong": "Too long",
+                    "country": "Two letters: ES, FR, DE…"
+                }
+            },
+            "categories": {
+                "title": "Income and expense categories",
+                "hint": "A preset by club type with PGC chart codes; the spreadsheet upload finds a category by its code.",
+                "add": "Add category",
+                "showArchived": "Show archived",
+                "income": "Income",
+                "expense": "Expenses",
+                "edit": "Edit",
+                "archive": "Archive",
+                "archivedBadge": "archived",
+                "archiveTitle": "Archive «{name}»?",
+                "archiveHint": "Its entries stay; new ones cannot use it.",
+                "archived": "Category archived",
+                "cancel": "Cancel",
+                "createTitle": "New category",
+                "editTitle": "Category",
+                "dialogHint": "The upload code is built from the name.",
+                "codeHint": "Upload code: {code}",
+                "fields": {
+                    "name": "Name",
+                    "direction": "Side",
+                    "pgcAccount": "PGC account",
+                    "taxTreatment": "Default tax"
+                },
+                "treatments": {
+                    "club": "Club rate",
+                    "taxable": "By rate",
+                    "exempt": "Exempt",
+                    "not_subject": "Not subject"
+                },
+                "save": "Save",
+                "saving": "Saving…",
+                "created": "Category added",
+                "updated": "Category saved",
+                "errors": {
+                    "required": "Fill in the field",
+                    "tooLong": "Too long",
+                    "pgc": "Digits only, 2 to 10"
+                },
+                "presets": {
+                    "membership_fees": "Membership fees",
+                    "sales": "Order payments",
+                    "donations": "Donations",
+                    "other_income": "Other income",
+                    "services": "Services",
+                    "purchases": "Goods purchases",
+                    "supplies": "Supplies and consumables",
+                    "rent": "Rent",
+                    "repairs": "Repairs and maintenance",
+                    "professional_services": "Professional services",
+                    "insurance": "Insurance",
+                    "bank_fees": "Bank fees",
+                    "marketing": "Advertising",
+                    "utilities": "Power, water, telecom",
+                    "taxes": "Taxes and fees",
+                    "salaries": "Salaries",
+                    "social_security": "Social Security",
+                    "other_expenses": "Other expenses"
+                }
+            },
+            "periods": {
+                "title": "Ledger months",
+                "hint": "A closed month does not change: corrections go as reversals in an open month. Only a past month can be closed.",
+                "entries": "{count, plural, =0 {no entries} one {# entry} other {# entries}}",
+                "closed": "Closed",
+                "closedBy": "{name}, {at}",
+                "open": "Open",
+                "close": "Close month",
+                "reopen": "Reopen",
+                "closeTitle": "Close the month?",
+                "closeHint": "Its entries can no longer be edited or cancelled, only reversed in an open month.",
+                "reopenTitle": "Reopen the month?",
+                "reopenHint": "Its entries become editable again. If the month went to the gestor, correct with reversals instead.",
+                "cancel": "Cancel",
+                "closedToast": "Month closed",
+                "reopenedToast": "Month reopened"
+            },
+            "errors": {
+                "period_closed": "The month is closed: correct it with a reversal in an open month",
+                "duplicate_document": "This counterparty already has a document with this number",
+                "entry_managed_by_source": "This entry follows its order or the entry it reverses",
+                "entry_already_void": "The entry is already cancelled",
+                "entry_already_reversed": "The entry already has a reversal",
+                "category_required": "Choose a category",
+                "category_direction_mismatch": "Category of the other side: income or expense",
+                "category_archived": "The category is archived",
+                "transfer_same_account": "A transfer goes between two different accounts",
+                "transfer_has_no_category": "A transfer has no category",
+                "counterparty_not_found": "Counterparty not found",
+                "member_not_found": "Member not found",
+                "tax_rate_not_found": "Tax rate not found",
+                "attachment_type": "Attach a photo (JPEG, PNG, WEBP) or a PDF",
+                "attachment_missing": "No file",
+                "counterparty_name_required": "Enter a name",
+                "counterparty_nif_invalid": "The tax id has an error: check the number",
+                "counterparty_nif_taken": "A counterparty with this tax id exists",
+                "counterparty_is_member": "A member is changed in their card",
+                "category_name_required": "Enter a name",
+                "category_code_taken": "Too many categories with this name",
+                "category_receives_orders": "Paid orders go to this category, it cannot be archived",
+                "period_not_past": "Only a past month can be closed",
+                "period_already_closed": "The month is already closed",
+                "period_not_closed": "The month is not closed",
+                "import_file_type": "Upload an .xlsx or .csv file",
+                "import_file_missing": "Choose a file",
+                "import_empty": "The file has no rows",
+                "import_missing_columns": "Required columns are missing: compare with the example",
+                "import_too_many_rows": "Too many rows in one file: split it"
             }
         },
         "sections": {
@@ -1851,7 +2205,32 @@
                 },
                 "finance": {
                     "profile_updated": "Organization details and taxes updated",
-                    "tax_rates_changed": "Tax rates changed"
+                    "tax_rates_changed": "Tax rates changed",
+                    "entry_recorded": {
+                        "manual": "{direction} recorded",
+                        "order_sale": "Order payment recorded as income",
+                        "import": "{direction} recorded from a spreadsheet",
+                        "reversal": "Reversal recorded",
+                        "legacy": "Entry moved from the old ledger"
+                    },
+                    "directions": {
+                        "income": "Income",
+                        "expense": "Expense",
+                        "transfer": "Transfer"
+                    },
+                    "entry_updated": "Entry corrected",
+                    "entry_voided": "Entry cancelled",
+                    "entries_imported": "{count, plural, one {# entry uploaded from a spreadsheet} other {# entries uploaded from a spreadsheet}}",
+                    "period_closed": "Month {period} closed",
+                    "period_reopened": "Month {period} reopened",
+                    "categories_changed": "Income and expense categories changed",
+                    "counterparties_changed": "Counterparties changed",
+                    "accessed": "Exported for the gestor: {book}",
+                    "books": {
+                        "entries": "entries",
+                        "purchases": "purchases book",
+                        "sales": "sales book"
+                    }
                 },
                 "role": {
                     "changed": "Role permissions changed"
@@ -1888,6 +2267,13 @@
                 "product": "Product",
                 "portal": "Club"
             }
+        },
+        "memberPicker": {
+            "placeholder": "Choose a member",
+            "search": "Name, email or number…",
+            "searching": "Searching…",
+            "empty": "Nobody found",
+            "inactive": "inactive"
         }
     }
 }

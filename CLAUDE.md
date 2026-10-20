@@ -114,6 +114,8 @@ Platform registration (create portal + owner): `POST /platform/portals/register`
 /{locale}/{portal}/crm/orders
 /{locale}/{portal}/crm/attendance
 /{locale}/{portal}/crm/employees
+/{locale}/{portal}/crm/finance          — ledger: overview, entries, expenses, counterparties, months
+/{locale}/{portal}/crm/finance/settings — organization, tax rates, income and expense categories
 /{locale}/{portal}/scan
 /{locale}/auth/register        — onboarding (no portal yet)
 /{locale}/auth/login

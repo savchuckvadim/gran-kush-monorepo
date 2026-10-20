@@ -12,7 +12,7 @@ import { getApiErrorMessage } from "@workspace/api-client/core";
 import { Button, Field } from "@workspace/ui";
 
 import { usePermissions } from "@/modules/entities/access";
-import { useMemberDetails } from "@/modules/entities/member";
+import { MemberPicker, toMemberChoice, useMemberDetails } from "@/modules/entities/member";
 import { useCreateOrder, useOrderFunnels } from "@/modules/entities/order";
 import { ROUTES, useLocalizedLink, useMoneyFormat } from "@/modules/shared";
 
@@ -26,7 +26,6 @@ import {
     toCreateOrderBody,
 } from "../model/order-draft";
 
-import { MemberPicker, toDraftMember } from "./MemberPicker";
 import { OrderDraftLineRow } from "./OrderDraftLineRow";
 import { OrderStageSelect } from "./OrderStageSelect";
 import { ProductPicker } from "./ProductPicker";
@@ -49,7 +48,7 @@ export function CreateOrderForm({ initialMemberId }: { initialMemberId?: string 
     // undefined — not touched yet: the member from the address (the member card's button) is used
     const [picked, setPicked] = useState<DraftMember | undefined>();
     const prefill = useMemberDetails(picked === undefined ? (initialMemberId ?? "") : "");
-    const member = picked ?? (prefill.data ? toDraftMember(prefill.data) : null);
+    const member = picked ?? (prefill.data ? toMemberChoice(prefill.data) : null);
 
     const [lines, setLines] = useState<OrderDraftLine[]>([]);
     const [notes, setNotes] = useState("");
@@ -110,6 +109,8 @@ export function CreateOrderForm({ initialMemberId }: { initialMemberId?: string 
 
             <div className="max-w-xl">
                 <MemberPicker
+                    label={t("member")}
+                    required
                     value={member}
                     onChange={setPicked}
                     error={memberError}

@@ -5,7 +5,19 @@ import type { DomainEventEnvelope } from "../envelope";
 
 import { commentAdded, commentDeleted, commentUpdated } from "./comment.events";
 import { employeeAccessChanged, employeeJoined } from "./employee.events";
-import { financeProfileUpdated, financeTaxRatesChanged } from "./finance.events";
+import {
+    financeAccessed,
+    financeCategoriesChanged,
+    financeCounterpartiesChanged,
+    financeEntriesImported,
+    financeEntryRecorded,
+    financeEntryUpdated,
+    financeEntryVoided,
+    financePeriodClosed,
+    financePeriodReopened,
+    financeProfileUpdated,
+    financeTaxRatesChanged,
+} from "./finance.events";
 import {
     memberConsentGiven,
     memberJoined,
@@ -36,6 +48,15 @@ export const EVENT_CATALOG = {
     "portal.module_changed": portalModuleChanged,
     "finance.profile_updated": financeProfileUpdated,
     "finance.tax_rates_changed": financeTaxRatesChanged,
+    "finance.entry_recorded": financeEntryRecorded,
+    "finance.entry_updated": financeEntryUpdated,
+    "finance.entry_voided": financeEntryVoided,
+    "finance.entries_imported": financeEntriesImported,
+    "finance.period_closed": financePeriodClosed,
+    "finance.period_reopened": financePeriodReopened,
+    "finance.categories_changed": financeCategoriesChanged,
+    "finance.counterparties_changed": financeCounterpartiesChanged,
+    "finance.accessed": financeAccessed,
     "notification.created": notificationCreated,
     "comment.added": commentAdded,
     "comment.updated": commentUpdated,
@@ -93,6 +114,15 @@ export {
     commentUpdated,
     employeeAccessChanged,
     employeeJoined,
+    financeAccessed,
+    financeCategoriesChanged,
+    financeCounterpartiesChanged,
+    financeEntriesImported,
+    financeEntryRecorded,
+    financeEntryUpdated,
+    financeEntryVoided,
+    financePeriodClosed,
+    financePeriodReopened,
     financeProfileUpdated,
     financeTaxRatesChanged,
     memberConsentGiven,
@@ -115,6 +145,7 @@ export {
     sessionRevoked,
 };
 export { COMMENT_SUBJECT_KINDS } from "./comment.events";
+export { LEDGER_SOURCE_KINDS } from "./finance.events";
 export { MEMBER_CHANGED_PARTS, type MemberChangedPart } from "./member.events";
 export { ORDER_STAGE_SEMANTICS } from "./order.events";
 export { ROLE_CHANGED_PARTS, type RoleChangedPart } from "./role.events";

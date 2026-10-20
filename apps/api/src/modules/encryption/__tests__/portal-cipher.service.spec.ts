@@ -77,6 +77,22 @@ describe("PortalCipherService", () => {
         expect(keys.rows.size).toBe(1);
     });
 
+    it("файл шифруется двоичным форматом и открывается только в своём контексте", async () => {
+        const cipher = new PortalCipherService(encryption(), new MemoryKeys());
+        const file = Buffer.from("%PDF-1.7 receipt 42.00 EUR");
+        const sealed = await cipher.encryptBytes("p1", "finance", "entry-1", file);
+
+        expect(sealed.subarray(0, 4).toString("ascii")).toBe("PCB1");
+        expect(sealed.includes(Buffer.from("receipt"))).toBe(false);
+        await expect(cipher.decryptBytes("p1", "finance", "entry-1", sealed)).resolves.toEqual(
+            file
+        );
+        await expect(cipher.decryptBytes("p1", "finance", "entry-2", sealed)).rejects.toThrow();
+        await expect(
+            cipher.decryptBytes("p1", "finance", "entry-1", Buffer.from("PCB1"))
+        ).rejects.toThrow("Invalid portal sealed file format");
+    });
+
     it("слепой индекс стабилен в портале и различается между порталами", async () => {
         const cipher = new PortalCipherService(encryption(), new MemoryKeys());
         const a1 = await cipher.blindIndex("p1", "finance", "B12345674");

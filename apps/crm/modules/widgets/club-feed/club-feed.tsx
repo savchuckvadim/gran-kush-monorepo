@@ -26,6 +26,7 @@ import {
     TimelineTextForm,
 } from "@/modules/widgets/entity-timeline";
 
+import { isFeedEcho } from "./feed-echo";
 import { FeedFilters } from "./feed-filters";
 import { FeedSubject } from "./feed-subject";
 import { useFeedFresh } from "./use-feed-fresh";
@@ -49,7 +50,12 @@ export function ClubFeed() {
     const { fresh, reset } = useFeedFresh();
 
     const days = useMemo(
-        () => groupByDay((feed.data?.pages ?? []).flatMap((page) => page.entries)),
+        () =>
+            groupByDay(
+                (feed.data?.pages ?? [])
+                    .flatMap((page) => page.entries)
+                    .filter((entry) => !isFeedEcho(entry))
+            ),
         [feed.data]
     );
 

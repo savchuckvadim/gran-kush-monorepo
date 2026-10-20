@@ -33,6 +33,10 @@ storage/
         └── {uuid}.{ext}
 ```
 
+Вложения проводок учёта (TASK-798) лежат в `private/finance/{portalId}/{uuid}.sealed`: содержимое
+зашифровано ключом портала (`PortalCipherService.encryptBytes`, формат `PCB1`) ещё до S3, отдаётся
+расшифрованным только через `GET /crm/finance/entries/:id/attachment` с правом `finance.read`.
+
 ### Асинхронная загрузка документов Member
 
 Актуальный поток регистрации члена клуба:

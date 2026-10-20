@@ -3190,104 +3190,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/crm/finance/transactions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Список транзакций (с фильтрами и пагинацией) */
-        get: operations["CrmFinance_listTransactions"];
-        put?: never;
-        /**
-         * Создать ручную транзакцию (Admin)
-         * @description Ручное создание финансовой транзакции. Автоматические транзакции создаются при оплате/возврате заказов.
-         */
-        post: operations["CrmFinance_createTransaction"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/crm/finance/transactions/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Детали транзакции */
-        get: operations["CrmFinance_getTransaction"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/crm/finance/reports/summary": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Суммарная финансовая статистика
-         * @description Общий доход, расход и чистый итог за период. Если период не указан — за всё время.
-         */
-        get: operations["CrmFinance_getSummary"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/crm/finance/reports/by-type": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Статистика по типам транзакций
-         * @description Группировка по типу и направлению транзакции за период.
-         */
-        get: operations["CrmFinance_getByType"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/crm/finance/reports/by-date": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Статистика по датам (для графиков)
-         * @description Доходы и расходы по дням за указанный период. Подходит для построения графиков.
-         */
-        get: operations["CrmFinance_getByDate"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/crm/finance/profile": {
         parameters: {
             query?: never;
@@ -3359,6 +3261,291 @@ export interface paths {
         /** Сделать ставкой по умолчанию: ею облагаются товары без своей ставки */
         put: operations["CrmTaxRates_makeDefault"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/entries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Проводки: новые сверху; фильтр по периоду, статье, счёту, контрагенту */
+        get: operations["CrmLedger_list"];
+        put?: never;
+        /**
+         * Доход, расход или перевод между счетами
+         * @description 409 duplicate_document — у контрагента уже есть документ с этим номером (повторить с allowDuplicate); 409 period_closed — месяц закрыт
+         */
+        post: operations["CrmLedger_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/entries/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Проводка: суммы по ставкам, документ, вложение, что можно менять */
+        get: operations["CrmLedger_get"];
+        /** Исправить ручную проводку открытого месяца целиком */
+        put: operations["CrmLedger_correct"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Разметка без сумм: статья, счёт, заметки (и у проводки заказа) */
+        patch: operations["CrmLedger_reclassify"];
+        trace?: never;
+    };
+    "/crm/finance/entries/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Отменить проводку
+         * @description Открытый месяц — отмена; закрытый — сторно сегодняшним числом
+         */
+        post: operations["CrmLedger_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/entries/{id}/attachment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Файл вложения (расшифрованный) */
+        get: operations["CrmLedgerAttachments_download"];
+        /** Приложить чек или фактуру: JPEG, PNG, WEBP или PDF */
+        put: operations["CrmLedgerAttachments_attach"];
+        post?: never;
+        /** Убрать вложение */
+        delete: operations["CrmLedgerAttachments_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/import/template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Пример таблицы: три строки, статьи клуба, памятка по колонкам */
+        get: operations["CrmLedgerFiles_template"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Импорт доходов и расходов таблицей (xlsx или csv)
+         * @description commit=false — отчёт по строкам без записи; commit=true — запись подходящих
+         */
+        post: operations["CrmLedgerFiles_import"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Выгрузка за период: проводки или книги compras y gastos / ventas e ingresos */
+        get: operations["CrmLedgerFiles_export"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Статьи клуба: доходы, затем расходы; пресет первым */
+        get: operations["CrmFinanceCategories_list"];
+        put?: never;
+        /** Своя статья; код для импорта собирается из названия */
+        post: operations["CrmFinanceCategories_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/categories/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * В архив: новые проводки статью не выберут, старые остаются
+         * @description 409 category_receives_orders — в статью идут оплаченные заказы
+         */
+        delete: operations["CrmFinanceCategories_archive"];
+        options?: never;
+        head?: never;
+        /** Переименовать статью, счёт PGC, налог по умолчанию */
+        patch: operations["CrmFinanceCategories_update"];
+        trace?: never;
+    };
+    "/crm/finance/counterparties": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Поставщики, клиенты, госорганы и участники-контрагенты */
+        get: operations["CrmCounterparties_list"];
+        put?: never;
+        /**
+         * Новый контрагент
+         * @description 400 counterparty_nif_invalid; 409 counterparty_nif_taken — номер уже у другого
+         */
+        post: operations["CrmCounterparties_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/counterparties/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Изменить контрагента (участника меняют в его карточке) */
+        put: operations["CrmCounterparties_update"];
+        post?: never;
+        /** В архив: проводки остаются, в новых его не выбрать */
+        delete: operations["CrmCounterparties_archive"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Доходы, расходы и результат периода, статьи, остатки счетов */
+        get: operations["CrmFinancePeriods_overview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/periods": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Месяцы учёта: с проводками, закрытые и текущий */
+        get: operations["CrmFinancePeriods_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/periods/{year}/{month}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Закрыть прошедший месяц: проводки заморожены, исправления — сторно
+         * @description 400 period_not_past — текущий месяц; 409 period_already_closed
+         */
+        post: operations["CrmFinancePeriods_close"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/periods/{year}/{month}/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Открыть закрытый месяц снова
+         * @description 409 period_not_closed
+         */
+        post: operations["CrmFinancePeriods_reopen"];
         delete?: never;
         options?: never;
         head?: never;
@@ -6921,216 +7108,6 @@ export interface components {
              */
             monthlyLimitGrams: number | null;
         };
-        TransactionOrderDto: {
-            /** @example 550e8400-e29b-41d4-a716-446655440000 */
-            id: string;
-            /** @example ORD-20260316-0001 */
-            orderNumber: string;
-        };
-        TransactionMemberDto: {
-            /** @example 550e8400-e29b-41d4-a716-446655440000 */
-            id: string;
-            /** @example John */
-            name: string;
-            /** @example Doe */
-            surname?: string | null;
-            /** @example MBR-0042 */
-            membershipNumber?: string | null;
-        };
-        TransactionEmployeeDto: {
-            /** @example 550e8400-e29b-41d4-a716-446655440000 */
-            id: string;
-            /** @example manager */
-            role: string;
-        };
-        FinancialTransactionListDto: {
-            /** @example 550e8400-e29b-41d4-a716-446655440000 */
-            id: string;
-            /**
-             * @example order_payment
-             * @enum {string}
-             */
-            type: "order_payment" | "refund" | "adjustment" | "manual";
-            /**
-             * @example income
-             * @enum {string}
-             */
-            direction: "income" | "expense";
-            /** @example 38.75 */
-            amount: number;
-            /** @example EUR */
-            currency: string;
-            /**
-             * @example cash
-             * @enum {string}
-             */
-            paymentMethod?: "cash" | "card" | "crypto";
-            /** @example Оплата заказа ORD-20260316-0001 */
-            description?: string | null;
-            /** @example 2026-03-16T14:30:00.000Z */
-            transactionDate: string;
-            order?: components["schemas"]["TransactionOrderDto"] | null;
-            member?: components["schemas"]["TransactionMemberDto"] | null;
-            createdByEmployee?: components["schemas"]["TransactionEmployeeDto"] | null;
-            /** @example 2026-03-16T14:30:00.000Z */
-            createdAt: string;
-        };
-        PaginatedResponse_FinancialTransactionListDto: {
-            /** @description Array of items */
-            items: components["schemas"]["FinancialTransactionListDto"][];
-            /**
-             * @description Total number of items
-             * @example 100
-             */
-            total: number;
-            /**
-             * @description Current page number
-             * @example 1
-             */
-            page: number;
-            /**
-             * @description Items per page
-             * @example 10
-             */
-            limit: number;
-            /**
-             * @description Total number of pages
-             * @example 10
-             */
-            totalPages: number;
-        };
-        FinancialTransactionDetailDto: {
-            /** @example 550e8400-e29b-41d4-a716-446655440000 */
-            id: string;
-            /**
-             * @example order_payment
-             * @enum {string}
-             */
-            type: "order_payment" | "refund" | "adjustment" | "manual";
-            /**
-             * @example income
-             * @enum {string}
-             */
-            direction: "income" | "expense";
-            /** @example 38.75 */
-            amount: number;
-            /** @example EUR */
-            currency: string;
-            /**
-             * @example cash
-             * @enum {string}
-             */
-            paymentMethod?: "cash" | "card" | "crypto";
-            /** @example Оплата заказа ORD-20260316-0001 */
-            description?: string | null;
-            /** @example 2026-03-16T14:30:00.000Z */
-            transactionDate: string;
-            order?: components["schemas"]["TransactionOrderDto"] | null;
-            member?: components["schemas"]["TransactionMemberDto"] | null;
-            createdByEmployee?: components["schemas"]["TransactionEmployeeDto"] | null;
-            /** @example 2026-03-16T14:30:00.000Z */
-            createdAt: string;
-            /** @example 550e8400-e29b-41d4-a716-446655440000 */
-            orderId?: string | null;
-            /** @example 550e8400-e29b-41d4-a716-446655440000 */
-            memberId?: string | null;
-            /** @example Внутренний перевод */
-            notes?: string | null;
-        };
-        CreateFinancialTransactionDto: {
-            /**
-             * @description ID заказа (если транзакция привязана к заказу)
-             * @example 550e8400-e29b-41d4-a716-446655440000
-             */
-            orderId?: string;
-            /**
-             * @description ID члена клуба
-             * @example 550e8400-e29b-41d4-a716-446655440000
-             */
-            memberId?: string;
-            /**
-             * @description Тип транзакции
-             * @example manual
-             * @enum {string}
-             */
-            type: "order_payment" | "refund" | "adjustment" | "manual";
-            /**
-             * @description Направление: доход или расход
-             * @example income
-             * @enum {string}
-             */
-            direction: "income" | "expense";
-            /**
-             * @description Сумма транзакции
-             * @example 50
-             */
-            amount: number;
-            /**
-             * @default EUR
-             * @example EUR
-             */
-            currency: string;
-            /**
-             * @description Способ оплаты
-             * @example cash
-             * @enum {string}
-             */
-            paymentMethod?: "cash" | "card" | "crypto";
-            /** @example Оплата за доп. услуги */
-            description?: string;
-            /** @example Примечание для бухгалтерии */
-            notes?: string;
-        };
-        TransactionSummaryDto: {
-            /**
-             * @description Общий доход
-             * @example 5000
-             */
-            totalIncome: number;
-            /**
-             * @description Общие расходы
-             * @example 200
-             */
-            totalExpense: number;
-            /**
-             * @description Чистый итог (доход - расход)
-             * @example 4800
-             */
-            netTotal: number;
-            /**
-             * @description Количество транзакций
-             * @example 42
-             */
-            transactionCount: number;
-        };
-        TransactionGroupedByTypeDto: {
-            /**
-             * @example order_payment
-             * @enum {string}
-             */
-            type: "order_payment" | "refund" | "adjustment" | "manual";
-            /**
-             * @example income
-             * @enum {string}
-             */
-            direction: "income" | "expense";
-            /** @example 30 */
-            count: number;
-            /** @example 4500 */
-            totalAmount: number;
-        };
-        TransactionGroupedByDateDto: {
-            /** @example 2026-03-16 */
-            date: string;
-            /** @example 500 */
-            income: number;
-            /** @example 50 */
-            expense: number;
-            /** @example 450 */
-            net: number;
-            /** @example 8 */
-            count: number;
-        };
         /** @enum {string} */
         LegalForm: "association" | "self_employed" | "limited_company" | "other";
         /** @enum {string} */
@@ -7234,6 +7211,382 @@ export interface components {
             percent?: number;
             /** @description taxable — по ставке; exempt — exenta (art. 20 LIVA); not_subject — no sujeta */
             treatment?: components["schemas"]["TaxTreatment"];
+        };
+        /** @enum {string} */
+        LedgerDirection: "income" | "expense" | "transfer";
+        /** @enum {string} */
+        FinanceAccount: "cash" | "bank" | "card";
+        /** @enum {string} */
+        LedgerEntryStatus: "posted" | "void";
+        /** @enum {string} */
+        LedgerDocumentType: "invoice_received" | "invoice_issued" | "receipt" | "none";
+        /** @enum {string} */
+        LedgerSource: "manual" | "order_sale" | "import" | "reversal" | "legacy";
+        LedgerLineDto: {
+            /** @example 21 */
+            percent: number;
+            /** @description null — без разбивки налога (заказ до включения финансов) */
+            treatment: components["schemas"]["TaxTreatment"] | null;
+            /**
+             * @description Евро
+             * @example 100
+             */
+            net: number;
+            /**
+             * @description Евро
+             * @example 21
+             */
+            tax: number;
+        };
+        LedgerWithholdingDto: {
+            /** @example 15 */
+            percent: number;
+            /**
+             * @description Евро
+             * @example 15
+             */
+            amount: number;
+        };
+        LedgerTotalsDto: {
+            /** @description Евро */
+            net: number;
+            /** @description Евро */
+            tax: number;
+            /** @description По документу: база + налог */
+            total: number;
+            /** @description Евро */
+            withholding: number;
+            /** @description Сколько денег прошло по счёту: итог − IRPF */
+            payable: number;
+        };
+        LedgerAttachmentDto: {
+            /** @example ticket.pdf */
+            name: string;
+            /** @example application/pdf */
+            mime: string;
+            /** @description Байт */
+            size: number;
+        };
+        /** @enum {string} */
+        EntryEditMode: "full" | "classification" | "notes" | "none";
+        LedgerEntryDto: {
+            /** Format: uuid */
+            id: string;
+            direction: components["schemas"]["LedgerDirection"];
+            status: components["schemas"]["LedgerEntryStatus"];
+            /** @example 2026-10-05 */
+            occurredOn: string;
+            /** Format: uuid */
+            categoryId: string | null;
+            /** Format: uuid */
+            counterpartyId: string | null;
+            counterpartyName: string | null;
+            counterpartyNif: string | null;
+            /** @description cash — касса клуба, bank — счёт в банке, card — карта */
+            account: components["schemas"]["FinanceAccount"];
+            /** @description cash — касса клуба, bank — счёт в банке, card — карта */
+            toAccount: components["schemas"]["FinanceAccount"] | null;
+            /** @example EUR */
+            currency: string;
+            documentType: components["schemas"]["LedgerDocumentType"];
+            documentNumber: string | null;
+            documentDate: string | null;
+            paidOn: string | null;
+            /** @description Пусто у проводки из заказа */
+            description: string | null;
+            notes: string | null;
+            sourceType: components["schemas"]["LedgerSource"];
+            /**
+             * Format: uuid
+             * @description Заказ проводки оплаты: открыть заказ из реестра
+             */
+            orderId: string | null;
+            /** @description Номер заказа */
+            sourceLabel: string | null;
+            /**
+             * Format: uuid
+             * @description Что отменяет это сторно
+             */
+            reversalOfId: string | null;
+            /**
+             * Format: uuid
+             * @description Сторно этой проводки
+             */
+            reversedById: string | null;
+            lines: components["schemas"]["LedgerLineDto"][];
+            withholding: components["schemas"]["LedgerWithholdingDto"] | null;
+            totals: components["schemas"]["LedgerTotalsDto"];
+            attachment: components["schemas"]["LedgerAttachmentDto"] | null;
+            editable: components["schemas"]["EntryEditMode"];
+            authorName: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            voidedAt: string | null;
+        };
+        PaginatedResponse_LedgerEntryDto: {
+            /** @description Array of items */
+            items: components["schemas"]["LedgerEntryDto"][];
+            /**
+             * @description Total number of items
+             * @example 100
+             */
+            total: number;
+            /**
+             * @description Current page number
+             * @example 1
+             */
+            page: number;
+            /**
+             * @description Items per page
+             * @example 10
+             */
+            limit: number;
+            /**
+             * @description Total number of pages
+             * @example 10
+             */
+            totalPages: number;
+        };
+        LedgerEntryInputDto: {
+            direction: components["schemas"]["LedgerDirection"];
+            /**
+             * @description Дата операции
+             * @example 2026-10-05
+             */
+            occurredOn: string;
+            /**
+             * Format: uuid
+             * @description У перевода нет
+             */
+            categoryId?: string | null;
+            /** @description cash — касса клуба, bank — счёт в банке, card — карта */
+            account: components["schemas"]["FinanceAccount"];
+            /** @description Перевод: куда пришли деньги */
+            toAccount?: components["schemas"]["FinanceAccount"] | null;
+            /**
+             * @description Евро
+             * @example 121
+             */
+            amount: number;
+            /**
+             * @description Сумма с налогом (чек); false — база без IVA (фактура)
+             * @default true
+             */
+            amountIncludesTax: boolean;
+            /**
+             * Format: uuid
+             * @description Ставка клуба; пусто — по статье или направлению
+             */
+            taxRateId?: string | null;
+            /**
+             * @description IRPF, %
+             * @example 15
+             */
+            withholdingPercent?: number;
+            /** @example Alquiler del local */
+            description: string;
+            notes?: string | null;
+            /** Format: uuid */
+            counterpartyId?: string | null;
+            /**
+             * Format: uuid
+             * @description Участник клуба — контрагент (взнос); важнее counterpartyId
+             */
+            memberId?: string | null;
+            /** @default none */
+            documentType: components["schemas"]["LedgerDocumentType"];
+            /** @example F-2026-118 */
+            documentNumber?: string | null;
+            /** @description Дата документа, если другая */
+            documentDate?: string | null;
+            /** @description Дата оплаты */
+            paidOn?: string | null;
+            /** @description Записать, хотя у контрагента уже проведён документ с этим номером */
+            allowDuplicate?: boolean;
+        };
+        ReclassifyEntryDto: {
+            /** Format: uuid */
+            categoryId?: string;
+            /** @description cash — касса клуба, bank — счёт в банке, card — карта */
+            account?: components["schemas"]["FinanceAccount"];
+            notes?: string | null;
+        };
+        CancelledEntryDto: {
+            /**
+             * @description voided — вышла из итогов; reversed — сторно в открытом месяце
+             * @enum {string}
+             */
+            mode: "voided" | "reversed";
+            /** @description Отменённая проводка или сторно */
+            entry: components["schemas"]["LedgerEntryDto"];
+        };
+        /** @enum {string} */
+        LedgerFileFormat: "xlsx" | "csv";
+        /** @enum {string} */
+        LedgerImportRowStatus: "create" | "duplicate" | "error";
+        /** @enum {string} */
+        LedgerImportColumn: "tipo" | "fecha" | "categoria" | "concepto" | "contraparte" | "nif" | "documento" | "base" | "iva_pct" | "iva" | "irpf_pct" | "total" | "pago" | "fecha_pago" | "notas";
+        /** @enum {string} */
+        LedgerImportIssue: "required" | "invalid" | "unknown_category" | "category_direction" | "tax_mismatch" | "total_mismatch" | "period_closed" | "duplicate" | "already_imported";
+        ImportIssueDto: {
+            column: components["schemas"]["LedgerImportColumn"] | null;
+            code: components["schemas"]["LedgerImportIssue"];
+        };
+        ImportPreviewDto: {
+            /** @enum {string} */
+            direction: "income" | "expense";
+            /** @example 2026-10-05 */
+            occurredOn: string;
+            /** Format: uuid */
+            categoryId: string;
+            description: string;
+            counterparty: string | null;
+            /** @description Евро: база + IVA − IRPF */
+            total: number;
+        };
+        ImportRowDto: {
+            /** @description Номер строки в файле; заголовки — строка 1 */
+            row: number;
+            status: components["schemas"]["LedgerImportRowStatus"];
+            issues: components["schemas"]["ImportIssueDto"][];
+            preview: components["schemas"]["ImportPreviewDto"] | null;
+        };
+        ImportReportDto: {
+            /** @description false — только проверка */
+            committed: boolean;
+            /** @description Сколько проводок записано */
+            created: number;
+            rows: components["schemas"]["ImportRowDto"][];
+        };
+        /** @enum {string} */
+        LedgerExportBook: "entries" | "purchases" | "sales";
+        /** @enum {string} */
+        CategoryDirection: "income" | "expense";
+        FinanceCategoryDto: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Код: подпись пресета переводит CRM, по нему импорт
+             * @example rent
+             */
+            code: string;
+            /** @description Своё название; у пресета — null */
+            name: string | null;
+            direction: components["schemas"]["CategoryDirection"];
+            /** @example 621 */
+            pgcAccount: string | null;
+            /** @description Налог проводок статьи по умолчанию; null — ставка клуба */
+            taxTreatment: components["schemas"]["TaxTreatment"] | null;
+            isPreset: boolean;
+            /** Format: date-time */
+            archivedAt: string | null;
+        };
+        CreateFinanceCategoryDto: {
+            /** @example Seguridad privada */
+            name: string;
+            direction: components["schemas"]["CategoryDirection"];
+            /** @example 629 */
+            pgcAccount?: string | null;
+            /** @description Налог проводок статьи по умолчанию; null — ставка клуба */
+            taxTreatment?: components["schemas"]["TaxTreatment"] | null;
+        };
+        UpdateFinanceCategoryDto: {
+            /** @description null у пресета — вернуть подпись по коду */
+            name?: string | null;
+            pgcAccount?: string | null;
+            /** @description Налог проводок статьи по умолчанию; null — ставка клуба */
+            taxTreatment?: components["schemas"]["TaxTreatment"] | null;
+        };
+        /**
+         * @description member заводит система: участник клуба становится контрагентом сам
+         * @enum {string}
+         */
+        CounterpartyKind: "supplier" | "customer" | "member" | "employee" | "authority";
+        CounterpartyDto: {
+            /** Format: uuid */
+            id: string;
+            /** @description member заводит система: участник клуба становится контрагентом сам */
+            kind: components["schemas"]["CounterpartyKind"];
+            /** Format: uuid */
+            memberId: string | null;
+            /** @description null — участник удалён */
+            name: string | null;
+            /** @example B12345674 */
+            nif: string | null;
+            /** @example ES */
+            country: string | null;
+            notes: string | null;
+            /** @description Проведённых проводок */
+            entryCount: number;
+            /** Format: date-time */
+            archivedAt: string | null;
+        };
+        CounterpartyInputDto: {
+            /** @description member заводит система: участник клуба становится контрагентом сам */
+            kind: components["schemas"]["CounterpartyKind"];
+            /** @example Inmobiliaria Sol SL */
+            name: string;
+            /** @example B12345674 */
+            nif?: string | null;
+            /**
+             * @description ISO 3166-1 alpha-2
+             * @example ES
+             */
+            country?: string | null;
+            notes?: string | null;
+        };
+        DirectionTotalsDto: {
+            /** @description Евро */
+            net: number;
+            /** @description Евро */
+            tax: number;
+            /** @description Евро */
+            total: number;
+            /** @description Евро */
+            withholding: number;
+            /** @description Евро */
+            payable: number;
+            count: number;
+        };
+        CategoryTotalsDto: {
+            /** Format: uuid */
+            categoryId: string;
+            /** @enum {string} */
+            direction: "income" | "expense";
+            /** @description Евро */
+            net: number;
+            /** @description Евро */
+            total: number;
+            count: number;
+        };
+        AccountBalanceDto: {
+            /** @description cash — касса клуба, bank — счёт в банке, card — карта */
+            account: components["schemas"]["FinanceAccount"];
+            /** @description Остаток на конец периода по всем проводкам */
+            balance: number;
+        };
+        FinanceOverviewDto: {
+            from: string;
+            to: string;
+            income: components["schemas"]["DirectionTotalsDto"];
+            expense: components["schemas"]["DirectionTotalsDto"];
+            /** @description Доходы минус расходы по базе */
+            result: number;
+            byCategory: components["schemas"]["CategoryTotalsDto"][];
+            accounts: components["schemas"]["AccountBalanceDto"][];
+        };
+        FinancePeriodDto: {
+            /** @example 2026 */
+            year: number;
+            /** @example 9 */
+            month: number;
+            entryCount: number;
+            /** Format: date-time */
+            closedAt: string | null;
+            closedByName: string | null;
+            /** @description Прошедший открытый месяц — его можно закрыть */
+            closable: boolean;
         };
         RegistrationLinkPrefillDto: {
             /** @example socio@example.com */
@@ -7877,16 +8230,6 @@ export type SchemaPaginatedResponseCabinetOrderListDto = components['schemas']['
 export type SchemaCancelOrderDto = components['schemas']['CancelOrderDto'];
 export type SchemaMonthlyLimitDto = components['schemas']['MonthlyLimitDto'];
 export type SchemaUpdateMemberLimitDto = components['schemas']['UpdateMemberLimitDto'];
-export type SchemaTransactionOrderDto = components['schemas']['TransactionOrderDto'];
-export type SchemaTransactionMemberDto = components['schemas']['TransactionMemberDto'];
-export type SchemaTransactionEmployeeDto = components['schemas']['TransactionEmployeeDto'];
-export type SchemaFinancialTransactionListDto = components['schemas']['FinancialTransactionListDto'];
-export type SchemaPaginatedResponseFinancialTransactionListDto = components['schemas']['PaginatedResponse_FinancialTransactionListDto'];
-export type SchemaFinancialTransactionDetailDto = components['schemas']['FinancialTransactionDetailDto'];
-export type SchemaCreateFinancialTransactionDto = components['schemas']['CreateFinancialTransactionDto'];
-export type SchemaTransactionSummaryDto = components['schemas']['TransactionSummaryDto'];
-export type SchemaTransactionGroupedByTypeDto = components['schemas']['TransactionGroupedByTypeDto'];
-export type SchemaTransactionGroupedByDateDto = components['schemas']['TransactionGroupedByDateDto'];
 export type SchemaLegalForm = components['schemas']['LegalForm'];
 export type SchemaVatRegime = components['schemas']['VatRegime'];
 export type SchemaIncomeTaxRegime = components['schemas']['IncomeTaxRegime'];
@@ -7895,6 +8238,42 @@ export type SchemaUpdateOrganizationProfileDto = components['schemas']['UpdateOr
 export type SchemaTaxRateDto = components['schemas']['TaxRateDto'];
 export type SchemaCreateTaxRateDto = components['schemas']['CreateTaxRateDto'];
 export type SchemaUpdateTaxRateDto = components['schemas']['UpdateTaxRateDto'];
+export type SchemaLedgerDirection = components['schemas']['LedgerDirection'];
+export type SchemaFinanceAccount = components['schemas']['FinanceAccount'];
+export type SchemaLedgerEntryStatus = components['schemas']['LedgerEntryStatus'];
+export type SchemaLedgerDocumentType = components['schemas']['LedgerDocumentType'];
+export type SchemaLedgerSource = components['schemas']['LedgerSource'];
+export type SchemaLedgerLineDto = components['schemas']['LedgerLineDto'];
+export type SchemaLedgerWithholdingDto = components['schemas']['LedgerWithholdingDto'];
+export type SchemaLedgerTotalsDto = components['schemas']['LedgerTotalsDto'];
+export type SchemaLedgerAttachmentDto = components['schemas']['LedgerAttachmentDto'];
+export type SchemaEntryEditMode = components['schemas']['EntryEditMode'];
+export type SchemaLedgerEntryDto = components['schemas']['LedgerEntryDto'];
+export type SchemaPaginatedResponseLedgerEntryDto = components['schemas']['PaginatedResponse_LedgerEntryDto'];
+export type SchemaLedgerEntryInputDto = components['schemas']['LedgerEntryInputDto'];
+export type SchemaReclassifyEntryDto = components['schemas']['ReclassifyEntryDto'];
+export type SchemaCancelledEntryDto = components['schemas']['CancelledEntryDto'];
+export type SchemaLedgerFileFormat = components['schemas']['LedgerFileFormat'];
+export type SchemaLedgerImportRowStatus = components['schemas']['LedgerImportRowStatus'];
+export type SchemaLedgerImportColumn = components['schemas']['LedgerImportColumn'];
+export type SchemaLedgerImportIssue = components['schemas']['LedgerImportIssue'];
+export type SchemaImportIssueDto = components['schemas']['ImportIssueDto'];
+export type SchemaImportPreviewDto = components['schemas']['ImportPreviewDto'];
+export type SchemaImportRowDto = components['schemas']['ImportRowDto'];
+export type SchemaImportReportDto = components['schemas']['ImportReportDto'];
+export type SchemaLedgerExportBook = components['schemas']['LedgerExportBook'];
+export type SchemaCategoryDirection = components['schemas']['CategoryDirection'];
+export type SchemaFinanceCategoryDto = components['schemas']['FinanceCategoryDto'];
+export type SchemaCreateFinanceCategoryDto = components['schemas']['CreateFinanceCategoryDto'];
+export type SchemaUpdateFinanceCategoryDto = components['schemas']['UpdateFinanceCategoryDto'];
+export type SchemaCounterpartyKind = components['schemas']['CounterpartyKind'];
+export type SchemaCounterpartyDto = components['schemas']['CounterpartyDto'];
+export type SchemaCounterpartyInputDto = components['schemas']['CounterpartyInputDto'];
+export type SchemaDirectionTotalsDto = components['schemas']['DirectionTotalsDto'];
+export type SchemaCategoryTotalsDto = components['schemas']['CategoryTotalsDto'];
+export type SchemaAccountBalanceDto = components['schemas']['AccountBalanceDto'];
+export type SchemaFinanceOverviewDto = components['schemas']['FinanceOverviewDto'];
+export type SchemaFinancePeriodDto = components['schemas']['FinancePeriodDto'];
 export type SchemaRegistrationLinkPrefillDto = components['schemas']['RegistrationLinkPrefillDto'];
 export type SchemaCreateRegistrationLinkDto = components['schemas']['CreateRegistrationLinkDto'];
 export type SchemaRegistrationLinkCreatedByDto = components['schemas']['RegistrationLinkCreatedByDto'];
@@ -17754,308 +18133,6 @@ export interface operations {
             };
         };
     };
-    CrmFinance_listTransactions: {
-        parameters: {
-            query?: {
-                page?: number;
-                limit?: number;
-                sortBy?: string;
-                sortOrder?: "asc" | "desc";
-                type?: "order_payment" | "refund" | "adjustment" | "manual";
-                direction?: "income" | "expense";
-                paymentMethod?: "cash" | "card" | "crypto";
-                memberId?: string;
-                orderId?: string;
-                /** @description Поиск по описанию/примечанию */
-                search?: string;
-                startDate?: string;
-                endDate?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Paginated list of transactions */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse_FinancialTransactionListDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    CrmFinance_createTransaction: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Ключ идемпотентности. Повтор с тем же ключом и тем же телом возвращает сохранённый ответ вместо повторного выполнения. Тот же ключ с другим телом → 422, ключ ещё в работе → 409. */
-                "idempotency-key"?: string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateFinancialTransactionDto"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FinancialTransactionDetailDto"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    CrmFinance_getTransaction: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FinancialTransactionDetailDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    CrmFinance_getSummary: {
-        parameters: {
-            query: {
-                /** @description Начало периода (YYYY-MM-DD) */
-                startDate: string;
-                /** @description Конец периода (YYYY-MM-DD) */
-                endDate: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TransactionSummaryDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    CrmFinance_getByType: {
-        parameters: {
-            query: {
-                /** @description Начало периода (YYYY-MM-DD) */
-                startDate: string;
-                /** @description Конец периода (YYYY-MM-DD) */
-                endDate: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TransactionGroupedByTypeDto"][];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
-    CrmFinance_getByDate: {
-        parameters: {
-            query: {
-                /** @description Начало периода (YYYY-MM-DD) */
-                startDate: string;
-                /** @description Конец периода (YYYY-MM-DD) */
-                endDate: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TransactionGroupedByDateDto"][];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-        };
-    };
     CrmFinanceProfile_get: {
         parameters: {
             query?: never;
@@ -18397,6 +18474,1351 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmLedger_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                from?: string;
+                to?: string;
+                direction?: components["schemas"]["LedgerDirection"];
+                categoryId?: string;
+                counterpartyId?: string;
+                /** @description cash — касса клуба, bank — счёт в банке, card — карта */
+                account?: components["schemas"]["FinanceAccount"];
+                /** @description Вместе с отменёнными */
+                includeVoid?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_LedgerEntryDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmLedger_create: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Ключ идемпотентности. Повтор с тем же ключом и тем же телом возвращает сохранённый ответ вместо повторного выполнения. Тот же ключ с другим телом → 422, ключ ещё в работе → 409. */
+                "idempotency-key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LedgerEntryInputDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LedgerEntryDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /**
+             * @description Conflict
+             *
+             *     Conflict
+             */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmLedger_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LedgerEntryDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmLedger_correct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LedgerEntryInputDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LedgerEntryDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmLedger_reclassify: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReclassifyEntryDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LedgerEntryDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmLedger_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CancelledEntryDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmLedgerAttachments_download: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StreamableFile"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmLedgerAttachments_attach: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LedgerEntryDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmLedgerAttachments_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LedgerEntryDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmLedgerFiles_template: {
+        parameters: {
+            query?: {
+                format?: components["schemas"]["LedgerFileFormat"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StreamableFile"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmLedgerFiles_import: {
+        parameters: {
+            query?: {
+                /** @description false — только проверить и показать отчёт; true — записать подходящие строки */
+                commit?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportReportDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmLedgerFiles_export: {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                /** @description entries — проводки; purchases — compras y gastos; sales — ventas e ingresos */
+                book: components["schemas"]["LedgerExportBook"];
+                format?: components["schemas"]["LedgerFileFormat"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StreamableFile"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmFinanceCategories_list: {
+        parameters: {
+            query?: {
+                /** @description Вместе с архивными */
+                includeArchived?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FinanceCategoryDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmFinanceCategories_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateFinanceCategoryDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FinanceCategoryDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmFinanceCategories_archive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmFinanceCategories_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateFinanceCategoryDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FinanceCategoryDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmCounterparties_list: {
+        parameters: {
+            query?: {
+                /** @description Вместе с архивными */
+                includeArchived?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CounterpartyDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmCounterparties_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CounterpartyInputDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CounterpartyDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmCounterparties_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CounterpartyInputDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CounterpartyDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmCounterparties_archive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmFinancePeriods_overview: {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FinanceOverviewDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmFinancePeriods_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FinancePeriodDto"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmFinancePeriods_close: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                year: number;
+                month: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmFinancePeriods_reopen: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                year: number;
+                month: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

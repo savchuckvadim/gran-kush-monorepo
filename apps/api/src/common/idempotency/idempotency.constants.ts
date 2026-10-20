@@ -17,7 +17,7 @@ export const IDEMPOTENCY_TTL_HOURS = 24;
 export const IdempotencyScope = {
     LK_ORDER_CREATE: "lk.orders.create",
     CRM_ORDER_CREATE: "crm.orders.create",
-    CRM_FINANCE_TRANSACTION_CREATE: "crm.finance.transactions.create",
+    CRM_FINANCE_ENTRY_CREATE: "crm.finance.entries.create",
     CRM_PRESENCE_SCAN: "crm.presence.scan",
 } as const;
 

@@ -23,6 +23,10 @@ const WRAP_PURPOSE = "portal-data-key-wrap";
 const KEK_VERSION = 1;
 /** Цель HKDF для «слепого индекса» внутри ключа портала */
 const BLIND_INDEX_INFO = "blind-index";
+/** Файл: метка формата и версия ключа (uint32) перед iv, тегом и данными — без base64 */
+const BYTES_MAGIC = Buffer.from("PCB1", "ascii");
+const VERSION_BYTES = 4;
+const BYTES_HEADER = BYTES_MAGIC.length + VERSION_BYTES;
 
 /**
  * Шифрование данных портала (envelope, TASK-796). У портала и цели свой случайный ключ AES-256,
@@ -94,6 +98,51 @@ export class PortalCipherService {
         ciphertext: string
     ): Promise<T> {
         return JSON.parse(await this.decrypt(portalId, purpose, context, ciphertext)) as T;
+    }
+
+    /**
+     * Файл целиком (чек, фактура): `PCB1` + версия ключа + iv + тег + данные. Двоичный формат —
+     * вложение не раздувается на треть, как строка base64.
+     */
+    async encryptBytes(
+        portalId: string,
+        purpose: PortalCipherPurpose,
+        context: string,
+        plaintext: Buffer
+    ): Promise<Buffer> {
+        const { version, key } = await this.currentKey(portalId, purpose);
+        const iv = crypto.randomBytes(IV_BYTES);
+        const cipher = crypto.createCipheriv(ALGORITHM, key, iv, { authTagLength: TAG_BYTES });
+        cipher.setAAD(this.aad(portalId, purpose, context));
+        const data = Buffer.concat([cipher.update(plaintext), cipher.final()]);
+        const header = Buffer.alloc(VERSION_BYTES);
+        header.writeUInt32BE(version);
+        return Buffer.concat([BYTES_MAGIC, header, iv, cipher.getAuthTag(), data]);
+    }
+
+    async decryptBytes(
+        portalId: string,
+        purpose: PortalCipherPurpose,
+        context: string,
+        sealed: Buffer
+    ): Promise<Buffer> {
+        const dataStart = BYTES_HEADER + IV_BYTES + TAG_BYTES;
+        if (
+            sealed.length < dataStart ||
+            !sealed.subarray(0, BYTES_MAGIC.length).equals(BYTES_MAGIC)
+        ) {
+            throw new Error("Invalid portal sealed file format");
+        }
+        const key = await this.keyVersion(
+            portalId,
+            purpose,
+            sealed.readUInt32BE(BYTES_MAGIC.length)
+        );
+        const iv = sealed.subarray(BYTES_HEADER, BYTES_HEADER + IV_BYTES);
+        const decipher = crypto.createDecipheriv(ALGORITHM, key, iv, { authTagLength: TAG_BYTES });
+        decipher.setAAD(this.aad(portalId, purpose, context));
+        decipher.setAuthTag(sealed.subarray(BYTES_HEADER + IV_BYTES, dataStart));
+        return Buffer.concat([decipher.update(sealed.subarray(dataStart)), decipher.final()]);
     }
 
     /**

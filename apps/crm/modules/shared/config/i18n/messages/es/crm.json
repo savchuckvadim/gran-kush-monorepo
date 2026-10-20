@@ -603,10 +603,6 @@
                 "title": "Nuevo pedido",
                 "description": "Un pedido para un socio del club: productos del catálogo, precio propio y regalos por línea. El stock se descuenta al momento.",
                 "member": "Socio",
-                "memberPlaceholder": "Elige un socio",
-                "memberSearch": "Nombre, email o número…",
-                "memberEmpty": "No se encontró a nadie",
-                "memberInactive": "inactivo",
                 "memberRequired": "Elige un socio",
                 "memberInactiveError": "El socio está inactivo: no se le puede hacer un pedido",
                 "searching": "Buscando…",
@@ -646,51 +642,6 @@
         "finance": {
             "title": "Finanzas",
             "subtitle": "Informes financieros, transacciones y analítica",
-            "summary": {
-                "loading": "Cargando...",
-                "period": "Mes actual",
-                "totalIncome": "Ingresos totales",
-                "totalExpense": "Gastos totales",
-                "netBalance": "Balance neto"
-            },
-            "transactions": {
-                "title": "Transacciones",
-                "loading": "Cargando...",
-                "error": "Error de carga",
-                "empty": "Sin transacciones",
-                "all": "Todas",
-                "income": "Ingreso",
-                "expense": "Gasto",
-                "colDate": "Fecha",
-                "colType": "Tipo",
-                "colDirection": "Dirección",
-                "colAmount": "Monto",
-                "colMethod": "Método",
-                "colDescription": "Descripción",
-                "page": "Pág.",
-                "type": {
-                    "order_payment": "Pago de pedido",
-                    "refund": "Reembolso",
-                    "adjustment": "Ajuste",
-                    "manual": "Manual"
-                },
-                "method": {
-                    "cash": "Efectivo",
-                    "card": "Tarjeta",
-                    "crypto": "Cripto"
-                }
-            },
-            "reports": {
-                "loading": "Cargando...",
-                "byTypeTitle": "Por tipo",
-                "transactions": "transacciones",
-                "type": {
-                    "order_payment": "Pago de pedido",
-                    "refund": "Reembolso",
-                    "adjustment": "Ajuste",
-                    "manual": "Manual"
-                }
-            },
             "module": {
                 "title": "Finanzas",
                 "subtitle": "Ingresos y gastos, impuestos en España e informes para tu gestor. El módulo se activa por separado en cada club.",
@@ -730,9 +681,6 @@
                 "title": "Configurar finanzas",
                 "subtitle": "Cuéntanos sobre la entidad del club: los impuestos y los informes dependen de su forma jurídica. Ya hemos puesto los valores habituales para tu tipo de club; revísalos y completa los datos.",
                 "submit": "Guardar y empezar"
-            },
-            "dashboard": {
-                "settings": "Entidad e impuestos"
             },
             "settings": {
                 "title": "Entidad e impuestos",
@@ -892,6 +840,412 @@
                     "tax_rate_archived": "El tipo está archivado",
                     "tax_rate_name_required": "Un tipo propio necesita nombre"
                 }
+            },
+            "tabs": {
+                "overview": "Resumen",
+                "entries": "Movimientos",
+                "expenses": "Gastos",
+                "counterparties": "Contrapartes",
+                "periods": "Meses"
+            },
+            "actions": {
+                "income": "Ingreso",
+                "expense": "Gasto",
+                "import": "Subir tabla",
+                "export": "Exportar",
+                "settings": "Ajustes"
+            },
+            "directions": {
+                "income": "Ingreso",
+                "expense": "Gasto",
+                "transfer": "Traspaso"
+            },
+            "accounts": {
+                "cash": "Caja",
+                "bank": "Banco",
+                "card": "Tarjeta"
+            },
+            "documentTypes": {
+                "none": "Sin documento",
+                "receipt": "Ticket",
+                "invoice_received": "Factura recibida",
+                "invoice_issued": "Factura emitida"
+            },
+            "sources": {
+                "manual": "Manual",
+                "order_sale": "Cobro de pedido",
+                "import": "Subida de tabla",
+                "reversal": "Rectificación",
+                "legacy": "Traído de la contabilidad anterior"
+            },
+            "overview": {
+                "income": "Ingresos",
+                "expense": "Gastos",
+                "count": "{count, plural, one {# movimiento} other {# movimientos}}",
+                "result": "Resultado",
+                "resultHint": "Ingresos menos gastos, sin impuestos",
+                "vat": "IVA a pagar",
+                "vatHint": "ventas {charged} · compras {paid}",
+                "accountsTitle": "Cuentas",
+                "accountsHint": "Saldo a fin de mes con todos los movimientos",
+                "top": {
+                    "income": "De dónde viene el dinero",
+                    "expense": "A dónde va el dinero"
+                },
+                "empty": "No hay movimientos este mes",
+                "error": "No se pudo cargar el resumen"
+            },
+            "ledger": {
+                "month": "Mes",
+                "allMonths": "Todos los meses",
+                "closedMonth": "cerrado",
+                "direction": "Tipo",
+                "allDirections": "Todos los tipos",
+                "category": "Categoría",
+                "allCategories": "Todas las categorías",
+                "account": "Cuenta",
+                "allAccounts": "Todas las cuentas",
+                "counterparty": "Contraparte",
+                "clearCounterparty": "Quitar el filtro de contraparte",
+                "columns": {
+                    "date": "Fecha",
+                    "what": "Concepto y contraparte",
+                    "category": "Categoría",
+                    "account": "Cuenta",
+                    "amount": "Importe"
+                },
+                "empty": "No hay movimientos",
+                "error": "No se pudieron cargar los movimientos",
+                "total": "{count, plural, one {# movimiento} other {# movimientos}}",
+                "page": "{page} de {pages}",
+                "previous": "Anterior",
+                "next": "Siguiente",
+                "orderSale": "Pedido {number}",
+                "noDescription": "Sin concepto",
+                "reversalOf": "Rectificación: {title}",
+                "reversal": "Rectificación",
+                "hasAttachment": "Con adjunto"
+            },
+            "entry": {
+                "loading": "Movimiento…",
+                "what": "Operación",
+                "date": "Fecha",
+                "category": "Categoría",
+                "account": "Cuenta",
+                "counterparty": "Contraparte",
+                "document": "Documento y origen",
+                "documentLabel": "Documento",
+                "documentDate": "Fecha del documento",
+                "paidOn": "Pagado el",
+                "source": "Origen",
+                "author": "Registrado por",
+                "system": "Sistema",
+                "recordedAt": "Registrado",
+                "openOrder": "Abrir el pedido {number}",
+                "openReversed": "Movimiento rectificado",
+                "openReversal": "Rectificación de este movimiento",
+                "rate": "Tipo",
+                "net": "Base",
+                "tax": "Cuota",
+                "total": "Total del documento",
+                "withholding": "Retención IRPF {percent} %",
+                "payable": "Pasó por la cuenta",
+                "noBreakdown": "Sin desglose de impuestos",
+                "treatments": {
+                    "exempt": "Exenta",
+                    "not_subject": "No sujeta"
+                },
+                "noAttachment": "Sin ticket ni factura adjuntos",
+                "download": "Descargar",
+                "attach": "Adjuntar",
+                "replace": "Sustituir",
+                "removeAttachment": "Quitar el adjunto",
+                "attached": "Archivo adjuntado",
+                "classifyHint": "Los importes los lleva el pedido: aquí cambian la categoría, la cuenta y las notas",
+                "notesHint": "La rectificación repite el movimiento rectificado: solo se puede añadir una nota",
+                "notes": "Notas",
+                "saveClassification": "Guardar",
+                "saved": "Guardado",
+                "cancelEntry": "Anular movimiento",
+                "cancelTitle": "¿Anular el movimiento?",
+                "cancelOpen": "El movimiento sale de los totales del mes pero queda en el historial.",
+                "cancelClosed": "El mes está cerrado: se registra una rectificación con fecha de hoy y el movimiento no cambia.",
+                "reverse": "Registrar rectificación",
+                "keep": "Mantener",
+                "voided": "Movimiento anulado",
+                "reversed": "Rectificación registrada",
+                "edit": "Editar",
+                "close": "Cerrar",
+                "voidBadge": "Anulado",
+                "reversalBadge": "Rectificación",
+                "reversedBadge": "Rectificado"
+            },
+            "entryForm": {
+                "createTitle": {
+                    "income": "Nuevo ingreso",
+                    "expense": "Nuevo gasto",
+                    "transfer": "Traspaso entre cuentas"
+                },
+                "editTitle": "Editar movimiento",
+                "hint": "Los importes se guardan cifrados; los informes muestran base, cuota e importe a pagar.",
+                "fields": {
+                    "date": "Fecha de operación",
+                    "category": "Categoría",
+                    "account": "Cuenta",
+                    "fromAccount": "Desde",
+                    "toAccount": "Hacia",
+                    "description": "Concepto",
+                    "amount": "Importe, €",
+                    "taxRate": "Impuesto",
+                    "withholding": "Retención IRPF, %",
+                    "counterparty": "Contraparte",
+                    "member": "O un socio del club",
+                    "documentType": "Documento",
+                    "documentNumber": "Número del documento",
+                    "documentDate": "Fecha del documento",
+                    "paidOn": "Fecha de pago",
+                    "notes": "Notas"
+                },
+                "categoryPlaceholder": "Elige una categoría",
+                "descriptionPlaceholder": {
+                    "income": "Cuotas de octubre",
+                    "expense": "Alquiler del local",
+                    "transfer": "Ingreso de caja en el banco"
+                },
+                "includesTax": "Importe con IVA",
+                "excludesTax": "Importe sin IVA (base)",
+                "taxDefault": "Por defecto: {rate}",
+                "noTax": "sin impuesto",
+                "withholdingHint": "Un profesional (gestor, abogado): normalmente 15 %",
+                "preview": "Base {net} · cuota {tax} · IRPF {withholding} · a pagar {payable}",
+                "noCounterparty": "Sin contraparte",
+                "deletedMember": "Socio eliminado",
+                "clearMember": "Quitar el socio",
+                "cancel": "Cancelar",
+                "save": "Registrar",
+                "saving": "Registrando…",
+                "created": "Movimiento registrado",
+                "updated": "Movimiento guardado",
+                "duplicateTitle": "Parece un duplicado",
+                "duplicateDescription": "Esta contraparte ya tiene un movimiento con este número de documento. ¿Registrar otro?",
+                "duplicateConfirm": "Registrar igualmente",
+                "errors": {
+                    "required": "Rellena el campo",
+                    "date": "Indica una fecha",
+                    "amount": "Un importe mayor que cero, con céntimos",
+                    "percent": "De 0 a 100",
+                    "tooLong": "Demasiado largo",
+                    "sameAccount": "El traspaso va entre cuentas distintas"
+                }
+            },
+            "import": {
+                "title": "Subida de tabla",
+                "hint": "Descarga el ejemplo, rellénalo y súbelo: primero revisamos cada fila y luego registramos las válidas.",
+                "templateLabel": "Ejemplo:",
+                "template": {
+                    "xlsx": "Excel (.xlsx)",
+                    "csv": "CSV"
+                },
+                "noFile": "Ningún archivo: xlsx o csv",
+                "pickFile": "Elegir archivo",
+                "otherFile": "Otro archivo",
+                "checking": "Revisando filas…",
+                "summary": "Se registran: {create} · duplicados: {duplicate} · con error: {error}",
+                "row": "fila {row}",
+                "status": {
+                    "create": "Se registra",
+                    "duplicate": "Duplicado",
+                    "error": "Error"
+                },
+                "issues": {
+                    "required": "vacío",
+                    "invalid": "no se entiende el valor",
+                    "unknown_category": "no existe esa categoría: los códigos están en la hoja «categorias»",
+                    "category_direction": "categoría del otro lado: ingreso o gasto",
+                    "tax_mismatch": "el IVA no cuadra con la base y el tipo",
+                    "total_mismatch": "el total no cuadra: base + IVA − IRPF",
+                    "period_closed": "el mes está cerrado",
+                    "duplicate": "ya existe: misma contraparte, número y fecha",
+                    "already_imported": "esta fila de este archivo ya se subió"
+                },
+                "commit": "{count, plural, =0 {Nada que registrar} one {Registrar # fila} other {Registrar # filas}}",
+                "close": "Cerrar",
+                "done": "{count, plural, one {# movimiento registrado} other {# movimientos registrados}}"
+            },
+            "export": {
+                "title": "Exportar para el gestor",
+                "hint": "Movimientos (se pueden volver a subir) o los libros de la Orden HAC/773/2019. Cada exportación queda en el registro del club.",
+                "book": "Qué exportar",
+                "books": {
+                    "entries": "Movimientos",
+                    "purchases": "Libro de compras y gastos",
+                    "sales": "Libro de ventas e ingresos"
+                },
+                "bookHint": {
+                    "entries": "Todos los movimientos del periodo, también los anulados",
+                    "purchases": "Gastos con número de recepción, tipos de IVA y retenciones",
+                    "sales": "Ingresos con tipos de IVA y retenciones"
+                },
+                "from": "Desde",
+                "to": "Hasta",
+                "format": "Formato",
+                "formats": {
+                    "xlsx": "Excel (.xlsx)",
+                    "csv": "CSV para Excel en español"
+                },
+                "cancel": "Cancelar",
+                "download": "Descargar",
+                "preparing": "Preparando el archivo…"
+            },
+            "counterparties": {
+                "title": "Contrapartes",
+                "hint": "Proveedores, clientes y organismos; un socio aparece solo cuando se le registra un ingreso. Nombres y NIF se guardan cifrados.",
+                "add": "Añadir contraparte",
+                "empty": "Aún no hay contrapartes",
+                "kinds": {
+                    "supplier": "Proveedor",
+                    "customer": "Cliente",
+                    "member": "Socio",
+                    "employee": "Empleado",
+                    "authority": "Organismo"
+                },
+                "entries": "{count, plural, =0 {Sin movimientos} one {# movimiento} other {# movimientos}}",
+                "deletedMember": "Socio eliminado",
+                "edit": "Editar",
+                "archive": "Archivar",
+                "archiveTitle": "¿Archivar «{name}»?",
+                "archiveHint": "Los movimientos se quedan; en los nuevos no se podrá elegir.",
+                "archived": "Contraparte archivada",
+                "cancel": "Cancelar",
+                "createTitle": "Nueva contraparte",
+                "editTitle": "Contraparte",
+                "dialogHint": "El NIF español se comprueba por su dígito de control; uno extranjero va con el prefijo de su país de la UE.",
+                "fields": {
+                    "kind": "Qué es",
+                    "name": "Nombre o razón social",
+                    "nif": "NIF / NIE / CIF",
+                    "country": "País",
+                    "notes": "Notas"
+                },
+                "nifHint": "Necesario para facturas, libros y el modelo 347",
+                "save": "Guardar",
+                "saving": "Guardando…",
+                "created": "Contraparte añadida",
+                "updated": "Contraparte guardada",
+                "errors": {
+                    "required": "Rellena el campo",
+                    "tooLong": "Demasiado largo",
+                    "country": "Dos letras: ES, FR, DE…"
+                }
+            },
+            "categories": {
+                "title": "Categorías de ingresos y gastos",
+                "hint": "Un preset según el tipo de club con códigos del PGC; la subida de tablas encuentra la categoría por su código.",
+                "add": "Añadir categoría",
+                "showArchived": "Mostrar archivadas",
+                "income": "Ingresos",
+                "expense": "Gastos",
+                "edit": "Editar",
+                "archive": "Archivar",
+                "archivedBadge": "archivada",
+                "archiveTitle": "¿Archivar «{name}»?",
+                "archiveHint": "Sus movimientos se quedan; en los nuevos no se podrá elegir.",
+                "archived": "Categoría archivada",
+                "cancel": "Cancelar",
+                "createTitle": "Nueva categoría",
+                "editTitle": "Categoría",
+                "dialogHint": "El código para la tabla se forma a partir del nombre.",
+                "codeHint": "Código en la tabla: {code}",
+                "fields": {
+                    "name": "Nombre",
+                    "direction": "Lado",
+                    "pgcAccount": "Cuenta PGC",
+                    "taxTreatment": "Impuesto por defecto"
+                },
+                "treatments": {
+                    "club": "Tipo del club",
+                    "taxable": "Según el tipo",
+                    "exempt": "Exenta",
+                    "not_subject": "No sujeta"
+                },
+                "save": "Guardar",
+                "saving": "Guardando…",
+                "created": "Categoría añadida",
+                "updated": "Categoría guardada",
+                "errors": {
+                    "required": "Rellena el campo",
+                    "tooLong": "Demasiado largo",
+                    "pgc": "Solo cifras, de 2 a 10"
+                },
+                "presets": {
+                    "membership_fees": "Cuotas de socios",
+                    "sales": "Cobros de pedidos",
+                    "donations": "Donaciones",
+                    "other_income": "Otros ingresos",
+                    "services": "Prestación de servicios",
+                    "purchases": "Compras de mercaderías",
+                    "supplies": "Material y consumibles",
+                    "rent": "Arrendamientos",
+                    "repairs": "Reparaciones y conservación",
+                    "professional_services": "Servicios de profesionales",
+                    "insurance": "Primas de seguros",
+                    "bank_fees": "Servicios bancarios",
+                    "marketing": "Publicidad",
+                    "utilities": "Suministros",
+                    "taxes": "Tributos",
+                    "salaries": "Sueldos y salarios",
+                    "social_security": "Seguridad Social",
+                    "other_expenses": "Otros gastos"
+                }
+            },
+            "periods": {
+                "title": "Meses contables",
+                "hint": "Un mes cerrado no cambia: las correcciones van como rectificación en un mes abierto. Solo se cierra un mes pasado.",
+                "entries": "{count, plural, =0 {sin movimientos} one {# movimiento} other {# movimientos}}",
+                "closed": "Cerrado",
+                "closedBy": "{name}, {at}",
+                "open": "Abierto",
+                "close": "Cerrar el mes",
+                "reopen": "Reabrir",
+                "closeTitle": "¿Cerrar el mes?",
+                "closeHint": "Sus movimientos ya no se podrán editar ni anular, solo rectificar en un mes abierto.",
+                "reopenTitle": "¿Reabrir el mes?",
+                "reopenHint": "Sus movimientos vuelven a ser editables. Si el mes ya se envió al gestor, corrige con rectificaciones.",
+                "cancel": "Cancelar",
+                "closedToast": "Mes cerrado",
+                "reopenedToast": "Mes reabierto"
+            },
+            "errors": {
+                "period_closed": "El mes está cerrado: corrígelo con una rectificación en un mes abierto",
+                "duplicate_document": "Esta contraparte ya tiene un documento con este número",
+                "entry_managed_by_source": "Este movimiento lo lleva su pedido o el movimiento que rectifica",
+                "entry_already_void": "El movimiento ya está anulado",
+                "entry_already_reversed": "El movimiento ya tiene rectificación",
+                "category_required": "Elige una categoría",
+                "category_direction_mismatch": "Categoría del otro lado: ingreso o gasto",
+                "category_archived": "La categoría está archivada",
+                "transfer_same_account": "El traspaso va entre cuentas distintas",
+                "transfer_has_no_category": "Un traspaso no tiene categoría",
+                "counterparty_not_found": "Contraparte no encontrada",
+                "member_not_found": "Socio no encontrado",
+                "tax_rate_not_found": "Tipo de impuesto no encontrado",
+                "attachment_type": "Adjunta una foto (JPEG, PNG, WEBP) o un PDF",
+                "attachment_missing": "No hay archivo",
+                "counterparty_name_required": "Indica un nombre",
+                "counterparty_nif_invalid": "El NIF tiene un error: revisa el número",
+                "counterparty_nif_taken": "Ya existe una contraparte con este NIF",
+                "counterparty_is_member": "El socio se cambia en su ficha",
+                "category_name_required": "Indica un nombre",
+                "category_code_taken": "Demasiadas categorías con este nombre",
+                "category_receives_orders": "A esta categoría van los pedidos cobrados: no se puede archivar",
+                "period_not_past": "Solo se puede cerrar un mes pasado",
+                "period_already_closed": "El mes ya está cerrado",
+                "period_not_closed": "El mes no está cerrado",
+                "import_file_type": "Sube un archivo .xlsx o .csv",
+                "import_file_missing": "Elige un archivo",
+                "import_empty": "El archivo no tiene filas",
+                "import_missing_columns": "Faltan columnas obligatorias: compáralo con el ejemplo",
+                "import_too_many_rows": "Demasiadas filas en un archivo: divídelo"
             }
         },
         "sections": {
@@ -1851,7 +2205,32 @@
                 },
                 "finance": {
                     "profile_updated": "Datos fiscales de la entidad actualizados",
-                    "tax_rates_changed": "Tipos de impuesto modificados"
+                    "tax_rates_changed": "Tipos de impuesto modificados",
+                    "entry_recorded": {
+                        "manual": "Registrado: {direction}",
+                        "order_sale": "Cobro de pedido registrado como ingreso",
+                        "import": "Registrado desde una tabla: {direction}",
+                        "reversal": "Rectificación registrada",
+                        "legacy": "Movimiento traído de la contabilidad anterior"
+                    },
+                    "directions": {
+                        "income": "ingreso",
+                        "expense": "gasto",
+                        "transfer": "traspaso"
+                    },
+                    "entry_updated": "Movimiento corregido",
+                    "entry_voided": "Movimiento anulado",
+                    "entries_imported": "{count, plural, one {# movimiento subido desde una tabla} other {# movimientos subidos desde una tabla}}",
+                    "period_closed": "Mes {period} cerrado",
+                    "period_reopened": "Mes {period} reabierto",
+                    "categories_changed": "Categorías de ingresos y gastos cambiadas",
+                    "counterparties_changed": "Contrapartes cambiadas",
+                    "accessed": "Exportado para el gestor: {book}",
+                    "books": {
+                        "entries": "movimientos",
+                        "purchases": "libro de compras y gastos",
+                        "sales": "libro de ventas e ingresos"
+                    }
                 },
                 "role": {
                     "changed": "Permisos del rol modificados"
@@ -1888,6 +2267,13 @@
                 "product": "Producto",
                 "portal": "Club"
             }
+        },
+        "memberPicker": {
+            "placeholder": "Elige un socio",
+            "search": "Nombre, email o número…",
+            "searching": "Buscando…",
+            "empty": "No hay nadie",
+            "inactive": "inactivo"
         }
     }
 }

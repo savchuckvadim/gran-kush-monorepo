@@ -28,12 +28,17 @@ const extractCookies = (res: request.Response): string => {
     return raw.map((c) => c.split(";")[0]).join("; ");
 };
 
-const transactionBody = (amount: number, description: string) => ({
-    type: "manual",
-    direction: "income",
+/**
+ * Перевод кассы в банк: проводка без статьи, пресет модуля финансов не нужен. Сумма и описание
+ * в базе зашифрованы, поэтому случаи различаются датой операции.
+ */
+const entryBody = (amount: number, occurredOn: string) => ({
+    direction: "transfer",
+    occurredOn,
+    account: "cash",
+    toAccount: "bank",
     amount,
-    currency: "EUR",
-    description,
+    description: "Ingreso en banco",
 });
 
 describe("Idempotency-Key (e2e)", () => {
@@ -71,7 +76,7 @@ describe("Idempotency-Key (e2e)", () => {
 
     const postTransaction = (portal: PortalContext, body: object, key?: string) => {
         const req = request(app.getHttpServer())
-            .post("/crm/finance/transactions")
+            .post("/crm/finance/entries")
             .set("Cookie", portal.cookies)
             .set("X-Portal-Slug", portal.slug);
         if (key) {
@@ -80,8 +85,10 @@ describe("Idempotency-Key (e2e)", () => {
         return req.send(body);
     };
 
-    const countTransactions = (portalId: string, description: string) =>
-        prisma.financialTransaction.count({ where: { portalId, description } });
+    const countTransactions = (portalId: string, occurredOn: string) =>
+        prisma.ledgerEntry.count({
+            where: { portalId, occurredOn: new Date(`${occurredOn}T00:00:00.000Z`) },
+        });
 
     beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -105,8 +112,8 @@ describe("Idempotency-Key (e2e)", () => {
 
     it("повтор с тем же ключом не создаёт вторую проводку", async () => {
         const key = `key-repeat-${suffix}`;
-        const description = `IDEM-REPEAT-${suffix}`;
-        const body = transactionBody(10.5, description);
+        const day = "2026-01-01";
+        const body = entryBody(10.5, day);
 
         const first = await postTransaction(portalA, body, key);
         expect(first.status).toBe(201);
@@ -115,41 +122,41 @@ describe("Idempotency-Key (e2e)", () => {
         expect(second.status).toBe(201);
 
         expect(second.body.id).toBe(first.body.id);
-        expect(await countTransactions(portalA.id, description)).toBe(1);
+        expect(await countTransactions(portalA.id, day)).toBe(1);
     });
 
     it("без заголовка поведение прежнее — два запроса создают две проводки", async () => {
-        const description = `IDEM-NOKEY-${suffix}`;
-        const body = transactionBody(11.5, description);
+        const day = "2026-01-02";
+        const body = entryBody(11.5, day);
 
         expect((await postTransaction(portalA, body)).status).toBe(201);
         expect((await postTransaction(portalA, body)).status).toBe(201);
 
-        expect(await countTransactions(portalA.id, description)).toBe(2);
+        expect(await countTransactions(portalA.id, day)).toBe(2);
     });
 
     it("тот же ключ с другим телом — 422, а не тихая подмена ответа", async () => {
         const key = `key-mismatch-${suffix}`;
-        const description = `IDEM-MISMATCH-${suffix}`;
+        const day = "2026-01-03";
 
-        const first = await postTransaction(portalA, transactionBody(12.5, description), key);
+        const first = await postTransaction(portalA, entryBody(12.5, day), key);
         expect(first.status).toBe(201);
 
-        const second = await postTransaction(portalA, transactionBody(99.99, description), key);
+        const second = await postTransaction(portalA, entryBody(99.99, day), key);
         expect(second.status).toBe(422);
 
-        expect(await countTransactions(portalA.id, description)).toBe(1);
+        expect(await countTransactions(portalA.id, day)).toBe(1);
     });
 
     it("ключ, занятый незавершённым запросом, отвечает 409, а не выполняет операцию второй раз", async () => {
         const key = `key-inflight-${suffix}`;
-        const description = `IDEM-INFLIGHT-${suffix}`;
-        const body = transactionBody(13.5, description);
+        const day = "2026-01-04";
+        const body = entryBody(13.5, day);
 
         // Имитируем запрос, который занял ключ и ещё не завершился.
         await prisma.idempotencyKey.create({
             data: {
-                scope: IdempotencyScope.CRM_FINANCE_TRANSACTION_CREATE,
+                scope: IdempotencyScope.CRM_FINANCE_ENTRY_CREATE,
                 ownerKey: `${portalA.id}:employee:${portalA.membershipId}`,
                 key,
                 requestHash: idempotency.hashRequest(body),
@@ -161,13 +168,13 @@ describe("Idempotency-Key (e2e)", () => {
         const res = await postTransaction(portalA, body, key);
         expect(res.status).toBe(409);
 
-        expect(await countTransactions(portalA.id, description)).toBe(0);
+        expect(await countTransactions(portalA.id, day)).toBe(0);
     });
 
     it("одинаковый ключ у двух клубов не пересекается — каждый получает свою проводку", async () => {
         const key = `key-shared-${suffix}`;
-        const description = `IDEM-SHARED-${suffix}`;
-        const body = transactionBody(14.5, description);
+        const day = "2026-01-05";
+        const body = entryBody(14.5, day);
 
         const inA = await postTransaction(portalA, body, key);
         expect(inA.status).toBe(201);
@@ -177,31 +184,28 @@ describe("Idempotency-Key (e2e)", () => {
 
         // Совпадение клиентских ключей не должно отдавать клубу B ответ клуба A.
         expect(inB.body.id).not.toBe(inA.body.id);
-        expect(await countTransactions(portalA.id, description)).toBe(1);
-        expect(await countTransactions(portalB.id, description)).toBe(1);
+        expect(await countTransactions(portalA.id, day)).toBe(1);
+        expect(await countTransactions(portalB.id, day)).toBe(1);
     });
 
     it("неудачный запрос освобождает ключ, и осмысленный ретрай проходит", async () => {
         const key = `key-release-${suffix}`;
-        const description = `IDEM-RELEASE-${suffix}`;
+        const day = "2026-01-06";
 
-        // Несуществующий участник — сервис отвергает проводку уже после занятия ключа.
+        // Перевод на тот же счёт — сервис отвергает проводку уже после занятия ключа.
         const failed = await postTransaction(
             portalA,
-            {
-                ...transactionBody(15.5, description),
-                memberId: "00000000-0000-4000-8000-000000000000",
-            },
+            { ...entryBody(15.5, day), toAccount: "cash" },
             key
         );
         expect(failed.status).toBeGreaterThanOrEqual(400);
 
         const held = await prisma.idempotencyKey.findFirst({
-            where: { key, scope: IdempotencyScope.CRM_FINANCE_TRANSACTION_CREATE },
+            where: { key, scope: IdempotencyScope.CRM_FINANCE_ENTRY_CREATE },
         });
         expect(held).toBeNull();
 
-        const retried = await postTransaction(portalA, transactionBody(15.5, description), key);
+        const retried = await postTransaction(portalA, entryBody(15.5, day), key);
         expect(retried.status).toBe(201);
     });
 });

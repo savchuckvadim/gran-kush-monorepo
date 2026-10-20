@@ -294,21 +294,27 @@ describe("CRM role-based access (e2e)", () => {
         });
     });
 
-    describe("finance — ручные транзакции только для admin", () => {
-        it("rejects manual transaction by employee role", async () => {
-            const res = await as(employeeCookies).post("/crm/finance/transactions").send({
-                type: "income",
+    describe("finance — ручные проводки только с finance.write", () => {
+        it("rejects manual entry by employee role", async () => {
+            const res = await as(employeeCookies).post("/crm/finance/entries").send({
+                direction: "transfer",
+                occurredOn: "2026-03-10",
+                account: "cash",
+                toAccount: "bank",
                 amount: 1000,
-                description: "Левая транзакция",
+                description: "Левая проводка",
             });
             expect(res.status).toBe(403);
         });
 
-        it("rejects manual transaction by manager role", async () => {
-            const res = await as(managerCookies).post("/crm/finance/transactions").send({
-                type: "income",
+        it("rejects manual entry by manager role", async () => {
+            const res = await as(managerCookies).post("/crm/finance/entries").send({
+                direction: "transfer",
+                occurredOn: "2026-03-10",
+                account: "cash",
+                toAccount: "bank",
                 amount: 1000,
-                description: "Левая транзакция",
+                description: "Левая проводка",
             });
             expect(res.status).toBe(403);
         });

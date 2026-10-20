@@ -136,13 +136,13 @@ describe("Employee permissions (e2e)", () => {
 
     it("an employee does not see finance, the team, document scans or QR issuing", async () => {
         const employee = as(staff.employee.cookies);
-        expect((await employee.get("/crm/finance/transactions")).status).toBe(403);
+        expect((await employee.get("/crm/finance/entries")).status).toBe(403);
         expect((await employee.get("/crm/employees")).status).toBe(403);
         expect((await employee.get("/crm/members/x/documents/y/preview")).status).toBe(403);
         expect((await employee.post("/crm/qr-codes/generate").send({})).status).toBe(403);
         expect((await employee.get("/crm/members")).status).toBe(200);
 
-        expect((await as(staff.manager.cookies).get("/crm/finance/transactions")).status).toBe(200);
+        expect((await as(staff.manager.cookies).get("/crm/finance/entries")).status).toBe(200);
     });
 
     it("me lists the role and its permissions per club", async () => {
@@ -174,7 +174,7 @@ describe("Employee permissions (e2e)", () => {
         expect(assigned.body.role.key).toBe(cashier.key);
 
         const employee = as(staff.employee.cookies);
-        expect((await employee.get("/crm/finance/transactions")).status).toBe(200);
+        expect((await employee.get("/crm/finance/entries")).status).toBe(200);
         expect((await employee.get("/crm/members")).status).toBe(403);
 
         const inUse = await as(owner).delete(`/crm/settings/roles/${cashier.id}`);

@@ -252,6 +252,10 @@ model Portal {
   taxRates              TaxRate[]
   comments              EntityComment[]
   notifications         Notification[]
+  financeCategories     FinanceCategory[]
+  counterparties        Counterparty[]
+  ledgerEntries         LedgerEntry[]
+  financePeriods        FinancePeriod[]
 
   @@index([name])
   @@index([status])
@@ -526,6 +530,7 @@ model Member {
   orders            Order[]
   documentShares    MemberDocumentShare[]
   notifications     Notification[]
+  counterparties    Counterparty[]
 
   @@unique([userId, portalId])
   @@unique([portalId, membershipNumber])
@@ -566,6 +571,9 @@ model Employee {
   pinnedComments        EntityComment[]        @relation("CommentPinnedBy")
   uiSettings            UiSetting[]
   notifications         Notification[]
+  ledgerEntries         LedgerEntry[]          @relation("LedgerEntryCreatedBy")
+  voidedLedgerEntries   LedgerEntry[]          @relation("LedgerEntryVoidedBy")
+  closedFinancePeriods  FinancePeriod[]        @relation("FinancePeriodClosedBy")
 
   @@unique([userId, portalId])
   @@index([portalId])
@@ -1861,4 +1869,176 @@ model EntityComment {
   @@index([portalId, subjectKind, subjectId, createdAt])
   @@index([portalId, createdAt])
   @@map("entity_comments")
+}
+
+// ========================
+// Ledger (TASK-798)
+// ========================
+
+/// Направление проводки: доход, расход или перевод между своими счетами (касса → банк)
+enum LedgerDirection {
+  income
+  expense
+  transfer
+
+  @@map("ledger_direction")
+}
+
+/// Проводка в учёте или отменена в открытом месяце; закрытый месяц исправляется сторно
+enum LedgerEntryStatus {
+  posted
+  void
+
+  @@map("ledger_entry_status")
+}
+
+/// Счёт, через который прошли деньги: касса клуба, банковский счёт, карта
+enum FinanceAccount {
+  cash
+  bank
+  card
+
+  @@map("finance_account")
+}
+
+/// Документ проводки: фактура полученная (расход), выданная (доход), чек или без документа
+enum LedgerDocumentType {
+  invoice_received
+  invoice_issued
+  receipt
+  none
+
+  @@map("ledger_document_type")
+}
+
+/// Кто контрагент: поставщик, клиент, участник клуба, сотрудник, госорган (AEAT, Seguridad Social)
+enum CounterpartyKind {
+  supplier
+  customer
+  member
+  employee
+  authority
+
+  @@map("counterparty_kind")
+}
+
+/// Статья доходов или расходов клуба. Пресет (клуб или студия) появляется при подключении
+/// финансов: подпись пресета переводит CRM по `code`, у своей статьи — `name`. По `code` импорт
+/// таблицей находит статью. Статьи не удаляются, а архивируются: на них ссылаются проводки
+model FinanceCategory {
+  id           String          @id @default(uuid())
+  portalId     String          @map("portal_id")
+  code         String          @db.VarChar(40)
+  name         String?         @db.VarChar(80)
+  /// income или expense; переводы статьи не имеют
+  direction    LedgerDirection
+  /// Счёт плана PGC (упрощённо): 600 закупки, 621 аренда, 705 услуги, 720 взносы…
+  pgcAccount   String?         @map("pgc_account") @db.VarChar(10)
+  /// Налог проводок статьи по умолчанию: взносы ассоциации — not_subject; пусто — ставка клуба
+  taxTreatment TaxTreatment?   @map("tax_treatment")
+  isPreset     Boolean         @default(false) @map("is_preset")
+  sortOrder    Int             @default(0) @map("sort_order")
+  archivedAt   DateTime?       @map("archived_at")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+
+  portal  Portal        @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  entries LedgerEntry[]
+
+  @@unique([portalId, code])
+  @@index([portalId, direction])
+  @@map("finance_categories")
+}
+
+/// Контрагент проводок. Имя, NIF, страна, заметки — одним шифром ключа портала (`details`);
+/// дубль по NIF или имени находят слепые индексы (HMAC ключом портала), не открытые значения.
+/// Участник клуба — ссылкой на участника: имя берётся из его карточки, своё не хранится
+model Counterparty {
+  id         String           @id @default(uuid())
+  portalId   String           @map("portal_id")
+  kind       CounterpartyKind
+  memberId   String?          @map("member_id")
+  details    String?          @db.Text
+  nifIndex   String?          @map("nif_index") @db.VarChar(64)
+  nameIndex  String?          @map("name_index") @db.VarChar(64)
+  archivedAt DateTime?        @map("archived_at")
+  createdAt  DateTime         @default(now()) @map("created_at")
+  updatedAt  DateTime         @updatedAt @map("updated_at")
+
+  portal  Portal        @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  member  Member?       @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  entries LedgerEntry[]
+
+  @@unique([portalId, memberId])
+  @@unique([portalId, nifIndex])
+  @@index([portalId, nameIndex])
+  @@map("counterparties")
+}
+
+/// Проводка учёта (заменяет `financial_transactions`). Открыто только то, по чему выбирают:
+/// портал, дата, статья, направление, счёт, источник, статус. Суммы (строки налога, удержание),
+/// описание, заметки, номер и даты документа — шифр ключа портала в `payload`.
+/// Источник — ключ идемпотентности: оплата заказа (`order_sale`, `<orderId>#<n>`), строка импорта
+/// (`import`, `<хеш файла>:<строка>`), сторно (`reversal`, id отменённой проводки). Сторно —
+/// отдельная проводка с обратными суммами в открытом месяце
+model LedgerEntry {
+  id             String             @id @default(uuid())
+  portalId       String             @map("portal_id")
+  direction      LedgerDirection
+  status         LedgerEntryStatus  @default(posted)
+  /// Дата операции (fecha de operación); месяц проводки — её месяц
+  occurredOn     DateTime           @map("occurred_on") @db.Date
+  categoryId     String?            @map("category_id")
+  counterpartyId String?            @map("counterparty_id")
+  account        FinanceAccount
+  /// Перевод: счёт, на который пришли деньги
+  toAccount      FinanceAccount?    @map("to_account")
+  currency       String             @default("EUR") @db.VarChar(3)
+  documentType   LedgerDocumentType @default(none) @map("document_type")
+  /// Слепой индекс номера документа: тот же контрагент и номер — вероятный дубль
+  documentIndex  String?            @map("document_index") @db.VarChar(64)
+  payload        String             @db.Text
+  /// Вложение (чек, фактура) в private storage, зашифровано ключом портала
+  attachmentPath String?            @map("attachment_path") @db.VarChar(255)
+  sourceType     String             @map("source_type") @db.VarChar(20)
+  sourceId       String?            @map("source_id") @db.VarChar(255)
+  reversalOfId   String?            @unique @map("reversal_of_id")
+  createdById    String?            @map("created_by_id")
+  voidedAt       DateTime?          @map("voided_at")
+  voidedById     String?            @map("voided_by_id")
+  createdAt      DateTime           @default(now()) @map("created_at")
+  updatedAt      DateTime           @updatedAt @map("updated_at")
+
+  portal       Portal           @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  category     FinanceCategory? @relation(fields: [categoryId], references: [id], onDelete: NoAction)
+  counterparty Counterparty?    @relation(fields: [counterpartyId], references: [id], onDelete: NoAction)
+  reversalOf   LedgerEntry?     @relation("LedgerReversal", fields: [reversalOfId], references: [id], onDelete: NoAction)
+  reversal     LedgerEntry?     @relation("LedgerReversal")
+  createdBy    Employee?        @relation("LedgerEntryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  voidedBy     Employee?        @relation("LedgerEntryVoidedBy", fields: [voidedById], references: [id], onDelete: SetNull)
+
+  @@unique([portalId, sourceType, sourceId])
+  @@index([portalId, occurredOn])
+  @@index([portalId, categoryId])
+  @@index([portalId, counterpartyId])
+  @@index([portalId, documentIndex])
+  @@map("ledger_entries")
+}
+
+/// Месяц учёта клуба. Строки нет — месяц открыт. Закрытый месяц замораживает проводки с датой
+/// в нём: исправление — сторно в открытом месяце
+model FinancePeriod {
+  id         String    @id @default(uuid())
+  portalId   String    @map("portal_id")
+  year       Int
+  month      Int
+  closedAt   DateTime? @map("closed_at")
+  closedById String?   @map("closed_by_id")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  portal   Portal    @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  closedBy Employee? @relation("FinancePeriodClosedBy", fields: [closedById], references: [id], onDelete: SetNull)
+
+  @@unique([portalId, year, month])
+  @@map("finance_periods")
 }

@@ -1,8 +1,8 @@
 import type { EntityComment } from "@prisma/client";
 
-import { subjectKindOf, type TimelineComment } from "../domain/timeline";
+import { personName, type PersonNameRow } from "@modules/portal/crm/entity-fields/lib/person-name";
 
-import { personName, type PersonNameRow } from "./staff-names";
+import { subjectKindOf, type TimelineComment } from "../domain/timeline";
 
 export type CommentRow = EntityComment & { author: PersonNameRow | null };
 

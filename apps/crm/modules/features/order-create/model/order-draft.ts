@@ -1,3 +1,4 @@
+import type { MemberChoice } from "@/modules/entities/member";
 import type { CreateOrderBody } from "@/modules/entities/order";
 
 /** A product as the picker found it: enough to price a line and check the stock. */
@@ -20,12 +21,7 @@ export interface OrderDraftLine {
 }
 
 /** The member the order is placed for. */
-export interface DraftMember {
-    id: string;
-    name: string;
-    email?: string | null;
-    isActive: boolean;
-}
+export type DraftMember = MemberChoice;
 
 export type DraftLineError = "quantity" | "price" | "stock";
 

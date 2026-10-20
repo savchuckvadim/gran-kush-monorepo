@@ -406,75 +406,63 @@ describe("Cross-portal isolation (e2e)", () => {
     });
 
     describe("finance isolation", () => {
-        let txnBId: string;
+        let entryBId: string;
+
+        const asPortal = (portal: typeof portalA, method: "get" | "post", path: string) =>
+            request(app.getHttpServer())
+                [method](path)
+                .set("Cookie", portal.cookies)
+                .set("X-Portal-Slug", portal.slug)
+                .set("Origin", "http://localhost:5000");
 
         beforeAll(async () => {
-            const txn = await prisma.financialTransaction.create({
-                data: {
-                    portalId: portalB.id,
-                    type: "adjustment",
-                    direction: "income",
-                    amount: 777.77,
-                    currency: "EUR",
-                    description: `ISO-FIN-${suffix}`,
-                },
+            // перевод кассы в банк: проводка без статьи, сумма в базе — шифр ключа клуба B
+            const res = await asPortal(portalB, "post", "/crm/finance/entries").send({
+                direction: "transfer",
+                occurredOn: "2026-03-10",
+                account: "cash",
+                toAccount: "bank",
+                amount: 777.77,
+                description: `ISO-FIN-${suffix}`,
             });
-            txnBId = txn.id;
+            expect(res.status).toBe(201);
+            entryBId = res.body.id as string;
         });
 
-        it("does not list portal B transactions for employee A", async () => {
-            const res = await request(app.getHttpServer())
-                .get("/crm/finance/transactions")
-                .set("Cookie", portalA.cookies)
-                .set("X-Portal-Slug", portalA.slug);
+        it("does not list portal B entries for employee A", async () => {
+            const res = await asPortal(portalA, "get", "/crm/finance/entries");
             expect(res.status).toBe(200);
-            expect(JSON.stringify(res.body)).not.toContain(txnBId);
+            expect(JSON.stringify(res.body)).not.toContain(entryBId);
         });
 
-        it("returns 404 for portal B transaction by id", async () => {
-            const res = await request(app.getHttpServer())
-                .get(`/crm/finance/transactions/${txnBId}`)
-                .set("Cookie", portalA.cookies)
-                .set("X-Portal-Slug", portalA.slug);
-            expect(res.status).toBe(404);
+        it("returns 404 for portal B entry by id and refuses to cancel it", async () => {
+            expect(
+                (await asPortal(portalA, "get", `/crm/finance/entries/${entryBId}`)).status
+            ).toBe(404);
+            const cancel = await asPortal(
+                portalA,
+                "post",
+                `/crm/finance/entries/${entryBId}/cancel`
+            );
+            expect(cancel.status).toBe(404);
         });
 
-        it("does not count portal B money into portal A summary", async () => {
-            const res = await request(app.getHttpServer())
-                .get("/crm/finance/reports/summary")
-                .query({ startDate: "2000-01-01", endDate: "2100-01-01" })
-                .set("Cookie", portalA.cookies)
-                .set("X-Portal-Slug", portalA.slug);
-            expect(res.status).toBe(200);
-            expect(Number(res.body.totalIncome)).toBe(0);
-        });
-
-        it("does not leak portal B money into portal A by-type report", async () => {
-            const res = await request(app.getHttpServer())
-                .get("/crm/finance/reports/by-type")
-                .query({ startDate: "2000-01-01", endDate: "2100-01-01" })
-                .set("Cookie", portalA.cookies)
-                .set("X-Portal-Slug", portalA.slug);
+        it("does not count portal B money into portal A overview", async () => {
+            const res = await asPortal(portalA, "get", "/crm/finance/overview").query({
+                from: "2000-01-01",
+                to: "2100-01-01",
+            });
             expect(res.status).toBe(200);
             expect(JSON.stringify(res.body)).not.toContain("777.77");
+            expect(res.body.accounts.every((row: { balance: number }) => row.balance === 0)).toBe(
+                true
+            );
         });
 
-        it("does not leak portal B money into portal A by-date report", async () => {
-            const res = await request(app.getHttpServer())
-                .get("/crm/finance/reports/by-date")
-                .query({ startDate: "2000-01-01", endDate: "2100-01-01" })
-                .set("Cookie", portalA.cookies)
-                .set("X-Portal-Slug", portalA.slug);
+        it("returns portal B entry to its own employee", async () => {
+            const res = await asPortal(portalB, "get", `/crm/finance/entries/${entryBId}`);
             expect(res.status).toBe(200);
-            expect(JSON.stringify(res.body)).not.toContain("777.77");
-        });
-
-        it("returns portal B transaction to its own employee", async () => {
-            const res = await request(app.getHttpServer())
-                .get(`/crm/finance/transactions/${txnBId}`)
-                .set("Cookie", portalB.cookies)
-                .set("X-Portal-Slug", portalB.slug);
-            expect(res.status).toBe(200);
+            expect(res.body.totals.net).toBe(777.77);
         });
     });
 

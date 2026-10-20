@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 import { DomainEventPublisher, employeeActor, type NewDomainEvent } from "@modules/events";
+import { PERSON_NAME_SELECT } from "@modules/portal/crm/entity-fields/lib/person-name";
 
 import {
     isTimelineSubjectKind,
@@ -15,7 +16,6 @@ import {
     type StoredComment,
 } from "../domain/timeline-repository.interface";
 
-import { PERSON_NAME_SELECT } from "./staff-names";
 import { toTimelineComment } from "./timeline-comment.mapper";
 
 const include = { author: { select: PERSON_NAME_SELECT } } as const;

@@ -16,6 +16,7 @@ import {
 import { TaxRatesCard } from "@/modules/features/tax-rates";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
+import { FinanceCategoriesCard } from "@/modules/widgets/finance";
 
 /** Организация, налоговые режимы и ставки клуба; ниже — отключение модуля для владельца. */
 export function FinanceSettingsPage() {
@@ -45,6 +46,7 @@ export function FinanceSettingsPage() {
                         submitLabel={t("submit")}
                     />
                     <TaxRatesCard />
+                    <FinanceCategoriesCard />
                     <FinanceModuleSwitch />
                 </div>
             )}

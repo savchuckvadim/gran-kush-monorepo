@@ -10,11 +10,13 @@ import {
 
 import { OrganizationProfileRepository } from "../domain/repositories/organization-profile-repository.interface";
 
+import { FinanceCategoriesService } from "./services/finance-categories.service";
 import { TaxRatesService } from "./services/tax-rates.service";
 
 /**
- * Включение финансов клуба: ставки налога Испании, по умолчанию — ставка режима IVA профиля
- * (до настройки профиля — general). Повторное включение недостающее досоздаёт, своё не трогает.
+ * Включение финансов клуба: ставки налога Испании (по умолчанию — ставка режима IVA профиля,
+ * до настройки профиля — general) и статьи доходов и расходов по типу портала. Повторное
+ * включение недостающее досоздаёт, своё не трогает.
  */
 @Injectable()
 export class FinanceModuleLifecycle implements PortalModuleLifecycle, OnModuleInit {
@@ -23,6 +25,7 @@ export class FinanceModuleLifecycle implements PortalModuleLifecycle, OnModuleIn
     constructor(
         private readonly registry: PortalModuleRegistry,
         private readonly taxRates: TaxRatesService,
+        private readonly categories: FinanceCategoriesService,
         private readonly profiles: OrganizationProfileRepository
     ) {}
 
@@ -33,5 +36,6 @@ export class FinanceModuleLifecycle implements PortalModuleLifecycle, OnModuleIn
     async onEnable(portalId: string, tx: OutboxTransaction): Promise<void> {
         const settings = await this.profiles.findTaxSettings(portalId);
         await this.taxRates.seedPresets(portalId, settings?.vatRegime ?? VatRegime.general, tx);
+        await this.categories.seedPresets(portalId, tx);
     }
 }

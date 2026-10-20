@@ -3,10 +3,9 @@ import { Injectable } from "@nestjs/common";
 import type { Prisma } from "@prisma/client";
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { PERSON_NAME_SELECT, personName } from "@modules/portal/crm/entity-fields/lib/person-name";
 
 import type { TimelineSubjectKind } from "../domain/timeline";
-
-import { PERSON_NAME_SELECT, personName } from "./staff-names";
 
 export interface EventLabel {
     label: string;

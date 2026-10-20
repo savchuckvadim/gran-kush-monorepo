@@ -603,10 +603,6 @@
                 "title": "Новый заказ",
                 "description": "Заказ за участника клуба: товары из каталога, своя цена и подарки по позициям. Товар списывается со склада сразу.",
                 "member": "Участник",
-                "memberPlaceholder": "Выберите участника",
-                "memberSearch": "Имя, email или номер…",
-                "memberEmpty": "Никого не нашли",
-                "memberInactive": "неактивен",
                 "memberRequired": "Выберите участника",
                 "memberInactiveError": "Участник не активен — заказ на него не оформить",
                 "searching": "Ищем…",
@@ -646,51 +642,6 @@
         "finance": {
             "title": "Финансы",
             "subtitle": "Финансовые отчёты, транзакции и аналитика",
-            "summary": {
-                "loading": "Загрузка...",
-                "period": "За текущий месяц",
-                "totalIncome": "Общий доход",
-                "totalExpense": "Общий расход",
-                "netBalance": "Чистый баланс"
-            },
-            "transactions": {
-                "title": "Транзакции",
-                "loading": "Загрузка...",
-                "error": "Ошибка загрузки",
-                "empty": "Нет транзакций",
-                "all": "Все",
-                "income": "Доход",
-                "expense": "Расход",
-                "colDate": "Дата",
-                "colType": "Тип",
-                "colDirection": "Направление",
-                "colAmount": "Сумма",
-                "colMethod": "Метод",
-                "colDescription": "Описание",
-                "page": "Стр.",
-                "type": {
-                    "order_payment": "Оплата заказа",
-                    "refund": "Возврат",
-                    "adjustment": "Корректировка",
-                    "manual": "Ручная"
-                },
-                "method": {
-                    "cash": "Наличные",
-                    "card": "Карта",
-                    "crypto": "Крипто"
-                }
-            },
-            "reports": {
-                "loading": "Загрузка...",
-                "byTypeTitle": "По типам",
-                "transactions": "транзакций",
-                "type": {
-                    "order_payment": "Оплата заказа",
-                    "refund": "Возврат",
-                    "adjustment": "Корректировка",
-                    "manual": "Ручная"
-                }
-            },
             "module": {
                 "title": "Финансы",
                 "subtitle": "Учёт доходов и расходов, налоги Испании и отчёты для gestor. Модуль подключается отдельно для каждого клуба.",
@@ -730,9 +681,6 @@
                 "title": "Настройка финансов",
                 "subtitle": "Расскажите об организации клуба: от её формы зависят налоги и отчёты. Обычные значения для вашего типа клуба уже подставлены — проверьте их и впишите реквизиты.",
                 "submit": "Сохранить и начать учёт"
-            },
-            "dashboard": {
-                "settings": "Организация и налоги"
             },
             "settings": {
                 "title": "Организация и налоги",
@@ -892,6 +840,412 @@
                     "tax_rate_archived": "Ставка в архиве",
                     "tax_rate_name_required": "У своей ставки должно быть название"
                 }
+            },
+            "tabs": {
+                "overview": "Обзор",
+                "entries": "Проводки",
+                "expenses": "Расходы",
+                "counterparties": "Контрагенты",
+                "periods": "Месяцы"
+            },
+            "actions": {
+                "income": "Доход",
+                "expense": "Расход",
+                "import": "Загрузить таблицу",
+                "export": "Выгрузка",
+                "settings": "Настройки"
+            },
+            "directions": {
+                "income": "Доход",
+                "expense": "Расход",
+                "transfer": "Перевод"
+            },
+            "accounts": {
+                "cash": "Касса",
+                "bank": "Банк",
+                "card": "Карта"
+            },
+            "documentTypes": {
+                "none": "Без документа",
+                "receipt": "Чек",
+                "invoice_received": "Фактура полученная",
+                "invoice_issued": "Фактура выданная"
+            },
+            "sources": {
+                "manual": "Вручную",
+                "order_sale": "Оплата заказа",
+                "import": "Загрузка таблицей",
+                "reversal": "Сторно",
+                "legacy": "Перенесена из старого учёта"
+            },
+            "overview": {
+                "income": "Доходы",
+                "expense": "Расходы",
+                "count": "{count, plural, one {# проводка} few {# проводки} many {# проводок} other {# проводки}}",
+                "result": "Результат",
+                "resultHint": "Доходы минус расходы, без налога",
+                "vat": "IVA к уплате",
+                "vatHint": "продажи {charged} · покупки {paid}",
+                "accountsTitle": "Счета",
+                "accountsHint": "Остаток на конец месяца по всем проводкам",
+                "top": {
+                    "income": "Что приносит деньги",
+                    "expense": "На что уходят деньги"
+                },
+                "empty": "За месяц проводок нет",
+                "error": "Не удалось загрузить обзор"
+            },
+            "ledger": {
+                "month": "Месяц",
+                "allMonths": "Все месяцы",
+                "closedMonth": "закрыт",
+                "direction": "Направление",
+                "allDirections": "Все направления",
+                "category": "Статья",
+                "allCategories": "Все статьи",
+                "account": "Счёт",
+                "allAccounts": "Все счета",
+                "counterparty": "Контрагент",
+                "clearCounterparty": "Убрать фильтр по контрагенту",
+                "columns": {
+                    "date": "Дата",
+                    "what": "Что и с кем",
+                    "category": "Статья",
+                    "account": "Счёт",
+                    "amount": "Сумма"
+                },
+                "empty": "Проводок нет",
+                "error": "Не удалось загрузить проводки",
+                "total": "{count, plural, one {# проводка} few {# проводки} many {# проводок} other {# проводки}}",
+                "page": "{page} из {pages}",
+                "previous": "Назад",
+                "next": "Дальше",
+                "orderSale": "Заказ {number}",
+                "noDescription": "Без описания",
+                "reversalOf": "Сторно: {title}",
+                "reversal": "Сторно",
+                "hasAttachment": "Есть вложение"
+            },
+            "entry": {
+                "loading": "Проводка…",
+                "what": "Операция",
+                "date": "Дата",
+                "category": "Статья",
+                "account": "Счёт",
+                "counterparty": "Контрагент",
+                "document": "Документ и источник",
+                "documentLabel": "Документ",
+                "documentDate": "Дата документа",
+                "paidOn": "Оплачено",
+                "source": "Откуда",
+                "author": "Записал",
+                "system": "Система",
+                "recordedAt": "Записано",
+                "openOrder": "Открыть заказ {number}",
+                "openReversed": "Отменённая проводка",
+                "openReversal": "Сторно этой проводки",
+                "rate": "Ставка",
+                "net": "База",
+                "tax": "Налог",
+                "total": "Итого по документу",
+                "withholding": "Удержание IRPF {percent} %",
+                "payable": "Прошло по счёту",
+                "noBreakdown": "Без разбивки налога",
+                "treatments": {
+                    "exempt": "Exenta",
+                    "not_subject": "No sujeta"
+                },
+                "noAttachment": "Чек или фактура не приложены",
+                "download": "Скачать",
+                "attach": "Приложить",
+                "replace": "Заменить",
+                "removeAttachment": "Убрать вложение",
+                "attached": "Файл приложен",
+                "classifyHint": "Суммы ведёт заказ: здесь меняются статья, счёт и заметки",
+                "notesHint": "Сторно повторяет отменённую проводку: можно оставить только заметку",
+                "notes": "Заметки",
+                "saveClassification": "Сохранить",
+                "saved": "Сохранено",
+                "cancelEntry": "Отменить проводку",
+                "cancelTitle": "Отменить проводку?",
+                "cancelOpen": "Проводка выйдет из итогов месяца, но останется в истории.",
+                "cancelClosed": "Месяц закрыт: запишем сторно сегодняшним числом, сама проводка не изменится.",
+                "reverse": "Записать сторно",
+                "keep": "Оставить",
+                "voided": "Проводка отменена",
+                "reversed": "Записано сторно",
+                "edit": "Изменить",
+                "close": "Закрыть",
+                "voidBadge": "Отменена",
+                "reversalBadge": "Сторно",
+                "reversedBadge": "Сторнирована"
+            },
+            "entryForm": {
+                "createTitle": {
+                    "income": "Новый доход",
+                    "expense": "Новый расход",
+                    "transfer": "Перевод между счетами"
+                },
+                "editTitle": "Изменить проводку",
+                "hint": "Суммы хранятся зашифрованными; в отчётах — база, налог и сумма к оплате.",
+                "fields": {
+                    "date": "Дата операции",
+                    "category": "Статья",
+                    "account": "Счёт",
+                    "fromAccount": "Откуда",
+                    "toAccount": "Куда",
+                    "description": "Описание",
+                    "amount": "Сумма, €",
+                    "taxRate": "Налог",
+                    "withholding": "Удержание IRPF, %",
+                    "counterparty": "Контрагент",
+                    "member": "Или участник клуба",
+                    "documentType": "Документ",
+                    "documentNumber": "Номер документа",
+                    "documentDate": "Дата документа",
+                    "paidOn": "Дата оплаты",
+                    "notes": "Заметки"
+                },
+                "categoryPlaceholder": "Выберите статью",
+                "descriptionPlaceholder": {
+                    "income": "Взносы за октябрь",
+                    "expense": "Аренда помещения",
+                    "transfer": "Сдали выручку в банк"
+                },
+                "includesTax": "Сумма с налогом",
+                "excludesTax": "Сумма без налога (база)",
+                "taxDefault": "По умолчанию — {rate}",
+                "noTax": "без налога",
+                "withholdingHint": "Профессионал (gestor, юрист) — обычно 15 %",
+                "preview": "База {net} · налог {tax} · IRPF {withholding} · к оплате {payable}",
+                "noCounterparty": "Без контрагента",
+                "deletedMember": "Удалённый участник",
+                "clearMember": "Убрать участника",
+                "cancel": "Отмена",
+                "save": "Записать",
+                "saving": "Записываем…",
+                "created": "Проводка записана",
+                "updated": "Проводка сохранена",
+                "duplicateTitle": "Похоже на дубль",
+                "duplicateDescription": "У этого контрагента уже есть проводка с таким номером документа. Записать ещё одну?",
+                "duplicateConfirm": "Записать всё равно",
+                "errors": {
+                    "required": "Заполните поле",
+                    "date": "Укажите дату",
+                    "amount": "Сумма больше нуля, до центов",
+                    "percent": "От 0 до 100",
+                    "tooLong": "Слишком длинно",
+                    "sameAccount": "Перевод — между разными счетами"
+                }
+            },
+            "import": {
+                "title": "Загрузка таблицей",
+                "hint": "Скачайте пример, заполните и загрузите файл: сначала проверим каждую строку, потом запишем подходящие.",
+                "templateLabel": "Пример таблицы:",
+                "template": {
+                    "xlsx": "Excel (.xlsx)",
+                    "csv": "CSV"
+                },
+                "noFile": "Файл не выбран — xlsx или csv",
+                "pickFile": "Выбрать файл",
+                "otherFile": "Другой файл",
+                "checking": "Проверяем строки…",
+                "summary": "Запишется: {create} · дубли: {duplicate} · с ошибкой: {error}",
+                "row": "стр. {row}",
+                "status": {
+                    "create": "Запишется",
+                    "duplicate": "Дубль",
+                    "error": "Ошибка"
+                },
+                "issues": {
+                    "required": "пусто",
+                    "invalid": "не разобрать значение",
+                    "unknown_category": "нет такой статьи — коды на листе «categorias»",
+                    "category_direction": "статья другой стороны: доход или расход",
+                    "tax_mismatch": "IVA не сходится с базой и ставкой",
+                    "total_mismatch": "итог не сходится: база + IVA − IRPF",
+                    "period_closed": "месяц закрыт",
+                    "duplicate": "уже есть: тот же контрагент, номер и дата",
+                    "already_imported": "эта строка этого файла уже загружена"
+                },
+                "commit": "{count, plural, =0 {Нечего записать} one {Записать # строку} few {Записать # строки} many {Записать # строк} other {Записать # строки}}",
+                "close": "Закрыть",
+                "done": "{count, plural, one {Записана # проводка} few {Записаны # проводки} many {Записано # проводок} other {Записано # проводки}}"
+            },
+            "export": {
+                "title": "Выгрузка для gestor",
+                "hint": "Проводки (их можно загрузить обратно) или книги по Orden HAC/773/2019. Каждая выгрузка попадает в журнал клуба.",
+                "book": "Что выгрузить",
+                "books": {
+                    "entries": "Проводки",
+                    "purchases": "Книга расходов (compras y gastos)",
+                    "sales": "Книга доходов (ventas e ingresos)"
+                },
+                "bookHint": {
+                    "entries": "Все проводки периода, включая отменённые",
+                    "purchases": "Расходы с номерами приёма, ставками IVA и удержаниями",
+                    "sales": "Доходы со ставками IVA и удержаниями"
+                },
+                "from": "С",
+                "to": "По",
+                "format": "Формат",
+                "formats": {
+                    "xlsx": "Excel (.xlsx)",
+                    "csv": "CSV для испанского Excel"
+                },
+                "cancel": "Отмена",
+                "download": "Скачать",
+                "preparing": "Готовим файл…"
+            },
+            "counterparties": {
+                "title": "Контрагенты",
+                "hint": "Поставщики, клиенты и госорганы; участник клуба появляется сам, когда на него записан доход. Имена и номера хранятся зашифрованными.",
+                "add": "Добавить контрагента",
+                "empty": "Контрагентов пока нет",
+                "kinds": {
+                    "supplier": "Поставщик",
+                    "customer": "Клиент",
+                    "member": "Участник",
+                    "employee": "Сотрудник",
+                    "authority": "Госорган"
+                },
+                "entries": "{count, plural, =0 {Нет проводок} one {# проводка} few {# проводки} many {# проводок} other {# проводки}}",
+                "deletedMember": "Удалённый участник",
+                "edit": "Изменить",
+                "archive": "В архив",
+                "archiveTitle": "Убрать «{name}» в архив?",
+                "archiveHint": "Проводки останутся, в новых его не выбрать.",
+                "archived": "Контрагент в архиве",
+                "cancel": "Отмена",
+                "createTitle": "Новый контрагент",
+                "editTitle": "Контрагент",
+                "dialogHint": "NIF испанского контрагента проверяется по контрольному знаку; иностранный — с префиксом страны ЕС.",
+                "fields": {
+                    "kind": "Кто это",
+                    "name": "Название или имя",
+                    "nif": "NIF / NIE / CIF",
+                    "country": "Страна",
+                    "notes": "Заметки"
+                },
+                "nifHint": "Нужен для фактур, книг и формы 347",
+                "save": "Сохранить",
+                "saving": "Сохраняем…",
+                "created": "Контрагент добавлен",
+                "updated": "Контрагент сохранён",
+                "errors": {
+                    "required": "Заполните поле",
+                    "tooLong": "Слишком длинно",
+                    "country": "Две буквы: ES, FR, DE…"
+                }
+            },
+            "categories": {
+                "title": "Статьи доходов и расходов",
+                "hint": "Пресет по типу клуба с кодами плана счетов PGC; по коду статью находит таблица импорта.",
+                "add": "Добавить статью",
+                "showArchived": "Показать архивные",
+                "income": "Доходы",
+                "expense": "Расходы",
+                "edit": "Изменить",
+                "archive": "В архив",
+                "archivedBadge": "в архиве",
+                "archiveTitle": "Убрать «{name}» в архив?",
+                "archiveHint": "Проводки статьи останутся, в новых её не выбрать.",
+                "archived": "Статья в архиве",
+                "cancel": "Отмена",
+                "createTitle": "Новая статья",
+                "editTitle": "Статья",
+                "dialogHint": "Код для таблицы импорта соберётся из названия.",
+                "codeHint": "Код в таблице импорта: {code}",
+                "fields": {
+                    "name": "Название",
+                    "direction": "Сторона",
+                    "pgcAccount": "Счёт PGC",
+                    "taxTreatment": "Налог по умолчанию"
+                },
+                "treatments": {
+                    "club": "По ставке клуба",
+                    "taxable": "По ставке",
+                    "exempt": "Exenta",
+                    "not_subject": "No sujeta"
+                },
+                "save": "Сохранить",
+                "saving": "Сохраняем…",
+                "created": "Статья добавлена",
+                "updated": "Статья сохранена",
+                "errors": {
+                    "required": "Заполните поле",
+                    "tooLong": "Слишком длинно",
+                    "pgc": "Только цифры, от 2 до 10"
+                },
+                "presets": {
+                    "membership_fees": "Членские взносы",
+                    "sales": "Оплаты заказов",
+                    "donations": "Пожертвования",
+                    "other_income": "Прочие доходы",
+                    "services": "Услуги",
+                    "purchases": "Закупки товара",
+                    "supplies": "Материалы и расходники",
+                    "rent": "Аренда",
+                    "repairs": "Ремонт и обслуживание",
+                    "professional_services": "Услуги профессионалов",
+                    "insurance": "Страхование",
+                    "bank_fees": "Банковские комиссии",
+                    "marketing": "Реклама",
+                    "utilities": "Свет, вода, связь",
+                    "taxes": "Налоги и сборы",
+                    "salaries": "Зарплаты",
+                    "social_security": "Seguridad Social",
+                    "other_expenses": "Прочие расходы"
+                }
+            },
+            "periods": {
+                "title": "Месяцы учёта",
+                "hint": "Закрытый месяц не меняется: исправления — сторно в открытом месяце. Закрыть можно только прошедший месяц.",
+                "entries": "{count, plural, =0 {нет проводок} one {# проводка} few {# проводки} many {# проводок} other {# проводки}}",
+                "closed": "Закрыт",
+                "closedBy": "{name}, {at}",
+                "open": "Открыт",
+                "close": "Закрыть месяц",
+                "reopen": "Открыть снова",
+                "closeTitle": "Закрыть месяц?",
+                "closeHint": "Проводки месяца нельзя будет поправить или отменить — только сторно в открытом месяце.",
+                "reopenTitle": "Открыть месяц снова?",
+                "reopenHint": "Проводки месяца снова можно будет править. Если месяц уже сдан gestor, исправляйте сторно.",
+                "cancel": "Отмена",
+                "closedToast": "Месяц закрыт",
+                "reopenedToast": "Месяц открыт"
+            },
+            "errors": {
+                "period_closed": "Месяц закрыт: исправление — сторно в открытом месяце",
+                "duplicate_document": "У контрагента уже есть документ с этим номером",
+                "entry_managed_by_source": "Эту проводку ведёт заказ или отменённая проводка",
+                "entry_already_void": "Проводка уже отменена",
+                "entry_already_reversed": "У проводки уже есть сторно",
+                "category_required": "Выберите статью",
+                "category_direction_mismatch": "Статья другой стороны: доход или расход",
+                "category_archived": "Статья в архиве",
+                "transfer_same_account": "Перевод — между разными счетами",
+                "transfer_has_no_category": "У перевода нет статьи",
+                "counterparty_not_found": "Контрагент не найден",
+                "member_not_found": "Участник не найден",
+                "tax_rate_not_found": "Ставка налога не найдена",
+                "attachment_type": "Приложите фото (JPEG, PNG, WEBP) или PDF",
+                "attachment_missing": "Файла нет",
+                "counterparty_name_required": "Укажите название",
+                "counterparty_nif_invalid": "NIF с ошибкой: проверьте номер",
+                "counterparty_nif_taken": "Контрагент с этим NIF уже есть",
+                "counterparty_is_member": "Участника меняют в его карточке",
+                "category_name_required": "Укажите название",
+                "category_code_taken": "Слишком много статей с таким названием",
+                "category_receives_orders": "В эту статью идут оплаченные заказы — её нельзя убрать",
+                "period_not_past": "Закрыть можно только прошедший месяц",
+                "period_already_closed": "Месяц уже закрыт",
+                "period_not_closed": "Месяц не закрыт",
+                "import_file_type": "Нужен файл .xlsx или .csv",
+                "import_file_missing": "Выберите файл",
+                "import_empty": "В файле нет строк",
+                "import_missing_columns": "В таблице нет обязательных колонок — сверьтесь с примером",
+                "import_too_many_rows": "Слишком много строк в одном файле — разделите его"
             }
         },
         "sections": {
@@ -1851,7 +2205,32 @@
                 },
                 "finance": {
                     "profile_updated": "Обновлены реквизиты и налоги организации",
-                    "tax_rates_changed": "Изменены ставки налога"
+                    "tax_rates_changed": "Изменены ставки налога",
+                    "entry_recorded": {
+                        "manual": "Записан {direction}",
+                        "order_sale": "Оплата заказа учтена как доход",
+                        "import": "Из таблицы записан {direction}",
+                        "reversal": "Записано сторно проводки",
+                        "legacy": "Перенесена проводка из старого учёта"
+                    },
+                    "directions": {
+                        "income": "доход",
+                        "expense": "расход",
+                        "transfer": "перевод"
+                    },
+                    "entry_updated": "Исправлена проводка",
+                    "entry_voided": "Отменена проводка",
+                    "entries_imported": "{count, plural, one {Из таблицы загружена # проводка} few {Из таблицы загружены # проводки} many {Из таблицы загружено # проводок} other {Из таблицы загружено # проводки}}",
+                    "period_closed": "Закрыт месяц {period}",
+                    "period_reopened": "Снова открыт месяц {period}",
+                    "categories_changed": "Изменены статьи доходов и расходов",
+                    "counterparties_changed": "Изменён справочник контрагентов",
+                    "accessed": "Выгружено для gestor: {book}",
+                    "books": {
+                        "entries": "проводки",
+                        "purchases": "книга расходов",
+                        "sales": "книга доходов"
+                    }
                 },
                 "role": {
                     "changed": "Изменены права роли"
@@ -1888,6 +2267,13 @@
                 "product": "Товар",
                 "portal": "Клуб"
             }
+        },
+        "memberPicker": {
+            "placeholder": "Выберите участника",
+            "search": "Имя, email или номер…",
+            "searching": "Ищем…",
+            "empty": "Никого не нашли",
+            "inactive": "неактивен"
         }
     }
 }
