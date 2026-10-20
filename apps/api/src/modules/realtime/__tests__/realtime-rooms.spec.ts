@@ -129,6 +129,32 @@ describe("куда уходит событие", () => {
         ]);
     });
 
+    it("уведомление: только своему адресату — сотруднику в CRM или участнику в кабинете", () => {
+        const base = {
+            notificationId: "n1",
+            type: "order.placed",
+            subjectKind: "order",
+            subjectId: "o1",
+            params: { orderNumber: "ORD-1" },
+        };
+        const toEmployee = envelope({
+            name: "notification.created",
+            aggregate: { kind: "notification", id: "n1" },
+            payload: { ...base, recipientKind: "employee", employeeId: "e7", memberId: null },
+        });
+        expect(targetsOf(toEmployee)).toEqual([
+            { audience: "crm", view: "full", rooms: [REALTIME_ROOMS.employee("p1", "e7")] },
+        ]);
+        const toMember = envelope({
+            name: "notification.created",
+            aggregate: { kind: "notification", id: "n2" },
+            payload: { ...base, recipientKind: "member", employeeId: null, memberId: "m3" },
+        });
+        expect(targetsOf(toMember)).toEqual([
+            { audience: "cabinet", view: "public", rooms: [REALTIME_ROOMS.member("p1", "m3")] },
+        ]);
+    });
+
     it("событие клуба без клуба никуда не уходит", () => {
         expect(
             targetsOf(

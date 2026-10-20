@@ -8,11 +8,12 @@ import { AppHeader } from "@/modules/shared/ui/shell";
 import { PortalSwitcher } from "@/modules/widgets/portal-switcher";
 
 import { AccountMenu } from "./account-menu";
+import { CrmNotificationBell } from "./crm-notification-bell";
 import { HeaderQuickActions } from "./header-quick-actions";
 import { SearchTrigger } from "./search-trigger";
 
 /**
- * Шапка CRM: слева клуб, справа поиск, действия у двери, оформление и аккаунт. Раздел в шапке
+ * Шапка CRM: слева клуб, справа поиск, действия у двери, уведомления, оформление и аккаунт. Раздел в шапке
  * не повторяется: его показывают меню и заголовок страницы.
  */
 export function CrmHeader() {
@@ -27,6 +28,7 @@ export function CrmHeader() {
                     <RealtimeStatusIndicator />
                     <SearchTrigger />
                     <HeaderQuickActions />
+                    <CrmNotificationBell />
                     <HeaderAppearance />
                     <AccountMenu />
                 </>

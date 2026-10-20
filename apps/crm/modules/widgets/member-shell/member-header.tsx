@@ -8,8 +8,9 @@ import { AppHeader } from "@/modules/shared/ui/shell";
 
 import { ClubSwitcher } from "./club-switcher";
 import { MemberAccountMenu } from "./member-account-menu";
+import { MemberNotificationBell } from "./member-notification-bell";
 
-/** Шапка кабинета: клуб слева; оформление и меню аккаунта справа. */
+/** Шапка кабинета: клуб слева; уведомления клуба, оформление и меню аккаунта справа. */
 export function MemberHeader() {
     const t = useTranslations("cabinet.shell");
     return (
@@ -19,6 +20,7 @@ export function MemberHeader() {
             end={
                 <>
                     <RealtimeStatusIndicator />
+                    <MemberNotificationBell />
                     <HeaderAppearance />
                     <MemberAccountMenu />
                 </>

@@ -14,6 +14,26 @@
         "allRightsReserved": "Todos los derechos reservados",
         "realtime": {
             "offline": "Sin conexión con el servidor: los datos se actualizan cada medio minuto"
+        },
+        "notifications": {
+            "title": "Notificaciones",
+            "bell": "Notificaciones",
+            "bellUnread": "Notificaciones: {count} nuevas",
+            "empty": "Nada nuevo por ahora",
+            "readAll": "Marcar todo como leído",
+            "loadMore": "Ver más",
+            "open": "Abrir",
+            "telegram": "Enviar también a Telegram",
+            "telegramHint": "El bot enviará el mismo mensaje a Telegram",
+            "types": {
+                "order": {
+                    "placed": "Nuevo pedido {orderNumber} desde el área de socios, productos: {itemCount}",
+                    "cancelled_by_member": "Un socio canceló el pedido {orderNumber}",
+                    "stage_changed": "Pedido {orderNumber}: {stage}",
+                    "cancelled_by_staff": "El club canceló el pedido {orderNumber}"
+                },
+                "unknown": "Nueva notificación"
+            }
         }
     },
     "meta": {

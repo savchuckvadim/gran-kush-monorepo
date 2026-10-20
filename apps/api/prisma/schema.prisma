@@ -250,6 +250,7 @@ model Portal {
   dataKeys              PortalDataKey[]
   organizationProfile   OrganizationProfile?
   taxRates              TaxRate[]
+  notifications         Notification[]
 
   @@index([name])
   @@index([status])
@@ -293,19 +294,20 @@ model User {
   createdAt      DateTime          @default(now()) @map("created_at")
   updatedAt      DateTime          @updatedAt @map("updated_at")
 
-  members              Member[]
-  employees            Employee[]
-  platformAdmin        PlatformAdmin?
-  sessions             AuthSession[]
-  authTokens           AuthToken[]
-  documents            UserDocument[]
-  signature            UserSignature?
-  profile              AccountProfile?
-  identities           UserIdentity[]
-  documentAccessLogs   DocumentAccessLog[]
-  portalReviews        PortalReview[]
-  productReviews       ProductReview[]
-  termsAcceptedPortals Portal[]            @relation("PortalTermsAcceptedBy")
+  members                 Member[]
+  employees               Employee[]
+  platformAdmin           PlatformAdmin?
+  sessions                AuthSession[]
+  authTokens              AuthToken[]
+  documents               UserDocument[]
+  signature               UserSignature?
+  profile                 AccountProfile?
+  identities              UserIdentity[]
+  notificationPreferences NotificationPreference[]
+  documentAccessLogs      DocumentAccessLog[]
+  portalReviews           PortalReview[]
+  productReviews          ProductReview[]
+  termsAcceptedPortals    Portal[]                 @relation("PortalTermsAcceptedBy")
 
   @@index([email])
   @@index([status])
@@ -522,6 +524,7 @@ model Member {
   createdByEmployee Employee?             @relation("MemberCreatedBy", fields: [createdByEmployeeId], references: [id], onDelete: SetNull)
   orders            Order[]
   documentShares    MemberDocumentShare[]
+  notifications     Notification[]
 
   @@unique([userId, portalId])
   @@unique([portalId, membershipNumber])
@@ -559,6 +562,7 @@ model Employee {
   registrationLinks     RegistrationLink[]     @relation("RegistrationLinkCreatedBy")
   sentInvitations       EmployeeInvitation[]   @relation("InvitationInvitedBy")
   uiSettings            UiSetting[]
+  notifications         Notification[]
 
   @@unique([userId, portalId])
   @@index([portalId])
@@ -1779,4 +1783,54 @@ model TaxRate {
   @@unique([portalId, presetCode])
   @@index([portalId])
   @@map("tax_rates")
+}
+
+enum NotificationRecipient {
+  employee
+  member
+
+  @@map("notification_recipient")
+}
+
+/// Личное уведомление (TASK-781): сотруднику в CRM или участнику в кабинете. Текст собирает
+/// клиент по `type` и `params` на языке получателя, Telegram — сервер по тем же ключам.
+/// Источник — событие шины: одно событие даёт адресату одно уведомление (`recipient_key`)
+model Notification {
+  id            String                @id @default(uuid())
+  portalId      String                @map("portal_id")
+  recipientKind NotificationRecipient @map("recipient_kind")
+  employeeId    String?               @map("employee_id")
+  memberId      String?               @map("member_id")
+  /// `employee:<id>` или `member:<id>`: уникальность (событие, адресат) без NULL в индексе
+  recipientKey  String                @map("recipient_key") @db.VarChar(80)
+  type          String                @db.VarChar(64)
+  eventId       String                @map("event_id")
+  /// О чём уведомление: куда ведёт нажатие (заказ, участник…)
+  subjectKind   String                @map("subject_kind") @db.VarChar(32)
+  subjectId     String                @map("subject_id")
+  /// Параметры текста: номер заказа, стадия; без персональных данных
+  params        Json                  @default("{}")
+  readAt        DateTime?             @map("read_at")
+  createdAt     DateTime              @default(now()) @map("created_at")
+
+  portal   Portal    @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  employee Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  member   Member?   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, recipientKey])
+  @@index([portalId, recipientKey, createdAt])
+  @@map("notifications")
+}
+
+/// Канал уведомлений аккаунта вне приложения (`telegram`); строки нет — канал включён
+model NotificationPreference {
+  userId    String   @map("user_id")
+  channel   String   @db.VarChar(32)
+  enabled   Boolean
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, channel])
+  @@map("notification_preferences")
 }

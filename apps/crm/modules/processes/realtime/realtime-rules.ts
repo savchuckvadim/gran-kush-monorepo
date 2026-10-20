@@ -6,6 +6,7 @@ import { employeeRealtimeRules } from "@/modules/entities/employee/realtime";
 import { financeRealtimeRules } from "@/modules/entities/finance/realtime";
 import { memberRealtimeRules } from "@/modules/entities/member/realtime";
 import { membershipRealtimeRules } from "@/modules/entities/membership/realtime";
+import { notificationRealtimeRules } from "@/modules/entities/notification/realtime";
 import { orderRealtimeRules } from "@/modules/entities/order/realtime";
 import { portalModuleRealtimeRules } from "@/modules/entities/portal-modules/realtime";
 import { presenceRealtimeRules } from "@/modules/entities/presence/realtime";
@@ -29,6 +30,7 @@ export const CRM_REALTIME_RULES: readonly RealtimeRule[] = [
     ...accessRealtimeRules,
     ...portalModuleRealtimeRules,
     ...financeRealtimeRules,
+    ...notificationRealtimeRules,
 ];
 
 export const CABINET_REALTIME_RULES: readonly RealtimeRule[] = [
@@ -36,4 +38,5 @@ export const CABINET_REALTIME_RULES: readonly RealtimeRule[] = [
     ...cabinetShopRealtimeRules,
     ...cabinetClubRealtimeRules,
     ...membershipRealtimeRules,
+    ...notificationRealtimeRules,
 ];

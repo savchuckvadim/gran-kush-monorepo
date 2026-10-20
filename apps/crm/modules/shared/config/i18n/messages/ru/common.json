@@ -14,6 +14,26 @@
         "allRightsReserved": "Все права защищены",
         "realtime": {
             "offline": "Нет связи с сервером: данные обновляются раз в полминуты"
+        },
+        "notifications": {
+            "title": "Уведомления",
+            "bell": "Уведомления",
+            "bellUnread": "Уведомления: новых — {count}",
+            "empty": "Пока ничего нового",
+            "readAll": "Прочитать все",
+            "loadMore": "Показать ещё",
+            "open": "Открыть",
+            "telegram": "Дублировать в Telegram",
+            "telegramHint": "Бот пришлёт то же сообщение в Telegram",
+            "types": {
+                "order": {
+                    "placed": "Новый заказ {orderNumber} из кабинета, позиций — {itemCount}",
+                    "cancelled_by_member": "Участник отменил заказ {orderNumber}",
+                    "stage_changed": "Заказ {orderNumber}: {stage}",
+                    "cancelled_by_staff": "Клуб отменил заказ {orderNumber}"
+                },
+                "unknown": "Новое уведомление"
+            }
         }
     },
     "meta": {

@@ -14,6 +14,26 @@
         "allRightsReserved": "All rights reserved",
         "realtime": {
             "offline": "No connection to the server: data refreshes every half a minute"
+        },
+        "notifications": {
+            "title": "Notifications",
+            "bell": "Notifications",
+            "bellUnread": "Notifications: {count} new",
+            "empty": "Nothing new yet",
+            "readAll": "Mark all as read",
+            "loadMore": "Show more",
+            "open": "Open",
+            "telegram": "Also send to Telegram",
+            "telegramHint": "The bot sends the same message to Telegram",
+            "types": {
+                "order": {
+                    "placed": "New order {orderNumber} from the cabinet, items: {itemCount}",
+                    "cancelled_by_member": "A member cancelled order {orderNumber}",
+                    "stage_changed": "Order {orderNumber}: {stage}",
+                    "cancelled_by_staff": "The club cancelled order {orderNumber}"
+                },
+                "unknown": "New notification"
+            }
         }
     },
     "meta": {

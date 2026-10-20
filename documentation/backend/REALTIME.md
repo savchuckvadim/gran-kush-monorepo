@@ -54,6 +54,8 @@ cannot reach another club's sockets.
 `RealtimeConsumer` subscribes to every event of the catalog and sends it by its `audience`:
 
 - `staff` → `/crm`, the permission room (or `staff`), **the whole envelope**;
+- `employee` (`by: employeeId`) → `/crm`, that employee's room, **the whole envelope** (a personal
+  notification);
 - `member` (`by: memberId`), `members`, `user` (`by: userId`) → **only `publicPayload`**.
 
 Rights change → connections are closed and the client reconnects with the new rights:

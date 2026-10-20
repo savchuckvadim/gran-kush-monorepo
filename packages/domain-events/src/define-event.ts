@@ -13,6 +13,8 @@ export interface EventAudience<S extends z.ZodTypeAny = z.ZodTypeAny> {
     staff?: { permission: string | null };
     /** The member whose id is in `payload[by]`. */
     member?: { by: PayloadKeys<S> };
+    /** One employee of the portal whose id is in `payload[by]` (a personal notification). */
+    employee?: { by: PayloadKeys<S> };
     /** The account whose user id is in `payload[by]` (cabinet without a club, the account itself). */
     user?: { by: PayloadKeys<S> };
     /** Every confirmed member of the portal (catalog, club-wide changes). */
@@ -32,6 +34,7 @@ export interface AnyEventDefinition {
     readonly audience: {
         staff?: { permission: string | null };
         member?: { by: string };
+        employee?: { by: string };
         user?: { by: string };
         members?: true;
     };

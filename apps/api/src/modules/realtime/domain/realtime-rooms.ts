@@ -93,6 +93,12 @@ export const eventTargets = (
             add({ audience: "cabinet", view: "public" }, REALTIME_ROOMS.member(portalId, memberId));
         }
     }
+    if (portalId && audience.employee) {
+        const employeeId = stringField(event.payload, audience.employee.by);
+        if (employeeId) {
+            add({ audience: "crm", view: "full" }, REALTIME_ROOMS.employee(portalId, employeeId));
+        }
+    }
     if (portalId && audience.members) {
         add({ audience: "cabinet", view: "public" }, REALTIME_ROOMS.members(portalId));
     }

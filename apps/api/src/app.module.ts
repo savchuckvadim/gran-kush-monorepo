@@ -23,6 +23,7 @@ import { EncryptionModule } from "./modules/encryption/encryption.module";
 import { EventsModule } from "./modules/events/events.module";
 import { HealthModule } from "./modules/health/health.module";
 import { MailModule } from "./modules/mail/mail.module";
+import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { PlatformModule } from "./modules/platform/platform.module";
 import { AuthModule } from "./modules/portal/auth/auth.module";
 import { SessionOriginMiddleware } from "./modules/portal/auth/sessions/api/session-origin.middleware";
@@ -45,6 +46,7 @@ import { StorageModule } from "./modules/storage/storage.module";
         TelegramModule,
         EventsModule,
         RealtimeModule,
+        NotificationsModule,
         MailModule,
         EncryptionModule,
         AuthModule,

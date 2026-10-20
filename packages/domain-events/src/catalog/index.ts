@@ -12,6 +12,7 @@ import {
     memberStatusChanged,
     memberUpdated,
 } from "./member.events";
+import { notificationCreated } from "./notification.events";
 import {
     orderCancelled,
     orderPaymentChanged,
@@ -34,6 +35,7 @@ export const EVENT_CATALOG = {
     "portal.module_changed": portalModuleChanged,
     "finance.profile_updated": financeProfileUpdated,
     "finance.tax_rates_changed": financeTaxRatesChanged,
+    "notification.created": notificationCreated,
     "member.joined": memberJoined,
     "member.consent_given": memberConsentGiven,
     "member.left": memberLeft,
@@ -91,6 +93,7 @@ export {
     memberLeft,
     memberStatusChanged,
     memberUpdated,
+    notificationCreated,
     orderCancelled,
     orderPaymentChanged,
     orderPlaced,

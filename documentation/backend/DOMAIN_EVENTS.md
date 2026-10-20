@@ -38,7 +38,7 @@ Rules for payloads: identifiers, statuses and names of things only. **No money**
 Catalog v1: `portal.founded`, `member.joined / consent_given / left / status_changed / updated`,
 `order.placed / stage_changed / cancelled / payment_changed`, `product.changed / stock_changed`,
 `presence.entered / left`, `employee.joined / access_changed`, `role.changed`, `session.revoked`,
-`portal.module_changed`, `finance.profile_updated`, `finance.tax_rates_changed`.
+`portal.module_changed`, `finance.profile_updated`, `finance.tax_rates_changed`, `notification.created`.
 
 ## Multi-tenancy
 
@@ -121,5 +121,9 @@ fails independently (the welcome letter and the Telegram alert are two consumers
 | `WelcomeLetterConsumer` | `portal.founded` | `portals`                              |
 | `PlatformAlertConsumer` | `portal.founded` | `portals`                              |
 | `RealtimeConsumer`      | every event      | `realtime` ([REALTIME](./REALTIME.md)) |
+| `OrderNotificationsConsumer` | `order.placed`, `order.cancelled`, `order.stage_changed` | `notifications` |
+| `TelegramNotificationsConsumer` | `notification.created` | `notifications` |
 
-Notifications (TASK-781) are the next consumer.
+Notifications (TASK-781): rules turn events into personal notifications (`notifications` table,
+one per event and recipient); each notification is the `notification.created` event for the bell and
+the toast, and Telegram sends it as a separate consumer, so a Telegram failure retries only the send.
