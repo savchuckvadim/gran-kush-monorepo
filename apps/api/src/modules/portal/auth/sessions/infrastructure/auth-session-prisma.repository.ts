@@ -6,11 +6,14 @@ import { PrismaService } from "@common/prisma/prisma.service";
 import { DomainEventPublisher } from "@modules/events";
 
 import { sessionRevokedEvents } from "../application/session-events";
-import type {
-    AuthSession,
-    SessionAccount,
-    SessionRevokeReason,
-    SessionSecrets,
+import {
+    type AppAuthSession,
+    type AuthSession,
+    isAppAudience,
+    SESSION_AUDIENCES,
+    type SessionAccount,
+    type SessionRevokeReason,
+    type SessionSecrets,
 } from "../domain/auth-session";
 import {
     AuthSessionRepository,
@@ -143,19 +146,28 @@ export class AuthSessionPrismaRepository extends AuthSessionRepository {
                 data: { revokedAt: new Date(), revokeReason: reason },
                 select: { id: true, userId: true, audience: true },
             });
-            if (revoked.length > 0) {
-                await this.events.publishMany(tx, sessionRevokedEvents(revoked, reason));
+            const events = sessionRevokedEvents(revoked, reason);
+            if (events.length > 0) {
+                await this.events.publishMany(tx, events);
             }
             return revoked.length;
         });
     }
 
-    async listActiveForUser(userId: string, now: Date): Promise<AuthSession[]> {
+    async listActiveForUser(userId: string, now: Date): Promise<AppAuthSession[]> {
         const rows = await this.prisma.authSession.findMany({
-            where: { userId, revokedAt: null, expiresAt: { gt: now } },
+            where: {
+                userId,
+                revokedAt: null,
+                expiresAt: { gt: now },
+                audience: { in: Object.values(SESSION_AUDIENCES) },
+            },
             orderBy: { lastUsedAt: "desc" },
         });
-        return rows.map(toSession);
+        return rows.flatMap((row) => {
+            const { audience } = row;
+            return isAppAudience(audience) ? [{ ...toSession(row), audience }] : [];
+        });
     }
 
     async deleteStale(now: Date, revokedBefore: Date): Promise<number> {

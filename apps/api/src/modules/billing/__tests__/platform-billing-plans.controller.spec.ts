@@ -7,6 +7,7 @@ import request from "supertest";
 
 import { PrismaService } from "@common/prisma/prisma.service";
 import { BillingModule } from "@modules/billing/billing.module";
+import { PlatformJwtAuthGuard } from "@modules/platform/auth/infrastructure/guards/platform-jwt-auth.guard";
 import {
     CabinetSessionGuard,
     CrmSessionGuard,
@@ -37,6 +38,8 @@ describe("GET /platform/billing/plans — публичный каталог та
             .overrideGuard(CrmSessionGuard)
             .useValue({ canActivate: () => false })
             .overrideGuard(CabinetSessionGuard)
+            .useValue({ canActivate: () => false })
+            .overrideGuard(PlatformJwtAuthGuard)
             .useValue({ canActivate: () => false })
             .compile();
 

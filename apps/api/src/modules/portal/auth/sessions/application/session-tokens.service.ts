@@ -8,7 +8,7 @@ import { hashSecretToken } from "@common/crypto/secret-token";
 import { parseDurationToMs } from "@common/time/duration.util";
 import { JWT_DEFAULTS, JWT_ENV_KEYS } from "@modules/portal/auth/domain/constants/jwt.constants";
 
-import type { SessionAudience } from "../domain/auth-session";
+import type { AnySessionAudience } from "../domain/auth-session";
 
 const TOKEN_TYPES = { Access: "access", Refresh: "refresh" } as const;
 type TokenType = (typeof TOKEN_TYPES)[keyof typeof TOKEN_TYPES];
@@ -75,7 +75,7 @@ export class SessionTokensService {
     async sign(
         userId: string,
         sessionId: string,
-        audience: SessionAudience
+        audience: AnySessionAudience
     ): Promise<SessionTokens> {
         const [accessToken, refreshToken] = await Promise.all([
             this.signOne({ sub: userId, sid: sessionId, typ: TOKEN_TYPES.Access }, audience, {
@@ -95,17 +95,23 @@ export class SessionTokensService {
         };
     }
 
-    verifyAccess(token: string, audience: SessionAudience): Promise<VerifiedSessionToken | null> {
+    verifyAccess(
+        token: string,
+        audience: AnySessionAudience
+    ): Promise<VerifiedSessionToken | null> {
         return this.verify(token, audience, TOKEN_TYPES.Access, this.accessSecret);
     }
 
-    verifyRefresh(token: string, audience: SessionAudience): Promise<VerifiedSessionToken | null> {
+    verifyRefresh(
+        token: string,
+        audience: AnySessionAudience
+    ): Promise<VerifiedSessionToken | null> {
         return this.verify(token, audience, TOKEN_TYPES.Refresh, this.refreshSecret);
     }
 
     private signOne(
         payload: SessionJwtPayload,
-        audience: SessionAudience,
+        audience: AnySessionAudience,
         options: Pick<JwtSignOptions, "secret" | "expiresIn">
     ): Promise<string> {
         // jwtid: две пары одной сессии за одну секунду иначе совпали бы байт в байт
@@ -114,7 +120,7 @@ export class SessionTokensService {
 
     private async verify(
         token: string,
-        audience: SessionAudience,
+        audience: AnySessionAudience,
         type: TokenType,
         secret: string
     ): Promise<VerifiedSessionToken | null> {

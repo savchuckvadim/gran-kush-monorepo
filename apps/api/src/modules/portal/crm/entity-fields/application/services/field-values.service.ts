@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 
 import { PortalFieldType, Prisma } from "@prisma/client";
 
 import { ContentLocale, resolveLabel } from "@common/i18n";
 import { PrismaService } from "@common/prisma/prisma.service";
+import { DYNAMIC_FIELD_LIMITS } from "@modules/portal/crm/entity-fields/constants/dynamic-field-limits";
 import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 
 type Tx = Prisma.TransactionClient;
@@ -89,6 +90,10 @@ export class FieldValuesService {
                 continue;
             }
             const items = def.isMultiple && Array.isArray(raw) ? raw : [raw];
+            // Каждый элемент — своя строка в БД; писатели проходят валидатор, это последний рубеж
+            if (items.length > DYNAMIC_FIELD_LIMITS.multipleMaxItems) {
+                throw new BadRequestException(`Field "${fieldKey}" has too many values`);
+            }
             items.forEach((item, valueIndex) => {
                 rows.push({
                     portalId,

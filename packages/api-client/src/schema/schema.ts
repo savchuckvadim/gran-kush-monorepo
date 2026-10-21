@@ -383,8 +383,42 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Платформенный админ: вход (отдельный JWT) */
+        /** Платформенный админ: вход, сессия с access и refresh в теле */
         post: operations["PlatformAuth_login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Платформенный админ: новая пара токенов, прежний refresh гаснет */
+        post: operations["PlatformAuth_refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Платформенный админ: выход, сессия гасится сразу */
+        post: operations["PlatformAuth_logout"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3915,7 +3949,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Публичная карточка клуба по slug */
+        /** Публичная карточка клуба по slug — только клубы, опубликованные на карте */
         get: operations["PublicPortals_bySlug"];
         put?: never;
         post?: never;
@@ -4268,6 +4302,23 @@ export interface components {
         PlatformLoginDto: {
             email: string;
             password: string;
+        };
+        PlatformAdminInfoDto: {
+            id: string;
+            role: string;
+            email: string;
+        };
+        PlatformLoginResponseDto: {
+            accessToken: string;
+            refreshToken: string;
+            admin: components["schemas"]["PlatformAdminInfoDto"];
+        };
+        PlatformRefreshTokenDto: {
+            refreshToken: string;
+        };
+        PlatformSessionTokensDto: {
+            accessToken: string;
+            refreshToken: string;
         };
         BillingPlanCatalogItemDto: {
             /** @example club-month */
@@ -8398,6 +8449,10 @@ export type SchemaUploadAccountSignatureDto = components['schemas']['UploadAccou
 export type SchemaAccountProfileDto = components['schemas']['AccountProfileDto'];
 export type SchemaSaveAccountProfileDto = components['schemas']['SaveAccountProfileDto'];
 export type SchemaPlatformLoginDto = components['schemas']['PlatformLoginDto'];
+export type SchemaPlatformAdminInfoDto = components['schemas']['PlatformAdminInfoDto'];
+export type SchemaPlatformLoginResponseDto = components['schemas']['PlatformLoginResponseDto'];
+export type SchemaPlatformRefreshTokenDto = components['schemas']['PlatformRefreshTokenDto'];
+export type SchemaPlatformSessionTokensDto = components['schemas']['PlatformSessionTokensDto'];
 export type SchemaBillingPlanCatalogItemDto = components['schemas']['BillingPlanCatalogItemDto'];
 export type SchemaBillingPlanCatalogResponseDto = components['schemas']['BillingPlanCatalogResponseDto'];
 export type SchemaPaymentWebhookAckDto = components['schemas']['PaymentWebhookAckDto'];
@@ -9950,11 +10005,98 @@ export interface operations {
             };
         };
         responses: {
-            201: {
+            /** @description Success */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["PlatformLoginResponseDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    PlatformAuth_refresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlatformRefreshTokenDto"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlatformSessionTokensDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    PlatformAuth_logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlatformRefreshTokenDto"];
+            };
+        };
+        responses: {
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
             };
         };
     };

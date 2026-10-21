@@ -112,4 +112,4 @@ const result = await authTokens.consume(AUTH_TOKEN_PURPOSES.PasswordReset, token
 | `TG_CLIENT_BOT_API_KEY`, `TG_CLIENT_BOT_USERNAME` | Telegram в кабинете |
 | `TG_CRM_BOT_API_KEY`, `TG_CRM_BOT_USERNAME` | Telegram в CRM (необязательно) |
 | `LOGIN_MAX_FAILURES`, `LOGIN_FAILURE_WINDOW_SECONDS` | лимит неудачных входов по адресу (10 / 900) |
-| `PLATFORM_JWT_SECRET` | вход админки платформы |
+| — | админка платформы — те же `JWT_SECRET` и `JWT_REFRESH_SECRET`, аудитория `platform` |

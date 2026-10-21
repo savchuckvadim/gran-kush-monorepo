@@ -1,34 +1,38 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { JwtService } from "@nestjs/jwt";
 
 import { PrismaService } from "@common/prisma/prisma.service";
+import { SessionsService } from "@modules/portal/auth/sessions/application/sessions.service";
 import {
-    JWT_DEFAULTS,
-    JWT_ENV_KEYS,
-    JWT_ERROR_MESSAGES,
-} from "@modules/portal/auth/domain/constants/jwt.constants";
+    PLATFORM_SESSION_AUDIENCE,
+    type SessionClient,
+} from "@modules/portal/auth/sessions/domain/auth-session";
 import { PasswordSignInService } from "@modules/portal/auth/shared/application/services/password-sign-in.service";
 
-export type PlatformAdminJwtPayload = {
-    sub: string;
-    type: "platform_admin";
-    userId: string;
-};
+export interface PlatformSessionTokens {
+    accessToken: string;
+    refreshToken: string;
+}
 
+export interface PlatformSignIn extends PlatformSessionTokens {
+    admin: { id: string; role: string; email: string };
+}
+
+/**
+ * Вход в админку платформы. Каждый вход — строка `auth_sessions` с аудиторией `platform`: выход,
+ * смена или сброс пароля и блокировка аккаунта гасят её сразу, а не когда истечёт токен. Токены
+ * отдаются в теле: их держит в HttpOnly-куках сервер админки, браузер их не видит. Админом считается
+ * активный `PlatformAdmin` активного аккаунта — это проверяется при входе и на каждый запрос
+ * (`PlatformJwtAuthGuard`).
+ */
 @Injectable()
 export class PlatformAuthService {
     constructor(
         private readonly prisma: PrismaService,
-        private readonly jwtService: JwtService,
-        private readonly configService: ConfigService,
+        private readonly sessions: SessionsService,
         private readonly passwords: PasswordSignInService
     ) {}
 
-    async login(
-        email: string,
-        password: string
-    ): Promise<{ accessToken: string; admin: { id: string; role: string; email: string } }> {
+    async login(email: string, password: string, client: SessionClient): Promise<PlatformSignIn> {
         const user = await this.prisma.user.findUnique({
             where: { email: email.trim().toLowerCase() },
             include: { platformAdmin: true },
@@ -40,31 +44,16 @@ export class PlatformAuthService {
             throw new UnauthorizedException("Invalid credentials");
         }
 
-        const payload: PlatformAdminJwtPayload = {
-            sub: user.platformAdmin.id,
-            type: "platform_admin",
+        const session = await this.sessions.start({
             userId: user.id,
-        };
-
-        const baseSecret = this.configService.get<string>(JWT_ENV_KEYS.SECRET);
-        const secret =
-            this.configService.get<string>(JWT_ENV_KEYS.PLATFORM_SECRET) ||
-            (baseSecret ? `${baseSecret}:platform` : undefined);
-        if (!secret) {
-            throw new Error(JWT_ERROR_MESSAGES.SECRET_NOT_CONFIGURED);
-        }
-
-        const expiresIn =
-            this.configService.get<string>(JWT_ENV_KEYS.PLATFORM_ACCESS_EXPIRES_IN) ||
-            JWT_DEFAULTS.PLATFORM_ACCESS_EXPIRES_IN;
-
-        const accessToken = await this.jwtService.signAsync(payload as never, {
-            secret,
-            expiresIn: expiresIn as unknown as number,
+            audience: PLATFORM_SESSION_AUDIENCE,
+            method: "password",
+            client,
         });
 
         return {
-            accessToken,
+            accessToken: session.accessToken,
+            refreshToken: session.refreshToken,
             admin: {
                 id: user.platformAdmin.id,
                 role: user.platformAdmin.role,
@@ -73,17 +62,12 @@ export class PlatformAuthService {
         };
     }
 
-    async validateJwtPayload(payload: PlatformAdminJwtPayload) {
-        if (payload.type !== "platform_admin") {
-            return null;
-        }
-        const admin = await this.prisma.platformAdmin.findUnique({
-            where: { id: payload.sub },
-            include: { user: true },
-        });
-        if (!admin?.isActive || !admin.user.isActive) {
-            return null;
-        }
-        return admin;
+    async refresh(refreshToken: string): Promise<PlatformSessionTokens> {
+        const session = await this.sessions.refresh(refreshToken, PLATFORM_SESSION_AUDIENCE);
+        return { accessToken: session.accessToken, refreshToken: session.refreshToken };
+    }
+
+    logout(refreshToken: string): Promise<void> {
+        return this.sessions.endByRefreshToken(refreshToken, PLATFORM_SESSION_AUDIENCE);
     }
 }

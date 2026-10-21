@@ -20,6 +20,8 @@ import {
     EmployeeRepository,
     EmployeeWithProfile,
 } from "@modules/portal/crm/employees/domain/repositories/employee-repository.interface";
+import { DynamicPayloadValidatorService } from "@modules/portal/crm/entity-fields/application/services/dynamic-payload-validator.service";
+import { ENTITY_DEFINITION_CODES } from "@modules/portal/crm/entity-fields/constants/entity-definition-codes";
 
 import { employeeAccessChangedEvent, employeeJoinedEvent } from "../events/employee-events";
 
@@ -50,7 +52,8 @@ export class EmployeesService {
         private readonly employeeRepository: EmployeeRepository,
         private readonly accountProvisioning: AccountProvisioningService,
         private readonly ownership: AccountOwnershipService,
-        private readonly roles: PortalRolesService
+        private readonly roles: PortalRolesService,
+        private readonly fieldsValidator: DynamicPayloadValidatorService
     ) {}
 
     async findAllByPortal(
@@ -92,6 +95,7 @@ export class EmployeesService {
         actor: EmployeeActor
     ): Promise<{ employee: EmployeeWithProfile; isNewUser: boolean }> {
         const role = await this.roles.requireAssignable(portalId, input.role, actor.permissions);
+        const fields = await this.validFields(portalId, input.fields);
 
         const { user, isNewUser } = await this.accountProvisioning.ensurePendingClaimUser(
             input.email
@@ -104,7 +108,7 @@ export class EmployeesService {
         }
 
         const employee = await this.employeeRepository.createWithProfile(
-            { userId: user.id, portalId, roleId: role.id, fields: input.fields },
+            { userId: user.id, portalId, roleId: role.id, fields },
             (created) => [employeeJoinedEvent(created.employee, employeeActor(actor.employeeId))]
         );
 
@@ -124,13 +128,14 @@ export class EmployeesService {
         },
         portalId: string
     ): Promise<EmployeeWithProfile> {
+        const fields = await this.validFields(portalId, input.fields);
         return this.employeeRepository.createWithProfile(
             {
                 userId: input.userId,
                 portalId,
                 roleId: input.roleId,
                 invitationId: input.invitationId,
-                fields: input.fields,
+                fields,
             },
             (created) => [employeeJoinedEvent(created.employee, userActor(input.userId))]
         );
@@ -152,8 +157,9 @@ export class EmployeesService {
                 ? undefined
                 : await this.roles.requireAssignable(portalId, data.role, actor.permissions);
 
-        if (data.fields && Object.keys(data.fields).length > 0) {
-            await this.employeeRepository.updateProfileFields(id, portalId, data.fields);
+        const fields = await this.validFields(portalId, data.fields);
+        if (Object.keys(fields).length > 0) {
+            await this.employeeRepository.updateProfileFields(id, portalId, fields);
         }
 
         if (role !== undefined || data.isActive !== undefined) {
@@ -205,5 +211,21 @@ export class EmployeesService {
             throw new ForbiddenException("This employee has permissions you do not have");
         }
         return target;
+    }
+
+    /**
+     * Поля профиля — через тот же валидатор, что анкета участника: известные поля, тип, опции и
+     * потолки длины. Без него форма сотрудника и публичное принятие приглашения писали что угодно.
+     */
+    private async validFields(
+        portalId: string,
+        fields: Record<string, unknown> | undefined
+    ): Promise<Record<string, unknown>> {
+        if (!fields || Object.keys(fields).length === 0) return {};
+        return this.fieldsValidator.validatePartialUpdate(
+            portalId,
+            ENTITY_DEFINITION_CODES.EMPLOYEE,
+            fields
+        );
     }
 }

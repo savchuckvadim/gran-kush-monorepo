@@ -7,6 +7,18 @@ import type { AuthPrincipalType } from "@modules/portal/auth/shared/domain/auth-
 export const SESSION_AUDIENCES = { Crm: "crm", Cabinet: "cabinet" } as const;
 export type SessionAudience = (typeof SESSION_AUDIENCES)[keyof typeof SESSION_AUDIENCES];
 
+/**
+ * Админка платформы — тоже сессия: выход и смена пароля гасят её сразу. Это не приложение клуба:
+ * ни кук, ни realtime, ни списка устройств в CRM и кабинете, поэтому в `SessionAudience` её нет.
+ */
+export const PLATFORM_SESSION_AUDIENCE = "platform" as const;
+export type AnySessionAudience = SessionAudience | typeof PLATFORM_SESSION_AUDIENCE;
+
+const APP_AUDIENCES: ReadonlySet<string> = new Set(Object.values(SESSION_AUDIENCES));
+
+export const isAppAudience = (audience: AnySessionAudience): audience is SessionAudience =>
+    APP_AUDIENCES.has(audience);
+
 /** Для MembershipGuard: в CRM аккаунт — сотрудник клуба, в кабинете — участник. */
 export const principalTypeOf = (audience: SessionAudience): AuthPrincipalType =>
     audience === SESSION_AUDIENCES.Crm ? "employee" : "member";
@@ -35,11 +47,11 @@ export type SessionRevokeReason =
  */
 export const REFRESH_REUSE_GRACE_MS = 30_000;
 
-/** Сессия, как её видит владелец в списке устройств. */
+/** Сессия входа в любую аудиторию, включая админку платформы. */
 export interface AuthSession {
     id: string;
     userId: string;
-    audience: SessionAudience;
+    audience: AnySessionAudience;
     deviceId: string;
     signInMethod: SignInMethod;
     userAgent: string | null;
@@ -49,6 +61,9 @@ export interface AuthSession {
     expiresAt: Date;
     revokedAt: Date | null;
 }
+
+/** Сессия, как её видит владелец в списке устройств CRM и кабинета: только приложения клуба. */
+export type AppAuthSession = AuthSession & { audience: SessionAudience };
 
 /** Хеши токенов сессии — только для ротации. */
 export interface SessionSecrets {

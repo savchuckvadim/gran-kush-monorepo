@@ -43,12 +43,15 @@ export class PublicPortalsController {
     }
 
     @Get(":slug")
-    @ApiOperation({ summary: "Публичная карточка клуба по slug" })
+    @ApiOperation({
+        summary: "Публичная карточка клуба по slug — только клубы, опубликованные на карте",
+    })
     @ApiSuccessResponse(PublicPortalMapItemDto)
     @ApiErrorResponse([404])
     async bySlug(@Param("slug") slug: string): Promise<PublicPortalMapItemDto> {
         const portal = await this.portalResolution.findActiveByIdOrSlug(undefined, slug);
-        if (!portal) {
+        // Клуб без галочки «показывать нас» для публики не существует — как и в выдаче карты
+        if (!portal?.isListedOnMap) {
             throw new NotFoundException("Portal not found");
         }
         const rating = await this.prisma.portalReview.aggregate({

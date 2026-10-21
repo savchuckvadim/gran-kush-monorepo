@@ -6,6 +6,8 @@ import { UserAccountStatus } from "@prisma/client";
 import { UserRepository } from "@users/domain/repositories/user-repository.interface";
 import { hash } from "bcrypt";
 
+import { withMinDuration } from "@common/time/min-duration.util";
+import { EMAIL_LOOKUP_MIN_RESPONSE_MS } from "@modules/portal/auth/domain/constants/email-lookup.constants";
 import { SessionsService } from "@modules/portal/auth/sessions/application/sessions.service";
 import { ClaimedMembershipRepository } from "@modules/portal/auth/shared/domain/repositories/claimed-membership-repository.interface";
 import { AuthTokensService } from "@modules/portal/auth/tokens/application/auth-tokens.service";
@@ -92,19 +94,21 @@ export class EmailVerificationService {
      * (неподтверждённый участник или приглашённый сотрудник потерял письмо).
      */
     async resendConfirmationByEmail(email: string, options: AuthMailOptions): Promise<void> {
-        const user = await this.userRepository.findByEmail(email);
-        if (!user) {
-            return;
-        }
-        try {
-            await this.sendVerificationEmailToUserId(user.id, options);
-        } catch (error: unknown) {
-            // Ответ одинаков для любого адреса; сбой почты не должен его менять
-            this.logger.error(
-                `Resend confirmation for user ${user.id} was not queued`,
-                error instanceof Error ? error.stack : String(error)
-            );
-        }
+        await withMinDuration(EMAIL_LOOKUP_MIN_RESPONSE_MS, async () => {
+            const user = await this.userRepository.findByEmail(email);
+            if (!user) {
+                return;
+            }
+            try {
+                await this.sendVerificationEmailToUserId(user.id, options);
+            } catch (error: unknown) {
+                // Ответ одинаков для любого адреса; сбой почты не должен его менять
+                this.logger.error(
+                    `Resend confirmation for user ${user.id} was not queued`,
+                    error instanceof Error ? error.stack : String(error)
+                );
+            }
+        });
     }
 
     /** Подтверждение почты ссылкой из письма; ссылка гасится. */
@@ -193,38 +197,48 @@ export class EmailVerificationService {
     }
 
     /**
-     * Запрос на сброс пароля
+     * Запрос на сброс пароля. Не раскрывает, есть ли аккаунт: ответ один и тот же по тексту и по
+     * времени (`EMAIL_LOOKUP_MIN_RESPONSE_MS`), сбой почты его не меняет.
      */
     async requestPasswordReset(
         email: string,
         options: AuthMailOptions = MEMBER_MAIL
     ): Promise<{ success: boolean; message: string }> {
-        const user = await this.userRepository.findByEmail(email);
-
-        // Не раскрываем, существует ли пользователь; блокировку сброс не снимает
-        if (!user || user.status === UserAccountStatus.blocked) {
-            return {
-                success: true,
-                message: "If the email exists, a password reset link has been sent",
-            };
-        }
-
-        const { token } = await this.authTokens.issue(AUTH_TOKEN_PURPOSES.PasswordReset, {
-            userId: user.id,
-        });
-
-        await this.mailService.sendPasswordReset(
-            { id: user.id, email: user.email },
-            user.displayName ?? user.email,
-            token,
-            options.language ?? DEFAULT_LANGUAGE,
-            options.app === "crm" ? "crm" : "site"
+        await withMinDuration(EMAIL_LOOKUP_MIN_RESPONSE_MS, () =>
+            this.sendPasswordResetIfAllowed(email, options)
         );
-
         return {
             success: true,
             message: "If the email exists, a password reset link has been sent",
         };
+    }
+
+    private async sendPasswordResetIfAllowed(
+        email: string,
+        options: AuthMailOptions
+    ): Promise<void> {
+        const user = await this.userRepository.findByEmail(email);
+        // Блокировку сброс не снимает
+        if (!user || user.status === UserAccountStatus.blocked) {
+            return;
+        }
+        try {
+            const { token } = await this.authTokens.issue(AUTH_TOKEN_PURPOSES.PasswordReset, {
+                userId: user.id,
+            });
+            await this.mailService.sendPasswordReset(
+                { id: user.id, email: user.email },
+                user.displayName ?? user.email,
+                token,
+                options.language ?? DEFAULT_LANGUAGE,
+                options.app === "crm" ? "crm" : "site"
+            );
+        } catch (error: unknown) {
+            this.logger.error(
+                `Password reset for user ${user.id} was not queued`,
+                error instanceof Error ? error.stack : String(error)
+            );
+        }
     }
 
     /** Новый пароль по ссылке сброса или первого пароля; ссылка гасится. */

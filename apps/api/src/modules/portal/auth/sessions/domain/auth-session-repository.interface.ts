@@ -1,7 +1,8 @@
 import type {
+    AnySessionAudience,
+    AppAuthSession,
     AuthSession,
     SessionAccount,
-    SessionAudience,
     SessionRevokeReason,
     SessionSecrets,
     SignInMethod,
@@ -10,7 +11,7 @@ import type {
 export interface StartSessionData {
     id: string;
     userId: string;
-    audience: SessionAudience;
+    audience: AnySessionAudience;
     deviceId: string;
     signInMethod: SignInMethod;
     refreshTokenHash: string;
@@ -52,7 +53,8 @@ export abstract class AuthSessionRepository {
         exceptSessionId?: string
     ): Promise<number>;
 
-    abstract listActiveForUser(userId: string, now: Date): Promise<AuthSession[]>;
+    /** Живые сессии приложений клуба; сессии админки платформы в список устройств не входят. */
+    abstract listActiveForUser(userId: string, now: Date): Promise<AppAuthSession[]>;
 
     /** Уборка: истёкшие и давно отозванные сессии. */
     abstract deleteStale(now: Date, revokedBefore: Date): Promise<number>;

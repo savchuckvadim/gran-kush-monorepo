@@ -6,10 +6,14 @@ import { hashSecretToken } from "@common/crypto/secret-token";
 import type { AuthenticatedUser } from "@modules/portal/auth/shared/domain/auth-user";
 
 import {
+    type AnySessionAudience,
+    type AppAuthSession,
     type AuthSession,
     isSessionUsable,
+    PLATFORM_SESSION_AUDIENCE,
     principalTypeOf,
     REFRESH_REUSE_GRACE_MS,
+    type SessionAccount,
     type SessionAudience,
     type SessionClient,
     type SessionRevokeReason,
@@ -58,7 +62,7 @@ export class SessionsService {
 
     async start(input: {
         userId: string;
-        audience: SessionAudience;
+        audience: AnySessionAudience;
         method: SignInMethod;
         client: SessionClient;
     }): Promise<StartedSession> {
@@ -88,20 +92,9 @@ export class SessionsService {
         accessToken: string,
         audience: SessionAudience
     ): Promise<AuthenticatedUser | null> {
-        const verified = await this.tokens.verifyAccess(accessToken, audience);
-        if (!verified) return null;
-        const found = await this.sessions.findWithAccount(verified.sessionId);
-        if (!found) return null;
-        const { session, account } = found;
-        if (
-            session.userId !== verified.userId ||
-            session.audience !== audience ||
-            !isSessionUsable(session, new Date()) ||
-            account.blocked ||
-            !account.isActive
-        ) {
-            return null;
-        }
+        const live = await this.liveSession(accessToken, audience);
+        if (!live) return null;
+        const { session, account, expiresAt } = live;
         return {
             kind: "authenticated_user",
             userId: account.id,
@@ -111,11 +104,19 @@ export class SessionsService {
             isActive: account.isActive,
             sessionId: session.id,
             audience,
-            accessExpiresAt: verified.expiresAt ?? undefined,
+            accessExpiresAt: expiresAt ?? undefined,
         };
     }
 
-    async refresh(refreshToken: string, audience: SessionAudience): Promise<StartedSession> {
+    /** Access админки платформы → аккаунт и сессия; права админа проверяет гвард платформы. */
+    async authenticatePlatform(
+        accessToken: string
+    ): Promise<{ userId: string; sessionId: string } | null> {
+        const live = await this.liveSession(accessToken, PLATFORM_SESSION_AUDIENCE);
+        return live ? { userId: live.account.id, sessionId: live.session.id } : null;
+    }
+
+    async refresh(refreshToken: string, audience: AnySessionAudience): Promise<StartedSession> {
         const verified = await this.tokens.verifyRefresh(refreshToken, audience);
         if (!verified) throw SESSION_ENDED();
         const found = await this.sessions.findWithAccount(verified.sessionId);
@@ -157,7 +158,7 @@ export class SessionsService {
     }
 
     /** Выход по refresh-токену; чужой или негодный токен выход не ломает. */
-    async endByRefreshToken(refreshToken: string, audience: SessionAudience): Promise<void> {
+    async endByRefreshToken(refreshToken: string, audience: AnySessionAudience): Promise<void> {
         const verified = await this.tokens.verifyRefresh(refreshToken, audience);
         if (verified) await this.sessions.revoke(verified.sessionId, "logout");
     }
@@ -180,8 +181,30 @@ export class SessionsService {
         return this.sessions.revokeOwned(sessionId, userId, "revoked_by_user");
     }
 
-    listForUser(userId: string): Promise<AuthSession[]> {
+    listForUser(userId: string): Promise<AppAuthSession[]> {
         return this.sessions.listActiveForUser(userId, new Date());
+    }
+
+    /** Живая сессия аудитории и её аккаунт; `null` — токен не годится, сессии или аккаунта нет. */
+    private async liveSession(
+        accessToken: string,
+        audience: AnySessionAudience
+    ): Promise<{ session: AuthSession; account: SessionAccount; expiresAt: Date | null } | null> {
+        const verified = await this.tokens.verifyAccess(accessToken, audience);
+        if (!verified) return null;
+        const found = await this.sessions.findWithAccount(verified.sessionId);
+        if (!found) return null;
+        const { session, account } = found;
+        if (
+            session.userId !== verified.userId ||
+            session.audience !== audience ||
+            !isSessionUsable(session, new Date()) ||
+            account.blocked ||
+            !account.isActive
+        ) {
+            return null;
+        }
+        return { session, account, expiresAt: verified.expiresAt };
     }
 
     private async staleToken(
