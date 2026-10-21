@@ -38,7 +38,7 @@ export interface ModalDialogProps {
     size?: keyof typeof WIDTH;
     /** `sheet` slides in from the right at full height — for settings and pickers */
     variant?: "dialog" | "sheet";
-    /** Long content scrolls inside the dialog instead of the page */
+    /** Long content scrolls between the fixed title and actions instead of leaving the screen */
     scrollable?: boolean;
     className?: string;
     children: ReactNode;
@@ -62,13 +62,14 @@ export function ModalDialog({
     className,
     children,
 }: ModalDialogProps) {
+    const scrollsBody = scrollable && variant === "dialog";
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             {trigger ? <DialogTrigger asChild>{trigger}</DialogTrigger> : null}
             <DialogContent
                 className={cn(
                     variant === "sheet" ? SHEET : WIDTH[size],
-                    scrollable && variant === "dialog" && "max-h-[90vh] overflow-y-auto",
+                    scrollsBody && "flex max-h-[90dvh] flex-col",
                     className
                 )}
             >
@@ -76,7 +77,12 @@ export function ModalDialog({
                     <DialogTitle>{title}</DialogTitle>
                     {description ? <DialogDescription>{description}</DialogDescription> : null}
                 </DialogHeader>
-                {children}
+                {scrollsBody ? (
+                    // The padding moves inside the scroll area: focus rings are not cut off
+                    <div className="-mx-6 min-h-0 flex-1 overflow-y-auto px-6 py-1">{children}</div>
+                ) : (
+                    children
+                )}
                 {footer ? <DialogFooter className="gap-2 sm:gap-2">{footer}</DialogFooter> : null}
             </DialogContent>
         </Dialog>

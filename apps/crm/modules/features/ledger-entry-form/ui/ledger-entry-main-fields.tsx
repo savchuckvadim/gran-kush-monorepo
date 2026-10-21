@@ -55,6 +55,7 @@ export function LedgerEntryMainFields({ form, categories, error }: LedgerEntryMa
                             <FieldSelect
                                 id="entry-category"
                                 label={t("fields.category")}
+                                hint={t("hints.category")}
                                 placeholder={t("categoryPlaceholder")}
                                 required
                                 value={field.value}
@@ -74,6 +75,7 @@ export function LedgerEntryMainFields({ form, categories, error }: LedgerEntryMa
                         <FieldSelect
                             id="entry-account"
                             label={transfer ? t("fields.fromAccount") : t("fields.account")}
+                            hint={t("hints.account")}
                             value={field.value}
                             onValueChange={field.onChange}
                             options={accountOptions}

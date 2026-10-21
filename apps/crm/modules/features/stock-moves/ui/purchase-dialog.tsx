@@ -78,6 +78,7 @@ export function PurchaseDialog({ open, onOpenChange, product = null }: PurchaseD
 
     return (
         <ModalDialog
+            scrollable
             open={open}
             onOpenChange={onOpenChange}
             title={t("title")}

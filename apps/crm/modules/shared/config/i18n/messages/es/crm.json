@@ -1049,7 +1049,6 @@
                 "taxDefault": "Por defecto: {rate}",
                 "noTax": "sin impuesto",
                 "withholdingHint": "Un profesional (gestor, abogado): normalmente 15 %",
-                "preview": "Base {net} · cuota {tax} · IRPF {withholding} · a pagar {payable}",
                 "noCounterparty": "Sin contraparte",
                 "deletedMember": "Socio eliminado",
                 "clearMember": "Quitar el socio",
@@ -1068,7 +1067,40 @@
                     "percent": "De 0 a 100",
                     "tooLong": "Demasiado largo",
                     "sameAccount": "El traspaso va entre cuentas distintas"
-                }
+                },
+                "steps": {
+                    "basics": "Operación",
+                    "amount": "Importe e impuestos",
+                    "document": "Documento"
+                },
+                "stepCounter": "Paso {current} de {total}",
+                "next": "Siguiente",
+                "back": "Atrás",
+                "directionHelp": {
+                    "income": "Ingreso: el dinero entra en el club (cuotas de socios, ventas, subvenciones). La categoría decide dónde aparece en los informes y qué impuesto se aplica por defecto.",
+                    "expense": "Gasto: el dinero sale del club (alquiler, compras, servicios, nóminas). Guarda el ticket o la factura: el gestor los pedirá para el libro de gastos.",
+                    "transfer": "Traspaso: el dinero pasa entre tus propias cuentas, por ejemplo la caja se ingresa en el banco. No es ingreso ni gasto y no lleva impuesto."
+                },
+                "hints": {
+                    "category": "La categoría agrupa las operaciones en los informes (alquiler, compras, cuotas) y propone el impuesto por defecto. Las categorías se configuran en los ajustes de finanzas.",
+                    "account": "Dónde está el dinero: caja — efectivo, banco — la cuenta del club, tarjeta — pagos con tarjeta o TPV.",
+                    "includesTax": "Un ticket suele mostrar el total con IVA: deja «Importe con impuesto». En una factura la base y el IVA van por separado: puedes introducir la base y desactivar el interruptor.",
+                    "taxRate": "El IVA es el impuesto sobre el valor añadido. El tipo por defecto viene de la categoría. En España el tipo general es el 21 %, los reducidos el 10 % y el 4 %.",
+                    "withholding": "La retención de IRPF se aplica al pagar a un profesional (gestor, abogado, autónomo): el club le paga el importe menos la retención e ingresa lo retenido en Hacienda (modelo 111). Normalmente el 15 %, el 7 % para nuevos autónomos. Si no pagas a un profesional, deja 0.",
+                    "counterparty": "A quién pagas o de quién recibes el dinero. La lista está en la pestaña «Contrapartes». Para la cuota de un socio, elígelo en el campo de al lado.",
+                    "document": "Número y fecha del ticket o la factura. En los gastos van al libro de facturas que entregas al gestor.",
+                    "paidOn": "Rellénala si el dinero se movió otro día que la operación: por ejemplo, una factura del día 1 pagada el 15."
+                },
+                "totals": {
+                    "net": "Base",
+                    "tax": "Impuesto",
+                    "withholding": "Retención IRPF",
+                    "payable": {
+                        "income": "A cobrar",
+                        "expense": "A pagar"
+                    }
+                },
+                "summaryTitle": "Revisa antes de guardar"
             },
             "import": {
                 "title": "Subida de tabla",
@@ -1228,6 +1260,10 @@
                     "salaries": "Sueldos y salarios",
                     "social_security": "Seguridad Social",
                     "other_expenses": "Otros gastos"
+                },
+                "hints": {
+                    "pgcAccount": "La cuenta del Plan General Contable donde el gestor contabiliza la categoría: 621 — arrendamientos, 600 — compras de mercaderías, 623 — servicios de profesionales, 629 — otros servicios. Si no lo sabes, déjala vacía y consúltalo con el gestor.",
+                    "taxTreatment": "«Tipo del club» usa el tipo por defecto de los ajustes de finanzas. Exenta — operación exenta de IVA, No sujeta — fuera del IVA. Qué operaciones del club están exentas, mejor consultarlo con el gestor."
                 }
             },
             "periods": {

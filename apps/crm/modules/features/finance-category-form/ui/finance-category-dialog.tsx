@@ -103,6 +103,7 @@ export function FinanceCategoryDialog({
 
     return (
         <ModalDialog
+            scrollable
             open={open}
             onOpenChange={onOpenChange}
             title={category ? t("editTitle") : t("createTitle")}
@@ -155,6 +156,7 @@ export function FinanceCategoryDialog({
                     <FieldInput
                         id="category-pgc"
                         label={t("fields.pgcAccount")}
+                        hint={t("hints.pgcAccount")}
                         placeholder="629"
                         error={error("pgcAccount")}
                         {...form.register("pgcAccount")}
@@ -166,6 +168,7 @@ export function FinanceCategoryDialog({
                             <FieldSelect
                                 id="category-treatment"
                                 label={t("fields.taxTreatment")}
+                                hint={t("hints.taxTreatment")}
                                 value={field.value}
                                 onValueChange={field.onChange}
                                 options={TREATMENTS.map((value) => ({

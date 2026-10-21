@@ -69,6 +69,8 @@ export {
     type FieldSelectProps,
 } from "./shared/field/field-select";
 export { FileUpload, type FileUploadProps } from "./shared/file-upload/file-upload";
+export { FormSteps, type FormStepsItem, type FormStepsProps } from "./shared/form-steps";
+export { InfoHint, type InfoHintProps } from "./shared/info-hint";
 export { InitialsAvatar, type InitialsAvatarProps } from "./shared/initials-avatar";
 export {
     kanbanAfterId,

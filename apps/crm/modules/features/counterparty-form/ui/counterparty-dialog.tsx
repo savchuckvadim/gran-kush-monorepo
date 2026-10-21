@@ -69,6 +69,7 @@ export function CounterpartyDialog({ open, onOpenChange, counterparty }: Counter
 
     return (
         <ModalDialog
+            scrollable
             open={open}
             onOpenChange={onOpenChange}
             title={counterparty ? t("editTitle") : t("createTitle")}

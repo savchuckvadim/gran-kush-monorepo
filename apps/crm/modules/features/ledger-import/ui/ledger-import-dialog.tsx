@@ -72,6 +72,7 @@ export function LedgerImportDialog({ open, onOpenChange }: LedgerImportDialogPro
 
     return (
         <ModalDialog
+            scrollable
             open={open}
             onOpenChange={close}
             size="xl"

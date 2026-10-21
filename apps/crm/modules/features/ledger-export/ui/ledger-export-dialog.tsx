@@ -54,6 +54,7 @@ export function LedgerExportDialog({ open, onOpenChange, from, to }: LedgerExpor
 
     return (
         <ModalDialog
+            scrollable
             open={open}
             onOpenChange={close}
             title={t("title")}

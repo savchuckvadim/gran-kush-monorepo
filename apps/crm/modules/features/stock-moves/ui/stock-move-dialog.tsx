@@ -68,6 +68,7 @@ export function StockMoveDialog({ open, onOpenChange, product = null }: StockMov
 
     return (
         <ModalDialog
+            scrollable
             open={open}
             onOpenChange={onOpenChange}
             title={t("title")}

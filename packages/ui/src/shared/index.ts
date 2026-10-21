@@ -2,6 +2,8 @@ export { Card, type CardProps } from "./card/card";
 export { ConfirmDialog, type ConfirmDialogProps } from "./confirm-dialog";
 export { Field, FieldInput, type FieldInputProps, type FieldProps } from "./field/field";
 export { FileUpload, type FileUploadProps } from "./file-upload/file-upload";
+export { FormSteps, type FormStepsItem, type FormStepsProps } from "./form-steps";
+export { InfoHint, type InfoHintProps } from "./info-hint";
 export { InitialsAvatar, type InitialsAvatarProps } from "./initials-avatar";
 export {
     kanbanAfterId,

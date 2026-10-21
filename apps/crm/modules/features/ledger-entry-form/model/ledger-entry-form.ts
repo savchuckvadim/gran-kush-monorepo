@@ -15,6 +15,33 @@ const DATE = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
 const ACCOUNTS = ["cash", "bank", "card"] as const;
 const DOCUMENT_TYPES = ["none", "receipt", "invoice_received", "invoice_issued"] as const;
 
+type CrossFieldValues = {
+    direction: LedgerDirection;
+    categoryId: string;
+    account: string;
+    toAccount: string;
+};
+
+export interface CrossFieldIssue {
+    path: "categoryId" | "toAccount";
+    message: "required" | "sameAccount";
+}
+
+/**
+ * Правила, связывающие поля: статья нужна доходу и расходу, перевод — между разными счетами.
+ * Ими же проверяется шаг мастера: zod не запускает `superRefine`, пока не заполнены все поля.
+ */
+export const crossFieldIssues = (values: CrossFieldValues): CrossFieldIssue[] => {
+    const issues: CrossFieldIssue[] = [];
+    if (values.direction !== "transfer" && !values.categoryId) {
+        issues.push({ path: "categoryId", message: "required" });
+    }
+    if (values.direction === "transfer" && values.toAccount === values.account) {
+        issues.push({ path: "toAccount", message: "sameAccount" });
+    }
+    return issues;
+};
+
 export const ledgerEntryFormSchema = z
     .object({
         direction: z.enum(["income", "expense", "transfer"]),
@@ -37,11 +64,8 @@ export const ledgerEntryFormSchema = z
         notes: z.string().max(2000, "tooLong"),
     })
     .superRefine((values, ctx) => {
-        if (values.direction !== "transfer" && !values.categoryId) {
-            ctx.addIssue({ code: "custom", path: ["categoryId"], message: "required" });
-        }
-        if (values.direction === "transfer" && values.toAccount === values.account) {
-            ctx.addIssue({ code: "custom", path: ["toAccount"], message: "sameAccount" });
+        for (const issue of crossFieldIssues(values)) {
+            ctx.addIssue({ code: "custom", path: [issue.path], message: issue.message });
         }
     });
 

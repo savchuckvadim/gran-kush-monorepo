@@ -1049,7 +1049,6 @@
                 "taxDefault": "Default — {rate}",
                 "noTax": "no tax",
                 "withholdingHint": "A professional (gestor, lawyer) — usually 15 %",
-                "preview": "Base {net} · tax {tax} · IRPF {withholding} · to pay {payable}",
                 "noCounterparty": "No counterparty",
                 "deletedMember": "Deleted member",
                 "clearMember": "Remove the member",
@@ -1068,7 +1067,40 @@
                     "percent": "From 0 to 100",
                     "tooLong": "Too long",
                     "sameAccount": "A transfer goes between two different accounts"
-                }
+                },
+                "steps": {
+                    "basics": "Operation",
+                    "amount": "Amount and tax",
+                    "document": "Document"
+                },
+                "stepCounter": "Step {current} of {total}",
+                "next": "Next",
+                "back": "Back",
+                "directionHelp": {
+                    "income": "Income — money came into the club: member fees, sales, grants. The category decides where it shows in reports and which tax applies by default.",
+                    "expense": "Expense — money left the club: rent, purchases, services, salaries. Keep the receipt or invoice — the gestor will ask for it for the expense book.",
+                    "transfer": "Transfer — money moves between your own accounts, e.g. cash takings paid into the bank. It is neither income nor expense and carries no tax."
+                },
+                "hints": {
+                    "category": "The category groups operations in reports (rent, purchases, fees) and suggests the default tax. Categories are set up in the finance settings.",
+                    "account": "Where the money is: cash — notes and coins, bank — the club's bank account, card — card payments or the terminal.",
+                    "includesTax": "A receipt usually shows the total including IVA — keep “Amount includes tax”. An invoice lists the base and IVA separately: you can enter the base and switch it off.",
+                    "taxRate": "IVA is the Spanish value-added tax. The default rate comes from the category. The general rate in Spain is 21 %, the reduced ones are 10 % and 4 %.",
+                    "withholding": "IRPF withholding applies when you pay a professional (gestor, lawyer, autónomo): the club pays them the amount minus the withholding and pays the withheld part to Hacienda itself (form 111). Usually 15 %, 7 % for new autónomos. If you are not paying a professional, leave 0.",
+                    "counterparty": "Who you pay or receive money from. The list is on the “Counterparties” tab. For a member fee, pick the member in the field next to it.",
+                    "document": "Number and date of the receipt or invoice. For expenses they go into the invoice book you hand to the gestor.",
+                    "paidOn": "Fill it in when the money moved on another day than the operation: e.g. an invoice dated the 1st paid on the 15th."
+                },
+                "totals": {
+                    "net": "Base",
+                    "tax": "Tax",
+                    "withholding": "IRPF withholding",
+                    "payable": {
+                        "income": "To receive",
+                        "expense": "To pay"
+                    }
+                },
+                "summaryTitle": "Check before saving"
             },
             "import": {
                 "title": "Spreadsheet upload",
@@ -1228,6 +1260,10 @@
                     "salaries": "Salaries",
                     "social_security": "Social Security",
                     "other_expenses": "Other expenses"
+                },
+                "hints": {
+                    "pgcAccount": "The account number from the Spanish chart of accounts (PGC) the gestor books the category to: 621 — rent, 600 — goods purchases, 623 — professional services, 629 — other services. Not sure — leave it empty and ask the gestor.",
+                    "taxTreatment": "“Club rate” takes the default rate from the finance settings. Exenta — exempt from IVA, No sujeta — outside IVA altogether. Ask the gestor which club operations are exempt."
                 }
             },
             "periods": {

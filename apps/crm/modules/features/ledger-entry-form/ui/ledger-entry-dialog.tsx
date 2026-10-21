@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 import { getApiErrorCode } from "@workspace/api-client/core";
-import { Button, ConfirmDialog, ModalDialog } from "@workspace/ui";
+import { ConfirmDialog, FormSteps, ModalDialog } from "@workspace/ui";
 
 import {
     type LedgerDirection,
@@ -21,6 +21,7 @@ import {
     useTaxRates,
 } from "@/modules/entities/finance";
 
+import { ENTRY_STEPS } from "../model/entry-steps";
 import {
     entryValues,
     ledgerEntryFormSchema,
@@ -29,12 +30,10 @@ import {
     toLedgerEntryInput,
 } from "../model/ledger-entry-form";
 import { localToday } from "../model/local-today";
+import { useEntrySteps } from "../model/use-entry-steps";
 
-import { LedgerDirectionSwitch } from "./ledger-direction-switch";
-import { LedgerEntryAmountFields } from "./ledger-entry-amount-fields";
-import { LedgerEntryDocumentFields } from "./ledger-entry-document-fields";
-import { LedgerEntryMainFields } from "./ledger-entry-main-fields";
-import { LedgerEntryPartyField } from "./ledger-entry-party-field";
+import { LedgerEntryDialogFooter } from "./ledger-entry-dialog-footer";
+import { LedgerEntryStepFields } from "./ledger-entry-step-fields";
 
 const FORM_ID = "ledger-entry-form";
 const DUPLICATE_DOCUMENT = "duplicate_document";
@@ -50,8 +49,10 @@ interface LedgerEntryDialogProps {
 }
 
 /**
- * Доход, расход или перевод: дата, статья, счёт, сумма с налогом, контрагент, документ. Тот же
- * документ у того же контрагента — вопрос «не дубль ли» и запись с подтверждением.
+ * Доход, расход или перевод — мастером из трёх шагов: операция (направление, дата, статья, счёт),
+ * сумма и налог, контрагент и документ. Термины объясняет «?» у поля. Новая проводка проходит
+ * шаги по порядку, правка открывает их вкладками. Тот же документ у того же контрагента — вопрос
+ * «не дубль ли» и запись с подтверждением.
  */
 export function LedgerEntryDialog({
     open,
@@ -74,7 +75,9 @@ export function LedgerEntryDialog({
         defaultValues: newEntryValues(direction, localToday()),
     });
     const current = useWatch({ control: form.control, name: "direction" });
-    const rateList = rates.data ?? [];
+    const editing = Boolean(entry);
+    const steps = useEntrySteps(form, editing);
+    const { restart } = steps;
 
     // поля заполняются один раз на открытие: обновление ставок по сокету не стирает ввод;
     // правке нужны ставки клуба, чтобы узнать ставку проводки по её проценту
@@ -89,8 +92,9 @@ export function LedgerEntryDialog({
         form.reset(
             entry ? entryValues(entry, rates.data ?? []) : newEntryValues(direction, localToday())
         );
+        restart();
         filledFor.current = key;
-    }, [open, entry, direction, rates.isSuccess, rates.data, form]);
+    }, [open, entry, direction, rates.isSuccess, rates.data, form, restart]);
 
     const save = (values: LedgerEntryFormValues, allowDuplicate: boolean) => {
         const input = toLedgerEntryInput(values, allowDuplicate);
@@ -109,6 +113,16 @@ export function LedgerEntryDialog({
         else create.mutate(input, done);
     };
 
+    // Enter в поле нового мастера ведёт на следующий шаг, а не записывает недозаполненное
+    const submit = (event: FormEvent<HTMLFormElement>) => {
+        if (!editing && !steps.last) {
+            event.preventDefault();
+            void steps.next();
+            return;
+        }
+        void form.handleSubmit((values) => save(values, false), steps.showErrors)(event);
+    };
+
     const error = (name: keyof LedgerEntryFormValues) => {
         const message = form.formState.errors[name]?.message;
         return message ? t(`errors.${message}`) : undefined;
@@ -120,60 +134,45 @@ export function LedgerEntryDialog({
                 open={open}
                 onOpenChange={onOpenChange}
                 size="xl"
+                scrollable
                 title={entry ? t("editTitle") : t(`createTitle.${current}`)}
                 description={t("hint")}
                 footer={
-                    <>
-                        <Button
-                            variant="outline"
-                            onClick={() => onOpenChange(false)}
-                            disabled={pending}
-                        >
-                            {t("cancel")}
-                        </Button>
-                        <Button type="submit" form={FORM_ID} disabled={pending}>
-                            {pending ? t("saving") : t("save")}
-                        </Button>
-                    </>
+                    <LedgerEntryDialogFooter
+                        steps={steps}
+                        editing={editing}
+                        pending={pending}
+                        formId={FORM_ID}
+                        onCancel={() => onOpenChange(false)}
+                    />
                 }
             >
-                <form
-                    id={FORM_ID}
-                    noValidate
-                    className="space-y-5"
-                    onSubmit={form.handleSubmit((values) => save(values, false))}
-                >
-                    <Controller
-                        control={form.control}
-                        name="direction"
-                        render={({ field }) => (
-                            <LedgerDirectionSwitch
-                                value={field.value}
-                                disabled={Boolean(entry)}
-                                onChange={(next) => {
-                                    field.onChange(next);
-                                    form.setValue("categoryId", "");
-                                    form.setValue("taxRateId", "");
-                                }}
-                            />
-                        )}
+                <div className="space-y-5">
+                    <FormSteps
+                        steps={ENTRY_STEPS.map((id) => ({ id, title: t(`steps.${id}`) }))}
+                        current={steps.step}
+                        reachable={steps.reachable}
+                        onSelect={(id) => {
+                            const target = ENTRY_STEPS.find((step) => step === id);
+                            if (target) void steps.goTo(target);
+                        }}
+                        counter={t("stepCounter", {
+                            current: steps.index + 1,
+                            total: steps.total,
+                        })}
                     />
-                    <LedgerEntryMainFields form={form} categories={categories} error={error} />
-                    <LedgerEntryAmountFields
-                        form={form}
-                        categories={categories}
-                        rates={rateList}
-                        error={error}
-                    />
-                    {current !== "transfer" && (
-                        <LedgerEntryPartyField form={form} counterparties={counterparties} />
-                    )}
-                    <LedgerEntryDocumentFields
-                        form={form}
-                        error={error}
-                        transfer={current === "transfer"}
-                    />
-                </form>
+                    <form id={FORM_ID} noValidate onSubmit={submit}>
+                        <LedgerEntryStepFields
+                            step={steps.step}
+                            form={form}
+                            categories={categories}
+                            rates={rates.data ?? []}
+                            counterparties={counterparties}
+                            error={error}
+                            editing={editing}
+                        />
+                    </form>
+                </div>
             </ModalDialog>
             <ConfirmDialog
                 open={duplicate !== null}

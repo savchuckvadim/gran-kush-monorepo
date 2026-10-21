@@ -34,6 +34,8 @@ export interface FieldSelectProps {
     label?: string;
     error?: string;
     helperText?: string;
+    /** Explanation of the term behind a "?" next to the label */
+    hint?: ReactNode;
     required?: boolean;
     disabled?: boolean;
     name?: string;
@@ -60,6 +62,7 @@ export function FieldSelect({
     label,
     error,
     helperText,
+    hint,
     required,
     disabled,
     name,
@@ -109,7 +112,7 @@ export function FieldSelect({
         return select;
     }
     return (
-        <Field label={label} error={error} helperText={helperText} required={required}>
+        <Field label={label} error={error} helperText={helperText} hint={hint} required={required}>
             {select}
         </Field>
     );

@@ -4,16 +4,17 @@ import { useTranslations } from "next-intl";
 
 import { Controller, type UseFormReturn, useWatch } from "react-hook-form";
 
-import { FieldInput, FieldSelect, Label, Switch } from "@workspace/ui";
+import { FieldInput, FieldSelect, InfoHint, Label, Switch } from "@workspace/ui";
 
 import { type FinanceCategory, type TaxRate, useTaxRateLabel } from "@/modules/entities/finance";
-import { useMoneyFormat } from "@/modules/shared";
 
 import {
     defaultEntryRate,
     type LedgerEntryFormValues,
     previewTotals,
 } from "../model/ledger-entry-form";
+
+import { LedgerEntryTotals } from "./ledger-entry-totals";
 
 interface LedgerEntryAmountFieldsProps {
     form: UseFormReturn<LedgerEntryFormValues>;
@@ -24,7 +25,7 @@ interface LedgerEntryAmountFieldsProps {
 
 /**
  * Сумма и налог: сумма с налогом (чек) или база (фактура), ставка клуба или по умолчанию,
- * удержание IRPF; под полями — база, налог и сумма к оплате, как их посчитает учёт.
+ * удержание IRPF; под полями — база, налог и итог, как их посчитает учёт. У терминов — «?».
  */
 export function LedgerEntryAmountFields({
     form,
@@ -34,7 +35,6 @@ export function LedgerEntryAmountFields({
 }: LedgerEntryAmountFieldsProps) {
     const t = useTranslations("crm.finance.entryForm");
     const rateLabel = useTaxRateLabel();
-    const money = useMoneyFormat();
     const [direction, categoryId, taxRateId, amount, includesTax, withholding] = useWatch({
         control: form.control,
         name: [
@@ -85,6 +85,9 @@ export function LedgerEntryAmountFields({
                                 <Label htmlFor="entry-includes-tax" className="text-sm font-normal">
                                     {field.value ? t("includesTax") : t("excludesTax")}
                                 </Label>
+                                <InfoHint label={t("includesTax")}>
+                                    {t("hints.includesTax")}
+                                </InfoHint>
                             </div>
                         )}
                     />
@@ -99,6 +102,7 @@ export function LedgerEntryAmountFields({
                             <FieldSelect
                                 id="entry-tax-rate"
                                 label={t("fields.taxRate")}
+                                hint={t("hints.taxRate")}
                                 value={field.value}
                                 onValueChange={field.onChange}
                                 options={[
@@ -122,6 +126,7 @@ export function LedgerEntryAmountFields({
                         id="entry-withholding"
                         label={t("fields.withholding")}
                         helperText={t("withholdingHint")}
+                        hint={t("hints.withholding")}
                         type="number"
                         inputMode="decimal"
                         step="0.01"
@@ -132,16 +137,7 @@ export function LedgerEntryAmountFields({
                     />
                 </div>
             )}
-            {!transfer && (
-                <p className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground tabular-nums">
-                    {t("preview", {
-                        net: money(totals.net),
-                        tax: money(totals.tax),
-                        withholding: money(totals.withholding),
-                        payable: money(totals.payable),
-                    })}
-                </p>
-            )}
+            {!transfer && <LedgerEntryTotals direction={direction} totals={totals} />}
         </div>
     );
 }

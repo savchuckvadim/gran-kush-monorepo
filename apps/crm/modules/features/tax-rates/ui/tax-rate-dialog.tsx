@@ -77,6 +77,7 @@ export function TaxRateDialog({ open, onOpenChange, rate }: TaxRateDialogProps) 
 
     return (
         <ModalDialog
+            scrollable
             open={open}
             onOpenChange={onOpenChange}
             title={rate ? t("editTitle") : t("createTitle")}

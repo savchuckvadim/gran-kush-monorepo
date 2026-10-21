@@ -43,6 +43,7 @@ export function LedgerEntryPartyField({ form, counterparties }: LedgerEntryParty
                     <FieldSelect
                         id="entry-counterparty"
                         label={t("fields.counterparty")}
+                        hint={t("hints.counterparty")}
                         value={member ? "" : field.value}
                         disabled={Boolean(member)}
                         onValueChange={field.onChange}

@@ -36,6 +36,7 @@ export function LedgerEntryDocumentFields({
                             <FieldSelect
                                 id="entry-document-type"
                                 label={t("fields.documentType")}
+                                hint={t("hints.document")}
                                 value={field.value}
                                 onValueChange={field.onChange}
                                 options={LEDGER_DOCUMENT_TYPES.map((type) => ({
@@ -64,6 +65,7 @@ export function LedgerEntryDocumentFields({
                 <FieldInput
                     id="entry-paid-on"
                     label={t("fields.paidOn")}
+                    hint={t("hints.paidOn")}
                     type="date"
                     {...form.register("paidOn")}
                 />
