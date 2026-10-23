@@ -5,6 +5,7 @@ import { Prisma } from "@prisma/client";
 import type { Server } from "http";
 import request from "supertest";
 
+import { BrandModule } from "@common/brand/brand.module";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { BillingModule } from "@modules/billing/billing.module";
 import { PlatformJwtAuthGuard } from "@modules/platform/auth/infrastructure/guards/platform-jwt-auth.guard";
@@ -30,7 +31,7 @@ describe("GET /platform/billing/plans — публичный каталог та
         const prismaMock = { billingPlan: { findMany } };
 
         const moduleRef = await Test.createTestingModule({
-            imports: [PortalContextModule, BillingModule],
+            imports: [BrandModule, PortalContextModule, BillingModule],
         })
             .overrideProvider(PrismaService)
             .useValue(prismaMock)

@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Patch } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
+import { BrandModuleRoutes } from "@common/brand/brand-module.guard";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
@@ -15,6 +16,7 @@ import { ClubPolicyDto, UpdateClubPolicyDto } from "../dto/club-policy.dto";
 @ApiTags("CRM Club Policy")
 @Controller("crm/settings/club-policy")
 @CrmAuth()
+@BrandModuleRoutes("club-policy")
 export class CrmClubPolicyController {
     constructor(private readonly policies: ClubPolicyService) {}
 

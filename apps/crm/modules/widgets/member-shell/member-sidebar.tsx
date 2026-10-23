@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Building2, Home, ShieldCheck, UserRound } from "lucide-react";
 
 import { useCabinetLinks } from "@/modules/processes/member-auth";
+import { BRAND } from "@/modules/shared/config/brand";
 import { ShellBrand } from "@/modules/shared/ui/Brand";
 import { type ISidebarItem, Sidebar } from "@/modules/shared/ui/Sidebar";
 
@@ -52,7 +53,7 @@ export function MemberSidebar() {
 
     return (
         <Sidebar
-            brand={<ShellBrand name={t("brand")} />}
+            brand={<ShellBrand name={BRAND.name} />}
             items={items}
             homeHref={links.home}
             labels={{ collapse: t("collapseMenu"), pin: t("pinMenu") }}

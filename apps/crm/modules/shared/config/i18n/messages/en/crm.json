@@ -1,7 +1,6 @@
 {
     "crm": {
         "shell": {
-            "brand": "PafPaf",
             "title": "CRM",
             "workspace": "Internal workspace",
             "profile": "Employee profile",
@@ -103,7 +102,7 @@
             "emailNotConfirmed": "Email not confirmed",
             "consent": {
                 "pending": "Awaiting the member's consent",
-                "pendingHint": "This email already had a PafPaf account. Documents and the signature stay hidden, and cannot be replaced, until the account owner confirms the membership from the email we sent.",
+                "pendingHint": "This email already had a {brand} account. Documents and the signature stay hidden, and cannot be replaced, until the account owner confirms the membership from the email we sent.",
                 "resend": "Resend consent email",
                 "resending": "Sending…",
                 "resent": "The consent email has been sent again",
@@ -200,7 +199,7 @@
                 "cancel": "Cancel",
                 "loading": "Loading the form…",
                 "created": "Member created",
-                "createdExisting": "Member added: this email already had a PafPaf account",
+                "createdExisting": "Member added: this email already had a {brand} account",
                 "createdAwaitingConsent": "Member added: the account owner got an email to confirm the membership"
             },
             "searchPlaceholder": "Name, phone, email or number…",
@@ -1515,7 +1514,7 @@
                 "follow": "Club theme",
                 "title": "Club theme",
                 "description": "Staff in the CRM and members in the cabinet see it until they pick their own. Changed by someone with the club settings permission.",
-                "none": "PafPaf theme",
+                "none": "{brand} theme",
                 "save": "Save",
                 "adminOnly": "The club theme is changed by someone with the club settings permission."
             }

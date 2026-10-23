@@ -10,8 +10,9 @@ import {
 
 const presenceSettingsKey = ["presence-settings"] as const;
 
-export function usePresenceSettings() {
-    return useQuery({ queryKey: presenceSettingsKey, queryFn: getPresenceSettings });
+/** `enabled: false` — the installation has no door (`presence`), the route answers 404. */
+export function usePresenceSettings(enabled = true) {
+    return useQuery({ queryKey: presenceSettingsKey, queryFn: getPresenceSettings, enabled });
 }
 
 export function useUpdatePresenceSettings() {

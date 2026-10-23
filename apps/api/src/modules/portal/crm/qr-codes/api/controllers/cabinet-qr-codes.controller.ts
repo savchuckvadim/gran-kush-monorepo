@@ -1,6 +1,7 @@
 import { Controller, Get, Post } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
+import { BrandModuleRoutes } from "@common/brand/brand-module.guard";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
 import { CurrentMember } from "@modules/portal/auth/members/api/decorators/current-member.decorator";
@@ -15,6 +16,7 @@ import { QrCodesService } from "@modules/portal/crm/qr-codes/application/service
 @Controller("cabinet/qr-code")
 @CabinetAuth()
 @ApiBearerAuth()
+@BrandModuleRoutes("presence")
 export class CabinetQrCodesController {
     constructor(private readonly qrCodesService: QrCodesService) {}
 

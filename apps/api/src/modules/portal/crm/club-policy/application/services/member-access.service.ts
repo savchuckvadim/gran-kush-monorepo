@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/commo
 
 import type { ProductAudience } from "@prisma/client";
 
+import { BrandService } from "@common/brand/brand.service";
 import {
     isSubscriptionOpen,
     subscriptionAccess,
@@ -11,7 +12,7 @@ import {
     audiencesFromFlags,
 } from "@modules/portal/crm/catalog/domain/product-audience";
 
-import { APPROVED_STATUS_KEY, ShopDenial } from "../../domain/club-policy";
+import { APPROVED_STATUS_KEY, NO_CLUB_POLICY, ShopDenial } from "../../domain/club-policy";
 import {
     ClubPolicyRepository,
     MemberShopContext,
@@ -39,7 +40,8 @@ const DENIAL_MESSAGES: Record<ShopDenial, string> = {
  * - The catalog is hidden outside the club unless the club opened it (`catalogOutsideClub`):
  *   «outside» means no open visit.
  * - Ordering also needs an approved member when the club asks for it (`ordersRequireApproval`)
- *   and a working subscription of the club.
+ *   and a working subscription of the club — where the installation charges (`billing`).
+ * - An installation without club rules (`club-policy`) works by `NO_CLUB_POLICY`.
  *
  * The membership itself (consent confirmed, active) is checked earlier by `MembershipGuard`.
  * Staff orders in the CRM keep their own rules; only an order for oneself is checked here.
@@ -48,7 +50,8 @@ const DENIAL_MESSAGES: Record<ShopDenial, string> = {
 export class MemberAccessService {
     constructor(
         private readonly repository: ClubPolicyRepository,
-        private readonly policies: ClubPolicyService
+        private readonly policies: ClubPolicyService,
+        private readonly brand: BrandService
     ) {}
 
     async evaluate(memberId: string, portalId: string): Promise<ShopAccess> {
@@ -56,18 +59,25 @@ export class MemberAccessService {
         if (!context) {
             throw new NotFoundException("Membership not found");
         }
-        return MemberAccessService.decide(context);
+        const rules = this.brand.has("club-policy") ? context.rules : NO_CLUB_POLICY;
+        return MemberAccessService.decide(
+            { ...context, rules },
+            { billing: this.brand.has("billing") }
+        );
     }
 
-    /** The rules alone, without I/O: what a given context allows. */
-    static decide(context: MemberShopContext): ShopAccess {
+    /**
+     * The rules alone, without I/O: what a given context allows. Without `billing` the club's
+     * subscription does not close the shop: the installation is free.
+     */
+    static decide(context: MemberShopContext, installation = { billing: true }): ShopAccess {
         const reasons: ShopDenial[] = [];
         const outside = !context.rules.catalogOutsideClub && !context.inClub;
         if (outside) reasons.push(ShopDenial.not_in_club);
         if (context.rules.ordersRequireApproval && context.statusKey !== APPROVED_STATUS_KEY) {
             reasons.push(ShopDenial.not_approved);
         }
-        if (!isSubscriptionOpen(subscriptionAccess(context.subscription))) {
+        if (installation.billing && !isSubscriptionOpen(subscriptionAccess(context.subscription))) {
             reasons.push(ShopDenial.club_subscription_inactive);
         }
         return { canBrowse: !outside, canOrder: reasons.length === 0, reasons };

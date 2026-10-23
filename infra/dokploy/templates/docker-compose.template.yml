@@ -1,24 +1,26 @@
-# PafPaf on Dokploy: one Compose service in its own Dokploy project on a shared
-# server. Setup, domains and the order of the first deploy: README.md here;
-# variables: .env.example here (real values live only in Dokploy).
+# __BRAND_NAME__ on Dokploy: one Compose service in its own Dokploy project on a shared
+# server. Setup, domains and the order of the first deploy: infra/dokploy/README.md;
+# variables: .env.example next to this file (real values live only in Dokploy).
 #
+# - One code, one installation per brand (pafpaf, inkspace, plisplas): each has its own
+#   project, database, Redis and secrets. BRAND below picks the brand in the API; the
+#   CRM, admin and site images are built per brand (tag __BRAND__-…).
 # - No host ports. Traefik (Dokploy → Domains) routes each host name to port
-#   3000 of a pafpaf-* service, so nothing collides with other projects.
-#   infra/compose/ is not used: its nginx wants :80, which Traefik owns here.
+#   3000 of a __BRAND__-* service, so nothing collides with other projects.
 # - Postgres and Redis stay on the project's internal network.
 # - Images come from ghcr.io: .github/workflows/deploy.yml builds them on every
 #   push to main, the server builds nothing. pull_policy: always makes every
 #   Dokploy deploy fetch the current tag.
-# - The pafpaf- prefix matters: dokploy-network is shared by every project on
+# - The __BRAND__- prefix matters: dokploy-network is shared by every project on
 #   the server, and a bare "api" or "site" could resolve to another container.
 # - Memory limits and log rotation protect the other projects on the server.
-# - The member cabinet (club.) is part of the CRM app: club.${DOMAIN} is a second
-#   domain of pafpaf-crm (port 3000), the CRM proxy routes it by host.
+# - The cabinet (__CABINET__.) is part of the CRM app: __CABINET__.${DOMAIN} is a second
+#   domain of __BRAND__-crm (port 3000), the CRM proxy routes it by host.
 # - No YAML anchors on purpose: Dokploy rewrites this file to add its domain
 #   labels, and every service must keep both networks however it is parsed.
 
 services:
-  pafpaf-postgres:
+  __BRAND__-postgres:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
@@ -41,7 +43,7 @@ services:
         limits:
           memory: 512M
 
-  pafpaf-redis:
+  __BRAND__-redis:
     image: redis:7-alpine
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes"]
@@ -61,7 +63,7 @@ services:
           memory: 128M
 
   # api.${DOMAIN}
-  pafpaf-api:
+  __BRAND__-api:
     image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/api:${TAG:-latest}
     restart: unless-stopped
     pull_policy: always
@@ -69,23 +71,23 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pafpaf-postgres:5432/${POSTGRES_DB}?schema=public
-      REDIS_URL: redis://pafpaf-redis:6379
+      # The installation: product name, kind of portal, modules (packages/brand)
+      BRAND: __BRAND__
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@__BRAND__-postgres:5432/${POSTGRES_DB}?schema=public
+      REDIS_URL: redis://__BRAND__-redis:6379
       RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
       RUN_SEED: ${RUN_SEED:-false}
       # Cloudflare and Traefik in front: two proxies, so req.ip is the visitor, not Cloudflare.
       TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-2}
-      APP_NAME: PafPaf API
-      APP_DESCRIPTION: PafPaf API
-      CORS_ORIGIN: https://crm.${DOMAIN:?set DOMAIN in Dokploy → Environment},https://club.${DOMAIN},https://admin.${DOMAIN}
-      CRM_FRONTEND_URL: https://crm.${DOMAIN}
-      MEMBER_FRONTEND_URL: https://club.${DOMAIN}
+      CORS_ORIGIN: https://crm.${DOMAIN:-__DOMAIN__},https://__CABINET__.${DOMAIN:-__DOMAIN__},https://admin.${DOMAIN:-__DOMAIN__}
+      CRM_FRONTEND_URL: https://crm.${DOMAIN:-__DOMAIN__}
+      MEMBER_FRONTEND_URL: https://__CABINET__.${DOMAIN:-__DOMAIN__}
       # Google OAuth redirect URIs are built from this base (README.md → «Вход через Google»)
-      API_PUBLIC_URL: https://api.${DOMAIN}
+      API_PUBLIC_URL: https://api.${DOMAIN:-__DOMAIN__}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       # Session hint for the CRM/cabinet proxies; token cookies stay host-only on api.
-      AUTH_HINT_COOKIE_DOMAIN: .${DOMAIN}
+      AUTH_HINT_COOKIE_DOMAIN: .${DOMAIN:-__DOMAIN__}
       AUTH_COOKIE_SECURE: "true"
       COOKIE_SECRET: ${COOKIE_SECRET:?set COOKIE_SECRET in Dokploy → Environment}
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in Dokploy → Environment}
@@ -98,7 +100,8 @@ services:
       MAIL_LOGIN: ${MAIL_LOGIN:-}
       MAIL_PASSWORD: ${MAIL_PASSWORD:-}
       SMTP_FROM: ${SMTP_FROM:-}
-      SMTP_FROM_NAME: ${SMTP_FROM_NAME:-PafPaf}
+      # Empty: the brand's name
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME:-}
       TG_BOT_API_KEY: ${TG_BOT_API_KEY:-}
       TG_BOT_CHAT_ID: ${TG_BOT_CHAT_ID:-}
       TG_CLIENT_BOT_API_KEY: ${TG_CLIENT_BOT_API_KEY:-}
@@ -116,17 +119,17 @@ services:
       AWS_BUCKET_NAME: ${AWS_BUCKET_NAME:-}
       AWS_ACCESS_KEY: ${AWS_ACCESS_KEY:-}
       AWS_SECRET_KEY: ${AWS_SECRET_KEY:-}
-      # Оплата (documentation/backend/BILLING.md). Без ключей онлайн-оплата выключена,
-      # работает ручное продление из админки
+      # Оплата (documentation/backend/BILLING.md) — только у брендов с модулем billing.
+      # Без ключей онлайн-оплата выключена, работает ручное продление из админки
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
       STRIPE_AUTOMATIC_TAX: ${STRIPE_AUTOMATIC_TAX:-false}
       BILLING_TRIAL_DAYS: ${BILLING_TRIAL_DAYS:-365}
       BILLING_GRACE_DAYS: ${BILLING_GRACE_DAYS:-7}
     depends_on:
-      pafpaf-postgres:
+      __BRAND__-postgres:
         condition: service_healthy
-      pafpaf-redis:
+      __BRAND__-redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://localhost:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
@@ -142,15 +145,15 @@ services:
         limits:
           memory: 768M
 
-  # crm.${DOMAIN}
-  pafpaf-crm:
-    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/crm:${TAG:-latest}
+  # crm.${DOMAIN} and __CABINET__.${DOMAIN}
+  __BRAND__-crm:
+    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/crm:__BRAND__-${TAG:-latest}
     restart: unless-stopped
     pull_policy: always
     networks: [default, dokploy-network]
     environment:
       HOSTNAME: 0.0.0.0
-    depends_on: [pafpaf-api]
+    depends_on: [__BRAND__-api]
     logging:
       driver: json-file
       options: { max-size: "10m", max-file: "3" }
@@ -160,14 +163,14 @@ services:
           memory: 512M
 
   # admin.${DOMAIN}: platform admin
-  pafpaf-admin:
-    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/admin:${TAG:-latest}
+  __BRAND__-admin:
+    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/admin:__BRAND__-${TAG:-latest}
     restart: unless-stopped
     pull_policy: always
     networks: [default, dokploy-network]
     environment:
       HOSTNAME: 0.0.0.0
-    depends_on: [pafpaf-api]
+    depends_on: [__BRAND__-api]
     logging:
       driver: json-file
       options: { max-size: "10m", max-file: "3" }
@@ -177,24 +180,24 @@ services:
           memory: 512M
 
   # ${DOMAIN}: product site, Payload admin at /admin
-  pafpaf-site:
-    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/site:${TAG:-latest}
+  __BRAND__-site:
+    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/site:__BRAND__-${TAG:-latest}
     restart: unless-stopped
     pull_policy: always
     networks: [default, dokploy-network]
     environment:
       HOSTNAME: 0.0.0.0
       # Payload creates this database on first start and applies its migrations.
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pafpaf-postgres:5432/site
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@__BRAND__-postgres:5432/site
       PAYLOAD_SECRET: ${PAYLOAD_SECRET:?set PAYLOAD_SECRET in Dokploy → Environment}
       PAYLOAD_ADMIN_EMAIL: ${PAYLOAD_ADMIN_EMAIL:-}
       PAYLOAD_ADMIN_PASSWORD: ${PAYLOAD_ADMIN_PASSWORD:-}
       PAYLOAD_SEED_IF_EMPTY: ${PAYLOAD_SEED_IF_EMPTY:-false}
-      BILLING_API_URL: http://pafpaf-api:3000
+      BILLING_API_URL: http://__BRAND__-api:3000
     volumes:
       - site_media:/app/apps/site/media
     depends_on:
-      pafpaf-postgres:
+      __BRAND__-postgres:
         condition: service_healthy
     logging:
       driver: json-file
@@ -203,13 +206,14 @@ services:
       resources:
         limits:
           memory: 768M
+# >>> server-wide: kept only in the installation with "serverServices": true
 
   # Disk janitor for the whole server: nightly Docker cleanup and disk alerts in
-  # Telegram. Code: apps/api/src/modules/disk-janitor; README.md here, «Уборка диска».
+  # Telegram. Code: apps/api/src/modules/disk-janitor; README.md, «Уборка диска».
   # Same image as the API, its own process. The Docker socket is root on the host,
   # so only this container gets it: no ports, no domain, not on dokploy-network,
   # no database or JWT secrets, read-only filesystem, no capabilities.
-  pafpaf-janitor:
+  __BRAND__-janitor:
     image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/api:${TAG:-latest}
     restart: unless-stopped
     pull_policy: always
@@ -236,6 +240,7 @@ services:
       resources:
         limits:
           memory: 160M
+# <<< server-wide
 
 networks:
   dokploy-network:

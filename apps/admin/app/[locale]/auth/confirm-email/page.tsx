@@ -9,6 +9,7 @@ import { Mail } from "lucide-react";
 
 import { Button, Card, FieldInput } from "@workspace/ui";
 
+import { BRAND } from "@/modules/shared/config/brand";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
@@ -41,7 +42,7 @@ export default function ConfirmEmailPage() {
             <Card
                 className="w-full max-w-md"
                 title={t("title")}
-                description={sent ? t("success") : t("subtitle")}
+                description={sent ? t("success") : t("subtitle", { brand: BRAND.name })}
                 headerIcon={
                     <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-primary/10">
                         <Mail className="size-6 text-primary" />

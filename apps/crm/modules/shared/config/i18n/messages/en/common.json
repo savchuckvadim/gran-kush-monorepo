@@ -37,8 +37,8 @@
         }
     },
     "meta": {
-        "crm": "PafPaf CRM",
-        "cabinet": "PafPaf Club",
+        "crm": "{brand} CRM",
+        "cabinet": "{cabinet}",
         "crmDescription": "Members, orders and the door of your club",
         "cabinetDescription": "Your clubs, QR at the door, shop and orders"
     }

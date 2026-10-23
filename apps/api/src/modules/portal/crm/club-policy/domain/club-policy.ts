@@ -27,6 +27,16 @@ export const DEFAULT_CLUB_POLICY: ClubPolicyRules = {
 };
 
 /**
+ * Rules where the installation has no club rules at all (studios, `club-policy` off): the catalog
+ * is not tied to a visit and nothing waits for a ruling of the club.
+ */
+export const NO_CLUB_POLICY: ClubPolicyRules = {
+    ...DEFAULT_CLUB_POLICY,
+    catalogOutsideClub: true,
+    staffSelfOrders: true,
+};
+
+/**
  * The member's limit for the last 30 days: their personal one, else the club's default; `null` — no
  * limit (the club has limits off, or neither is set). Decision 3 (2026-10-16): a club setting.
  */

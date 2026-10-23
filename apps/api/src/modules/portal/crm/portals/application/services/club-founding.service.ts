@@ -2,6 +2,7 @@ import { ConflictException, Injectable } from "@nestjs/common";
 
 import { Employee, Portal, Prisma, User } from "@prisma/client";
 
+import { BrandService } from "@common/brand/brand.service";
 import { LEGAL_TERMS_VERSION } from "@common/legal/legal-terms";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { isUniqueViolationOn } from "@common/prisma/unique-violation";
@@ -46,7 +47,8 @@ export class ClubFoundingService {
         private readonly prisma: PrismaService,
         private readonly provisionFromTemplates: ProvisionPortalFromTemplatesService,
         private readonly billingSettings: BillingSettings,
-        private readonly events: DomainEventPublisher
+        private readonly events: DomainEventPublisher,
+        private readonly brand: BrandService
     ) {}
 
     /** 409 before the transaction for the common case; the unique index covers the race. */
@@ -76,9 +78,10 @@ export class ClubFoundingService {
     }
 
     /**
-     * The club, its entities and statuses from templates, and the account as its owner. The
-     * `portal.founded` event is written in the same transaction: its consumers send the welcome
-     * letter and the platform alert once, even when the request is retried.
+     * The club, its entities and statuses from templates, and the account as its owner. The kind
+     * of portal is the installation's (a club on PafPaf, a studio on Ink Space), so the templates
+     * match it. The `portal.founded` event is written in the same transaction: its consumers send
+     * the welcome letter and the platform alert once, even when the request is retried.
      */
     async found(
         tx: Prisma.TransactionClient,
@@ -87,6 +90,7 @@ export class ClubFoundingService {
     ): Promise<FoundedClub> {
         const portal = await tx.portal.create({
             data: {
+                type: this.brand.portalType,
                 name: dto.name.trim().toLowerCase(),
                 displayName: dto.displayName.trim(),
                 termsAcceptedAt: new Date(),

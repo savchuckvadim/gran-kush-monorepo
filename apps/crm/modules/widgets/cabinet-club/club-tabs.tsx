@@ -9,15 +9,18 @@ import { QrCode, ReceiptText, ShoppingBag } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 
 import { useCabinetLinks } from "@/modules/processes/member-auth";
+import { brandHas } from "@/modules/shared/config/brand";
 
-/** Разделы клуба. «Заказы» активны и на странице одного заказа. */
+/** Разделы клуба. «Заказы» активны и на странице одного заказа; QR — только там, где есть дверь. */
 export function ClubTabs({ slug }: { slug: string }) {
     const t = useTranslations("cabinet.club.tabs");
     const links = useCabinetLinks();
     const pathname = usePathname();
 
     const tabs = [
-        { href: links.club(slug), label: t("club"), icon: QrCode, exact: true },
+        ...(brandHas("presence")
+            ? [{ href: links.club(slug), label: t("club"), icon: QrCode, exact: true }]
+            : []),
         { href: links.clubShop(slug), label: t("shop"), icon: ShoppingBag, exact: false },
         { href: links.clubOrders(slug), label: t("orders"), icon: ReceiptText, exact: false },
     ];

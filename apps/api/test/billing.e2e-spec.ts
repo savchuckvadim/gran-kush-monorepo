@@ -61,8 +61,10 @@ class FakeStripeProvider extends StripeBillingProvider {
 
 /**
  * Оплата подписки клуба: CRM → Stripe Checkout → вебхуки → статус → гард 402 → крон.
+ * Платят только студии: под PafPaf биллинга нет (TASK-790), поэтому набор идёт под Ink Space.
  */
 describe("Billing: Stripe subscription flow (e2e)", () => {
+    const previousBrand = process.env.BRAND;
     let app: INestApplication;
     let prisma: PrismaService;
     const stripe = new FakeStripeProvider();
@@ -102,6 +104,7 @@ describe("Billing: Stripe subscription flow (e2e)", () => {
 
     beforeAll(async () => {
         process.env.STRIPE_WEBHOOK_SECRET = WEBHOOK_SECRET;
+        process.env.BRAND = "inkspace";
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [AppModule],
         })
@@ -158,6 +161,8 @@ describe("Billing: Stripe subscription flow (e2e)", () => {
             where: { eventId: { startsWith: `evt_${suffix}` } },
         });
         await app.close();
+        if (previousBrand === undefined) delete process.env.BRAND;
+        else process.env.BRAND = previousBrand;
     });
 
     it("a new club starts with a free year", async () => {
@@ -345,6 +350,14 @@ describe("Billing: Stripe subscription flow (e2e)", () => {
         const sub = await subscription();
         expect(sub.status).toBe("past_due");
         expect(sub.graceEndsAt?.getTime()).toBeGreaterThan(Date.now());
+    });
+
+    it("a canceled subscription closes the CRM with 402", async () => {
+        await prisma.portalSubscription.update({
+            where: { portalId },
+            data: { status: "canceled", graceEndsAt: null },
+        });
+        expect((await crm("get", "/crm/members")).status).toBe(402);
     });
 
     it("a club without a subscription gets 402, not free access", async () => {

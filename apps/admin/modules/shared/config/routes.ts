@@ -3,6 +3,8 @@
  * Centralized location for all route paths
  */
 
+import { BRAND } from "./brand";
+
 export const ROUTES = {
     HOME: "/",
     PROFILE: "/profile",
@@ -44,11 +46,10 @@ export type Route = (typeof ROUTES)[keyof typeof ROUTES];
 
 /** Публичный адрес CRM: из него собирается ссылка на скрытый тариф. */
 export const CRM_PUBLIC_URL = (
-    process.env.NEXT_PUBLIC_CRM_URL || "https://crm.paf-paf.app"
+    process.env.NEXT_PUBLIC_CRM_URL || `https://${BRAND.domains.crm}`
 ).replace(/\/$/, "");
 
 /** Product site with the legal pages: `${SITE_PUBLIC_URL}/{locale}/legal/{doc}`. */
-export const SITE_PUBLIC_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://paf-paf.app").replace(
-    /\/$/,
-    ""
-);
+export const SITE_PUBLIC_URL = (
+    process.env.NEXT_PUBLIC_SITE_URL || `https://${BRAND.domains.site}`
+).replace(/\/$/, "");

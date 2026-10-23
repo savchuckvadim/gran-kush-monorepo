@@ -1,6 +1,6 @@
 /**
  * Адреса кабинета участника. Кабинет — часть приложения CRM, но открывается на своём домене
- * `club.paf-paf.app` (TASK-710…713): тот же контейнер, второй хост.
+ * (`club.paf-paf.app`, у студий `app.<домен>`; TASK-710…713): тот же контейнер, второй хост.
  *
  * Видимые адреса на club. короткие, без служебного префикса:
  *
@@ -17,6 +17,8 @@
  *
  * Здесь только чистые функции без Next, чтобы правила маршрутов читались и проверялись отдельно.
  */
+
+import { BRAND } from "./brand";
 
 /**
  * Слова, которые не могут быть slug клуба: они заняты страницами и служебными путями.
@@ -81,8 +83,27 @@ export const resolveRequestHost = (headers: { get(name: string): string | null }
     return raw.split(":")[0]?.toLowerCase() ?? "";
 };
 
-/** `club.paf-paf.app`, `club.localhost` и любой другой хост, начинающийся с `club.`. */
-export const isClubHost = (host: string): boolean => host === "club" || host.startsWith("club.");
+/**
+ * Первая метка хоста кабинета: `club` у клубов, `app` у студий. Берётся из `NEXT_PUBLIC_MEMBER_URL`,
+ * а без него — из домена кабинета бренда, так что локально кабинет PafPaf — `club.localhost`.
+ */
+export const cabinetHostLabel = (memberUrl: string | undefined, brandCabinetHost: string): string => {
+    let host = brandCabinetHost;
+    if (memberUrl) {
+        try {
+            host = new URL(memberUrl).hostname;
+        } catch {
+            // не адрес — остаётся домен бренда
+        }
+    }
+    return host.split(".")[0] ?? host;
+};
+
+const CABINET_HOST_LABEL = cabinetHostLabel(process.env.NEXT_PUBLIC_MEMBER_URL, BRAND.domains.cabinet);
+
+/** Хост кабинета: `club.paf-paf.app`, `club.localhost`, `app.ink.space` — по первой метке. */
+export const isClubHost = (host: string): boolean =>
+    host === CABINET_HOST_LABEL || host.startsWith(`${CABINET_HOST_LABEL}.`);
 
 /** Что сделать с запросом на хосте club. */
 export type ClubRouteAction =

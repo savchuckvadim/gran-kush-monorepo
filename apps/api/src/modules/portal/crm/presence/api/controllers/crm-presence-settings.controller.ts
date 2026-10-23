@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Patch } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
+import { BrandModuleRoutes } from "@common/brand/brand-module.guard";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
@@ -15,6 +16,7 @@ import { PresenceSettingsDto, UpdatePresenceSettingsDto } from "../dto/presence-
 @ApiTags("CRM Presence Settings")
 @Controller("crm/settings/presence")
 @CrmAuth()
+@BrandModuleRoutes("presence")
 export class CrmPresenceSettingsController {
     constructor(private readonly settings: PresenceSettingsService) {}
 

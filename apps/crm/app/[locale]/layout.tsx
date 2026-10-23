@@ -6,6 +6,7 @@ import { getMessages, getTranslations } from "next-intl/server";
 
 import { locales } from "@/i18n";
 import { PortalProvider } from "@/modules/processes";
+import { BRAND } from "@/modules/shared/config/brand";
 import { isClubHost, resolveRequestHost } from "@/modules/shared/config/club-routes";
 import { pickNamespaces, PUBLIC_NAMESPACES } from "@/modules/shared/config/i18n/public-messages";
 import { ApiLocaleSync } from "@/modules/shared/providers/api-locale-sync";
@@ -13,7 +14,7 @@ import { ApiLocaleSync } from "@/modules/shared/providers/api-locale-sync";
 // Force dynamic rendering to avoid cache conflicts
 export const dynamic = "force-dynamic";
 
-/** Заголовок вкладки и описание — по хосту: кабинет участника на `club.`, иначе CRM. */
+/** Заголовок вкладки и описание — по хосту: кабинет на его хосте (`club.`, `app.`), иначе CRM. */
 export async function generateMetadata({
     params,
 }: {
@@ -22,7 +23,9 @@ export async function generateMetadata({
     const { locale } = await params;
     const t = await getTranslations({ locale, namespace: "meta" });
     const club = isClubHost(resolveRequestHost(await headers()));
-    const app = club ? t("cabinet") : t("crm");
+    const app = club
+        ? t("cabinet", { brand: BRAND.name, cabinet: BRAND.cabinetName })
+        : t("crm", { brand: BRAND.name });
     return {
         title: { default: app, template: `%s · ${app}` },
         description: club ? t("cabinetDescription") : t("crmDescription"),

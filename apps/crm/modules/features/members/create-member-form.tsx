@@ -19,6 +19,7 @@ import {
 import { Button, FieldInput } from "@workspace/ui";
 
 import { useCreateCrmMember, useCrmMemberCreateSchema } from "@/modules/entities/member";
+import { BRAND } from "@/modules/shared/config/brand";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
@@ -85,7 +86,8 @@ export function CreateMemberForm({
                                 ? "createdAwaitingConsent"
                                 : isNewUser
                                   ? "created"
-                                  : "createdExisting"
+                                  : "createdExisting",
+                            { brand: BRAND.name }
                         )
                     );
                     router.push(localizedLink(`${ROUTES.CRM_MEMBER_DETAILS}/${memberId}`));

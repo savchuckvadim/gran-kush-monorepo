@@ -5,6 +5,7 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
+import { BrandModule } from "./common/brand/brand.module";
 import { configureBodyParsers } from "./common/config/body-parser/body-parser.config";
 import { PublicUrlsModule } from "./common/config/public-urls/public-urls.module";
 import { getThrottlerConfig } from "./common/config/throttler/throttler.config";
@@ -39,6 +40,7 @@ import { TimelineModule } from "./modules/timeline/timeline.module";
             expandVariables: true,
         }),
         ThrottlerModule.forRoot(getThrottlerConfig()),
+        BrandModule,
         PublicUrlsModule,
         CoreModule,
         PrismaModule,

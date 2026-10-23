@@ -3,18 +3,20 @@
  * All magic strings and configuration values for mail module
  */
 
+import { INSTALLATION_BRAND } from "@common/brand/installation-brand";
+
 /**
  * Default sender when SMTP_FROM / SMTP_FROM_NAME are not set
  */
-export const DEFAULT_EMAIL_FROM = "noreply@paf-paf.app";
-export const DEFAULT_EMAIL_FROM_NAME = "PafPaf";
+export const DEFAULT_EMAIL_FROM = `noreply@${INSTALLATION_BRAND.domains.site}`;
+export const DEFAULT_EMAIL_FROM_NAME = INSTALLATION_BRAND.name;
 
 /**
- * Brand in email texts and layout — until the shared brand package (TASK-531) exists
+ * Brand in email texts and layout: the installation's (`BRAND`)
  */
-export const MAIL_BRAND_NAME = "PafPaf";
-export const MAIL_BRAND_WORDMARK = "paf paf";
-export const MAIL_BRAND_SITE_URL = "https://paf-paf.app";
+export const MAIL_BRAND_NAME = INSTALLATION_BRAND.name;
+export const MAIL_BRAND_WORDMARK = INSTALLATION_BRAND.wordmark;
+export const MAIL_BRAND_SITE_URL = `https://${INSTALLATION_BRAND.domains.site}`;
 
 /**
  * Email subjects by language and type

@@ -10,6 +10,7 @@ import { TooltipProvider } from "@workspace/ui";
 import { cn } from "@workspace/ui/lib/utils";
 
 import { type Permission, usePermissions } from "@/modules/entities/access";
+import { brandHas } from "@/modules/shared/config/brand";
 
 import {
     AppearancePanel,
@@ -21,7 +22,10 @@ import {
     TeamPanel,
 } from "./panels";
 
-/** Вкладка видна, если у роли есть хотя бы одно из прав `anyOf`; `null` — у всех. */
+/**
+ * Вкладка видна, если у роли есть хотя бы одно из прав `anyOf` (`null` — у всех) и инсталляция
+ * предлагает её корневую функцию (`brandModule`).
+ */
 const TABS = [
     {
         id: "members",
@@ -38,7 +42,13 @@ const TABS = [
     { id: "catalog", icon: Package, Panel: CatalogPanel, anyOf: ["catalog.manage"] },
     { id: "entities", icon: Boxes, Panel: EntitiesPanel, anyOf: ["settings.structure"] },
     { id: "modules", icon: Blocks, Panel: ModulesPanel, anyOf: ["settings.club"] },
-    { id: "billing", icon: CreditCard, Panel: BillingPanel, anyOf: ["billing.manage"] },
+    {
+        id: "billing",
+        icon: CreditCard,
+        Panel: BillingPanel,
+        anyOf: ["billing.manage"],
+        brandModule: "billing",
+    },
     { id: "appearance", icon: Palette, Panel: AppearancePanel, anyOf: null },
 ] as const satisfies readonly ({ anyOf: readonly Permission[] | null } & Record<string, unknown>)[];
 
@@ -56,7 +66,9 @@ export function SettingsHubPage() {
     const searchParams = useSearchParams();
     const { can } = usePermissions();
     const tabs: readonly Tab[] = TABS.filter(
-        (tab) => tab.anyOf === null || tab.anyOf.some((code) => can(code))
+        (tab) =>
+            (!("brandModule" in tab) || brandHas(tab.brandModule)) &&
+            (tab.anyOf === null || tab.anyOf.some((code) => can(code)))
     );
     const requested = searchParams.get("tab");
     const current: TabId =

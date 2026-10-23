@@ -418,7 +418,7 @@
   1. Задать `IMAGE_PREFIX` явно в Environment Dokploy.
   2. Переименовать репозиторий на GitHub.
   3. Прогнать `deploy.yml`, чтобы образы появились по новому пути в ghcr.
-  4. Обновить URL репозитория в Dokploy и дефолты `IMAGE_PREFIX` в `infra/dokploy/docker-compose.yml`
+  4. Обновить URL репозитория в Dokploy и дефолты `IMAGE_PREFIX` в `infra/dokploy/templates/docker-compose.template.yml` (затем `node infra/dokploy/render.mjs`)
      и `infra/compose/docker-compose.deploy.yml`.
   5. Обновить ссылки в доках и памяти агентов (`api.github.com/repos/savchuckvadim/gran-kush-monorepo`).
 - Если пропустить первый шаг, прод молча останется на старых образах.

@@ -1,0 +1,23 @@
+{
+    "pafpaf": {
+        "domain": "paf-paf.app",
+        "cabinetSubdomain": "club",
+        "released": true,
+        "deployOrder": 3,
+        "serverServices": true
+    },
+    "inkspace": {
+        "domain": "ink.space",
+        "cabinetSubdomain": "app",
+        "released": true,
+        "deployOrder": 1,
+        "serverServices": false
+    },
+    "plisplas": {
+        "domain": "plisplas.app",
+        "cabinetSubdomain": "app",
+        "released": false,
+        "deployOrder": 2,
+        "serverServices": false
+    }
+}

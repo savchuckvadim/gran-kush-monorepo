@@ -1,6 +1,18 @@
-import { CabinetClubPage } from "@/modules/pages/cabinet";
+import { redirect } from "next/navigation";
 
-export default async function CabinetClub({ params }: { params: Promise<{ club: string }> }) {
-    const { club } = await params;
-    return <CabinetClubPage slug={club.toLowerCase()} />;
+import { CabinetClubPage } from "@/modules/pages/cabinet";
+import { brandHas } from "@/modules/shared/config/brand";
+
+/** Главная клуба — QR для двери; где двери нет (студии), раздел открывается витриной. */
+export default async function CabinetClub({
+    params,
+}: {
+    params: Promise<{ locale: string; club: string }>;
+}) {
+    const { locale, club } = await params;
+    const slug = club.toLowerCase();
+    if (!brandHas("presence")) {
+        redirect(`/${locale}/${slug}/shop`);
+    }
+    return <CabinetClubPage slug={slug} />;
 }

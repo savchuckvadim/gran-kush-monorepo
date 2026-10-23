@@ -2,6 +2,8 @@ import { INestApplication } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { DocumentBuilder, SwaggerDocumentOptions, SwaggerModule } from "@nestjs/swagger";
 
+import { BrandService } from "@common/brand/brand.service";
+
 interface HttpResponseLike {
     setHeader(name: string, value: string): void;
     send(body: unknown): void;
@@ -9,7 +11,8 @@ interface HttpResponseLike {
 
 export const getSwaggerConfig = (app: INestApplication) => {
     const configService = app.get(ConfigService);
-    const appName = configService.get<string>("APP_NAME") || "API";
+    const appName =
+        configService.get<string>("APP_NAME") || `${app.get(BrandService).brand.name} API`;
     const appDescription = configService.get<string>("APP_DESCRIPTION") || "API Documentation";
 
     const config = new DocumentBuilder()

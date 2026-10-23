@@ -9,6 +9,7 @@ import { usePermissions } from "@/modules/entities/access";
 import { useEntityDefinitions } from "@/modules/entities/entity-settings";
 import { usePortalInfo } from "@/modules/entities/portal";
 import { ROUTES, useLocalizedLink } from "@/modules/shared";
+import { brandHas } from "@/modules/shared/config/brand";
 
 import { ICrmNavigation } from "./crm-navigation.interface";
 import { CRM_NAVIGATION } from "./data";
@@ -22,7 +23,9 @@ export function useCrmNavigation(): ICrmNavigation[] {
     const moduleVisible = (item: ICrmNavigation) =>
         !item.module || modules.includes(item.module) || can("settings.club");
     const allowed = (item: ICrmNavigation) =>
-        (!item.requires || item.requires.some((code) => can(code))) && moduleVisible(item);
+        (!item.brandModule || brandHas(item.brandModule)) &&
+        (!item.requires || item.requires.some((code) => can(code))) &&
+        moduleVisible(item);
     const localizedLink = useLocalizedLink();
     const pathname = usePathname();
     const { data: definitions } = useEntityDefinitions();

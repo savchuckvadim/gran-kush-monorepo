@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { DEFAULT_LANGUAGE } from "@mail/consts/mail.constants";
 
+import { BrandModuleRoutes } from "@common/brand/brand-module.guard";
 import { CurrentEmployee } from "@common/decorators/auth/current-employee.decorator";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
@@ -27,6 +28,7 @@ import {
 // Без subscription gate: оплатить нужно именно тогда, когда CRM уже закрыта 402
 @CrmAuth({ subscription: false })
 @ApiBearerAuth()
+@BrandModuleRoutes("billing")
 export class CrmBillingController {
     constructor(private readonly billing: PortalBillingService) {}
 

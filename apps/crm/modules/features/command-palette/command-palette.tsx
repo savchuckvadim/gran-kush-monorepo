@@ -19,6 +19,7 @@ import {
 
 import { useCrmNavigation, usePortal } from "@/modules/processes";
 import { $api, useDebouncedValue } from "@/modules/shared";
+import { brandHas } from "@/modules/shared/config/brand";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { type EntityRef, useOpenEntity } from "@/modules/shared/lib/entity-slider";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
@@ -85,12 +86,16 @@ function CommandPalette({ onClose }: { onClose: () => void }) {
             url: item.url,
             icon: item.icon,
         })),
-        {
-            key: "billing",
-            title: t("pages.billing"),
-            url: localizedLink(ROUTES.CRM_SETTINGS_BILLING),
-            icon: <CreditCard />,
-        },
+        ...(brandHas("billing")
+            ? [
+                  {
+                      key: "billing",
+                      title: t("pages.billing"),
+                      url: localizedLink(ROUTES.CRM_SETTINGS_BILLING),
+                      icon: <CreditCard />,
+                  },
+              ]
+            : []),
         {
             key: "appearance",
             title: t("pages.appearance"),

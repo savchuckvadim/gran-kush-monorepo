@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, NotFoundException, Param, Post } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
+import { BrandModuleRoutes } from "@common/brand/brand-module.guard";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
@@ -24,6 +25,7 @@ import { QrCodesService } from "@modules/portal/crm/qr-codes/application/service
 @Controller("crm/qr-codes")
 @CrmAuth()
 @ApiBearerAuth()
+@BrandModuleRoutes("presence")
 export class CrmQrCodesController {
     constructor(private readonly qrCodesService: QrCodesService) {}
 

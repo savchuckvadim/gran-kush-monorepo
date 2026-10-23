@@ -8,6 +8,7 @@ import { usePermissions } from "@/modules/entities/access";
 import { getFieldDisplayLabel, useEntityFields } from "@/modules/entities/entity-settings";
 import { useMemberStatusItems } from "@/modules/entities/member";
 import { usePresenceSettings } from "@/modules/entities/presence";
+import { brandHas } from "@/modules/shared/config/brand";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 
@@ -32,7 +33,8 @@ export function MembersPanel() {
     const { can } = usePermissions();
     const fields = useEntityFields(MEMBER);
     const statuses = useMemberStatusItems(true);
-    const presence = usePresenceSettings();
+    const hasDoor = brandHas("presence");
+    const presence = usePresenceSettings(hasDoor);
     const cap = presence.data?.maxSessionHours ?? null;
 
     const activeFields = (fields.data ?? []).filter((field) => field.isActive && !field.hidden);
@@ -78,12 +80,15 @@ export function MembersPanel() {
             {can("members.invite") && <RegistrationLinksTile />}
             {canClub && (
                 <>
+                    {brandHas("club-policy") && (
                     <SettingsTile
                         icon={Scale}
                         title={t("clubPolicy.title")}
                         description={t("clubPolicy.description")}
                         href={link(ROUTES.CRM_SETTINGS_CLUB_POLICY)}
                     />
+                    )}
+                    {hasDoor && (
                     <SettingsTile
                         icon={DoorOpen}
                         title={t("presence.title")}
@@ -103,6 +108,7 @@ export function MembersPanel() {
                         loading={presence.isLoading}
                         href={link(ROUTES.CRM_SETTINGS_PRESENCE)}
                     />
+                    )}
                 </>
             )}
             {can("members.create") && (

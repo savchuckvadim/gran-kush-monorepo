@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Card } from "@workspace/ui";
 
 import { RegistrationForm } from "@/modules/features/auth";
+import { BRAND } from "@/modules/shared/config/brand";
 
 export default function RegisterPage() {
     const t = useTranslations("auth.register");
@@ -14,7 +15,7 @@ export default function RegisterPage() {
             <Card
                 className="w-full max-w-4xl"
                 title={t("title")}
-                description={t("subtitle")}
+                description={t("subtitle", { brand: BRAND.name })}
                 headerClassName="text-center"
             >
                 <RegistrationForm />

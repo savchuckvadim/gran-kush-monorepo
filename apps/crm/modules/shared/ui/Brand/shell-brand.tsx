@@ -5,7 +5,7 @@ import { ClubBadge } from "./club-badge";
 
 interface ShellBrandProps {
     name: string;
-    /** Премиум-тариф (`customBrand`): название клуба вместо PafPaf. */
+    /** Премиум-тариф (`customBrand`): название клуба вместо бренда инсталляции. */
     clubName?: string | null;
     className?: string;
 }

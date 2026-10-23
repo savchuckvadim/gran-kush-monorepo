@@ -37,8 +37,8 @@
         }
     },
     "meta": {
-        "crm": "PafPaf CRM",
-        "cabinet": "PafPaf — кабинет",
+        "crm": "{brand} CRM",
+        "cabinet": "{brand} — кабинет",
         "crmDescription": "Участники, заказы и вход вашего клуба",
         "cabinetDescription": "Ваши клубы, QR на входе, витрина и заказы"
     }

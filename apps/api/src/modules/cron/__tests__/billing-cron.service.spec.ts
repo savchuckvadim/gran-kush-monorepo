@@ -1,5 +1,6 @@
 import { SubscriptionStatus } from "@prisma/client";
 
+import { BrandService } from "@common/brand/brand.service";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { BillingSettings } from "@modules/billing/application/billing-settings";
 import { BillingCronService } from "@modules/cron/services/billing-cron.service";
@@ -50,7 +51,9 @@ const buildPrisma = (byStep: LockedRow[][][]) => {
 
 const run = async (byStep: LockedRow[][][]) => {
     const mocks = buildPrisma(byStep);
-    const service = new BillingCronService(mocks.prisma as unknown as PrismaService, settings);
+    const service = new BillingCronService(mocks.prisma as unknown as PrismaService, settings, {
+        has: () => true,
+    } as unknown as BrandService);
     await service.enforceSubscriptions();
     return mocks;
 };

@@ -10,6 +10,7 @@ import { usePortalInfo } from "@/modules/entities/portal";
 import { SkinPickerSheet, useChangeLocale } from "@/modules/features";
 import { useAuth } from "@/modules/processes";
 import { cabinetAppUrl } from "@/modules/shared/config/app-urls";
+import { brandHas } from "@/modules/shared/config/brand";
 import { ROUTES } from "@/modules/shared/config/routes";
 import { useLocalizedLink } from "@/modules/shared/lib/use-localized-link";
 import {
@@ -86,7 +87,7 @@ export function AccountMenu() {
                         label={t("settings")}
                     />
                 )}
-                {can("billing.manage") && (
+                {can("billing.manage") && brandHas("billing") && (
                     <AccountTileLink
                         href={localizedLink(ROUTES.CRM_SETTINGS_BILLING)}
                         icon={CreditCard}

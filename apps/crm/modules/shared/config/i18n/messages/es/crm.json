@@ -1,7 +1,6 @@
 {
     "crm": {
         "shell": {
-            "brand": "PafPaf",
             "title": "CRM",
             "workspace": "Espacio de trabajo interno",
             "profile": "Perfil del empleado",
@@ -103,7 +102,7 @@
             "emailNotConfirmed": "Correo no confirmado",
             "consent": {
                 "pending": "Pendiente de la confirmación del socio",
-                "pendingHint": "Este email ya tenía cuenta en PafPaf. Los documentos y la firma no se muestran ni se pueden sustituir hasta que el titular de la cuenta confirme la membresía desde el email que le enviamos.",
+                "pendingHint": "Este email ya tenía cuenta en {brand}. Los documentos y la firma no se muestran ni se pueden sustituir hasta que el titular de la cuenta confirme la membresía desde el email que le enviamos.",
                 "resend": "Reenviar email de consentimiento",
                 "resending": "Enviando…",
                 "resent": "El email de consentimiento se ha enviado de nuevo",
@@ -200,7 +199,7 @@
                 "cancel": "Cancelar",
                 "loading": "Cargando el formulario…",
                 "created": "Socio creado",
-                "createdExisting": "Socio añadido: este email ya tenía cuenta en PafPaf",
+                "createdExisting": "Socio añadido: este email ya tenía cuenta en {brand}",
                 "createdAwaitingConsent": "Socio añadido: el titular de la cuenta ha recibido un email para confirmar la membresía"
             },
             "searchPlaceholder": "Nombre, teléfono, email o número…",
@@ -1515,7 +1514,7 @@
                 "follow": "Tema del club",
                 "title": "Tema del club",
                 "description": "Lo ven el personal en el CRM y los socios en su área hasta que eligen el suyo. Lo cambia quien tiene el permiso de ajustes del club.",
-                "none": "Tema PafPaf",
+                "none": "Tema {brand}",
                 "save": "Guardar",
                 "adminOnly": "El tema del club lo cambia quien tiene el permiso de ajustes del club."
             }

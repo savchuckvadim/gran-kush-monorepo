@@ -7,6 +7,7 @@ import {
     getSignaturePreviewUrl,
 } from "@/modules/entities/member-documents";
 import { MemberDocumentEditModal } from "@/modules/features/members";
+import { BRAND } from "@/modules/shared/config/brand";
 
 import { MemberDocumentCard } from "./components/MemberDocumentCard";
 import { MemberSignatureCard } from "./components/MemberSignatureCard";
@@ -33,7 +34,7 @@ export function MemberDocuments({ member }: IMemberDocumentsProps) {
                 <h2 className="text-base font-medium">{documentsTitle}</h2>
             </div>
             {awaitingConsent && (
-                <p className="text-sm text-muted-foreground">{t("consent.pendingHint")}</p>
+                <p className="text-sm text-muted-foreground">{t("consent.pendingHint", { brand: BRAND.name })}</p>
             )}
             {(member.documents.length > 0 || member.hasSignature) && (
                 <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">

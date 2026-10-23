@@ -56,6 +56,7 @@ export const CRM_NAVIGATION: ICrmNavigation[] = [
         title: "Attendance",
         isActive: false,
         requires: ["presence.read", "presence.checkin"],
+        brandModule: "presence",
         icon: <CalendarCheck />,
     },
     {

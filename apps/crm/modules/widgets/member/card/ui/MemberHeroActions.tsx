@@ -9,6 +9,7 @@ import { Button } from "@workspace/ui";
 
 import { type CrmMemberDetails, useResendMemberConsent } from "@/modules/entities/member";
 import { MemberProfileEditModal, NewOrderButton } from "@/modules/features";
+import { brandHas } from "@/modules/shared/config/brand";
 import { notifyApiError } from "@/modules/shared/lib/notify-api-error";
 
 import { MemberPresenceButton } from "./MemberPresenceButton";
@@ -22,6 +23,8 @@ interface MemberHeroActionsProps {
 export function MemberHeroActions({ member, inClubNow }: MemberHeroActionsProps) {
     const t = useTranslations("crm.members");
     const resend = useResendMemberConsent(member.id);
+    // QR и отметка визита — только там, где у инсталляции есть дверь
+    const hasDoor = brandHas("presence");
 
     return (
         <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
@@ -41,9 +44,11 @@ export function MemberHeroActions({ member, inClubNow }: MemberHeroActionsProps)
                     {resend.isPending ? t("consent.resending") : t("consent.resend")}
                 </Button>
             )}
-            {member.isActive && <MemberPresenceButton memberId={member.id} inClubNow={inClubNow} />}
+            {member.isActive && hasDoor && (
+                <MemberPresenceButton memberId={member.id} inClubNow={inClubNow} />
+            )}
             {member.isActive && <NewOrderButton memberId={member.id} size="sm" variant="outline" />}
-            <MemberQrDialog memberId={member.id} />
+            {hasDoor && <MemberQrDialog memberId={member.id} />}
             <MemberProfileEditModal member={member} />
         </div>
     );

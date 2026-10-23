@@ -59,6 +59,7 @@
         "@react-email/img": "0.0.12",
         "@react-email/link": "0.0.13",
         "@socket.io/redis-adapter": "^8.3.0",
+        "@workspace/brand": "workspace:*",
         "@workspace/domain-events": "workspace:*",
         "add": "^2.0.6",
         "bcrypt": "^6.0.0",

@@ -232,17 +232,16 @@
     background: transparent;
 }
 
-:root[data-skin="black"] [data-slot="app-main"]::before {
+:root[data-skin="black"][data-brand-lettering] [data-slot="app-main"]::before {
     content: "";
     position: fixed;
     inset: 0;
     z-index: -1;
     background-color: var(--foreground);
     opacity: 0.045;
-    -webkit-mask: url("/brand/lettering-blackmetal.svg") var(--black-ghost-x, 50%) 56% /
-        min(70vw, 120vh) auto no-repeat;
-    mask: url("/brand/lettering-blackmetal.svg") var(--black-ghost-x, 50%) 56% / min(70vw, 120vh)
-        auto no-repeat;
+    -webkit-mask: var(--brand-lettering) var(--black-ghost-x, 50%) 56% / min(70vw, 120vh) auto
+        no-repeat;
+    mask: var(--brand-lettering) var(--black-ghost-x, 50%) 56% / min(70vw, 120vh) auto no-repeat;
     pointer-events: none;
 }
 
@@ -462,21 +461,22 @@
     }
 }
 
-/* Black, PafPaf's own name (not a club's): the black-metal lettering from design/brand instead
-   of the fraktur text. A mask over the skin's bone colour; the file loads only in this skin. In a
-   narrow sidebar the left «P» of the same lettering stands for the initial. */
+/* Black, the installation's own name (not a club's): its lettering instead of the fraktur text,
+   when the brand has one (`data-brand-lettering` and `--brand-lettering` on <html>; PafPaf only
+   for now). A mask over the skin's bone colour; the file loads only in this skin. In a narrow
+   sidebar the left «P» of the same lettering stands for the initial. */
 
 [data-slot="brand-lettering"] {
     display: none;
 }
 
-:root[data-skin="black"]
+:root[data-skin="black"][data-brand-lettering]
     [data-slot="brand-name"][data-lettering]
     > :not([data-slot="brand-lettering"]) {
     display: none;
 }
 
-:root[data-skin="black"] [data-slot="brand-lettering"] {
+:root[data-skin="black"][data-brand-lettering] [data-slot="brand-lettering"] {
     display: block;
     position: relative;
     width: 6.25rem;
@@ -484,21 +484,21 @@
     filter: drop-shadow(0 0 6px rgb(233 228 218 / 0.25));
 }
 
-:root[data-skin="black"] [data-slot="brand-lettering"]::before,
-:root[data-skin="black"] [data-slot="brand-initial"] {
+:root[data-skin="black"][data-brand-lettering] [data-slot="brand-lettering"]::before,
+:root[data-skin="black"][data-brand-lettering] [data-slot="brand-initial"] {
     background-color: #f2eee6;
-    -webkit-mask: url("/brand/lettering-blackmetal.svg") left center / contain no-repeat;
-    mask: url("/brand/lettering-blackmetal.svg") left center / contain no-repeat;
+    -webkit-mask: var(--brand-lettering) left center / contain no-repeat;
+    mask: var(--brand-lettering) left center / contain no-repeat;
 }
 
-:root[data-skin="black"] [data-slot="brand-lettering"]::before {
+:root[data-skin="black"][data-brand-lettering] [data-slot="brand-lettering"]::before {
     content: "";
     position: absolute;
     inset: 0;
 }
 
 /* the lettering is 1519×855 and its «P» takes the left 0.56 of the height */
-:root[data-skin="black"] [data-slot="brand-initial"] {
+:root[data-skin="black"][data-brand-lettering] [data-slot="brand-initial"] {
     width: 1.15rem;
     height: 2rem;
     overflow: hidden;

@@ -3,7 +3,8 @@
 # ─────────────────────────────────────────────────────────────
 # API (NestJS 11 + Prisma 7) — production image
 # Build context = monorepo root.
-#   docker build -f infra/docker/api.Dockerfile -t gran-kush/api .
+#   docker build -f infra/docker/api.Dockerfile --build-arg APP_VERSION=$(git rev-parse HEAD) -t gran-kush/api .
+# One image for every installation: the brand comes from BRAND at run time (packages/brand).
 # ─────────────────────────────────────────────────────────────
 
 FROM node:22-slim AS base
@@ -29,6 +30,9 @@ RUN pnpm --filter api prisma:generate \
 # We keep the full workspace (incl. dev deps) so that `prisma migrate deploy`
 # and the ts-node admin seed can run from the entrypoint at container start.
 FROM base AS runner
+# The commit of this build: GET /health reports it, the deploy waits for it (infra/dokploy/deploy.mjs)
+ARG APP_VERSION=dev
+ENV APP_VERSION=$APP_VERSION
 ENV NODE_ENV=production
 COPY --from=builder /app /app
 COPY infra/docker/api-entrypoint.sh /usr/local/bin/api-entrypoint.sh

@@ -1,23 +1,20 @@
-# CD: build the five production images, push them to ghcr.io, then deploy to
-# the server over SSH (documentation/tasks/deployment.md §3, шаги 4–5).
-# PafPaf on Dokploy pulls the same images instead (infra/dokploy/README.md).
+# CD: build the production images, push them to ghcr.io, then deploy the installations on
+# Dokploy one by one (infra/dokploy/README.md).
 #
-# While the server does not exist yet, the deploy job is skipped automatically:
-# it only runs when the SSH_* secrets are configured. The build half still runs
-# on every push to main, so images are always ready in the registry.
+# One code, one installation per brand (packages/brand/src/installations.json):
+#   api            one image for every installation — the brand comes from BRAND at run time;
+#   crm/admin/site per released installation: NEXT_PUBLIC_* are inlined at BUILD time, so each
+#                  brand has its own build, tagged <brand>-latest and <brand>-sha-<commit>.
+# The matrix and the addresses baked into the builds come from infra/dokploy/ci-matrix.mjs.
 #
 # Repository secrets (deploy):
-#   SSH_HOST, SSH_USER, SSH_PRIVATE_KEY — dedicated deploy key, not a personal one
-#   DOKPLOY_URL, DOKPLOY_API_KEY, DOKPLOY_COMPOSE_ID — PafPaf on Dokploy: once the
-#     images are pushed, Dokploy is asked to redeploy (infra/dokploy/README.md)
-# Repository variables (build/smoke):
-#   NEXT_PUBLIC_API_URL, NEXT_PUBLIC_CRM_URL, NEXT_PUBLIC_MEMBER_URL (cabinet, https://club.<domain>),
-#   NEXT_PUBLIC_MAIN_SITE_URL —
-#     inlined into the Next.js bundles at BUILD time (changing them = rebuild)
-#   NEXT_PUBLIC_SITE_URL — product site with the legal pages; empty = https://paf-paf.app
+#   DOKPLOY_URL, DOKPLOY_API_KEY — the Dokploy API; without them nothing is deployed and the
+#     Deploy button in Dokploy stays manual
+#   DOKPLOY_COMPOSE_ID_<BRAND> (…_PAFPAF, …_INKSPACE, …_PLISPLAS) — the compose of each project;
+#     an installation without one is skipped. PafPaf also takes the old DOKPLOY_COMPOSE_ID.
+# Repository variables (build):
 #   NEXT_PUBLIC_PLANS_PURCHASABLE — `true` once Stripe is live: the site's plan buttons lead to
 #     sign-up with the plan; empty = «coming soon, try it free»
-#   SMOKE_CHECK_URL — e.g. https://api.<domain>/health; smoke step skipped if empty
 
 name: Deploy
 
@@ -34,8 +31,20 @@ permissions:
   contents: read
 
 jobs:
+  matrix:
+    name: Images to build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      images: ${{ steps.matrix.outputs.images }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: matrix
+        run: echo "images=$(node infra/dokploy/ci-matrix.mjs)" >> "$GITHUB_OUTPUT"
+
   build:
-    name: Build & push ${{ matrix.app }}
+    name: Build & push ${{ matrix.app }} ${{ matrix.brand }}
+    needs: [matrix]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -43,23 +52,17 @@ jobs:
       packages: write
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - app: api
-            dockerfile: infra/docker/api.Dockerfile
-          - app: crm
-            dockerfile: infra/docker/next.Dockerfile
-          - app: admin
-            dockerfile: infra/docker/next.Dockerfile
-          - app: site
-            dockerfile: infra/docker/next.Dockerfile
+      matrix: ${{ fromJSON(needs.matrix.outputs.images) }}
     steps:
       - uses: actions/checkout@v4
 
-      # ghcr image paths must be lowercase; github.repository may not be.
+      # ghcr image paths must be lowercase; github.repository may not be. Brand builds share the
+      # app's package and differ by tag prefix, so a new brand needs no new package.
       - name: Compute image name
         id: image
-        run: echo "name=ghcr.io/${GITHUB_REPOSITORY,,}/${{ matrix.app }}" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "name=ghcr.io/${GITHUB_REPOSITORY,,}/${{ matrix.app }}" >> "$GITHUB_OUTPUT"
+          echo "prefix=${{ matrix.brand && format('{0}-', matrix.brand) || '' }}" >> "$GITHUB_OUTPUT"
 
       - uses: docker/setup-buildx-action@v3
 
@@ -76,97 +79,51 @@ jobs:
           file: ${{ matrix.dockerfile }}
           push: true
           tags: |
-            ${{ steps.image.outputs.name }}:sha-${{ github.sha }}
-            ${{ steps.image.outputs.name }}:latest
+            ${{ steps.image.outputs.name }}:${{ steps.image.outputs.prefix }}sha-${{ github.sha }}
+            ${{ steps.image.outputs.name }}:${{ steps.image.outputs.prefix }}latest
           build-args: |
             APP=${{ matrix.app }}
-            NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
-            NEXT_PUBLIC_CRM_URL=${{ vars.NEXT_PUBLIC_CRM_URL }}
-            NEXT_PUBLIC_MEMBER_URL=${{ vars.NEXT_PUBLIC_MEMBER_URL }}
-            NEXT_PUBLIC_MAIN_SITE_URL=${{ vars.NEXT_PUBLIC_MAIN_SITE_URL }}
-            NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL }}
+            APP_VERSION=${{ github.sha }}
+            NEXT_PUBLIC_BRAND=${{ matrix.brand }}
+            NEXT_PUBLIC_SITE=${{ matrix.brand }}
+            NEXT_PUBLIC_SERVER_URL=${{ matrix.site_url }}
+            NEXT_PUBLIC_API_URL=${{ matrix.api_url }}
+            NEXT_PUBLIC_CRM_URL=${{ matrix.crm_url }}
+            NEXT_PUBLIC_MEMBER_URL=${{ matrix.member_url }}
+            NEXT_PUBLIC_MAIN_SITE_URL=${{ matrix.site_url }}
+            NEXT_PUBLIC_SITE_URL=${{ matrix.site_url }}
             NEXT_PUBLIC_PLANS_PURCHASABLE=${{ vars.NEXT_PUBLIC_PLANS_PURCHASABLE }}
-          cache-from: type=gha,scope=${{ matrix.app }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.app }}
+          cache-from: type=gha,scope=${{ matrix.app }}-${{ matrix.brand }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.app }}-${{ matrix.brand }}
 
   # Job-level `if` cannot read the secrets context, so a tiny job exports
-  # which deploy targets have their secrets configured.
-  server-check:
+  # whether the Dokploy API is configured.
+  dokploy-check:
     name: Check deploy target
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - id: check
-        run: |
-          echo "configured=${{ secrets.SSH_HOST != '' && secrets.SSH_USER != '' && secrets.SSH_PRIVATE_KEY != '' }}" >> "$GITHUB_OUTPUT"
-          echo "dokploy=${{ secrets.DOKPLOY_URL != '' && secrets.DOKPLOY_API_KEY != '' && secrets.DOKPLOY_COMPOSE_ID != '' }}" >> "$GITHUB_OUTPUT"
+        run: echo "dokploy=${{ secrets.DOKPLOY_URL != '' && secrets.DOKPLOY_API_KEY != '' }}" >> "$GITHUB_OUTPUT"
     outputs:
-      configured: ${{ steps.check.outputs.configured }}
       dokploy: ${{ steps.check.outputs.dokploy }}
 
-  # Dokploy pulls :latest on deploy, so it must start only after every image is
+  # Dokploy pulls the tags on deploy, so it must start only after every image is
   # pushed. Its own Autodeploy (git push hook) would race the build — keep it off.
   dokploy:
     name: Deploy on Dokploy
-    needs: [build, server-check]
-    if: needs.server-check.outputs.dokploy == 'true'
+    needs: [build, dokploy-check]
+    if: needs.dokploy-check.outputs.dokploy == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 40
     steps:
-      - name: Trigger compose deploy
+      - uses: actions/checkout@v4
+      - name: Deploy installations one by one
         env:
           DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
           DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
           DOKPLOY_COMPOSE_ID: ${{ secrets.DOKPLOY_COMPOSE_ID }}
-        run: |
-          curl -fsS --retry 3 --retry-delay 10 -X POST "${DOKPLOY_URL%/}/api/compose.deploy" \
-            -H "x-api-key: ${DOKPLOY_API_KEY}" \
-            -H "Content-Type: application/json" \
-            -d "{\"composeId\":\"${DOKPLOY_COMPOSE_ID}\"}" > /dev/null
-          echo "Dokploy deploy queued for ${{ github.sha }}"
-
-  deploy:
-    name: Deploy to server
-    needs: [build, server-check]
-    if: needs.server-check.outputs.configured == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Prepare SSH key
-        run: |
-          mkdir -p ~/.ssh
-          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-
-      - name: Pull images & restart stack
-        run: |
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new \
-            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" bash -s <<'EOF'
-          set -euo pipefail
-          cd /opt/gran-kush
-          git fetch origin main
-          git checkout main
-          git pull --ff-only
-          export TAG=sha-${{ github.sha }}
-          # The TLS overlay is opt-in by the presence of the certificate: drop
-          # one into infra/docker/nginx/certs/ and every later deploy keeps :443.
-          # Without this check a deploy would silently recreate nginx on :80 only.
-          FILES="-f infra/compose/docker-compose.prod.yml -f infra/compose/docker-compose.deploy.yml"
-          if [ -f infra/docker/nginx/certs/origin.pem ]; then
-            FILES="$FILES -f infra/compose/docker-compose.tls.yml"
-            echo "TLS overlay enabled"
-          else
-            echo "No certificate found — serving plain HTTP on :80"
-          fi
-          docker compose --env-file infra/compose/.env $FILES pull
-          docker compose --env-file infra/compose/.env $FILES up -d --remove-orphans
-          docker image prune -f
-          EOF
-
-      - name: Smoke check
-        if: vars.SMOKE_CHECK_URL != ''
-        run: |
-          sleep 20
-          curl -fsS --retry 5 --retry-delay 10 --retry-all-errors \
-            "${{ vars.SMOKE_CHECK_URL }}" > /dev/null
-          echo "Smoke check OK: ${{ vars.SMOKE_CHECK_URL }}"
+          DOKPLOY_COMPOSE_ID_PAFPAF: ${{ secrets.DOKPLOY_COMPOSE_ID_PAFPAF }}
+          DOKPLOY_COMPOSE_ID_INKSPACE: ${{ secrets.DOKPLOY_COMPOSE_ID_INKSPACE }}
+          DOKPLOY_COMPOSE_ID_PLISPLAS: ${{ secrets.DOKPLOY_COMPOSE_ID_PLISPLAS }}
+        run: node infra/dokploy/deploy.mjs "${{ github.sha }}"

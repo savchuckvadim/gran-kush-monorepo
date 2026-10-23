@@ -157,9 +157,9 @@ export const config = {
          * - _next/static (static files)
          * - _next/image (image optimization files)
          * - favicon.ico (favicon file)
-         * - apple-icon (generated icon, served without an extension)
+         * - icon, apple-icon (generated icons, served without an extension)
          * - files with extensions (e.g. .png, .jpg, .svg)
          */
-        "/((?!api|_next/static|_next/image|favicon.ico|apple-icon|.*\\..*).*)",
+        "/((?!api|_next/static|_next/image|favicon.ico|icon|apple-icon|.*\\..*).*)",
     ],
 };

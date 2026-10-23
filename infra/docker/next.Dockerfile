@@ -6,7 +6,8 @@
 #   docker build -f infra/docker/next.Dockerfile \
 #     --build-arg APP=crm --build-arg NEXT_PUBLIC_API_URL=https://api.example \
 #     -t gran-kush/crm .
-# APP is the directory name under apps/ (crm | admin | site).
+# APP is the directory name under apps/ (crm | admin | site); NEXT_PUBLIC_BRAND the installation
+# (pafpaf | inkspace | plisplas): a Next image is built once per brand.
 # ─────────────────────────────────────────────────────────────
 
 FROM node:22-slim AS base
@@ -20,12 +21,18 @@ WORKDIR /app
 FROM base AS builder
 ARG APP
 # NEXT_PUBLIC_* are inlined into the client bundle at build time.
+ARG NEXT_PUBLIC_BRAND
+ARG NEXT_PUBLIC_SITE
+ARG NEXT_PUBLIC_SERVER_URL
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_CRM_URL
 ARG NEXT_PUBLIC_MEMBER_URL
 ARG NEXT_PUBLIC_MAIN_SITE_URL
 ARG NEXT_PUBLIC_SITE_URL
 ARG NEXT_PUBLIC_PLANS_PURCHASABLE
+ENV NEXT_PUBLIC_BRAND=$NEXT_PUBLIC_BRAND
+ENV NEXT_PUBLIC_SITE=$NEXT_PUBLIC_SITE
+ENV NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_CRM_URL=$NEXT_PUBLIC_CRM_URL
 ENV NEXT_PUBLIC_MEMBER_URL=$NEXT_PUBLIC_MEMBER_URL

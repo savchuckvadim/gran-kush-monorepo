@@ -8,11 +8,12 @@ import { Button, Card, FieldSelect } from "@workspace/ui";
 import { usePermissions } from "@/modules/entities/access";
 import { usePortalInfo, useUpdatePortalAppearance } from "@/modules/entities/portal";
 import { useSkinText } from "@/modules/features/skin-picker/use-skin-text";
+import { BRAND } from "@/modules/shared/config/brand";
 import { DEFAULT_SKIN, normalizeSkinId, SKINS } from "@/modules/shared/config/skins";
 
 /**
  * Тема клуба по умолчанию: её видят сотрудники в CRM и участники в кабинете, пока не выбрали
- * свою. Пустое значение — тема PafPaf. Меняет администратор, остальные видят выбранную.
+ * свою. Пустое значение — тема инсталляции по умолчанию. Меняет администратор, остальные видят выбранную.
  */
 export function ClubSkinSetting() {
     const text = useSkinText();
@@ -25,7 +26,7 @@ export function ClubSkinSetting() {
     const selected = value ?? saved;
 
     const options = [
-        { value: "", label: text.t("clubSkin.none") },
+        { value: "", label: text.t("clubSkin.none", { brand: BRAND.name }) },
         ...SKINS.filter((skin) => skin.id !== DEFAULT_SKIN).map((skin) => ({
             value: skin.id,
             label: text.name(skin.id),

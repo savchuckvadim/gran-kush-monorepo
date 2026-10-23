@@ -1,6 +1,7 @@
 import { Controller, Get, Query } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
+import { BrandModuleRoutes } from "@common/brand/brand-module.guard";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
 import { ApiPaginatedResponse } from "@common/decorators/response/api-paginated-response.decorator";
 import { ApiSuccessResponse } from "@common/decorators/response/api-success-response.decorator";
@@ -22,6 +23,7 @@ import { PresenceService } from "@modules/portal/crm/presence/application/servic
 @Controller("cabinet/presence")
 @CabinetAuth()
 @ApiBearerAuth()
+@BrandModuleRoutes("presence")
 export class CabinetPresenceController {
     constructor(private readonly presenceService: PresenceService) {}
 

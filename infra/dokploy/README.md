@@ -1,10 +1,13 @@
-# PafPaf на Dokploy
+# PafPaf, Ink Space и Plis Plas на Dokploy
 
 Отдельный проект на том же сервере и в той же панели Dokploy, где работают диваны. Чужие проекты на сервере не трогаем. Остальной `infra/` здесь не используется: его nginx занимает порт 80, а на сервере этот порт уже у Traefik. SSH-деплой из `deploy.yml` к этой схеме не относится: без SSH-секретов он не запускается.
 
 ## Как устроено
 
-- Один Compose-сервис из `infra/dokploy/docker-compose.yml`. В нём Postgres, Redis, API, CRM, кабинет участника, админка платформы и сайт.
+- Один код — по инсталляции на бренд (TASK-793): PafPaf (клубы, `paf-paf.app`), Ink Space (тату, `ink.space`), Plis Plas (бьюти, домен ещё не куплен). Каждая — свой проект Dokploy со своими Postgres, Redis, секретами, OAuth и ботами. Список, домены и порядок деплоя — `packages/brand/src/installations.json`.
+- У каждой инсталляции один Compose-сервис из `infra/dokploy/<бренд>/docker-compose.yml`. В нём Postgres, Redis, API, CRM, кабинет, админка платформы и сайт. Файлы `docker-compose.yml` и `.env.example` бренда **генерируются** из `templates/` командой `node infra/dokploy/render.mjs`: правится шаблон, затем рендер, CI проверяет, что файлы свежие (`--check`). Имена сервисов (`<бренд>-api`, …) — ключи YAML, их нельзя взять из env, а на общей `dokploy-network` они должны быть уникальны.
+- Бренд в API — переменная `BRAND` в compose (уже прописана). Образ API один на все инсталляции; CRM, админка и сайт собираются на бренд (адреса вшиваются при сборке) и различаются тегом: `crm:pafpaf-latest`, `crm:inkspace-latest`, откат — `crm:<бренд>-sha-<коммит>`.
+- Сервисы на весь сервер (уборка диска `pafpaf-janitor`) — только в compose PafPaf (`serverServices` в `installations.json`).
 - Портов наружу нет. Трафик по доменам раздаёт Traefik, а Postgres и Redis доступны только внутри проекта.
 - Образы собирает GitHub Actions (`.github/workflows/deploy.yml`) при каждом push в `main` и кладёт в ghcr.io. Сервер ничего не собирает.
 - Секреты хранятся только в Dokploy, на вкладке Environment. В git лежит только `.env.example`.
@@ -33,11 +36,7 @@
 
 ### GitHub
 
-- Репозиторий → Settings → Secrets and variables → Actions → **Variables**:
-  - `NEXT_PUBLIC_API_URL` = `https://api.paf-paf.app`;
-  - `NEXT_PUBLIC_CRM_URL` = `https://crm.paf-paf.app`.
-
-  Эти адреса вшиваются в образы при сборке. Если они не заданы, в CRM попадает `http://localhost:3000`, и CRM не достучится до API. После их смены запустите сборку заново: Actions → Deploy → Run workflow.
+- Адреса, которые вшиваются в CRM, админку и сайт, CI берёт из `installations.json` (`infra/dokploy/ci-matrix.mjs`); переменные `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_CRM_URL` и `NEXT_PUBLIC_MEMBER_URL` в настройках репозитория больше не читаются. Осталась одна: `NEXT_PUBLIC_PLANS_PURCHASABLE`.
 - Токен для образов не нужен, пока репозиторий публичный: образы в ghcr тоже публичные.
 
 ### Dokploy
@@ -45,9 +44,9 @@
 1. Projects → Create Project → `pafpaf`.
 2. Create Service → **Compose**, тип Docker Compose:
    - провайдер Git, URL `https://github.com/savchuckvadim/gran-kush-monorepo.git`, ветка `main`. Репозиторий публичный, поэтому ключ не нужен;
-   - Compose Path: `./infra/dokploy/docker-compose.yml`;
+   - Compose Path: `./infra/dokploy/<бренд>/docker-compose.yml` (у PafPaf — `./infra/dokploy/pafpaf/docker-compose.yml`; до 23.10.2026 было `./infra/dokploy/docker-compose.yml` — в проекте `pafpaf` путь поменять перед первым деплоем после TASK-793);
    - **Autodeploy выключить**. Иначе Dokploy начнёт деплой сразу после push, пока GitHub ещё собирает новые образы.
-3. Environment: вставить `infra/dokploy/.env.example` и заполнить.
+3. Environment: вставить `infra/dokploy/<бренд>/.env.example` и заполнить. Секреты у каждой инсталляции свои.
    - Секреты генерируются командой `openssl rand -hex 32`.
    - Обязательные переменные помечены `(required)`. Пока хоть одна пустая, деплой останавливается с понятной ошибкой.
 4. Domains: заполнить по таблице выше (домен, сервис, порт 3000, HTTPS, сертификат Let's Encrypt).
@@ -83,8 +82,9 @@
 3. GitHub → Settings → Secrets and variables → Actions → New repository secret:
    - `DOKPLOY_URL` — адрес панели: `https://panel.divan.group`;
    - `DOKPLOY_API_KEY` — ключ из шага 1;
-   - `DOKPLOY_COMPOSE_ID` — из шага 2.
-4. Проверка: после следующего push в `main` в Actions → Deploy зелёная задача «Deploy on Dokploy», а в Dokploy → Deployments появился новый деплой.
+   - `DOKPLOY_COMPOSE_ID_<БРЕНД>` — из шага 2, по одному на инсталляцию: `DOKPLOY_COMPOSE_ID_PAFPAF`, `DOKPLOY_COMPOSE_ID_INKSPACE`, `DOKPLOY_COMPOSE_ID_PLISPLAS`. Старый `DOKPLOY_COMPOSE_ID` PafPaf тоже принимается.
+4. Деплой идёт по очереди `deployOrder`: Ink Space → Plis Plas → PafPaf. Следующая инсталляция начинается, только когда `https://api.<домен>/health` предыдущей ответил своим брендом и этим коммитом (`version`); красная останавливает остальные (`infra/dokploy/deploy.mjs`). Инсталляция без своего compose id пропускается.
+5. Проверка: после следующего push в `main` в Actions → Deploy зелёная задача «Deploy on Dokploy», а в Dokploy → Deployments появился новый деплой.
 
 ## Почта
 

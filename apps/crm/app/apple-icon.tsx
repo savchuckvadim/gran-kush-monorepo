@@ -1,6 +1,8 @@
 import { ImageResponse } from "next/og";
 
-import { BRAND_MARK_DATA_URL } from "@workspace/ui/lib/brand-mark";
+import { brandMarkDataUrl } from "@workspace/brand";
+
+import { BRAND } from "@/modules/shared/config/brand";
 
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
@@ -19,7 +21,7 @@ const AppleIcon = () =>
             }}
         >
             {/* eslint-disable-next-line @next/next/no-img-element -- ImageResponse draws plain img */}
-            <img src={BRAND_MARK_DATA_URL} width={128} height={128} alt="" />
+            <img src={brandMarkDataUrl(BRAND)} width={128} height={128} alt="" />
         </div>,
         size
     );

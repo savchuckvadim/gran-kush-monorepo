@@ -12,6 +12,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { LogoutButton } from "@/modules/features/auth";
 import { LangSwitcher } from "@/modules/features/lang-switcher";
 import { ROUTES, useLocalizedLink } from "@/modules/shared";
+import { BRAND } from "@/modules/shared/config/brand";
 
 import { useSessionExpiredRedirect } from "./use-session-expired-redirect";
 
@@ -36,7 +37,7 @@ export function AdminShell({ email, children }: { email: string | null; children
                         className="flex items-center gap-2 font-bold"
                     >
                         <ShieldCheck className="h-5 w-5 text-primary" />
-                        {t("adminTitle")}
+                        {t("adminTitle", { brand: BRAND.name })}
                     </Link>
                     <nav className="flex items-center gap-1">
                         {NAV_ITEMS.map(({ code, route, icon: Icon }) => {

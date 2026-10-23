@@ -2,6 +2,7 @@ import type { Viewport } from "next";
 import { getLocale } from "next-intl/server";
 
 import { THEME_COLORS } from "@/modules/shared/config/app-meta";
+import { BRAND } from "@/modules/shared/config/brand";
 import { SKIN_BOOT_SCRIPT } from "@/modules/shared/lib/skin/skin-scripts";
 import { Providers } from "@/modules/shared/providers/providers";
 
@@ -23,10 +24,19 @@ export default async function RootLayout({
 }>) {
     // язык страницы для скринридеров и переноса слов; next-intl знает его из адреса
     const locale = await getLocale();
+    // Надпись логотипа для темы Black — только у бренда, у которого она есть (shell.css)
+    const lettering = BRAND.skinLettering;
+    const style = lettering ? { ...fontStyle, "--brand-lettering": `url("${lettering}")` } : fontStyle;
 
     return (
         // Font variables sit on <html> so a skin's `--font-sans: var(--font-onest)` resolves there.
-        <html lang={locale} suppressHydrationWarning className={fontVariables} style={fontStyle}>
+        <html
+            lang={locale}
+            suppressHydrationWarning
+            className={fontVariables}
+            style={style}
+            data-brand-lettering={lettering ? "" : undefined}
+        >
             <head>
                 <script dangerouslySetInnerHTML={{ __html: SKIN_BOOT_SCRIPT }} />
             </head>

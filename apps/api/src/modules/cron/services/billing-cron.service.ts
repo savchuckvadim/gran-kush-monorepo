@@ -3,6 +3,7 @@ import { Cron, CronExpression } from "@nestjs/schedule";
 
 import { Prisma, SubscriptionStatus } from "@prisma/client";
 
+import { BrandService } from "@common/brand/brand.service";
 import { PrismaService } from "@common/prisma/prisma.service";
 import { BillingSettings } from "@modules/billing/application/billing-settings";
 import { BILLING_PROVIDERS } from "@modules/billing/domain/billing-providers";
@@ -18,7 +19,8 @@ export class BillingCronService {
 
     constructor(
         private readonly prisma: PrismaService,
-        private readonly settings: BillingSettings
+        private readonly settings: BillingSettings,
+        private readonly brand: BrandService
     ) {}
 
     /**
@@ -35,9 +37,12 @@ export class BillingCronService {
      * (TASK-105) к этому добавляются дубли. Поэтому строки захватываются
      * `SELECT ... FOR UPDATE SKIP LOCKED` внутри транзакции: условие проверяется уже
      * под блокировкой, а вторая реплика пропускает занятое и берёт следующую пачку.
+     *
+     * Инсталляция без `billing` бесплатна: сроки не ведутся, подписки остаются как есть.
      */
     @Cron(CronExpression.EVERY_HOUR)
     async enforceSubscriptions(): Promise<void> {
+        if (!this.brand.has("billing")) return;
         const now = new Date();
         const pastDue = {
             status: SubscriptionStatus.past_due,

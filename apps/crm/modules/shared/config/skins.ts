@@ -1,3 +1,5 @@
+import { BRAND } from "./brand";
+
 /**
  * CRM skins. Tokens and effects live in packages/ui/src/styles/skins.css; texts live in the
  * `crm.appearance` messages (`skins.<id>.name`, `skins.<id>.description`, `tags.<tag>`).
@@ -23,6 +25,10 @@ export const SKIN_IDS = [
     "coqueta",
 ] as const;
 
+/** Any known id, offered by this installation or not. */
+const isSkinIdValue = (value: unknown): value is SkinId =>
+    typeof value === "string" && (SKIN_IDS as readonly string[]).includes(value);
+
 /** Ids a skin used to have: a stored choice under the old name still resolves. */
 export const LEGACY_SKIN_IDS: Record<string, SkinId> = { infierno: "black" };
 
@@ -44,8 +50,8 @@ export interface SkinDefinition {
 /** Clásico: the tokens in globals.css, rendered without a data-skin attribute. */
 export const BASE_SKIN: SkinId = "clasico";
 
-/** What an account sees until it picks a skin. */
-export const DEFAULT_SKIN: SkinId = "pafpaf";
+/** What an account sees until it picks a skin: the installation's own. */
+export const DEFAULT_SKIN: SkinId = isSkinIdValue(BRAND.defaultSkin) ? BRAND.defaultSkin : BASE_SKIN;
 
 const BOTH: readonly [SkinMode, SkinMode] = ["light", "dark"];
 const DARK_FIRST: readonly [SkinMode, SkinMode] = ["dark", "light"];
@@ -156,12 +162,15 @@ const SKIN_MAP: Record<SkinId, SkinDefinition> = {
     },
 };
 
-export const SKINS: readonly SkinDefinition[] = SKIN_IDS.map((id) => SKIN_MAP[id]);
+/** Skins this installation offers: another brand's look (PafPaf on Ink Space) is left out. */
+export const SKINS: readonly SkinDefinition[] = SKIN_IDS.filter(
+    (id) => !BRAND.hiddenSkins.includes(id)
+).map((id) => SKIN_MAP[id]);
 
 export const getSkin = (id: SkinId): SkinDefinition => SKIN_MAP[id];
 
 export const isSkinId = (value: unknown): value is SkinId =>
-    typeof value === "string" && (SKIN_IDS as readonly string[]).includes(value);
+    isSkinIdValue(value) && !BRAND.hiddenSkins.includes(value);
 
 /** A stored id, current or legacy, to the skin it means today. */
 export const normalizeSkinId = (value: unknown): SkinId | null => {
@@ -176,9 +185,6 @@ export const getForcedMode = (skin: SkinDefinition): SkinMode | undefined =>
 export const getEffectiveMode = (skin: SkinDefinition, preferred: SkinMode): SkinMode =>
     skin.modes.includes(preferred) ? preferred : skin.modes[0];
 
-/**
- * Personal choice wins over the club default. Today the club default is always PafPaf;
- * TASK-410 brings it from the Portal.
- */
+/** Personal choice wins over the club default; without one — the installation's skin. */
 export const resolveSkin = (personal: SkinId | null, clubDefault: SkinId = DEFAULT_SKIN): SkinId =>
     personal ?? clubDefault;

@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { Card } from "@workspace/ui";
 
 import { useMyMemberships } from "@/modules/entities/membership";
+import { brandHas } from "@/modules/shared/config/brand";
 import { useClubDefaultSkin } from "@/modules/shared/lib/skin";
 import { ClubBadge } from "@/modules/shared/ui/Brand";
 
@@ -54,7 +55,7 @@ export function CabinetClubLayout({ slug, children }: { slug: string; children: 
                         <h1 className="truncate text-2xl font-semibold tracking-tight">
                             {membership.displayName}
                         </h1>
-                        <PresenceBadge slug={slug} />
+                        {brandHas("presence") && <PresenceBadge slug={slug} />}
                     </div>
                 </div>
                 <ClubTabs slug={slug} />

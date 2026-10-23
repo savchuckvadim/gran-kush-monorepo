@@ -1,6 +1,7 @@
 import { Body, Controller, Get, NotFoundException, Param, Post, Query } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
+import { BrandModuleRoutes } from "@common/brand/brand-module.guard";
 import { PortalId } from "@common/decorators/auth/portal-id.decorator";
 import { RequirePermission } from "@common/decorators/auth/require-permission.decorator";
 import { ApiErrorResponse } from "@common/decorators/response/api-error-response.decorator";
@@ -37,6 +38,7 @@ import { ConfirmDoorScanUseCase } from "@modules/portal/crm/presence/application
 @Controller("crm/presence")
 @CrmAuth()
 @ApiBearerAuth()
+@BrandModuleRoutes("presence")
 export class CrmPresenceController {
     constructor(
         private readonly presenceService: PresenceService,

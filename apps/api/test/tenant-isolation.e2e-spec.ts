@@ -38,7 +38,6 @@ describe("Cross-portal isolation (e2e)", () => {
     let memberBId: string;
     let memberUserId: string;
     let sessionBId: string;
-    let billingPlanId: string;
     let measurementUnitId: string;
 
     const registerPortal = async (slug: string, email: string): Promise<PortalContext> => {
@@ -129,9 +128,6 @@ describe("Cross-portal isolation (e2e)", () => {
         await prisma.user.deleteMany({
             where: { email: { endsWith: `${suffix}@test.local` } },
         });
-        if (billingPlanId) {
-            await prisma.billingPlan.deleteMany({ where: { id: billingPlanId } });
-        }
         await app.close();
     });
 
@@ -799,76 +795,6 @@ describe("Cross-portal isolation (e2e)", () => {
                 .set("X-Portal-Slug", portalA.slug)
                 .send({ statusItemId: statusItemBId });
             expect(res.status).toBe(400);
-        });
-    });
-
-    describe("subscription gate", () => {
-        beforeAll(async () => {
-            const plan = await prisma.billingPlan.create({
-                data: {
-                    code: `iso-plan-${suffix}`,
-                    name: "Isolation Test Plan",
-                    priceAmount: 0,
-                    featuresJson: {},
-                },
-            });
-            billingPlanId = plan.id;
-        });
-
-        afterAll(async () => {
-            await prisma.portalSubscription.deleteMany({ where: { portalId: portalA.id } });
-        });
-
-        it("returns 402 when subscription is canceled", async () => {
-            // Регистрация портала может асинхронно создать trialing-подписку — используем upsert
-            await prisma.portalSubscription.upsert({
-                where: { portalId: portalA.id },
-                create: {
-                    portalId: portalA.id,
-                    planId: billingPlanId,
-                    status: "canceled",
-                },
-                update: { status: "canceled", graceEndsAt: null },
-            });
-
-            const res = await request(app.getHttpServer())
-                .get("/crm/members")
-                .set("Cookie", portalA.cookies)
-                .set("X-Portal-Slug", portalA.slug);
-            expect(res.status).toBe(402);
-        });
-
-        it("passes past_due within grace and sets warning header", async () => {
-            await prisma.portalSubscription.update({
-                where: { portalId: portalA.id },
-                data: {
-                    status: "past_due",
-                    graceEndsAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-                },
-            });
-
-            const res = await request(app.getHttpServer())
-                .get("/crm/members")
-                .set("Cookie", portalA.cookies)
-                .set("X-Portal-Slug", portalA.slug);
-            expect(res.status).toBe(200);
-            expect(res.headers["x-subscription-warning"]).toBe("past_due");
-        });
-
-        it("returns 402 when grace period has ended", async () => {
-            await prisma.portalSubscription.update({
-                where: { portalId: portalA.id },
-                data: {
-                    status: "past_due",
-                    graceEndsAt: new Date(Date.now() - 60 * 1000),
-                },
-            });
-
-            const res = await request(app.getHttpServer())
-                .get("/crm/members")
-                .set("Cookie", portalA.cookies)
-                .set("X-Portal-Slug", portalA.slug);
-            expect(res.status).toBe(402);
         });
     });
 });

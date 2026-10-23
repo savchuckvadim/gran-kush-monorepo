@@ -3,7 +3,7 @@ import { SubscriptionStatus } from "@prisma/client";
 import { subscriptionAccess } from "@modules/billing/domain/subscription-access";
 
 import { MemberAccessService } from "../application/services/member-access.service";
-import { DEFAULT_CLUB_POLICY, ShopDenial } from "../domain/club-policy";
+import { DEFAULT_CLUB_POLICY, NO_CLUB_POLICY, ShopDenial } from "../domain/club-policy";
 import { MemberShopContext } from "../domain/repositories/club-policy-repository.interface";
 
 const active = { status: SubscriptionStatus.active, graceEndsAt: null };
@@ -58,6 +58,20 @@ describe("MemberAccessService.decide — правила магазина клу�
             canOrder: false,
             reasons: [ShopDenial.club_subscription_inactive],
         });
+    });
+
+    it("бесплатная инсталляция (без billing) не закрывает заказы по подписке", () => {
+        const free = MemberAccessService.decide(context({ subscription: null }), {
+            billing: false,
+        });
+        expect(free).toEqual({ canBrowse: true, canOrder: true, reasons: [] });
+    });
+
+    it("без правил клуба (студии) каталог открыт и вне визита", () => {
+        const studio = MemberAccessService.decide(
+            context({ inClub: false, rules: NO_CLUB_POLICY })
+        );
+        expect(studio).toEqual({ canBrowse: true, canOrder: true, reasons: [] });
     });
 });
 

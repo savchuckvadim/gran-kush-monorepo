@@ -1,3 +1,5 @@
+import type { BrandModuleCode } from "@workspace/brand";
+
 import type { Permission } from "@/modules/entities/access";
 import type { PortalModuleCode } from "@/modules/entities/portal-modules";
 import { ISidebarItem } from "@/modules/shared/ui/Sidebar";
@@ -10,4 +12,6 @@ export interface ICrmNavigation extends ISidebarItem {
      * подключить (settings.club), — всегда: раздел предложит подключение
      */
     module?: PortalModuleCode;
+    /** Раздел корневой функции инсталляции (TASK-793): без неё в бренде пункта нет вовсе */
+    brandModule?: BrandModuleCode;
 }
