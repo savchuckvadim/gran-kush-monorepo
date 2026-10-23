@@ -574,6 +574,10 @@ Semgrep, Trivy, ZAP по OpenAPI).
 
 ### TASK-669: рантайм, зависимости, CI `[ ]` P1
 
+- [x] 2026-10-23 (`fix/next-rce-16-4`): Security на main упал на трёх critical из свежих advisory — две RCE без
+      авторизации в Next `>=16.0.0 <=16.4.0` (Image Optimization с SVG; `use cache` с typed arrays) и обход
+      `SAFE_FOR_TEMPLATES` в DOMPurify 3.4.8 (сайт через Payload/monaco). Next 16.3.8 → 16.4.2 в crm, admin, site
+      (16.4.3 вышла в тот же день — не брали), override `dompurify@3 >=3.4.17`. `pnpm audit --prod`: 0 critical
 - [x] Образы переведены на `node:22-slim` (`chore/next-16-3-8`, 2026-10-12): Node 20 — EOL, и
       Next 16.3.8 зовёт `util.markAsUncloneable`, которого в Node 20 нет (образ `site` не
       собирался). Проверено локальной docker-сборкой `site` и `api`
