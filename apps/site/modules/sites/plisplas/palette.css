@@ -1,0 +1,14 @@
+/* Plis Plas: hot pink to blush over the PafPaf base (../pafpaf/liquid.css). */
+
+/* `:root:root` outranks the base whatever order the bundler puts the files in */
+:root:root {
+    --a1: #ff4fa3;
+    --a2: #ff85c0;
+    --a3: #ffc2dd;
+}
+
+:root:root[data-mode="light"] {
+    --a1: #db2777;
+    --a2: #e8559b;
+    --a3: #c0577f;
+}

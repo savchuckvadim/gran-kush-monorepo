@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import NextLink from "next/link";
 
+import { BRAND } from "@/modules/shared/config/site";
+
 import { LogoMark } from "./svg-defs";
 import { LangToggle, ModeSwitch } from "./switches";
 
@@ -82,10 +84,10 @@ export const Nav = ({ items, homeHref, activeId, crm, labels }: NavProps) => {
     }, [items, activeId, active, place]);
 
     return (
-        <nav className={`nav glass${small ? " is-small" : ""}`} aria-label="PafPaf">
-            <NextLink className="logo" href={homeHref} aria-label="PafPaf">
+        <nav className={`nav glass${small ? " is-small" : ""}`} aria-label={BRAND.name}>
+            <NextLink className="logo" href={homeHref} aria-label={BRAND.name}>
                 <LogoMark />
-                <span>paf paf</span>
+                <span>{BRAND.wordmark}</span>
             </NextLink>
             <div className="nav__links" ref={linksRef} onPointerLeave={() => place(active)}>
                 <div className="nav__goo" aria-hidden="true">

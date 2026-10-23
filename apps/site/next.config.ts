@@ -5,6 +5,8 @@ import { withPayload } from "@payloadcms/next/withPayload";
 import path from "path";
 import { fileURLToPath } from "url";
 
+import { getBrand } from "@workspace/brand";
+
 import { LOCALES } from "./modules/shared/config/locales";
 import { HOME_SLUG } from "./modules/shared/config/routes";
 
@@ -24,9 +26,9 @@ const SECURITY_HEADERS = [
     { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
 ];
 
-// One codebase, one build per product site: the build picks its theme (styles and fonts).
-const SITES = ["pafpaf", "nagual"];
-const site = SITES.find((name) => name === process.env.NEXT_PUBLIC_SITE) ?? "pafpaf";
+// One codebase, one build per installation (packages/brand): the build picks its theme (styles
+// and fonts). An unknown NEXT_PUBLIC_SITE stops the build.
+const site = getBrand(process.env.NEXT_PUBLIC_SITE).code;
 const siteTheme = `./modules/sites/${site}/theme.ts`;
 
 const withNextIntl = createNextIntlPlugin("./i18n.ts");
@@ -46,10 +48,6 @@ const nextConfig: NextConfig = {
             destination: "/:locale",
             permanent: true,
         },
-        // One database and one admin: editors work on the PafPaf build only.
-        ...(site === "pafpaf"
-            ? []
-            : [{ source: "/admin/:path*", destination: "/", permanent: false }]),
     ],
     webpack: (webpackConfig) => {
         webpackConfig.resolve.extensionAlias = {

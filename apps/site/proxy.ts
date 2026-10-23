@@ -9,7 +9,7 @@ export default createMiddleware({
 });
 
 export const config = {
-    // The Payload admin and REST API live outside the localized site, and so does the generated
-    // apple-icon route, the only metadata file without an extension.
-    matcher: ["/((?!api|admin|_next|_vercel|apple-icon|.*\\..*).*)"],
+    // The Payload admin and REST API live outside the localized site, and so do the generated
+    // icon and apple-icon routes, the metadata files without an extension.
+    matcher: ["/((?!api|admin|_next|_vercel|icon|apple-icon|.*\\..*).*)"],
 };

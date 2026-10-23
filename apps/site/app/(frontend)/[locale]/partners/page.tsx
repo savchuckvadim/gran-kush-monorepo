@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 
 import { PartnerBrief } from "@/modules/legal/partner-brief";
-import { PARTNER_BRIEF } from "@/modules/legal/partner-content";
+import { PARTNER_BRIEF, PARTNER_BRIEF_SITE } from "@/modules/legal/partner-content";
 import { DEFAULT_LOCALE, isLocale } from "@/modules/shared/config/locales";
+import { SITE } from "@/modules/shared/config/site";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -15,6 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PartnersPage({ params }: Props) {
+    if (SITE !== PARTNER_BRIEF_SITE) notFound();
     const { locale } = await params;
     const lang = isLocale(locale) ? locale : DEFAULT_LOCALE;
     setRequestLocale(lang);

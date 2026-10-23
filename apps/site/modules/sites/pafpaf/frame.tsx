@@ -3,8 +3,10 @@ import { getTranslations } from "next-intl/server";
 
 import type { ReactNode } from "react";
 
+import { HOME_SECTIONS } from "@/modules/shared/config/home-sections";
 import type { Locale } from "@/modules/shared/config/locales";
 import { crmHref, ROUTES } from "@/modules/shared/config/routes";
+import { BRAND, SITE } from "@/modules/shared/config/site";
 import type { Site } from "@/payload-types";
 
 import { GlassLight, Reveal } from "./ui/effects";
@@ -34,18 +36,12 @@ export const SiteFrame = async ({ locale, site, current, children }: SiteFramePr
             href: home,
             spy: current === "home" ? "top" : undefined,
         },
-        {
-            id: "features",
-            label: t("nav.features"),
-            href: `${home}#funciones`,
-            spy: current === "home" ? "funciones" : undefined,
-        },
-        {
-            id: "privacy",
-            label: t("nav.privacy"),
-            href: `${home}#privacidad`,
-            spy: current === "home" ? "privacidad" : undefined,
-        },
+        ...HOME_SECTIONS[SITE].map((section) => ({
+            id: section.id,
+            label: t(`nav.${section.label}`),
+            href: `${home}#${section.anchor}`,
+            spy: current === "home" ? section.anchor : undefined,
+        })),
         { id: "pricing", label: t("nav.pricing"), href: ROUTES.page(locale, "precios") },
     ];
     const labels = { language: t("a11y.language"), mode: t("a11y.mode") };
@@ -76,7 +72,7 @@ export const SiteFrame = async ({ locale, site, current, children }: SiteFramePr
                 <div className="foot__row">
                     <NextLink className="logo" href={home}>
                         <LogoMark />
-                        <span>paf paf</span>
+                        <span>{BRAND.wordmark}</span>
                     </NextLink>
                     <div className="foot__links">
                         {items.slice(1).map((item) => (
@@ -103,7 +99,13 @@ export const SiteFrame = async ({ locale, site, current, children }: SiteFramePr
                     </div>
                 </div>
                 <div className="foot__row">
-                    <span>{t("footer.rights", { year: new Date().getFullYear() })}</span>
+                    <span>
+                        {t("footer.rights", {
+                            year: new Date().getFullYear(),
+                            brand: BRAND.name,
+                            domain: BRAND.domains.site,
+                        })}
+                    </span>
                     <LangList />
                 </div>
             </footer>

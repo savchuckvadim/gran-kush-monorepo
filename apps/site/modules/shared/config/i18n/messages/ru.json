@@ -3,6 +3,7 @@
         "home": "Главная",
         "features": "Функции",
         "privacy": "Приватность",
+        "soon": "Скоро",
         "pricing": "Цены",
         "crm": "Войти",
         "register": "Начать",
@@ -16,7 +17,11 @@
         "main": "Основное"
     },
     "meta": {
-        "tagline": "CRM для социальных клубов и ассоциаций"
+        "tagline": {
+            "pafpaf": "CRM для социальных клубов и ассоциаций",
+            "inkspace": "CRM для тату-студий",
+            "plisplas": "CRM для салонов красоты"
+        }
     },
     "hero": {
         "hint": "Коснитесь дыма"
@@ -71,7 +76,7 @@
         "soonTry": "Попробовать бесплатно"
     },
     "footer": {
-        "rights": "© {year} PafPaf · paf-paf.app",
+        "rights": "© {year} {brand} · {domain}",
         "legal": {
             "aviso-legal": "Правовая информация",
             "privacidad": "Конфиденциальность",

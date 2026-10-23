@@ -1,0 +1,14 @@
+/* Ink Space: deep indigo and cyan ink over the PafPaf base (../pafpaf/liquid.css). */
+
+/* `:root:root` outranks the base whatever order the bundler puts the files in */
+:root:root {
+    --a1: #6d6bff;
+    --a2: #22b8f0;
+    --a3: #5ef0e6;
+}
+
+:root:root[data-mode="light"] {
+    --a1: #4338ca;
+    --a2: #0284c7;
+    --a3: #0d9488;
+}

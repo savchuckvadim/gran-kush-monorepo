@@ -1,10 +1,7 @@
+// PafPaf starter content: clubs. Other installations: content-<brand>.ts, picked in site-content.ts.
 import type { Locale } from "../../modules/shared/config/locales";
-import type { Page, Plan } from "../../payload-types";
 
-type L = Record<Locale, string>;
-type Block = NonNullable<Page["layout"]>[number];
-
-const pick = (text: L, locale: Locale) => text[locale];
+import { type Block, type FeatureIcon, type L, type PageSeed, pick, type PlanSeed } from "./seed-types";
 
 const TRY: L = { es: "Probar gratis", ru: "Попробовать бесплатно", en: "Try it free" };
 
@@ -26,7 +23,7 @@ const FINAL = (locale: Locale): Block => ({
     cta: { label: pick(TRY, locale), href: "crm:register" },
 });
 
-const FEATURES: { id: string; icon: NonNullable<Extract<Block, { blockType: "featureGrid" }>["items"]>[number]["icon"]; title: L; text: L }[] = [
+const FEATURES: { id: string; icon: FeatureIcon; title: L; text: L }[] = [
     {
         id: "f-signature",
         icon: "users",
@@ -324,7 +321,7 @@ export const pricingLayout = (locale: Locale): Block[] => [
     FINAL(locale),
 ];
 
-export const PAGES: { slug: string; title: L; seoTitle: L; seoDescription: L; layout: (locale: Locale) => Block[] }[] = [
+export const PAGES: PageSeed[] = [
     {
         slug: "home",
         title: { es: "Inicio", ru: "Главная", en: "Home" },
@@ -352,11 +349,6 @@ export const PAGES: { slug: string; title: L; seoTitle: L; seoDescription: L; la
         layout: pricingLayout,
     },
 ];
-
-type PlanSeed = Omit<Plan, "id" | "createdAt" | "updatedAt" | "forWhom" | "features"> & {
-    forWhom: L;
-    features: { id: string; text: L }[];
-};
 
 export const PLANS: PlanSeed[] = [
     {

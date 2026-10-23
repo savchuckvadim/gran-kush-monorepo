@@ -1,10 +1,12 @@
 import type { Payload } from "payload";
 
 import { DEFAULT_LOCALE, LOCALES } from "../../modules/shared/config/locales";
+import { SITE } from "../../modules/shared/config/site";
 
-import { PAGES, PLANS, SITE_DOC } from "./content";
+import { SITE_CONTENT } from "./site-content";
 
-// Idempotent: run it again after editing content.ts and the documents are updated in place.
+// Idempotent: run it again after editing the content and the documents are updated in place.
+// Seeds the site of this build (NEXT_PUBLIC_SITE): each installation has its own database.
 // The default locale goes first so required fields exist before the translations.
 const ORDER = [DEFAULT_LOCALE, ...LOCALES.filter((locale) => locale !== DEFAULT_LOCALE)];
 
@@ -24,6 +26,12 @@ const scopeIds = <T>(value: T, prefix: string): T => {
 };
 
 export async function seedContent(payload: Payload): Promise<void> {
+    const content = SITE_CONTENT[SITE];
+    if (!content) {
+        payload.logger.info(`Seed skipped: no starter content for site ${SITE}`);
+        return;
+    }
+    const { PAGES, PLANS, SITE_DOC } = content;
     const siteFound = await payload.find({
         collection: "sites",
         where: { code: { equals: SITE_DOC.code } },

@@ -55,13 +55,13 @@
 
 ## A. Ядро вертикалей — `feat/verticals-core`
 
-### TASK-750: тип портала из бренда инсталляции `[ ]` P0
+### TASK-750: тип портала из бренда инсталляции `[~]` P0
 
-- [ ] `ClubFoundingService.found()` → `provisionPortal(portalId, brand.portalType)` (конфиг TASK-787);
-      переименовать в `PortalFoundingService`; выбора ниши при регистрации нет
+- [x] `ClubFoundingService.found()` создаёт портал с `brand.portalType` (`BrandService`, 2026-10-23); выбора ниши
+      при регистрации нет. Переименование в `PortalFoundingService` — не сделано
 - [ ] `portal-info.dto` и `me` отдают `type`; в CRM `useBrand()` / `usePortalType()`
 - [ ] `GlobalEntityTemplate.applicablePortalTypes` и `modulesJson` начинают читаться
-- [ ] e2e: провижининг для каждого бренда (матрица `BRAND`)
+- [x] e2e: `brand-installation.e2e-spec.ts` — PafPaf и Ink Space (тип портала, модули, биллинг)
 
 ### TASK-751: словарь вертикали в i18n `[ ]` P0
 
@@ -72,9 +72,12 @@
       нейтральные (клиент, организация)
 - [ ] Письма (`apps/api` mail-шаблоны) без «клуб»: `packages/brand` из TASK-531 + словарь по типу
 
-### TASK-752: модули по типу портала `[ ]` P0
+### TASK-752: модули по типу портала `[~]` P0
 
-- [ ] `brand.modules[]` → `portal-info`; `crm-navigation.hook.tsx` и `settings-hub-page.tsx` фильтруют
+- [x] 2026-10-23: корневые модули бренда `presence`, `club-policy`, `billing` (`packages/brand`); CRM знает бренд
+      из `NEXT_PUBLIC_BRAND` (не из `portal-info`), меню, настройки, карточка участника и кабинет прячут
+      разделы, прямые адреса — 404; API — `@BrandModuleRoutes` (404 раньше гвардов сессии)
+- [ ] `booking`, `services` для студий — вместе с TASK-754/755. Исходный план: `brand.modules[]` → `portal-info`; `crm-navigation.hook.tsx` и `settings-hub-page.tsx` фильтруют
       по модулям: `attendance`/`presence` — club; `booking`, `services` — студии; `orders`, `catalog`,
       `finance`, `employees`, `clients` — все
 - [ ] Кабинет: разделы по модулям (QR/присутствие — club; «мои записи» — студии)
@@ -156,12 +159,11 @@
       каждом проекте Dokploy (TASK-788) со своей БД `site`, томом media и Payload `/admin`
 - [ ] `PAYLOAD_SEED_IF_EMPTY` сидит свой бренд
 
-### TASK-761: единый список сайтов, без Nagual `[ ]` P0
+### TASK-761: единый список сайтов, без Nagual `[x]` P0 — 2026-10-23
 
-- [ ] `SITES` в одном месте (`modules/shared/config/site.ts`), `next.config.ts` импортирует; `SITE_OPTIONS`
-      и enum в Payload из него; миграция: `tattoo`, `beauty` в `enum_pages_site`/`enum_sites_code`, `nagual` —
-      удалить (данных нет)
-- [ ] Удалить `modules/sites/nagual`, `nagual.club` из `PRODUCTION_URLS`; `design/sites/nagual` — референс
+- [x] `SITES` = коды брендов (`@workspace/brand`), `next.config.ts` и `SITE_OPTIONS` из него; миграция
+      `20261023_161732_brand_sites`: `inkspace`, `plisplas` в `enum_pages_site`/`enum_sites_code`, `nagual` удалён
+- [x] `modules/sites/nagual` удалён; домены, имя и знак сайта — из бренда; `design/sites/nagual` — референс
 
 ### TASK-762: тема = база PafPaf + палитра + эффект `[ ]` P0
 
@@ -387,9 +389,14 @@ outbox, relay, потребители, плюс realtime-шлюз socket.io (TAS
 
 ## E. Инсталляция на бренд — `feat/brand-installations`
 
-### TASK-787: конфиг бренда `packages/brand` `[ ]` P0 (поглощает TASK-531)
+### TASK-787: конфиг бренда `packages/brand` `[~]` P0 (поглощает TASK-531)
 
-- [ ] `packages/brand/src/{pafpaf,plisplas,inkspace}.ts`: имя, домены (site/crm/club/api), скин по
+Сделано 2026-10-23 (`feat/brand-installations`): пакет с конфигами трёх брендов, `getBrand` падает на
+неизвестном коде, `installations.json` — домены, порядок деплоя, серверные сервисы. API — `BRAND`, CRM,
+админка и сайт — бренд **при сборке** (`NEXT_PUBLIC_BRAND` / `NEXT_PUBLIC_SITE`). Открыто: бренд в рантайме
+(один образ CRM/admin на всех), реквизиты зонтика April IT.
+
+- [x] `packages/brand/src/brands/{pafpaf,plisplas,inkspace}.ts`: имя, домены (site/crm/club/api), скин по
       умолчанию, логотипы, `portalType`, `modules[]`, ключ словаря i18n, отправитель писем, реквизиты
       зонтика; схема валидации, `getBrand(process.env.BRAND)` падает на старте при ошибке
 - [ ] Рутовые фичи: PafPaf — `presence`, `club-policy`, `membership-consent`; Ink Space — `booking`,
@@ -399,7 +406,10 @@ outbox, relay, потребители, плюс realtime-шлюз socket.io (TAS
       — только одинаковое для всех; один образ CRM и один admin на три инсталляции
 - [ ] Сайт — бренд при сборке (тема через alias), `NEXT_PUBLIC_SITE` = бренд
 
-### TASK-788: инфра трёх инсталляций `[ ]` P0
+### TASK-788: инфра трёх инсталляций `[~]` P0
+
+Сделано 2026-10-23: `infra/dokploy/templates` → `render.mjs` → `infra/dokploy/<бренд>/{docker-compose.yml,.env.example}`
+(свои Postgres, Redis, секреты; `BRAND` в compose). Руками — проекты в Dokploy, домены, OAuth, боты, SMTP.
 
 - [ ] Dokploy: проекты `pafpaf`, `plisplas`, `inkspace` — в каждом api, crm, admin, site, postgres, redis;
       Traefik общий, маршрутизация по хосту; лимиты памяти в compose
@@ -415,13 +425,16 @@ outbox, relay, потребители, плюс realtime-шлюз socket.io (TAS
 - [ ] Ресурсы: замерить `docker stats`; ориентир 1,5–2 GB RAM на бренд → 8 GB впритык, 16 GB спокойно
 - [ ] Runbook переезда бренда на другой сервер: pg_dump/restore, тома media, DNS
 
-### TASK-789: релиз и бэкапы трёх инсталляций `[ ]` P0 (расширяет TASK-551)
+### TASK-789: релиз и бэкапы трёх инсталляций `[~]` P0 (расширяет TASK-551)
 
-- [ ] CI: образы api ×1, crm ×1, admin ×1, site ×3; один тег релиза → деплой по очереди Ink Space →
+- [x] 2026-10-23: CI собирает api ×1 и crm/admin/site на каждый выпущенный бренд (теги `<бренд>-latest`,
+      `<бренд>-sha-*`, матрица `infra/dokploy/ci-matrix.mjs`); деплой по очереди с ожиданием `/health`
+      своего бренда и коммита (`infra/dokploy/deploy.mjs`), секреты `DOKPLOY_COMPOSE_ID_<БРЕНД>`
+- [ ] Исходный план: образы api ×1, crm ×1, admin ×1, site ×3; один тег релиза → деплой по очереди Ink Space →
       Plis Plas → PafPaf, стоп при красном `/health`; миграции применяет каждый API на старте
 - [ ] Бэкапы всех баз (api и site каждого бренда) offsite по расписанию, раздельные папки, проверенное
       восстановление на каждую
-- [ ] Версия в `/health` и в футере CRM — видно, что все три на одной версии
+- [~] Версия в `/health` — есть (`APP_VERSION`); в футере CRM — нет
 
 ### TASK-790: PafPaf бесплатно, Stripe только у чистых брендов `[~]` P0
 
@@ -431,8 +444,9 @@ Stripe запрещает «dispensarios de cannabis y negocios relacionados»
 
 - [x] Решение Вадима 2026-10-19: Stripe — только Plis Plas и Ink Space; PafPaf пока бесплатно целиком —
       ради PR и ссылок (бейдж «Gestionado con PafPaf», TASK-774)
-- [ ] PafPaf: биллинг выключен конфигом бренда (`modules` без `billing`), гард 402 не срабатывает, на сайте
-      вместо тарифов — «Gratis»; `NEXT_PUBLIC_PLANS_PURCHASABLE` не нужен
+- [x] PafPaf: биллинг выключен конфигом бренда (`modules` без `billing`): нет гарда 402, страницы подписки,
+      крона сроков и закрытия заказов кабинета по подписке (2026-10-23)
+- [ ] Сайт PafPaf: «Gratis» вместо тарифов — решение Вадима 2026-10-23: пока не трогать
 - [ ] Задачу «Подключить Stripe и проверить оплату за 5 €» выполнить на Plis Plas / Ink Space
 
 ### TASK-791: участник PafPaf без почты — только Telegram `[ ]` P1
@@ -498,26 +512,31 @@ PWA не делаем (решение Вадима 2026-10-19). База — н�
       Telegram-боты — позже
 - [ ] GitHub: секрет `DOKPLOY_COMPOSE_ID_INKSPACE` (и переименовать текущий в `…_PAFPAF`)
 
-### Шаг 1 — `feat/brand-installations` (TASK-787/788 минимум, A750/752 минимум; 3–4 дня)
+### Шаг 1 — `feat/brand-installations` (TASK-787/788 минимум, A750/752 минимум; 3–4 дня) — код готов 2026-10-23
 
-- [ ] `packages/brand`: `brands/{pafpaf,inkspace,plisplas}.ts` + `getBrand(code)` с валидацией; поля:
+Отличия от плана: кабинет и CRM без `BrandProvider` — бренд константой при сборке; образы различаются тегом,
+а не именем пакета (`crm:<бренд>-latest`: новый пакет в ghcr мог бы оказаться приватным); `infra/brands.json` →
+`packages/brand/src/installations.json`; тема Ink Space — обёртка над темой PafPaf со своей палитрой, сид
+Ink Space — главная и цены с тарифами-заглушками «gratis durante la beta». Открыто: проверки как в CI и слияние.
+
+- [x] `packages/brand`: `brands/{pafpaf,inkspace,plisplas}.ts` + `getBrand(code)` с валидацией; поля:
       `code`, `name`, `domains` (site/crm/cabinet/api), `portalType`, `modules[]`, `defaultSkin`
       (pafpaf → `pafpaf`, inkspace → `black`, plisplas → `coqueta` — скины уже есть), `mail.fromName`,
       `legal` (April IT); `modules` сейчас: все три — `crm`, `catalog`, `orders`, `finance`, `employees`;
       PafPaf дополнительно `presence`, `club-policy`
-- [ ] API: `BrandModule` (`BRAND` из env, падает на старте при неизвестном); `ClubFoundingService` →
+- [x] API: `BrandModule` (`BRAND` из env, падает на старте при неизвестном); `ClubFoundingService` →
       `provisionPortal(brand.portalType)` и переименование в `PortalFoundingService`; `APP_NAME`,
       `SMTP_FROM_NAME` — из бренда; `/health` → `{ ok, brand, version }`; гард модуля: маршруты
       `presence`/`qr-codes`/`club-policy` отвечают 404, если модуля нет
-- [ ] CRM/admin: `NEXT_PUBLIC_BRAND` → `BrandProvider`; имя, логотип (`brand-mark.ts`), `DEFAULT_SKIN`,
+- [x] CRM/admin: `NEXT_PUBLIC_BRAND` → `BrandProvider`; имя, логотип (`brand-mark.ts`), `DEFAULT_SKIN`,
       `app-meta.ts`, manifest/иконки — из бренда; навигация и вкладки настроек фильтруют по
       `brand.modules` (`crm-navigation.hook.tsx`, `settings-hub-page.tsx`); кабинет студий — хост `app.`
       (`club-routes.ts`: хост кабинета из `NEXT_PUBLIC_MEMBER_URL`, не литерал `club.`)
-- [ ] Сайт: `NEXT_PUBLIC_SITE=inkspace`; `SITES` в одном месте + enum-миграция Payload (`inkspace`,
+- [x] Сайт: `NEXT_PUBLIC_SITE=inkspace`; `SITES` в одном месте + enum-миграция Payload (`inkspace`,
       `plisplas`, убрать `nagual`) — TASK-761; `modules/sites/inkspace/theme.ts` = копия темы PafPaf с
       чёрной палитрой и логотипом Ink Space (эффект чернил — TASK-762, позже); сид `home` + `precios` для
       Ink Space es/ru/en, честный: «agenda y reservas — próximamente», без обещаний
-- [ ] Инфра: `infra/dokploy/docker-compose.template.yml` с плейсхолдером `__BRAND__` + скрипт
+- [x] Инфра: `infra/dokploy/docker-compose.template.yml` с плейсхолдером `__BRAND__` + скрипт
       `infra/dokploy/render.mjs` → `infra/dokploy/{pafpaf,inkspace,plisplas}/docker-compose.yml`
       (имена сервисов нельзя брать из env — они ключи YAML, а на общей `dokploy-network` должны быть
       уникальны); `.env.example` на бренд; `next.Dockerfile` принимает `NEXT_PUBLIC_BRAND`,

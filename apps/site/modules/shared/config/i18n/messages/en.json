@@ -3,6 +3,7 @@
         "home": "Home",
         "features": "Features",
         "privacy": "Privacy",
+        "soon": "Coming soon",
         "pricing": "Pricing",
         "crm": "Sign in",
         "register": "Get started",
@@ -16,7 +17,11 @@
         "main": "Main"
     },
     "meta": {
-        "tagline": "The CRM for social clubs and associations"
+        "tagline": {
+            "pafpaf": "The CRM for social clubs and associations",
+            "inkspace": "The CRM for tattoo studios",
+            "plisplas": "The CRM for beauty salons"
+        }
     },
     "hero": {
         "hint": "Touch the smoke"
@@ -71,7 +76,7 @@
         "soonTry": "Try it free"
     },
     "footer": {
-        "rights": "© {year} PafPaf · paf-paf.app",
+        "rights": "© {year} {brand} · {domain}",
         "legal": {
             "aviso-legal": "Legal notice",
             "privacidad": "Privacy",

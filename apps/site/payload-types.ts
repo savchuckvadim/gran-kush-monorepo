@@ -130,7 +130,7 @@ export interface UserAuthOperations {
 export interface Page {
   id: number;
   title: string;
-  site: 'pafpaf' | 'nagual';
+  site: 'pafpaf' | 'inkspace' | 'plisplas';
   /**
    * home — the main page; precios — /es/precios
    */
@@ -400,7 +400,7 @@ export interface Plan {
  */
 export interface Site {
   id: number;
-  code: 'pafpaf' | 'nagual';
+  code: 'pafpaf' | 'inkspace' | 'plisplas';
   name: string;
   domain?: string | null;
   contacts?: {

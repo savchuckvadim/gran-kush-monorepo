@@ -1,20 +1,23 @@
-# Продуктовые сайты PafPaf и Nagual (`apps/site`)
+# Продуктовые сайты PafPaf, Ink Space и Plis Plas (`apps/site`)
 
-Сайты, которые продают CRM, — отдельно от `apps/web` (кабинет участника и сайт клуба).
-Один код, своя сборка на каждый сайт, общая админка и общая база.
+Сайты, которые продают CRM. Один код, своя сборка, своя база и своя админка на каждую инсталляцию
+(`packages/brand`, TASK-793). Nagual — только тема CRM, сайта у него нет (TASK-761).
 
-| | PafPaf | Nagual |
-|---|---|---|
-| Сборка | `NEXT_PUBLIC_SITE=pafpaf` | `NEXT_PUBLIC_SITE=nagual` |
-| Домен | `paf-paf.app` | `nagual.club` |
-| Дизайн | «жидкий»: живой WebGL-дым под страницей, жидкое стекло, жидкие компоненты | кодекс-ритуал (пока заглушка, перенос — следующий шаг) |
-| Прототип | `design/sites/pafpaf-liquid/` | `design/sites/nagual/` |
+| | PafPaf | Ink Space | Plis Plas |
+|---|---|---|---|
+| Сборка | `NEXT_PUBLIC_SITE=pafpaf` | `NEXT_PUBLIC_SITE=inkspace` | `NEXT_PUBLIC_SITE=plisplas` |
+| Домен | `paf-paf.app` | `ink.space` | не куплен |
+| Дизайн | «жидкий»: живой WebGL-дым, жидкое стекло, жидкие компоненты | тема PafPaf с палитрой чернил (эффект чернил — TASK-762) | тема PafPaf с розовой палитрой |
+| Стартовый контент | `payload/seed/content.ts` | `payload/seed/content-inkspace.ts` | нет |
+
+Имя, знак, домены и надпись логотипа — из бренда; меню главной — `modules/shared/config/home-sections.ts`;
+юридические тексты написаны для PafPaf, другие инсталляции получают своё имя и домен (`legal/content/index.ts`).
 
 ## Стек и решения
 
 - **Стек.** Next 16 + Payload 3 в одном приложении:
   - сайт — `/{locale}/…`;
-  - админка — `/admin`, есть только в сборке PafPaf;
+  - админка — `/admin`, своя у каждой инсталляции;
   - REST API Payload — `/api`.
 - **Языки** — `es` (по умолчанию), `ru`, `en`:
   - тексты интерфейса — next-intl, `modules/shared/config/i18n/messages`;

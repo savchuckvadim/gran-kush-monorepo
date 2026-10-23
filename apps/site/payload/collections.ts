@@ -1,6 +1,8 @@
 import path from "path";
 import type { CollectionConfig } from "payload";
 
+import { SITE } from "@/modules/shared/config/site";
+
 import { anyone, authenticated } from "./access";
 import { PAGE_BLOCKS } from "./blocks";
 import { SITE_OPTIONS } from "./fields";
@@ -68,7 +70,8 @@ export const Pages: CollectionConfig = {
                     name: "site",
                     type: "select",
                     required: true,
-                    defaultValue: "pafpaf",
+                    // the installation of this build: its own database holds only its pages
+                    defaultValue: () => SITE,
                     options: SITE_OPTIONS,
                 },
                 {

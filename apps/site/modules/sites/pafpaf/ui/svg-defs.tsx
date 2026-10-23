@@ -1,3 +1,5 @@
+import { BRAND } from "@/modules/shared/config/site";
+
 // Filters for goo (liquid drops) and refraction (liquid glass), referenced from CSS.
 export const SvgDefs = () => (
     <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
@@ -80,23 +82,37 @@ export const SvgDefs = () => (
                 <feBlend in="r2" in2="g" mode="screen" result="rg" />
                 <feBlend in="rg" in2="b2" mode="screen" />
             </filter>
+            {/* the aurora of the theme (--a1…--a3 in its css), the mark in the brand's own gradient */}
             <linearGradient id="auroraV" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="#8f7bff" />
-                <stop offset=".55" stopColor="#ff6fae" />
-                <stop offset="1" stopColor="#ffbf5a" />
+                <stop offset="0" style={{ stopColor: "var(--a1)" }} />
+                <stop offset=".55" style={{ stopColor: "var(--a2)" }} />
+                <stop offset="1" style={{ stopColor: "var(--a3)" }} />
             </linearGradient>
             <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="#7b61ff" />
-                <stop offset=".55" stopColor="#ff5fa2" />
-                <stop offset="1" stopColor="#ffb340" />
+                <stop offset="0" stopColor={BRAND.palette[0]} />
+                <stop offset=".55" stopColor={BRAND.palette[1]} />
+                <stop offset="1" stopColor={BRAND.palette[2]} />
             </linearGradient>
         </defs>
     </svg>
 );
 
+/** The installation's mark (PafPaf — two puffs) in the gradient of `SvgDefs`. */
 export const LogoMark = () => (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-        <circle cx="9" cy="13.5" r="6.4" fill="url(#logoGrad)" />
-        <circle cx="16.6" cy="8" r="4.3" fill="url(#logoGrad)" opacity=".82" />
+        {BRAND.mark.shapes.map((shape, index) =>
+            shape.kind === "circle" ? (
+                <circle
+                    key={index}
+                    cx={shape.cx}
+                    cy={shape.cy}
+                    r={shape.r}
+                    fill="url(#logoGrad)"
+                    opacity={shape.opacity}
+                />
+            ) : (
+                <path key={index} d={shape.d} fill="url(#logoGrad)" opacity={shape.opacity} />
+            )
+        )}
     </svg>
 );

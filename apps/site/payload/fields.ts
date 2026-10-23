@@ -1,9 +1,11 @@
 import type { Field, GroupField, TextareaField, TextField } from "payload";
 
-export const SITE_OPTIONS = [
-    { label: "PafPaf", value: "pafpaf" },
-    { label: "Nagual", value: "nagual" },
-];
+import { BRANDS } from "@workspace/brand";
+
+import { SITES } from "@/modules/shared/config/site";
+
+/** Product sites = installations (packages/brand). Each installation has its own database. */
+export const SITE_OPTIONS = SITES.map((code) => ({ label: BRANDS[code].name, value: code }));
 
 export const eyebrow: TextField = {
     name: "eyebrow",

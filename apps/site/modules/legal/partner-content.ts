@@ -1,4 +1,8 @@
 import type { Locale } from "@/modules/shared/config/locales";
+import type { SiteCode } from "@/modules/shared/config/site";
+
+/** The brief tells partners about PafPaf: other installations have no partners page. */
+export const PARTNER_BRIEF_SITE: SiteCode = "pafpaf";
 
 /**
  * Inline text: `{done}`, `{wip}`, `{plan}` render a status pill with the default label,
