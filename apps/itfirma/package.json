@@ -1,0 +1,39 @@
+{
+    "name": "itfirma",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "next dev -p 5003",
+        "build": "next build",
+        "start": "next start -p 5003",
+        "lint": "eslint .",
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@workspace/brand": "workspace:*",
+        "lucide-react": "^0.563.0",
+        "next": "16.4.2",
+        "next-intl": "^4.8.3",
+        "nodemailer": "^10.0.0",
+        "react": "19.2.6",
+        "react-dom": "19.2.6",
+        "server-only": "^0.0.1",
+        "zod": "^3.25.76"
+    },
+    "devDependencies": {
+        "@tailwindcss/postcss": "^4.1.18",
+        "@types/node": "22.19.9",
+        "@types/nodemailer": "^6.4.17",
+        "@types/react": "19.2.14",
+        "@types/react-dom": "19.2.3",
+        "@workspace/eslint-config": "workspace:*",
+        "@workspace/typescript-config": "workspace:*",
+        "eslint": "^9.16.0",
+        "tailwindcss": "^4.1.18",
+        "typescript": "5.9.3"
+    },
+    "engines": {
+        "node": ">=20.9.0"
+    }
+}

@@ -1,0 +1,216 @@
+{
+    "meta": {
+        "title": "Desenvolupament de programari, integracions i Bitrix24",
+        "description": "Estudi de desenvolupament a Espanya: webs, aplicacions web i mòbils, integracions, agents d'IA, implantació completa de Bitrix24 i formació en vibe coding."
+    },
+    "nav": {
+        "services": "Serveis",
+        "products": "Productes",
+        "process": "Procés",
+        "about": "Estudi",
+        "contact": "Contacte",
+        "language": "Idioma"
+    },
+    "skins": {
+        "label": "Tema",
+        "black": "Black",
+        "cristal": "Cristal",
+        "sociopath": "Sociopath",
+        "coqueta": "Coqueta",
+        "toDark": "Mode fosc",
+        "toLight": "Mode clar"
+    },
+    "hero": {
+        "badge": "Acceptem nous projectes",
+        "titleStart": "Dissenyem i llancem",
+        "titleEnd": "per al teu negoci",
+        "words": {
+            "web": "webs i botigues",
+            "mobile": "apps mòbils",
+            "crm": "CRM a mida",
+            "ai": "agents d'IA",
+            "bitrix": "Bitrix24 clau en mà"
+        },
+        "lead": "Estudi de desenvolupament a Espanya. De la idea a producció: arquitectura, disseny, codi, integracions i suport, amb un sol equip.",
+        "ctaPrimary": "Demanar pressupost",
+        "ctaSecondary": "Veure serveis"
+    },
+    "services": {
+        "eyebrow": "01 · Serveis",
+        "title": "Què fem",
+        "lead": "Projectes complets o una part concreta. Treballem amb el mateix stack amb què construïm els nostres propis productes.",
+        "items": {
+            "web": {
+                "title": "Webs i landing pages",
+                "text": "Llocs ràpids i multilingües amb SEO tècnic, panell de continguts i formularis que arriben directament al teu CRM.",
+                "stack": "Next.js · CMS · SEO"
+            },
+            "apps": {
+                "title": "Aplicacions web i SaaS",
+                "text": "Panells, àrees de client, CRM a mida i productes SaaS multiempresa, del prototip a producció.",
+                "stack": "React · NestJS · PostgreSQL"
+            },
+            "mobile": {
+                "title": "Apps mòbils",
+                "text": "Una base de codi per a iOS i Android: accés, pagaments, notificacions i publicació a les botigues.",
+                "stack": "React Native · Expo"
+            },
+            "bitrix": {
+                "title": "Bitrix24 clau en mà",
+                "text": "Implantació completa: embuts, camps, automatitzacions, telefonia, informes i formació de l'equip. Apps pròpies per al portal.",
+                "stack": "REST API · Apps · Robots"
+            },
+            "integrations": {
+                "title": "Integracions",
+                "text": "Connectem CRM, web, telefonia, pagaments, comptabilitat i missatgeria perquè ningú copiï dades a mà.",
+                "stack": "REST · Webhooks · Cues"
+            },
+            "ai": {
+                "title": "Agents d'IA",
+                "text": "Assistents que llegeixen el CRM, resumeixen trucades, omplen informes i responen clients, integrats amb Bitrix24 i els teus sistemes.",
+                "stack": "Claude · OpenAI · RAG"
+            },
+            "training": {
+                "title": "Vibe coding per a equips",
+                "text": "Ensenyem el teu equip a crear eines internes amb IA: flux de treball, bones pràctiques i revisió del codi.",
+                "stack": "Claude Code · Tallers"
+            },
+            "devops": {
+                "title": "Infraestructura i suport",
+                "text": "Servidors, desplegament automàtic, còpies de seguretat i monitoratge. Continuem al teu costat després del llançament.",
+                "stack": "Docker · CI/CD · Linux"
+            }
+        }
+    },
+    "products": {
+        "eyebrow": "02 · Productes",
+        "title": "Productes propis",
+        "lead": "Desenvolupem i mantenim el nostre propi programari. El que oferim als clients, ho fem servir cada dia.",
+        "items": {
+            "inkspace": {
+                "kind": "SaaS · estudis de tatuatge",
+                "name": "Ink Space",
+                "text": "CRM i agenda per a estudis de tatuatge: cites, clients, consentiments i àrea del client.",
+                "status": "Properament"
+            },
+            "plisplas": {
+                "kind": "SaaS · bellesa",
+                "name": "Plis Plas",
+                "text": "CRM per a salons de bellesa i ungles: reserves, historial de clients i equip.",
+                "status": "Properament"
+            },
+            "bitrix": {
+                "kind": "Bitrix24 · vendes B2B",
+                "name": "Automatització de vendes",
+                "text": "Apps per a Bitrix24 que guien la venda activa B2B: un informe després de cada trucada, embut i tasques automàtics, KPI de l'equip. Funcionen en molts portals alhora.",
+                "status": "A petició"
+            }
+        }
+    },
+    "process": {
+        "eyebrow": "03 · Procés",
+        "title": "Com treballem",
+        "lead": "Sense sorpreses: abast clar, lliuraments freqüents i el codi sempre a nom teu.",
+        "steps": {
+            "talk": {
+                "title": "Conversa",
+                "text": "Ens expliques la tasca; fem preguntes i mirem el que ja tens. Gratis i sense compromís."
+            },
+            "offer": {
+                "title": "Proposta",
+                "text": "Abast, terminis i preu per escrit. Els projectes grans, per etapes amb lliuraments cada una o dues setmanes."
+            },
+            "build": {
+                "title": "Desenvolupament",
+                "text": "Veus l'avenç en un entorn de proves des de la primera setmana. El codi i els accessos són teus."
+            },
+            "launch": {
+                "title": "Llançament i suport",
+                "text": "Publiquem, formem l'equip i continuem amb manteniment i millores."
+            }
+        }
+    },
+    "about": {
+        "eyebrow": "04 · Estudi",
+        "title": "Un estudi petit que lliura productes complets",
+        "text": "IT-firma és l'estudi de desenvolupament de {name}, enginyer de programari full-stack a Espanya. Construïm i operem els nostres propis productes SaaS i, amb la mateixa base tècnica, fem projectes per a clients: de l'arquitectura a la publicació i el suport.",
+        "principles": {
+            "own": {
+                "title": "Productes propis",
+                "text": "Operem el nostre propi programari en producció. Sabem el que costa mantenir-lo després del llançament."
+            },
+            "clean": {
+                "title": "Codi mantenible",
+                "text": "TypeScript estricte, arquitectura neta, proves i CI. Un altre equip pot continuar on ho vam deixar."
+            },
+            "direct": {
+                "title": "Tracte directe",
+                "text": "Parles amb qui dissenya i escriu el codi, sense intermediaris."
+            },
+            "spain": {
+                "title": "A Espanya, per a Europa",
+                "text": "Facturem a Espanya, apliquem el RGPD des del disseny i treballem en remot amb tota Europa."
+            }
+        }
+    },
+    "contact": {
+        "eyebrow": "05 · Contacte",
+        "title": "Explica'ns el teu projecte",
+        "lead": "Responem en un dia laborable amb preguntes o una primera estimació.",
+        "note": "Prefereixes escriure directament? Fes servir el correu. Les dades del formulari només s'utilitzen per respondre't.",
+        "form": {
+            "name": "Nom",
+            "email": "Correu electrònic",
+            "phone": "Telèfon o Telegram",
+            "service": "Servei",
+            "budget": "Pressupost",
+            "message": "Què necessites",
+            "messagePlaceholder": "Què vols construir, per a qui, en quin termini i què existeix ja.",
+            "consent": "He llegit la <link>política de privacitat</link> i accepto el tractament de les meves dades per respondre la sol·licitud.",
+            "invalid": "Revisa els camps: nom, un correu vàlid, un missatge d'almenys 10 caràcters i la casella de privacitat.",
+            "tooMany": "Massa enviaments seguits. Torna-ho a provar d'aquí a uns minuts.",
+            "unavailable": "No hem pogut enviar la sol·licitud. Escriu-nos a {email}.",
+            "submit": "Enviar sol·licitud",
+            "sentTitle": "Sol·licitud enviada",
+            "sentText": "Gràcies. Et responem en un dia laborable.",
+            "services": {
+                "web": "Web o landing",
+                "apps": "Aplicació web o SaaS",
+                "mobile": "App mòbil",
+                "bitrix": "Bitrix24",
+                "integrations": "Integració",
+                "ai": "Agent d'IA",
+                "training": "Formació en vibe coding",
+                "devops": "Infraestructura o suport",
+                "other": "Altres"
+            },
+            "budgets": {
+                "unknown": "Encara no ho sé",
+                "lt3k": "Menys de 3.000 €",
+                "3k-10k": "3.000–10.000 €",
+                "10k-30k": "10.000–30.000 €",
+                "gt30k": "Més de 30.000 €"
+            }
+        }
+    },
+    "footer": {
+        "tagline": "Desenvolupament de programari, integracions i Bitrix24. Des d'Espanya.",
+        "theme": "Tema",
+        "legal": "Legal",
+        "contact": "Contacte",
+        "owner": "IT-firma és el nom comercial de {name}, autònom, NIF {nif}."
+    },
+    "legal": {
+        "updated": "Actualitzat: {date}",
+        "titles": {
+            "aviso-legal": "Avís legal",
+            "privacidad": "Privacitat",
+            "cookies": "Galetes"
+        }
+    },
+    "notFound": {
+        "title": "Pàgina no trobada",
+        "text": "L'adreça no existeix o ha canviat.",
+        "home": "Anar a l'inici"
+    }
+}

@@ -1,0 +1,19 @@
+{
+    "$schema": "https://turbo.build/schema.json",
+    "extends": ["//"],
+    "tasks": {
+        "build": {
+            "env": [
+                "NEXT_PUBLIC_SERVER_URL",
+                "MAIL_HOST",
+                "MAIL_PORT",
+                "MAIL_USER",
+                "MAIL_PASS",
+                "MAIL_FROM",
+                "LEAD_TO",
+                "TELEGRAM_BOT_TOKEN",
+                "TELEGRAM_CHAT_ID"
+            ]
+        }
+    }
+}

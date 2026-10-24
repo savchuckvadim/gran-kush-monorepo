@@ -9,7 +9,8 @@ gran-kush/
 ├── apps/
 │   ├── api/          # NestJS 11 backend (port 3000)
 │   ├── crm/          # Next.js 16: CRM for employees + member cabinet on club. (port 5000)
-│   ├── site/         # Next.js 16 + Payload 3: product sites PafPaf / Nagual (port 5002)
+│   ├── site/         # Next.js 16 + Payload 3: product sites PafPaf / Ink Space / Plis Plas (port 5002)
+│   ├── itfirma/      # Next.js 16: IT-firma studio site, services + lead form, no CMS (port 5003)
 │   └── admin/        # Admin app
 ├── packages/
 │   ├── api-client/   # OpenAPI-generated API client (@workspace/api-client)
@@ -47,6 +48,8 @@ pnpm --filter site dev          # Next.js + Payload, port 5002 (documentation/si
 pnpm --filter site seed         # PafPaf content in es/ru/en
 pnpm --filter site generate     # payload-types.ts + admin import map
 pnpm --filter site migrate:create <name>   # after changing collections/blocks; production applies it on start
+
+pnpm --filter itfirma dev       # studio site, port 5003, es/en/ru/ca (documentation/site/ITFIRMA.md)
 ```
 
 ### Database (from apps/api)

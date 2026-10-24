@@ -1,0 +1,216 @@
+{
+    "meta": {
+        "title": "Desarrollo de software, integraciones y Bitrix24",
+        "description": "Estudio de desarrollo en España: webs, aplicaciones web y móviles, integraciones, agentes de IA, implantación completa de Bitrix24 y formación en vibe coding."
+    },
+    "nav": {
+        "services": "Servicios",
+        "products": "Productos",
+        "process": "Proceso",
+        "about": "Estudio",
+        "contact": "Contacto",
+        "language": "Idioma"
+    },
+    "skins": {
+        "label": "Tema",
+        "black": "Black",
+        "cristal": "Cristal",
+        "sociopath": "Sociopath",
+        "coqueta": "Coqueta",
+        "toDark": "Modo oscuro",
+        "toLight": "Modo claro"
+    },
+    "hero": {
+        "badge": "Aceptamos nuevos proyectos",
+        "titleStart": "Diseñamos y lanzamos",
+        "titleEnd": "para tu negocio",
+        "words": {
+            "web": "webs y tiendas",
+            "mobile": "apps móviles",
+            "crm": "CRM a medida",
+            "ai": "agentes de IA",
+            "bitrix": "Bitrix24 llave en mano"
+        },
+        "lead": "Estudio de desarrollo en España. De la idea a producción: arquitectura, diseño, código, integraciones y soporte, con un solo equipo.",
+        "ctaPrimary": "Pedir presupuesto",
+        "ctaSecondary": "Ver servicios"
+    },
+    "services": {
+        "eyebrow": "01 · Servicios",
+        "title": "Lo que hacemos",
+        "lead": "Proyectos completos o una parte concreta. Trabajamos con el mismo stack con el que construimos nuestros propios productos.",
+        "items": {
+            "web": {
+                "title": "Webs y landing pages",
+                "text": "Sitios rápidos y multilingües con SEO técnico, panel de contenidos y formularios que llegan directamente a tu CRM.",
+                "stack": "Next.js · CMS · SEO"
+            },
+            "apps": {
+                "title": "Aplicaciones web y SaaS",
+                "text": "Paneles, áreas de cliente, CRM a medida y productos SaaS multiempresa, del prototipo a producción.",
+                "stack": "React · NestJS · PostgreSQL"
+            },
+            "mobile": {
+                "title": "Apps móviles",
+                "text": "Una base de código para iOS y Android: acceso, pagos, notificaciones y publicación en las tiendas.",
+                "stack": "React Native · Expo"
+            },
+            "bitrix": {
+                "title": "Bitrix24 llave en mano",
+                "text": "Implantación completa: embudos, campos, automatizaciones, telefonía, informes y formación del equipo. Apps propias para el portal.",
+                "stack": "REST API · Apps · Robots"
+            },
+            "integrations": {
+                "title": "Integraciones",
+                "text": "Conectamos CRM, web, telefonía, pagos, contabilidad y mensajería para que nadie copie datos a mano.",
+                "stack": "REST · Webhooks · Colas"
+            },
+            "ai": {
+                "title": "Agentes de IA",
+                "text": "Asistentes que leen el CRM, resumen llamadas, rellenan informes y responden a clientes, integrados con Bitrix24 y tus sistemas.",
+                "stack": "Claude · OpenAI · RAG"
+            },
+            "training": {
+                "title": "Vibe coding para equipos",
+                "text": "Enseñamos a tu equipo a crear herramientas internas con IA: flujo de trabajo, buenas prácticas y revisión del código.",
+                "stack": "Claude Code · Talleres"
+            },
+            "devops": {
+                "title": "Infraestructura y soporte",
+                "text": "Servidores, despliegue automático, copias de seguridad y monitorización. Seguimos contigo después del lanzamiento.",
+                "stack": "Docker · CI/CD · Linux"
+            }
+        }
+    },
+    "products": {
+        "eyebrow": "02 · Productos",
+        "title": "Productos propios",
+        "lead": "Desarrollamos y mantenemos nuestro propio software. Lo que ofrecemos a clientes lo usamos cada día.",
+        "items": {
+            "inkspace": {
+                "kind": "SaaS · estudios de tatuaje",
+                "name": "Ink Space",
+                "text": "CRM y agenda para estudios de tatuaje: citas, clientes, consentimientos y área del cliente.",
+                "status": "Próximamente"
+            },
+            "plisplas": {
+                "kind": "SaaS · belleza",
+                "name": "Plis Plas",
+                "text": "CRM para salones de belleza y uñas: reservas, historial de clientes y equipo.",
+                "status": "Próximamente"
+            },
+            "bitrix": {
+                "kind": "Bitrix24 · ventas B2B",
+                "name": "Automatización de ventas",
+                "text": "Apps para Bitrix24 que guían la venta activa B2B: un informe tras cada llamada, embudo y tareas automáticos, KPI del equipo. Funcionan en muchos portales a la vez.",
+                "status": "Bajo pedido"
+            }
+        }
+    },
+    "process": {
+        "eyebrow": "03 · Proceso",
+        "title": "Cómo trabajamos",
+        "lead": "Sin sorpresas: alcance claro, entregas frecuentes y el código siempre a tu nombre.",
+        "steps": {
+            "talk": {
+                "title": "Conversación",
+                "text": "Nos cuentas la tarea; hacemos preguntas y miramos lo que ya tienes. Gratis y sin compromiso."
+            },
+            "offer": {
+                "title": "Propuesta",
+                "text": "Alcance, plazos y precio por escrito. Los proyectos grandes, por etapas con entregas cada una o dos semanas."
+            },
+            "build": {
+                "title": "Desarrollo",
+                "text": "Ves el avance en un entorno de pruebas desde la primera semana. El código y los accesos son tuyos."
+            },
+            "launch": {
+                "title": "Lanzamiento y soporte",
+                "text": "Publicamos, formamos al equipo y seguimos con mantenimiento y mejoras."
+            }
+        }
+    },
+    "about": {
+        "eyebrow": "04 · Estudio",
+        "title": "Un estudio pequeño que entrega productos completos",
+        "text": "IT-firma es el estudio de desarrollo de {name}, ingeniero de software full-stack en España. Construimos y operamos nuestros propios productos SaaS y, con la misma base técnica, hacemos proyectos para clientes: de la arquitectura a la publicación y el soporte.",
+        "principles": {
+            "own": {
+                "title": "Productos propios",
+                "text": "Operamos nuestro propio software en producción. Sabemos lo que cuesta mantenerlo después del lanzamiento."
+            },
+            "clean": {
+                "title": "Código mantenible",
+                "text": "TypeScript estricto, arquitectura limpia, pruebas y CI. Otro equipo puede seguir donde lo dejamos."
+            },
+            "direct": {
+                "title": "Trato directo",
+                "text": "Hablas con quien diseña y escribe el código, sin intermediarios."
+            },
+            "spain": {
+                "title": "En España, para Europa",
+                "text": "Facturamos en España, aplicamos el RGPD desde el diseño y trabajamos en remoto con toda Europa."
+            }
+        }
+    },
+    "contact": {
+        "eyebrow": "05 · Contacto",
+        "title": "Cuéntanos tu proyecto",
+        "lead": "Respondemos en un día laborable con preguntas o una primera estimación.",
+        "note": "¿Prefieres escribir directamente? Usa el correo. Los datos del formulario solo se usan para responderte.",
+        "form": {
+            "name": "Nombre",
+            "email": "E-mail",
+            "phone": "Teléfono o Telegram",
+            "service": "Servicio",
+            "budget": "Presupuesto",
+            "message": "Qué necesitas",
+            "messagePlaceholder": "Qué quieres construir, para quién, en qué plazo y qué existe ya.",
+            "consent": "He leído la <link>política de privacidad</link> y acepto el tratamiento de mis datos para responder a la solicitud.",
+            "invalid": "Revisa los campos: nombre, un e-mail válido, un mensaje de al menos 10 caracteres y la casilla de privacidad.",
+            "tooMany": "Demasiados envíos seguidos. Inténtalo de nuevo en unos minutos.",
+            "unavailable": "No hemos podido enviar la solicitud. Escríbenos a {email}.",
+            "submit": "Enviar solicitud",
+            "sentTitle": "Solicitud enviada",
+            "sentText": "Gracias. Te respondemos en un día laborable.",
+            "services": {
+                "web": "Web o landing",
+                "apps": "Aplicación web o SaaS",
+                "mobile": "App móvil",
+                "bitrix": "Bitrix24",
+                "integrations": "Integración",
+                "ai": "Agente de IA",
+                "training": "Formación en vibe coding",
+                "devops": "Infraestructura o soporte",
+                "other": "Otro"
+            },
+            "budgets": {
+                "unknown": "Aún no lo sé",
+                "lt3k": "Menos de 3.000 €",
+                "3k-10k": "3.000–10.000 €",
+                "10k-30k": "10.000–30.000 €",
+                "gt30k": "Más de 30.000 €"
+            }
+        }
+    },
+    "footer": {
+        "tagline": "Desarrollo de software, integraciones y Bitrix24. Desde España.",
+        "theme": "Tema",
+        "legal": "Legal",
+        "contact": "Contacto",
+        "owner": "IT-firma es el nombre comercial de {name}, autónomo, NIF {nif}."
+    },
+    "legal": {
+        "updated": "Actualizado: {date}",
+        "titles": {
+            "aviso-legal": "Aviso legal",
+            "privacidad": "Privacidad",
+            "cookies": "Cookies"
+        }
+    },
+    "notFound": {
+        "title": "Página no encontrada",
+        "text": "La dirección no existe o ha cambiado.",
+        "home": "Ir al inicio"
+    }
+}

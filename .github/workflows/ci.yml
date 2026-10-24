@@ -40,6 +40,9 @@ jobs:
       - name: Typecheck admin
         run: pnpm --filter "./apps/admin" typecheck
 
+      - name: Typecheck itfirma
+        run: pnpm --filter itfirma typecheck
+
       - name: Unit tests (api)
         run: pnpm --filter api test
 

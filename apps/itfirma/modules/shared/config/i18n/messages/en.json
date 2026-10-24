@@ -1,0 +1,216 @@
+{
+    "meta": {
+        "title": "Software development, integrations and Bitrix24",
+        "description": "Development studio in Spain: websites, web and mobile apps, integrations, AI agents, full Bitrix24 setup and vibe coding training."
+    },
+    "nav": {
+        "services": "Services",
+        "products": "Products",
+        "process": "Process",
+        "about": "Studio",
+        "contact": "Contact",
+        "language": "Language"
+    },
+    "skins": {
+        "label": "Theme",
+        "black": "Black",
+        "cristal": "Cristal",
+        "sociopath": "Sociopath",
+        "coqueta": "Coqueta",
+        "toDark": "Dark mode",
+        "toLight": "Light mode"
+    },
+    "hero": {
+        "badge": "Taking on new projects",
+        "titleStart": "We design and ship",
+        "titleEnd": "for your business",
+        "words": {
+            "web": "websites and stores",
+            "mobile": "mobile apps",
+            "crm": "custom CRMs",
+            "ai": "AI agents",
+            "bitrix": "turnkey Bitrix24"
+        },
+        "lead": "A development studio in Spain. From idea to production: architecture, design, code, integrations and support, with one team.",
+        "ctaPrimary": "Get a quote",
+        "ctaSecondary": "See services"
+    },
+    "services": {
+        "eyebrow": "01 · Services",
+        "title": "What we do",
+        "lead": "Whole projects or one specific part. We work with the same stack we build our own products on.",
+        "items": {
+            "web": {
+                "title": "Websites and landing pages",
+                "text": "Fast multilingual sites with technical SEO, a content panel and forms that go straight into your CRM.",
+                "stack": "Next.js · CMS · SEO"
+            },
+            "apps": {
+                "title": "Web apps and SaaS",
+                "text": "Dashboards, client areas, custom CRMs and multi-tenant SaaS products, from prototype to production.",
+                "stack": "React · NestJS · PostgreSQL"
+            },
+            "mobile": {
+                "title": "Mobile apps",
+                "text": "One codebase for iOS and Android: sign-in, payments, notifications and store publishing.",
+                "stack": "React Native · Expo"
+            },
+            "bitrix": {
+                "title": "Turnkey Bitrix24",
+                "text": "Full setup: pipelines, fields, automations, telephony, reports and team training. Custom apps for your portal.",
+                "stack": "REST API · Apps · Robots"
+            },
+            "integrations": {
+                "title": "Integrations",
+                "text": "We connect CRM, website, telephony, payments, accounting and messengers so nobody copies data by hand.",
+                "stack": "REST · Webhooks · Queues"
+            },
+            "ai": {
+                "title": "AI agents",
+                "text": "Assistants that read the CRM, summarise calls, fill in reports and answer clients, wired into Bitrix24 and your systems.",
+                "stack": "Claude · OpenAI · RAG"
+            },
+            "training": {
+                "title": "Vibe coding for teams",
+                "text": "We teach your team to build internal tools with AI: workflow, good practices and code review.",
+                "stack": "Claude Code · Workshops"
+            },
+            "devops": {
+                "title": "Infrastructure and support",
+                "text": "Servers, automatic deployment, backups and monitoring. We stay with you after launch.",
+                "stack": "Docker · CI/CD · Linux"
+            }
+        }
+    },
+    "products": {
+        "eyebrow": "02 · Products",
+        "title": "Our own products",
+        "lead": "We build and maintain our own software. What we offer clients, we use every day.",
+        "items": {
+            "inkspace": {
+                "kind": "SaaS · tattoo studios",
+                "name": "Ink Space",
+                "text": "CRM and booking for tattoo studios: appointments, clients, consent forms and a client area.",
+                "status": "Coming soon"
+            },
+            "plisplas": {
+                "kind": "SaaS · beauty",
+                "name": "Plis Plas",
+                "text": "CRM for beauty and nail salons: bookings, client history and staff.",
+                "status": "Coming soon"
+            },
+            "bitrix": {
+                "kind": "Bitrix24 · B2B sales",
+                "name": "Sales automation",
+                "text": "Bitrix24 apps that guide active B2B sales: one report after each call, automatic pipeline and tasks, team KPIs. Running on many portals at once.",
+                "status": "On request"
+            }
+        }
+    },
+    "process": {
+        "eyebrow": "03 · Process",
+        "title": "How we work",
+        "lead": "No surprises: clear scope, frequent deliveries and the code always in your name.",
+        "steps": {
+            "talk": {
+                "title": "Conversation",
+                "text": "You tell us the task; we ask questions and look at what you already have. Free, no commitment."
+            },
+            "offer": {
+                "title": "Proposal",
+                "text": "Scope, timeline and price in writing. Big projects go in stages with a delivery every one or two weeks."
+            },
+            "build": {
+                "title": "Development",
+                "text": "You see progress on a staging environment from the first week. The code and the accounts are yours."
+            },
+            "launch": {
+                "title": "Launch and support",
+                "text": "We go live, train the team and carry on with maintenance and improvements."
+            }
+        }
+    },
+    "about": {
+        "eyebrow": "04 · Studio",
+        "title": "A small studio that ships complete products",
+        "text": "IT-firma is the development studio of {name}, a full-stack software engineer based in Spain. We build and run our own SaaS products and, on the same technical base, deliver projects for clients: from architecture to launch and support.",
+        "principles": {
+            "own": {
+                "title": "Our own products",
+                "text": "We run our own software in production. We know what it takes to maintain it after launch."
+            },
+            "clean": {
+                "title": "Maintainable code",
+                "text": "Strict TypeScript, clean architecture, tests and CI. Another team can pick up where we left off."
+            },
+            "direct": {
+                "title": "Direct contact",
+                "text": "You talk to the person who designs and writes the code, with no middlemen."
+            },
+            "spain": {
+                "title": "In Spain, for Europe",
+                "text": "We invoice from Spain, apply GDPR by design and work remotely across Europe."
+            }
+        }
+    },
+    "contact": {
+        "eyebrow": "05 · Contact",
+        "title": "Tell us about your project",
+        "lead": "We reply within one working day with questions or a first estimate.",
+        "note": "Prefer to write directly? Use the e-mail. Form data is only used to reply to you.",
+        "form": {
+            "name": "Name",
+            "email": "E-mail",
+            "phone": "Phone or Telegram",
+            "service": "Service",
+            "budget": "Budget",
+            "message": "What you need",
+            "messagePlaceholder": "What you want to build, for whom, by when and what already exists.",
+            "consent": "I have read the <link>privacy policy</link> and agree to my data being processed to answer this request.",
+            "invalid": "Check the fields: name, a valid e-mail, a message of at least 10 characters and the privacy box.",
+            "tooMany": "Too many requests in a row. Please try again in a few minutes.",
+            "unavailable": "We could not send the request. Write to us at {email}.",
+            "submit": "Send request",
+            "sentTitle": "Request sent",
+            "sentText": "Thank you. We will reply within one working day.",
+            "services": {
+                "web": "Website or landing",
+                "apps": "Web app or SaaS",
+                "mobile": "Mobile app",
+                "bitrix": "Bitrix24",
+                "integrations": "Integration",
+                "ai": "AI agent",
+                "training": "Vibe coding training",
+                "devops": "Infrastructure or support",
+                "other": "Other"
+            },
+            "budgets": {
+                "unknown": "Not sure yet",
+                "lt3k": "Under €3,000",
+                "3k-10k": "€3,000–10,000",
+                "10k-30k": "€10,000–30,000",
+                "gt30k": "Over €30,000"
+            }
+        }
+    },
+    "footer": {
+        "tagline": "Software development, integrations and Bitrix24. From Spain.",
+        "theme": "Theme",
+        "legal": "Legal",
+        "contact": "Contact",
+        "owner": "IT-firma is the trade name of {name}, self-employed, tax ID {nif}."
+    },
+    "legal": {
+        "updated": "Updated: {date}",
+        "titles": {
+            "aviso-legal": "Legal notice",
+            "privacidad": "Privacy",
+            "cookies": "Cookies"
+        }
+    },
+    "notFound": {
+        "title": "Page not found",
+        "text": "The address does not exist or has changed.",
+        "home": "Go home"
+    }
+}
