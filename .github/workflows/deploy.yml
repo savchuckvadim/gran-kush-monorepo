@@ -72,9 +72,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # next/font fetches Google Fonts during the build, and now and then Google answers one
+      # runner with font URLs Turbopack cannot parse («next/font/google queries have exactly one
+      # entry», 24.10.2026: crm pafpaf red, crm inkspace from the same commit green). One more
+      # attempt with the layers already cached gets past such a flake; a real error fails twice.
       - name: Build & push
+        id: build
+        continue-on-error: true
         uses: docker/build-push-action@v6
-        with:
+        with: &build-inputs
           context: .
           file: ${{ matrix.dockerfile }}
           push: true
@@ -95,6 +101,11 @@ jobs:
             NEXT_PUBLIC_PLANS_PURCHASABLE=${{ vars.NEXT_PUBLIC_PLANS_PURCHASABLE }}
           cache-from: type=gha,scope=${{ matrix.app }}-${{ matrix.brand }}
           cache-to: type=gha,mode=max,scope=${{ matrix.app }}-${{ matrix.brand }}
+
+      - name: Build & push (second attempt)
+        if: steps.build.outcome == 'failure'
+        uses: docker/build-push-action@v6
+        with: *build-inputs
 
   # Job-level `if` cannot read the secrets context, so a tiny job exports
   # whether the Dokploy API is configured.
