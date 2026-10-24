@@ -6,7 +6,7 @@
 | | PafPaf | Ink Space | Plis Plas |
 |---|---|---|---|
 | Сборка | `NEXT_PUBLIC_SITE=pafpaf` | `NEXT_PUBLIC_SITE=inkspace` | `NEXT_PUBLIC_SITE=plisplas` |
-| Домен | `paf-paf.app` | `ink.space` | не куплен |
+| Домен | `paf-paf.app` | `ink-space.app` | не куплен |
 | Дизайн | «жидкий»: живой WebGL-дым, жидкое стекло, жидкие компоненты | тема PafPaf с палитрой чернил (эффект чернил — TASK-762) | тема PafPaf с розовой палитрой |
 | Стартовый контент | `payload/seed/content.ts` | `payload/seed/content-inkspace.ts` | нет |
 

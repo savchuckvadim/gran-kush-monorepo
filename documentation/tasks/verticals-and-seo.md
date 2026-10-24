@@ -20,7 +20,7 @@
    `BRAND` на деплое; из конфига бренда — тип портала, набор модулей («рутовые фичи»), словарь, тема, сайт
    (раздел E). `PortalTypeEnum { CLUB, TATTOO_STUDIO, BEAUTY_STUDIO }` остаётся полем данных; в инсталляции
    все порталы её типа. Музыкальные студии — позже, четвёртым брендом.
-2. **Три сайта на одном движке `apps/site`**: PafPaf (`paf-paf.app`), Ink Space (`ink.space`), Plis Plas
+2. **Три сайта на одном движке `apps/site`**: PafPaf (`paf-paf.app`), Ink Space (`ink-space.app`), Plis Plas
    (домен купить) — продающие сайты чуть разные. Дизайн PafPaf — база для всех: Plis Plas — более свежая,
    молодая, розовая и дерзкая палитра; Ink Space — вместо дыма эффект чернил/краски. Темы с нуля не делаем.
 3. **Nagual — только скин CRM** (`nagual` в `SKIN_IDS`). Сайта и приложения Nagual не будет; stub
@@ -227,7 +227,7 @@
 
 ### TASK-770: имена и домены для тату и бьюти `[~]` P0
 
-- [x] Имена (2026-10-19): PafPaf — клубы, Plis Plas — бьюти, Ink Space — тату (домен `ink.space` есть);
+- [x] Имена (2026-10-19): PafPaf — клубы, Plis Plas — бьюти, Ink Space — тату (домен `ink-space.app` куплен в Vercel, DNS там же);
       зонтик — «April IT by V. Savchuk», autónomo
 - [ ] Товарные знаки в [TMview](https://www.tmdn.org/tmview/) и [OEPM](https://www.oepm.es/), классы 9 и 42
 - [ ] Домены Plis Plas (`.app` + `.es`), `inkspace.es`; Cloudflare-зоны; отправитель с SPF/DKIM/DMARC
@@ -416,7 +416,7 @@ outbox, relay, потребители, плюс realtime-шлюз socket.io (TAS
 - [ ] Postgres и Redis — свои на проект (общий Redis смешает очереди BullMQ: имена `mail`, `member-files`
       одинаковые)
 - [ ] Секреты разные на бренд: `JWT_SECRET`, `JWT_REFRESH_SECRET`, `COOKIE_SECRET`, `ENCRYPTION_MASTER_KEY`,
-      `PAYLOAD_SECRET`; `AUTH_HINT_COOKIE_DOMAIN` — `.paf-paf.app` / `.ink.space` / домен Plis Plas;
+      `PAYLOAD_SECRET`; `AUTH_HINT_COOKIE_DOMAIN` — `.paf-paf.app` / `.ink-space.app` / домен Plis Plas;
       `CORS_ORIGIN`, `CRM_FRONTEND_URL`, `MEMBER_FRONTEND_URL`
 - [ ] Внешние сервисы на бренд: Google OAuth client и consent screen (имя бренда), Telegram-бот (Login
       Widget — один домен на бота), SMTP-отправитель, Search Console
@@ -486,7 +486,7 @@ PWA не делаем (решение Вадима 2026-10-19). База — н�
 
 ## F. Запуск Ink Space и Plis Plas — пошагово (TASK-793)
 
-Цель первого этапа: Ink Space живёт на `ink.space` в своём проекте Dokploy с теми же функциями, что PafPaf,
+Цель первого этапа: Ink Space живёт на `ink-space.app` в своём проекте Dokploy с теми же функциями, что PafPaf,
 но под своим именем, скином и без клубных разделов. Фичи студий добавляются после, каждая — за модулем
 бренда, так что PafPaf их не видит. Plis Plas поднимается тем же путём, как только куплен домен.
 
@@ -502,11 +502,11 @@ PWA не делаем (решение Вадима 2026-10-19). База — н�
 
 ### Шаг 0 — руками, до кода (TASK-770 остаток, день 1)
 
-- [ ] Cloudflare: зона `ink.space`; записи `@`, `api`, `crm`, `app` → сервер (proxied); www → root
+- [ ] Cloudflare: зона `ink-space.app`; записи `@`, `api`, `crm`, `app` → сервер (proxied); www → root
 - [ ] Dokploy: проект `inkspace`, Compose из git-пути `infra/dokploy/inkspace/docker-compose.yml`
       (появится в шаге 1), Environment — по `.env.example` с новыми секретами (`openssl rand -hex 32`),
-      `DOMAIN=ink.space`, `BRAND=inkspace`, домены сервисов в Dokploy → Domains
-- [ ] Почта: identity `ink.space` у текущего EU-провайдера (SPF/DKIM/DMARC), `SMTP_FROM=no-reply@ink.space`
+      `DOMAIN=ink-space.app`, `BRAND=inkspace`, домены сервисов в Dokploy → Domains
+- [ ] Почта: identity `ink-space.app` у текущего EU-провайдера (SPF/DKIM/DMARC), `SMTP_FROM=no-reply@ink-space.app`
       — без `MAIL_HOST` письмо подтверждения не уйдёт и студия не зарегистрируется
 - [ ] Google OAuth client «Ink Space» (можно позже: без ключей кнопка отвечает «not configured»);
       Telegram-боты — позже
@@ -549,10 +549,10 @@ Ink Space — главная и цены с тарифами-заглушкам�
 
 ### Шаг 2 — Ink Space в сети (день 5)
 
-- [ ] Deploy в Dokploy; `https://api.ink.space/health` → `brand: inkspace`; `https://ink.space` — сайт;
-      `https://crm.ink.space` — регистрация студии с сайта, письмо пришло, CRM показывает «Ink Space»,
-      скин Black, в меню нет «Посещения»; `https://app.ink.space` — кабинет клиента
-- [ ] Search Console + Bing + Plausible для `ink.space` (TASK-771), скриншот нулевой точки
+- [ ] Deploy в Dokploy; `https://api.ink-space.app/health` → `brand: inkspace`; `https://ink-space.app` — сайт;
+      `https://crm.ink-space.app` — регистрация студии с сайта, письмо пришло, CRM показывает «Ink Space»,
+      скин Black, в меню нет «Посещения»; `https://app.ink-space.app` — кабинет клиента
+- [ ] Search Console + Bing + Plausible для `ink-space.app` (TASK-771), скриншот нулевой точки
 - [ ] Листинг Capterra/GetApp ES для Ink Space (TASK-774) — домену пора стареть
 
 ### Шаг 3 — Plis Plas тем же путём (как только куплен домен; полдня)

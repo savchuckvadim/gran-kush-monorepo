@@ -7,7 +7,7 @@
         "serverServices": true
     },
     "inkspace": {
-        "domain": "ink.space",
+        "domain": "ink-space.app",
         "cabinetSubdomain": "app",
         "released": true,
         "deployOrder": 1,

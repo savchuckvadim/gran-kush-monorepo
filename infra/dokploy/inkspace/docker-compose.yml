@@ -80,15 +80,15 @@ services:
       RUN_SEED: ${RUN_SEED:-false}
       # Cloudflare and Traefik in front: two proxies, so req.ip is the visitor, not Cloudflare.
       TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-2}
-      CORS_ORIGIN: https://crm.${DOMAIN:-ink.space},https://app.${DOMAIN:-ink.space},https://admin.${DOMAIN:-ink.space}
-      CRM_FRONTEND_URL: https://crm.${DOMAIN:-ink.space}
-      MEMBER_FRONTEND_URL: https://app.${DOMAIN:-ink.space}
+      CORS_ORIGIN: https://crm.${DOMAIN:-ink-space.app},https://app.${DOMAIN:-ink-space.app},https://admin.${DOMAIN:-ink-space.app}
+      CRM_FRONTEND_URL: https://crm.${DOMAIN:-ink-space.app}
+      MEMBER_FRONTEND_URL: https://app.${DOMAIN:-ink-space.app}
       # Google OAuth redirect URIs are built from this base (README.md → «Вход через Google»)
-      API_PUBLIC_URL: https://api.${DOMAIN:-ink.space}
+      API_PUBLIC_URL: https://api.${DOMAIN:-ink-space.app}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       # Session hint for the CRM/cabinet proxies; token cookies stay host-only on api.
-      AUTH_HINT_COOKIE_DOMAIN: .${DOMAIN:-ink.space}
+      AUTH_HINT_COOKIE_DOMAIN: .${DOMAIN:-ink-space.app}
       AUTH_COOKIE_SECURE: "true"
       COOKIE_SECRET: ${COOKIE_SECRET:?set COOKIE_SECRET in Dokploy → Environment}
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in Dokploy → Environment}

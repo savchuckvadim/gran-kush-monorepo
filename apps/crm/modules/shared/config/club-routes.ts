@@ -101,7 +101,7 @@ export const cabinetHostLabel = (memberUrl: string | undefined, brandCabinetHost
 
 const CABINET_HOST_LABEL = cabinetHostLabel(process.env.NEXT_PUBLIC_MEMBER_URL, BRAND.domains.cabinet);
 
-/** Хост кабинета: `club.paf-paf.app`, `club.localhost`, `app.ink.space` — по первой метке. */
+/** Хост кабинета: `club.paf-paf.app`, `club.localhost`, `app.ink-space.app` — по первой метке. */
 export const isClubHost = (host: string): boolean =>
     host === CABINET_HOST_LABEL || host.startsWith(`${CABINET_HOST_LABEL}.`);
 

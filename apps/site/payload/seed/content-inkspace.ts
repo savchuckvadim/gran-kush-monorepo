@@ -253,7 +253,7 @@ export const INKSPACE_CONTENT: SiteContent = {
     SITE_DOC: {
         code: "inkspace",
         name: "Ink Space",
-        domain: "ink.space",
+        domain: "ink-space.app",
         footerNote: {
             es: "Gratis durante la beta. Precios orientativos, sin IVA.",
             ru: "Бесплатно, пока идёт бета. Цены ориентировочные, без НДС.",

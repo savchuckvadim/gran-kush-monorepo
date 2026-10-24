@@ -4,7 +4,7 @@
 
 ## Как устроено
 
-- Один код — по инсталляции на бренд (TASK-793): PafPaf (клубы, `paf-paf.app`), Ink Space (тату, `ink.space`), Plis Plas (бьюти, домен ещё не куплен). Каждая — свой проект Dokploy со своими Postgres, Redis, секретами, OAuth и ботами. Список, домены и порядок деплоя — `packages/brand/src/installations.json`.
+- Один код — по инсталляции на бренд (TASK-793): PafPaf (клубы, `paf-paf.app`), Ink Space (тату, `ink-space.app`), Plis Plas (бьюти, домен ещё не куплен). Каждая — свой проект Dokploy со своими Postgres, Redis, секретами, OAuth и ботами. Список, домены и порядок деплоя — `packages/brand/src/installations.json`.
 - У каждой инсталляции один Compose-сервис из `infra/dokploy/<бренд>/docker-compose.yml`. В нём Postgres, Redis, API, CRM, кабинет, админка платформы и сайт. Файлы `docker-compose.yml` и `.env.example` бренда **генерируются** из `templates/` командой `node infra/dokploy/render.mjs`: правится шаблон, затем рендер, CI проверяет, что файлы свежие (`--check`). Имена сервисов (`<бренд>-api`, …) — ключи YAML, их нельзя взять из env, а на общей `dokploy-network` они должны быть уникальны.
 - Бренд в API — переменная `BRAND` в compose (уже прописана). Образ API один на все инсталляции; CRM, админка и сайт собираются на бренд (адреса вшиваются при сборке) и различаются тегом: `crm:pafpaf-latest`, `crm:inkspace-latest`, откат — `crm:<бренд>-sha-<коммит>`.
 - Сервисы на весь сервер (уборка диска `pafpaf-janitor`) — только в compose PafPaf (`serverServices` в `installations.json`).
