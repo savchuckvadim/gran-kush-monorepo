@@ -1,7 +1,7 @@
 {
     "meta": {
-        "title": "Software development, integrations and Bitrix24",
-        "description": "Development studio in Spain: websites, web and mobile apps, integrations, AI agents, full Bitrix24 setup and vibe coding training."
+        "title": "Custom software development and SaaS products",
+        "description": "Development studio in Spain. Custom websites, web and mobile apps, integrations, AI agents and turnkey Bitrix24, plus our own SaaS products by subscription."
     },
     "nav": {
         "services": "Services",
@@ -31,14 +31,14 @@
             "ai": "AI agents",
             "bitrix": "turnkey Bitrix24"
         },
-        "lead": "A development studio in Spain. From idea to production: architecture, design, code, integrations and support, with one team.",
+        "lead": "We build custom software for businesses and run our own SaaS products. One team takes you from idea to launch and support.",
         "ctaPrimary": "Get a quote",
         "ctaSecondary": "See services"
     },
     "services": {
-        "eyebrow": "01 · Services",
-        "title": "What we do",
-        "lead": "Whole projects or one specific part. We work with the same stack we build our own products on.",
+        "eyebrow": "Services",
+        "title": "Custom development",
+        "lead": "A whole project or just the missing piece. We use the same stack our own products run on.",
         "items": {
             "web": {
                 "title": "Websites and landing pages",
@@ -70,10 +70,10 @@
                 "text": "Assistants that read the CRM, summarise calls, fill in reports and answer clients, wired into Bitrix24 and your systems.",
                 "stack": "Claude · OpenAI · RAG"
             },
-            "training": {
-                "title": "Vibe coding for teams",
-                "text": "We teach your team to build internal tools with AI: workflow, good practices and code review.",
-                "stack": "Claude Code · Workshops"
+            "aiAdoption": {
+                "title": "AI in your processes",
+                "text": "We find where AI saves your team time, connect it to your processes and systems, and train people to use it.",
+                "stack": "Audit · Rollout · Training"
             },
             "devops": {
                 "title": "Infrastructure and support",
@@ -83,7 +83,7 @@
         }
     },
     "products": {
-        "eyebrow": "02 · Products",
+        "eyebrow": "Products",
         "title": "Our own products",
         "lead": "We build and maintain our own software. What we offer clients, we use every day.",
         "items": {
@@ -108,9 +108,9 @@
         }
     },
     "process": {
-        "eyebrow": "03 · Process",
+        "eyebrow": "Process",
         "title": "How we work",
-        "lead": "No surprises: clear scope, frequent deliveries and the code always in your name.",
+        "lead": "No surprises: scope and price in writing, visible progress every week.",
         "steps": {
             "talk": {
                 "title": "Conversation",
@@ -131,13 +131,13 @@
         }
     },
     "about": {
-        "eyebrow": "04 · Studio",
-        "title": "A small studio that ships complete products",
-        "text": "IT-firma is the development studio of {name}, a full-stack software engineer based in Spain. We build and run our own SaaS products and, on the same technical base, deliver projects for clients: from architecture to launch and support.",
+        "eyebrow": "Studio",
+        "title": "Software for clients, and software of our own",
+        "text": "IT-firma is the studio of {name}, a full-stack software engineer in Spain. We work in two lines: custom software for clients, and our own SaaS products offered by subscription. Each feeds the other: what we recommend to a client, we have launched and maintain ourselves.",
         "principles": {
             "own": {
-                "title": "Our own products",
-                "text": "We run our own software in production. We know what it takes to maintain it after launch."
+                "title": "Our own SaaS",
+                "text": "We build and run cloud services for small businesses, paid by subscription. We know what a product costs after launch."
             },
             "clean": {
                 "title": "Maintainable code",
@@ -154,7 +154,7 @@
         }
     },
     "contact": {
-        "eyebrow": "05 · Contact",
+        "eyebrow": "Contact",
         "title": "Tell us about your project",
         "lead": "We reply within one working day with questions or a first estimate.",
         "note": "Prefer to write directly? Use the e-mail. Form data is only used to reply to you.",
@@ -180,7 +180,7 @@
                 "bitrix": "Bitrix24",
                 "integrations": "Integration",
                 "ai": "AI agent",
-                "training": "Vibe coding training",
+                "aiAdoption": "AI adoption",
                 "devops": "Infrastructure or support",
                 "other": "Other"
             },
@@ -194,7 +194,7 @@
         }
     },
     "footer": {
-        "tagline": "Software development, integrations and Bitrix24. From Spain.",
+        "tagline": "Software for business, built to order or by subscription.",
         "theme": "Theme",
         "legal": "Legal",
         "contact": "Contact",

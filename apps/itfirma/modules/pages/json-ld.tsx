@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import type { Locale } from "@/modules/shared/config/locales";
+import { type Locale, LOCALES } from "@/modules/shared/config/locales";
 import { CONTACT_EMAIL, OWNER, SERVER_URL, SITE_NAME } from "@/modules/shared/config/site";
 
 interface JsonLdProps {
@@ -19,7 +19,7 @@ export const JsonLd = async ({ locale }: JsonLdProps) => {
         email: CONTACT_EMAIL,
         founder: { "@type": "Person", name: OWNER.name },
         areaServed: OWNER.country,
-        knowsLanguage: ["es", "en", "ru", "ca"],
+        knowsLanguage: [...LOCALES],
     };
     return (
         <script

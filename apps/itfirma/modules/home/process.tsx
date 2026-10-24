@@ -14,7 +14,12 @@ export const Process = () => {
             id="process"
             className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16 md:px-6 md:py-24"
         >
-            <SectionHeading eyebrow={t("eyebrow")} title={t("title")} lead={t("lead")} />
+            <SectionHeading
+                section="process"
+                eyebrow={t("eyebrow")}
+                title={t("title")}
+                lead={t("lead")}
+            />
             <ol className="grid gap-6 md:grid-cols-4">
                 {STEPS.map((step, index) => (
                     <Reveal

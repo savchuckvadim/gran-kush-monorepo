@@ -2,35 +2,12 @@ import { useTranslations } from "next-intl";
 
 import { ArrowUpRight } from "lucide-react";
 
-import { type BrandCode, BRANDS, INSTALLATIONS } from "@workspace/brand";
-
+import { SHOWN_PRODUCTS } from "@/modules/shared/config/products";
 import { Reveal } from "@/modules/shared/ui/reveal";
 import { SectionHeading } from "@/modules/shared/ui/section-heading";
 import { SpotlightCard } from "@/modules/shared/ui/spotlight-card";
 
-interface Product {
-    /** Texts: `products.items.<key>`. */
-    key: string;
-    palette: readonly string[];
-    /** Public address; none yet — the card shows `items.<key>.status`. */
-    url: string | null;
-}
-
-/** Clean installations only: the club product stays apart from the studio (multi-niche rule). */
-const OWN_BRANDS: readonly BrandCode[] = ["inkspace", "plisplas"];
-
-const BITRIX_PALETTE = ["#2f54eb", "#00b8d9"] as const;
-
-const PRODUCTS: readonly Product[] = [
-    ...OWN_BRANDS.map((code) => ({
-        key: code,
-        palette: BRANDS[code].palette,
-        url: INSTALLATIONS[code].released ? `https://${BRANDS[code].domains.site}` : null,
-    })),
-    { key: "bitrix", palette: BITRIX_PALETTE, url: null },
-];
-
-/** Products the studio owns and runs. */
+/** Products the studio owns and runs; which ones show is `LIVE_PRODUCTS` in the config. */
 export const Products = () => {
     const t = useTranslations("products");
 
@@ -39,9 +16,14 @@ export const Products = () => {
             id="products"
             className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16 md:px-6 md:py-24"
         >
-            <SectionHeading eyebrow={t("eyebrow")} title={t("title")} lead={t("lead")} />
+            <SectionHeading
+                section="products"
+                eyebrow={t("eyebrow")}
+                title={t("title")}
+                lead={t("lead")}
+            />
             <div className="grid gap-4 md:grid-cols-3">
-                {PRODUCTS.map(({ key, url, palette }, index) => (
+                {SHOWN_PRODUCTS.map(({ key, url, palette }, index) => (
                     <Reveal key={key} delay={index * 90}>
                         <SpotlightCard className="flex h-full flex-col gap-4 p-6">
                             <span

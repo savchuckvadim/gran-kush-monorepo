@@ -32,4 +32,14 @@ for (const [brand, { domain, cabinetSubdomain, released }] of Object.entries(ins
     }
 }
 
+// The studio site (apps/itfirma) is no installation: one build, untagged by brand, its address
+// from its own installation.json. Dokploy deploys it by hand (infra/dokploy/itfirma).
+const studio = JSON.parse(readFileSync(join(root, "apps/itfirma/installation.json"), "utf8"));
+include.push({
+    app: "itfirma",
+    brand: "",
+    dockerfile: NEXT_DOCKERFILE,
+    site_url: `https://${studio.domain}`,
+});
+
 process.stdout.write(JSON.stringify({ include }));

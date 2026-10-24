@@ -25,7 +25,7 @@ const readMail = (): MailChannel | null => {
     if (!MAIL_HOST || !MAIL_USER || !MAIL_PASS || !LEAD_TO) return null;
     return {
         host: MAIL_HOST,
-        port: Number(MAIL_PORT ?? 465),
+        port: Number(MAIL_PORT ?? 587),
         user: MAIL_USER,
         pass: MAIL_PASS,
         from: MAIL_FROM || MAIL_USER,

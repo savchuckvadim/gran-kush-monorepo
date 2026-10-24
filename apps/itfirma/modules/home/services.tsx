@@ -4,11 +4,11 @@ import {
     Bot,
     Boxes,
     Globe,
-    GraduationCap,
     LayoutDashboard,
     Plug,
     ServerCog,
     Smartphone,
+    Workflow,
 } from "lucide-react";
 
 import { Reveal } from "@/modules/shared/ui/reveal";
@@ -23,7 +23,7 @@ const SERVICES = [
     { key: "bitrix", Icon: Boxes },
     { key: "integrations", Icon: Plug },
     { key: "ai", Icon: Bot },
-    { key: "training", Icon: GraduationCap },
+    { key: "aiAdoption", Icon: Workflow },
     { key: "devops", Icon: ServerCog },
 ] as const;
 
@@ -35,7 +35,12 @@ export const Services = () => {
             id="services"
             className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16 md:px-6 md:py-24"
         >
-            <SectionHeading eyebrow={t("eyebrow")} title={t("title")} lead={t("lead")} />
+            <SectionHeading
+                section="services"
+                eyebrow={t("eyebrow")}
+                title={t("title")}
+                lead={t("lead")}
+            />
             <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {SERVICES.map(({ key, Icon }, index) => (
                     <Reveal key={key} as="li" className="h-full" delay={(index % 4) * 70}>

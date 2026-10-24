@@ -9,7 +9,7 @@ export const LEAD_SERVICES = [
     "bitrix",
     "integrations",
     "ai",
-    "training",
+    "aiAdoption",
     "devops",
     "other",
 ] as const;

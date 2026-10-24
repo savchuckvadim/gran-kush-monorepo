@@ -8,7 +8,7 @@ export const ca: LegalContent = {
                 heading: "Titular del lloc",
                 paragraphs: [
                     "En compliment de la Llei 34/2002, de serveis de la societat de la informació i de comerç electrònic (LSSI-CE), s'informa que el titular de {domain} és {name}, professional autònom, NIF {nif}, amb domicili a {address}. Correu de contacte: {email}.",
-                    "IT-firma és el nom comercial amb què {name} presta serveis de desenvolupament de programari, integració de sistemes i consultoria tecnològica.",
+                    "IT-firma és el nom comercial amb què {name} exerceix dues activitats: el desenvolupament de programari a mida per a tercers (aplicacions web i mòbils, llocs web, integracions i consultoria tecnològica) i el desenvolupament i la comercialització de programari propi al núvol (SaaS) mitjançant subscripció.",
                 ],
             },
             {

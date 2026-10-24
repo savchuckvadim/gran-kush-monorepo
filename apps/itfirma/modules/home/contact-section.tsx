@@ -17,7 +17,12 @@ export const ContactSection = () => {
         >
             <div className="grid gap-10 md:grid-cols-[1fr_1.4fr]">
                 <div>
-                    <SectionHeading eyebrow={t("eyebrow")} title={t("title")} lead={t("lead")} />
+                    <SectionHeading
+                        section="contact"
+                        eyebrow={t("eyebrow")}
+                        title={t("title")}
+                        lead={t("lead")}
+                    />
                     <Reveal delay={120}>
                         <a
                             href={`mailto:${CONTACT_EMAIL}`}

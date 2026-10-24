@@ -14,7 +14,7 @@ export const About = () => {
         <section id="about" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16 md:px-6 md:py-24">
             <div className="grid gap-10 md:grid-cols-[1.1fr_1fr]">
                 <div>
-                    <SectionHeading eyebrow={t("eyebrow")} title={t("title")} />
+                    <SectionHeading section="about" eyebrow={t("eyebrow")} title={t("title")} />
                     <Reveal delay={100}>
                         <p className="max-w-xl text-base text-muted-foreground md:text-lg">
                             {t("text", { name: OWNER.name })}

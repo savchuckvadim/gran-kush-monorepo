@@ -49,7 +49,7 @@ pnpm --filter site seed         # PafPaf content in es/ru/en
 pnpm --filter site generate     # payload-types.ts + admin import map
 pnpm --filter site migrate:create <name>   # after changing collections/blocks; production applies it on start
 
-pnpm --filter itfirma dev       # studio site, port 5003, es/en/ru/ca (documentation/site/ITFIRMA.md)
+pnpm --filter itfirma dev       # studio site, port 5003, es/en/ru/uk/ca (documentation/site/ITFIRMA.md)
 ```
 
 ### Database (from apps/api)

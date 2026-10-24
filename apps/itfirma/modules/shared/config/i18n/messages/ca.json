@@ -1,7 +1,7 @@
 {
     "meta": {
-        "title": "Desenvolupament de programari, integracions i Bitrix24",
-        "description": "Estudi de desenvolupament a Espanya: webs, aplicacions web i mòbils, integracions, agents d'IA, implantació completa de Bitrix24 i formació en vibe coding."
+        "title": "Desenvolupament de programari a mida i productes SaaS",
+        "description": "Estudi de desenvolupament a Espanya. Webs, aplicacions web i mòbils a mida, integracions, agents d'IA i Bitrix24 clau en mà, a més de productes SaaS propis per subscripció."
     },
     "nav": {
         "services": "Serveis",
@@ -31,14 +31,14 @@
             "ai": "agents d'IA",
             "bitrix": "Bitrix24 clau en mà"
         },
-        "lead": "Estudi de desenvolupament a Espanya. De la idea a producció: arquitectura, disseny, codi, integracions i suport, amb un sol equip.",
+        "lead": "Desenvolupem programari a mida per a empreses i creem els nostres propis productes SaaS. Un sol equip t'acompanya de la idea al llançament i el suport.",
         "ctaPrimary": "Demanar pressupost",
         "ctaSecondary": "Veure serveis"
     },
     "services": {
-        "eyebrow": "01 · Serveis",
-        "title": "Què fem",
-        "lead": "Projectes complets o una part concreta. Treballem amb el mateix stack amb què construïm els nostres propis productes.",
+        "eyebrow": "Serveis",
+        "title": "Desenvolupament a mida",
+        "lead": "Un projecte complet o només la part que falta. Fem servir el mateix stack amb què funcionen els nostres propis productes.",
         "items": {
             "web": {
                 "title": "Webs i landing pages",
@@ -70,10 +70,10 @@
                 "text": "Assistents que llegeixen el CRM, resumeixen trucades, omplen informes i responen clients, integrats amb Bitrix24 i els teus sistemes.",
                 "stack": "Claude · OpenAI · RAG"
             },
-            "training": {
-                "title": "Vibe coding per a equips",
-                "text": "Ensenyem el teu equip a crear eines internes amb IA: flux de treball, bones pràctiques i revisió del codi.",
-                "stack": "Claude Code · Tallers"
+            "aiAdoption": {
+                "title": "IA als teus processos",
+                "text": "Detectem on la IA estalvia temps a l'equip, la connectem als teus processos i sistemes i formem les persones per fer-la servir.",
+                "stack": "Auditoria · Implantació · Formació"
             },
             "devops": {
                 "title": "Infraestructura i suport",
@@ -83,7 +83,7 @@
         }
     },
     "products": {
-        "eyebrow": "02 · Productes",
+        "eyebrow": "Productes",
         "title": "Productes propis",
         "lead": "Desenvolupem i mantenim el nostre propi programari. El que oferim als clients, ho fem servir cada dia.",
         "items": {
@@ -108,9 +108,9 @@
         }
     },
     "process": {
-        "eyebrow": "03 · Procés",
+        "eyebrow": "Procés",
         "title": "Com treballem",
-        "lead": "Sense sorpreses: abast clar, lliuraments freqüents i el codi sempre a nom teu.",
+        "lead": "Sense sorpreses: abast i preu per escrit i avenços visibles cada setmana.",
         "steps": {
             "talk": {
                 "title": "Conversa",
@@ -131,13 +131,13 @@
         }
     },
     "about": {
-        "eyebrow": "04 · Estudi",
-        "title": "Un estudi petit que lliura productes complets",
-        "text": "IT-firma és l'estudi de desenvolupament de {name}, enginyer de programari full-stack a Espanya. Construïm i operem els nostres propis productes SaaS i, amb la mateixa base tècnica, fem projectes per a clients: de l'arquitectura a la publicació i el suport.",
+        "eyebrow": "Estudi",
+        "title": "Programari per a clients i programari propi",
+        "text": "IT-firma és l'estudi de {name}, enginyer de programari full-stack a Espanya. Treballem en dues línies: desenvolupament de programari a mida per a clients i productes SaaS propis que oferim per subscripció. L'una alimenta l'altra: el que recomanem a un client, ho hem llançat i ho mantenim nosaltres mateixos.",
         "principles": {
             "own": {
-                "title": "Productes propis",
-                "text": "Operem el nostre propi programari en producció. Sabem el que costa mantenir-lo després del llançament."
+                "title": "SaaS propis",
+                "text": "Desenvolupem i operem serveis al núvol per a petites empreses, amb pagament per subscripció. Sabem el que costa un producte després del llançament."
             },
             "clean": {
                 "title": "Codi mantenible",
@@ -154,7 +154,7 @@
         }
     },
     "contact": {
-        "eyebrow": "05 · Contacte",
+        "eyebrow": "Contacte",
         "title": "Explica'ns el teu projecte",
         "lead": "Responem en un dia laborable amb preguntes o una primera estimació.",
         "note": "Prefereixes escriure directament? Fes servir el correu. Les dades del formulari només s'utilitzen per respondre't.",
@@ -180,7 +180,7 @@
                 "bitrix": "Bitrix24",
                 "integrations": "Integració",
                 "ai": "Agent d'IA",
-                "training": "Formació en vibe coding",
+                "aiAdoption": "Implantació d'IA",
                 "devops": "Infraestructura o suport",
                 "other": "Altres"
             },
@@ -194,7 +194,7 @@
         }
     },
     "footer": {
-        "tagline": "Desenvolupament de programari, integracions i Bitrix24. Des d'Espanya.",
+        "tagline": "Programari per a empreses: a mida i per subscripció.",
         "theme": "Tema",
         "legal": "Legal",
         "contact": "Contacte",

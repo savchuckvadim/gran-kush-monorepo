@@ -6,7 +6,7 @@
 #   docker build -f infra/docker/next.Dockerfile \
 #     --build-arg APP=crm --build-arg NEXT_PUBLIC_API_URL=https://api.example \
 #     -t gran-kush/crm .
-# APP is the directory name under apps/ (crm | admin | site); NEXT_PUBLIC_BRAND the installation
+# APP is the directory name under apps/ (crm | admin | site | itfirma); NEXT_PUBLIC_BRAND the installation
 # (pafpaf | inkspace | plisplas): a Next image is built once per brand.
 # ─────────────────────────────────────────────────────────────
 

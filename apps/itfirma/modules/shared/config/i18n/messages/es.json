@@ -1,7 +1,7 @@
 {
     "meta": {
-        "title": "Desarrollo de software, integraciones y Bitrix24",
-        "description": "Estudio de desarrollo en España: webs, aplicaciones web y móviles, integraciones, agentes de IA, implantación completa de Bitrix24 y formación en vibe coding."
+        "title": "Desarrollo de software a medida y productos SaaS",
+        "description": "Estudio de desarrollo en España. Webs, aplicaciones web y móviles a medida, integraciones, agentes de IA y Bitrix24 llave en mano, además de productos SaaS propios por suscripción."
     },
     "nav": {
         "services": "Servicios",
@@ -31,14 +31,14 @@
             "ai": "agentes de IA",
             "bitrix": "Bitrix24 llave en mano"
         },
-        "lead": "Estudio de desarrollo en España. De la idea a producción: arquitectura, diseño, código, integraciones y soporte, con un solo equipo.",
+        "lead": "Desarrollamos software a medida para empresas y creamos nuestros propios productos SaaS. Un solo equipo te acompaña de la idea al lanzamiento y el soporte.",
         "ctaPrimary": "Pedir presupuesto",
         "ctaSecondary": "Ver servicios"
     },
     "services": {
-        "eyebrow": "01 · Servicios",
-        "title": "Lo que hacemos",
-        "lead": "Proyectos completos o una parte concreta. Trabajamos con el mismo stack con el que construimos nuestros propios productos.",
+        "eyebrow": "Servicios",
+        "title": "Desarrollo a medida",
+        "lead": "Un proyecto completo o solo la parte que falta. Usamos el mismo stack con el que funcionan nuestros propios productos.",
         "items": {
             "web": {
                 "title": "Webs y landing pages",
@@ -70,10 +70,10 @@
                 "text": "Asistentes que leen el CRM, resumen llamadas, rellenan informes y responden a clientes, integrados con Bitrix24 y tus sistemas.",
                 "stack": "Claude · OpenAI · RAG"
             },
-            "training": {
-                "title": "Vibe coding para equipos",
-                "text": "Enseñamos a tu equipo a crear herramientas internas con IA: flujo de trabajo, buenas prácticas y revisión del código.",
-                "stack": "Claude Code · Talleres"
+            "aiAdoption": {
+                "title": "IA en tus procesos",
+                "text": "Detectamos dónde la IA ahorra tiempo al equipo, la conectamos a tus procesos y sistemas y formamos a las personas para usarla.",
+                "stack": "Auditoría · Implantación · Formación"
             },
             "devops": {
                 "title": "Infraestructura y soporte",
@@ -83,7 +83,7 @@
         }
     },
     "products": {
-        "eyebrow": "02 · Productos",
+        "eyebrow": "Productos",
         "title": "Productos propios",
         "lead": "Desarrollamos y mantenemos nuestro propio software. Lo que ofrecemos a clientes lo usamos cada día.",
         "items": {
@@ -108,9 +108,9 @@
         }
     },
     "process": {
-        "eyebrow": "03 · Proceso",
+        "eyebrow": "Proceso",
         "title": "Cómo trabajamos",
-        "lead": "Sin sorpresas: alcance claro, entregas frecuentes y el código siempre a tu nombre.",
+        "lead": "Sin sorpresas: alcance y precio por escrito y avances visibles cada semana.",
         "steps": {
             "talk": {
                 "title": "Conversación",
@@ -131,13 +131,13 @@
         }
     },
     "about": {
-        "eyebrow": "04 · Estudio",
-        "title": "Un estudio pequeño que entrega productos completos",
-        "text": "IT-firma es el estudio de desarrollo de {name}, ingeniero de software full-stack en España. Construimos y operamos nuestros propios productos SaaS y, con la misma base técnica, hacemos proyectos para clientes: de la arquitectura a la publicación y el soporte.",
+        "eyebrow": "Estudio",
+        "title": "Software para clientes y software propio",
+        "text": "IT-firma es el estudio de {name}, ingeniero de software full-stack en España. Trabajamos en dos líneas: desarrollo de software a medida para clientes y productos SaaS propios que ofrecemos por suscripción. Una alimenta a la otra: lo que recomendamos a un cliente lo hemos lanzado y lo mantenemos nosotros mismos.",
         "principles": {
             "own": {
-                "title": "Productos propios",
-                "text": "Operamos nuestro propio software en producción. Sabemos lo que cuesta mantenerlo después del lanzamiento."
+                "title": "SaaS propios",
+                "text": "Desarrollamos y operamos servicios en la nube para pequeñas empresas, con pago por suscripción. Sabemos lo que cuesta un producto después del lanzamiento."
             },
             "clean": {
                 "title": "Código mantenible",
@@ -154,7 +154,7 @@
         }
     },
     "contact": {
-        "eyebrow": "05 · Contacto",
+        "eyebrow": "Contacto",
         "title": "Cuéntanos tu proyecto",
         "lead": "Respondemos en un día laborable con preguntas o una primera estimación.",
         "note": "¿Prefieres escribir directamente? Usa el correo. Los datos del formulario solo se usan para responderte.",
@@ -180,7 +180,7 @@
                 "bitrix": "Bitrix24",
                 "integrations": "Integración",
                 "ai": "Agente de IA",
-                "training": "Formación en vibe coding",
+                "aiAdoption": "Implantación de IA",
                 "devops": "Infraestructura o soporte",
                 "other": "Otro"
             },
@@ -194,7 +194,7 @@
         }
     },
     "footer": {
-        "tagline": "Desarrollo de software, integraciones y Bitrix24. Desde España.",
+        "tagline": "Software para empresas: a medida y por suscripción.",
         "theme": "Tema",
         "legal": "Legal",
         "contact": "Contacto",

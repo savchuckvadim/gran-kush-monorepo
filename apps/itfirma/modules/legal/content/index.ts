@@ -8,6 +8,7 @@ import { ca } from "./ca";
 import { en } from "./en";
 import { es } from "./es";
 import { ru } from "./ru";
+import { uk } from "./uk";
 
 const VALUES: Record<string, string> = {
     name: OWNER.name,
@@ -38,5 +39,6 @@ export const LEGAL_CONTENT: Record<Locale, LegalContent> = {
     es: fillContent(es),
     en: fillContent(en),
     ru: fillContent(ru),
+    uk: fillContent(uk),
     ca: fillContent(ca),
 };

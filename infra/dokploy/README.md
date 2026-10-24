@@ -86,6 +86,16 @@
 4. Деплой идёт по очереди `deployOrder`: Ink Space → Plis Plas → PafPaf. Следующая инсталляция начинается, только когда `https://api.<домен>/health` предыдущей ответил своим брендом и этим коммитом (`version`); красная останавливает остальные (`infra/dokploy/deploy.mjs`). Инсталляция без своего compose id пропускается.
 5. Проверка: после следующего push в `main` в Actions → Deploy зелёная задача «Deploy on Dokploy», а в Dokploy → Deployments появился новый деплой.
 
+## Сайт студии IT-firma
+
+Сайт-визитка студии (`apps/itfirma`, [ITFIRMA](../../documentation/site/ITFIRMA.md)) — не инсталляция: один контейнер без базы, свой проект Dokploy.
+
+- **Образ** `itfirma:latest` собирает тот же `deploy.yml` (строка в `ci-matrix.mjs`). Адрес для canonical и sitemap вшивается при сборке из `apps/itfirma/installation.json` — после смены домена нужен новый push в `main`.
+- **Пакет ghcr.** Новый пакет `itfirma` может появиться приватным: GitHub → Packages → `itfirma` → Package settings → Change visibility → Public. Иначе Dokploy не скачает образ.
+- **Dokploy:** Create Project → `itfirma` → Compose, тот же репозиторий, Compose Path `./infra/dokploy/itfirma/docker-compose.yml`, Autodeploy выключен. Environment — из `infra/dokploy/itfirma/.env.example`. Domains: домен из `installation.json`, сервис `itfirma-site`, порт 3000, HTTPS. Deploy.
+- **Обновление** — кнопка Deploy после сборки образов: `deploy.mjs` выкатывает только инсталляции.
+- **Заявки** уходят в SMTP и/или Telegram. Без обоих каналов форма отвечает 503 и показывает почту.
+
 ## Почта
 
 Письма (подтверждение email, сброс пароля, приглашения) уходят по SMTP. Провайдер должен быть в ЕС: передавать адреса участников клубов за пределы ЕЭЗ нельзя, а для России, например Beget, нет решения об адекватности.

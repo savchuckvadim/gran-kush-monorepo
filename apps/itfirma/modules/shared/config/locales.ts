@@ -1,14 +1,15 @@
-export const LOCALES = ["es", "en", "ru", "ca"] as const;
+export const LOCALES = ["es", "en", "ru", "uk", "ca"] as const;
 
 export type Locale = (typeof LOCALES)[number];
 
-// Spain first: clients read Spanish; English, Russian and Catalan follow.
+// Spain first: clients read Spanish; English, Russian, Ukrainian and Catalan follow.
 export const DEFAULT_LOCALE: Locale = "es";
 
 export const LOCALE_LABELS: Record<Locale, string> = {
     es: "ES",
     en: "EN",
     ru: "RU",
+    uk: "UA",
     ca: "CA",
 };
 
@@ -17,6 +18,7 @@ export const OG_LOCALES: Record<Locale, string> = {
     es: "es_ES",
     en: "en_US",
     ru: "ru_RU",
+    uk: "uk_UA",
     ca: "ca_ES",
 };
 

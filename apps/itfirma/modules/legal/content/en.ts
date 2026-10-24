@@ -8,7 +8,7 @@ export const en: LegalContent = {
                 heading: "Site owner",
                 paragraphs: [
                     "In compliance with Spanish Law 34/2002 on Information Society Services and Electronic Commerce (LSSI-CE), the owner of {domain} is {name}, self-employed professional (autónomo), tax ID {nif}, with address at {address}. Contact e-mail: {email}.",
-                    "IT-firma is the trade name under which {name} provides software development, systems integration and technology consulting services.",
+                    "IT-firma is the trade name under which {name} carries out two activities: custom software development for third parties (web and mobile apps, websites, integrations and technology consulting) and the development and sale of proprietary cloud software (SaaS) by subscription.",
                 ],
             },
             {

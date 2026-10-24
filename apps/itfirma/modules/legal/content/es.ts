@@ -8,7 +8,7 @@ export const es: LegalContent = {
                 heading: "Titular del sitio",
                 paragraphs: [
                     "En cumplimiento de la Ley 34/2002, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI-CE), se informa de que el titular de {domain} es {name}, profesional autónomo, NIF {nif}, con domicilio en {address}. Correo de contacto: {email}.",
-                    "IT-firma es el nombre comercial bajo el que {name} presta servicios de desarrollo de software, integración de sistemas y consultoría tecnológica.",
+                    "IT-firma es el nombre comercial con el que {name} ejerce dos actividades: el desarrollo de software a medida para terceros (aplicaciones web y móviles, sitios web, integraciones y consultoría tecnológica) y el desarrollo y la comercialización de software propio en la nube (SaaS) mediante suscripción.",
                 ],
             },
             {

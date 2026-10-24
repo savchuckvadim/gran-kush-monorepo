@@ -1,0 +1,37 @@
+# IT-firma studio site on Dokploy: its own project with one Compose service. Setup and domain:
+# infra/dokploy/README.md, «Сайт студии IT-firma»; variables: .env.example next to this file.
+#
+# - No database: texts live in the image, a contact request goes straight to SMTP and/or Telegram.
+# - The image is built by .github/workflows/deploy.yml on every push to main (itfirma:latest);
+#   the server builds nothing. Deploy is the Deploy button: deploy.mjs only handles installations.
+# - No host ports: Traefik (Dokploy → Domains) routes the domain to port 3000.
+
+services:
+  itfirma-site:
+    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/itfirma:${TAG:-latest}
+    restart: unless-stopped
+    pull_policy: always
+    networks: [dokploy-network]
+    environment:
+      HOSTNAME: 0.0.0.0
+      # Delivery of contact requests: at least one channel, otherwise the form answers 503 and
+      # shows the e-mail address instead.
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USER: ${MAIL_USER:-}
+      MAIL_PASS: ${MAIL_PASS:-}
+      MAIL_FROM: ${MAIL_FROM:-}
+      LEAD_TO: ${LEAD_TO:-}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+networks:
+  dokploy-network:
+    external: true
