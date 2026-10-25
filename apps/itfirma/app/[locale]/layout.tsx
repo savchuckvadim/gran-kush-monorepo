@@ -54,7 +54,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             <head>
                 <script dangerouslySetInnerHTML={{ __html: SKIN_SCRIPT }} />
             </head>
-            <body className="flex min-h-dvh flex-col">
+            <body className="flex min-h-dvh flex-col pt-16 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pt-0 lg:pb-0">
                 <NextIntlClientProvider locale={locale} messages={messages}>
                     <SkinSync />
                     <Backdrop />

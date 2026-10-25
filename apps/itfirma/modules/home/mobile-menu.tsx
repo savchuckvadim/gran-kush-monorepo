@@ -16,8 +16,8 @@ import { ICON_BUTTON } from "@/modules/shared/ui/icon-button";
 import { useDismiss } from "@/modules/shared/ui/use-dismiss";
 
 /**
- * The burger of phones and tablets: a panel under the header with the sections, the eight
- * services and the request button. It closes on a link, on Escape and on a press outside.
+ * The burger of the bottom bar: a glass sheet above the bar with the sections, the eight services
+ * and the request button. It closes on a link, on Escape and on a press outside.
  */
 export const MobileMenu = () => {
     const t = useTranslations("nav");
@@ -36,7 +36,7 @@ export const MobileMenu = () => {
     useDismiss(open, close, refs);
 
     return (
-        <div ref={rootRef} className="lg:hidden">
+        <div ref={rootRef} className="shrink-0">
             <button
                 type="button"
                 aria-expanded={open}
@@ -48,22 +48,22 @@ export const MobileMenu = () => {
             >
                 {open ? <X className="size-4" /> : <Menu className="size-4" />}
             </button>
-            {/* in a portal: the header blurs its backdrop, which would pin a fixed panel to the header box */}
+            {/* in a portal: the bar blurs its backdrop, which would pin a fixed sheet to the bar box */}
             {open
                 ? createPortal(
                       <div
                           ref={panelRef}
                           id={panelId}
-                          className="mobile-panel fixed inset-x-0 top-16 bottom-0 z-40 overflow-y-auto border-t border-border bg-background"
+                          className="mobile-sheet glass fixed inset-x-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-40 mx-auto max-h-[calc(100dvh-9rem)] max-w-md overflow-y-auto overscroll-contain rounded-3xl [scrollbar-width:thin]"
                       >
-                          <nav aria-label={t("menu")} className="wrap flex flex-col gap-10 py-8">
+                          <nav aria-label={t("menu")} className="flex flex-col gap-8 p-6">
                               <ul className="space-y-1">
                                   {MENU_SECTIONS.map((section) => (
                                       <li key={section}>
                                           <Link
                                               href={`/#${section}`}
                                               onClick={close}
-                                              className="block py-2 font-display text-3xl tracking-tight"
+                                              className="block py-1.5 font-display text-2xl tracking-tight"
                                           >
                                               {t(section)}
                                           </Link>
@@ -73,7 +73,7 @@ export const MobileMenu = () => {
                                       <Link
                                           href={INSIGHTS_PATH}
                                           onClick={close}
-                                          className="block py-2 font-display text-3xl tracking-tight"
+                                          className="block py-1.5 font-display text-2xl tracking-tight"
                                       >
                                           {t("insights")}
                                       </Link>
@@ -82,7 +82,7 @@ export const MobileMenu = () => {
                                       <Link
                                           href="/#faq"
                                           onClick={close}
-                                          className="block py-2 font-display text-3xl tracking-tight"
+                                          className="block py-1.5 font-display text-2xl tracking-tight"
                                       >
                                           {t("faq")}
                                       </Link>
@@ -92,7 +92,7 @@ export const MobileMenu = () => {
                                   <p className="mb-3 text-sm text-muted-foreground">
                                       {t("services")}
                                   </p>
-                                  <ul className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
+                                  <ul className="grid gap-y-2">
                                       {SERVICE_KEYS.map((key) => (
                                           <li key={key}>
                                               <Link
@@ -106,10 +106,8 @@ export const MobileMenu = () => {
                                       ))}
                                   </ul>
                               </div>
-                              <div className="flex flex-col items-start gap-4 border-t border-border pt-8">
-                                  <CtaLink size="lg" onClick={close}>
-                                      {cta("request")}
-                                  </CtaLink>
+                              <div className="flex flex-col items-start gap-4 border-t border-border pt-6">
+                                  <CtaLink onClick={close}>{cta("request")}</CtaLink>
                                   <a
                                       href={`mailto:${CONTACT_EMAIL}`}
                                       className="text-sm text-muted-foreground underline-offset-4 hover:underline"

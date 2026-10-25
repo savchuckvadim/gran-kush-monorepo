@@ -286,6 +286,59 @@
 /* ---------- surfaces: in the components layer, so a Tailwind utility (absolute, bg-…) can still override ---------- */
 
 @layer components {
+    /* liquid glass after the PafPaf site, an approximation with backdrop-filter: blurs and
+       saturates what is behind, a light rim on the edge, a soft shadow below. The bars of phones
+       and the burger sheet are made of it. */
+    .glass {
+        position: relative;
+        isolation: isolate;
+        background: color-mix(in oklab, var(--card) 58%, transparent);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        backdrop-filter: blur(20px) saturate(180%);
+        box-shadow:
+            0 18px 44px -20px rgb(0 0 0 / 0.55),
+            inset 0 1px 0 rgb(255 255 255 / 0.14),
+            inset 0 -1px 0 rgb(255 255 255 / 0.04);
+    }
+
+    .glass::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        padding: 1px;
+        border-radius: inherit;
+        background: linear-gradient(
+            150deg,
+            color-mix(in oklab, var(--foreground) 36%, transparent),
+            color-mix(in oklab, var(--foreground) 10%, transparent) 30%,
+            transparent 52%,
+            color-mix(in oklab, var(--foreground) 10%, transparent) 78%,
+            color-mix(in oklab, var(--foreground) 28%, transparent)
+        );
+        -webkit-mask:
+            linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+    }
+
+    :root:not(.dark) .glass {
+        background: color-mix(in oklab, var(--card) 72%, transparent);
+        box-shadow:
+            0 16px 40px -22px color-mix(in oklab, var(--foreground) 40%, transparent),
+            0 0 0 1px color-mix(in oklab, var(--foreground) 6%, transparent),
+            inset 0 1px 0 rgb(255 255 255 / 0.9);
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+        .glass {
+            background: var(--card);
+            -webkit-backdrop-filter: none;
+            backdrop-filter: none;
+        }
+    }
     .surface {
         position: relative;
         background: var(--card);
@@ -592,20 +645,43 @@
     }
 }
 
-/* burger panel slides down from under the header */
-.mobile-panel {
-    animation: panel-in 0.25s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+/* burger sheet rises from the bottom bar */
+.mobile-sheet {
+    animation: sheet-in 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
-@keyframes panel-in {
+@keyframes sheet-in {
     from {
         opacity: 0;
-        transform: translateY(-8px);
+        transform: translateY(16px) scale(0.98);
     }
     to {
         opacity: 1;
         transform: none;
     }
+}
+
+/* the pill under the current item of the bottom bar slides with a slight overshoot */
+.bar-pill {
+    transition:
+        left 0.55s cubic-bezier(0.34, 1.56, 0.64, 1),
+        width 0.55s cubic-bezier(0.34, 1.56, 0.64, 1),
+        opacity 0.3s;
+}
+
+/* until the script places the pill (before hydration) the current item paints its own */
+.bar-track:not([data-ready]) [aria-current] {
+    background: var(--primary);
+}
+
+/* header buttons inside a glass bar go bare: the bar is their frame */
+.glass .icon-btn {
+    border-color: transparent;
+    background: transparent;
+}
+
+.glass .icon-btn:hover {
+    background: color-mix(in oklab, var(--foreground) 8%, transparent);
 }
 
 /* ---------- prose (articles) ---------- */
@@ -640,13 +716,16 @@
         transition: none;
     }
     .split-word,
-    .mobile-panel,
+    .mobile-sheet,
     .backdrop-blobs > span,
     .marquee {
         animation: none;
     }
     .shine::after {
         display: none;
+    }
+    .bar-pill {
+        transition: none;
     }
     html {
         scroll-behavior: auto;

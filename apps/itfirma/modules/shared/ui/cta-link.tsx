@@ -5,7 +5,7 @@ import { CONTACT_PATH } from "@/modules/shared/config/routes";
 import { Link } from "@/modules/shared/i18n/navigation";
 
 type Variant = "primary" | "secondary" | "ghost";
-type Size = "md" | "lg";
+type Size = "sm" | "md" | "lg";
 
 interface CtaLinkProps {
     children: ReactNode;
@@ -27,6 +27,7 @@ const VARIANT: Record<Variant, string> = {
 };
 
 const SIZE: Record<Size, string> = {
+    sm: "h-9 px-4 text-xs",
     md: "h-11 px-5 text-sm",
     lg: "h-13 px-7 text-base",
 };
