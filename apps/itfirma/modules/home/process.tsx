@@ -11,14 +11,14 @@ export const Process = () => {
     const t = useTranslations("process");
 
     return (
-        <section id="process" className="scroll-mt-20 py-24 md:py-32">
+        <section id="process" className="scroll-mt-20 py-16 md:py-32">
             <div className="wrap">
                 <SectionHeading title={t("title")} lead={t("lead")} />
                 <ol className="mt-14 grid gap-10 border-t border-border pt-10 md:grid-cols-4 md:gap-8">
                     {STEPS.map((step, index) => (
                         <Reveal key={step} as="li" delay={index * 90}>
                             <p className="font-mono text-sm text-primary">
-                                [{String(index + 1).padStart(2, "0")}]
+                                {String(index + 1).padStart(2, "0")}
                             </p>
                             <h3 className="mt-3 text-xl md:text-2xl">{t(`steps.${step}.title`)}</h3>
                             <p className="mt-3 text-muted-foreground">{t(`steps.${step}.text`)}</p>

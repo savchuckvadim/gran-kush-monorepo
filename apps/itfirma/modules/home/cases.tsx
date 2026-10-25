@@ -12,7 +12,7 @@ export const Cases = () => {
     const t = useTranslations("cases");
 
     return (
-        <section id="cases" className="scroll-mt-20 py-24 md:py-32">
+        <section id="cases" className="scroll-mt-20 py-16 md:py-32">
             <div className="wrap">
                 <SectionHeading title={t("title")} lead={t("lead")} />
                 <div className="mt-14">

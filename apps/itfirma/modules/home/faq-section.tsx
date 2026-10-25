@@ -34,7 +34,7 @@ export const FaqSection = () => {
     };
 
     return (
-        <section id="faq" className="scroll-mt-20 py-24 md:py-32">
+        <section id="faq" className="scroll-mt-20 py-16 md:py-32">
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

@@ -592,6 +592,22 @@
     }
 }
 
+/* burger panel slides down from under the header */
+.mobile-panel {
+    animation: panel-in 0.25s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes panel-in {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
 /* ---------- prose (articles) ---------- */
 
 .prose-article p {
@@ -624,6 +640,7 @@
         transition: none;
     }
     .split-word,
+    .mobile-panel,
     .backdrop-blobs > span,
     .marquee {
         animation: none;

@@ -5,6 +5,15 @@ export type Locale = (typeof LOCALES)[number];
 // Spain first: clients read Spanish; English, Russian, Ukrainian and Catalan follow.
 export const DEFAULT_LOCALE: Locale = "es";
 
+/** Each language by its own name, as the language menu lists them. */
+export const LOCALE_NAMES: Record<Locale, string> = {
+    es: "Español",
+    en: "English",
+    ru: "Русский",
+    uk: "Українська",
+    ca: "Català",
+};
+
 export const LOCALE_LABELS: Record<Locale, string> = {
     es: "ES",
     en: "EN",

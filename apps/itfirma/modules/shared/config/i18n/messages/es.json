@@ -11,7 +11,9 @@
         "insights": "Artículos",
         "faq": "Preguntas",
         "contact": "Contacto",
-        "language": "Idioma"
+        "language": "Idioma",
+        "menu": "Menú",
+        "closeMenu": "Cerrar menú"
     },
     "cta": {
         "request": "Solicitar presupuesto",

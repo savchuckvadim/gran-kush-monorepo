@@ -11,7 +11,9 @@
         "insights": "Articles",
         "faq": "Questions",
         "contact": "Contact",
-        "language": "Language"
+        "language": "Language",
+        "menu": "Menu",
+        "closeMenu": "Close menu"
     },
     "cta": {
         "request": "Get a quote",

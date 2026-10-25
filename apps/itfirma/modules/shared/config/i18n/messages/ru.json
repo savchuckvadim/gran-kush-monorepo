@@ -11,7 +11,9 @@
         "insights": "Статьи",
         "faq": "Вопросы",
         "contact": "Контакты",
-        "language": "Язык"
+        "language": "Язык",
+        "menu": "Меню",
+        "closeMenu": "Закрыть меню"
     },
     "cta": {
         "request": "Обсудить проект",

@@ -4,10 +4,8 @@ import { useTranslations } from "next-intl";
 
 import { Moon, Sun } from "lucide-react";
 
+import { ICON_BUTTON } from "./icon-button";
 import { useSkin } from "./use-skin";
-
-const BUTTON =
-    "grid size-9 place-items-center rounded-full border border-border bg-card/60 text-foreground transition-colors hover:bg-accent";
 
 /** Sun or moon: flips light and dark for the current palette; hidden when the palette has one mode. */
 export const ModeToggle = () => {
@@ -24,7 +22,7 @@ export const ModeToggle = () => {
             onClick={() => setMode(next)}
             aria-label={t(next)}
             title={t(next)}
-            className={BUTTON}
+            className={ICON_BUTTON}
         >
             {mode === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
         </button>

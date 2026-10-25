@@ -19,8 +19,8 @@ export const Hero = () => {
     return (
         <section className="relative isolate overflow-hidden">
             <AuroraCanvas className="fade-b -z-10" />
-            <div className="wrap flex min-h-[82dvh] flex-col justify-center pt-16 pb-20 md:pt-20 md:pb-28">
-                <h1 className="max-w-5xl text-5xl leading-[1.04] md:text-7xl">
+            <div className="wrap flex min-h-[72dvh] md:min-h-[82dvh] flex-col justify-center pt-16 pb-20 md:pt-20 md:pb-28">
+                <h1 className="max-w-5xl text-4xl leading-[1.06] sm:text-5xl md:text-7xl">
                     <SplitText text={t("titleStart")} />
                     <WordRotator words={words} />
                     <span className="text-muted-foreground">{t("titleEnd")}</span>

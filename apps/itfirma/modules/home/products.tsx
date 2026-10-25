@@ -12,7 +12,7 @@ export const Products = () => {
     const t = useTranslations("products");
 
     return (
-        <section id="products" className="wrap scroll-mt-20 py-24 md:py-32">
+        <section id="products" className="wrap scroll-mt-20 py-16 md:py-32">
             <SectionHeading title={t("title")} lead={t("lead")} />
             <div className="grid gap-4 md:grid-cols-3">
                 {SHOWN_PRODUCTS.map(({ key, url, palette }, index) => (

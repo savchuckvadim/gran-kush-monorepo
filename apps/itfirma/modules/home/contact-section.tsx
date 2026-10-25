@@ -11,7 +11,7 @@ export const ContactSection = () => {
     const t = useTranslations("contact");
 
     return (
-        <section id="contact" className="scroll-mt-20 py-24 md:py-32">
+        <section id="contact" className="scroll-mt-20 py-16 md:py-32">
             <div className="wrap grid gap-12 lg:grid-cols-[1fr_1.5fr] lg:gap-20">
                 <div>
                     <SectionHeading title={t("title")} lead={t("lead")} />

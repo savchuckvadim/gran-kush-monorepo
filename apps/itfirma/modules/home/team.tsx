@@ -11,7 +11,7 @@ export const Team = () => {
     const t = useTranslations("team");
 
     return (
-        <section id="team" className="scroll-mt-20 py-24 md:py-32">
+        <section id="team" className="scroll-mt-20 py-16 md:py-32">
             <div className="wrap grid gap-12 lg:grid-cols-[1.2fr_1fr] lg:gap-20">
                 <div>
                     <SectionHeading title={t("title")} size="lg" />

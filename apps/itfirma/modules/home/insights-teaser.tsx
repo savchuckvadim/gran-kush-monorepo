@@ -17,7 +17,7 @@ export const InsightsTeaser = () => {
     const articles = getArticles(isLocale(locale) ? locale : DEFAULT_LOCALE);
 
     return (
-        <section id="insights" className="scroll-mt-20 py-24 md:py-32">
+        <section id="insights" className="scroll-mt-20 py-16 md:py-32">
             <div className="wrap grid gap-12 lg:grid-cols-[1fr_1.6fr] lg:gap-20">
                 <div className="lg:sticky lg:top-28 lg:self-start">
                     <SectionHeading title={t("title")} lead={t("lead")} />

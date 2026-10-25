@@ -15,6 +15,8 @@ interface CtaLinkProps {
     className?: string;
     /** Primary buttons point right; a link into the page may want no arrow. */
     arrow?: boolean;
+    /** Runs before navigation, e.g. to close the burger panel. */
+    onClick?: () => void;
 }
 
 const VARIANT: Record<Variant, string> = {
@@ -40,9 +42,11 @@ export const CtaLink = ({
     size = "md",
     className,
     arrow = variant === "primary",
+    onClick,
 }: CtaLinkProps) => (
     <Link
         href={href}
+        onClick={onClick}
         className={[
             "group inline-flex shrink-0 items-center gap-2 rounded-full font-medium whitespace-nowrap",
             variant === "ghost" ? "" : SIZE[size],

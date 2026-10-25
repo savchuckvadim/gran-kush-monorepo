@@ -1,5 +1,7 @@
 import { useTranslations } from "next-intl";
 
+import { Check } from "lucide-react";
+
 import type { ServicePageContent } from "@/modules/content/types";
 import { CtaBand } from "@/modules/home/cta-band";
 import { SERVICE_KEYS, servicePath } from "@/modules/shared/config/services";
@@ -53,7 +55,7 @@ export const ServicePage = ({ content }: ServicePageProps) => {
                     <ul className="mt-5 space-y-3">
                         {content.forWhom.map((line) => (
                             <li key={line} className="flex gap-3 text-muted-foreground">
-                                <span className="font-mono text-primary">[ ]</span>
+                                <Check className="mt-1 size-4 shrink-0 text-primary" aria-hidden />
                                 <span>{line}</span>
                             </li>
                         ))}
@@ -83,7 +85,7 @@ export const ServicePage = ({ content }: ServicePageProps) => {
                     {content.steps.map((step, index) => (
                         <Reveal key={step.title} as="li" delay={index * 80}>
                             <p className="font-mono text-sm text-primary">
-                                [{String(index + 1).padStart(2, "0")}]
+                                {String(index + 1).padStart(2, "0")}
                             </p>
                             <h3 className="mt-3 text-xl">{step.title}</h3>
                             <p className="mt-3 text-muted-foreground">{step.text}</p>

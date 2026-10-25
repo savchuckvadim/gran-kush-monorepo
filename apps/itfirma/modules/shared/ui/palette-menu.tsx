@@ -1,40 +1,27 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useId, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { Palette } from "lucide-react";
 
 import { SKINS } from "@/modules/shared/config/skins";
 
+import { HEADER_POPOVER, ICON_BUTTON } from "./icon-button";
+import { useDismiss } from "./use-dismiss";
 import { useSkin } from "./use-skin";
 
-const BUTTON =
-    "grid size-9 place-items-center rounded-full border border-border bg-card/60 text-foreground transition-colors hover:bg-accent";
-
-/** A palette icon that opens four swatches, one per CRM skin; the active one wears a ring. */
+/** A palette icon that opens four gradient swatches, one per CRM skin; the active one wears a ring. */
 export const PaletteMenu = () => {
     const t = useTranslations("skins");
     const { skin, setSkin } = useSkin();
     const [open, setOpen] = useState(false);
     const rootRef = useRef<HTMLDivElement>(null);
     const panelId = useId();
+    const close = useCallback(() => setOpen(false), []);
 
-    useEffect(() => {
-        if (!open) return;
-        const onPointerDown = (event: PointerEvent) => {
-            if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
-        };
-        const onKeyDown = (event: KeyboardEvent) => {
-            if (event.key === "Escape") setOpen(false);
-        };
-        document.addEventListener("pointerdown", onPointerDown);
-        document.addEventListener("keydown", onKeyDown);
-        return () => {
-            document.removeEventListener("pointerdown", onPointerDown);
-            document.removeEventListener("keydown", onKeyDown);
-        };
-    }, [open]);
+    const refs = useMemo(() => [rootRef], []);
+    useDismiss(open, close, refs);
 
     return (
         <div ref={rootRef} className="relative">
@@ -46,7 +33,7 @@ export const PaletteMenu = () => {
                 aria-label={t("palette")}
                 title={t("palette")}
                 onClick={() => setOpen((value) => !value)}
-                className={BUTTON}
+                className={ICON_BUTTON}
             >
                 <Palette className="size-4" />
             </button>
@@ -55,7 +42,7 @@ export const PaletteMenu = () => {
                     id={panelId}
                     role="radiogroup"
                     aria-label={t("palette")}
-                    className="surface absolute top-full right-0 z-40 mt-2 flex gap-2 p-2"
+                    className={`${HEADER_POPOVER} flex gap-2 p-2`}
                 >
                     {SKINS.map((item) => (
                         <button
@@ -67,7 +54,7 @@ export const PaletteMenu = () => {
                             title={t(item.id)}
                             onClick={() => {
                                 setSkin(item.id);
-                                setOpen(false);
+                                close();
                             }}
                             data-skin={item.id}
                             className={[

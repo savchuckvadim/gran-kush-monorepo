@@ -43,7 +43,7 @@ export const Services = () => {
     const missing = SERVICE_KEYS.filter((key) => !ORDER.includes(key));
 
     return (
-        <section id="services" className="relative scroll-mt-20 py-24 md:py-32">
+        <section id="services" className="relative scroll-mt-20 py-16 md:py-32">
             <DotGrid className="fade-y -z-10" />
             <div className="wrap">
                 <SectionHeading title={t("title")} lead={t("lead")} size="lg" />

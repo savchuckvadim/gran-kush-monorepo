@@ -11,7 +11,9 @@
         "insights": "Articles",
         "faq": "Preguntes",
         "contact": "Contacte",
-        "language": "Idioma"
+        "language": "Idioma",
+        "menu": "Menú",
+        "closeMenu": "Tancar el menú"
     },
     "cta": {
         "request": "Demanar pressupost",
