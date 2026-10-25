@@ -6,8 +6,11 @@ import { Moon, Sun } from "lucide-react";
 
 import { useSkin } from "./use-skin";
 
-/** Light / dark for skins that have both; hidden for a single-mode skin such as Black. */
-export const ModeSwitch = () => {
+const BUTTON =
+    "grid size-9 place-items-center rounded-full border border-border bg-card/60 text-foreground transition-colors hover:bg-accent";
+
+/** Sun or moon: flips light and dark for the current palette; hidden when the palette has one mode. */
+export const ModeToggle = () => {
     const t = useTranslations("skins");
     const { mode, canToggleMode, setMode } = useSkin();
 
@@ -19,9 +22,9 @@ export const ModeSwitch = () => {
         <button
             type="button"
             onClick={() => setMode(next)}
-            aria-label={t(next === "dark" ? "toDark" : "toLight")}
-            title={t(next === "dark" ? "toDark" : "toLight")}
-            className="grid size-9 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            aria-label={t(next)}
+            title={t(next)}
+            className={BUTTON}
         >
             {mode === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
         </button>

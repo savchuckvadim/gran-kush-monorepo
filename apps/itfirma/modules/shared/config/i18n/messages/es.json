@@ -1,89 +1,115 @@
 {
     "meta": {
-        "title": "Desarrollo de software a medida y productos SaaS",
-        "description": "Estudio de desarrollo en España. Webs, aplicaciones web y móviles a medida, integraciones, agentes de IA y Bitrix24 llave en mano, además de productos SaaS propios por suscripción."
+        "title": "Software a medida, Bitrix24 e IA para empresas",
+        "description": "Estudio de desarrollo en España. Aplicaciones web y móviles a medida, implantación de Bitrix24, integraciones, agentes de IA y soporte. También creamos productos SaaS propios por suscripción."
     },
     "nav": {
         "services": "Servicios",
-        "products": "Productos",
-        "process": "Proceso",
-        "about": "Estudio",
+        "cases": "Casos",
+        "process": "Cómo trabajamos",
+        "team": "Estudio",
+        "insights": "Artículos",
+        "faq": "Preguntas",
         "contact": "Contacto",
         "language": "Idioma"
     },
+    "cta": {
+        "request": "Solicitar presupuesto",
+        "seeServices": "Ver servicios"
+    },
     "skins": {
-        "label": "Tema",
+        "label": "Apariencia",
+        "palette": "Paleta",
         "black": "Black",
         "cristal": "Cristal",
         "sociopath": "Sociopath",
         "coqueta": "Coqueta",
-        "toDark": "Modo oscuro",
-        "toLight": "Modo claro"
+        "light": "Claro",
+        "dark": "Oscuro"
     },
     "hero": {
-        "badge": "Aceptamos nuevos proyectos",
-        "titleStart": "Diseñamos y lanzamos",
-        "titleEnd": "para tu negocio",
-        "words": {
-            "web": "webs y tiendas",
-            "mobile": "apps móviles",
-            "crm": "CRM a medida",
-            "ai": "agentes de IA",
-            "bitrix": "Bitrix24 llave en mano"
-        },
-        "lead": "Desarrollamos software a medida para empresas y creamos nuestros propios productos SaaS. Un solo equipo te acompaña de la idea al lanzamiento y el soporte.",
-        "ctaPrimary": "Pedir presupuesto",
-        "ctaSecondary": "Ver servicios"
+        "title": "Software a medida para vender más y administrar menos.",
+        "lead": "Aplicaciones web y móviles, Bitrix24 llave en mano, integraciones y agentes de IA. Desde España, de la idea al soporte."
     },
     "services": {
-        "eyebrow": "Servicios",
-        "title": "Desarrollo a medida",
-        "lead": "Un proyecto completo o solo la parte que falta. Usamos el mismo stack con el que funcionan nuestros propios productos.",
+        "title": "Construimos lo que a tu negocio le falta",
+        "lead": "Un proyecto completo o la pieza que falta. Trabajamos con el mismo stack con el que funcionan nuestros propios productos.",
         "items": {
             "web": {
                 "title": "Webs y landing pages",
                 "text": "Sitios rápidos y multilingües con SEO técnico, panel de contenidos y formularios que llegan directamente a tu CRM.",
-                "stack": "Next.js · CMS · SEO"
+                "stack": "Next.js, CMS, SEO"
             },
             "apps": {
                 "title": "Aplicaciones web y SaaS",
                 "text": "Paneles, áreas de cliente, CRM a medida y productos SaaS multiempresa, del prototipo a producción.",
-                "stack": "React · NestJS · PostgreSQL"
+                "stack": "React, NestJS, PostgreSQL"
             },
             "mobile": {
                 "title": "Apps móviles",
                 "text": "Una base de código para iOS y Android: acceso, pagos, notificaciones y publicación en las tiendas.",
-                "stack": "React Native · Expo"
+                "stack": "React Native, Expo"
             },
             "bitrix": {
                 "title": "Bitrix24 llave en mano",
-                "text": "Implantación completa: embudos, campos, automatizaciones, telefonía, informes y formación del equipo. Apps propias para el portal.",
-                "stack": "REST API · Apps · Robots"
+                "text": "Implantación completa: embudos, campos, automatizaciones, telefonía, informes y formación del equipo. Aplicaciones propias para tu portal cuando la configuración no llega.",
+                "stack": "REST API, apps, robots"
             },
             "integrations": {
                 "title": "Integraciones",
                 "text": "Conectamos CRM, web, telefonía, pagos, contabilidad y mensajería para que nadie copie datos a mano.",
-                "stack": "REST · Webhooks · Colas"
+                "stack": "REST, webhooks, colas"
             },
             "ai": {
                 "title": "Agentes de IA",
-                "text": "Asistentes que leen el CRM, resumen llamadas, rellenan informes y responden a clientes, integrados con Bitrix24 y tus sistemas.",
-                "stack": "Claude · OpenAI · RAG"
+                "text": "Asistentes que leen el CRM, resumen llamadas, rellenan informes y responden a clientes dentro de tus sistemas.",
+                "stack": "Claude, OpenAI, RAG"
             },
             "aiAdoption": {
                 "title": "IA en tus procesos",
-                "text": "Detectamos dónde la IA ahorra tiempo al equipo, la conectamos a tus procesos y sistemas y formamos a las personas para usarla.",
-                "stack": "Auditoría · Implantación · Formación"
+                "text": "Detectamos dónde la IA ahorra tiempo al equipo, la conectamos a tus sistemas y formamos a las personas para usarla.",
+                "stack": "Auditoría, implantación, formación"
             },
             "devops": {
                 "title": "Infraestructura y soporte",
                 "text": "Servidores, despliegue automático, copias de seguridad y monitorización. Seguimos contigo después del lanzamiento.",
-                "stack": "Docker · CI/CD · Linux"
+                "stack": "Docker, CI/CD, Linux"
             }
         }
     },
+    "bitrix": {
+        "kicker": "Bitrix24",
+        "title": "Un Bitrix24 que el equipo de ventas usa de verdad",
+        "lead": "Lo configuramos alrededor de cómo vende tu equipo, no al revés. El comercial lo abre porque le ahorra trabajo; el responsable, porque ve el embudo sin preguntar.",
+        "points": {
+            "crm": {
+                "title": "Embudos y fichas",
+                "text": "Etapas que reflejan tu ciclo real de venta, campos que importan y nada que rellenar dos veces."
+            },
+            "automation": {
+                "title": "Automatizaciones",
+                "text": "Tareas, recordatorios y cambios de etapa que ocurren solos cuando pasa algo: una llamada, un correo, un pago."
+            },
+            "telephony": {
+                "title": "Telefonía e informes de llamada",
+                "text": "Llamadas dentro del CRM y un informe corto tras cada una. Todo lo que el comercial sabe queda en la ficha."
+            },
+            "apps": {
+                "title": "Aplicaciones propias",
+                "text": "Cuando Bitrix24 no llega, desarrollamos la app: widgets en la ficha, formularios, robots y paneles a medida."
+            },
+            "migration": {
+                "title": "Migración e integraciones",
+                "text": "Traemos datos de hojas de cálculo u otro CRM y conectamos web, telefonía, contabilidad y mensajería."
+            },
+            "training": {
+                "title": "Formación y acompañamiento",
+                "text": "Enseñamos al equipo con su propio portal y nos quedamos las primeras semanas para ajustar lo que la práctica cambie."
+            }
+        },
+        "more": "Más sobre Bitrix24"
+    },
     "products": {
-        "eyebrow": "Productos",
         "title": "Productos propios",
         "lead": "Desarrollamos y mantenemos nuestro propio software. Lo que ofrecemos a clientes lo usamos cada día.",
         "items": {
@@ -102,15 +128,47 @@
             "bitrix": {
                 "kind": "Bitrix24 · ventas B2B",
                 "name": "Automatización de ventas",
-                "text": "Apps para Bitrix24 que guían la venta activa B2B: un informe tras cada llamada, embudo y tareas automáticos, KPI del equipo. Funcionan en muchos portales a la vez.",
+                "text": "Apps para Bitrix24 que guían la venta activa B2B: un informe tras cada llamada, embudo y tareas automáticos, KPI del equipo.",
                 "status": "Bajo pedido"
             }
         }
     },
+    "cases": {
+        "title": "Problemas que ya hemos resuelto",
+        "lead": "Tres proyectos reales, descritos sin nombres: la tarea, lo que construimos y lo que cambió.",
+        "labels": {
+            "project": "Proyecto",
+            "task": "Tarea",
+            "solution": "Qué construimos",
+            "result": "Qué cambió"
+        },
+        "items": {
+            "sales": {
+                "sector": "Ventas B2B · red de distribuidores",
+                "name": "Automatización de ventas activas en Bitrix24",
+                "task": "Decenas de comerciales que llaman en frío, presentan a distancia y hacen seguimiento durante meses. Los responsables no veían el embudo real y los comerciales perdían horas rellenando la CRM.",
+                "solution": "Aplicaciones para Bitrix24 que funcionan en muchos portales a la vez: un informe de una pantalla tras cada llamada, etapas y tareas automáticas, panel de KPI para los responsables y telefonía integrada.",
+                "result": "Un formulario por llamada en lugar de una docena de campos. Los responsables ven conversión y actividad sin pedir nada y los clientes dormidos se redistribuyen entre comerciales por reglas acordadas."
+            },
+            "studios": {
+                "sector": "SaaS · negocios con cita previa",
+                "name": "CRM con área de cliente para estudios",
+                "task": "Negocios que gestionaban citas, clientes y consentimientos en papel y chats. Necesitaban una herramienta sencilla para el equipo y un área donde el cliente firma y consulta sus datos.",
+                "solution": "Plataforma SaaS multiempresa: agenda, fichas de clientes, firma de consentimientos, área de cliente con acceso por enlace o Telegram, roles del equipo y facturación por suscripción.",
+                "result": "Cada negocio arranca en minutos con su propio espacio aislado. El consentimiento se firma desde el móvil y queda guardado; el equipo trabaja desde una sola pantalla."
+            },
+            "kpi": {
+                "sector": "Dirección comercial · herramientas internas",
+                "name": "Panel de KPI en tiempo real y constructor de contratos",
+                "task": "La dirección preparaba informes a mano a partir de varios sistemas y los contratos se montaban en una herramienta local heredada que nadie podía mantener.",
+                "solution": "Panel web con datos en tiempo real desde CRM y ERP por WebSockets, y un constructor de contratos incrustado en la ficha de la CRM, con colas y caché para que las plantillas pesadas no bloqueen a nadie.",
+                "result": "El informe de la mañana desapareció: las cifras están siempre al día. Los contratos salen de la propia CRM con la versión correcta de cada plantilla."
+            }
+        }
+    },
     "process": {
-        "eyebrow": "Proceso",
         "title": "Cómo trabajamos",
-        "lead": "Sin sorpresas: alcance y precio por escrito y avances visibles cada semana.",
+        "lead": "Alcance y precio por escrito, avances visibles cada semana y el código a tu nombre desde el primer día.",
         "steps": {
             "talk": {
                 "title": "Conversación",
@@ -128,16 +186,35 @@
                 "title": "Lanzamiento y soporte",
                 "text": "Publicamos, formamos al equipo y seguimos con mantenimiento y mejoras."
             }
+        },
+        "models": {
+            "title": "Tres formas de trabajar juntos",
+            "lead": "Elegimos el modelo según lo claro que esté el alcance. Se puede cambiar de uno a otro entre etapas.",
+            "items": {
+                "fixed": {
+                    "title": "Precio cerrado",
+                    "text": "Para un alcance definido: una landing, una integración concreta, una implantación estándar de Bitrix24. Sabes el precio antes de empezar."
+                },
+                "time": {
+                    "title": "Por horas, con tope",
+                    "text": "Para productos que evolucionan. Facturamos el trabajo real cada mes, con un límite acordado y un informe de lo hecho."
+                },
+                "retainer": {
+                    "title": "Soporte mensual",
+                    "text": "Una bolsa de horas para mantenimiento, pequeñas mejoras y consultas, con tiempo de respuesta acordado."
+                }
+            }
         }
     },
-    "about": {
-        "eyebrow": "Estudio",
-        "title": "Software para clientes y software propio",
-        "text": "IT-firma es el estudio de {name}, ingeniero de software full-stack en España. Trabajamos en dos líneas: desarrollo de software a medida para clientes y productos SaaS propios que ofrecemos por suscripción. Una alimenta a la otra: lo que recomendamos a un cliente lo hemos lanzado y lo mantenemos nosotros mismos.",
+    "team": {
+        "title": "Un estudio pequeño que entrega productos completos",
+        "text1": "IT-firma es un estudio de desarrollo con base en España. Trabajamos en dos líneas que se alimentan entre sí: software a medida para clientes y productos SaaS propios que ofrecemos por suscripción. Lo que recomendamos a un cliente, lo hemos lanzado y lo mantenemos nosotros.",
+        "text2": "El núcleo del equipo es full-stack: arquitectura, backend, interfaces y despliegue en las mismas manos, sin pasar la tarea de departamento en departamento. Para diseño, pruebas o una tecnología concreta sumamos especialistas de confianza al proyecto. Hablas siempre con quien escribe el código.",
+        "founder": "Al frente está {name}, ingeniero de software full-stack y fundador del estudio.",
         "principles": {
             "own": {
-                "title": "SaaS propios",
-                "text": "Desarrollamos y operamos servicios en la nube para pequeñas empresas, con pago por suscripción. Sabemos lo que cuesta un producto después del lanzamiento."
+                "title": "Productos propios",
+                "text": "Operamos nuestro software en producción y sabemos lo que cuesta después del lanzamiento."
             },
             "clean": {
                 "title": "Código mantenible",
@@ -145,7 +222,7 @@
             },
             "direct": {
                 "title": "Trato directo",
-                "text": "Hablas con quien diseña y escribe el código, sin intermediarios."
+                "text": "Sin gestores intermedios: decisiones rápidas y respuestas de quien conoce el proyecto."
             },
             "spain": {
                 "title": "En España, para Europa",
@@ -153,8 +230,57 @@
             }
         }
     },
+    "insights": {
+        "title": "Artículos",
+        "lead": "Lo que aprendemos construyendo CRM, automatizaciones y productos, contado sin jerga.",
+        "all": "Todos los artículos",
+        "reading": "{minutes} min de lectura",
+        "pageTitle": "Artículos",
+        "pageLead": "Notas prácticas sobre CRM, Bitrix24, IA y desarrollo a medida, escritas por quienes lo implantan."
+    },
+    "faq": {
+        "title": "Preguntas frecuentes",
+        "lead": "Lo que nos preguntan en la primera conversación.",
+        "items": {
+            "cost": {
+                "question": "¿Cuánto cuesta un proyecto?",
+                "answer": "Depende del alcance, y por eso lo cerramos por escrito antes de empezar. Como referencia: una landing o una integración concreta suele quedar por debajo de 3.000 €; una aplicación web o una implantación completa de Bitrix24 se mueve entre 3.000 y 30.000 €; un producto SaaS o una app móvil con backend propio, por encima. Tras la primera conversación recibes una horquilla; tras el análisis, un precio."
+            },
+            "time": {
+                "question": "¿Cuánto tarda?",
+                "answer": "Una landing, de dos a cuatro semanas. Una implantación de Bitrix24, de tres a ocho semanas según los procesos. Una aplicación a medida, de dos a cuatro meses hasta la primera versión en producción, entregada por etapas para que la uses antes de que esté todo."
+            },
+            "start": {
+                "question": "¿Qué necesitáis para empezar?",
+                "answer": "Una descripción de la tarea con tus palabras, acceso a lo que ya existe (web, CRM, hojas de cálculo) y una persona de tu lado que pueda decidir. El resto lo preguntamos nosotros."
+            },
+            "ownership": {
+                "question": "¿De quién es el código?",
+                "answer": "Tuyo. El repositorio, las cuentas de hosting y los dominios se crean a tu nombre o se transfieren al terminar. Podemos seguir manteniendo el proyecto, pero no dependes de nosotros para hacerlo."
+            },
+            "support": {
+                "question": "¿Qué pasa después del lanzamiento?",
+                "answer": "Las primeras semanas corregimos sin coste lo que el uso real saque a la luz. Después puedes contratar soporte mensual con horas y tiempos de respuesta acordados, o llamarnos solo cuando haga falta."
+            },
+            "remote": {
+                "question": "¿Trabajáis en remoto?",
+                "answer": "Sí, con toda España y Europa. Las reuniones son por videollamada, el avance se ve en un entorno de pruebas y la comunicación va por el canal que prefieras: correo, Telegram o Slack."
+            },
+            "stack": {
+                "question": "¿Con qué tecnologías trabajáis?",
+                "answer": "TypeScript en todo el stack: Next.js y React en el front, NestJS y PostgreSQL en el backend, React Native para móvil, Docker y CI/CD para desplegar. Para Bitrix24 usamos su REST API y aplicaciones propias. Si tu sistema actual está en PHP o Python, también lo entendemos."
+            },
+            "small": {
+                "question": "¿Trabajáis con empresas pequeñas?",
+                "answer": "Sí, es nuestro cliente habitual: negocios de dos a cincuenta personas que necesitan que la herramienta funcione desde el primer día. Para una tarea pequeña proponemos una solución pequeña."
+            }
+        }
+    },
+    "ctaBand": {
+        "title": "¿Hablamos de tu proyecto?",
+        "text": "Cuéntanos la tarea en unas líneas. Respondemos en un día laborable con preguntas o una primera estimación."
+    },
     "contact": {
-        "eyebrow": "Contacto",
         "title": "Cuéntanos tu proyecto",
         "lead": "Respondemos en un día laborable con preguntas o una primera estimación.",
         "note": "¿Prefieres escribir directamente? Usa el correo. Los datos del formulario solo se usan para responderte.",
@@ -187,18 +313,34 @@
             "budgets": {
                 "unknown": "Aún no lo sé",
                 "lt3k": "Menos de 3.000 €",
-                "3k-10k": "3.000–10.000 €",
-                "10k-30k": "10.000–30.000 €",
+                "3k-10k": "3.000 a 10.000 €",
+                "10k-30k": "10.000 a 30.000 €",
                 "gt30k": "Más de 30.000 €"
             }
         }
     },
     "footer": {
-        "tagline": "Software para empresas: a medida y por suscripción.",
-        "theme": "Tema",
-        "legal": "Legal",
+        "tagline": "Software a medida y productos SaaS para empresas. Desde España.",
+        "services": "Servicios",
+        "company": "Estudio",
         "contact": "Contacto",
         "owner": "IT-firma es el nombre comercial de {name}, autónomo, NIF {nif}."
+    },
+    "servicePage": {
+        "allServices": "Todos los servicios",
+        "forWhom": "Para quién",
+        "deliverables": "Qué entregamos",
+        "how": "Cómo lo hacemos",
+        "stack": "Tecnologías",
+        "faq": "Preguntas sobre este servicio",
+        "ctaTitle": "¿Empezamos?",
+        "ctaText": "Cuéntanos qué necesitas en {service} y te respondemos en un día laborable con preguntas o una primera estimación.",
+        "otherServices": "Otros servicios"
+    },
+    "article": {
+        "back": "Todos los artículos",
+        "related": "Servicio relacionado",
+        "openService": "Ver el servicio"
     },
     "legal": {
         "updated": "Actualizado: {date}",

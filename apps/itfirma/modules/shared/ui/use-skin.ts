@@ -36,14 +36,24 @@ const persist = (key: string, value: string) => {
     }
 };
 
-/** Writes the look to <html> and storage; the same rules as SKIN_SCRIPT runs before paint. */
-const applySkin = (skin: SkinId, preferred: SkinMode) => {
+/** What the device asks for; the default until the visitor picks a mode. */
+const systemMode = (): SkinMode =>
+    window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+
+/**
+ * Writes the look to <html> and, when the visitor chose it, to storage; the same rules as
+ * SKIN_SCRIPT runs before paint. A mode that only follows the device is not remembered, so the
+ * site keeps following the device until the visitor presses the toggle.
+ */
+const applySkin = (skin: SkinId, preferred: SkinMode, remember = true) => {
     const mode = getEffectiveMode(getSkin(skin), preferred);
     const root = document.documentElement;
     root.setAttribute("data-skin", skin);
     root.classList.toggle("dark", mode === "dark");
-    persist(SKIN_KEY, skin);
-    persist(MODE_KEY, mode);
+    if (remember) {
+        persist(SKIN_KEY, skin);
+        persist(MODE_KEY, mode);
+    }
     window.dispatchEvent(new Event(SKIN_EVENT));
 };
 
@@ -63,7 +73,8 @@ export const restoreSkin = () => {
     const stored = readStored(SKIN_KEY);
     const skin = isSkinId(stored) ? stored : DEFAULT_SKIN;
     const mode = readStored(MODE_KEY);
-    applySkin(skin, mode === "light" || mode === "dark" ? mode : getSkin(skin).modes[0]);
+    const chosen = mode === "light" || mode === "dark";
+    applySkin(skin, chosen ? mode : systemMode(), chosen);
 };
 
 /** The current look and the two ways to change it; every switch on the page stays in sync. */

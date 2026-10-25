@@ -1,23 +1,35 @@
 import type { ReactNode } from "react";
 
-import { type HomeSection, sectionNumber } from "@/modules/shared/config/routes";
-
 import { Reveal } from "./reveal";
 
 interface SectionHeadingProps {
-    section: HomeSection;
-    eyebrow: string;
     title: ReactNode;
     lead?: string;
+    /** Small label above the title; the home page uses it on two sections at most. */
+    kicker?: string;
+    size?: "md" | "lg";
+    className?: string;
 }
 
-/** Numbered eyebrow in mono, display title, one-paragraph lead. */
-export const SectionHeading = ({ section, eyebrow, title, lead }: SectionHeadingProps) => (
-    <Reveal className="mb-10 max-w-2xl md:mb-14">
-        <p className="mb-3 font-mono text-xs tracking-widest text-primary uppercase">
-            {sectionNumber(section)} · {eyebrow}
-        </p>
-        <h2 className="text-3xl leading-tight md:text-5xl">{title}</h2>
-        {lead ? <p className="mt-4 text-base text-muted-foreground md:text-lg">{lead}</p> : null}
+/** Display title with an optional one-paragraph lead, stacked and left-aligned. */
+export const SectionHeading = ({
+    title,
+    lead,
+    kicker,
+    size = "md",
+    className,
+}: SectionHeadingProps) => (
+    <Reveal className={["max-w-3xl", className].filter(Boolean).join(" ")}>
+        {kicker ? <p className="mb-4 text-sm font-medium text-primary">{kicker}</p> : null}
+        <h2
+            className={
+                size === "lg"
+                    ? "text-4xl leading-[1.05] md:text-6xl"
+                    : "text-3xl leading-tight md:text-5xl"
+            }
+        >
+            {title}
+        </h2>
+        {lead ? <p className="mt-5 max-w-[60ch] text-lg text-muted-foreground">{lead}</p> : null}
     </Reveal>
 );

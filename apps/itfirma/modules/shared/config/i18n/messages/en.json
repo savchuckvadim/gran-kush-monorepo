@@ -1,89 +1,115 @@
 {
     "meta": {
-        "title": "Custom software development and SaaS products",
-        "description": "Development studio in Spain. Custom websites, web and mobile apps, integrations, AI agents and turnkey Bitrix24, plus our own SaaS products by subscription."
+        "title": "Custom software, Bitrix24 and AI for business",
+        "description": "Development studio in Spain. Custom web and mobile apps, Bitrix24 implementation, integrations, AI agents and support. We also build our own SaaS products sold by subscription."
     },
     "nav": {
         "services": "Services",
-        "products": "Products",
-        "process": "Process",
-        "about": "Studio",
+        "cases": "Cases",
+        "process": "How we work",
+        "team": "Studio",
+        "insights": "Articles",
+        "faq": "Questions",
         "contact": "Contact",
         "language": "Language"
     },
+    "cta": {
+        "request": "Get a quote",
+        "seeServices": "See services"
+    },
     "skins": {
-        "label": "Theme",
+        "label": "Appearance",
+        "palette": "Palette",
         "black": "Black",
         "cristal": "Cristal",
         "sociopath": "Sociopath",
         "coqueta": "Coqueta",
-        "toDark": "Dark mode",
-        "toLight": "Light mode"
+        "light": "Light",
+        "dark": "Dark"
     },
     "hero": {
-        "badge": "Taking on new projects",
-        "titleStart": "We design and ship",
-        "titleEnd": "for your business",
-        "words": {
-            "web": "websites and stores",
-            "mobile": "mobile apps",
-            "crm": "custom CRMs",
-            "ai": "AI agents",
-            "bitrix": "turnkey Bitrix24"
-        },
-        "lead": "We build custom software for businesses and run our own SaaS products. One team takes you from idea to launch and support.",
-        "ctaPrimary": "Get a quote",
-        "ctaSecondary": "See services"
+        "title": "Custom software to sell more and administer less.",
+        "lead": "Web and mobile apps, turnkey Bitrix24, integrations and AI agents. From Spain, from the idea to support."
     },
     "services": {
-        "eyebrow": "Services",
-        "title": "Custom development",
-        "lead": "A whole project or just the missing piece. We use the same stack our own products run on.",
+        "title": "We build what your business is missing",
+        "lead": "A whole project or the one piece that is missing. We work on the same stack our own products run on.",
         "items": {
             "web": {
                 "title": "Websites and landing pages",
                 "text": "Fast multilingual sites with technical SEO, a content panel and forms that go straight into your CRM.",
-                "stack": "Next.js · CMS · SEO"
+                "stack": "Next.js, CMS, SEO"
             },
             "apps": {
                 "title": "Web apps and SaaS",
                 "text": "Dashboards, client areas, custom CRMs and multi-tenant SaaS products, from prototype to production.",
-                "stack": "React · NestJS · PostgreSQL"
+                "stack": "React, NestJS, PostgreSQL"
             },
             "mobile": {
                 "title": "Mobile apps",
                 "text": "One codebase for iOS and Android: sign-in, payments, notifications and store publishing.",
-                "stack": "React Native · Expo"
+                "stack": "React Native, Expo"
             },
             "bitrix": {
                 "title": "Turnkey Bitrix24",
-                "text": "Full setup: pipelines, fields, automations, telephony, reports and team training. Custom apps for your portal.",
-                "stack": "REST API · Apps · Robots"
+                "text": "Full implementation: pipelines, fields, automations, telephony, reports and team training. Custom apps for your portal where configuration stops.",
+                "stack": "REST API, apps, robots"
             },
             "integrations": {
                 "title": "Integrations",
                 "text": "We connect CRM, website, telephony, payments, accounting and messengers so nobody copies data by hand.",
-                "stack": "REST · Webhooks · Queues"
+                "stack": "REST, webhooks, queues"
             },
             "ai": {
                 "title": "AI agents",
-                "text": "Assistants that read the CRM, summarise calls, fill in reports and answer clients, wired into Bitrix24 and your systems.",
-                "stack": "Claude · OpenAI · RAG"
+                "text": "Assistants that read the CRM, summarise calls, fill in reports and answer clients inside your systems.",
+                "stack": "Claude, OpenAI, RAG"
             },
             "aiAdoption": {
                 "title": "AI in your processes",
-                "text": "We find where AI saves your team time, connect it to your processes and systems, and train people to use it.",
-                "stack": "Audit · Rollout · Training"
+                "text": "We find where AI saves your team time, connect it to your systems and train people to use it.",
+                "stack": "Audit, rollout, training"
             },
             "devops": {
                 "title": "Infrastructure and support",
                 "text": "Servers, automatic deployment, backups and monitoring. We stay with you after launch.",
-                "stack": "Docker · CI/CD · Linux"
+                "stack": "Docker, CI/CD, Linux"
             }
         }
     },
+    "bitrix": {
+        "kicker": "Bitrix24",
+        "title": "A Bitrix24 your sales team actually uses",
+        "lead": "We configure it around the way your team sells, not the other way round. Reps open it because it saves them work; managers, because they see the pipeline without asking.",
+        "points": {
+            "crm": {
+                "title": "Pipelines and cards",
+                "text": "Stages that mirror your real sales cycle, fields that matter and nothing to fill in twice."
+            },
+            "automation": {
+                "title": "Automations",
+                "text": "Tasks, reminders and stage changes that happen by themselves when something happens: a call, an email, a payment."
+            },
+            "telephony": {
+                "title": "Telephony and call reports",
+                "text": "Calls inside the CRM and a short report after each one. Everything the rep knows ends up on the card."
+            },
+            "apps": {
+                "title": "Custom apps",
+                "text": "Where Bitrix24 stops, we build the app: widgets in the card, forms, robots and custom dashboards."
+            },
+            "migration": {
+                "title": "Migration and integrations",
+                "text": "We bring data over from spreadsheets or another CRM and connect website, telephony, accounting and messengers."
+            },
+            "training": {
+                "title": "Training and follow-up",
+                "text": "We train the team on their own portal and stay for the first weeks to adjust what real use changes."
+            }
+        },
+        "more": "More about Bitrix24"
+    },
     "products": {
-        "eyebrow": "Products",
         "title": "Our own products",
         "lead": "We build and maintain our own software. What we offer clients, we use every day.",
         "items": {
@@ -102,15 +128,47 @@
             "bitrix": {
                 "kind": "Bitrix24 · B2B sales",
                 "name": "Sales automation",
-                "text": "Bitrix24 apps that guide active B2B sales: one report after each call, automatic pipeline and tasks, team KPIs. Running on many portals at once.",
+                "text": "Bitrix24 apps that guide active B2B sales: one report after each call, automatic pipeline and tasks, team KPIs.",
                 "status": "On request"
             }
         }
     },
+    "cases": {
+        "title": "Problems we have already solved",
+        "lead": "Three real projects, described without names: the task, what we built and what changed.",
+        "labels": {
+            "project": "Project",
+            "task": "Task",
+            "solution": "What we built",
+            "result": "What changed"
+        },
+        "items": {
+            "sales": {
+                "sector": "B2B sales · distributor network",
+                "name": "Active sales automation in Bitrix24",
+                "task": "Dozens of reps cold-calling, presenting remotely and following up for months. Managers could not see the real pipeline and reps lost hours filling in the CRM.",
+                "solution": "Bitrix24 apps running on many portals at once: a one-screen report after every call, automatic stages and tasks, a KPI dashboard for managers and integrated telephony.",
+                "result": "One form per call instead of a dozen fields. Managers see conversion and activity without asking, and dormant clients are redistributed between reps by agreed rules."
+            },
+            "studios": {
+                "sector": "SaaS · appointment-based businesses",
+                "name": "CRM with a client area for studios",
+                "task": "Businesses that ran appointments, clients and consent forms on paper and in chats. They needed a simple tool for the team and an area where the client signs and checks their own data.",
+                "solution": "Multi-tenant SaaS platform: calendar, client cards, consent signing, a client area reached by link or Telegram, team roles and subscription billing.",
+                "result": "Each business starts in minutes in its own isolated workspace. Consent is signed on the phone and kept; the team works from a single screen."
+            },
+            "kpi": {
+                "sector": "Sales management · internal tools",
+                "name": "Real-time KPI dashboard and contract builder",
+                "task": "Management compiled reports by hand from several systems, and contracts were assembled in a legacy desktop tool nobody could maintain.",
+                "solution": "A web dashboard with live data from CRM and ERP over WebSockets, and a contract builder embedded in the CRM card, with queues and caching so heavy templates block nobody.",
+                "result": "The morning report is gone: the numbers are always current. Contracts come out of the CRM itself with the right version of every template."
+            }
+        }
+    },
     "process": {
-        "eyebrow": "Process",
         "title": "How we work",
-        "lead": "No surprises: scope and price in writing, visible progress every week.",
+        "lead": "Scope and price in writing, visible progress every week and the code in your name from day one.",
         "steps": {
             "talk": {
                 "title": "Conversation",
@@ -128,16 +186,35 @@
                 "title": "Launch and support",
                 "text": "We go live, train the team and carry on with maintenance and improvements."
             }
+        },
+        "models": {
+            "title": "Three ways to work together",
+            "lead": "We pick the model by how clear the scope is. You can switch between them from one stage to the next.",
+            "items": {
+                "fixed": {
+                    "title": "Fixed price",
+                    "text": "For a defined scope: a landing page, one integration, a standard Bitrix24 implementation. You know the price before we start."
+                },
+                "time": {
+                    "title": "Hourly, with a cap",
+                    "text": "For products that keep evolving. We bill the actual work each month, within an agreed limit and with a report of what was done."
+                },
+                "retainer": {
+                    "title": "Monthly support",
+                    "text": "A pool of hours for maintenance, small improvements and questions, with an agreed response time."
+                }
+            }
         }
     },
-    "about": {
-        "eyebrow": "Studio",
-        "title": "Software for clients, and software of our own",
-        "text": "IT-firma is the studio of {name}, a full-stack software engineer in Spain. We work in two lines: custom software for clients, and our own SaaS products offered by subscription. Each feeds the other: what we recommend to a client, we have launched and maintain ourselves.",
+    "team": {
+        "title": "A small studio that ships complete products",
+        "text1": "IT-firma is a development studio based in Spain. We work in two lines that feed each other: custom software for clients and our own SaaS products sold by subscription. What we recommend to a client, we have launched and maintain ourselves.",
+        "text2": "The core of the team is full-stack: architecture, backend, interfaces and deployment in the same hands, without the task being passed from department to department. For design, testing or a specific technology we bring trusted specialists onto the project. You always talk to the person writing the code.",
+        "founder": "The studio is led by {name}, a full-stack software engineer and its founder.",
         "principles": {
             "own": {
-                "title": "Our own SaaS",
-                "text": "We build and run cloud services for small businesses, paid by subscription. We know what a product costs after launch."
+                "title": "Our own products",
+                "text": "We run our own software in production and know what it costs after launch."
             },
             "clean": {
                 "title": "Maintainable code",
@@ -145,7 +222,7 @@
             },
             "direct": {
                 "title": "Direct contact",
-                "text": "You talk to the person who designs and writes the code, with no middlemen."
+                "text": "No account managers in between: quick decisions and answers from the person who knows the project."
             },
             "spain": {
                 "title": "In Spain, for Europe",
@@ -153,8 +230,57 @@
             }
         }
     },
+    "insights": {
+        "title": "Articles",
+        "lead": "What we learn building CRMs, automations and products, told without jargon.",
+        "all": "All articles",
+        "reading": "{minutes} min read",
+        "pageTitle": "Articles",
+        "pageLead": "Practical notes on CRM, Bitrix24, AI and custom development, written by the people who implement them."
+    },
+    "faq": {
+        "title": "Frequently asked questions",
+        "lead": "What we get asked in the first conversation.",
+        "items": {
+            "cost": {
+                "question": "How much does a project cost?",
+                "answer": "It depends on the scope, which is why we fix it in writing before starting. As a guide: a landing page or a single integration usually stays under €3,000; a web app or a full Bitrix24 implementation sits between €3,000 and €30,000; a SaaS product or a mobile app with its own backend, above that. After the first conversation you get a range; after the analysis, a price."
+            },
+            "time": {
+                "question": "How long does it take?",
+                "answer": "A landing page, two to four weeks. A Bitrix24 implementation, three to eight weeks depending on the processes. A custom application, two to four months to the first production version, delivered in stages so you use it before everything is finished."
+            },
+            "start": {
+                "question": "What do you need to start?",
+                "answer": "A description of the task in your own words, access to what already exists (website, CRM, spreadsheets) and one person on your side who can decide. We ask about the rest."
+            },
+            "ownership": {
+                "question": "Who owns the code?",
+                "answer": "You do. The repository, hosting accounts and domains are created in your name or transferred at the end. We can keep maintaining the project, but you do not depend on us to do so."
+            },
+            "support": {
+                "question": "What happens after launch?",
+                "answer": "In the first weeks we fix at no cost whatever real use brings to light. After that you can take monthly support with agreed hours and response times, or call us only when needed."
+            },
+            "remote": {
+                "question": "Do you work remotely?",
+                "answer": "Yes, across Spain and Europe. Meetings are video calls, progress is visible on a staging environment and communication goes through the channel you prefer: email, Telegram or Slack."
+            },
+            "stack": {
+                "question": "Which technologies do you work with?",
+                "answer": "TypeScript across the stack: Next.js and React on the front, NestJS and PostgreSQL on the backend, React Native for mobile, Docker and CI/CD for deployment. For Bitrix24 we use its REST API and custom apps. If your current system is in PHP or Python, we read that too."
+            },
+            "small": {
+                "question": "Do you work with small companies?",
+                "answer": "Yes, that is our usual client: businesses of two to fifty people who need the tool to work from day one. For a small task we propose a small solution."
+            }
+        }
+    },
+    "ctaBand": {
+        "title": "Shall we talk about your project?",
+        "text": "Tell us the task in a few lines. We reply within one working day with questions or a first estimate."
+    },
     "contact": {
-        "eyebrow": "Contact",
         "title": "Tell us about your project",
         "lead": "We reply within one working day with questions or a first estimate.",
         "note": "Prefer to write directly? Use the e-mail. Form data is only used to reply to you.",
@@ -187,18 +313,34 @@
             "budgets": {
                 "unknown": "Not sure yet",
                 "lt3k": "Under €3,000",
-                "3k-10k": "€3,000–10,000",
-                "10k-30k": "€10,000–30,000",
+                "3k-10k": "€3,000 to 10,000",
+                "10k-30k": "€10,000 to 30,000",
                 "gt30k": "Over €30,000"
             }
         }
     },
     "footer": {
-        "tagline": "Software for business, built to order or by subscription.",
-        "theme": "Theme",
-        "legal": "Legal",
+        "tagline": "Custom software and SaaS products for business. From Spain.",
+        "services": "Services",
+        "company": "Studio",
         "contact": "Contact",
         "owner": "IT-firma is the trade name of {name}, self-employed, tax ID {nif}."
+    },
+    "servicePage": {
+        "allServices": "All services",
+        "forWhom": "Who it is for",
+        "deliverables": "What we deliver",
+        "how": "How we do it",
+        "stack": "Technologies",
+        "faq": "Questions about this service",
+        "ctaTitle": "Shall we start?",
+        "ctaText": "Tell us what you need in {service} and we reply within one working day with questions or a first estimate.",
+        "otherServices": "Other services"
+    },
+    "article": {
+        "back": "All articles",
+        "related": "Related service",
+        "openService": "See the service"
     },
     "legal": {
         "updated": "Updated: {date}",

@@ -68,7 +68,7 @@ const sendMail = async (channel: MailChannel, lead: LeadInput, text: string) => 
         from: `${SITE_NAME} <${channel.from}>`,
         to: channel.to,
         replyTo: lead.email,
-        subject: `[${SITE_NAME}] ${lead.service} — ${lead.name}`,
+        subject: `[${SITE_NAME}] ${lead.service}: ${lead.name}`,
         text,
     });
 };

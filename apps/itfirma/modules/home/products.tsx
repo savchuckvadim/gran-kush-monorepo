@@ -12,16 +12,8 @@ export const Products = () => {
     const t = useTranslations("products");
 
     return (
-        <section
-            id="products"
-            className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16 md:px-6 md:py-24"
-        >
-            <SectionHeading
-                section="products"
-                eyebrow={t("eyebrow")}
-                title={t("title")}
-                lead={t("lead")}
-            />
+        <section id="products" className="wrap scroll-mt-20 py-24 md:py-32">
+            <SectionHeading title={t("title")} lead={t("lead")} />
             <div className="grid gap-4 md:grid-cols-3">
                 {SHOWN_PRODUCTS.map(({ key, url, palette }, index) => (
                     <Reveal key={key} delay={index * 90}>

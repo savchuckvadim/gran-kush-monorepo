@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const t = await getTranslations({ locale, namespace: "meta" });
     return {
         metadataBase: new URL(SERVER_URL),
-        title: { default: `${SITE_NAME} — ${t("title")}`, template: `%s — ${SITE_NAME}` },
+        title: { default: `${SITE_NAME} · ${t("title")}`, template: `%s · ${SITE_NAME}` },
         description: t("description"),
         alternates: {
             canonical: `/${locale}`,
@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             type: "website",
             siteName: SITE_NAME,
             locale: OG_LOCALES[locale],
-            title: `${SITE_NAME} — ${t("title")}`,
+            title: `${SITE_NAME} · ${t("title")}`,
             description: t("description"),
         },
     };

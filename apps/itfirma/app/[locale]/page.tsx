@@ -1,12 +1,17 @@
 import { setRequestLocale } from "next-intl/server";
 
-import { About } from "@/modules/home/about";
+import { BitrixBand } from "@/modules/home/bitrix-band";
+import { Cases } from "@/modules/home/cases";
 import { ContactSection } from "@/modules/home/contact-section";
+import { CtaBand } from "@/modules/home/cta-band";
+import { FaqSection } from "@/modules/home/faq-section";
 import { Hero } from "@/modules/home/hero";
+import { InsightsTeaser } from "@/modules/home/insights-teaser";
 import { Process } from "@/modules/home/process";
 import { Products } from "@/modules/home/products";
 import { Services } from "@/modules/home/services";
 import { StackMarquee } from "@/modules/home/stack-marquee";
+import { Team } from "@/modules/home/team";
 import { JsonLd } from "@/modules/pages/json-ld";
 import { DEFAULT_LOCALE, isLocale } from "@/modules/shared/config/locales";
 import { HAS_PRODUCTS } from "@/modules/shared/config/products";
@@ -24,9 +29,14 @@ export default async function HomePage({ params }: Props) {
             <Hero />
             <StackMarquee />
             <Services />
+            <BitrixBand />
             {HAS_PRODUCTS ? <Products /> : null}
+            <Cases />
             <Process />
-            <About />
+            <Team />
+            <InsightsTeaser />
+            <FaqSection />
+            <CtaBand />
             <ContactSection />
         </>
     );

@@ -16,10 +16,9 @@ export interface SkinDefinition {
 
 const BOTH: readonly [SkinMode, SkinMode] = ["light", "dark"];
 const DARK_FIRST: readonly [SkinMode, SkinMode] = ["dark", "light"];
-const DARK_ONLY: readonly [SkinMode] = ["dark"];
 
 const SKIN_MAP: Record<SkinId, SkinDefinition> = {
-    black: { id: "black", modes: DARK_ONLY },
+    black: { id: "black", modes: DARK_FIRST },
     cristal: { id: "cristal", modes: BOTH },
     sociopath: { id: "sociopath", modes: DARK_FIRST },
     coqueta: { id: "coqueta", modes: BOTH },
@@ -41,7 +40,6 @@ export const SKIN_KEY = "itfirma.skin";
 export const MODE_KEY = "itfirma.mode";
 export const SKIN_EVENT = "itfirma:skin";
 
-const OWN_MODES = Object.fromEntries(SKINS.map((skin) => [skin.id, skin.modes[0]]));
 const FORCED_MODES = Object.fromEntries(
     SKINS.filter((skin) => skin.modes.length === 1).map((skin) => [skin.id, skin.modes[0]])
 );
@@ -49,6 +47,6 @@ const FORCED_MODES = Object.fromEntries(
 /**
  * Runs before paint so a saved look never flashes the default one. Same rules as `applySkin` in
  * `modules/shared/ui/use-skin.ts`: an unknown skin falls back to the default, a skin with one mode
- * forces it, no saved mode means the skin's own.
+ * forces it, and without a saved mode the device setting decides.
  */
-export const SKIN_SCRIPT = `(function(){try{var d=document.documentElement,O=${JSON.stringify(OWN_MODES)},F=${JSON.stringify(FORCED_MODES)},s=localStorage.getItem("${SKIN_KEY}"),m=localStorage.getItem("${MODE_KEY}");if(!O[s])s="${DEFAULT_SKIN}";if(F[s])m=F[s];else if(m!=="light"&&m!=="dark")m=O[s];d.setAttribute("data-skin",s);d.classList.toggle("dark",m==="dark")}catch(e){}})();`;
+export const SKIN_SCRIPT = `(function(){try{var d=document.documentElement,F=${JSON.stringify(FORCED_MODES)},K=${JSON.stringify(SKIN_IDS)},s=localStorage.getItem("${SKIN_KEY}"),m=localStorage.getItem("${MODE_KEY}");if(K.indexOf(s)<0)s="${DEFAULT_SKIN}";if(F[s])m=F[s];else if(m!=="light"&&m!=="dark")m=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";d.setAttribute("data-skin",s);d.classList.toggle("dark",m==="dark")}catch(e){}})();`;

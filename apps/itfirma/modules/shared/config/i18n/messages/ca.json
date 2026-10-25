@@ -1,89 +1,115 @@
 {
     "meta": {
-        "title": "Desenvolupament de programari a mida i productes SaaS",
-        "description": "Estudi de desenvolupament a Espanya. Webs, aplicacions web i mòbils a mida, integracions, agents d'IA i Bitrix24 clau en mà, a més de productes SaaS propis per subscripció."
+        "title": "Programari a mida, Bitrix24 i IA per a empreses",
+        "description": "Estudi de desenvolupament a Espanya. Aplicacions web i mòbils a mida, implantació de Bitrix24, integracions, agents d'IA i suport. També creem productes SaaS propis per subscripció."
     },
     "nav": {
         "services": "Serveis",
-        "products": "Productes",
-        "process": "Procés",
-        "about": "Estudi",
+        "cases": "Casos",
+        "process": "Com treballem",
+        "team": "Estudi",
+        "insights": "Articles",
+        "faq": "Preguntes",
         "contact": "Contacte",
         "language": "Idioma"
     },
+    "cta": {
+        "request": "Demanar pressupost",
+        "seeServices": "Veure serveis"
+    },
     "skins": {
-        "label": "Tema",
+        "label": "Aparença",
+        "palette": "Paleta",
         "black": "Black",
         "cristal": "Cristal",
         "sociopath": "Sociopath",
         "coqueta": "Coqueta",
-        "toDark": "Mode fosc",
-        "toLight": "Mode clar"
+        "light": "Clar",
+        "dark": "Fosc"
     },
     "hero": {
-        "badge": "Acceptem nous projectes",
-        "titleStart": "Dissenyem i llancem",
-        "titleEnd": "per al teu negoci",
-        "words": {
-            "web": "webs i botigues",
-            "mobile": "apps mòbils",
-            "crm": "CRM a mida",
-            "ai": "agents d'IA",
-            "bitrix": "Bitrix24 clau en mà"
-        },
-        "lead": "Desenvolupem programari a mida per a empreses i creem els nostres propis productes SaaS. Un sol equip t'acompanya de la idea al llançament i el suport.",
-        "ctaPrimary": "Demanar pressupost",
-        "ctaSecondary": "Veure serveis"
+        "title": "Programari a mida per vendre més i administrar menys.",
+        "lead": "Aplicacions web i mòbils, Bitrix24 clau en mà, integracions i agents d'IA. Des d'Espanya, de la idea al suport."
     },
     "services": {
-        "eyebrow": "Serveis",
-        "title": "Desenvolupament a mida",
-        "lead": "Un projecte complet o només la part que falta. Fem servir el mateix stack amb què funcionen els nostres propis productes.",
+        "title": "Construïm el que li falta al teu negoci",
+        "lead": "Un projecte complet o la peça que falta. Treballem amb el mateix stack amb què funcionen els nostres propis productes.",
         "items": {
             "web": {
                 "title": "Webs i landing pages",
                 "text": "Llocs ràpids i multilingües amb SEO tècnic, panell de continguts i formularis que arriben directament al teu CRM.",
-                "stack": "Next.js · CMS · SEO"
+                "stack": "Next.js, CMS, SEO"
             },
             "apps": {
                 "title": "Aplicacions web i SaaS",
                 "text": "Panells, àrees de client, CRM a mida i productes SaaS multiempresa, del prototip a producció.",
-                "stack": "React · NestJS · PostgreSQL"
+                "stack": "React, NestJS, PostgreSQL"
             },
             "mobile": {
                 "title": "Apps mòbils",
                 "text": "Una base de codi per a iOS i Android: accés, pagaments, notificacions i publicació a les botigues.",
-                "stack": "React Native · Expo"
+                "stack": "React Native, Expo"
             },
             "bitrix": {
                 "title": "Bitrix24 clau en mà",
-                "text": "Implantació completa: embuts, camps, automatitzacions, telefonia, informes i formació de l'equip. Apps pròpies per al portal.",
-                "stack": "REST API · Apps · Robots"
+                "text": "Implantació completa: embuts, camps, automatitzacions, telefonia, informes i formació de l'equip. Aplicacions pròpies per al teu portal quan la configuració no arriba.",
+                "stack": "REST API, apps, robots"
             },
             "integrations": {
                 "title": "Integracions",
                 "text": "Connectem CRM, web, telefonia, pagaments, comptabilitat i missatgeria perquè ningú copiï dades a mà.",
-                "stack": "REST · Webhooks · Cues"
+                "stack": "REST, webhooks, cues"
             },
             "ai": {
                 "title": "Agents d'IA",
-                "text": "Assistents que llegeixen el CRM, resumeixen trucades, omplen informes i responen clients, integrats amb Bitrix24 i els teus sistemes.",
-                "stack": "Claude · OpenAI · RAG"
+                "text": "Assistents que llegeixen el CRM, resumeixen trucades, omplen informes i responen clients dins dels teus sistemes.",
+                "stack": "Claude, OpenAI, RAG"
             },
             "aiAdoption": {
                 "title": "IA als teus processos",
-                "text": "Detectem on la IA estalvia temps a l'equip, la connectem als teus processos i sistemes i formem les persones per fer-la servir.",
-                "stack": "Auditoria · Implantació · Formació"
+                "text": "Detectem on la IA estalvia temps a l'equip, la connectem als teus sistemes i formem les persones per fer-la servir.",
+                "stack": "Auditoria, implantació, formació"
             },
             "devops": {
                 "title": "Infraestructura i suport",
                 "text": "Servidors, desplegament automàtic, còpies de seguretat i monitoratge. Continuem al teu costat després del llançament.",
-                "stack": "Docker · CI/CD · Linux"
+                "stack": "Docker, CI/CD, Linux"
             }
         }
     },
+    "bitrix": {
+        "kicker": "Bitrix24",
+        "title": "Un Bitrix24 que l'equip de vendes fa servir de debò",
+        "lead": "El configurem al voltant de com ven el teu equip, no a l'inrevés. El comercial l'obre perquè li estalvia feina; el responsable, perquè veu l'embut sense preguntar.",
+        "points": {
+            "crm": {
+                "title": "Embuts i fitxes",
+                "text": "Etapes que reflecteixen el teu cicle real de venda, camps que importen i res a omplir dues vegades."
+            },
+            "automation": {
+                "title": "Automatitzacions",
+                "text": "Tasques, recordatoris i canvis d'etapa que passen sols quan passa alguna cosa: una trucada, un correu, un pagament."
+            },
+            "telephony": {
+                "title": "Telefonia i informes de trucada",
+                "text": "Trucades dins del CRM i un informe curt després de cadascuna. Tot el que sap el comercial queda a la fitxa."
+            },
+            "apps": {
+                "title": "Aplicacions pròpies",
+                "text": "Quan Bitrix24 no arriba, desenvolupem l'app: widgets a la fitxa, formularis, robots i panells a mida."
+            },
+            "migration": {
+                "title": "Migració i integracions",
+                "text": "Portem dades de fulls de càlcul o d'un altre CRM i connectem web, telefonia, comptabilitat i missatgeria."
+            },
+            "training": {
+                "title": "Formació i acompanyament",
+                "text": "Ensenyem l'equip amb el seu propi portal i ens quedem les primeres setmanes per ajustar el que la pràctica canviï."
+            }
+        },
+        "more": "Més sobre Bitrix24"
+    },
     "products": {
-        "eyebrow": "Productes",
         "title": "Productes propis",
         "lead": "Desenvolupem i mantenim el nostre propi programari. El que oferim als clients, ho fem servir cada dia.",
         "items": {
@@ -102,15 +128,47 @@
             "bitrix": {
                 "kind": "Bitrix24 · vendes B2B",
                 "name": "Automatització de vendes",
-                "text": "Apps per a Bitrix24 que guien la venda activa B2B: un informe després de cada trucada, embut i tasques automàtics, KPI de l'equip. Funcionen en molts portals alhora.",
+                "text": "Apps per a Bitrix24 que guien la venda activa B2B: un informe després de cada trucada, embut i tasques automàtics, KPI de l'equip.",
                 "status": "A petició"
             }
         }
     },
+    "cases": {
+        "title": "Problemes que ja hem resolt",
+        "lead": "Tres projectes reals, descrits sense noms: la tasca, el que vam construir i el que va canviar.",
+        "labels": {
+            "project": "Projecte",
+            "task": "Tasca",
+            "solution": "Què vam construir",
+            "result": "Què va canviar"
+        },
+        "items": {
+            "sales": {
+                "sector": "Vendes B2B · xarxa de distribuïdors",
+                "name": "Automatització de vendes actives a Bitrix24",
+                "task": "Desenes de comercials que truquen en fred, presenten a distància i fan seguiment durant mesos. Els responsables no veien l'embut real i els comercials perdien hores omplint el CRM.",
+                "solution": "Aplicacions per a Bitrix24 que funcionen en molts portals alhora: un informe d'una pantalla després de cada trucada, etapes i tasques automàtiques, panell de KPI per als responsables i telefonia integrada.",
+                "result": "Un formulari per trucada en lloc d'una dotzena de camps. Els responsables veuen conversió i activitat sense demanar res i els clients adormits es redistribueixen entre comercials per regles acordades."
+            },
+            "studios": {
+                "sector": "SaaS · negocis amb cita prèvia",
+                "name": "CRM amb àrea de client per a estudis",
+                "task": "Negocis que gestionaven cites, clients i consentiments en paper i xats. Necessitaven una eina senzilla per a l'equip i una àrea on el client signa i consulta les seves dades.",
+                "solution": "Plataforma SaaS multiempresa: agenda, fitxes de clients, signatura de consentiments, àrea de client amb accés per enllaç o Telegram, rols de l'equip i facturació per subscripció.",
+                "result": "Cada negoci arrenca en minuts amb el seu propi espai aïllat. El consentiment se signa des del mòbil i queda desat; l'equip treballa des d'una sola pantalla."
+            },
+            "kpi": {
+                "sector": "Direcció comercial · eines internes",
+                "name": "Panell de KPI en temps real i constructor de contractes",
+                "task": "La direcció preparava informes a mà a partir de diversos sistemes i els contractes es muntaven en una eina local heretada que ningú podia mantenir.",
+                "solution": "Panell web amb dades en temps real des del CRM i l'ERP per WebSockets, i un constructor de contractes incrustat a la fitxa del CRM, amb cues i memòria cau perquè les plantilles pesades no bloquegin ningú.",
+                "result": "L'informe del matí va desaparèixer: les xifres sempre estan al dia. Els contractes surten del mateix CRM amb la versió correcta de cada plantilla."
+            }
+        }
+    },
     "process": {
-        "eyebrow": "Procés",
         "title": "Com treballem",
-        "lead": "Sense sorpreses: abast i preu per escrit i avenços visibles cada setmana.",
+        "lead": "Abast i preu per escrit, avenços visibles cada setmana i el codi a nom teu des del primer dia.",
         "steps": {
             "talk": {
                 "title": "Conversa",
@@ -128,16 +186,35 @@
                 "title": "Llançament i suport",
                 "text": "Publiquem, formem l'equip i continuem amb manteniment i millores."
             }
+        },
+        "models": {
+            "title": "Tres maneres de treballar junts",
+            "lead": "Triem el model segons com de clar estigui l'abast. Es pot canviar d'un a l'altre entre etapes.",
+            "items": {
+                "fixed": {
+                    "title": "Preu tancat",
+                    "text": "Per a un abast definit: una landing, una integració concreta, una implantació estàndard de Bitrix24. Saps el preu abans de començar."
+                },
+                "time": {
+                    "title": "Per hores, amb sostre",
+                    "text": "Per a productes que evolucionen. Facturem la feina real cada mes, amb un límit acordat i un informe del que s'ha fet."
+                },
+                "retainer": {
+                    "title": "Suport mensual",
+                    "text": "Una bossa d'hores per a manteniment, petites millores i consultes, amb temps de resposta acordat."
+                }
+            }
         }
     },
-    "about": {
-        "eyebrow": "Estudi",
-        "title": "Programari per a clients i programari propi",
-        "text": "IT-firma és l'estudi de {name}, enginyer de programari full-stack a Espanya. Treballem en dues línies: desenvolupament de programari a mida per a clients i productes SaaS propis que oferim per subscripció. L'una alimenta l'altra: el que recomanem a un client, ho hem llançat i ho mantenim nosaltres mateixos.",
+    "team": {
+        "title": "Un estudi petit que lliura productes complets",
+        "text1": "IT-firma és un estudi de desenvolupament amb base a Espanya. Treballem en dues línies que s'alimenten mútuament: programari a mida per a clients i productes SaaS propis que oferim per subscripció. El que recomanem a un client, ho hem llançat i ho mantenim nosaltres.",
+        "text2": "El nucli de l'equip és full-stack: arquitectura, backend, interfícies i desplegament a les mateixes mans, sense passar la tasca de departament en departament. Per a disseny, proves o una tecnologia concreta sumem especialistes de confiança al projecte. Parles sempre amb qui escriu el codi.",
+        "founder": "Al capdavant hi ha {name}, enginyer de programari full-stack i fundador de l'estudi.",
         "principles": {
             "own": {
-                "title": "SaaS propis",
-                "text": "Desenvolupem i operem serveis al núvol per a petites empreses, amb pagament per subscripció. Sabem el que costa un producte després del llançament."
+                "title": "Productes propis",
+                "text": "Operem el nostre programari en producció i sabem el que costa després del llançament."
             },
             "clean": {
                 "title": "Codi mantenible",
@@ -145,7 +222,7 @@
             },
             "direct": {
                 "title": "Tracte directe",
-                "text": "Parles amb qui dissenya i escriu el codi, sense intermediaris."
+                "text": "Sense gestors intermedis: decisions ràpides i respostes de qui coneix el projecte."
             },
             "spain": {
                 "title": "A Espanya, per a Europa",
@@ -153,8 +230,57 @@
             }
         }
     },
+    "insights": {
+        "title": "Articles",
+        "lead": "El que aprenem construint CRM, automatitzacions i productes, explicat sense argot.",
+        "all": "Tots els articles",
+        "reading": "{minutes} min de lectura",
+        "pageTitle": "Articles",
+        "pageLead": "Notes pràctiques sobre CRM, Bitrix24, IA i desenvolupament a mida, escrites per qui ho implanta."
+    },
+    "faq": {
+        "title": "Preguntes freqüents",
+        "lead": "El que ens pregunten a la primera conversa.",
+        "items": {
+            "cost": {
+                "question": "Quant costa un projecte?",
+                "answer": "Depèn de l'abast, i per això el tanquem per escrit abans de començar. Com a referència: una landing o una integració concreta sol quedar per sota de 3.000 €; una aplicació web o una implantació completa de Bitrix24 es mou entre 3.000 i 30.000 €; un producte SaaS o una app mòbil amb backend propi, per sobre. Després de la primera conversa reps una forquilla; després de l'anàlisi, un preu."
+            },
+            "time": {
+                "question": "Quant triga?",
+                "answer": "Una landing, de dues a quatre setmanes. Una implantació de Bitrix24, de tres a vuit setmanes segons els processos. Una aplicació a mida, de dos a quatre mesos fins a la primera versió en producció, lliurada per etapes perquè la facis servir abans que estigui tot."
+            },
+            "start": {
+                "question": "Què necessiteu per començar?",
+                "answer": "Una descripció de la tasca amb les teves paraules, accés al que ja existeix (web, CRM, fulls de càlcul) i una persona del teu costat que pugui decidir. La resta ho preguntem nosaltres."
+            },
+            "ownership": {
+                "question": "De qui és el codi?",
+                "answer": "Teu. El repositori, els comptes d'allotjament i els dominis es creen a nom teu o es transfereixen en acabar. Podem continuar mantenint el projecte, però no depens de nosaltres per fer-ho."
+            },
+            "support": {
+                "question": "Què passa després del llançament?",
+                "answer": "Les primeres setmanes corregim sense cost el que l'ús real tregui a la llum. Després pots contractar suport mensual amb hores i temps de resposta acordats, o trucar-nos només quan calgui."
+            },
+            "remote": {
+                "question": "Treballeu en remot?",
+                "answer": "Sí, amb tota Espanya i Europa. Les reunions són per videotrucada, l'avenç es veu en un entorn de proves i la comunicació va pel canal que prefereixis: correu, Telegram o Slack."
+            },
+            "stack": {
+                "question": "Amb quines tecnologies treballeu?",
+                "answer": "TypeScript a tot l'stack: Next.js i React al front, NestJS i PostgreSQL al backend, React Native per a mòbil, Docker i CI/CD per desplegar. Per a Bitrix24 fem servir la seva REST API i aplicacions pròpies. Si el teu sistema actual és en PHP o Python, també l'entenem."
+            },
+            "small": {
+                "question": "Treballeu amb empreses petites?",
+                "answer": "Sí, és el nostre client habitual: negocis de dues a cinquanta persones que necessiten que l'eina funcioni des del primer dia. Per a una tasca petita proposem una solució petita."
+            }
+        }
+    },
+    "ctaBand": {
+        "title": "Parlem del teu projecte?",
+        "text": "Explica'ns la tasca en unes línies. Responem en un dia laborable amb preguntes o una primera estimació."
+    },
     "contact": {
-        "eyebrow": "Contacte",
         "title": "Explica'ns el teu projecte",
         "lead": "Responem en un dia laborable amb preguntes o una primera estimació.",
         "note": "Prefereixes escriure directament? Fes servir el correu. Les dades del formulari només s'utilitzen per respondre't.",
@@ -187,18 +313,34 @@
             "budgets": {
                 "unknown": "Encara no ho sé",
                 "lt3k": "Menys de 3.000 €",
-                "3k-10k": "3.000–10.000 €",
-                "10k-30k": "10.000–30.000 €",
+                "3k-10k": "De 3.000 a 10.000 €",
+                "10k-30k": "De 10.000 a 30.000 €",
                 "gt30k": "Més de 30.000 €"
             }
         }
     },
     "footer": {
-        "tagline": "Programari per a empreses: a mida i per subscripció.",
-        "theme": "Tema",
-        "legal": "Legal",
+        "tagline": "Programari a mida i productes SaaS per a empreses. Des d'Espanya.",
+        "services": "Serveis",
+        "company": "Estudi",
         "contact": "Contacte",
         "owner": "IT-firma és el nom comercial de {name}, autònom, NIF {nif}."
+    },
+    "servicePage": {
+        "allServices": "Tots els serveis",
+        "forWhom": "Per a qui",
+        "deliverables": "Què lliurem",
+        "how": "Com ho fem",
+        "stack": "Tecnologies",
+        "faq": "Preguntes sobre aquest servei",
+        "ctaTitle": "Comencem?",
+        "ctaText": "Explica'ns què necessites en {service} i et responem en un dia laborable amb preguntes o una primera estimació.",
+        "otherServices": "Altres serveis"
+    },
+    "article": {
+        "back": "Tots els articles",
+        "related": "Servei relacionat",
+        "openService": "Veure el servei"
     },
     "legal": {
         "updated": "Actualitzat: {date}",
