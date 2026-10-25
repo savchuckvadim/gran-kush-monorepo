@@ -38,7 +38,10 @@ export const Header = () => {
                     <ModeToggle />
                     <PaletteMenu />
                     <LocaleSwitch />
-                    <CtaLink className="hidden md:inline-flex">{cta("request")}</CtaLink>
+                    {/* the button sets inline-flex itself, so the phone hides its wrapper, not the link */}
+                    <div className="hidden md:block">
+                        <CtaLink>{cta("request")}</CtaLink>
+                    </div>
                 </div>
             </div>
         </header>

@@ -28,7 +28,15 @@
         "dark": "Fosc"
     },
     "hero": {
-        "title": "Programari a mida per vendre més i administrar menys.",
+        "titleStart": "Dissenyem i llancem",
+        "titleEnd": "per al teu negoci",
+        "words": {
+            "web": "webs i botigues",
+            "mobile": "apps mòbils",
+            "crm": "CRM a mida",
+            "ai": "agents d'IA",
+            "bitrix": "Bitrix24 clau en mà"
+        },
         "lead": "Aplicacions web i mòbils, Bitrix24 clau en mà, integracions i agents d'IA. Des d'Espanya, de la idea al suport."
     },
     "services": {

@@ -71,8 +71,7 @@ export const PaletteMenu = () => {
                             }}
                             data-skin={item.id}
                             className={[
-                                "size-7 rounded-full border transition-transform hover:scale-110",
-                                "bg-[linear-gradient(135deg,var(--background)_50%,var(--primary)_50%)]",
+                                "swatch size-7 rounded-full border transition-transform hover:scale-110",
                                 item.modes[0] === "dark" ? "dark" : "",
                                 skin === item.id
                                     ? "border-transparent ring-2 ring-ring ring-offset-2 ring-offset-card"

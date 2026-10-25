@@ -28,7 +28,15 @@
         "dark": "Dark"
     },
     "hero": {
-        "title": "Custom software to sell more and administer less.",
+        "titleStart": "We design and ship",
+        "titleEnd": "for your business",
+        "words": {
+            "web": "websites and stores",
+            "mobile": "mobile apps",
+            "crm": "custom CRMs",
+            "ai": "AI agents",
+            "bitrix": "turnkey Bitrix24"
+        },
         "lead": "Web and mobile apps, turnkey Bitrix24, integrations and AI agents. From Spain, from the idea to support."
     },
     "services": {

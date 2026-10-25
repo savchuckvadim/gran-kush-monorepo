@@ -28,7 +28,15 @@
         "dark": "Oscuro"
     },
     "hero": {
-        "title": "Software a medida para vender más y administrar menos.",
+        "titleStart": "Diseñamos y lanzamos",
+        "titleEnd": "para tu negocio",
+        "words": {
+            "web": "webs y tiendas",
+            "mobile": "apps móviles",
+            "crm": "CRM a medida",
+            "ai": "agentes de IA",
+            "bitrix": "Bitrix24 llave en mano"
+        },
         "lead": "Aplicaciones web y móviles, Bitrix24 llave en mano, integraciones y agentes de IA. Desde España, de la idea al soporte."
     },
     "services": {

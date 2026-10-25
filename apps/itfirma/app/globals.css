@@ -283,109 +283,126 @@
     }
 }
 
-/* ---------- surfaces ---------- */
+/* ---------- surfaces: in the components layer, so a Tailwind utility (absolute, bg-…) can still override ---------- */
 
-.surface {
-    position: relative;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-card);
-}
+@layer components {
+    .surface {
+        position: relative;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-card);
+    }
 
-[data-skin="cristal"] .surface::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    border-radius: inherit;
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
-    backdrop-filter: blur(var(--glass-blur)) saturate(160%);
-}
+    [data-skin="cristal"] .surface::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        border-radius: inherit;
+        -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+        backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+    }
 
-[data-skin="coqueta"] .surface::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    background: linear-gradient(180deg, rgb(255 255 255 / 0.3), rgb(255 255 255 / 0) 55%);
-}
+    [data-skin="coqueta"] .surface::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        pointer-events: none;
+        background: linear-gradient(180deg, rgb(255 255 255 / 0.3), rgb(255 255 255 / 0) 55%);
+    }
 
-/* a tinted tile for the two services the home page spotlights */
-.tile-featured {
-    background:
-        radial-gradient(
-            120% 90% at 100% 0%,
-            color-mix(in oklab, var(--primary) 16%, transparent),
+    /* a tinted tile for the two services the home page spotlights */
+    .tile-featured {
+        background:
+            radial-gradient(
+                120% 90% at 100% 0%,
+                color-mix(in oklab, var(--primary) 16%, transparent),
+                transparent 60%
+            ),
+            var(--card);
+    }
+
+    /* spotlight: the pointer lights the card from where it is (--sx/--sy set by SpotlightCard) */
+    .spotlight::before {
+        content: "";
+        position: absolute;
+        inset: -1px;
+        border-radius: inherit;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.4s;
+        background: radial-gradient(
+            320px circle at var(--sx, 50%) var(--sy, 50%),
+            var(--glow),
             transparent 60%
-        ),
-        var(--card);
-}
+        );
+        -webkit-mask:
+            linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+        mask:
+            linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        padding: 1px;
+    }
 
-/* spotlight: the pointer lights the card from where it is (--sx/--sy set by SpotlightCard) */
-.spotlight::before {
-    content: "";
-    position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.4s;
-    background: radial-gradient(
-        320px circle at var(--sx, 50%) var(--sy, 50%),
-        var(--glow),
-        transparent 60%
-    );
-    -webkit-mask:
-        linear-gradient(#000 0 0) content-box,
-        linear-gradient(#000 0 0);
-    mask:
-        linear-gradient(#000 0 0) content-box,
-        linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    padding: 1px;
-}
+    .spotlight:hover::before {
+        opacity: 1;
+    }
 
-.spotlight:hover::before {
-    opacity: 1;
-}
+    /* a light sweep across the primary button on hover */
+    .shine {
+        position: relative;
+        overflow: hidden;
+    }
 
-/* a light sweep across the primary button on hover */
-.shine {
-    position: relative;
-    overflow: hidden;
-}
+    .shine::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            115deg,
+            transparent 30%,
+            color-mix(in oklab, var(--primary-foreground) 28%, transparent) 50%,
+            transparent 70%
+        );
+        transform: translateX(-120%);
+        transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+        pointer-events: none;
+    }
 
-.shine::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        115deg,
-        transparent 30%,
-        color-mix(in oklab, var(--primary-foreground) 28%, transparent) 50%,
-        transparent 70%
-    );
-    transform: translateX(-120%);
-    transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
-    pointer-events: none;
-}
+    .shine:hover::after {
+        transform: translateX(120%);
+    }
 
-.shine:hover::after {
-    transform: translateX(120%);
-}
+    /* fades a full-box canvas out at the edges of its section */
+    .fade-y {
+        -webkit-mask-image: linear-gradient(
+            to bottom,
+            transparent,
+            #000 12%,
+            #000 80%,
+            transparent
+        );
+        mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 80%, transparent);
+    }
 
-/* fades a full-box canvas out at the edges of its section */
-.fade-y {
-    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 80%, transparent);
-    mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 80%, transparent);
-}
-
-.fade-b {
-    -webkit-mask-image: linear-gradient(to bottom, #000 35%, transparent);
-    mask-image: linear-gradient(to bottom, #000 35%, transparent);
+    .fade-b {
+        -webkit-mask-image: linear-gradient(to bottom, #000 35%, transparent);
+        mask-image: linear-gradient(to bottom, #000 35%, transparent);
+    }
+    /* one palette as a round gradient: its background, its primary and its third chart colour */
+    .swatch {
+        background: linear-gradient(
+            135deg,
+            var(--background) 0%,
+            var(--primary) 52%,
+            var(--chart-3) 100%
+        );
+    }
 }
 
 /* ---------- backdrop ---------- */
@@ -481,6 +498,32 @@
 }
 
 /* ---------- motion ---------- */
+
+/* hero: one word of the headline at a time; a line of its own, so a long phrase wraps on a phone */
+.rotator {
+    display: grid;
+    overflow: hidden;
+    padding-bottom: 0.12em;
+}
+
+.rotator > span {
+    grid-area: 1 / 1;
+    opacity: 0;
+    transform: translateY(110%);
+    transition:
+        opacity 0.5s,
+        transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.rotator > span[data-active="true"] {
+    opacity: 1;
+    transform: none;
+}
+
+.rotator > span[data-leaving="true"] {
+    opacity: 0;
+    transform: translateY(-110%);
+}
 
 @keyframes drift {
     from {
