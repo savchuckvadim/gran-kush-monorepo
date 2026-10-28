@@ -152,7 +152,7 @@
 
 ## B. Три сайта — `feat/site-verticals`
 
-### TASK-760: сборка и деплой трёх сайтов `[ ]` P0
+### TASK-760: сборка и деплой трёх сайтов `[~]` P0
 
 - [ ] `infra/docker/next.Dockerfile`: build-args `NEXT_PUBLIC_SITE`, `NEXT_PUBLIC_SERVER_URL`
 - [ ] `.github/workflows/deploy.yml`: образы `site:<brand>` ×3 (тема вшивается alias'ом при сборке); сайт в
@@ -194,7 +194,7 @@
 - [ ] Наборы блоков по сайту: студии без `qrDoor`, `limitFlask`, `clubsMerge`, `privacyRoles`; новые
       `bookingDemo` (слот → подтверждение), `consentFlow` (тату), `reminders`; `FEATURE_ICONS` расширить
 
-### TASK-766: seed-контент тату и бьюти `[ ]` P0
+### TASK-766: seed-контент тату и бьюти `[~]` P0
 
 - [ ] `SITE_DOC` на три сайта, страницы `home`/`precios` es/ru/en под каждую нишу (копирайт по
       seo-playbook §2–3, без обещаний функций, которых нет — см. TASK-755/757)
@@ -268,7 +268,7 @@
 outbox, relay, потребители, плюс realtime-шлюз socket.io (TASK-794) и реестр инвалидации на фронте
 (TASK-795), которых здесь не было. Финансы — [finance-accounting](finance-accounting.md) (TASK-796…803).
 
-### TASK-780: доменные события CRM — шина с outbox `[ ]` P0 — продумать до кода
+### TASK-780: доменные события CRM — шина с outbox `[x]` P0 — в `events-realtime.md` (2026-10-20)
 
 - [ ] **Контракт события**: `{ id: uuid, name: 'order.stage_changed', version: 1, portalId, occurredAt,
     actor: { kind: EMPLOYEE|MEMBER|SYSTEM, id }, aggregate: { kind, id }, payload }`; имена
@@ -300,7 +300,7 @@ outbox, relay, потребители, плюс realtime-шлюз socket.io (TAS
       идемпотентен, консьюмер получает ровно один раз при повторе job; контрактные тесты payload по каталогу
 - [ ] **Нагрузка**: оценка — тысячи событий/день на портал; одна таблица, без партиционирования до 10 M строк
 
-### TASK-781: уведомления — потребитель событий `[ ]` P0
+### TASK-781: уведомления — потребитель событий `[x]` P0 — в `events-realtime.md` (2026-10-20)
 
 - [ ] Модели: `Notification` (portalId, recipientKind EMPLOYEE|MEMBER, recipientId, eventId, type,
       payloadJson, readAt), `NotificationPreference` (recipient × type × channel IN_APP|EMAIL|TELEGRAM)
@@ -313,7 +313,7 @@ outbox, relay, потребители, плюс realtime-шлюз socket.io (TAS
       непрочитанных в меню
 - [ ] e2e: матрица правил (кто что получает), отмена напоминания при переносе, предпочтения каналов
 
-### TASK-782: история портала — проекция событий `[ ]` P0
+### TASK-782: история портала — проекция событий `[x]` P0 — в `events-realtime.md` (2026-10-20)
 
 - [ ] Журнал = чтение `domain_events` по порталу/агрегату с человекочитаемым рендером из каталога
       (`i18n` по имени события и payload); отдельной таблицы `ActivityLog` нет, пока не нужен diff полей
@@ -502,8 +502,8 @@ PWA не делаем (решение Вадима 2026-10-19). База — н�
 
 ### Шаг 0 — руками, до кода (TASK-770 остаток, день 1)
 
-- [ ] Cloudflare: зона `ink-space.app`; записи `@`, `api`, `crm`, `app` → сервер (proxied); www → root
-- [ ] Dokploy: проект `inkspace`, Compose из git-пути `infra/dokploy/inkspace/docker-compose.yml`
+- [x] Cloudflare: зона `ink-space.app`; записи `@`, `api`, `crm`, `app` → сервер (proxied); www → root
+- [x] Dokploy: проект `inkspace`, Compose из git-пути `infra/dokploy/inkspace/docker-compose.yml`
       (появится в шаге 1), Environment — по `.env.example` с новыми секретами (`openssl rand -hex 32`),
       `DOMAIN=ink-space.app`, `BRAND=inkspace`, домены сервисов в Dokploy → Domains
 - [ ] Почта: identity `ink-space.app` у текущего EU-провайдера (SPF/DKIM/DMARC), `SMTP_FROM=no-reply@ink-space.app`
@@ -549,7 +549,7 @@ Ink Space — главная и цены с тарифами-заглушкам�
 
 ### Шаг 2 — Ink Space в сети (день 5)
 
-- [ ] Deploy в Dokploy; `https://api.ink-space.app/health` → `brand: inkspace`; `https://ink-space.app` — сайт;
+- [~] Deploy в Dokploy; `https://api.ink-space.app/health` → `brand: inkspace`; `https://ink-space.app` — сайт;
       `https://crm.ink-space.app` — регистрация студии с сайта, письмо пришло, CRM показывает «Ink Space»,
       скин Black, в меню нет «Посещения»; `https://app.ink-space.app` — кабинет клиента
 - [ ] Search Console + Bing + Plausible для `ink-space.app` (TASK-771), скриншот нулевой точки
