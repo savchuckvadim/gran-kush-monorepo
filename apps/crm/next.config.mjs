@@ -4,6 +4,16 @@ import { fileURLToPath } from "node:url";
 
 const withNextIntl = createNextIntlPlugin("./i18n.ts");
 
+// CSP only closes framing, <base> and plugins: script-src would need nonces for Next and the Google
+// and Telegram sign-in scripts. 'self' keeps the same-origin iframe used to check the mobile width.
+// Referrer-Policy: reset and confirmation tokens live in page URLs and must not leak in Referer.
+const SECURITY_HEADERS = [
+    { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+    { key: "X-Content-Type-Options", value: "nosniff" },
+    { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+    { key: "Content-Security-Policy", value: "frame-ancestors 'self'; base-uri 'self'; object-src 'none'" },
+];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     output: "standalone",
@@ -15,13 +25,7 @@ const nextConfig = {
     outputFileTracingRoot: fileURLToPath(new URL("../..", import.meta.url)),
     transpilePackages: ["@workspace/ui", "@workspace/api-client"],
     async headers() {
-        return [
-            {
-                // Токены сброса/подтверждения живут в URL страниц: не отдаём их в Referer
-                source: "/:path*",
-                headers: [{ key: "Referrer-Policy", value: "strict-origin-when-cross-origin" }],
-            },
-        ];
+        return [{ source: "/:path*", headers: SECURITY_HEADERS }];
     },
     async redirects() {
         return [

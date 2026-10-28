@@ -58,7 +58,7 @@ pnpm --filter itfirma dev       # studio site, port 5003, es/en/ru/uk/ca (docume
 pnpm --filter api prisma:migrate          # prisma migrate dev
 pnpm --filter api prisma:migrate:deploy   # prisma migrate deploy (production)
 pnpm --filter api prisma:generate         # prisma generate
-pnpm --filter api prisma:seed:admin       # ts-node prisma/seed-admin.ts
+pnpm --filter api prisma:seed:admin       # ts-node src/seed-admin.main.ts
 pnpm --filter api prisma:studio           # prisma studio
 ```
 

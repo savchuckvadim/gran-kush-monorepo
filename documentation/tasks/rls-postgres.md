@@ -299,7 +299,7 @@ base.$extends({
       обернуть `process()` в `als.run({ portalId })`; `mail` работает с глобальными данными →
       системный клиент. Там, где `portalId` в payload нет, — добавить его в payload,
       а не расширять область системного клиента
-- [ ] `prisma/seed-admin.ts` — owner-роль (получится автоматически после смены URL)
+- [ ] `src/seed-admin.main.ts` — owner-роль (получится автоматически после смены URL)
 - [ ] `PortalResolutionService` читает `portals` (глобальная таблица) — менять нечего
 - [ ] правило ревью: `PrismaSystemService` инжектится только в перечисленных модулях
 

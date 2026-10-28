@@ -3,6 +3,7 @@ import { NestFactory } from "@nestjs/core";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
 
 import { setCorsConfig } from "@common/config/cors/cors.config";
 
@@ -24,6 +25,16 @@ async function bootstrap() {
     // заголовком X-Forwarded-For и лимит обойти.
     const trustProxyHops = Number(process.env.TRUST_PROXY_HOPS ?? 1);
     app.set("trust proxy", Number.isFinite(trustProxyHops) ? trustProxyHops : 1);
+
+    // Заголовки безопасности. CSP выключен: API отдаёт JSON и файлы, а политика по умолчанию
+    // ломает Swagger UI и встроенный просмотр PDF. CORP same-site: картинки и файлы API
+    // встраивают CRM, кабинет и сайт на поддоменах того же домена
+    app.use(
+        helmet({
+            contentSecurityPolicy: false,
+            crossOriginResourcePolicy: { policy: "same-site" },
+        })
+    );
 
     // Валидация DTO и формат ошибок — APP_PIPE / APP_FILTER в AppModule
     const configService = app.get(ConfigService);

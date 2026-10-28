@@ -97,7 +97,7 @@ pnpm --filter site dev                         # http://localhost:5002/es
 
 Сейчас в `billing_plans` есть только `trial`, поэтому сайт показывает запасные цены.
 
-Тарифы попадут в прод data-миграцией Prisma, а не через `seed-admin.ts`: контейнеры по умолчанию запускают `migrate deploy`, а сид — только по opt-in (`RUN_SEED=true` или `BOOTSTRAP_ADMIN_ENABLED=true`).
+Тарифы попадут в прод data-миграцией Prisma, а не через `seed-admin.main.ts`: контейнеры по умолчанию запускают `migrate deploy`, а сид — только по opt-in (`RUN_SEED=true` или `BOOTSTRAP_ADMIN_ENABLED=true`).
 
 Набросок (Postgres 16, `gen_random_uuid()` есть):
 

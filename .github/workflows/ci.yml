@@ -8,6 +8,10 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Checks only read the code: the token cannot push, comment or touch packages
+permissions:
+  contents: read
+
 jobs:
   checks:
     name: Lint, typecheck, unit

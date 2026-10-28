@@ -1,11 +1,16 @@
-import "dotenv/config";
-
+/**
+ * Platform admin and global entity templates. Built with the API so the image runs it without
+ * ts-node: `node dist/seed-admin.main` when the container starts with RUN_SEED=true; locally
+ * `pnpm --filter api prisma:seed:admin`.
+ */
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 import { hash } from "bcrypt";
 
-import { ensureGlobalEntityTemplates } from "../src/common/reference-data/global-templates.seed";
-import { syncSystemLabelTranslations } from "../src/common/reference-data/system-label-translations.sync";
+import { ensureGlobalEntityTemplates } from "./common/reference-data/global-templates.seed";
+import { syncSystemLabelTranslations } from "./common/reference-data/system-label-translations.sync";
+
+import "dotenv/config";
 
 function getRequiredEnv(name: string): string {
     const value = process.env[name];

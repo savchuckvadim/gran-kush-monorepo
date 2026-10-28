@@ -14,7 +14,7 @@
         "@workspace/brand": "workspace:*",
         "lucide-react": "^0.563.0",
         "next": "16.4.2",
-        "next-intl": "^4.8.3",
+        "next-intl": "^4.14.2",
         "nodemailer": "^10.0.0",
         "react": "19.2.6",
         "react-dom": "19.2.6",

@@ -547,13 +547,15 @@ Semgrep, Trivy, ZAP по OpenAPI).
 - [x] Лимит входа по адресу в Redis (`PasswordSignInService`): 10 неудач за 15 минут закрывают вход
       паролем по адресу при любом IP — CRM, кабинет и админка платформы (TASK-739, 2026-10-17;
       e2e `sign-in-abuse`). Лимит по IP (`AUTH_THROTTLE`) остаётся
-- [ ] Dokploy: `TRUST_PROXY_HOPS=2`, Cloudflare в режиме Full (не strict), allowlist IP Cloudflare
-      нет — если сервер достижим напрямую, `X-Forwarded-For` подделывается (не подтверждено,
-      проверить с Вадимом в панели)
-- [~] CRM, кабинет и админка: добавлен `Referrer-Policy: strict-origin-when-cross-origin`
-      (`next.config.mjs` всех трёх, `audit/auth-flow`, 2026-10-14) — токены сброса из URL не утекают
-      в Referer. Остальное открыто: `frame-ancestors`/`X-Frame-Options`, CSP, HSTS, nosniff +
-      `helmet` в API
+- [~] Dokploy: `TRUST_PROXY_HOPS` по умолчанию 2 в compose всех инсталляций (Cloudflare + Traefik).
+      Открыто (Вадим, в панели): Cloudflare в режиме Full (не strict), allowlist IP Cloudflare нет —
+      если сервер достижим напрямую, `X-Forwarded-For` подделывается
+- [x] Заголовки (`fix/security-667-669`, 2026-10-28). CRM и кабинет: HSTS, nosniff, Referrer-Policy,
+      CSP `frame-ancestors 'self'; base-uri 'self'; object-src 'none'` (админка — `frame-ancestors 'none'`);
+      `script-src` не задан — нужны nonce для Next и скриптов входа Google/Telegram. Сайт и itfirma —
+      HSTS, nosniff, `frame-ancestors 'self'` (раньше). API — `helmet` (HSTS, nosniff,
+      `X-Frame-Options`, COOP, без `X-Powered-By`; CSP выключен — JSON, Swagger и просмотр PDF;
+      CORP `same-site` — файлы API встраивают поддомены того же домена)
 
 ### TASK-668: сессионные токены `[x]` P1
 
@@ -572,7 +574,7 @@ Semgrep, Trivy, ZAP по OpenAPI).
 - [x] Куки токенов — host-only на хосте API, refresh только на `/{aud}/auth`; фронтам — подсказка
       `*_session=1` на общем домене (TASK-734, 2026-10-17)
 
-### TASK-669: рантайм, зависимости, CI `[ ]` P1
+### TASK-669: рантайм, зависимости, CI `[~]` P1
 
 - [x] 2026-10-23 (`fix/next-rce-16-4`): Security на main упал на трёх critical из свежих advisory — две RCE без
       авторизации в Next `>=16.0.0 <=16.4.0` (Image Optimization с SVG; `use cache` с typed arrays) и обход
@@ -581,12 +583,12 @@ Semgrep, Trivy, ZAP по OpenAPI).
 - [x] Образы переведены на `node:22-slim` (`chore/next-16-3-8`, 2026-10-12): Node 20 — EOL, и
       Next 16.3.8 зовёт `util.markAsUncloneable`, которого в Node 20 нет (образ `site` не
       собирался). Проверено локальной docker-сборкой `site` и `api`
-- [ ] Контейнер API работает от root; образ API — 4,1 ГБ (runner копирует весь `/app` с
-      `node_modules` монорепы) — при каждом Deploy диск сервера забивается старыми версиями
-      (инцидент 12.10.2026: диск 100 %, все Postgres в Restarting). Ужать образ (`pnpm deploy
-      --prod` или `--filter api... --prod`). Уборка диска сделана отдельно — TASK-674
-      (`pafpaf-janitor`)
-- [ ] `apps/site`: `next-intl@4.8.3` (помечен в TASK-306), `next@16.3.3`
+- [x] Контейнер API работал от root, образ — 4,1 ГБ (runner копировал весь `/app` с `node_modules`
+      монорепы; инцидент 12.10.2026: диск 100 %, все Postgres в Restarting). С `fix/security-667-669`
+      (2026-10-28): runner — `pnpm deploy --prod` только API, `USER node`; `prisma` и `dotenv` —
+      рантайм-зависимости (миграции на старте), сид админа собирается с API (`dist/seed-admin.main`),
+      entrypoint без pnpm. Janitor по-прежнему root через `user` в compose. Уборка диска — TASK-674
+- [x] `apps/site` и `apps/itfirma`: `next-intl` ^4.14 как в CRM (было 4.8.3), `next` 16.4.2 везде
 - [x] `next` 16.3.8 во всех приложениях (SSRF в `next/image`), `sharp` 0.35.5, `source-map-js`,
       и pnpm overrides по пропатченным версиям внутри мажоров: `proxy-addr` >= 2.0.8 (critical —
       подмена IP через IPv4-mapped адреса, ломала лимиты по IP), `path-to-regexp` 8.x,
@@ -597,13 +599,14 @@ Semgrep, Trivy, ZAP по OpenAPI).
 - [ ] Workflow `Security`: `pnpm audit` и Trivy падают только на critical; оставшиеся high —
       CLI-цепочки Prisma/Payload/drizzle и `braces` под sass (без фикса) — закрывать при
       обновлении Prisma и Payload; Trivy misconfig по Dockerfile (root, Node 20) — пункт выше
-- [ ] `ci.yml` без `permissions:`, actions не прибиты к SHA, SSH `StrictHostKeyChecking=accept-new`
-- [~] Слабые дефолты вместо падения на старте: `JWT_DEFAULTS.SECRET = "default-secret"` удалён —
-      без `JWT_SECRET` приложение не стартует (`audit/auth-flow`, 2026-10-14). Остались:
-      `ENCRYPTION_MASTER_KEY` → случайный ключ (`encryption.service.ts:33`), `PAYLOAD_SECRET || ""`;
-      секрет платформенного JWT по-прежнему производный от `JWT_SECRET` (`:platform`)
-- [ ] Redis без пароля; dev-compose публикует Postgres и Redis на 0.0.0.0; лишний пакет `add` в
-      зависимостях API
+- [~] `ci.yml` — `permissions: contents: read` (2026-10-28); SSH из CI ушёл вместе с деплоем через
+      Dokploy. Открыто: actions не прибиты к SHA (решить вместе с Dependabot)
+- [x] Слабые дефолты: без `JWT_SECRET` (2026-10-14) и без `ENCRYPTION_MASTER_KEY` (2026-10-28, раньше —
+      случайный ключ на запуск) API не стартует. Платформенный JWT ушёл с переездом админки на сессии
+      (TASK-666). `PAYLOAD_SECRET || ""` — не дефолт: Payload сам не стартует без секрета
+- [~] dev-compose публикует Postgres и Redis только на 127.0.0.1, пакет `add` удалён (2026-10-28).
+      Открыто: Redis без пароля — в проде он только во внутренней сети проекта; пароль — с новым
+      секретом `REDIS_PASSWORD` в трёх инсталляциях
 
 ### TASK-670: мелочи `[ ]` P2
 

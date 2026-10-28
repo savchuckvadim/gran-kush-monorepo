@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
 import * as crypto from "crypto";
@@ -13,7 +13,6 @@ import * as crypto from "crypto";
  */
 @Injectable()
 export class EncryptionService {
-    private readonly logger = new Logger(EncryptionService.name);
     private readonly algorithm = "aes-256-gcm";
     private readonly keyLength = 32; // 256 бит
     private readonly ivLength = 16; // 128 бит
@@ -24,21 +23,19 @@ export class EncryptionService {
     constructor(private readonly configService: ConfigService) {
         const keyHex = this.configService.get<string>("ENCRYPTION_MASTER_KEY");
 
+        // Без ключа не стартуем: случайный ключ на запуск делал бы зашифрованные данные
+        // нечитаемыми после первого же рестарта
         if (!keyHex) {
-            this.logger.warn(
-                "⚠️ ENCRYPTION_MASTER_KEY is not set! Generating a random key. " +
-                    "THIS IS NOT SUITABLE FOR PRODUCTION. " +
-                    "Set ENCRYPTION_MASTER_KEY env variable (64 hex chars = 32 bytes)."
+            throw new Error(
+                "ENCRYPTION_MASTER_KEY is not set: 64 hex characters (32 bytes) are required."
             );
-            this.encryptionKey = crypto.randomBytes(this.keyLength);
-        } else {
-            if (keyHex.length !== 64) {
-                throw new Error(
-                    `ENCRYPTION_MASTER_KEY must be 64 hex characters (32 bytes). Got ${keyHex.length} chars.`
-                );
-            }
-            this.encryptionKey = Buffer.from(keyHex, "hex");
         }
+        if (!/^[0-9a-f]{64}$/i.test(keyHex)) {
+            throw new Error(
+                `ENCRYPTION_MASTER_KEY must be 64 hex characters (32 bytes). Got ${keyHex.length} chars.`
+            );
+        }
+        this.encryptionKey = Buffer.from(keyHex, "hex");
     }
 
     /**
