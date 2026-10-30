@@ -3,16 +3,6 @@
         "adminTitle": "{brand} · Админка",
         "clubs": "Клубы",
         "plans": "Тарифы",
-        "home": "Главная",
-        "login": "Войти",
-        "register": "Регистрация",
-        "profile": "Профиль",
-        "settings": "Настройки",
-        "logout": "Выйти",
-        "privacy": "Конфиденциальность",
-        "terms": "Условия",
-        "navigationSection": "Навигация",
-        "accountSection": "Аккаунт",
-        "legalSection": "Правовая информация"
+        "logout": "Выйти"
     }
 }

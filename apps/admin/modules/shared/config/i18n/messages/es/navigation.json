@@ -3,16 +3,6 @@
         "adminTitle": "{brand} · Admin",
         "clubs": "Clubes",
         "plans": "Planes",
-        "home": "Inicio",
-        "login": "Iniciar sesión",
-        "register": "Registrarse",
-        "profile": "Perfil",
-        "settings": "Configuración",
-        "logout": "Cerrar sesión",
-        "privacy": "Privacidad",
-        "terms": "Términos",
-        "navigationSection": "Navegación",
-        "accountSection": "Cuenta",
-        "legalSection": "Legal"
+        "logout": "Cerrar sesión"
     }
 }

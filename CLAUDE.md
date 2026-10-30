@@ -263,10 +263,11 @@ Frontend must use `credentials: "include"` for cookie-based calls.
 
 ```ts
 // apps/crm/modules/shared/api/api.ts
-configureApiClient(baseUrl, ApiAuthType.CRM, { authStrategy: "cookie" });
+configureApiClient(baseUrl, ApiAuthType.CRM, { getPortalSlug, getLocale });
 ```
 
-`getAuthMiddleware` handles 401 → refresh → retry automatically.
+Session lives in HttpOnly cookies only. `getAuthMiddleware` handles 401 → refresh → retry automatically;
+`refresh: false` turns that off for an app whose own server refreshes the session (`apps/admin` proxy).
 
 Error handling:
 

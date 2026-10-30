@@ -20,6 +20,11 @@ export const configureApiClient = <P extends object = paths>(
         getLocale?: () => string | null | undefined;
         /** Проставлять Idempotency-Key на мутациях. По умолчанию включено. */
         idempotency?: boolean;
+        /**
+         * Обновлять сессию на 401 через `POST /{aud}/auth/refresh` и повторять запрос. По умолчанию
+         * включено; выключается, когда refresh делает сервер приложения (прокси админки).
+         */
+        refresh?: boolean;
     }
 ): Client<P> => {
     const client = createClient<P>({
@@ -34,6 +39,11 @@ export const configureApiClient = <P extends object = paths>(
     if (options?.getLocale) {
         client.use(getLocaleMiddleware(options.getLocale));
     }
-    client.use(getAuthMiddleware(type, baseurl, options?.getPortalSlug));
+    client.use(
+        getAuthMiddleware(type, baseurl, {
+            getPortalSlug: options?.getPortalSlug,
+            refresh: options?.refresh,
+        })
+    );
     return client;
 };

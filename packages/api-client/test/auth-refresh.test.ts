@@ -133,4 +133,19 @@ describe("token refresh of two clients", () => {
             .filter((url) => !url.endsWith("/auth/refresh"));
         expect(retried.sort()).toEqual([`${BASE}/cabinet/qr-code`, `${BASE}/crm/members`]);
     });
+
+    it("a client whose server refreshes for it returns the 401 as is", async () => {
+        const auth = getAuthMiddleware(ApiAuthType.CRM, BASE, { refresh: false });
+        const request = new Request(`${BASE}/platform/portals`);
+        await auth.onRequest?.({ request } as never);
+
+        const result = await auth.onResponse?.({
+            request,
+            response: new Response(null, { status: 401 }),
+        } as never);
+
+        expect((result as Response).status).toBe(401);
+        expect(refreshCalls(fetchMock, "/crm/auth/refresh")).toBe(0);
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
 });

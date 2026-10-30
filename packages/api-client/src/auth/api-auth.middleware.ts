@@ -13,6 +13,12 @@ const isAuthEndpoint = (url: string): boolean =>
 /** Клон запроса до отправки: его тело не прочитано, и после refresh его можно повторить. */
 const retryRequests = new WeakMap<Request, Request>();
 
+export type AuthMiddlewareOptions = {
+    getPortalSlug?: () => string | null;
+    /** `false` — 401 отдаётся как есть: сессию обновляет не браузер, а сервер приложения. */
+    refresh?: boolean;
+};
+
 /**
  * Сессия по HttpOnly-кукам: заголовки клуба и устройства на запрос; на 401 — один refresh на тип
  * клиента и повтор исходного запроса. Не-401 ошибки становятся `ApiClientError` со статусом и телом.
@@ -20,8 +26,9 @@ const retryRequests = new WeakMap<Request, Request>();
 export const getAuthMiddleware = (
     type: ApiAuthType,
     baseUrl: string,
-    getPortalSlug?: () => string | null
+    options: AuthMiddlewareOptions = {}
 ): Middleware => {
+    const { getPortalSlug, refresh = true } = options;
     const refreshHelper = new ApiRefreshHelper(type, baseUrl);
 
     return {
@@ -46,7 +53,7 @@ export const getAuthMiddleware = (
                 // ApiClientError сохраняет status/body — консюмеры различают 402/403/404
                 throw await parseApiErrorFromResponse(response);
             }
-            if (isAuthEndpoint(request.url)) {
+            if (!refresh || isAuthEndpoint(request.url)) {
                 return response;
             }
 
