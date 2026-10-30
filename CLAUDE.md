@@ -69,7 +69,7 @@ pnpm --filter api prisma:studio           # prisma studio
 - **NestJS 11** — DDD + Clean Architecture
 - **Prisma 7** (with `@prisma/adapter-pg`) — ORM, migrations
 - **PostgreSQL** — primary database
-- **Redis + BullMQ** — async queues (`mail`, `member-files`, `domain-events`)
+- **Redis + BullMQ** — async queues (`mail`, `member-files`, `domain-events`, `operations`)
 - **Domain events** — transactional outbox + `@OnDomainEvent` consumers, contract in `@workspace/domain-events` ([DOMAIN_EVENTS](documentation/backend/DOMAIN_EVENTS.md))
 - **Passport + JWT** — dual auth (Member / Employee)
 - **class-validator + class-transformer** — DTO validation
@@ -317,11 +317,18 @@ All routes are prefixed with `/{locale}`.
 
 ## Queue System (BullMQ)
 
-| Queue           | Purpose                                                       |
-| --------------- | ------------------------------------------------------------- |
-| `mail`          | Email sending (Nodemailer + React Email templates)            |
-| `member-files`  | Async member document/signature processing                    |
-| `domain-events` | Delivery of domain events to consumers (one job per consumer) |
+| Queue           | Purpose                                                                                      |
+| --------------- | -------------------------------------------------------------------------------------------- |
+| `mail`          | Email sending (Nodemailer + React Email templates)                                           |
+| `member-files`  | Async member document/signature processing                                                   |
+| `domain-events` | Delivery of domain events to consumers (one job per consumer)                                |
+| `operations`    | Background operations: a route marked `@BackgroundOperation` answers 202, the work runs here |
+
+**Background operations.** A heavy route (exports, filings, mailings) is marked
+`@BackgroundOperation(definition)`, returns the operation input and answers `202 { operationId }`; a
+provider with `@RunsOperation(definition)` does the work; the author gets `operation.finished / failed`
+over the socket and reads `GET /crm/operations/:id`. Orders and ordinary forms stay synchronous.
+Details: [BACKGROUND_OPERATIONS](documentation/backend/BACKGROUND_OPERATIONS.md).
 
 **Domain events.** Anything another part of the system must learn about (realtime, notifications,
 journal, letters) is a domain event written in the transaction of the change: repositories take
@@ -380,3 +387,4 @@ needs a rule there, not polling. Details: [REALTIME](documentation/backend/REALT
 - [Multi-tenant plan](documentation/crm/MULTITENANT_NEXTJS_AUTH_PLAYBOOK.md) — portal scoping strategy
 - [Domain events](documentation/backend/DOMAIN_EVENTS.md) — outbox, catalog, consumers, how to add an event
 - [Realtime](documentation/backend/REALTIME.md) — socket.io gateway, rooms, client rules
+- [Background operations](documentation/backend/BACKGROUND_OPERATIONS.md) — 202 + operation id, `operations` queue, runners, CRM hooks

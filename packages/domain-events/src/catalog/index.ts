@@ -26,6 +26,7 @@ import {
     memberUpdated,
 } from "./member.events";
 import { notificationCreated } from "./notification.events";
+import { operationFailed, operationFinished } from "./operation.events";
 import {
     orderCancelled,
     orderPaymentChanged,
@@ -58,6 +59,8 @@ export const EVENT_CATALOG = {
     "finance.counterparties_changed": financeCounterpartiesChanged,
     "finance.accessed": financeAccessed,
     "notification.created": notificationCreated,
+    "operation.finished": operationFinished,
+    "operation.failed": operationFailed,
     "comment.added": commentAdded,
     "comment.updated": commentUpdated,
     "comment.deleted": commentDeleted,
@@ -131,6 +134,8 @@ export {
     memberStatusChanged,
     memberUpdated,
     notificationCreated,
+    operationFailed,
+    operationFinished,
     orderCancelled,
     orderPaymentChanged,
     orderPlaced,

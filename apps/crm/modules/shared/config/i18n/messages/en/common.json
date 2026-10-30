@@ -34,6 +34,25 @@
                 },
                 "unknown": "New notification"
             }
+        },
+        "operations": {
+            "queued": "Waiting in the queue…",
+            "running": "Working…",
+            "done": "Done",
+            "unavailable": "Could not read the state of the operation",
+            "open": "Open",
+            "finished": "{kind}: done",
+            "failed": "{kind}: failed — {reason}",
+            "failedShort": "Failed — {reason}",
+            "kinds": {
+                "unknown": "Background task"
+            },
+            "reasons": {
+                "operation_failed": "internal error, we already know about it",
+                "operation_runner_missing": "nothing can run this task yet",
+                "operation_queue_unavailable": "the queue is unavailable, try again later",
+                "unknown": "the task was rejected"
+            }
         }
     },
     "meta": {

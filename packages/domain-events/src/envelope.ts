@@ -18,6 +18,7 @@ export const AGGREGATE_KINDS = [
     "notification",
     "comment",
     "ledger_entry",
+    "operation",
 ] as const;
 export type AggregateKind = (typeof AGGREGATE_KINDS)[number];
 

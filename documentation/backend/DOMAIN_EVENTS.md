@@ -39,7 +39,8 @@ Catalog v1: `portal.founded`, `member.joined / consent_given / left / status_cha
 `order.placed / stage_changed / cancelled / payment_changed`, `product.changed / stock_changed`,
 `presence.entered / left`, `employee.joined / access_changed`, `role.changed`, `session.revoked`,
 `portal.module_changed`, `finance.profile_updated`, `finance.tax_rates_changed`, `notification.created`, `comment.added / updated / deleted`,
-`finance.entry_recorded / entry_updated / entry_voided / entries_imported / period_closed / period_reopened / categories_changed / counterparties_changed / accessed`.
+`finance.entry_recorded / entry_updated / entry_voided / entries_imported / period_closed / period_reopened / categories_changed / counterparties_changed / accessed`,
+`operation.finished / failed` (audience — the author only; [BACKGROUND_OPERATIONS](./BACKGROUND_OPERATIONS.md)).
 
 ## Multi-tenancy
 
@@ -117,14 +118,14 @@ fails independently (the welcome letter and the Telegram alert are two consumers
 
 ## Consumers today
 
-| Consumer                | Events           | Module                                 |
-| ----------------------- | ---------------- | -------------------------------------- |
-| `WelcomeLetterConsumer` | `portal.founded` | `portals`                              |
-| `PlatformAlertConsumer` | `portal.founded` | `portals`                              |
-| `RealtimeConsumer`      | every event      | `realtime` ([REALTIME](./REALTIME.md)) |
-| `OrderNotificationsConsumer` | `order.placed`, `order.cancelled`, `order.stage_changed` | `notifications` |
-| `TelegramNotificationsConsumer` | `notification.created` | `notifications` |
-| `OrderLedgerConsumer` | `order.payment_changed`, `order.stage_changed` | `finance` |
+| Consumer                        | Events                                                   | Module                                 |
+| ------------------------------- | -------------------------------------------------------- | -------------------------------------- |
+| `WelcomeLetterConsumer`         | `portal.founded`                                         | `portals`                              |
+| `PlatformAlertConsumer`         | `portal.founded`                                         | `portals`                              |
+| `RealtimeConsumer`              | every event                                              | `realtime` ([REALTIME](./REALTIME.md)) |
+| `OrderNotificationsConsumer`    | `order.placed`, `order.cancelled`, `order.stage_changed` | `notifications`                        |
+| `TelegramNotificationsConsumer` | `notification.created`                                   | `notifications`                        |
+| `OrderLedgerConsumer`           | `order.payment_changed`, `order.stage_changed`           | `finance`                              |
 
 Notifications (TASK-781): rules turn events into personal notifications (`notifications` table,
 one per event and recipient); each notification is the `notification.created` event for the bell and

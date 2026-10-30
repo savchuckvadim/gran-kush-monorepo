@@ -34,6 +34,25 @@
                 },
                 "unknown": "Nueva notificación"
             }
+        },
+        "operations": {
+            "queued": "En cola…",
+            "running": "En proceso…",
+            "done": "Listo",
+            "unavailable": "No se pudo leer el estado de la operación",
+            "open": "Abrir",
+            "finished": "{kind}: listo",
+            "failed": "{kind}: no se completó — {reason}",
+            "failedShort": "No se completó — {reason}",
+            "kinds": {
+                "unknown": "Tarea en segundo plano"
+            },
+            "reasons": {
+                "operation_failed": "error interno, ya lo sabemos",
+                "operation_runner_missing": "todavía nada puede ejecutar esta tarea",
+                "operation_queue_unavailable": "la cola no está disponible, inténtalo más tarde",
+                "unknown": "la tarea fue rechazada"
+            }
         }
     },
     "meta": {

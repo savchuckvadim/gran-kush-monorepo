@@ -34,6 +34,25 @@
                 },
                 "unknown": "Новое уведомление"
             }
+        },
+        "operations": {
+            "queued": "Ждёт очереди…",
+            "running": "Выполняется…",
+            "done": "Готово",
+            "unavailable": "Не удалось узнать состояние операции",
+            "open": "Открыть",
+            "finished": "{kind}: готово",
+            "failed": "{kind}: не удалось — {reason}",
+            "failedShort": "Не удалось — {reason}",
+            "kinds": {
+                "unknown": "Фоновая задача"
+            },
+            "reasons": {
+                "operation_failed": "внутренняя ошибка, мы уже знаем",
+                "operation_runner_missing": "эту задачу пока нечем выполнить",
+                "operation_queue_unavailable": "очередь недоступна, попробуйте позже",
+                "unknown": "задача отклонена"
+            }
         }
     },
     "meta": {

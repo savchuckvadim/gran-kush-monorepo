@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/crm/operations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Моя фоновая операция: статус, результат или причина сбоя
+         * @description Операцию видит только её автор в своём клубе; остальным — 404
+         */
+        get: operations["CrmOperations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/crm/notifications": {
         parameters: {
             query?: never;
@@ -675,7 +695,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Liveness: процесс жив, без обращения к БД */
+        /** Liveness: процесс жив, без обращения к БД; бренд и версия сборки */
         get: operations["Health_getHealth"];
         put?: never;
         post?: never;
@@ -4068,6 +4088,47 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        OperationDto: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Вид операции
+             * @example finance.export_books
+             */
+            kind: string;
+            /** @enum {string} */
+            status: "queued" | "running" | "done" | "failed";
+            /** @description Результат исполнителя после `done`; файлы — ссылкой со сроком */
+            result: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * @description Машинная причина сбоя после `failed`: код доменной ошибки или `operation_failed`
+             * @example operation_failed
+             */
+            error: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            startedAt: string | null;
+            /** Format: date-time */
+            finishedAt: string | null;
+        };
+        ApiErrorResponseDto: {
+            /**
+             * @description Error message
+             * @example Validation failed
+             */
+            message: string;
+            /**
+             * @description Array of validation errors (for validation errors)
+             * @example [
+             *       "email must be an email",
+             *       "password must be longer than 8 characters"
+             *     ]
+             */
+            errors?: string[];
+        };
         NotificationDto: {
             /** Format: uuid */
             id: string;
@@ -4098,21 +4159,6 @@ export interface components {
             nextCursor: string | null;
             /** @description Непрочитанных всего */
             unread: number;
-        };
-        ApiErrorResponseDto: {
-            /**
-             * @description Error message
-             * @example Validation failed
-             */
-            message: string;
-            /**
-             * @description Array of validation errors (for validation errors)
-             * @example [
-             *       "email must be an email",
-             *       "password must be longer than 8 characters"
-             *     ]
-             */
-            errors?: string[];
         };
         UnreadNotificationsDto: {
             unread: number;
@@ -4561,6 +4607,13 @@ export interface components {
         HealthResponseDto: {
             /** @example ok */
             status: string;
+            /**
+             * @example pafpaf
+             * @enum {string}
+             */
+            brand: "pafpaf" | "inkspace" | "plisplas";
+            /** @example 0f6ba55 */
+            version: string;
         };
         ReadinessChecksDto: {
             /**
@@ -8420,9 +8473,10 @@ export interface components {
     headers: never;
     pathItems: never;
 }
+export type SchemaOperationDto = components['schemas']['OperationDto'];
+export type SchemaApiErrorResponseDto = components['schemas']['ApiErrorResponseDto'];
 export type SchemaNotificationDto = components['schemas']['NotificationDto'];
 export type SchemaNotificationListDto = components['schemas']['NotificationListDto'];
-export type SchemaApiErrorResponseDto = components['schemas']['ApiErrorResponseDto'];
 export type SchemaUnreadNotificationsDto = components['schemas']['UnreadNotificationsDto'];
 export type SchemaMarkNotificationsReadDto = components['schemas']['MarkNotificationsReadDto'];
 export type SchemaNotificationPreferencesDto = components['schemas']['NotificationPreferencesDto'];
@@ -8775,6 +8829,64 @@ export type SchemaShopDenial = components['schemas']['ShopDenial'];
 export type SchemaShopAccessDto = components['schemas']['ShopAccessDto'];
 export type $defs = Record<string, never>;
 export interface operations {
+    CrmOperations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
     CrmNotifications_list: {
         parameters: {
             query?: {

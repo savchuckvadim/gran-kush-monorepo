@@ -58,3 +58,14 @@ export const MEMBER_FILES_JOB_OPTIONS: DefaultJobOptions = {
     removeOnComplete: { age: 10 * 60, count: 100 },
     removeOnFail: { age: DAY, count: 100 },
 };
+
+/**
+ * Фоновые операции (TASK-809). Одна попытка: тяжёлая операция (выгрузка, подача) не обязана быть
+ * идемпотентной, поэтому сбой фиксируется строкой `failed` и событием автору, а не повтором.
+ * Запись о выполненной задаче живёт час — это окно дедупликации по `jobId` операции.
+ */
+export const OPERATIONS_JOB_OPTIONS: DefaultJobOptions = {
+    attempts: 1,
+    removeOnComplete: { age: HOUR, count: 1_000 },
+    removeOnFail: { age: 7 * DAY },
+};

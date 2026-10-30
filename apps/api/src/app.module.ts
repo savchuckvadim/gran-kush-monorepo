@@ -25,6 +25,7 @@ import { EventsModule } from "./modules/events/events.module";
 import { HealthModule } from "./modules/health/health.module";
 import { MailModule } from "./modules/mail/mail.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
+import { OperationsModule } from "./modules/operations/operations.module";
 import { PlatformModule } from "./modules/platform/platform.module";
 import { AuthModule } from "./modules/portal/auth/auth.module";
 import { SessionOriginMiddleware } from "./modules/portal/auth/sessions/api/session-origin.middleware";
@@ -48,6 +49,7 @@ import { TimelineModule } from "./modules/timeline/timeline.module";
         QueueModule,
         TelegramModule,
         EventsModule,
+        OperationsModule,
         RealtimeModule,
         NotificationsModule,
         TimelineModule,
