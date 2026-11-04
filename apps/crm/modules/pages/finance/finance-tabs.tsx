@@ -8,6 +8,7 @@ import type { Counterparty, LedgerEntry } from "@/modules/entities/finance";
 import {
     CounterpartiesPanel,
     FinanceOverviewPanel,
+    FinanceReportsPanel,
     type LedgerFilterState,
     LedgerMonthSelect,
     LedgerTable,
@@ -18,6 +19,7 @@ import { StockPanel } from "@/modules/widgets/stock";
 
 export const FINANCE_TABS = [
     "overview",
+    "reports",
     "entries",
     "expenses",
     "stock",
@@ -69,6 +71,9 @@ export function FinanceTabs(props: FinanceTabsProps) {
                     range={monthRange(month)}
                     onOpenCategory={(categoryId) => showEntries({ month, categoryId })}
                 />
+            </TabsContent>
+            <TabsContent value="reports">
+                <FinanceReportsPanel onOpen={onOpen} />
             </TabsContent>
             <TabsContent value="entries">
                 <LedgerTable filter={entries} onFilterChange={onEntries} onOpen={onOpen} />

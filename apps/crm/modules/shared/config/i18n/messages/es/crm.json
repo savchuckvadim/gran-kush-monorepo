@@ -873,6 +873,7 @@
             },
             "tabs": {
                 "overview": "Resumen",
+                "reports": "Informes",
                 "entries": "Movimientos",
                 "expenses": "Gastos",
                 "counterparties": "Contrapartes",
@@ -1313,6 +1314,112 @@
                 "import_empty": "El archivo no tiene filas",
                 "import_missing_columns": "Faltan columnas obligatorias: compáralo con el ejemplo",
                 "import_too_many_rows": "Demasiadas filas en un archivo: divídelo"
+            },
+            "reports": {
+                "quarter": "Trimestre",
+                "quarterLabel": "{quarter}T {year}",
+                "disclaimer": "Cifras para revisar con tu gestor: la CRM las calcula con los apuntes y no presenta modelos.",
+                "error": "No se han podido cargar los informes",
+                "vat": {
+                    "title": "IVA del trimestre",
+                    "hint": "Diferencia sin reglas de deducción: {balance}",
+                    "output": "Repercutido en ventas",
+                    "input": "Soportado en compras",
+                    "base": "Base",
+                    "tax": "IVA",
+                    "total": "Total IVA",
+                    "empty": "Sin líneas",
+                    "unclassified": "Sin tipo",
+                    "treatments": {
+                        "exempt": "Exenta",
+                        "not_subject": "No sujeta"
+                    }
+                },
+                "withholding": {
+                    "title": "Retenciones IRPF",
+                    "hint": "De los documentos con retención",
+                    "received": {
+                        "label": "Nos retuvieron los clientes",
+                        "details": "base {base} · documentos: {count}"
+                    },
+                    "applied": {
+                        "label": "Retuvimos a profesionales (modelo 111)",
+                        "details": "base {base} · perceptores: {counterparties}"
+                    }
+                },
+                "accounts": {
+                    "title": "Caja y banco",
+                    "hint": "Saldo inicial y final del trimestre con todos los apuntes",
+                    "account": "Cuenta",
+                    "opening": "Inicial",
+                    "inflow": "Entradas",
+                    "outflow": "Salidas",
+                    "closing": "Final"
+                },
+                "forms": {
+                    "openCell": "Apuntes: {count}",
+                    "showSkipped": "No incluidos en el modelo: {count} — ver",
+                    "skippedTitle": "{form}: apuntes no incluidos",
+                    "cellTitle": "{form}, casilla {code}",
+                    "closeCell": "Cerrar",
+                    "cellError": "No se han podido cargar los apuntes",
+                    "es_303": {
+                        "title": "Modelo 303 — IVA",
+                        "hint": "Régimen general del trimestre; compensaciones de periodos anteriores, con tu gestor",
+                        "cells": {
+                            "14": "Modificación de bases",
+                            "15": "Modificación de cuotas",
+                            "27": "Total cuota devengada",
+                            "28": "Base soportada en operaciones interiores corrientes",
+                            "29": "Cuotas soportadas deducibles",
+                            "40": "Rectificación de deducciones: base",
+                            "41": "Rectificación de deducciones: cuota",
+                            "45": "Total a deducir",
+                            "46": "Resultado régimen general",
+                            "150": "Base imponible al 0 %",
+                            "151": "Tipo",
+                            "152": "Cuota al 0 %",
+                            "153": "Base imponible al 5 %",
+                            "154": "Tipo",
+                            "155": "Cuota al 5 %",
+                            "01": "Base imponible al 4 %",
+                            "02": "Tipo",
+                            "03": "Cuota al 4 %",
+                            "04": "Base imponible al 10 %",
+                            "05": "Tipo",
+                            "06": "Cuota al 10 %",
+                            "07": "Base imponible al 21 %",
+                            "08": "Tipo",
+                            "09": "Cuota al 21 %"
+                        }
+                    },
+                    "es_130": {
+                        "title": "Modelo 130 — IRPF",
+                        "hint": "Acumulado desde el 1 de enero",
+                        "cells": {
+                            "01": "Ingresos computables (acumulado)",
+                            "02": "Gastos fiscalmente deducibles",
+                            "03": "Rendimiento neto",
+                            "04": "20 % del rendimiento neto",
+                            "05": "Pagos fraccionados de trimestres anteriores",
+                            "06": "Retenciones e ingresos a cuenta",
+                            "07": "Resultado del pago fraccionado"
+                        }
+                    },
+                    "reasons": {
+                        "vat_exempt": "La organización está exenta de IVA: no presenta el 303.",
+                        "equivalence_surcharge": "Recargo de equivalencia: el IVA lo ingresa el proveedor; no hay 303 por esta actividad.",
+                        "not_self_employed": "El 130 es para autónomos en estimación directa. Una asociación o sociedad tributa por IS (modelos 200/202).",
+                        "objective_regime": "En estimación objetiva (módulos) se presenta el 131, no el 130."
+                    },
+                    "notes": {
+                        "unclassified_lines": "Hay líneas sin tipo (pedidos anteriores a activar finanzas): no entran en el modelo.",
+                        "unmapped_rate": "Hay un tipo propio que no existe en el modelo: esos apuntes no entran.",
+                        "prorrata_review": "Hay ingresos exentos: la deducción del IVA puede requerir prorrata; revísalo con tu gestor.",
+                        "depreciation_missing": "Las amortizaciones aún no están en la contabilidad: añádelas a los gastos.",
+                        "previous_payments_estimated": "Los pagos de trimestres anteriores los calcula la CRM; si presentaste otras cifras, corrige la casilla 05."
+                    }
+                }
             }
         },
         "sections": {

@@ -873,6 +873,7 @@
             },
             "tabs": {
                 "overview": "Overview",
+                "reports": "Reports",
                 "entries": "Entries",
                 "expenses": "Expenses",
                 "counterparties": "Counterparties",
@@ -1313,6 +1314,112 @@
                 "import_empty": "The file has no rows",
                 "import_missing_columns": "Required columns are missing: compare with the example",
                 "import_too_many_rows": "Too many rows in one file: split it"
+            },
+            "reports": {
+                "quarter": "Quarter",
+                "quarterLabel": "Q{quarter} {year}",
+                "disclaimer": "Figures to check with your gestor: the CRM computes them from entries and does not file forms.",
+                "error": "Could not load the reports",
+                "vat": {
+                    "title": "VAT for the quarter",
+                    "hint": "Difference before deduction rules: {balance}",
+                    "output": "Charged on sales",
+                    "input": "Paid on purchases",
+                    "base": "Base",
+                    "tax": "VAT",
+                    "total": "Total VAT",
+                    "empty": "No lines",
+                    "unclassified": "No rate",
+                    "treatments": {
+                        "exempt": "Exempt",
+                        "not_subject": "Not subject"
+                    }
+                },
+                "withholding": {
+                    "title": "IRPF withholdings",
+                    "hint": "From documents with a withholding",
+                    "received": {
+                        "label": "Withheld from our income by clients",
+                        "details": "base {base} · documents: {count}"
+                    },
+                    "applied": {
+                        "label": "We withheld from professionals (form 111)",
+                        "details": "base {base} · recipients: {counterparties}"
+                    }
+                },
+                "accounts": {
+                    "title": "Cash and bank",
+                    "hint": "Opening and closing balance of the quarter over all entries",
+                    "account": "Account",
+                    "opening": "Opening",
+                    "inflow": "In",
+                    "outflow": "Out",
+                    "closing": "Closing"
+                },
+                "forms": {
+                    "openCell": "Entries: {count}",
+                    "showSkipped": "Left out of the form: {count} — show",
+                    "skippedTitle": "{form}: entries left out",
+                    "cellTitle": "{form}, box {code}",
+                    "closeCell": "Close",
+                    "cellError": "Could not load the entries",
+                    "es_303": {
+                        "title": "Form 303 — VAT",
+                        "hint": "General regime for the quarter; carry-overs from earlier periods are up to your gestor",
+                        "cells": {
+                            "14": "Base corrections (reversals, refunds)",
+                            "15": "VAT corrections (reversals, refunds)",
+                            "27": "Total output VAT",
+                            "28": "Base of domestic purchases",
+                            "29": "Deductible input VAT",
+                            "40": "Deduction corrections: base",
+                            "41": "Deduction corrections: VAT",
+                            "45": "Total deductible",
+                            "46": "Result: payable (negative — refundable)",
+                            "150": "Taxable base at 0 %",
+                            "151": "Rate",
+                            "152": "VAT at 0 %",
+                            "153": "Taxable base at 5 %",
+                            "154": "Rate",
+                            "155": "VAT at 5 %",
+                            "01": "Taxable base at 4 %",
+                            "02": "Rate",
+                            "03": "VAT at 4 %",
+                            "04": "Taxable base at 10 %",
+                            "05": "Rate",
+                            "06": "VAT at 10 %",
+                            "07": "Taxable base at 21 %",
+                            "08": "Rate",
+                            "09": "VAT at 21 %"
+                        }
+                    },
+                    "es_130": {
+                        "title": "Form 130 — IRPF",
+                        "hint": "Year to date from 1 January",
+                        "cells": {
+                            "01": "Income year to date",
+                            "02": "Deductible expenses year to date",
+                            "03": "Net income",
+                            "04": "20 % of net income",
+                            "05": "Payments of previous quarters",
+                            "06": "Withholdings by clients",
+                            "07": "Result: payable"
+                        }
+                    },
+                    "reasons": {
+                        "vat_exempt": "The organization is VAT-exempt: no form 303.",
+                        "equivalence_surcharge": "Equivalence surcharge: the supplier pays the VAT; no form 303 for this activity.",
+                        "not_self_employed": "Form 130 is for the self-employed in direct estimation. An association or a company pays corporate tax (forms 200/202).",
+                        "objective_regime": "Objective estimation (módulos) files form 131, not 130."
+                    },
+                    "notes": {
+                        "unclassified_lines": "Some lines have no rate (orders before finance was on): they are not in the form.",
+                        "unmapped_rate": "A custom rate is not on the form: those entries are left out.",
+                        "prorrata_review": "There is exempt income: the VAT deduction may need a pro rata; check with your gestor.",
+                        "depreciation_missing": "Depreciation is not in the ledger yet: add it to the expenses yourself.",
+                        "previous_payments_estimated": "Payments of previous quarters are computed by the CRM; if you filed other figures, correct box 05."
+                    }
+                }
             }
         },
         "sections": {

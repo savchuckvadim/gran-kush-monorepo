@@ -7,3 +7,4 @@ export { LedgerMonthSelect } from "./ledger/ledger-month-select";
 export { LedgerTable } from "./ledger/ledger-table";
 export { currentMonth, monthRange } from "./ledger/month-range";
 export { FinanceOverviewPanel } from "./overview/finance-overview-panel";
+export { FinanceReportsPanel } from "./reports/finance-reports-panel";

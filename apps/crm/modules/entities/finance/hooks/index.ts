@@ -1,4 +1,5 @@
 export * from "./finance-directory.hook";
+export * from "./finance-reports.hook";
 export * from "./ledger.hook";
 export * from "./ledger-error.hook";
 export * from "./ledger-files.hook";

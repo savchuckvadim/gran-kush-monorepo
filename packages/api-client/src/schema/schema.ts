@@ -3606,6 +3606,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/crm/finance/reports/period": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Отчёт за период: IVA по ставкам, удержания IRPF, касса и банк */
+        get: operations["CrmFinanceReports_period"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/reports/forms": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Цифры для форм квартала (303, 130) по профилю организации */
+        get: operations["CrmFinanceReports_forms"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/reports/forms/{form}/cells/{cell}/entries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Проводки, из которых сложилась ячейка формы, новые сверху */
+        get: operations["CrmFinanceReports_cellEntries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/crm/stock/products/{productId}": {
         parameters: {
             query?: never;
@@ -7858,6 +7909,95 @@ export interface components {
             /** @description Прошедший открытый месяц — его можно закрыть */
             closable: boolean;
         };
+        VatRowDto: {
+            percent: number;
+            /** @description null — строки без ставки: заказ до включения финансов */
+            treatment: components["schemas"]["TaxTreatment"] | null;
+            /** @description Евро */
+            base: number;
+            /** @description Евро */
+            tax: number;
+            count: number;
+        };
+        VatBreakdownDto: {
+            /** @description Начисленный — с доходов */
+            output: components["schemas"]["VatRowDto"][];
+            /** @description Уплаченный — в расходах */
+            input: components["schemas"]["VatRowDto"][];
+            /** @description Евро */
+            outputTax: number;
+            /** @description Евро */
+            inputTax: number;
+            /** @description Начисленный минус уплаченный, без правил вычета */
+            balance: number;
+        };
+        WithholdingSideDto: {
+            /** @description Евро */
+            base: number;
+            /** @description Евро */
+            amount: number;
+            count: number;
+            counterparties: number;
+        };
+        WithholdingTotalsDto: {
+            /** @description Удержали с наших доходов */
+            received: components["schemas"]["WithholdingSideDto"];
+            /** @description Мы удержали с профессионалов */
+            applied: components["schemas"]["WithholdingSideDto"];
+        };
+        AccountFlowDto: {
+            /** @description cash — касса клуба, bank — счёт в банке, card — карта */
+            account: components["schemas"]["FinanceAccount"];
+            /** @description Евро */
+            opening: number;
+            /** @description Евро */
+            inflow: number;
+            /** @description Евро */
+            outflow: number;
+            /** @description Евро */
+            closing: number;
+        };
+        PeriodReportDto: {
+            from: string;
+            to: string;
+            vat: components["schemas"]["VatBreakdownDto"];
+            withholding: components["schemas"]["WithholdingTotalsDto"];
+            accounts: components["schemas"]["AccountFlowDto"][];
+        };
+        /** @enum {string} */
+        TaxFormCode: "es_303" | "es_130";
+        /** @enum {string} */
+        TaxFormNotApplicable: "vat_exempt" | "equivalence_surcharge" | "not_self_employed" | "objective_regime";
+        FormCellDto: {
+            /**
+             * @description Номер ячейки бланка (casilla)
+             * @example 07
+             */
+            code: string;
+            /** @enum {string} */
+            kind: "amount" | "percent";
+            /** @description Евро или процент */
+            value: number;
+            /** @description Посчитана из других ячеек */
+            computed: boolean;
+            /** @description Проводок в ячейке */
+            entryCount: number;
+        };
+        /** @enum {string} */
+        TaxFormNote: "unclassified_lines" | "unmapped_rate" | "prorrata_review" | "depreciation_missing" | "previous_payments_estimated";
+        TaxFormDto: {
+            form: components["schemas"]["TaxFormCode"];
+            year: number;
+            quarter: number;
+            from: string;
+            to: string;
+            applicable: boolean;
+            reason: components["schemas"]["TaxFormNotApplicable"] | null;
+            cells: components["schemas"]["FormCellDto"][];
+            notes: components["schemas"]["TaxFormNote"][];
+            /** @description Проводок, не попавших в форму */
+            skippedCount: number;
+        };
         StockStateDto: {
             /** Format: uuid */
             productId: string;
@@ -8767,6 +8907,17 @@ export type SchemaCategoryTotalsDto = components['schemas']['CategoryTotalsDto']
 export type SchemaAccountBalanceDto = components['schemas']['AccountBalanceDto'];
 export type SchemaFinanceOverviewDto = components['schemas']['FinanceOverviewDto'];
 export type SchemaFinancePeriodDto = components['schemas']['FinancePeriodDto'];
+export type SchemaVatRowDto = components['schemas']['VatRowDto'];
+export type SchemaVatBreakdownDto = components['schemas']['VatBreakdownDto'];
+export type SchemaWithholdingSideDto = components['schemas']['WithholdingSideDto'];
+export type SchemaWithholdingTotalsDto = components['schemas']['WithholdingTotalsDto'];
+export type SchemaAccountFlowDto = components['schemas']['AccountFlowDto'];
+export type SchemaPeriodReportDto = components['schemas']['PeriodReportDto'];
+export type SchemaTaxFormCode = components['schemas']['TaxFormCode'];
+export type SchemaTaxFormNotApplicable = components['schemas']['TaxFormNotApplicable'];
+export type SchemaFormCellDto = components['schemas']['FormCellDto'];
+export type SchemaTaxFormNote = components['schemas']['TaxFormNote'];
+export type SchemaTaxFormDto = components['schemas']['TaxFormDto'];
 export type SchemaStockStateDto = components['schemas']['StockStateDto'];
 export type SchemaStockMoveReason = components['schemas']['StockMoveReason'];
 export type SchemaStockMoveDto = components['schemas']['StockMoveDto'];
@@ -20475,6 +20626,171 @@ export interface operations {
             };
             /** @description Conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmFinanceReports_period: {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PeriodReportDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmFinanceReports_forms: {
+        parameters: {
+            query: {
+                year: number;
+                quarter: 1 | 2 | 3 | 4;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaxFormDto"][];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmFinanceReports_cellEntries: {
+        parameters: {
+            query: {
+                page?: number;
+                limit?: number;
+                year: number;
+                quarter: 1 | 2 | 3 | 4;
+            };
+            header?: never;
+            path: {
+                form: components["schemas"]["TaxFormCode"];
+                /** @description Номер ячейки или «skipped» */
+                cell: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_LedgerEntryDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
