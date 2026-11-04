@@ -78,24 +78,34 @@ export const summarize = (entries: readonly LedgerEntry[]): LedgerSummary => {
     return { income, expense, result: income.net - expense.net, byCategory };
 };
 
+export interface AccountMovement {
+    account: FinanceAccount;
+    cents: number;
+}
+
 /**
- * Остатки счетов по проводкам: доход приходит на счёт суммой к получению (за вычетом IRPF),
- * расход уходит суммой к оплате, перевод уходит со счёта и приходит на другой.
+ * Движение денег по счетам от проводки: доход приходит на счёт суммой к получению (за вычетом
+ * IRPF), расход уходит суммой к оплате, перевод уходит со счёта и приходит на другой.
  */
+export const accountMovements = (entry: LedgerEntry): AccountMovement[] => {
+    const { payable, net } = totalsOf(entry.secret);
+    if (entry.direction === LedgerDirection.income) {
+        return [{ account: entry.account, cents: payable }];
+    }
+    if (entry.direction === LedgerDirection.expense) {
+        return [{ account: entry.account, cents: -payable }];
+    }
+    const out = { account: entry.account, cents: -net };
+    return entry.toAccount ? [out, { account: entry.toAccount, cents: net }] : [out];
+};
+
+/** Остатки счетов по проводкам. */
 export const accountBalances = (entries: readonly LedgerEntry[]): Map<FinanceAccount, number> => {
     const balances = new Map<FinanceAccount, number>(
         Object.values(FinanceAccount).map((account) => [account, 0])
     );
-    const move = (account: FinanceAccount, cents: number) =>
+    for (const { account, cents } of entries.flatMap(accountMovements)) {
         balances.set(account, (balances.get(account) ?? 0) + cents);
-    for (const entry of entries) {
-        const { payable, net } = totalsOf(entry.secret);
-        if (entry.direction === LedgerDirection.income) move(entry.account, payable);
-        else if (entry.direction === LedgerDirection.expense) move(entry.account, -payable);
-        else {
-            move(entry.account, -net);
-            if (entry.toAccount) move(entry.toAccount, net);
-        }
     }
     return balances;
 };

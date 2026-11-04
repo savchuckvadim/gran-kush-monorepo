@@ -8,6 +8,7 @@ import { CrmCounterpartiesController } from "./api/controllers/crm-counterpartie
 import { CrmFinanceCategoriesController } from "./api/controllers/crm-finance-categories.controller";
 import { CrmFinancePeriodsController } from "./api/controllers/crm-finance-periods.controller";
 import { CrmFinanceProfileController } from "./api/controllers/crm-finance-profile.controller";
+import { CrmFinanceReportsController } from "./api/controllers/crm-finance-reports.controller";
 import { CrmLedgerController } from "./api/controllers/crm-ledger.controller";
 import { CrmLedgerAttachmentsController } from "./api/controllers/crm-ledger-attachments.controller";
 import { CrmLedgerFilesController } from "./api/controllers/crm-ledger-files.controller";
@@ -19,6 +20,7 @@ import { CounterpartiesService } from "./application/services/counterparties.ser
 import { FinanceCategoriesService } from "./application/services/finance-categories.service";
 import { FinanceOverviewService } from "./application/services/finance-overview.service";
 import { FinancePeriodsService } from "./application/services/finance-periods.service";
+import { FinanceReportsService } from "./application/services/finance-reports.service";
 import { LedgerAttachmentsService } from "./application/services/ledger-attachments.service";
 import { LedgerEntriesService } from "./application/services/ledger-entries.service";
 import { LedgerEntryInputService } from "./application/services/ledger-entry-input.service";
@@ -87,6 +89,7 @@ import { ExcelJsSpreadsheet } from "./infrastructure/spreadsheet/exceljs-spreads
         LedgerTemplateService,
         FinancePeriodsService,
         FinanceOverviewService,
+        FinanceReportsService,
         PurchaseLedgerService,
         RecordEntryUseCase,
         CorrectEntryUseCase,
@@ -121,6 +124,7 @@ import { ExcelJsSpreadsheet } from "./infrastructure/spreadsheet/exceljs-spreads
         CrmFinanceCategoriesController,
         CrmCounterpartiesController,
         CrmFinancePeriodsController,
+        CrmFinanceReportsController,
     ],
     exports: [
         TaxPolicyService,
