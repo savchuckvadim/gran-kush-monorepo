@@ -97,7 +97,7 @@ describe("Background operations (e2e)", () => {
     let ownerEmployeeId: string;
     let employeeCookies: string;
 
-    const start = (club: Club, body: unknown, cookies?: string) =>
+    const start = (club: Club, body: object, cookies?: string) =>
         fx.crm(club, "post", "/crm/operations-probe", cookies).send(body);
 
     const read = (club: Club, id: string, cookies?: string) =>
