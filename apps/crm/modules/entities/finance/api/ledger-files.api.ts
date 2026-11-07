@@ -22,7 +22,7 @@ export interface LedgerDownload {
     fileName: string;
 }
 
-const downloaded = async (
+export const toLedgerDownload = async (
     response: { data?: Blob; error?: unknown; response: Response },
     fallback: string
 ): Promise<LedgerDownload> => {
@@ -43,7 +43,7 @@ export async function downloadImportTemplate(format: LedgerFileFormat): Promise<
         params: { query: { format } },
         parseAs: "blob",
     });
-    return downloaded(response, `plantilla.${format}`);
+    return toLedgerDownload(response, `plantilla.${format}`);
 }
 
 export async function importLedger(file: File, commit: boolean): Promise<ImportReport> {
@@ -64,7 +64,7 @@ export async function downloadLedgerExport(query: {
         params: { query },
         parseAs: "blob",
     });
-    return downloaded(response, `${query.book}.${query.format}`);
+    return toLedgerDownload(response, `${query.book}.${query.format}`);
 }
 
 export async function attachLedgerFile(id: string, file: File): Promise<LedgerEntry> {
@@ -80,7 +80,7 @@ export async function downloadLedgerFile(id: string, fallback: string): Promise<
         params: { path: { id } },
         parseAs: "blob",
     });
-    return downloaded(response, fallback);
+    return toLedgerDownload(response, fallback);
 }
 
 export async function removeLedgerFile(id: string): Promise<LedgerEntry> {

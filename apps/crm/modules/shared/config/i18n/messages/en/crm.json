@@ -1419,6 +1419,13 @@
                         "depreciation_missing": "Depreciation is not in the ledger yet: add it to the expenses yourself.",
                         "previous_payments_estimated": "Payments of previous quarters are computed by the CRM; if you filed other figures, correct box 05."
                     }
+                },
+                "pdf": {
+                    "start": "PDF for the gestor",
+                    "hint": "Quarterly report with the form figures; the export goes to the club log",
+                    "download": "Download {fileName}",
+                    "startError": "Could not prepare the PDF",
+                    "downloadError": "Could not download the PDF"
                 }
             }
         },
@@ -2413,7 +2420,8 @@
                     "books": {
                         "entries": "entries",
                         "purchases": "purchases book",
-                        "sales": "sales book"
+                        "sales": "sales book",
+                        "report": "quarterly report (PDF)"
                     }
                 },
                 "role": {

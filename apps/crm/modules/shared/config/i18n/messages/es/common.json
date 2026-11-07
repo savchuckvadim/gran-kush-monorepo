@@ -45,7 +45,10 @@
             "failed": "{kind}: no se completó — {reason}",
             "failedShort": "No se completó — {reason}",
             "kinds": {
-                "unknown": "Tarea en segundo plano"
+                "unknown": "Tarea en segundo plano",
+                "finance": {
+                    "report_pdf": "PDF del informe trimestral"
+                }
             },
             "reasons": {
                 "operation_failed": "error interno, ya lo sabemos",

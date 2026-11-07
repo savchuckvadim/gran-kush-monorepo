@@ -1,9 +1,7 @@
-import { INestApplication, NotFoundException } from "@nestjs/common";
+import { INestApplication } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 
 import cookieParser from "cookie-parser";
-import { randomUUID } from "crypto";
-import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { LegacyLedgerMigration } from "../src/modules/portal/crm/finance/application/legacy-ledger.migration";
@@ -11,6 +9,7 @@ import { ExcelJsSpreadsheet } from "../src/modules/portal/crm/finance/infrastruc
 import { StorageService } from "../src/modules/storage/application/services/storage.service";
 
 import { type Club, financeFixtures } from "./support/finance-club";
+import { binary, MemoryStorage } from "./support/memory-storage";
 
 jest.setTimeout(120_000);
 
@@ -21,38 +20,6 @@ const today = new Intl.DateTimeFormat("en-CA", {
     month: "2-digit",
     day: "2-digit",
 }).format(new Date());
-
-/** S3 в e2e нет: хранилище в памяти, чтобы проверить, что туда уходит шифр, а не файл. */
-class MemoryStorage {
-    readonly files = new Map<string, Buffer>();
-
-    uploadFile(file: { buffer: Buffer; originalname: string }, folder: string, type: string) {
-        const relativePath = `${type}/${folder}/${randomUUID()}-${file.originalname}`;
-        this.files.set(relativePath, file.buffer);
-        return Promise.resolve({
-            fileName: file.originalname,
-            filePath: relativePath,
-            relativePath,
-            url: "",
-        });
-    }
-
-    getFile(path: string): Promise<Buffer> {
-        const file = this.files.get(path);
-        return file ? Promise.resolve(file) : Promise.reject(new NotFoundException(path));
-    }
-
-    deleteFile(path: string): Promise<void> {
-        this.files.delete(path);
-        return Promise.resolve();
-    }
-}
-
-const binary = (res: request.Response, callback: (error: Error | null, body: Buffer) => void) => {
-    const chunks: Buffer[] = [];
-    res.on("data", (chunk: Buffer) => chunks.push(chunk));
-    res.on("end", () => callback(null, Buffer.concat(chunks)));
-};
 
 /**
  * Файлы учёта (TASK-798): вложение шифруется до хранилища и отдаётся расшифрованным; шаблон

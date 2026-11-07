@@ -45,7 +45,10 @@
             "failed": "{kind}: не удалось — {reason}",
             "failedShort": "Не удалось — {reason}",
             "kinds": {
-                "unknown": "Фоновая задача"
+                "unknown": "Фоновая задача",
+                "finance": {
+                    "report_pdf": "PDF отчёта квартала"
+                }
             },
             "reasons": {
                 "operation_failed": "внутренняя ошибка, мы уже знаем",

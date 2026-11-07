@@ -14,6 +14,7 @@ import { PageSpinner } from "@/modules/shared/ui/Loading/PageSpinner";
 
 import { AccountFlowsCard } from "./account-flows-card";
 import { FormCellEntries } from "./form-cell-entries";
+import { ReportPdfAction } from "./report-pdf-action";
 import { currentQuarter, quarterRange } from "./report-quarter";
 import { ReportQuarterSelect } from "./report-quarter-select";
 import { TaxFormCard } from "./tax-form-card";
@@ -43,6 +44,7 @@ export function FinanceReportsPanel({ onOpen }: FinanceReportsPanelProps) {
         <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-3">
                 <ReportQuarterSelect value={quarter} onChange={changeQuarter} />
+                <ReportPdfAction quarter={quarter} />
                 <p className="text-xs text-muted-foreground">{t("disclaimer")}</p>
             </div>
             {(report.isLoading || forms.isLoading) && <PageSpinner />}
@@ -50,7 +52,7 @@ export function FinanceReportsPanel({ onOpen }: FinanceReportsPanelProps) {
                 <p className="text-sm text-destructive">{t("error")}</p>
             )}
             {forms.data && forms.data.length > 0 && (
-                <div className="grid gap-4 lg:grid-cols-2">
+                <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
                     {forms.data.map((form) => (
                         <TaxFormCard
                             key={form.form}
@@ -65,7 +67,7 @@ export function FinanceReportsPanel({ onOpen }: FinanceReportsPanelProps) {
             )}
             {cell && <FormCellEntries cell={cell} onClose={() => setCell(null)} onOpen={onOpen} />}
             {report.data && (
-                <div className="grid gap-4 lg:grid-cols-2">
+                <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
                     <VatCard report={report.data} />
                     <div className="space-y-4">
                         <WithholdingCard report={report.data} />

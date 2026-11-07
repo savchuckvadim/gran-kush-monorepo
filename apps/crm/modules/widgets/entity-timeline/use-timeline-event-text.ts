@@ -19,7 +19,7 @@ const STOCK_REASONS = new Set([
 const MODULES = new Set(["finance"]);
 const LEDGER_SOURCES = new Set(["manual", "order_sale", "import", "reversal", "legacy"]);
 const LEDGER_DIRECTIONS = new Set(["income", "expense", "transfer"]);
-const LEDGER_BOOKS = new Set(["entries", "purchases", "sales"]);
+const LEDGER_BOOKS = new Set(["entries", "purchases", "sales", "report"]);
 
 const text = (value: unknown): string =>
     typeof value === "string" || typeof value === "number" ? String(value) : "";

@@ -163,7 +163,7 @@ export const financeCounterpartiesChanged = defineEvent({
     description: "A supplier, customer or other counterparty was added, changed or archived",
 });
 
-/** Data left the system: an export of entries or a book for the gestor. Visible to finance admins. */
+/** Data left the system: an export of entries, a book or the quarterly PDF report for the gestor. Visible to finance admins. */
 export const financeAccessed = defineEvent({
     name: "finance.accessed",
     version: 1,
@@ -171,11 +171,12 @@ export const financeAccessed = defineEvent({
     aggregate: "organization",
     payload: z.object({
         kind: z.enum(["export"]),
-        book: z.enum(["entries", "purchases", "sales"]),
+        book: z.enum(["entries", "purchases", "sales", "report"]),
         from: z.string().min(1),
         to: z.string().min(1),
     }),
     audience: { staff: { permission: "finance.admin" } },
     publicPayload: [],
-    description: "Ledger data was exported: entries or the purchases or sales book",
+    description:
+        "Ledger data was exported: entries, the purchases or sales book, or the quarterly report",
 });

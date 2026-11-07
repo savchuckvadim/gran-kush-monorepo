@@ -8,6 +8,7 @@ import { CrmCounterpartiesController } from "./api/controllers/crm-counterpartie
 import { CrmFinanceCategoriesController } from "./api/controllers/crm-finance-categories.controller";
 import { CrmFinancePeriodsController } from "./api/controllers/crm-finance-periods.controller";
 import { CrmFinanceProfileController } from "./api/controllers/crm-finance-profile.controller";
+import { CrmFinanceReportFilesController } from "./api/controllers/crm-finance-report-files.controller";
 import { CrmFinanceReportsController } from "./api/controllers/crm-finance-reports.controller";
 import { CrmLedgerController } from "./api/controllers/crm-ledger.controller";
 import { CrmLedgerAttachmentsController } from "./api/controllers/crm-ledger-attachments.controller";
@@ -15,6 +16,7 @@ import { CrmLedgerFilesController } from "./api/controllers/crm-ledger-files.con
 import { CrmTaxRatesController } from "./api/controllers/crm-tax-rates.controller";
 import { FinanceModuleLifecycle } from "./application/finance-module.lifecycle";
 import { LegacyLedgerMigration } from "./application/legacy-ledger.migration";
+import { ExportQuarterReportOperation } from "./application/operations/export-quarter-report.operation";
 import { OrderLedgerConsumer } from "./application/order-ledger.consumer";
 import { CounterpartiesService } from "./application/services/counterparties.service";
 import { FinanceCategoriesService } from "./application/services/finance-categories.service";
@@ -32,6 +34,7 @@ import { TaxRatesService } from "./application/services/tax-rates.service";
 import { CancelEntryUseCase } from "./application/use-cases/cancel-entry.use-case";
 import { CorrectEntryUseCase } from "./application/use-cases/correct-entry.use-case";
 import { ExportLedgerUseCase } from "./application/use-cases/export-ledger.use-case";
+import { ExportQuarterReportUseCase } from "./application/use-cases/export-quarter-report.use-case";
 import { ImportLedgerUseCase } from "./application/use-cases/import-ledger.use-case";
 import { ReclassifyEntryUseCase } from "./application/use-cases/reclassify-entry.use-case";
 import { ReconcileOrderSaleUseCase } from "./application/use-cases/reconcile-order-sale.use-case";
@@ -39,6 +42,7 @@ import { RecordEntryUseCase } from "./application/use-cases/record-entry.use-cas
 import { CounterpartyRepository } from "./domain/repositories/counterparty-repository.interface";
 import { FinanceCategoryRepository } from "./domain/repositories/finance-category-repository.interface";
 import { FinancePeriodRepository } from "./domain/repositories/finance-period-repository.interface";
+import { FinanceReportRenderer } from "./domain/repositories/finance-report-renderer.interface";
 import {
     FinanceAttachmentStore,
     FinanceAuditLog,
@@ -54,6 +58,7 @@ import { LedgerCodec } from "./infrastructure/ledger/ledger-codec";
 import { LedgerLookup } from "./infrastructure/ledger/ledger-lookup";
 import { LedgerPrismaRepository } from "./infrastructure/ledger/ledger-prisma.repository";
 import { LegacyTransactionPrismaSource } from "./infrastructure/legacy/legacy-transaction-prisma.source";
+import { PdfkitReportRenderer } from "./infrastructure/reports/pdfkit-report-renderer";
 import { CounterpartyPrismaRepository } from "./infrastructure/repositories/counterparty-prisma.repository";
 import { FinanceCategoryPrismaRepository } from "./infrastructure/repositories/finance-category-prisma.repository";
 import { FinancePeriodPrismaRepository } from "./infrastructure/repositories/finance-period-prisma.repository";
@@ -98,6 +103,8 @@ import { ExcelJsSpreadsheet } from "./infrastructure/spreadsheet/exceljs-spreads
         ReconcileOrderSaleUseCase,
         ImportLedgerUseCase,
         ExportLedgerUseCase,
+        ExportQuarterReportUseCase,
+        ExportQuarterReportOperation,
         OrderLedgerConsumer,
         LegacyLedgerMigration,
         LedgerCodec,
@@ -114,6 +121,7 @@ import { ExcelJsSpreadsheet } from "./infrastructure/spreadsheet/exceljs-spreads
         { provide: FinanceAuditLog, useClass: FinanceAuditPrismaLog },
         { provide: LegacyTransactionSource, useClass: LegacyTransactionPrismaSource },
         { provide: LedgerSpreadsheet, useClass: ExcelJsSpreadsheet },
+        { provide: FinanceReportRenderer, useClass: PdfkitReportRenderer },
     ],
     controllers: [
         CrmFinanceProfileController,
@@ -125,6 +133,7 @@ import { ExcelJsSpreadsheet } from "./infrastructure/spreadsheet/exceljs-spreads
         CrmCounterpartiesController,
         CrmFinancePeriodsController,
         CrmFinanceReportsController,
+        CrmFinanceReportFilesController,
     ],
     exports: [
         TaxPolicyService,

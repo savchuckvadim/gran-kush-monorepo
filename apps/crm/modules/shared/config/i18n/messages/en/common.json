@@ -45,7 +45,10 @@
             "failed": "{kind}: failed — {reason}",
             "failedShort": "Failed — {reason}",
             "kinds": {
-                "unknown": "Background task"
+                "unknown": "Background task",
+                "finance": {
+                    "report_pdf": "Quarterly report PDF"
+                }
             },
             "reasons": {
                 "operation_failed": "internal error, we already know about it",

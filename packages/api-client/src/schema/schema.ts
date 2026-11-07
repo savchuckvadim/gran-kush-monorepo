@@ -3657,6 +3657,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/crm/finance/reports/pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Собрать PDF отчёта квартала для gestor (фоновая операция) */
+        post: operations["CrmFinanceReportFiles_startPdf"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/crm/finance/reports/files/{operationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Скачать PDF готовой операции отчёта: только автору, до срока */
+        get: operations["CrmFinanceReportFiles_download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/crm/stock/products/{productId}": {
         parameters: {
             query?: never;
@@ -7998,6 +8032,19 @@ export interface components {
             /** @description Проводок, не попавших в форму */
             skippedCount: number;
         };
+        QuarterQueryDto: {
+            /** @example 2026 */
+            year: number;
+            /**
+             * @example 4
+             * @enum {number}
+             */
+            quarter: 1 | 2 | 3 | 4;
+        };
+        OperationAcceptedDto: {
+            /** Format: uuid */
+            operationId: string;
+        };
         StockStateDto: {
             /** Format: uuid */
             productId: string;
@@ -8918,6 +8965,8 @@ export type SchemaTaxFormNotApplicable = components['schemas']['TaxFormNotApplic
 export type SchemaFormCellDto = components['schemas']['FormCellDto'];
 export type SchemaTaxFormNote = components['schemas']['TaxFormNote'];
 export type SchemaTaxFormDto = components['schemas']['TaxFormDto'];
+export type SchemaQuarterQueryDto = components['schemas']['QuarterQueryDto'];
+export type SchemaOperationAcceptedDto = components['schemas']['OperationAcceptedDto'];
 export type SchemaStockStateDto = components['schemas']['StockStateDto'];
 export type SchemaStockMoveReason = components['schemas']['StockMoveReason'];
 export type SchemaStockMoveDto = components['schemas']['StockMoveDto'];
@@ -20769,6 +20818,127 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmFinanceReportFiles_startPdf: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Ключ идемпотентности. Повтор с тем же ключом и тем же входом возвращает ту же операцию; тот же ключ с другим входом → 422. */
+                "idempotency-key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuarterQueryDto"];
+            };
+        };
+        responses: {
+            /** @description Операция «finance.report_pdf» принята: Quarterly report for the gestor as a PDF with a download link */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationAcceptedDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Очередь операций недоступна — повторить позже */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CrmFinanceReportFiles_download: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                operationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StreamableFile"];
                 };
             };
             /** @description Unauthorized */

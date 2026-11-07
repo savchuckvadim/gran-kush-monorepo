@@ -124,7 +124,7 @@ export const counterpartiesChangedEvent = (
 
 export const financeAccessedEvent = (
     portalId: string,
-    book: LedgerBook | "entries",
+    book: LedgerBook | "entries" | "report",
     range: { from: string; to: string },
     actor: EventActor
 ): NewDomainEvent => ({

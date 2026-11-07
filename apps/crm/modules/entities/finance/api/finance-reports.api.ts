@@ -11,6 +11,8 @@ import {
 
 import { $api } from "@/modules/shared";
 
+import { type LedgerDownload, toLedgerDownload } from "./ledger-files.api";
+
 export type PeriodReport = SchemaPeriodReportDto;
 export type TaxForm = SchemaTaxFormDto;
 export type TaxFormCell = SchemaFormCellDto;
@@ -56,4 +58,20 @@ export async function getFormCellEntries(
         },
     });
     return assertOpenApiOk<SchemaPaginatedResponseLedgerEntryDto>(response);
+}
+
+/** Собрать PDF квартала для gestor: ответ 202, файл собирается фоновой операцией. */
+export async function startQuarterReportPdf(quarter: QuarterRef): Promise<string> {
+    const response = await $api.POST("/crm/finance/reports/pdf", { body: quarter });
+    const accepted = await assertOpenApiOk<{ operationId: string }>(response);
+    return accepted.operationId;
+}
+
+/** Готовый PDF операции: только автору и до срока (иначе 404 / 410). */
+export async function downloadQuarterReport(operationId: string): Promise<LedgerDownload> {
+    const response = await $api.GET("/crm/finance/reports/files/{operationId}", {
+        params: { path: { operationId } },
+        parseAs: "blob",
+    });
+    return toLedgerDownload(response, "informe.pdf");
 }

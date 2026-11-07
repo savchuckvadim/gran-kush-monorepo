@@ -1,6 +1,6 @@
 "use client";
 
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 
 import {
     type FormCellRef,
@@ -8,6 +8,7 @@ import {
     getPeriodReport,
     getTaxForms,
     type QuarterRef,
+    startQuarterReportPdf,
 } from "../api/finance-reports.api";
 import { ledgerKeys } from "../model/ledger-keys";
 
@@ -35,3 +36,6 @@ export function useFormCellEntries(ref: FormCellRef | null, page: number, limit:
         placeholderData: keepPreviousData,
     });
 }
+
+export const useStartQuarterReportPdf = () =>
+    useMutation({ mutationFn: (quarter: QuarterRef) => startQuarterReportPdf(quarter) });

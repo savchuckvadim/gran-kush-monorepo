@@ -93,8 +93,21 @@ exportBooks(@Query() query: ExportBooksQueryDto): ExportBooksInput {
 4. E2E: `test/operations.e2e-spec.ts` covers the mechanism with a probe route; a new operation
    needs its own test for the runner.
 
+## Operations in use
+
+| Kind                 | Route                               | Runner                         | Result                                   |
+| -------------------- | ----------------------------------- | ------------------------------ | ---------------------------------------- |
+| `finance.report_pdf` | `POST /crm/finance/reports/pdf` 202 | `ExportQuarterReportOperation` | `{ fileName, expiresAt, fileKey }` (PDF) |
+
+`finance.report_pdf` (TASK-799) builds the quarterly report for the gestor, seals the PDF with the
+club key and keeps it in private storage next to the ledger attachments. The author downloads it
+with `GET /crm/finance/reports/files/:operationId` until `expiresAt`
+(`FINANCE_REPORT_FILE_HOURS`, 24 by default): another employee or club gets 404, a late request 410
+`report_file_expired`. `fileKey` is a storage key, not a secret — the file is encrypted and the
+route checks the author.
+
 ## Not covered yet
 
-A janitor for old rows (`finished_at` older than a month), progress reporting inside a run, and
-recovery of rows left `running` by a crashed process (a stalled-job check) — add them with the
-first heavy export (TASK-799).
+A janitor for old rows (`finished_at` older than a month) and for expired report files in storage,
+progress reporting inside a run, and recovery of rows left `running` by a crashed process (a
+stalled-job check).

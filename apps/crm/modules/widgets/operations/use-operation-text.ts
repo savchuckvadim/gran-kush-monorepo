@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 
 /** Виды операций, которые клиент умеет назвать; новее клиента — «фоновая задача». */
-const KNOWN_KINDS: ReadonlySet<string> = new Set<string>([]);
+const KNOWN_KINDS: ReadonlySet<string> = new Set<string>(["finance.report_pdf"]);
 
 /** Причины сбоя механизма; код доменной ошибки исполнителя без перевода — «не удалось». */
 const KNOWN_REASONS: ReadonlySet<string> = new Set([
@@ -22,7 +22,8 @@ export function useOperationText(): {
 
     return useMemo(
         () => ({
-            kind: (kind: string) => (KNOWN_KINDS.has(kind) ? t(`kinds.${kind}`) : t("kinds.unknown")),
+            kind: (kind: string) =>
+                KNOWN_KINDS.has(kind) ? t(`kinds.${kind}`) : t("kinds.unknown"),
             reason: (code: string | null) =>
                 code && KNOWN_REASONS.has(code) ? t(`reasons.${code}`) : t("reasons.unknown"),
         }),

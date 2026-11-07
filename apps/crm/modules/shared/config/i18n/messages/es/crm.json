@@ -1419,6 +1419,13 @@
                         "depreciation_missing": "Las amortizaciones aún no están en la contabilidad: añádelas a los gastos.",
                         "previous_payments_estimated": "Los pagos de trimestres anteriores los calcula la CRM; si presentaste otras cifras, corrige la casilla 05."
                     }
+                },
+                "pdf": {
+                    "start": "PDF para el gestor",
+                    "hint": "Informe del trimestre con las cifras de los modelos; queda en el registro del club",
+                    "download": "Descargar {fileName}",
+                    "startError": "No se ha podido preparar el PDF",
+                    "downloadError": "No se ha podido descargar el PDF"
                 }
             }
         },
@@ -2413,7 +2420,8 @@
                     "books": {
                         "entries": "movimientos",
                         "purchases": "libro de compras y gastos",
-                        "sales": "libro de ventas e ingresos"
+                        "sales": "libro de ventas e ingresos",
+                        "report": "informe trimestral (PDF)"
                     }
                 },
                 "role": {

@@ -15,6 +15,8 @@ export const FINANCE_LIMITS = {
     attachmentBytes: envPositive("FINANCE_ATTACHMENT_MAX_MB", 10) * MiB,
     /** Потолок суммы одной проводки, евро: опечатка в лишний ноль не уходит в отчёты */
     maxEntryAmount: 10_000_000,
+    /** Сколько часов отчёт PDF можно скачать: дальше — собрать заново, данные могли измениться */
+    reportFileHours: envPositive("FINANCE_REPORT_FILE_HOURS", 24),
 };
 
 /** Валюта учёта v1: многовалютности нет (finance-requirements §4). */
