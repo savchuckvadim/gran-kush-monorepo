@@ -35,6 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         },
         openGraph: {
             type: "website",
+            url: `/${locale}`,
             siteName: SITE_NAME,
             locale: OG_LOCALES[locale],
             title: `${SITE_NAME} · ${t("title")}`,
