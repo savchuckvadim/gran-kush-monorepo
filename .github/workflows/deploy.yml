@@ -15,6 +15,8 @@
 # Repository variables (build):
 #   NEXT_PUBLIC_PLANS_PURCHASABLE — `true` once Stripe is live: the site's plan buttons lead to
 #     sign-up with the plan; empty = «coming soon, try it free»
+#   NEXT_PUBLIC_OWNER_NIF, NEXT_PUBLIC_OWNER_ADDRESS — the owner's NIF and address on the legal pages of
+#     every site (LSSI-CE art. 10): kept out of git, baked into the build; empty = «pending» mark
 
 name: Deploy
 
@@ -99,6 +101,8 @@ jobs:
             NEXT_PUBLIC_MAIN_SITE_URL=${{ matrix.site_url }}
             NEXT_PUBLIC_SITE_URL=${{ matrix.site_url }}
             NEXT_PUBLIC_PLANS_PURCHASABLE=${{ vars.NEXT_PUBLIC_PLANS_PURCHASABLE }}
+            NEXT_PUBLIC_OWNER_NIF=${{ vars.NEXT_PUBLIC_OWNER_NIF }}
+            NEXT_PUBLIC_OWNER_ADDRESS=${{ vars.NEXT_PUBLIC_OWNER_ADDRESS }}
           cache-from: type=gha,scope=${{ matrix.app }}-${{ matrix.brand }}
           cache-to: type=gha,mode=max,scope=${{ matrix.app }}-${{ matrix.brand }}
 

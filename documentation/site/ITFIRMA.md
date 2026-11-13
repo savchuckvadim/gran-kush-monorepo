@@ -16,7 +16,7 @@
 | CMS                  | нет: тексты интерфейса в `modules/shared/config/i18n/messages/*.json`, контент в TS      |
 | Темы                 | Black (по умолчанию, тёмная и светлая), Cristal, Sociopath, Coqueta — палитры скинов CRM |
 | Домен, почта         | `installation.json`                                                                      |
-| Владелец, NIF, адрес | `modules/shared/config/site.ts` (`OWNER`) — сейчас заглушки                              |
+| Владелец, NIF, адрес | `modules/shared/config/site.ts` (`OWNER`); NIF и адрес — из `NEXT_PUBLIC_OWNER_*`        |
 | Деплой               | `infra/dokploy/itfirma`, раздел «Сайт студии IT-firma» в его README                      |
 
 ## Запуск
@@ -88,7 +88,9 @@ pnpm --filter itfirma dev                        # http://localhost:5003/es
 
 ## Не сделано
 
-- NIF, адрес и домен — заглушки до регистрации autónomo и покупки домена.
-- Деплой в Dokploy — руками, по README `infra/dokploy`; до покупки домена сайт живёт на Vercel
+- Домен — `it-firma.dev` (`installation.json`, 2026-11-13). NIF и адрес — из `NEXT_PUBLIC_OWNER_NIF` /
+  `NEXT_PUBLIC_OWNER_ADDRESS`: локально `.env.local`, для образа — переменные репозитория GitHub
+  (README `infra/dokploy`); пока их нет, на страницах заглушки.
+- Деплой в Dokploy — руками, по README `infra/dokploy`; до переезда на `it-firma.dev` сайт живёт на Vercel
   (проект `itfirma`), обновление — пересобрать автономную копию и `vercel deploy --prod`.
 - Нет кейсов с именами клиентов, вакансий, партнёрских статусов и калькулятора стоимости.

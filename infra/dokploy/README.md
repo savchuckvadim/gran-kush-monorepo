@@ -36,7 +36,7 @@
 
 ### GitHub
 
-- Адреса, которые вшиваются в CRM, админку и сайт, CI берёт из `installations.json` (`infra/dokploy/ci-matrix.mjs`); переменные `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_CRM_URL` и `NEXT_PUBLIC_MEMBER_URL` в настройках репозитория больше не читаются. Осталась одна: `NEXT_PUBLIC_PLANS_PURCHASABLE`.
+- Адреса, которые вшиваются в CRM, админку и сайт, CI берёт из `installations.json` (`infra/dokploy/ci-matrix.mjs`); переменные `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_CRM_URL` и `NEXT_PUBLIC_MEMBER_URL` в настройках репозитория больше не читаются. Остались `NEXT_PUBLIC_PLANS_PURCHASABLE` и реквизиты владельца для юр. страниц всех сайтов (LSSI-CE, ст. 10) — `NEXT_PUBLIC_OWNER_NIF` и `NEXT_PUBLIC_OWNER_ADDRESS` (GitHub → Settings → Secrets and variables → Actions → Variables). В git их нет, в сборку они вшиваются; пустые — на странице подсвеченная заглушка. После смены — новый push в `main` или Run workflow у «Deploy».
 - Токен для образов не нужен, пока репозиторий публичный: образы в ghcr тоже публичные.
 
 ### Dokploy

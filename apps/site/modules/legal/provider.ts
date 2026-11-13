@@ -1,11 +1,14 @@
 /**
  * Who sells PafPaf. `null` renders as a highlighted "pending" mark until the lawyer review:
  * fill these in before the pages are opened to search engines (LEGAL_INDEXABLE).
+ * NIF and address are not committed: `NEXT_PUBLIC_OWNER_NIF` / `NEXT_PUBLIC_OWNER_ADDRESS` in
+ * `.env.local` locally and in the GitHub repository variables for the image (inlined at build time).
+ * `||`, not `??`: an unset build arg arrives as an empty string.
  */
 export const PROVIDER = {
     name: "Vadim Savchuk",
-    nif: null as string | null,
-    address: null as string | null,
+    nif: process.env.NEXT_PUBLIC_OWNER_NIF || null,
+    address: process.env.NEXT_PUBLIC_OWNER_ADDRESS || null,
     email: "savchuckvadim@gmail.com" as string | null,
 };
 
