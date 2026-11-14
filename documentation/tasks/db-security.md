@@ -23,6 +23,7 @@
 - **Payload-сайт**: его БД `site` лежит на том же сервере Postgres, и сайт ходит туда под тем же пользователем.
 
 Следствия:
+
 - Взлом Payload (`/admin` публичный, без 2FA — TASK-670) даёт полный доступ к CRM-базе:
   участники, документы, финансы.
 - SQL-инъекция или RCE в API получает права суперпользователя. Через `COPY … TO PROGRAM`
@@ -46,13 +47,13 @@ RLS не включён, политик и ролей нет (`set_config`, `CRE
 
 ### 1.3 Схема: 70 моделей, `portalId` есть у 39
 
-| Группа | Таблицы |
-|---|---|
-| Портальные с `portalId` (39) | `members`, `employees`, `portal_roles`, `orders`, `products`, `ledger_entries`, `counterparties`, `stock_moves`, `purchases`, `notifications`, `operations`, `portal_data_keys`, … |
-| Портальные **без своего** `portalId` (9) | `status_items`, `field_definitions`, `field_options`, `form_definition_items`, `stages`, `qr_codes`, `presence_sessions`, `product_images`, `order_items` |
-| Аккаунт (принадлежат человеку, не клубу) | `users`, `user_identities`, `account_profiles`, `user_documents`, `user_signatures`, `member_document_shares`, `auth_sessions`, `auth_tokens`, `notification_preferences` |
-| Платформа | `portals`, `platform_admins`, `billing_plans`, `payment_events`, `idempotency_keys`, `domain_event_deliveries`, `global_*_templates` (7) |
-| `portalId` nullable | `domain_events` (платформенные события), `document_access_logs`, `measurement_units` (общий справочник + свои единицы клуба) |
+| Группа                                   | Таблицы                                                                                                                                                                            |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Портальные с `portalId` (39)             | `members`, `employees`, `portal_roles`, `orders`, `products`, `ledger_entries`, `counterparties`, `stock_moves`, `purchases`, `notifications`, `operations`, `portal_data_keys`, … |
+| Портальные **без своего** `portalId` (9) | `status_items`, `field_definitions`, `field_options`, `form_definition_items`, `stages`, `qr_codes`, `presence_sessions`, `product_images`, `order_items`                          |
+| Аккаунт (принадлежат человеку, не клубу) | `users`, `user_identities`, `account_profiles`, `user_documents`, `user_signatures`, `member_document_shares`, `auth_sessions`, `auth_tokens`, `notification_preferences`          |
+| Платформа                                | `portals`, `platform_admins`, `billing_plans`, `payment_events`, `idempotency_keys`, `domain_event_deliveries`, `global_*_templates` (7)                                           |
+| `portalId` nullable                      | `domain_events` (платформенные события), `document_access_logs`, `measurement_units` (общий справочник + свои единицы клуба)                                                       |
 
 Внешние ключи не включают портал. Поэтому `orders.member_id`, `order_items.product_id`,
 `ledger_entries.counterparty_id` и другие могут указывать на строку чужого клуба, если сервис
@@ -87,16 +88,23 @@ RLS не включён, политик и ролей нет (`set_config`, `CRE
 Порядок — от наибольшего эффекта при наименьшей цене. Фазы A и B не зависят от RLS и
 закрывают самые опасные пути уже сами по себе.
 
-### Фаза A — роли и лимиты `[ ]` P0, ~1 день, ветка `feat/db-roles`
+### Фаза A — роли и лимиты `[~]` P0, ветка `feat/db-roles`
+
+Сделано 2026-11-14 в коде: `infra/postgres/` (`roles.sql`, `own-schema.sql`, `apply-roles.sh`),
+сервис `<бренд>-db-setup` в Dokploy, `db-roles` в dev-compose, e2e в CI под `crm_app`. Роли
+`crm_owner` / `crm_app` / `site_app`. Проверено на копии «продовой» базы: повторный запуск
+идемпотентен, `crm_app` получает отказ на DDL, `COPY … PROGRAM` и `_prisma_migrations`, роли
+API и сайта не видят базы друг друга. Осталось: три пароля в Environment каждой инсталляции и
+Deploy (`infra/dokploy/README.md` → «Роли Postgres»).
 
 **TASK-820: роли Postgres.** Вместо одного суперпользователя — четыре роли на инсталляцию:
 
-| Роль | Кто | Права |
-|---|---|---|
-| `postgres` (суперпользователь) | только руками при обслуживании | — |
-| `<бренд>_owner` | `migrate deploy`, сид, системный клиент RLS (фаза C) | владелец схемы и таблиц CRM-базы, `NOSUPERUSER` |
-| `<бренд>_app` | рантайм API и воркеры | только DML (`SELECT/INSERT/UPDATE/DELETE`) и последовательности, без DDL и `BYPASSRLS` |
-| `<бренд>_site` | Payload | владелец только базы `site`, `CONNECT` к CRM-базе отозван |
+| Роль                           | Кто                                                  | Права                                                                                  |
+| ------------------------------ | ---------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `postgres` (суперпользователь) | только руками при обслуживании                       | —                                                                                      |
+| `<бренд>_owner`                | `migrate deploy`, сид, системный клиент RLS (фаза C) | владелец схемы и таблиц CRM-базы, `NOSUPERUSER`                                        |
+| `<бренд>_app`                  | рантайм API и воркеры                                | только DML (`SELECT/INSERT/UPDATE/DELETE`) и последовательности, без DDL и `BYPASSRLS` |
+| `<бренд>_site`                 | Payload                                              | владелец только базы `site`, `CONNECT` к CRM-базе отозван                              |
 
 - [ ] `infra/postgres/roles.sql`: идемпотентный скрипт (создать роли, если их нет). В нём
       `REVOKE CREATE ON SCHEMA public FROM PUBLIC`,
@@ -125,6 +133,7 @@ RLS не включён, политик и ролей нет (`set_config`, `CRE
 ### Фаза B — бэкапы `[ ]` P0, Вадим + ½ дня кода
 
 **TASK-551 (расширение): бэкапы с проверкой восстановления.**
+
 - [ ] Ежедневный `pg_dump -Fc` CRM-базы и `site` в отдельное хранилище (Dokploy Backups → S3),
       хранить 14 дней. Дамп шифруется ключом, которого нет на сервере.
 - [ ] Раз в месяц — восстановление в пустой контейнер и `prisma migrate status` (скрипт в `infra/`).
@@ -134,6 +143,7 @@ RLS не включён, политик и ролей нет (`set_config`, `CRE
 ### Фаза C — схема под изоляцию `[ ]` P1, 1–2 дня, ветка `feat/db-tenant-schema`
 
 **TASK-822 (= TASK-201 + TASK-207): `portal_id` в дочерних таблицах и составные FK.**
+
 - [ ] `portalId` в 9 дочерних таблицах из §1.3. Миграция заполняет его из родителя
       (`UPDATE … FROM parent`), потом `SET NOT NULL`. Сброс прода не нужен.
 - [ ] Индексы с `portal_id` первой колонкой; уникальные ключи дочерних таблиц расширить порталом.
@@ -150,6 +160,7 @@ RLS не включён, политик и ролей нет (`set_config`, `CRE
 ### Фаза D — RLS `[ ]` P1, 3–5 дней, ветка `feat/rls`
 
 Шаги 3–6 и 8–11 из [rls-postgres.md](./rls-postgres.md) с поправками на текущий код:
+
 - [ ] Генератор политик из DMMF с allowlist глобальных таблиц: новая модель без политики
       роняет CI (TASK-203/204).
 - [ ] `AsyncLocalStorage` + `$extends` с `SET LOCAL app.portal_id`; системный клиент под
@@ -176,6 +187,7 @@ blind index (как `counterparties.nif_index`). Удалить `consent_token`,
 шифруется ключом портала (`PortalCipherService`), из поиска и экспорта поле исключается.
 
 **TASK-826: RGPD — удаление и сроки.**
+
 - [ ] Удаление аккаунта: анонимизировать `users` и `account_profiles`, удалить сканы, подпись,
       сессии и идентичности. Финансовые проводки клуба остаются, но без ссылок на человека.
 - [ ] Срок хранения сканов после выхода из всех клубов (решение Вадима и юриста) и крон чистки.

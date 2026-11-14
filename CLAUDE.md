@@ -294,7 +294,8 @@ All routes are prefixed with `/{locale}`.
 
 | Variable                                | Purpose                                                  |
 | --------------------------------------- | -------------------------------------------------------- |
-| `DATABASE_URL`                          | PostgreSQL connection string                             |
+| `DATABASE_URL`                          | PostgreSQL, runtime role `crm_app` (no DDL)              |
+| `DATABASE_OWNER_URL`                    | PostgreSQL, owner role `crm_owner`: Prisma migrations    |
 | `REDIS_URL`                             | Redis connection string                                  |
 | `JWT_SECRET`                            | Access token signing secret                              |
 | `JWT_REFRESH_SECRET`                    | Refresh token signing secret                             |

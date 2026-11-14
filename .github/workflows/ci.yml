@@ -88,7 +88,10 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     env:
-      DATABASE_URL: postgresql://kush:kush@localhost:5432/gran_kush_test?schema=public
+      # The production roles (infra/postgres): e2e run as crm_app, so a query the runtime
+      # role may not make fails here and not in production
+      DATABASE_URL: postgresql://crm_app:ci-app@localhost:5432/gran_kush_test?schema=public
+      DATABASE_OWNER_URL: postgresql://crm_owner:ci-owner@localhost:5432/gran_kush_test?schema=public
       REDIS_URL: redis://localhost:6379
       JWT_SECRET: ci-access-secret
       JWT_REFRESH_SECRET: ci-refresh-secret
@@ -116,6 +119,17 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Postgres roles
+        run: sh infra/postgres/apply-roles.sh
+        env:
+          PGHOST: localhost
+          PGUSER: kush
+          PGPASSWORD: kush
+          CRM_DB: gran_kush_test
+          DB_OWNER_PASSWORD: ci-owner
+          DB_APP_PASSWORD: ci-app
+          DB_SITE_PASSWORD: ci-site
 
       - name: Apply migrations
         run: pnpm --filter api prisma:migrate:deploy

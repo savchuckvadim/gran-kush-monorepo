@@ -54,9 +54,9 @@
 
 ## Первый деплой
 
-- **API** сам применит миграции Prisma (`RUN_MIGRATIONS=true`). Чтобы создать админа платформы, на первый деплой поставьте `RUN_SEED=true` и заполните `PLATFORM_BOOTSTRAP_ADMIN_*`. Потом верните `RUN_SEED=false`.
+- **База.** Перед API и сайтом отрабатывает одноразовый `<бренд>-db-setup` (см. «Роли Postgres» ниже): создаёт роли и базу `site`, затем применяет миграции Prisma. В Dokploy он остаётся в статусе Exited (0) — так и должно быть. Чтобы создать админа платформы, на первый деплой поставьте `RUN_SEED=true` и заполните `PLATFORM_BOOTSTRAP_ADMIN_*`. Потом верните `RUN_SEED=false`.
 - **Сайт** при первом старте всё сделает сам:
-  - создаст базу `site` и применит миграции Payload;
+  - применит миграции Payload в своей базе `site`;
   - создаст админа CMS из `PAYLOAD_ADMIN_*`, так что форма «создать первого пользователя» на публичном домене ни разу не будет открыта;
   - зальёт стартовый контент (`PAYLOAD_SEED_IF_EMPTY=true`).
 
@@ -66,6 +66,35 @@
   - `https://paf-paf.app/es`. Пока в `billing_plans` нет тарифов, сайт показывает запасные цены из CMS;
   - `https://paf-paf.app/admin`, вход в CMS;
   - `https://crm.paf-paf.app`, `https://club.paf-paf.app`, `https://admin.paf-paf.app`.
+
+## Роли Postgres
+
+С TASK-820 сервисы не ходят в базу под суперпользователем `POSTGRES_USER`
+([db-security.md](../../documentation/tasks/db-security.md), фаза A):
+
+| Роль | Кто | Что может |
+|---|---|---|
+| `POSTGRES_USER` | только `<бренд>-db-setup` и обслуживание руками | всё |
+| `crm_owner` | миграции Prisma в `<бренд>-db-setup` | владелец таблиц базы `POSTGRES_DB` |
+| `crm_app` | API и его воркеры | только строки: без DDL, таймаут запроса 30 с, до 30 соединений |
+| `site_app` | сайт (Payload) | только своя база `site`, к базе API подключиться не может |
+
+`<бренд>-db-setup` запускается на каждом деплое: `infra/postgres/apply-roles.sh` приводит роли,
+пароли, владельцев и права к `infra/postgres/roles.sql`, затем `prisma migrate deploy` под
+`crm_owner`. API и сайт стартуют, только когда он завершился успешно. Если он упал — смотреть
+его лог в Dokploy, API при этом остаётся на прошлой версии.
+
+**Переход существующей инсталляции** (один раз, простой около минуты):
+
+1. Environment: добавить `POSTGRES_OWNER_PASSWORD`, `POSTGRES_APP_PASSWORD`,
+   `POSTGRES_SITE_PASSWORD` — каждому `openssl rand -hex 24`. Остальное не меняется.
+2. Deploy. `<бренд>-db-setup` передаст таблицы обеих баз новым ролям и выдаст права; данные не
+   трогаются.
+3. Проверить `https://api.<домен>/health`, вход в CRM и `/admin` сайта.
+
+Откат через `TAG` на образ старше TASK-820 не сработает: в нём нет `infra/postgres`, и
+`<бренд>-db-setup` упадёт. Откатывать коммитом (`git revert` в `main`) — прежний compose снова
+ходит под `POSTGRES_USER`, а суперпользователю новые владельцы таблиц не мешают.
 
 ## Обновления и откат
 

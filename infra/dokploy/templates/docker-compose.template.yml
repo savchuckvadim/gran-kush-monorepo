@@ -62,6 +62,39 @@ services:
         limits:
           memory: 128M
 
+  # One-off on every deploy, before the API and the site: Postgres roles and grants
+  # (infra/postgres/roles.sql), then the API migrations under the owner role. The superuser
+  # password reaches only this container; the API and the site get their own roles
+  # (documentation/tasks/db-security.md, TASK-820).
+  __BRAND__-db-setup:
+    image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/api:${TAG:-latest}
+    restart: "no"
+    pull_policy: always
+    command: ["sh", "-c", "sh /app/infra/postgres/apply-roles.sh && ./node_modules/.bin/prisma migrate deploy"]
+    environment:
+      # the entrypoint would migrate before the roles exist
+      RUN_MIGRATIONS: "false"
+      RUN_SEED: "false"
+      PGHOST: __BRAND__-postgres
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      CRM_DB: ${POSTGRES_DB}
+      SITE_DB: site
+      DB_OWNER_PASSWORD: ${POSTGRES_OWNER_PASSWORD:?set POSTGRES_OWNER_PASSWORD in Dokploy → Environment}
+      DB_APP_PASSWORD: ${POSTGRES_APP_PASSWORD:?set POSTGRES_APP_PASSWORD in Dokploy → Environment}
+      DB_SITE_PASSWORD: ${POSTGRES_SITE_PASSWORD:?set POSTGRES_SITE_PASSWORD in Dokploy → Environment}
+      DATABASE_OWNER_URL: postgresql://crm_owner:${POSTGRES_OWNER_PASSWORD}@__BRAND__-postgres:5432/${POSTGRES_DB}?schema=public
+    depends_on:
+      __BRAND__-postgres:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+
   # api.${DOMAIN}
   __BRAND__-api:
     image: ${IMAGE_PREFIX:-ghcr.io/savchuckvadim/gran-kush-monorepo}/api:${TAG:-latest}
@@ -73,9 +106,10 @@ services:
       PORT: 3000
       # The installation: product name, kind of portal, modules (packages/brand)
       BRAND: __BRAND__
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@__BRAND__-postgres:5432/${POSTGRES_DB}?schema=public
+      # Runtime role: rows only, no DDL, statement timeouts (__BRAND__-db-setup migrates)
+      DATABASE_URL: postgresql://crm_app:${POSTGRES_APP_PASSWORD}@__BRAND__-postgres:5432/${POSTGRES_DB}?schema=public
       REDIS_URL: redis://__BRAND__-redis:6379
-      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
+      RUN_MIGRATIONS: "false"
       RUN_SEED: ${RUN_SEED:-false}
       # Cloudflare and Traefik in front: two proxies, so req.ip is the visitor, not Cloudflare.
       TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-2}
@@ -127,8 +161,8 @@ services:
       BILLING_TRIAL_DAYS: ${BILLING_TRIAL_DAYS:-365}
       BILLING_GRACE_DAYS: ${BILLING_GRACE_DAYS:-7}
     depends_on:
-      __BRAND__-postgres:
-        condition: service_healthy
+      __BRAND__-db-setup:
+        condition: service_completed_successfully
       __BRAND__-redis:
         condition: service_healthy
     healthcheck:
@@ -187,8 +221,9 @@ services:
     networks: [default, dokploy-network]
     environment:
       HOSTNAME: 0.0.0.0
-      # Payload creates this database on first start and applies its migrations.
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@__BRAND__-postgres:5432/site
+      # __BRAND__-db-setup creates this database for the site role; Payload applies its
+      # migrations on start. The role cannot connect to the API's database.
+      DATABASE_URL: postgresql://site_app:${POSTGRES_SITE_PASSWORD}@__BRAND__-postgres:5432/site
       PAYLOAD_SECRET: ${PAYLOAD_SECRET:?set PAYLOAD_SECRET in Dokploy → Environment}
       PAYLOAD_ADMIN_EMAIL: ${PAYLOAD_ADMIN_EMAIL:-}
       PAYLOAD_ADMIN_PASSWORD: ${PAYLOAD_ADMIN_PASSWORD:-}
@@ -197,8 +232,8 @@ services:
     volumes:
       - site_media:/app/apps/site/media
     depends_on:
-      __BRAND__-postgres:
-        condition: service_healthy
+      __BRAND__-db-setup:
+        condition: service_completed_successfully
     logging:
       driver: json-file
       options: { max-size: "10m", max-file: "3" }

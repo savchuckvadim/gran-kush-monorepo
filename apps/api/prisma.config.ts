@@ -9,6 +9,8 @@ export default defineConfig({
         path: "prisma/migrations",
     },
     datasource: {
-        url: process.env["DATABASE_URL"],
+        // Migrations run under the owner role; the runtime role behind DATABASE_URL has no DDL
+        // (infra/postgres/roles.sql). Without DATABASE_OWNER_URL — the one URL for both.
+        url: process.env["DATABASE_OWNER_URL"] ?? process.env["DATABASE_URL"],
     },
 });

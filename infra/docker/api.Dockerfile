@@ -45,6 +45,11 @@ ENV NODE_ENV=production
 WORKDIR /app/apps/api
 COPY --from=builder /prod/api ./
 COPY --from=builder /app/apps/api/dist ./dist
+# psql for <brand>-db-setup: Postgres roles before the migrations (infra/postgres, TASK-820)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+COPY infra/postgres /app/infra/postgres
 COPY infra/docker/api-entrypoint.sh /usr/local/bin/api-entrypoint.sh
 RUN chmod +x /usr/local/bin/api-entrypoint.sh
 # Files live in S3 and nothing is written to the image, so the API runs as the unprivileged

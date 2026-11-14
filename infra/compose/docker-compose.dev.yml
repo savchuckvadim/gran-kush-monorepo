@@ -29,6 +29,30 @@ services:
       timeout: 5s
       retries: 5
 
+  # One-off on every `pnpm docker:dev`: the same roles as in production (infra/postgres).
+  # Connect the API with crm_app (DATABASE_URL), migrate with crm_owner (DATABASE_OWNER_URL),
+  # the site with site_app. The superuser URLs keep working too.
+  db-roles:
+    image: postgres:16-alpine
+    restart: "no"
+    command: ["sh", "/opt/postgres/apply-roles.sh"]
+    environment:
+      PGHOST: postgres
+      PGUSER: ${POSTGRES_USER:-kush}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-kush}
+      CRM_DB: ${POSTGRES_DB:-bro-crm}
+      SITE_DB: site
+      DB_OWNER_PASSWORD: ${POSTGRES_OWNER_PASSWORD:-crm_owner}
+      DB_APP_PASSWORD: ${POSTGRES_APP_PASSWORD:-crm_app}
+      DB_SITE_PASSWORD: ${POSTGRES_SITE_PASSWORD:-site_app}
+      # prisma migrate dev creates a shadow database
+      DB_OWNER_CREATEDB: "true"
+    volumes:
+      - ../postgres:/opt/postgres:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   redis:
     image: redis:7-alpine
     container_name: gran-kush-redis-dev
