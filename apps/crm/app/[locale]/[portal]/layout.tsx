@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+
 import type { ReactNode } from "react";
 
 import { PortalProvider } from "@/modules/processes";
@@ -17,7 +18,9 @@ export default async function PortalSegmentLayout({
     const { portal } = await params;
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
-    const res = await fetch(`${apiUrl}/crm/portals/resolve?slug=${portal}`, {
+    // Сегмент URL приходит раскодированным: без кодирования «a&x=1» дописал бы в запрос свои параметры
+    const query = new URLSearchParams({ slug: portal });
+    const res = await fetch(`${apiUrl}/crm/portals/resolve?${query}`, {
         next: { revalidate: 60 },
     });
     if (!res.ok) {

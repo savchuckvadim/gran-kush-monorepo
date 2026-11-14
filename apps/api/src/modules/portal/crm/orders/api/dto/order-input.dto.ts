@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 import { Type } from "class-transformer";
 import {
+    ArrayMaxSize,
     ArrayMinSize,
     IsArray,
     IsBoolean,
@@ -18,6 +19,7 @@ import {
 } from "class-validator";
 
 import { OrderStatus, PaymentStatus } from "@modules/portal/crm/orders/domain/entity/order.entity";
+import { ORDER_MAX_ITEMS } from "@modules/portal/crm/orders/domain/order.limits";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Create Order
@@ -51,9 +53,11 @@ export class CreateOrderDto {
     @ApiProperty({
         type: [CreateOrderItemDto],
         description: "Список позиций заказа (минимум 1)",
+        maxItems: ORDER_MAX_ITEMS,
     })
     @IsArray()
     @ArrayMinSize(1, { message: "Заказ должен содержать хотя бы одну позицию" })
+    @ArrayMaxSize(ORDER_MAX_ITEMS)
     @ValidateNested({ each: true })
     @Type(() => CreateOrderItemDto)
     items: CreateOrderItemDto[];
@@ -104,9 +108,11 @@ export class CrmCreateOrderDto {
     @ApiProperty({
         type: [CrmCreateOrderItemDto],
         description: "Список позиций заказа (минимум 1)",
+        maxItems: ORDER_MAX_ITEMS,
     })
     @IsArray()
     @ArrayMinSize(1, { message: "Заказ должен содержать хотя бы одну позицию" })
+    @ArrayMaxSize(ORDER_MAX_ITEMS)
     @ValidateNested({ each: true })
     @Type(() => CrmCreateOrderItemDto)
     items: CrmCreateOrderItemDto[];

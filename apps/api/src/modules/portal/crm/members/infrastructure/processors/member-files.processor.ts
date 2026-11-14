@@ -4,6 +4,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { UserDocumentSide } from "@prisma/client";
 import { Job } from "bullmq";
 
+import { dropJobSecrets, isFinalAttempt } from "@common/queue/drop-job-secrets";
 import { decodeDataUrl } from "@common/upload";
 import { AccountFilesService } from "@modules/account/application/services/account-files.service";
 import { QueueMemberFilesPayload } from "@modules/portal/crm/members/application/services/member-files.service";
@@ -11,6 +12,9 @@ import {
     MEMBER_FILES_QUEUE_NAME,
     MEMBER_FILES_WORKER_EVENTS,
 } from "@modules/portal/crm/members/events/member-files-events.constants";
+
+/** Сканы документов и подпись в base64: после сохранения в хранилище им незачем лежать в Redis. */
+const MEMBER_FILES_SECRET_KEYS = ["documentFirst", "documentSecond", "signature"] as const;
 
 @Processor(MEMBER_FILES_QUEUE_NAME)
 @Injectable()
@@ -62,12 +66,16 @@ export class MemberFilesProcessor extends WorkerHost {
     }
 
     @OnWorkerEvent(MEMBER_FILES_WORKER_EVENTS.COMPLETED)
-    onCompleted(job: Job<QueueMemberFilesPayload>) {
+    async onCompleted(job: Job<QueueMemberFilesPayload>): Promise<void> {
         this.logger.log(`Member files job completed: ${job.id}`);
+        await dropJobSecrets(job, MEMBER_FILES_SECRET_KEYS);
     }
 
     @OnWorkerEvent(MEMBER_FILES_WORKER_EVENTS.FAILED)
-    onFailed(job: Job<QueueMemberFilesPayload>, error: Error) {
+    async onFailed(job: Job<QueueMemberFilesPayload>, error: Error): Promise<void> {
         this.logger.error(`Member files job failed: ${job.id}: ${error.message}`);
+        if (isFinalAttempt(job)) {
+            await dropJobSecrets(job, MEMBER_FILES_SECRET_KEYS);
+        }
     }
 }

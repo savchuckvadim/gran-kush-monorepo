@@ -30,6 +30,18 @@ export const crmHref = (locale: Locale, target: CrmTarget, plan?: string | null)
     return url.toString();
 };
 
+const SAFE_LINK_SCHEMES: ReadonlySet<string> = new Set(["http:", "https:", "mailto:", "tel:"]);
+
+// The browser's own URL parser: it drops tabs and leading spaces the same way, so " java\tscript:"
+// is caught too. A string it cannot parse without a base is a relative link.
+const absoluteScheme = (href: string): string | null => {
+    try {
+        return new URL(href).protocol;
+    } catch {
+        return null;
+    }
+};
+
 // CMS links: "/precios" is a page of this site, "#entrada" an anchor, "crm:register" / "crm:login"
 // the CRM (its domain differs per environment, so the CMS never stores it), anything else is external.
 export const resolveHref = (href: string | null | undefined, locale: Locale): string => {
@@ -38,7 +50,10 @@ export const resolveHref = (href: string | null | undefined, locale: Locale): st
         const target = href.slice("crm:".length);
         return crmHref(locale, isCrmTarget(target) ? target : "login");
     }
-    if (href.startsWith("#") || /^[a-z]+:/i.test(href)) return href;
+    if (href.startsWith("#")) return href;
     if (href.startsWith("/")) return ROUTES.page(locale, href.slice(1) || HOME_SLUG);
-    return href;
+    const scheme = absoluteScheme(href);
+    if (scheme === null) return href;
+    // An editor account must not be enough to run script on every visitor's page (javascript:, data:)
+    return SAFE_LINK_SCHEMES.has(scheme) ? href : ROUTES.home(locale);
 };

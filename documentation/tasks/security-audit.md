@@ -397,7 +397,8 @@ Semgrep, Trivy, ZAP по OpenAPI).
       кабинет; до подтверждения карточка в CRM — только email
 - [x] Документы — то, что пользователь показал этому клубу: связь «документ ↔ членство»
       (или флаг `sharedWithPortalIds`), `toCrmMemberFullDto`/превью/`PATCH files` фильтруют по ней
-- [ ] Создание участника — роль `manager+` (решение Вадима: пока любой сотрудник, до настоящих прав)
+- [x] Создание участника — право `members.create` (TASK-730…732); у роли `employee` по умолчанию
+      есть, клуб снимает его на экране «Роли и права»
 - [x] e2e `crm-create-member-existing-user`, `crm-files-foreign-account` (есть как `it.failing`)
 
 **Сделано 2026-10-12 (ветка `feat/member-consent`)** — ровно по схеме и правилам ниже:
@@ -608,20 +609,29 @@ Semgrep, Trivy, ZAP по OpenAPI).
       Открыто: Redis без пароля — в проде он только во внутренней сети проекта; пароль — с новым
       секретом `REDIS_PASSWORD` в трёх инсталляциях
 
-### TASK-670: мелочи `[ ]` P2
+### TASK-670: мелочи `[~]` P2 — `fix/security-670`, 2026-11-14
 
-- [ ] Токены в путях (`/public/invitations/<t>`) попадают в лог (`/auth/verify/<t>` удалён 2026-10-17)
-      (`global-exception.filter.ts:114`); email в логах уровня info (`mail.service.ts`)
-- [ ] Упавшие mail-джобы хранят ссылки сброса 7 дней (`job-options.ts:35`); base64 сканов в
-      Redis до суток
-- [ ] Payload `/admin` публичный без 2FA; media принимает SVG (`collections.ts:28`);
-      `resolveHref` пропускает `javascript:` (`routes.ts:38`)
-- [ ] Лимиты длины: `publicDescription`, `coverImageUrl` (не проверяется как URL),
-      `membershipNumber`; `items` заказа без максимума
-- [ ] Любой сотрудник создаёт участников и выпускает/отзывает QR — решить с Вадимом
-- [~] CRM: слаг в URL без кодирования (`[portal]/layout.tsx:20`) — открыто; `/crm/portals/resolve`
-      без слага — теперь 400, неизвестный слаг — 404, добавлены `@Public` и троттл
-      (`audit/auth-flow`, 2026-10-14; e2e `resolve endpoint answers 400/404`)
+- [x] Токены в путях (`/public/invitations/<t>`, consent, reg-links, приглашения CRM и кабинета) и
+      секретные query (`token`, `code`, `state`…) вырезаются из лога фильтра ошибок —
+      `common/logging/redact-url.ts`; email в логах почты — маска `m***@club.es`
+      (`common/logging/mask-email.ts`, `mail.service.ts`, `mail.processor.ts`)
+- [x] Тело письма со ссылками стирается из Redis после отправки и после последней попытки, сканы и
+      подпись `member-files` — так же (`common/queue/drop-job-secrets.ts`). Попутно: `sendEmail`
+      глотал ошибку транспорта, и 5 повторов `MAIL_JOB_OPTIONS` не срабатывали никогда — теперь
+      `MailProcessor` превращает `false` в ошибку задачи
+- [x] Payload media — только растровые картинки и видео, без SVG (`payload/collections.ts`);
+      `resolveHref` пропускает только относительные ссылки, http(s), mailto и tel (`routes.ts`)
+- [ ] Payload `/admin` публичный без 2FA — у Payload её нет из коробки; вариант — Cloudflare Access
+      на `/admin` и `/api/users/*` сайта (решение и настройка — Вадим)
+- [x] Лимиты: `publicDescription` 2000, `coverImageUrl` — `@IsUrl` http(s) и 500
+      (`public-portal.limits.ts`), `membershipNumber` 50 по колонке (`members/domain/member.limits.ts`),
+      `items` заказа до 100 (`orders/domain/order.limits.ts`)
+- [x] Создание участников и QR — под правами (TASK-730…732): `POST /crm/members` —
+      `members.create`, выпуск и отзыв QR — `qr.manage` (`crm-qr-codes.controller.ts`); у роли
+      `employee` по умолчанию `members.create` есть, `qr.manage` нет (`access/domain/portal-role.ts`),
+      клуб меняет набор на экране «Роли и права»
+- [x] CRM: слаг кодируется в запросе `resolve` (`[portal]/layout.tsx`); `/crm/portals/resolve`
+      без слага — 400, неизвестный слаг — 404, `@Public` и троттл (`audit/auth-flow`, 2026-10-14)
 
 ### Проверено 2026-10-12 и в порядке
 
@@ -685,7 +695,9 @@ Swagger выключен в проде; `.env` нет ни в истории git
 - [x] **Существующий аккаунт не может зарегистрировать клуб** — закрыто TASK-708 (2026-10-16): на 409
       `email_taken` форма ведёт на вход, клуб заводится под сессией через `POST /crm/my-portals` и
       страницу «Новый клуб». Сам 409 B2B-формы оставлен осознанно (решение в TASK-665)
-- [ ] **Плоский employee** читает финансы (`/crm/finance/*`), превью документов и подписи
+- [x] **Плоский employee** — закрыто TASK-679 / TASK-730…732 (2026-10-17): все маршруты
+      `/crm/finance/*` под `@RequirePermission` (кроме `GET` налоговых ставок — справочник).
+      Было: читает финансы (`/crm/finance/*`), превью документов и подписи
       участников, список сотрудников; создаёт участников, QR, check-in — решение 2026-10-14:
       система прав со скоупами, кастомными ролями и виджетом в настройках → **TASK-679**
       (`crm-polish.md`)

@@ -6,6 +6,7 @@ import { User } from "@prisma/client";
 import { render } from "@react-email/components";
 import { Queue } from "bullmq";
 
+import { maskEmail, maskEmails } from "@common/logging/mask-email";
 import { buildJobId } from "@common/queue/job-options";
 
 import {
@@ -87,7 +88,7 @@ export class MailService {
             { to: [to], ...rest },
             jobId ? { jobId } : undefined
         );
-        this.logger.log(`📬 ${mail.emailType} email queued for ${to}`);
+        this.logger.log(`📬 ${mail.emailType} email queued for ${maskEmail(to)}`);
         return true;
     }
 
@@ -234,7 +235,7 @@ export class MailService {
         if (!baseUrl) {
             // Кабинет участника на проде может быть не поднят: ссылка в никуда хуже, чем без письма
             this.logger.warn(
-                `Account setup email for ${params.to} skipped: frontend URL for "${params.app}" is not configured`
+                `Account setup email for ${maskEmail(params.to)} skipped: frontend URL for "${params.app}" is not configured`
             );
             return false;
         }
@@ -264,7 +265,7 @@ export class MailService {
         const baseUrl = this.frontendUrl("member");
         if (!baseUrl) {
             this.logger.warn(
-                `Account exists email for ${params.to} skipped: cabinet URL is not configured`
+                `Account exists email for ${maskEmail(params.to)} skipped: cabinet URL is not configured`
             );
             return false;
         }
@@ -288,7 +289,7 @@ export class MailService {
         const baseUrl = this.frontendUrl(params.app ?? "member");
         if (!baseUrl) {
             this.logger.warn(
-                `Telegram email for ${params.to} skipped: frontend URL is not configured`
+                `Telegram email for ${maskEmail(params.to)} skipped: frontend URL is not configured`
             );
             return false;
         }
@@ -335,8 +336,8 @@ export class MailService {
         to: string[];
         attachments?: MailAttachment[];
     }): Promise<boolean> {
-        // В лог — только адресаты и тема: в html лежат ссылки с токенами подтверждения и сброса
-        const recipients = params.to.join(", ");
+        // В лог — только маска адресатов и тема: в html лежат ссылки с токенами подтверждения и сброса
+        const recipients = maskEmails(params.to);
         try {
             if (params.to.length === 0) {
                 throw new Error("Email has no recipients");

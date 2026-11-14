@@ -8,10 +8,16 @@ import {
     IsNumber,
     IsOptional,
     IsString,
+    IsUrl,
     Max,
     MaxLength,
     Min,
 } from "class-validator";
+
+import {
+    COVER_IMAGE_URL_PROTOCOLS,
+    PUBLIC_PORTAL_LIMITS,
+} from "@modules/portal/public/public-portal.limits";
 
 export class PublicPortalMapItemDto {
     @ApiProperty({ type: String })
@@ -63,15 +69,26 @@ export class UpdatePortalSettingsDto {
     @MaxLength(255)
     displayName?: string;
 
-    @ApiPropertyOptional({ type: String, nullable: true })
+    @ApiPropertyOptional({
+        type: String,
+        nullable: true,
+        maxLength: PUBLIC_PORTAL_LIMITS.publicDescriptionLength,
+    })
     @IsOptional()
     @IsString()
+    @MaxLength(PUBLIC_PORTAL_LIMITS.publicDescriptionLength)
     publicDescription?: string | null;
 
-    @ApiPropertyOptional({ type: String, nullable: true })
+    @ApiPropertyOptional({
+        type: String,
+        nullable: true,
+        format: "uri",
+        maxLength: PUBLIC_PORTAL_LIMITS.coverImageUrlLength,
+    })
     @IsOptional()
     @IsString()
-    @MaxLength(500)
+    @MaxLength(PUBLIC_PORTAL_LIMITS.coverImageUrlLength)
+    @IsUrl({ protocols: COVER_IMAGE_URL_PROTOCOLS, require_protocol: true })
     coverImageUrl?: string | null;
 
     @ApiPropertyOptional({ type: String, nullable: true })

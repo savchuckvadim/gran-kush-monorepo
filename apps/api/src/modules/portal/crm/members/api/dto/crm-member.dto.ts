@@ -1,10 +1,11 @@
 import { ApiProperty, ApiPropertyOptional, IntersectionType } from "@nestjs/swagger";
 
 import { MemberConsentStatus, UserDocumentSide } from "@prisma/client";
-import { IsBoolean, IsObject, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsBoolean, IsObject, IsOptional, IsString, IsUUID, MaxLength } from "class-validator";
 
 import { PaginationDto } from "@common/paginate/dto/pagination.dto";
 import { EntityFilterDto } from "@modules/portal/crm/entity-fields/api/dto/entity-filter.dto";
+import { MEMBERSHIP_NUMBER_MAX_LENGTH } from "@modules/portal/crm/members/domain/member.limits";
 
 export class CrmMemberStatusDto {
     @ApiProperty({ type: String })
@@ -125,9 +126,10 @@ export class CrmMemberFieldsPatchDto {
     @IsString()
     statusItemId?: string;
 
-    @ApiPropertyOptional({ type: String, nullable: true })
+    @ApiPropertyOptional({ type: String, nullable: true, maxLength: MEMBERSHIP_NUMBER_MAX_LENGTH })
     @IsOptional()
     @IsString()
+    @MaxLength(MEMBERSHIP_NUMBER_MAX_LENGTH)
     membershipNumber?: string | null;
 
     @ApiPropertyOptional({ type: Boolean })

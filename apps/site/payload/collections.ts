@@ -20,6 +20,16 @@ export const Users: CollectionConfig = {
     fields: [{ name: "name", type: "text" }],
 };
 
+const MEDIA_MIME_TYPES = [
+    "image/png",
+    "image/jpeg",
+    "image/webp",
+    "image/avif",
+    "image/gif",
+    "video/mp4",
+    "video/webm",
+];
+
 export const Media: CollectionConfig = {
     slug: "media",
     access: { read: anyone, create: authenticated, update: authenticated, delete: authenticated },
@@ -27,7 +37,9 @@ export const Media: CollectionConfig = {
         // cwd is apps/site both in dev and in the standalone server (it chdirs to its own folder),
         // so production uploads land in /app/apps/site/media, the volume in infra/dokploy.
         staticDir: path.resolve(process.cwd(), "media"),
-        mimeTypes: ["image/*", "video/mp4", "video/webm"],
+        // Raster images only: an SVG is a document that can carry script and is served from the
+        // site's own origin, so an editor account would be enough for stored XSS.
+        mimeTypes: MEDIA_MIME_TYPES,
     },
     fields: [{ name: "alt", type: "text", localized: true }],
 };

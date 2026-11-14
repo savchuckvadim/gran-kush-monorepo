@@ -3,17 +3,18 @@ import {
     BadRequestException,
     ForbiddenException,
     Logger,
+    NotFoundException,
     ServiceUnavailableException,
 } from "@nestjs/common";
 
 import { GlobalExceptionFilter } from "../global-exception.filter";
 
-const run = (exception: unknown, headersSent = false) => {
+const run = (exception: unknown, headersSent = false, originalUrl = "/crm/orders") => {
     const json = jest.fn();
     const status = jest.fn().mockReturnValue({ json });
     const end = jest.fn();
     const response = { status, end, headersSent };
-    const request = { method: "POST", originalUrl: "/crm/orders" };
+    const request = { method: "POST", originalUrl };
     const host = {
         switchToHttp: () => ({ getRequest: () => request, getResponse: () => response }),
     } as unknown as ArgumentsHost;
@@ -90,5 +91,17 @@ describe("GlobalExceptionFilter", () => {
         const { status, end } = run(new Error("stream broke"), true);
         expect(status).toBeUndefined();
         expect(end).toHaveBeenCalledTimes(1);
+    });
+
+    it("токен из пути и секреты query не попадают в лог", () => {
+        const debug = jest.spyOn(Logger.prototype, "debug").mockImplementation(() => undefined);
+
+        run(new NotFoundException(), false, "/public/invitations/secret-token/accept?code=c1");
+
+        const line = String(debug.mock.calls[0]?.[0]);
+        expect(line).not.toContain("secret-token");
+        expect(line).not.toContain("c1");
+        expect(line).toContain("/public/invitations/[redacted]/accept?code=[redacted]");
+        debug.mockRestore();
     });
 });

@@ -32,6 +32,7 @@ export const MAIL_JOB_OPTIONS: DefaultJobOptions = {
     backoff: { type: "exponential", delay: 10_000 },
     removeOnComplete: { age: HOUR, count: 1_000 },
     // Упавшие держим неделю: этого хватает разобраться, но очередь не растёт бесконечно.
+    // Тело письма со ссылками стирается после последней попытки — `dropJobSecrets` в MailProcessor.
     removeOnFail: { age: 7 * DAY },
 };
 

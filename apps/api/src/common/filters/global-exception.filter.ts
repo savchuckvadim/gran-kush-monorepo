@@ -9,6 +9,8 @@ import {
 
 import type { Request, Response } from "express";
 
+import { redactUrl } from "@common/logging/redact-url";
+
 /** Тело любой ошибки API — контракт в documentation/backend/HTTP_API_CONTRACT.md */
 export interface ApiErrorBody {
     message: string;
@@ -111,7 +113,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     private log(exception: unknown, status: number, body: ApiErrorBody, request: Request): void {
-        const line = `${request.method} ${request.originalUrl} -> ${status} ${body.message}`;
+        const line = `${request.method} ${redactUrl(request.originalUrl)} -> ${status} ${body.message}`;
 
         if (status >= 500) {
             const stack = exception instanceof Error ? exception.stack : String(exception);
