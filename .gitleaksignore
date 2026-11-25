@@ -1,0 +1,6 @@
+# Findings in git history that are not secrets. One fingerprint per line:
+# <commit>:<file>:<rule>:<line>. The weekly full-history scan (Security workflow) reads this file.
+
+# The CircleCI badge of the stock NestJS README from the initial commit: `token=abc123def456`
+# is the placeholder of the Nest starter, not a credential.
+4634971b19c0e86caff4f0406bd9ddf4ea0871d2:apps/api/README.md:generic-api-key:5
