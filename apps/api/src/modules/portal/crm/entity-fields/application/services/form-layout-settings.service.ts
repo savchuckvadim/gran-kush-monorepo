@@ -59,6 +59,7 @@ export class FormLayoutSettingsService {
                 }
                 await tx.formDefinitionItem.create({
                     data: {
+                        portalId,
                         formDefinitionId: form.id,
                         fieldDefinitionId: def.id,
                         sortOrder: row.sortOrder,

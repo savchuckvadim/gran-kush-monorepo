@@ -112,6 +112,7 @@ describe("Cross-portal isolation (e2e)", () => {
 
         const session = await prisma.presenceSession.create({
             data: {
+                portalId: portalB.id,
                 entityRecordId: entityRecord.id,
                 entryMethod: "manual_employee",
             },

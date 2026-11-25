@@ -80,6 +80,7 @@ export class EntityDefinitionsService {
 
                 const titleField = await tx.fieldDefinition.create({
                     data: {
+                        portalId,
                         entityDefinitionId: definition.id,
                         fieldKey: ENTITY_TITLE_FIELD_KEY,
                         type: PortalFieldType.string,

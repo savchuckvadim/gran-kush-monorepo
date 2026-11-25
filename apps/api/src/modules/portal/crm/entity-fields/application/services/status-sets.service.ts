@@ -156,6 +156,7 @@ export class StatusSetsService {
 
         return this.prisma.statusItem.create({
             data: {
+                portalId,
                 statusSetId,
                 key: input.key,
                 label: input.label,

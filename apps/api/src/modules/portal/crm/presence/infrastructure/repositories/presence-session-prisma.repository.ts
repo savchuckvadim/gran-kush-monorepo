@@ -102,6 +102,7 @@ export class PresenceSessionPrismaRepository extends PresenceSessionRepository {
             return await this.prisma.$transaction(async (tx) => {
                 const row = await tx.presenceSession.create({
                     data: {
+                        portalId: data.portalId,
                         entityRecordId,
                         activeEntityRecordId: entityRecordId,
                         employeeId: data.employeeId,

@@ -34,8 +34,8 @@ describe("Presence settings (e2e)", () => {
     let prisma: PrismaService;
     const clubs = [`pres-a-${suffix}`, `pres-b-${suffix}`] as const;
     const owners = new Map<string, string>();
-    /** entityRecordId участников по клубам: [клуб][номер участника] */
-    const members = new Map<string, string[]>();
+    /** Записи участников по клубам: [клуб][номер участника] */
+    const members = new Map<string, { entityRecordId: string; portalId: string }[]>();
 
     const crm = (slug: string) => ({
         get: (url: string) =>
@@ -51,9 +51,13 @@ describe("Presence settings (e2e)", () => {
     });
 
     const openVisit = (slug: string, memberIndex: number, enteredAt: string) => {
-        const entityRecordId = members.get(slug)?.[memberIndex] ?? "";
+        const { entityRecordId, portalId } = members.get(slug)?.[memberIndex] ?? {
+            entityRecordId: "",
+            portalId: "",
+        };
         return prisma.presenceSession.create({
             data: {
+                portalId,
                 entityRecordId,
                 activeEntityRecordId: entityRecordId,
                 enteredAt: at(enteredAt),
@@ -113,9 +117,9 @@ describe("Presence settings (e2e)", () => {
                     .expect(201);
                 const member = await prisma.member.findUniqueOrThrow({
                     where: { id: joined.body.memberId as string },
-                    select: { entityRecordId: true },
+                    select: { entityRecordId: true, portalId: true },
                 });
-                members.get(slug)?.push(member.entityRecordId);
+                members.get(slug)?.push(member);
             }
         }
     });

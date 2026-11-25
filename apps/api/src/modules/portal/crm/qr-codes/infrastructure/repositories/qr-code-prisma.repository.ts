@@ -60,6 +60,7 @@ export class QrCodePrismaRepository extends QrCodeRepository {
         const row = await this.prisma.qrCode.create({
             data: {
                 ...(data.id ? { id: data.id } : {}),
+                portalId: data.portalId,
                 entityRecordId,
                 issuedAt: data.issuedAt,
                 expiresAt: data.expiresAt,

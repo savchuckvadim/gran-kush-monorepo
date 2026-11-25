@@ -215,14 +215,11 @@ export class OrderPrismaRepository extends OrderRepository {
     // ─── Обновление заказа ───────────────────────────────────────────────────
 
     async update(id: string, data: UpdateOrderInput): Promise<Order> {
-        const updateData: Prisma.OrderUpdateInput = {};
+        // The scalar, not `employee: { connect | disconnect }`: the relation is the composite key
+        // (employee_id, portal_id), and a nested write would also rewrite or null the order's portal.
+        const updateData: Prisma.OrderUncheckedUpdateInput = {};
 
-        if (data.employeeId !== undefined) {
-            updateData.employee =
-                data.employeeId === null
-                    ? { disconnect: true }
-                    : { connect: { id: data.employeeId } };
-        }
+        if (data.employeeId !== undefined) updateData.employeeId = data.employeeId;
         if (data.paymentStatus !== undefined) updateData.paymentStatus = data.paymentStatus;
         if (data.confirmedAt !== undefined) updateData.confirmedAt = data.confirmedAt;
         if (data.preparedAt !== undefined) updateData.preparedAt = data.preparedAt;

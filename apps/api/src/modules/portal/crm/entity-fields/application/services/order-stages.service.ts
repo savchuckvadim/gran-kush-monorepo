@@ -11,7 +11,7 @@ type StageCategoryRow = Prisma.StageCategoryGetPayload<{ include: typeof STAGES_
 type StageRow = StageCategoryRow["stages"][number];
 
 /** Стадия для ответа: название уже на языке запроса, сырые переводы наружу не уходят. */
-export type StageView = Omit<StageRow, "nameI18n">;
+export type StageView = Omit<StageRow, "nameI18n" | "portalId">;
 export type StageCategoryView = Omit<StageCategoryRow, "stages"> & { stages: StageView[] };
 
 export interface StageInput {
@@ -143,6 +143,7 @@ export class OrderStagesService {
                             data: {
                                 ...stageData(stage),
                                 name: stage.name,
+                                portalId,
                                 stageCategoryId: category.id,
                             },
                         });

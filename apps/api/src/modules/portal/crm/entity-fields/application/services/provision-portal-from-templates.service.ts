@@ -125,6 +125,7 @@ export class ProvisionPortalFromTemplatesService {
         for (const ft of gt.fieldTemplates) {
             const fd = await db.fieldDefinition.create({
                 data: {
+                    portalId,
                     entityDefinitionId: ed.id,
                     fieldKey: ft.fieldKey,
                     type: ft.type,
@@ -180,6 +181,7 @@ export class ProvisionPortalFromTemplatesService {
                 }
                 return [
                     {
+                        portalId,
                         formDefinitionId: form.id,
                         fieldDefinitionId,
                         sortOrder: ft.sortOrder,

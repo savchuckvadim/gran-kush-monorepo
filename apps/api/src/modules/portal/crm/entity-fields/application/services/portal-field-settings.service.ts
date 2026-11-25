@@ -57,6 +57,7 @@ export class PortalFieldSettingsService {
         try {
             return await this.prisma.fieldDefinition.create({
                 data: {
+                    portalId,
                     entityDefinitionId,
                     fieldKey: dto.fieldKey,
                     type: dto.type,
@@ -178,6 +179,7 @@ export class PortalFieldSettingsService {
         try {
             return await this.prisma.fieldOption.create({
                 data: {
+                    portalId,
                     fieldDefinitionId: def.id,
                     valueKey: input.valueKey,
                     label: input.label,

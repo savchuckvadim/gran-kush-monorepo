@@ -57,6 +57,34 @@ export type MemberAuthView = Prisma.MemberGetPayload<{
 
 This guarantees that when `include` changes, the type is updated automatically.
 
+## Portal in the Schema: Composite Foreign Keys
+
+The code filters by `portalId`, the database guarantees it (TASK-822). A row of one portal cannot
+reference a row of another one, even when a service forgot the check.
+
+1. Every table that belongs to a portal has its own `portalId` — child tables included
+   (`order_items`, `stages`, `field_options`). It is not inherited through a join.
+2. A portal-scoped model that other models reference declares `@@unique([id, portalId])`.
+3. A relation between two portal-scoped models is composite:
+
+    ```prisma
+    order   Order     @relation(fields: [orderId, portalId], references: [id, portalId], onDelete: Cascade)
+    author  Employee? @relation(fields: [authorId, portalId], references: [id, portalId], onDelete: SetNull)
+    ```
+
+4. **Optional relation with `SetNull`:** Prisma generates `ON DELETE SET NULL`, which would also
+   null `portal_id` and fail every delete of the parent. In the migration write the column list by
+   hand: `ON DELETE SET NULL ("author_id")`. Prisma does not see the difference, so the next
+   `migrate diff` stays clean. `prisma validate` prints a `SetNull` warning for each such relation —
+   expected.
+5. Write relation scalars (`employeeId: null`, `employeeId: id`), not nested
+   `employee: { connect | disconnect }`: a nested write on a composite relation also rewrites or
+   nulls `portalId`. Nested `create` under a parent is fine — the child takes the parent's portal.
+6. A one-to-one relation additionally needs `@@unique([xId, portalId])` on the side that holds the key.
+
+`test/db-constraints.e2e-spec.ts` reads the Postgres catalog and fails on a single-column key
+between two portal tables and on a plain `SET NULL` over `portal_id`.
+
 ## Classes vs Types
 
 Use **domain classes** when business behavior/invariants are needed.
